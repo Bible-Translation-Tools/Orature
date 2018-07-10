@@ -3,7 +3,8 @@ package com.example.demo.view
 import javafx.scene.paint.Color
 import tornadofx.*
 
-class TopWidget(rad: Double): Fragment() {
+//a temporary substitute for the users' icons, just a circle
+class UserIconWidget(rad: Double): Fragment() {
     override val root = hbox {
         circle {
             radius = rad;
@@ -12,7 +13,8 @@ class TopWidget(rad: Double): Fragment() {
     }
 }
 
-class BottomWidget: Fragment() {
+//purple rectangle, temporary home button
+class HomeWidget: Fragment() {
     override val root = hbox {
         rectangle {
             fill = Color.DARKORCHID
