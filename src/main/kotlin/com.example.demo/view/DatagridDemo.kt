@@ -9,9 +9,9 @@ import tornadofx.*;
 
 class DatagridDemo: View("Datagrid Demo") {
 
-    val data: DataService by inject();
+    private val data: DataService by inject();
 
-    val myCurrentUser = borderpane () {
+    private val myCurrentUser = borderpane () {
         val mycuTopWidget = TopWidget(100.0);
         //alignment must be set on root, not on Widget itself
         mycuTopWidget.root.alignment = Pos.BOTTOM_CENTER;
@@ -32,7 +32,7 @@ class DatagridDemo: View("Datagrid Demo") {
         usePrefSize;
     }
 
-    val myDatagrid = datagrid(data.numbers()) {
+    private val myDatagrid = datagrid(data.numbers()) {
         cellFormat {
             graphic = borderpane() {
                 val mydgTopWidget = TopWidget(25.0);
@@ -50,7 +50,7 @@ class DatagridDemo: View("Datagrid Demo") {
         usePrefSize;
     }
 
-    val welcomeScreen = borderpane() {
+    private val welcomeScreen = borderpane() {
         BorderPane.setMargin(myCurrentUser, Insets(20.0, 20.0, 20.0, 20.0));
         BorderPane.setMargin(myDatagrid, Insets(20.0, 20.0, 20.0, 20.0));
         BorderPane.setAlignment(myCurrentUser, Pos.BOTTOM_CENTER)

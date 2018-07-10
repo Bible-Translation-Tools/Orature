@@ -1,6 +1,5 @@
 package com.example.demo.view
 
-import javafx.collections.FXCollections.fill
 import javafx.scene.paint.Color
 import tornadofx.*
 
