@@ -20,6 +20,48 @@ import java.nio.file.Path
 class TestDirectoryManager {
     var mockFileSystem = Mockito.mock(FileSystem::class.java)
 
+    val APPDATA_TESTS_TABLE = listOf(
+            mapOf(
+                    "expected" to "/Users/edvin/Library/Application Support/translationRecorder/database",
+                    "os" to "Mac OS X",
+                    "separator" to "/",
+                    "appdata" to "/Users/edvin"
+            ),
+            mapOf(
+                    "expected" to "/home/edvin/.config/translationRecorder/database",
+                    "os" to "Linux",
+                    "separator" to "/",
+                    "appdata" to "/home/edvin"
+            ),
+            mapOf(
+                    "expected" to "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\database",
+                    "os" to "Windows 10",
+                    "separator" to "\\",
+                    "appdata" to "C:\\Users\\Edvin\\AppData\\Roaming"
+            )
+    )
+
+    val USERDATA_TESTS_TABLE = listOf(
+            mapOf(
+                    "expected" to "/Users/edvin/translationRecorder/Projects",
+                    "os" to "Mac OS X",
+                    "separator" to "/",
+                    "home" to "/Users/edvin"
+            ),
+            mapOf(
+                    "expected" to "/home/edvin/translationRecorder/Projects",
+                    "os" to "Linux",
+                    "separator" to "/",
+                    "home" to "/home/edvin"
+            ),
+            mapOf(
+                    "expected" to "C:\\Users\\Edvin\\translationRecorder\\Projects",
+                    "os" to "Windows 10",
+                    "separator" to "\\",
+                    "home" to "C:\\Users\\Edvin"
+            )
+    )
+
     @Before
     fun setup() {
         // setup up the mock of System
@@ -30,74 +72,56 @@ class TestDirectoryManager {
     }
 
     @Test
-    fun testIfCorrectAppDataDirectoryPathIsReturnedForMacOSX() {
-        // define the expected result
-        val expected = "/Users/edvin/Library/Application Support/translationRecorder/database"
+    fun testIfCorrectAppDataDirectoryPathIsReturnedForEachPlatform() {
+        for (testCase in APPDATA_TESTS_TABLE) {
+            // define the expected result
+            val expected = testCase["expected"]
 
-        // configure for Mac OS X responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Mac OS X")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/Users/edvin")
+            // configure for OS responses
+            BDDMockito.given(System.getProperty("os.name")).willReturn(testCase["os"])
+            BDDMockito.given(mockFileSystem.separator).willReturn(testCase["separator"])
+            when (testCase["os"]) {
+                "Windows 10" -> BDDMockito.given(System.getenv("APPDATA")).willReturn(testCase["appdata"])
+                else -> BDDMockito.given(System.getProperty("user.home")).willReturn(testCase["appdata"])
+            }
 
-        // get the result
-        val result = DirectoryManager("translationRecorder")
-                .getAppDataDirectory("database", false)
+            // get the result
+            val result = DirectoryManager("translationRecorder")
+                    .getAppDataDirectory("database", false)
 
-        // assert
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun testLinuxAppDataDirectory() {
-        // define the expected result
-        val expected = "/home/edvin/.config/translationRecorder/database"
-
-        // configure for Linux responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Linux")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
-
-        // get the result
-        val result = DirectoryManager("translationRecorder")
-                .getAppDataDirectory("database", false)
-
-        // assert
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun testWindows10AppDataDirectory() {
-        // define the expected result
-        val expected = "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\database"
-
-        // configure for Windows 10 responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
-        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
-        BDDMockito.given(System.getenv("APPDATA")).willReturn("C:\\Users\\Edvin\\AppData\\Roaming")
-
-        // get the result
-        val result = DirectoryManager("translationRecorder")
-                .getAppDataDirectory("database", false)
-
-        // assert
-        assertEquals(expected, result)
+            // assert
+            try {
+                assertEquals(expected, result)
+            } catch (e: AssertionError) {
+                // failed the assert
+                println("Input OS: ${testCase["os"]}")
+                println("Expected: $expected")
+                println("Result:   $result")
+                throw e
+            }
+        }
     }
 
     // Test if file system API is called correctly
     @Test
-    fun testAppDataDirectoryCreateIfNotExists() {
+    fun testIfFileCreateDirectoriesCalledWhenAppDataDirectoryDoesNotExist() {
+        // Only Windows 10 is checked since this is not OS dependent code
+
         // define the expected result
-        val expected = "/home/edvin/.config/translationRecorder/database"
+        val expected = "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\database"
         val expectedDidCallFileSystem = true
 
         // set default result
         var resultDidCallFileSystem = false
 
         // configure for Windows 10 responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Linux")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
+        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
+        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
+        BDDMockito.given(System.getenv("APPDATA")).willReturn("C:\\Users\\Edvin\\AppData\\Roaming")
+
+        // force file to not exist
         BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(true)
+
         BDDMockito.given(Files.createDirectories(any(Path::class.java))).will {
             resultDidCallFileSystem = true
             it.arguments.first()
@@ -113,22 +137,27 @@ class TestDirectoryManager {
     }
 
     @Test
-    fun testAppDataDirectoryCreateIfNotExistsException() {
+    fun testIfFileCreateDirectoriesNotCalledWhenAppDataDirectoryDoesExist() {
+        // Only Windows 10 is checked since this is not OS dependent code
+
         // define the expected result
-        val expected = ""
-        val expectedDidCallFileSystem = true
+        val expected = "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\database"
+        val expectedDidCallFileSystem = false
 
         // set default result
         var resultDidCallFileSystem = false
 
-        // configure for Linux responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Linux")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
-        BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(true)
+        // configure for Windows 10 responses
+        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
+        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
+        BDDMockito.given(System.getenv("APPDATA")).willReturn("C:\\Users\\Edvin\\AppData\\Roaming")
+
+        // force file to exist
+        BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(false)
+
         BDDMockito.given(Files.createDirectories(any(Path::class.java))).will {
             resultDidCallFileSystem = true
-            throw Exception()
+            it.arguments.first()
         }
 
         // get the result
@@ -141,7 +170,39 @@ class TestDirectoryManager {
     }
 
     @Test
-    fun testAppDataDirectoryUnrecognizedOS() {
+    fun testIfEmptyPathIsReturnedWhenExceptionThrownWhileCreatingAppDataDirectory() {
+        // Only windows 10 is checked since this is not OS dependent code
+        // define the expected result
+        val expected = ""
+        val expectedDidCallFileSystem = true
+
+        // set default result
+        var resultDidCallFileSystem = false
+
+        // configure for Linux responses
+        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
+        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
+        BDDMockito.given(System.getenv("APPDATA")).willReturn("C:\\Users\\Edvin\\AppData\\Roaming")
+
+        // force file to not exist
+        BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(true)
+
+        BDDMockito.given(Files.createDirectories(any(Path::class.java))).will {
+            resultDidCallFileSystem = true
+            throw Exception() // throw the exception
+        }
+
+        // get the result
+        val result = DirectoryManager("translationRecorder")
+                .getAppDataDirectory("database", true)
+
+        // assert
+        assertEquals(expected, result)
+        assertEquals(expectedDidCallFileSystem, resultDidCallFileSystem)
+    }
+
+    @Test
+    fun testIfEmptyPathIsReturnedForAppDataDirectoryWhenUnrecognizedOS() {
         // define the expected result
         val expected = ""
 
@@ -159,72 +220,44 @@ class TestDirectoryManager {
     }
 
     @Test
-    fun testMacOSXUserDataDirectory() {
-        // define the expected result
-        val expected = "/Users/Edvin/translationRecorder/Projects"
+    fun testIfCorrectUserDataDirectoryPathIsReturnedForEachPlatform() {
+        for (testCase in USERDATA_TESTS_TABLE) {
+            // configure for OS responses
+            BDDMockito.given(System.getProperty("os.name")).willReturn(testCase["os"])
+            BDDMockito.given(mockFileSystem.separator).willReturn(testCase["separator"])
+            BDDMockito.given(System.getProperty("user.home")).willReturn(testCase["home"])
 
-        // configure for Mac OS X responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Mac OS X")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/Users/Edvin")
+            // get the result
+            val result = DirectoryManager("translationRecorder")
+                    .getUserDataDirectory("Projects", false)
 
-        // get the result
-        val result = DirectoryManager("translationRecorder")
-                .getUserDataDirectory("Projects", false)
-
-        // assert
-        assertEquals(expected, result)
+            // assert
+            try {
+                assertEquals(testCase["expected"], result)
+            } catch (e: AssertionError) {
+                println("Input OS: ${testCase["os"]}")
+                println("Expected: ${testCase["expected"]}")
+                println("Result:   $result")
+                throw e
+            }
+        }
     }
 
     @Test
-    fun testLinuxUserDataDirectory() {
-        // define the expected result
-        val expected = "/home/edvin/translationRecorder/Projects"
-
-        // configure for Linux responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Linux")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
-
-        // get the result
-        val result = DirectoryManager("translationRecorder")
-                .getUserDataDirectory("Projects", false)
-
-        // assert
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun testWindows10UserDataDirectory() {
+    fun testIfFileCreateDirectoriesCalledWhenUserDataDirectoryDoesNotExist() {
         // define the expected result
         val expected = "C:\\Users\\Edvin\\translationRecorder\\Projects"
-
-        // configure for Windows 10 responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
-        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("C:\\Users\\Edvin")
-
-        // get the result
-        val result = DirectoryManager("translationRecorder")
-                .getUserDataDirectory("Projects", false)
-
-        // assert
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun testUserDataDirectoryCreateIfNotExists() {
-        // define the expected result
-        val expected = "/home/edvin/translationRecorder/Projects"
         val expectedDidCallFileSystem = true
 
         // set default result
         var resultDidCallFileSystem = false
 
         // configure for Linux responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Linux")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
+        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
+        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
+        BDDMockito.given(System.getProperty("user.home")).willReturn("C:\\Users\\Edvin")
+
+        // force file to not exist
         BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(true)
         BDDMockito.given(Files.createDirectories(any(Path::class.java))).will {
             resultDidCallFileSystem = true
@@ -241,7 +274,39 @@ class TestDirectoryManager {
     }
 
     @Test
-    fun testUserDataDirectoryCreateIfNotExistsException() {
+    fun testIfFileCreateDirectoriesNotCalledWhenUserDataDirectoryDoesExist() {
+        // define the expected result
+        val expected = "C:\\Users\\Edvin\\translationRecorder\\Projects"
+        val expectedDidCallFileSystem = false
+
+        // set default result
+        var resultDidCallFileSystem = false
+
+        // configure for Linux responses
+        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
+        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
+        BDDMockito.given(System.getProperty("user.home")).willReturn("C:\\Users\\Edvin")
+
+        // force file to exist
+        BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(false)
+        BDDMockito.given(Files.createDirectories(any(Path::class.java))).will {
+            resultDidCallFileSystem = true
+            it.arguments.first()
+        }
+
+        // get the result
+        val result = DirectoryManager("translationRecorder")
+                .getUserDataDirectory("Projects", true)
+
+        // assert
+        assertEquals(expected, result)
+        assertEquals(expectedDidCallFileSystem, resultDidCallFileSystem)
+    }
+
+    @Test
+    fun testIfEmptyPathIsReturnedWhenExceptionThrownWhileCreatingUserDataDirectory() {
+        // Only windows 10 is checked since this is not OS dependent code
+
         // define the expected result
         val expected = ""
         val expectedDidCallFileSystem = true
@@ -250,13 +315,15 @@ class TestDirectoryManager {
         var resultDidCallFileSystem = false
 
         // configure for Linux responses
-        BDDMockito.given(System.getProperty("os.name")).willReturn("Linux")
-        BDDMockito.given(mockFileSystem.separator).willReturn("/")
-        BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
+        BDDMockito.given(System.getProperty("os.name")).willReturn("Windows 10")
+        BDDMockito.given(mockFileSystem.separator).willReturn("\\")
+        BDDMockito.given(System.getProperty("user.home")).willReturn("C:\\Users\\Edvin")
+
+        // force file to not exist
         BDDMockito.given(Files.notExists(any(Path::class.java))).willReturn(true)
         BDDMockito.given(Files.createDirectories(any(Path::class.java))).will {
             resultDidCallFileSystem = true
-            throw Exception()
+            throw Exception() // throw the exception
         }
 
         // get the result
