@@ -1,8 +1,8 @@
-package widgets.ui
+package widgets
 
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
-import recources.ui.UIColors
+import recources.UIColors
 import tornadofx.*
 
 /**

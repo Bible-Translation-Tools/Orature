@@ -1,4 +1,4 @@
-package recources.ui
+package recources
 
 object UIColors {
 

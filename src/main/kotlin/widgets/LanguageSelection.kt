@@ -1,4 +1,4 @@
-package widgets.ui
+package widgets
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
