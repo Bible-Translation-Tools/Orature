@@ -4,9 +4,16 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.StackPane
+import javafx.scene.paint.Color
 import tornadofx.*;
 
 class DatagridDemo: View("Datagrid Demo") {
+
+    override fun onCreate() {
+        setWindowMinSize(800, 200);
+        println("goodnight goodnight")
+        super.onCreate()
+    }
 
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
@@ -39,6 +46,15 @@ class DatagridDemo: View("Datagrid Demo") {
         bottom = myHomeWidget.root;
     }
 
+
+    /*
+    private val myGrid = gridpane() {
+        for(it in data.numbers()) {
+            add(IconAndHomeWidget(it));
+        }
+    }
+    */
+
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
@@ -65,9 +81,10 @@ class DatagridDemo: View("Datagrid Demo") {
                 bottom = mydgBottomWidget.root;
             }
         }
-        setPrefSize(gridWidth, gridHeight);
-        usePrefSize;
+//        setPrefSize(gridWidth, gridHeight);
+//        usePrefSize;
     }
+
 
     private val plusButton = PlusWidget();
 
@@ -77,20 +94,24 @@ class DatagridDemo: View("Datagrid Demo") {
         //BorderPane.setAlignment(bigIcons, Pos.CENTER)
         //put the elems in the welcomeScreen
         left = bigIcons;
-        right = myGrid;
+        center = myGrid;
         //make sure the plus button is in the bottom right
         BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
 //        plusButton.root.alignment = Pos.BOTTOM_RIGHT;
         bottom = plusButton.root;
         //put in some nice margins so it's not too crowded
         padding = insets(pad);
-
-        val minWidth = 2 * pad + 2 * rad + gridWidth;
-        val minHeight = 2 * pad + gridHeight;
-        setMinSize(minWidth, minHeight);
-        }
+    }
 
     //set the root of the view to the welcomeScreen
     override val root = welcomeScreen;
+
+    //current window will be null unless init goes under setting of root
+    init{
+        val minWidth = 2 * pad + 2 * rad + gridWidth;
+        //add 100 for home button and Welcome message; probably in real thing these will be vars
+        val minHeight = 2 * pad + 2 * rad + 100.0;
+        setWindowMinSize(minWidth, minHeight);
+    }
 }
 

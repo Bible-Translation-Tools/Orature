@@ -1,5 +1,7 @@
 package com.example.demo.view
 
+import javafx.geometry.Insets
+import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import tornadofx.*
 
@@ -27,5 +29,18 @@ class HomeWidget: Fragment() {
 class PlusWidget: Fragment() {
     override val root = button {
         label("+");
+    }
+}
+
+class IconAndHomeWidget(label: String): Fragment() {
+    override val root = vbox {
+        padding = Insets(20.0);
+        val myIcon = UserIconWidget(25.0);
+        val myHome = HomeWidget();
+        myIcon.root.alignment = Pos.TOP_CENTER;
+        myHome.root.alignment = Pos.BOTTOM_CENTER;
+        add(myIcon);
+        add(myHome);
+        label("user " + label);
     }
 }
