@@ -28,38 +28,22 @@ class DatagridDemo: View("Datagrid Demo") {
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
         myBigUserIcon.root.alignment = Pos.CENTER;
-
-        //if you want to set the size of the box surrounding the elements, I think this works:
-        //tell the icon how big it should be
-//        myBigUserIcon.root.setPrefSize(200.0, 200.0);
-        //tell it that it should definitely be the size you just told it
-        //(not sure under which circumstances it wouldn't be, but just to be safe)
-//        usePrefSize;
-        //areas of borderpane can be set to root of View/Frag
-        //you can't set areas of the borderpane to Views/Frags themselves because they aren't nodes
-        top = myBigUserIcon.root;
-
-        center = label("Welcome!");
-
         val myHomeWidget = HomeWidget();
         myHomeWidget.root.alignment = Pos.CENTER;
+
+        top = myBigUserIcon.root;
+        center = label("Welcome!");
         bottom = myHomeWidget.root;
-    }
 
-
-    /*
-    private val myGrid = gridpane() {
-        for(it in data.numbers()) {
-            add(IconAndHomeWidget(it));
-        }
+        setMaxSize(2 * rad + 100, 3 * rad);
+        setPrefSize(2 * rad + 100, 3 * rad);
+        usePrefSize;
     }
-    */
 
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
     val gridWidth = 600.0;
-    val gridHeight = 200.0;
     private val myGrid = datagrid(data.numbers()) {
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
@@ -81,8 +65,6 @@ class DatagridDemo: View("Datagrid Demo") {
                 bottom = mydgBottomWidget.root;
             }
         }
-//        setPrefSize(gridWidth, gridHeight);
-//        usePrefSize;
     }
 
 
@@ -93,7 +75,9 @@ class DatagridDemo: View("Datagrid Demo") {
     private val welcomeScreen = borderpane() {
         //BorderPane.setAlignment(bigIcons, Pos.CENTER)
         //put the elems in the welcomeScreen
-        left = bigIcons;
+        left = stackpane{
+            add(bigIcons);
+        };
         center = myGrid;
         //make sure the plus button is in the bottom right
         BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
