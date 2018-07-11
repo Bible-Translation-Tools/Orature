@@ -23,3 +23,9 @@ class HomeWidget: Fragment() {
         }
     }
 }
+
+class PlusWidget: Fragment() {
+    override val root = button {
+        label("+");
+    }
+}

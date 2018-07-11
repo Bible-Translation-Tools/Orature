@@ -3,6 +3,7 @@ import com.example.demo.controller.DataService
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.StackPane
 import tornadofx.*;
 
 class DatagridDemo: View("Datagrid Demo") {
@@ -39,7 +40,7 @@ class DatagridDemo: View("Datagrid Demo") {
 
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
-    //right now it has just 6 elems but the real one will have who-knows-how-many
+    //right now it has just 9 elems but the real one will have who-knows-how-many
     private val myGrid = datagrid(data.numbers()) {
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
@@ -61,9 +62,11 @@ class DatagridDemo: View("Datagrid Demo") {
                 bottom = mydgBottomWidget.root;
             }
         }
-        setPrefSize(200.0, 200.0);
+        setPrefSize(600.0, 200.0);
         usePrefSize;
     }
+
+    private val plusButton = PlusWidget();
 
     private val welcomeScreen = borderpane() {
         //put in some nice margins so it's not too crowded
@@ -73,10 +76,14 @@ class DatagridDemo: View("Datagrid Demo") {
         //put the elems in the welcomeScreen
         left = bigIcons;
         right = myGrid;
-    }
+        //make sure the plus button is in the bottom right
+        BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
+//        plusButton.root.alignment = Pos.BOTTOM_RIGHT;
+        bottom = plusButton.root;
+        padding = insets(20.0);
+        }
 
     //set the root of the view to the welcomeScreen
     override val root = welcomeScreen;
-
 }
 
