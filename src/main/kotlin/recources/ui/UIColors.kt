@@ -1,6 +1,8 @@
 package recources.ui
 
 object UIColors {
-    val ROMAN = "#e56060"
-    val SUMMERSKY = "#3db5ff"
+
+    const val ROMAN = "#e56060"
+    const val SUMMERSKY = "#3db5ff"
+
 }
