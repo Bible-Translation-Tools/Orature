@@ -1,9 +1,8 @@
-package app.ui
+package widgets.ui
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.geometry.Pos
-import javafx.scene.paint.Paint
 import tornadofx.*
 
 
@@ -17,7 +16,7 @@ fun main(args: Array<String>) {
     launch<LanguagesDemoApp>(args)
 }
 
-class LanguagesDemoApp : App(MainView::class, LanguageStyle::class)
+class LanguagesDemoApp : App(MainView::class, LanguageSelectionStyle::class)
 
 /**
  * Above main and app are used to demo
@@ -33,23 +32,20 @@ class MainView : View() {
 
     private val hint = "Try English"
 
-    private val targetColor = Paint.valueOf("#e56060")
-    private val sourceColor = Paint.valueOf("#3db5ff")
-
-    private val targetBox = LanguageSelectionWidget(
+    private val targetBox = LanguageSelection(
             FXCollections.observableList(languages),
             newTarget,
             "Target Languages",
             hint,
-            LanguageStyle.targetLanguageSelector
+            LanguageSelectionStyle.targetLanguageSelector
     )
 
-    private val sourceBox = LanguageSelectionWidget(
+    private val sourceBox = LanguageSelection(
             FXCollections.observableList(languages),
             newSource,
             "Source Languages",
             hint,
-            LanguageStyle.sourceLanguageSelector
+            LanguageSelectionStyle.sourceLanguageSelector
     )
 
     override val root = hbox {

@@ -1,4 +1,4 @@
-package app.ui
+package widgets.ui
 
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
@@ -12,8 +12,8 @@ import tornadofx.*
  * target or source languages
  */
 
-class LanguageSelectionWidget(list : ObservableList<String>,
-                              observer : SimpleStringProperty,
+class LanguageSelection(list : ObservableList<String>,
+                              input : SimpleStringProperty,
                               label : String,
                               hint : String,
                               styleClass : CssRule
@@ -25,7 +25,7 @@ class LanguageSelectionWidget(list : ObservableList<String>,
 
         label(label)
 
-        combobox(observer, list) {
+        combobox(input, list) {
 
             /**
              * Give it some personal space

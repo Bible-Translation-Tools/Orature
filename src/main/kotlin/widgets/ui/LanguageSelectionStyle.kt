@@ -1,7 +1,8 @@
-package app.ui
+package widgets.ui
 
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import recources.ui.UIColors
 import tornadofx.*
 
 /**
@@ -10,15 +11,15 @@ import tornadofx.*
  *
  * Each is specified by it's color
  */
-class LanguageStyle : Stylesheet() {
+class LanguageSelectionStyle : Stylesheet() {
 
     companion object {
         val targetLanguageSelector by cssclass()
         val sourceLanguageSelector by cssclass()
     }
 
-    private val targetColor = Paint.valueOf("#e56060")
-    private val sourceColor = Paint.valueOf("#3db5ff")
+    private val targetColor = Paint.valueOf(UIColors.ROMAN)
+    private val sourceColor = Paint.valueOf(UIColors.SUMMERSKY)
 
     init {
 
