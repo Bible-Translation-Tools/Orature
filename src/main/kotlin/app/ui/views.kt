@@ -5,7 +5,6 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import tornadofx.*
-import java.awt.Button
 import kotlin.concurrent.thread
 
 /**
@@ -30,7 +29,7 @@ class ProgressBar : View() {
                 }
             }
         }
-        button("Stop the progress") {
+        button("Take the Upgrade") {
             action {
                 isItDone = true
                 println(isItDone)
@@ -40,7 +39,7 @@ class ProgressBar : View() {
 }
 
 /**
- * garbage code for making buttons/chips of each language selected
+ * garbo code for making buttons/chips of each language selected
  */
 class languageSelector : Fragment() {
     var languageList: ArrayList<String> = ArrayList()
