@@ -14,9 +14,10 @@ class DatagridDemo: View("Datagrid Demo") {
 
     //the left half of the screen, which displays:
     //the last user to log in, a welcome message, and a button to go to that user's home
+    val rad = 100.0;
     private val bigIcons = borderpane () {
         //make a big user icon
-        val myBigUserIcon = UserIconWidget(100.0);
+        val myBigUserIcon = UserIconWidget(rad);
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
         myBigUserIcon.root.alignment = Pos.CENTER;
@@ -41,6 +42,8 @@ class DatagridDemo: View("Datagrid Demo") {
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
+    val gridWidth = 600.0;
+    val gridHeight = 200.0;
     private val myGrid = datagrid(data.numbers()) {
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
@@ -62,16 +65,15 @@ class DatagridDemo: View("Datagrid Demo") {
                 bottom = mydgBottomWidget.root;
             }
         }
-        setPrefSize(600.0, 200.0);
+        setPrefSize(gridWidth, gridHeight);
         usePrefSize;
     }
 
     private val plusButton = PlusWidget();
 
+
+    val pad = 60.0;
     private val welcomeScreen = borderpane() {
-        //put in some nice margins so it's not too crowded
-        BorderPane.setMargin(bigIcons, Insets(20.0, 20.0, 20.0, 20.0));
-        BorderPane.setMargin(myGrid, Insets(20.0, 20.0, 20.0, 20.0));
         //BorderPane.setAlignment(bigIcons, Pos.CENTER)
         //put the elems in the welcomeScreen
         left = bigIcons;
@@ -80,7 +82,12 @@ class DatagridDemo: View("Datagrid Demo") {
         BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
 //        plusButton.root.alignment = Pos.BOTTOM_RIGHT;
         bottom = plusButton.root;
-        padding = insets(20.0);
+        //put in some nice margins so it's not too crowded
+        padding = insets(pad);
+
+        val minWidth = 2 * pad + 2 * rad + gridWidth;
+        val minHeight = 2 * pad + gridHeight;
+        setMinSize(minWidth, minHeight);
         }
 
     //set the root of the view to the welcomeScreen
