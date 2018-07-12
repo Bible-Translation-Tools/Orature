@@ -10,12 +10,17 @@ class ChartCSS : Stylesheet() {
     companion object {
         val defaultPieChart by cssclass()
         val progressBarStyle by cssclass()
+        val transparentButton by cssclass()
 
         val bg by cssproperty<MultiValue<Paint>>("-fx-background-color")
     }
     init {
         s(button) {
             bg.value += Color.LEMONCHIFFON
+        }
+
+        transparentButton {
+            bg.value += Color.TRANSPARENT
         }
 
         /**

@@ -29,12 +29,13 @@ object Application {
                 // pull some views
                 val mainView = find(ProgressBar::class)
                 val buttonAttempt = find(languageSelector::class)
+                val carlsChipView = find(TagCloudView::class)
 
                 // stick those bois in there
                 borderpane {
                     center = mainView.root
                     left = buttonAttempt.root
-                    //right = buttonAttempt.root
+                    // right = carlsChipView.root
                     // left = leftSideBar.root
                     // right = leftSideBar.root
                     // top = titleBanner.root
