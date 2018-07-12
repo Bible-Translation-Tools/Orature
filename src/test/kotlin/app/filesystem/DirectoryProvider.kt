@@ -1,4 +1,4 @@
-import app.filesystem.DirectoryManager
+import app.filesystem.DirectoryProvider
 
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
@@ -16,8 +16,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @RunWith(PowerMockRunner::class)
-@PrepareForTest(DirectoryManager::class)
-class TestDirectoryManager {
+@PrepareForTest(DirectoryProvider::class)
+class TestDirectoryProvider {
     var mockFileSystem = Mockito.mock(FileSystem::class.java)
 
     val APPDATA_TESTS_TABLE = listOf(
@@ -86,7 +86,7 @@ class TestDirectoryManager {
             }
 
             // get the result
-            val result = DirectoryManager("translationRecorder")
+            val result = DirectoryProvider("translationRecorder")
                     .getAppDataDirectory("database", false)
 
             // assert
@@ -128,7 +128,7 @@ class TestDirectoryManager {
         }
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getAppDataDirectory("database", true)
 
         // assert
@@ -161,7 +161,7 @@ class TestDirectoryManager {
         }
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getAppDataDirectory("database", true)
 
         // assert
@@ -193,7 +193,7 @@ class TestDirectoryManager {
         }
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getAppDataDirectory("database", true)
 
         // assert
@@ -212,7 +212,7 @@ class TestDirectoryManager {
         BDDMockito.given(System.getProperty("user.home")).willReturn("/home/edvin")
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getAppDataDirectory("database", false)
 
         // assert
@@ -228,7 +228,7 @@ class TestDirectoryManager {
             BDDMockito.given(System.getProperty("user.home")).willReturn(testCase["home"])
 
             // get the result
-            val result = DirectoryManager("translationRecorder")
+            val result = DirectoryProvider("translationRecorder")
                     .getUserDataDirectory("Projects", false)
 
             // assert
@@ -265,7 +265,7 @@ class TestDirectoryManager {
         }
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getUserDataDirectory("Projects", true)
 
         // assert
@@ -295,7 +295,7 @@ class TestDirectoryManager {
         }
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getUserDataDirectory("Projects", true)
 
         // assert
@@ -327,7 +327,7 @@ class TestDirectoryManager {
         }
 
         // get the result
-        val result = DirectoryManager("translationRecorder")
+        val result = DirectoryProvider("translationRecorder")
                 .getUserDataDirectory("Projects", true)
 
         // assert
