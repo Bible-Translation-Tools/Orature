@@ -1,8 +1,9 @@
-package app.ui
+package app.ui;
+import tornadofx.*;
 
-object Application {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        println("hello")
-    }
+class MyApp: App(ViewMine::class)
+
+fun main(args: Array<String>) {
+    launch<MyApp>();
 }
+
