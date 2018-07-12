@@ -4,9 +4,9 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class DirectoryManager(private val appName: String) {
+class DirectoryProvider(private val appName: String) {
 
-    val separator = FileSystems.getDefault().separator   //if mac '/' if windows '\\'
+    private val separator = FileSystems.getDefault().separator   //if mac '/' if windows '\\'
 
     // private function to create a directory if it does not exist
     private fun makeDirectories(pathString: String) : Boolean {
