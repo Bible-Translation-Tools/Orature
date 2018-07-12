@@ -1,41 +1,39 @@
 package com.example.demo.view
 import com.example.demo.controller.DataService
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.StackPane
-import javafx.scene.paint.Color
 import tornadofx.*;
 
 class DatagridDemo: View("Datagrid Demo") {
 
-    override fun onCreate() {
-        setWindowMinSize(800, 200);
-        println("goodnight goodnight")
-        super.onCreate()
-    }
-
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
+    //so replace this injection with whatever injection you do
     private val data: DataService by inject();
 
     //the left half of the screen, which displays:
     //the last user to log in, a welcome message, and a button to go to that user's home
-    val rad = 100.0;
+    private val rad = 100.0;
     private val bigIcons = borderpane () {
         //make a big user icon
         val myBigUserIcon = UserIconWidget(rad);
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
         myBigUserIcon.root.alignment = Pos.CENTER;
+
         val myHomeWidget = HomeWidget();
+        //set its alignment to center it
+        //alignment must be set on root, not on Widget itself
         myHomeWidget.root.alignment = Pos.CENTER;
 
         top = myBigUserIcon.root;
         center = label("Welcome!");
         bottom = myHomeWidget.root;
 
-        setMaxSize(2 * rad + 100, 3 * rad);
+        //prevents from spreading out to take up whole screen when window maximized
+        //note: 100 extra pixels hard coded in for space,
+        // but we may change this val depending on size of home button and text
+        setMaxSize(2 * rad, 3 * rad);
         setPrefSize(2 * rad + 100, 3 * rad);
         usePrefSize;
     }
@@ -58,11 +56,12 @@ class DatagridDemo: View("Datagrid Demo") {
                 //set it to an area of the borderpane
                 top = currentSmallUserIcon.root;
 
+                //puts a user's number instead of their icon; in the real thing use icon
                 center = label("user " + it);
 
-                val mydgBottomWidget = HomeWidget();
-                mydgBottomWidget.root.alignment = Pos.CENTER;
-                bottom = mydgBottomWidget.root;
+                val currentBottomWidget = HomeWidget();
+                currentBottomWidget.root.alignment = Pos.CENTER;
+                bottom = currentBottomWidget.root;
             }
         }
     }
@@ -73,15 +72,16 @@ class DatagridDemo: View("Datagrid Demo") {
 
     val pad = 60.0;
     private val welcomeScreen = borderpane() {
-        //BorderPane.setAlignment(bigIcons, Pos.CENTER)
-        //put the elems in the welcomeScreen
         left = stackpane{
             add(bigIcons);
-        };
+        }
+        //grid needs to go in center or it won't auto-realign when window resized
+        //borderpane gives prefered size to top, bottom, left, and right
+        //so resizing gets ignored by top, bottom, left, and right
         center = myGrid;
+
         //make sure the plus button is in the bottom right
         BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
-//        plusButton.root.alignment = Pos.BOTTOM_RIGHT;
         bottom = plusButton.root;
         //put in some nice margins so it's not too crowded
         padding = insets(pad);
@@ -90,9 +90,11 @@ class DatagridDemo: View("Datagrid Demo") {
     //set the root of the view to the welcomeScreen
     override val root = welcomeScreen;
 
+    //DON'T MOVE THIS TO THE TOP
     //current window will be null unless init goes under setting of root
     init{
-        val minWidth = 2 * pad + 2 * rad + gridWidth;
+        //set minimum size of window so they can always see the last user and the grid of other users
+        val minWidth = 3 * pad + 2 * rad + gridWidth;
         //add 100 for home button and Welcome message; probably in real thing these will be vars
         val minHeight = 2 * pad + 2 * rad + 100.0;
         setWindowMinSize(minWidth, minHeight);
