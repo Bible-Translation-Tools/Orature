@@ -1,4 +1,4 @@
-package app.ui
+package app
 
 object Application {
     @JvmStatic
