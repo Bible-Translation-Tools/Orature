@@ -2,7 +2,7 @@ package view
 
 import tornadofx.*;
 
-class RecordView1: Fragment() {
+class RecordView1: View() {
     override val root = hbox {
         label("1");
     }
