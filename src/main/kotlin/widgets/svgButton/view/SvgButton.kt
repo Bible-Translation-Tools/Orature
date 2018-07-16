@@ -1,4 +1,4 @@
-package widgets.createNewProfileButton.view
+package widgets.svgButton.view
 
 import afester.javafx.svg.SvgLoader
 import tornadofx.*

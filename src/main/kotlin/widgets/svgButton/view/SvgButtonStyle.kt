@@ -1,4 +1,4 @@
-package widgets.createNewProfileButton.view
+package widgets.svgButton.view
 
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
