@@ -1,5 +1,9 @@
+package app
+
 import com.example.demo.view.DatagridDemo
+import javafx.application.Application.launch
 import tornadofx.*;
+
 //Put the view you want before the double colon
 //Sub in other views to test them out by themselves
 class MyApp: App(DatagridDemo::class)

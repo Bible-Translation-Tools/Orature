@@ -7,35 +7,54 @@ import javafx.scene.control.Button
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import tornadofx.*
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.scene.layout.VBox
 
 //a temporary substitute for the users' icons, just a circle
 class UserIconWidget(rad: Double): Fragment() {
     override val root = hbox {
         circle {
-            radius = rad;
-            fill = Color.TRANSPARENT;
+            radius = rad
+            fill = Color.TRANSPARENT
         }
     }
 }
 
-//purple rectangle, temporary home button
-class HomeWidget: HBox() {
+
+class HomeWidget(color: String) : HBox() {
+    val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px").setStyleClass("primary")
+
+    val root = button("",homeIcon) {
+        style {
+            backgroundColor+=c(color)
+            setMinWidth(150.0)
+            alignment = Pos.CENTER
+
+        }
+
+    }
+
     init {
-        rectangle {
-                style {
-                    borderRadius += box(25.0.px)
-                    backgroundRadius += box(25.0.px)
-                }
-            fill = Color.valueOf("#CC4141")
-            width = 150.0
-            height = 25.0
-
-        }
+       alignment = Pos.CENTER
     }
+
 }
 
-class PlusWidget: Fragment() {
-    override val root = button {
-        label("+");
+class PlusWidget: VBox() {
+
+    val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "50px").setStyleClass("primary")
+
+     val root = button ("", addUserIcon){
+        style {
+            borderRadius+=box(50.0.px)
+            backgroundColor+=c("#FFFFFF")
+            backgroundRadius+=box(50.0.px)
+            setMinWidth(75.0)
+            setMinHeight(75.0)
+            accentColor=Color.WHITE
+            baseColor=Color.WHITE
+            textFill=c("#CC4141")
+        }
     }
 }
