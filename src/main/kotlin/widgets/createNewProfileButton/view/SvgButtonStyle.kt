@@ -4,7 +4,7 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
 
-class CreateNewProfileButtonStyle: Stylesheet() {
+class SvgButtonStyle: Stylesheet() {
     companion object {
         val NewProfIcon by cssclass()
     }
