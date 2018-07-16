@@ -2,7 +2,7 @@ package recources
 
 object UIColors {
 
-    const val ROMAN = "#e56060"
-    const val SUMMERSKY = "#3db5ff"
+    const val UI_PRIMARY = "#e56060" //ROMAN
+    const val UI_SECINDARY = "#3db5ff" //SUMMERSKY
 
 }
