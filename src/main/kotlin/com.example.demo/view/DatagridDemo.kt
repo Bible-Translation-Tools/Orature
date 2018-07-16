@@ -2,9 +2,13 @@ package com.example.demo.view
 import com.example.demo.controller.DataService
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
+import javafx.scene.paint.Color
 import tornadofx.*;
+import widgets.profileIcon.view.ProfileIcon
 
 class DatagridDemo: View("Datagrid Demo") {
+
+
 
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
@@ -13,29 +17,38 @@ class DatagridDemo: View("Datagrid Demo") {
 
     //the left half of the screen, which displays:
     //the last user to log in, a welcome message, and a button to go to that user's home
-    private val rad = 100.0;
+    private val rad = 100.0
     private val bigIcons = borderpane () {
+        style{
+            backgroundColor += Color.valueOf("#FFFFFF")
+        }
         //make a big user icon
-        val myBigUserIcon = UserIconWidget(rad);
+        val myBigUserIcon = UserIconWidget(rad)
+
+        val iconHash = ProfileIcon("12345678901")
+
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
-        myBigUserIcon.root.alignment = Pos.CENTER;
+        //myBigUserIcon.root.alignment = Pos.CENTER
 
-        val myHomeWidget = HomeWidget();
+        iconHash.alignment = Pos.CENTER
+
+
+        val myHomeWidget = HomeWidget()
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
-        myHomeWidget.root.alignment = Pos.CENTER;
+        myHomeWidget.alignment = Pos.CENTER
 
-        top = myBigUserIcon.root;
-        center = label("Welcome!");
-        bottom = myHomeWidget.root;
+        top = iconHash
+        center = label("Welcome Back!")
+        bottom = myHomeWidget
 
         //prevents from spreading out to take up whole screen when window maximized
         //note: 100 extra pixels hard coded in for space,
         // but we may change this val depending on size of home button and text
         setMaxSize(2 * rad, 3 * rad);
         setPrefSize(2 * rad + 100, 3 * rad);
-        usePrefSize;
+        usePrefSize
     }
 
     //the grid of users
@@ -43,25 +56,39 @@ class DatagridDemo: View("Datagrid Demo") {
     //right now it has just 9 elems but the real one will have who-knows-how-many
     val gridWidth = 600.0;
     private val myGrid = datagrid(data.numbers()) {
+
+        style{
+            backgroundColor += Color.valueOf("#DFDEE3")
+        }
+
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
         cellFormat {
             //each cell is a borderpane
             graphic = borderpane() {
+
+                style{
+                    backgroundColor += Color.valueOf("#DFDEE3")
+                }
+
+
                 //make a small icon
-                val currentSmallUserIcon = UserIconWidget(25.0);
+                val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
+                val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 55.0)
+
+
                 //set its alignment to center so it shows up in the middle of the cell
                 //(otherwise shows up in left)
-                currentSmallUserIcon.root.alignment = Pos.CENTER;
+                currentSmallUserIcon.alignment = Pos.CENTER;
                 //set it to an area of the borderpane
-                top = currentSmallUserIcon.root;
+                top = currentSmallUserIcon;
 
                 //puts a user's number instead of their icon; in the real thing use icon
                 center = label("user " + it);
 
                 val currentBottomWidget = HomeWidget();
-                currentBottomWidget.root.alignment = Pos.CENTER;
-                bottom = currentBottomWidget.root;
+                currentBottomWidget.alignment = Pos.CENTER;
+                bottom = currentBottomWidget;
             }
         }
     }

@@ -2,6 +2,9 @@ package com.example.demo.view
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Node
+import javafx.scene.control.Button
+import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import tornadofx.*
 
@@ -10,18 +13,23 @@ class UserIconWidget(rad: Double): Fragment() {
     override val root = hbox {
         circle {
             radius = rad;
-            fill = Color.CORAL;
+            fill = Color.TRANSPARENT;
         }
     }
 }
 
 //purple rectangle, temporary home button
-class HomeWidget: Fragment() {
-    override val root = hbox {
+class HomeWidget: HBox() {
+    init {
         rectangle {
-            fill = Color.DARKORCHID
-            width = 50.0
+                style {
+                    borderRadius += box(25.0.px)
+                    backgroundRadius += box(25.0.px)
+                }
+            fill = Color.valueOf("#CC4141")
+            width = 150.0
             height = 25.0
+
         }
     }
 }
