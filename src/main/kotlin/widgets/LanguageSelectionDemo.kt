@@ -28,32 +28,39 @@ class MainView : View() {
     private val newTarget = SimpleStringProperty()
     private val newSource = SimpleStringProperty()
 
+    private val selectedTargets = mutableListOf<String>().observable()
+    private val selectedSources = mutableListOf<String>().observable()
+
+
     private val languages = listOf("English", "Spanish", "French", "Russian", "Engrish", "Sppanish", "Arabic", "MandArin", "Afrikaans", "Hebrew", "English", "Spanish", "French", "Russian", "Engrish", "Sppanish", "Arabic", "MandArin", "Afrikaans", "Hebrew", "English", "Spanish", "French", "Russian", "Engrish", "Sppanish", "Arabic", "MandArin", "Afrikaans", "Hebrew", "English", "Spanish", "French", "Russian", "Engrish", "Sppanish", "Arabic", "MandArin", "Afrikaans", "Hebrew", "English", "Spanish", "French", "Russian", "Engrish", "Sppanish", "Arabic", "MandArin", "Afrikaans", "Hebrew", "English", "Spanish", "French", "Russian", "Engrish", "Sppanish", "Arabic", "MandArin", "Afrikaans", "Hebrew")
 
     private val hint = "Try English"
 
-    private val targetBox = LanguageSelection(
-            FXCollections.observableList(languages),
-            newTarget,
-            "Target Languages",
-            hint,
-            LanguageSelectionStyle.targetLanguageSelector
-    )
-
-    private val sourceBox = LanguageSelection(
-            FXCollections.observableList(languages),
-            newSource,
-            "Source Languages",
-            hint,
-            LanguageSelectionStyle.sourceLanguageSelector
-    )
-
     override val root = hbox {
 
-        setPrefSize(400.0, 200.0)
+        setPrefSize(800.0, 400.0)
         alignment = Pos.CENTER
-        add(targetBox)
-        add(sourceBox)
+
+        // Target Language ComboBox
+        add(LanguageSelection(
+                FXCollections.observableList(languages),
+                newTarget,
+                "Target Languages",
+                hint,
+                LanguageSelectionStyle.targetLanguageSelector,
+                selectedTargets
+        ))
+
+        // Source Language ComboBox
+        add(LanguageSelection(
+                FXCollections.observableList(languages),
+                newSource,
+                "Source Languages",
+                hint,
+                LanguageSelectionStyle.sourceLanguageSelector,
+                selectedSources
+        ))
 
     }
+
 }

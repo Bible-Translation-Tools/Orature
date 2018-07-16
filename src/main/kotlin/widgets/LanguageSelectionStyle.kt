@@ -11,6 +11,7 @@ import tornadofx.*
  *
  * Each is specified by it's color
  */
+
 class LanguageSelectionStyle : Stylesheet() {
 
     companion object {
@@ -18,8 +19,8 @@ class LanguageSelectionStyle : Stylesheet() {
         val sourceLanguageSelector by cssclass()
     }
 
-    private val targetColor = Paint.valueOf(UIColors.ROMAN)
-    private val sourceColor = Paint.valueOf(UIColors.SUMMERSKY)
+    private val targetColor = Paint.valueOf(UIColors.UI_PRIMARY)
+    private val sourceColor = Paint.valueOf(UIColors.UI_SECINDARY)
 
     init {
 
