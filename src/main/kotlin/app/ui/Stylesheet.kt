@@ -8,7 +8,6 @@ import tornadofx.*
 
 class ChartCSS : Stylesheet() {
     companion object {
-        val defaultPieChart by cssclass()
         val progressBarStyle by cssclass()
         val transparentButton by cssclass()
 
@@ -16,7 +15,8 @@ class ChartCSS : Stylesheet() {
     }
     init {
         s(button) {
-            bg.value += Color.LEMONCHIFFON
+            bg.value += c("#E56060")
+            textFill = Color.WHITE
         }
 
         transparentButton {

@@ -1,7 +1,9 @@
 package app.ui
 
+import javafx.geometry.NodeOrientation
 import javafx.scene.layout.VBox
 import tornadofx.*
+import java.util.*
 
 object Application {
     class MyApp : App(MyView::class, ChartCSS::class) {
@@ -24,7 +26,7 @@ object Application {
         override val root = VBox()
         init {
             with(root) {
-                // root.nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
+                //root.nodeOrientation = NodeOrientation.RIGHT_TO_LEFT
 
                 // pull some views
                 val mainView = find(ProgressBar::class)
@@ -56,6 +58,6 @@ object Application {
  */
 fun main(args: Array<String>) {
     // set the locale
-    //Locale.setDefault(Locale.forLanguageTag("fr"))
+    // Locale.setDefault(Locale.forLanguageTag("ar"))
     launch<Application.MyApp>(args)
 }

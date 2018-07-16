@@ -13,6 +13,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import tornadofx.*
+import java.util.*
 
 
 /**
@@ -20,6 +21,8 @@ import tornadofx.*
  * ALL HAIL CARL WALKER, THE MAN, THE MYTH, THE LEGEND
  */
 class TagCloudView : View("Tag Cloud") {
+    init {// pulls correct language
+        messages = ResourceBundle.getBundle("MyView")}
 
     val tags = listOf(
             "Engrish", "ManArin", "Hebrew", "Aramaic", "Hebrew", "Hebrew", "Icelandic"
@@ -34,7 +37,7 @@ class TagCloudView : View("Tag Cloud") {
             tagToAdd.bind( selectionModel.selectedItemProperty() )
             items = tags
         }
-        button("Add") {
+        button(messages["addButton"]) {
             action {
                 if( tagToAdd.isNotEmpty().value && !selectedTags.contains(tagToAdd.value) ) {
                     selectedTags.add( tagToAdd.value )
@@ -62,7 +65,7 @@ class TagCloudView : View("Tag Cloud") {
 
         // creates the background for the tag
         val background = Rectangle()
-        background.fill = Color.WHITE
+        background.fill = c("#E56060")
         background.arcWidth = 20.0
         background.arcHeight = 20.0
         background.width = 200.0
