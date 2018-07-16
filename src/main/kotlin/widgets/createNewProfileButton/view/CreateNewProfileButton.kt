@@ -12,8 +12,8 @@ class CreateNewProfileButton(var buttonSize: Double= 64.0): StackPane() {
     var svgGroup = SvgLoader().loadSvg(Thread.currentThread().contextClassLoader.getResource("addNewProfileIcon.svg").path)
     init{
         val newProfileIcon = button(graphic = svgGroup) {
-
-            addClass(NewProfIcon)
+            importStylesheet(CreateNewProfileButtonStyle:: class)
+            addClass(CreateNewProfileButtonStyle.NewProfIcon)
             prefWidth = buttonSize
             prefHeight = buttonSize
             resizeSvg(svgGroup, buttonSize)
