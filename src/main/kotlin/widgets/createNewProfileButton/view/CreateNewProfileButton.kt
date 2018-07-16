@@ -4,7 +4,6 @@ import afester.javafx.svg.SvgLoader
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.layout.StackPane
-import widgets.createNewProfileButton.view.CreateNewProfileButtonStyle.Companion.NewProfIcon
 
 
 class CreateNewProfileButton(var buttonSize: Double= 64.0): StackPane() {
