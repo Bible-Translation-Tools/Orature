@@ -16,7 +16,7 @@ class SvgButton(var buttonSize: Double= 64.0,
     init{
         val newProfileIcon = button(graphic = svgGroup) {
             importStylesheet(SvgButtonStyle:: class)
-            addClass(SvgButtonStyle.NewProfIcon)
+            addClass(SvgButtonStyle.SvgIcon)
             prefWidth = buttonSize
             prefHeight = buttonSize
             resizeSvg(svgGroup, buttonSize)

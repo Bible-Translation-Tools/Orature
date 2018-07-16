@@ -6,10 +6,10 @@ import tornadofx.*
 
 class SvgButtonStyle: Stylesheet() {
     companion object {
-        val NewProfIcon by cssclass()
+        val SvgIcon by cssclass()
     }
     init {
-        NewProfIcon {
+        SvgIcon {
             backgroundColor += c("#ffffff")
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
