@@ -35,6 +35,7 @@ class SvgButton(var buttonSize: Double= 64.0,
         val currentHeight = svgGroup.prefHeight(currentWidth) // get default preferred height
 
         //Suggested (svgScaleX/svgScaleY)CompareToButton for "Create New Profile" is (0.50484/0.2734)
+        //Suggested (svgScaleX/svgScaleY)CompareToButton for "Mic Icon" is (0.3088/0.4192)
         svgGroup.scaleX = (size * svgScaleXCompareToButton) / currentWidth
         svgGroup.scaleY = (size* svgScaleYCompareToButton) / currentHeight
     }
