@@ -6,14 +6,17 @@ import javafx.scene.Group
 import javafx.scene.layout.StackPane
 
 
+//Class to create button with SVG graphic inside
+//Use "::functionName" to pass function as parameter
 class SvgButton(var buttonSize: Double= 64.0,
                 var svgFileName: String,
                 var svgScaleXCompareToButton: Double = 0.50484,
-                var svgScaleYCompareToButton: Double = 0.50484): StackPane() {
-
+                var svgScaleYCompareToButton: Double = 0.50484,
+                operation: () -> Unit ): StackPane() {
     //get resource method is adapted from: https://stackoverflow.com/questions/15749192/how-do-i-load-a-file-from-resource-folder
     var svgGroup = SvgLoader().loadSvg(Thread.currentThread().contextClassLoader.getResource("$svgFileName.svg").path)
     init{
+
         val newProfileIcon = button(graphic = svgGroup) {
             importStylesheet(SvgButtonStyle:: class)
             addClass(SvgButtonStyle.SvgIcon)
@@ -21,7 +24,7 @@ class SvgButton(var buttonSize: Double= 64.0,
             prefHeight = buttonSize
             resizeSvg(svgGroup, buttonSize)
             action {
-                println("Go to New Profile Id Recorder phase 1 view click")
+                operation()
             }
         }
         add(newProfileIcon)
