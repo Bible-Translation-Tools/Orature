@@ -3,6 +3,7 @@ buildscript {
 
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -13,7 +14,7 @@ plugins {
     id 'java'
 }
 
-group 'org.wycliffeassociates.translationrecorder'
+group 'com.kotlin.example'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin'
@@ -22,12 +23,26 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven { url 'https://jitpack.io'}
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url 'https://mvnrepository.com/artifac/'}
+    maven { url  "https://dl.bintray.com/kotlin/exposed" }
+    maven { url  "https://dl.bintray.com/dua3/public" }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile 'no.tornado:tornadofx:1.7.15'
+    compile "no.tornado:tornadofx:1.7.16"
+    compile 'io.reactivex.rxjava2:rxkotlin:2.2.0'
+    compile 'de.jensd:fontawesomefx-commons:9.1.2-jpms'
+    compile 'de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2-jpms'
+    compile 'de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms'
+    implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+    implementation 'com.github.afester.FranzXaver:Examples:0.1'
+
+
 }
 
 compileKotlin {

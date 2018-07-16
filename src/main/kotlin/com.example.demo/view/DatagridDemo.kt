@@ -21,14 +21,14 @@ class DatagridDemo: View("Datagrid Demo") {
         //alignment must be set on root, not on Widget itself
         myBigUserIcon.root.alignment = Pos.CENTER;
 
-        val myHomeWidget = HomeWidget();
+        val myHomeWidget = HomeWidget("#CC4141");
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
         myHomeWidget.root.alignment = Pos.CENTER;
 
         top = myBigUserIcon.root;
         center = label("Welcome!");
-        bottom = myHomeWidget.root;
+        bottom = myHomeWidget;
 
         //prevents from spreading out to take up whole screen when window maximized
         //note: 100 extra pixels hard coded in for space,
@@ -41,7 +41,7 @@ class DatagridDemo: View("Datagrid Demo") {
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
-    val gridWidth = 600.0;
+    val gridWidth = 400.0;
     private val myGrid = datagrid(data.numbers()) {
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
@@ -59,7 +59,7 @@ class DatagridDemo: View("Datagrid Demo") {
                 //puts a user's number instead of their icon; in the real thing use icon
                 center = label("user " + it);
 
-                val currentBottomWidget = HomeWidget();
+                val currentBottomWidget = HomeWidget("#1B2633");
                 currentBottomWidget.root.alignment = Pos.CENTER;
                 bottom = currentBottomWidget.root;
             }
@@ -81,8 +81,14 @@ class DatagridDemo: View("Datagrid Demo") {
         center = myGrid;
 
         //make sure the plus button is in the bottom right
-        BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
-        bottom = plusButton.root;
+        //BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
+//        bottom = plusButton;
+        bottom = borderpane {
+
+            right= plusButton
+
+            }
+
         //put in some nice margins so it's not too crowded
         padding = insets(pad);
     }
