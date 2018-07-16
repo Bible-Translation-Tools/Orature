@@ -81,10 +81,10 @@ class DatagridDemo: View("Datagrid Demo") {
                 //(otherwise shows up in left)
                 currentSmallUserIcon.alignment = Pos.CENTER;
                 //set it to an area of the borderpane
-                top = currentSmallUserIcon;
+                center = currentSmallUserIcon
 
                 //puts a user's number instead of their icon; in the real thing use icon
-                center = label("user " + it);
+                //center = label("user " + it);
 
                 val currentBottomWidget = HomeWidget();
                 currentBottomWidget.alignment = Pos.CENTER;
