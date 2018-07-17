@@ -1,21 +1,17 @@
 package view
 
 import tornadofx.*;
+import javafx.scene.layout.HBox
 
-class RecordView1: View() {
-    override val root = hbox {
-        label("1");
-    }
-}
+class RecordView  {
+    var one = HBox();
+    var two = HBox();
+    var three = HBox();
+    var myListOf = listOf(one, two, three);
 
-class RecordView2: View() {
-    override val root = hbox {
-        label("2");
-    }
-}
-
-class RecordView3: View() {
-    override val root = hbox {
-        label("3");
+    init{
+        one.label("hullo");
+        two.label("there");
+        three.label("You");
     }
 }
