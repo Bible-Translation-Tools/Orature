@@ -6,13 +6,17 @@ import javafx.scene.Cursor
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.layout.StackPane
+import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import javafx.scene.shape.ArcType
+import widgets.ViewMine
 
 
-//Class to create circle button with SVG graphic inside
+//Class to create circle button with MaterialIcon  inside
 //Use "::functionName" to pass function as parameter
-//Example how to use: RoundButton(64.0, c("#CC4141"), "forwardArrowIcon", operation = ::abc)
+//Example how to use: RoundButton(64.0, c("#CC4141"), MaterialIcon.HOME, operation = ::abc)
 //For suggestions the best values to put in the parameter for certain buttons, scroll to bottom of this file
+
 class RoundButton(var buttonSize: Double= 64.0,
                   var myVariable: Paint = c("#ffffff"),
                   icon: MaterialIcon,
@@ -25,19 +29,17 @@ class RoundButton(var buttonSize: Double= 64.0,
                   var outerCircleRadius : Double = buttonSize - 30.0
                   ): StackPane() {
 
-    //get resource method is adapted from: https://stackoverflow.com/questions/15749192/how-do-i-load-a-file-from-resource-folder
-    //    var svgGroup = SvgLoader().loadSvg(Thread.currentThread().contextClassLoader.getResource("$svgFileName.svg").path)
-    val circle = circle {
-        radius = outerCircleRadius
-        fill = c("#E5E5E5") }
+        val circle = circle {
+            radius = outerCircleRadius
+            fill = c("#E5E5E5") }
 
     init {
         val mIcon = MaterialIconView(icon, iconSize)
 
         val svgButton = button("", mIcon) {
             if (outerCircle) circle else circle.removeFromParent()
-            importStylesheet(widgets.RoundButton.view.RoundButtonStyle::class)
-            addClass(widgets.RoundButton.view.RoundButtonStyle.Companion.SvgIcon)
+            importStylesheet(RoundButtonStyle::class)
+            addClass(RoundButtonStyle.SvgIcon)
             prefWidth = buttonSize
             prefHeight = buttonSize
             style {

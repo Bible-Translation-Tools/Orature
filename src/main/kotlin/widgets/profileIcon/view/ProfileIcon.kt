@@ -1,8 +1,6 @@
 package widgets.profileIcon.view
 
 import afester.javafx.svg.SvgLoader
-import com.example.demo.view.DatagridDemo
-import com.example.demo.view.RecordUser
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.layout.StackPane

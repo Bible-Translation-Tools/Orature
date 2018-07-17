@@ -31,6 +31,7 @@ class RectangleButton(color: String = "#FFFF", width: Double, myFill : String, i
 
         action {
             operation()
+
         }
     }
 

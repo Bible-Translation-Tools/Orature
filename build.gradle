@@ -43,7 +43,7 @@ dependencies {
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
     implementation 'com.github.afester.FranzXaver:Examples:0.1'
 
-}
+    }
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"

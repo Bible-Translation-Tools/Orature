@@ -15,7 +15,7 @@ class PlusWidget(myFill :String) : VBox() {
     val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "40px")
 
      val root = button ("", addUserIcon){
-         action { find(DatagridDemo::class).replaceWith(RecordUser::class)  }
+         action { find(DatagridDemo::class).replaceWith(UserCreation::class)  }
 
         style {
             borderRadius+=box(50.0.px)
@@ -34,7 +34,7 @@ class PlusWidget(myFill :String) : VBox() {
 
 
          action {
-             val userScreen = RecordUser()
+             val userScreen = UserCreation()
              find(DatagridDemo::class).replaceWith(userScreen)
          }
 

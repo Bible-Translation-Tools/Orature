@@ -10,7 +10,6 @@ import javafx.scene.text.FontWeight
 
 import javafx.stage.Screen
 import tornadofx.*;
-import tornadofx.ViewTransition.Companion.SlideOut
 import widgets.RectangleButton
 import widgets.profileIcon.view.ProfileIcon
 import widgets.RoundButton.view.RoundButton
@@ -142,10 +141,10 @@ class DatagridDemo: View("Datagrid Demo") {
 
 
     fun navigate() {
-        find(DatagridDemo::class).replaceWith(RecordUser::class,transition = ViewTransition.Slide(.9.seconds))
+        find(DatagridDemo::class).replaceWith(UserCreation::class,transition = ViewTransition.Slide(.9.seconds))
     }
 
-    private val plusButton = widgets.RoundButton.view.RoundButton(icon = MaterialIcon.GROUP_ADD, operation = ::navigate, fillColor = "#CC4141")
+    private val plusButton = RoundButton(icon = MaterialIcon.GROUP_ADD, operation = ::navigate, fillColor = "#CC4141")
 
 
     val pad = 60.0
