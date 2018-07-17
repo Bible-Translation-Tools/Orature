@@ -1,4 +1,4 @@
-package com.example.demo.view.Fragment
+package widgets
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -11,16 +11,17 @@ import javafx.scene.paint.Color
 import tornadofx.*
 
 
-class ButtonComponent(color: String, width: Double, myFill : String): HBox() {
+class RectangleButton(color: String, width: Double, myFill : String, icon: MaterialIcon, var iconSize: String = "25px"): HBox() {
 
-    val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
 
-    val root = button("",homeIcon) {
+    val mIcon = MaterialIconView(icon, iconSize)
+
+    val root = button("",mIcon) {
         style {
             backgroundColor+= c(color)
             setMinWidth(width)
             alignment = Pos.CENTER
-            homeIcon.fill = c(myFill)
+            mIcon.fill = c(myFill)
             effect = DropShadow(10.0, Color.GRAY)
             cursor = Cursor.HAND
 

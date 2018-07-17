@@ -1,10 +1,7 @@
 package com.example.demo.view
 import com.example.demo.controller.DataService
-import com.example.demo.view.Fragment.ButtonComponent
-
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import javafx.geometry.Pos
-import javafx.scene.control.ScrollPane
-import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 
@@ -12,7 +9,9 @@ import javafx.scene.text.FontWeight
 
 import javafx.stage.Screen
 import tornadofx.*;
+import widgets.RectangleButton
 import widgets.profileIcon.view.ProfileIcon
+import widgets.svgButton.view.RoundButton
 import java.awt.Window
 
 class DatagridDemo: View("Datagrid Demo") {
@@ -46,7 +45,7 @@ class DatagridDemo: View("Datagrid Demo") {
 
 
 
-        val myHomeWidget = ButtonComponent("#CC4141", 175.0, "#FFFF")
+        val myHomeWidget = RectangleButton("#CC4141", 175.0, "#FFFF", MaterialIcon.HOME)
 
 
         //set its alignment to center it
@@ -129,7 +128,7 @@ class DatagridDemo: View("Datagrid Demo") {
 
                     //puts a user's number instead of their icon; in the real thing use icon
 
-                    val currentBottomWidget = ButtonComponent("#FFFF",100.0, "#CC4141");
+                    val currentBottomWidget = RectangleButton("#FFFF", 100.0, "#CC4141", MaterialIcon.HOME);
                     currentBottomWidget.alignment = Pos.CENTER;
                     add(currentBottomWidget);
                 }
@@ -138,10 +137,14 @@ class DatagridDemo: View("Datagrid Demo") {
     }
 
 
-    private val plusButton = PlusWidget("#CC4141");
+    fun navigate() {
+        find(DatagridDemo::class).replaceWith(RecordUser::class)
+    }
+
+    private val plusButton = RoundButton(icon = MaterialIcon.GROUP_ADD, operation = ::navigate, fillColor = "#CC4141")
 
 
-    val pad = 60.0;
+    val pad = 60.0
     private val welcomeScreen = hbox() {
 
         style {

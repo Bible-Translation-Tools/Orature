@@ -5,7 +5,7 @@ import javafx.scene.paint.Color
 import tornadofx.*
 
 
-class SvgButtonStyle: Stylesheet() {
+class RoundButtonStyle: Stylesheet() {
     companion object {
         val SvgIcon by cssclass()
     }
