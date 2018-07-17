@@ -13,19 +13,15 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 
 //a temporary substitute for the users' icons, just a circle
-class UserIconWidget(rad: Double): Fragment() {
-    override val root = hbox {
-        circle {
-            radius = rad;
-            fill = Color.TRANSPARENT;
-        }
-    }
-}
-
-//purple rectangle, temporary home button
-class HomeWidget(color: String, width : Double, myfill : String) : HBox() {
-
-}
+//class UserIconWidget(rad: Double): Fragment() {
+//    override val root = hbox {
+//        circle {
+//            radius = rad;
+//            fill = Color.TRANSPARENT;
+//        }
+//    }
+//}
+//
 
 class PlusWidget(myFill :String) : VBox() {
 
@@ -44,5 +40,10 @@ class PlusWidget(myFill :String) : VBox() {
             addUserIcon.fill= c(myFill)
 
         }
+
+         action {
+             val userScreen = RecordUser()
+             find(DatagridDemo::class).replaceWith(userScreen)
+         }
     }
 }

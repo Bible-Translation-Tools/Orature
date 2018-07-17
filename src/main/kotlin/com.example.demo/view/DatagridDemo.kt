@@ -2,9 +2,12 @@ package com.example.demo.view
 import com.example.demo.controller.DataService
 import com.example.demo.view.Fragment.ButtonComponent
 import javafx.geometry.Pos
+import javafx.scene.control.ScrollPane
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
+import javafx.stage.Screen
 import tornadofx.*;
 import widgets.profileIcon.view.ProfileIcon
 import java.awt.Window
@@ -26,7 +29,6 @@ class DatagridDemo: View("Datagrid Demo") {
             backgroundColor += Color.valueOf("#FFFFFF")
         }
         //make a big user icon
-        val myBigUserIcon = UserIconWidget(rad)
 
         val iconHash = ProfileIcon("12345678901")
 
@@ -44,7 +46,12 @@ class DatagridDemo: View("Datagrid Demo") {
 
 
         top = iconHash
-        center = label("Welcome Back!")
+        center = label("Welcome Back!") {
+            style {
+                fontSize = 32.0.px
+                FontWeight.BOLD
+            }
+        }
         bottom = myHomeWidget
 
 
@@ -62,21 +69,31 @@ class DatagridDemo: View("Datagrid Demo") {
     val gridWidth = 400.0;
     private val myGrid = datagrid(data.numbers()) {
 
+
+
         style{
             backgroundColor += Color.valueOf("#DFDEE3")
-            setMinWidth(700.0)
+            setMinWidth(Screen.getPrimary().bounds.width/2)
+            hgrow = Priority.ALWAYS
+            padding = box(56.0.px)
+//            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+//            vbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+
 
         }
 
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
+        verticalCellSpacing = 24.0
+        maxCellsInRow = 3
+
+
         cellFormat {
             //each cell is a borderpane
-            graphic = borderpane() {
+            graphic = vbox(16) {
 
                 style{
                     backgroundColor += Color.valueOf("#DFDEE3")
-                    endMargin = 150.0.px
 
                 }
 
@@ -90,15 +107,16 @@ class DatagridDemo: View("Datagrid Demo") {
                 //(otherwise shows up in left)
                 currentSmallUserIcon.alignment = Pos.CENTER;
                 //set it to an area of the borderpane
-                center = currentSmallUserIcon;
+                   add(currentSmallUserIcon)
 
-                //puts a user's number instead of their icon; in the real thing use icon
 
-                val currentBottomWidget = ButtonComponent("#FFFF",75.0, "#CC4141");
-                currentBottomWidget.alignment = Pos.CENTER;
-                bottom = currentBottomWidget;
+                    //puts a user's number instead of their icon; in the real thing use icon
 
-            }
+                    val currentBottomWidget = ButtonComponent("#FFFF",100.0, "#CC4141");
+                    currentBottomWidget.alignment = Pos.CENTER;
+                    add(currentBottomWidget);
+                }
+
         }
     }
 
@@ -110,7 +128,7 @@ class DatagridDemo: View("Datagrid Demo") {
     private val welcomeScreen = hbox() {
 
         style {
-            setMinWidth(1400.0)
+            setMinWidth(Screen.getPrimary().bounds.width)
         }
         vbox {
             alignment = Pos.CENTER
@@ -118,13 +136,13 @@ class DatagridDemo: View("Datagrid Demo") {
                 add(bigIcons);
                 style {
 
-                    setMinWidth(700.0)
+
                     setMinHeight(Window.HEIGHT.toDouble())
                     backgroundColor += Color.WHITE
                     vgrow = Priority.ALWAYS
+                    setMinWidth(Screen.getPrimary().bounds.width/2)
                 }
             }
-
 
         }
 
@@ -137,12 +155,14 @@ class DatagridDemo: View("Datagrid Demo") {
 
                 style {
                     backgroundColor += c("#DFDEE3")
+                    vgrow= Priority.ALWAYS
+                    hgrow= Priority.ALWAYS
                 }
 
                 right= plusButton
                 padding = insets(pad);
+           }
 
-            }
         }
 
         //make sure the plus button is in the bottom right

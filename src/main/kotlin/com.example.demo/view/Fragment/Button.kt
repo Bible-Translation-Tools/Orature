@@ -3,6 +3,7 @@ package com.example.demo.view.Fragment
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
+import javafx.scene.Cursor
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import tornadofx.*
@@ -18,6 +19,8 @@ class ButtonComponent(color: String, width: Double, myFill : String): HBox() {
             setMinWidth(width)
             alignment = Pos.CENTER
             homeIcon.fill = c(myFill)
+            startMargin = 24.0.px
+            cursor = Cursor.HAND
 
         }
 
