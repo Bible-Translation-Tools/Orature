@@ -29,6 +29,7 @@ repositories {
     maven { url 'https://mvnrepository.com/artifac/'}
     maven { url  "https://dl.bintray.com/kotlin/exposed" }
     maven { url  "https://dl.bintray.com/dua3/public" }
+
 }
 
 dependencies {
