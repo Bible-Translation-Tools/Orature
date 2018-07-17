@@ -1,10 +1,15 @@
 package com.example.demo.view
 import com.example.demo.controller.DataService
+import com.example.demo.view.Fragment.ButtonComponent
+
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import javafx.stage.Screen
 import tornadofx.*;
 import widgets.profileIcon.view.ProfileIcon
+import java.awt.Window
 
 class DatagridDemo: View("Datagrid Demo") {
 
@@ -17,15 +22,14 @@ class DatagridDemo: View("Datagrid Demo") {
 
     //the left half of the screen, which displays:
     //the last user to log in, a welcome message, and a button to go to that user's home
-    private val rad = 100.0
+    private val rad = 125.0
     private val bigIcons = borderpane () {
         style{
             backgroundColor += Color.valueOf("#FFFFFF")
         }
-        //make a big user icon
-        val myBigUserIcon = UserIconWidget(rad)
 
-        val iconHash = ProfileIcon("12345678901")
+
+        val iconHash = ProfileIcon("12345678901", 150.0, true )
 
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
@@ -34,7 +38,9 @@ class DatagridDemo: View("Datagrid Demo") {
         iconHash.alignment = Pos.CENTER
 
 
-        val myHomeWidget = HomeWidget("#CC4141");
+
+        val myHomeWidget = ButtonComponent("#CC4141", 175.0, "#FFFF")
+
 
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
@@ -57,72 +63,105 @@ class DatagridDemo: View("Datagrid Demo") {
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
-    val gridWidth = 400.0;
+    val gridWidth = 400.0
     private val myGrid = datagrid(data.numbers()) {
+        verticalCellSpacing = 25.0
 
         style{
             backgroundColor += Color.valueOf("#DFDEE3")
+            setMinWidth(Screen.getPrimary().bounds.width/2)
+            hgrow = Priority.ALWAYS
+            vgrow =Priority.ALWAYS
+
+
         }
 
         //formats each cell; if not called, cells are just empty white squares
         //the "it" inside is an item from data.numbers
         cellFormat {
+
             //each cell is a borderpane
             graphic = borderpane() {
 
                 style{
                     backgroundColor += Color.valueOf("#DFDEE3")
+                    endMargin = 250.0.px
+
+
                 }
+
 
 
                 //make a small icon
                 val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
-                val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 55.0)
+                val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 100.0)
 
 
                 //set its alignment to center so it shows up in the middle of the cell
                 //(otherwise shows up in left)
                 currentSmallUserIcon.alignment = Pos.CENTER;
                 //set it to an area of the borderpane
-                center = currentSmallUserIcon
+
+                center = currentSmallUserIcon;
 
                 //puts a user's number instead of their icon; in the real thing use icon
-                //center = label("user " + it);
 
-
-                val currentBottomWidget = HomeWidget("#FFFFFF")
-                currentBottomWidget.root.alignment = Pos.CENTER
-                bottom = currentBottomWidget.root
+                val currentBottomWidget = ButtonComponent("#FFFF",75.0, "#CC4141");
+                currentBottomWidget.alignment = Pos.CENTER;
+                bottom = currentBottomWidget;
 
             }
         }
     }
 
 
-    private val plusButton = PlusWidget();
+    private val plusButton = PlusWidget("#CC4141");
 
 
     val pad = 60.0;
-    private val welcomeScreen = borderpane() {
-        left = stackpane{
-            add(bigIcons);
+    private val welcomeScreen = hbox() {
+
+        style {
+            setMinWidth(  Screen.getPrimary().bounds.width)
         }
+        vbox {
+            alignment = Pos.CENTER
+            stackpane {
+                add(bigIcons);
+                style {
+
+                    setMinWidth(700.0)
+                    setMinHeight(Window.HEIGHT.toDouble())
+                    backgroundColor += Color.WHITE
+                    vgrow = Priority.ALWAYS
+                }
+            }
+
+
+        }
+
         //grid needs to go in center or it won't auto-realign when window resized
         //borderpane gives prefered size to top, bottom, left, and right
         //so resizing gets ignored by top, bottom, left, and right
-        center = myGrid;
+        vbox { add(myGrid)
+
+            borderpane {
+
+                style {
+                    backgroundColor += c("#DFDEE3")
+                }
+
+                right= plusButton
+                padding = insets(pad);
+
+            }
+        }
 
         //make sure the plus button is in the bottom right
         //BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
 //        bottom = plusButton;
-        bottom = borderpane {
-
-            right= plusButton
-
-            }
-
         //put in some nice margins so it's not too crowded
-        padding = insets(pad);
+
     }
 
     //set the root of the view to the welcomeScreen

@@ -4,48 +4,27 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
-import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import tornadofx.*
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.scene.Cursor
+import javafx.scene.effect.DropShadow
+
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+
 import javafx.scene.layout.VBox
-
-//a temporary substitute for the users' icons, just a circle
-class UserIconWidget(rad: Double): Fragment() {
-    override val root = hbox {
-        circle {
-            radius = rad
-            fill = Color.TRANSPARENT
-        }
-    }
-}
+import javafx.stage.Screen
 
 
-class HomeWidget(color: String) : HBox() {
-    val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px").setStyleClass("primary")
+class PlusWidget(myFill :String) : VBox() {
 
-    val root = button("",homeIcon) {
-        style {
-            backgroundColor+=c(color)
-            setMinWidth(150.0)
-            alignment = Pos.CENTER
-
-        }
-
-    }
-
-    init {
-       alignment = Pos.CENTER
-    }
-
-}
-
-class PlusWidget: VBox() {
-
-    val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "50px").setStyleClass("primary")
+    val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "40px")
 
      val root = button ("", addUserIcon){
+         action { find(DatagridDemo::class).replaceWith(RecordUser::class)  }
+
         style {
             borderRadius+=box(50.0.px)
             backgroundColor+=c("#FFFFFF")
@@ -55,6 +34,14 @@ class PlusWidget: VBox() {
             accentColor=Color.WHITE
             baseColor=Color.WHITE
             textFill=c("#CC4141")
+            addUserIcon.fill= c(myFill)
+            effect = DropShadow(10.0, Color.GRAY)
+            cursor = Cursor.HAND
+
         }
+
     }
+
+
+
 }

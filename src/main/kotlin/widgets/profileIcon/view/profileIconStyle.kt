@@ -20,6 +20,8 @@ class ProfileIconStyle : Stylesheet() {
 
             and(hover) {
                 opacity = 0.90
+                scaleX = 1.1
+                scaleY = 1.1
             }
         }
     }
