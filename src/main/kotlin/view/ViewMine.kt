@@ -31,7 +31,6 @@ class ViewMine: Pane()  {
         fill = Color.OLIVE;
     }
 
-
     // an object that holds obervable disposables
     val compositeDisposable = CompositeDisposable()
 
@@ -48,32 +47,27 @@ class ViewMine: Pane()  {
             .observeOnFx()
             //we make our subscriber
             .subscribe {
-                val oneCover = circle{
-                    centerX = 30.0;
-                    centerY = 20.0;
-                    radius = 20.0;
-                    fill = Color.WHITE;
-                }
-
-                val twoCover = circle{
-                    centerX = 70.0;
-                    centerY = 20.0;
-                    radius = 20.0;
-                    fill = Color.WHITE;
-                }
-
-                val threeCover = circle{
-                    centerX = 110.0;
-                    centerY = 20.0;
-                    radius = 20.0;
-                    fill = Color.WHITE;
-                }
                 if (it == "0".toLong()) {
-                    add(oneCover);
+                    circle{
+                        centerX = 30.0;
+                        centerY = 20.0;
+                        radius = 21.0;
+                        fill = Color.WHITE;
+                    }
                 } else if (it == "1".toLong()) {
-                    add(twoCover);
+                    circle{
+                        centerX = 70.0;
+                        centerY = 20.0;
+                        radius = 21.0;
+                        fill = Color.WHITE;
+                    }
                 } else if (it == "2".toLong()) {
-                    add(threeCover);
+                    circle{
+                        centerX = 110.0;
+                        centerY = 20.0;
+                        radius = 21.0;
+                        fill = Color.WHITE;
+                    }
                 }
             }
 
