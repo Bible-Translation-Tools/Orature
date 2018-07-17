@@ -9,7 +9,14 @@ import tornadofx.*;
 
 class ViewMine: HBox() {
 
-    val  arc = arc {
+    val bigCircle = circle{
+             centerX = 120.0
+             centerY = 120.0
+             radius = 120.0;
+             fill = c("#EDEDED");
+         }
+
+        val  arc = arc {
         fill = c("#CC4141");
         centerX = 120.0
         centerY = 120.0
@@ -24,36 +31,12 @@ class ViewMine: HBox() {
 
     }
 
-
      val root = pane{
 
          alignment = Pos.CENTER
 
-//                 val bigCircle = circle{
-//                     centerX = 100.0
-//                     centerY = 100.0
-//                     radius = 100.0;
-//                     fill = Color.DIMGREY;
-//                 }
-
-//                 val mediumCircle = circle{
-//                     centerX = 100.0
-//                     centerY = 100.0
-//                     radius = 90.0;
-//                     fill = Color.ANTIQUEWHITE;
-//
-//                 }
-
+                 add(bigCircle)
                  add(arc)
-
-//                 val smallCircle = circle{
-//                     centerX = 100.0
-//                     centerY = 100.0
-//                     radius = 20.0;
-//                     fill = Color.DIMGREY;
-//                 }
-
-
     }
 
     fun animate() {

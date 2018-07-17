@@ -50,12 +50,7 @@ class UserCreation : View("My View") {
 
         }
 
-        bottom {
-//            add(jj)
-//            style {
-//                alignment = Pos.CENTER
-//            }
-        }
+
 
     }
 }

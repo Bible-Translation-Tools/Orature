@@ -17,17 +17,10 @@ import widgets.ViewMine
 //Example how to use: RoundButton(64.0, c("#CC4141"), MaterialIcon.HOME, operation = ::abc)
 //For suggestions the best values to put in the parameter for certain buttons, scroll to bottom of this file
 
-class RoundButton(var buttonSize: Double= 64.0,
-                  var myVariable: Paint = c("#ffffff"),
-                  icon: MaterialIcon,
-                  var iconSize: String = "25px",
-                  fillColor: String,
-                  var svgScaleXCompareToButton: Double = 0.50484,
-                  var svgScaleYCompareToButton: Double = 0.50484,
-                  operation: () -> Unit,
-                  var outerCircle: Boolean = false,
-                  var outerCircleRadius : Double = buttonSize - 30.0
-                  ): StackPane() {
+class RoundButton(var buttonSize: Double= 64.0, var myVariable: Paint = c("#ffffff"),
+                  icon: MaterialIcon, var iconSize: String = "25px",
+                  fillColor: String, operation: () -> Unit,
+                  var outerCircle: Boolean = false, var outerCircleRadius : Double = buttonSize - 30.0): StackPane() {
 
         val circle = circle {
             radius = outerCircleRadius
@@ -48,7 +41,6 @@ class RoundButton(var buttonSize: Double= 64.0,
                 cursor = Cursor.HAND
 
             }
-            //resizeSvg(svgGroup, buttonSize)
             action {
                 operation()
             }
@@ -57,16 +49,6 @@ class RoundButton(var buttonSize: Double= 64.0,
         add(svgButton)
     }
 
-    fun resizeSvg(svgGroup: Group, size: Double = buttonSize) {
-
-        // adapted from https://stackoverflow.com/questions/38953921/how-to-set-the-size-of-a-svgpath-in-javafx
-        val currentWidth = svgGroup.prefWidth(-1.0) // get the default preferred width
-        val currentHeight = svgGroup.prefHeight(currentWidth) // get default preferred height
-
-
-        svgGroup.scaleX = (size * svgScaleXCompareToButton) / currentWidth
-        svgGroup.scaleY = (size * svgScaleYCompareToButton) / currentHeight
-    }
 }
 
 //How to use:
