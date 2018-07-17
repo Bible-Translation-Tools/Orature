@@ -11,7 +11,7 @@ import javafx.scene.paint.Color
 import tornadofx.*
 
 
-class RectangleButton(color: String, width: Double, myFill : String, icon: MaterialIcon, var iconSize: String = "25px"): HBox() {
+class RectangleButton(color: String = "#FFFF", width: Double, myFill : String, icon: MaterialIcon, var iconSize: String = "25px"): HBox() {
 
 
     val mIcon = MaterialIconView(icon, iconSize)
