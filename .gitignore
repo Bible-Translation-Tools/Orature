@@ -7,12 +7,13 @@
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/../vcs.xml
+.idea/vcs.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
 .idea/**/dataSources.ids
 .idea/**/dataSources.local.xml
-.idea/**/sqlDataSources.xmlK
+.idea/**/sqlDataSources.xml
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
