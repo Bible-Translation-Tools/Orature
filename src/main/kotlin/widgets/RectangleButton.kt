@@ -11,12 +11,14 @@ import javafx.scene.paint.Color
 import tornadofx.*
 
 
-class RectangleButton(color: String = "#FFFF", width: Double, myFill : String, icon: MaterialIcon, var iconSize: String = "25px"): HBox() {
+class RectangleButton(color: String = "#FFFF", width: Double, myFill : String, icon: MaterialIcon,
+                      var iconSize: String = "25px",  operation: () -> Unit): HBox() {
 
 
     val mIcon = MaterialIconView(icon, iconSize)
 
     val root = button("",mIcon) {
+
         style {
             backgroundColor+= c(color)
             setMinWidth(width)
@@ -25,8 +27,10 @@ class RectangleButton(color: String = "#FFFF", width: Double, myFill : String, i
             effect = DropShadow(10.0, Color.GRAY)
             cursor = Cursor.HAND
 
+        }
 
-
+        action {
+            operation()
         }
     }
 

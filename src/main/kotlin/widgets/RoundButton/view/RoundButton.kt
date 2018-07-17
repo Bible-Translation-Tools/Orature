@@ -1,7 +1,8 @@
-package widgets.svgButton.view
+package widgets.RoundButton.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.scene.Cursor
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.layout.StackPane
@@ -19,22 +20,31 @@ class RoundButton(var buttonSize: Double= 64.0,
                   fillColor: String,
                   var svgScaleXCompareToButton: Double = 0.50484,
                   var svgScaleYCompareToButton: Double = 0.50484,
-                  operation: () -> Unit ): StackPane() {
+                  operation: () -> Unit,
+                  var outerCircle: Boolean = false,
+                  var outerCircleRadius : Double = buttonSize - 30.0
+                  ): StackPane() {
 
     //get resource method is adapted from: https://stackoverflow.com/questions/15749192/how-do-i-load-a-file-from-resource-folder
     //    var svgGroup = SvgLoader().loadSvg(Thread.currentThread().contextClassLoader.getResource("$svgFileName.svg").path)
+    val circle = circle {
+        radius = outerCircleRadius
+        fill = c("#E5E5E5") }
 
     init {
         val mIcon = MaterialIconView(icon, iconSize)
 
         val svgButton = button("", mIcon) {
-            importStylesheet(RoundButtonStyle::class)
-            addClass(RoundButtonStyle.SvgIcon)
+            if (outerCircle) circle else circle.removeFromParent()
+            importStylesheet(widgets.RoundButton.view.RoundButtonStyle::class)
+            addClass(widgets.RoundButton.view.RoundButtonStyle.Companion.SvgIcon)
             prefWidth = buttonSize
             prefHeight = buttonSize
             style {
                 backgroundColor += myVariable
                 mIcon.fill = c(fillColor)
+                cursor = Cursor.HAND
+
             }
             //resizeSvg(svgGroup, buttonSize)
             action {

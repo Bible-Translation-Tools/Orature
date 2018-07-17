@@ -1,4 +1,4 @@
-package widgets.svgButton.view
+package widgets.RoundButton.view
 
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color

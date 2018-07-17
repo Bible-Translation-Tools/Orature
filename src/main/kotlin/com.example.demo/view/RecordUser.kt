@@ -6,13 +6,17 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.*
 import widgets.RectangleButton
-import widgets.svgButton.view.RoundButton
+import widgets.RoundButton.view.RoundButton
 
 class RecordUser : View("My View") {
     override val root = borderpane {
 
-        val RecordButton = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px")
-        val CloseButton = RectangleButton(width= 100.0,myFill = "#CC4141", icon = MaterialIcon.CLOSE )
+        fun navHome() {
+            find(RecordUser::class).replaceWith(DatagridDemo::class, ViewTransition.Slide(.9.seconds, ViewTransition.Direction.RIGHT))
+        }
+
+        val RecordButton = widgets.RoundButton.view.RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", outerCircle = true, outerCircleRadius = 120.0)
+        val CloseButton = RectangleButton(width= 100.0,myFill = "#CC4141", icon = MaterialIcon.CLOSE, operation =::navHome )
 
         top {
             add(CloseButton)

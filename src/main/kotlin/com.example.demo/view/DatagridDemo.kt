@@ -1,6 +1,7 @@
 package com.example.demo.view
 import com.example.demo.controller.DataService
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
+
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
@@ -9,9 +10,10 @@ import javafx.scene.text.FontWeight
 
 import javafx.stage.Screen
 import tornadofx.*;
+import tornadofx.ViewTransition.Companion.SlideOut
 import widgets.RectangleButton
 import widgets.profileIcon.view.ProfileIcon
-import widgets.svgButton.view.RoundButton
+import widgets.RoundButton.view.RoundButton
 import java.awt.Window
 
 class DatagridDemo: View("Datagrid Demo") {
@@ -45,7 +47,7 @@ class DatagridDemo: View("Datagrid Demo") {
 
 
 
-        val myHomeWidget = RectangleButton("#CC4141", 175.0, "#FFFF", MaterialIcon.HOME)
+        val myHomeWidget = RectangleButton("#CC4141", 175.0, "#FFFF", MaterialIcon.HOME, operation = ::println)
 
 
         //set its alignment to center it
@@ -128,7 +130,9 @@ class DatagridDemo: View("Datagrid Demo") {
 
                     //puts a user's number instead of their icon; in the real thing use icon
 
-                    val currentBottomWidget = RectangleButton("#FFFF", 100.0, "#CC4141", MaterialIcon.HOME);
+
+                    val currentBottomWidget = RectangleButton("#FFFF", 100.0, "#CC4141", MaterialIcon.HOME, operation = :: println);
+
                     currentBottomWidget.alignment = Pos.CENTER;
                     add(currentBottomWidget);
                 }
@@ -138,10 +142,10 @@ class DatagridDemo: View("Datagrid Demo") {
 
 
     fun navigate() {
-        find(DatagridDemo::class).replaceWith(RecordUser::class)
+        find(DatagridDemo::class).replaceWith(RecordUser::class,transition = ViewTransition.Slide(.9.seconds))
     }
 
-    private val plusButton = RoundButton(icon = MaterialIcon.GROUP_ADD, operation = ::navigate, fillColor = "#CC4141")
+    private val plusButton = widgets.RoundButton.view.RoundButton(icon = MaterialIcon.GROUP_ADD, operation = ::navigate, fillColor = "#CC4141")
 
 
     val pad = 60.0
