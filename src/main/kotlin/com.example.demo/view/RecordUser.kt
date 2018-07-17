@@ -1,17 +1,10 @@
 package com.example.demo.view
 
-import javafx.scene.Parent
 import tornadofx.*
 
-class RecordUser: View() {
+class RecordUser : View("My View") {
+    override val root = borderpane {
 
-    companion object {
-        val button = " String"
-    }
-
-    override val root = hbox {
-        style{
-            backgroundColor += c("#000000")
-        }
     }
 }
+

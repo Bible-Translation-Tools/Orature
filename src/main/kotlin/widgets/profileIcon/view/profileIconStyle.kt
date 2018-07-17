@@ -17,6 +17,7 @@ class ProfileIconStyle : Stylesheet() {
             borderRadius += box(100.percent)
             cursor = Cursor.HAND
             effect = DropShadow(10.0, Color.GRAY)
+            cursor = Cursor.HAND
 
             and(hover) {
                 opacity = 0.90

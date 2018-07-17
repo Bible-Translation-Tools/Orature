@@ -1,21 +1,13 @@
 package com.example.demo.view
 
-import javafx.geometry.Insets
-import javafx.geometry.Pos
-import javafx.scene.Node
-import javafx.scene.control.Button
+
 import javafx.scene.paint.Color
 import tornadofx.*
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
-
-import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-
 import javafx.scene.layout.VBox
-import javafx.stage.Screen
 
 
 class PlusWidget(myFill :String) : VBox() {
@@ -39,6 +31,12 @@ class PlusWidget(myFill :String) : VBox() {
             cursor = Cursor.HAND
 
         }
+
+
+         action {
+             val userScreen = RecordUser()
+             find(DatagridDemo::class).replaceWith(userScreen)
+         }
 
     }
 
