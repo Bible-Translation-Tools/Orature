@@ -1,8 +1,13 @@
 package app.ui
 
+import tornadofx.App
+import tornadofx.launch
+
 object Application {
     @JvmStatic
     fun main(args: Array<String>) {
-        println("hello")
+        launch<MainApp>()
     }
 }
+
+class MainApp: App(MainView::class)
