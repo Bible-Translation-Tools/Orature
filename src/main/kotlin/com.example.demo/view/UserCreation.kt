@@ -6,10 +6,7 @@ import javafx.scene.shape.Arc
 import tornadofx.*
 import widgets.RectangleButton
 import widgets.RoundButton.view.RoundButton
-import widgets.ViewMine
 import widgets.RecordButton.RecordButton
-
-import kotlin.reflect.jvm.internal.impl.metadata.jvm.JvmProtoBuf
 
 class UserCreation : View("My View") {
     override val root = borderpane {
@@ -28,9 +25,8 @@ class UserCreation : View("My View") {
 
         val RecordButtons = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", outerCircle = true, outerCircleRadius = 120.0)
         val CloseButton = RectangleButton(width= 100.0,myFill = "#CC4141", icon = MaterialIcon.CLOSE, operation =::navHome )
-        val anim = ViewMine()
-        val jj = RecordButton()
 
+        val jj = RecordButton()
 
         top {
             CloseButton.alignment = Pos.BOTTOM_RIGHT
@@ -48,7 +44,15 @@ class UserCreation : View("My View") {
             jj.alignment = Pos.CENTER
 
 
+
+
+
+
         }
+
+
+
+
 
 
 
