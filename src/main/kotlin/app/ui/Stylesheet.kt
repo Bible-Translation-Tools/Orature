@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXProgressBar
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import javafx.scene.text.Font
 import tornadofx.*
 
 class ChartCSS : Stylesheet() {
@@ -14,6 +15,10 @@ class ChartCSS : Stylesheet() {
         val bg by cssproperty<MultiValue<Paint>>("-fx-background-color")
     }
     init {
+        s(label) {
+            font = Font.font("NotoSans-Black")
+        }
+
         s(button) {
             bg.value += c("#E56060")
             textFill = Color.WHITE
