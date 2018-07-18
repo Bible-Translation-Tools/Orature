@@ -12,7 +12,8 @@ class UserCreation : View("My View") {
     override val root = borderpane {
 
         fun navHome() {
-            find(UserCreation::class).replaceWith(DatagridDemo::class, ViewTransition.Slide(.9.seconds, ViewTransition.Direction.RIGHT))
+            find(UserCreation::class).replaceWith(WelcomeScreen::class, ViewTransition.Slide(.9.seconds, ViewTransition.Direction.RIGHT))
+
         }
 
         fun animation(arc: Arc) {
@@ -29,13 +30,16 @@ class UserCreation : View("My View") {
         val jj = RecordButton()
 
         top {
-            CloseButton.alignment = Pos.BOTTOM_RIGHT
-            add(CloseButton)
-            style {
-                setPrefHeight(200.0)
+
+            hbox {
                 alignment = Pos.BOTTOM_RIGHT
+                add(CloseButton)
+                style {
+                    setPrefHeight(200.0)
+                    alignment = Pos.BOTTOM_RIGHT
 
 
+                }
             }
 
         }

@@ -32,14 +32,14 @@ class RoundButton(var buttonSize: Double= 64.0, var myVariable: Paint = c("#ffff
         val svgButton = button("", mIcon) {
             if (outerCircle) circle else circle.removeFromParent()
             importStylesheet(RoundButtonStyle::class)
-            addClass(RoundButtonStyle.SvgIcon)
+            addClass(RoundButtonStyle.RoundButton)
             prefWidth = buttonSize
             prefHeight = buttonSize
             style {
                 backgroundColor += myVariable
                 mIcon.fill = c(fillColor)
                 cursor = Cursor.HAND
-
+                borderI
             }
             action {
                 operation()

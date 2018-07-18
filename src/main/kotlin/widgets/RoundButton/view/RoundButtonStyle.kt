@@ -7,13 +7,15 @@ import tornadofx.*
 
 class RoundButtonStyle: Stylesheet() {
     companion object {
-        val SvgIcon by cssclass()
+        val RoundButton by cssclass()
     }
     init {
-        SvgIcon {
+        RoundButton {
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
             effect = DropShadow(10.0, Color.GRAY)
+            minWidth = 64.0.px
+            minHeight = 64.0.px
 
             and(hover) {
                 opacity = 0.9
