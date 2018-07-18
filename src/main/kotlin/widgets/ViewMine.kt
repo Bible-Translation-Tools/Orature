@@ -9,6 +9,7 @@ import tornadofx.*;
 
 class ViewMine: HBox() {
 
+
     val bigCircle = circle{
              centerX = 120.0
              centerY = 120.0
