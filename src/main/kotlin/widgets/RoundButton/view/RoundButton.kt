@@ -39,7 +39,7 @@ class RoundButton(var buttonSize: Double= 64.0, var myVariable: Paint = c("#ffff
                 backgroundColor += myVariable
                 mIcon.fill = c(fillColor)
                 cursor = Cursor.HAND
-                borderI
+
             }
             action {
                 operation()
