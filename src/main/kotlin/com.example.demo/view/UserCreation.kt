@@ -7,8 +7,8 @@ import javafx.scene.shape.Arc
 import tornadofx.*
 import widgets.RectangleButton
 import widgets.RoundButton.view.RoundButton
-import widgets.ViewMine
 import widgets.RecordButton.RecordButton
+import widgets.ViewMine
 
 class UserCreation : View("My View") {
     override val root = borderpane {
@@ -22,12 +22,14 @@ class UserCreation : View("My View") {
 
         }
 
-
 //        val RecordButtons = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", outerCircle = true, outerCircleRadius = 120.0)
         val CloseButton = RectangleButton(width= 100.0,myFill = "#CC4141", icon = MaterialIcon.CLOSE, operation =::navHome )
+
         val anim = ViewMine()
         val RecordButton = RecordButton()
 
+
+        val jj = RecordButton()
 
         top {
 
@@ -35,10 +37,9 @@ class UserCreation : View("My View") {
                 alignment = Pos.BOTTOM_RIGHT
                 add(CloseButton)
                 style {
-                    setPrefHeight(200.0)
                     alignment = Pos.BOTTOM_RIGHT
-                    padding= box(40.0.px)
-
+                    paddingRight= 40.0
+                    paddingTop = 40.0
 
                 }
             }
@@ -48,11 +49,7 @@ class UserCreation : View("My View") {
             add(RecordButton)
             RecordButton.alignment = Pos.CENTER
 
-
         }
-
-
-
     }
 }
 
