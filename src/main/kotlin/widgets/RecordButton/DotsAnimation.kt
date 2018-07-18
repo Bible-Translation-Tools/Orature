@@ -50,9 +50,9 @@ class DotsAnimation: HBox() {
 
     fun showCircles() {
         var timer = Timer()
-        timer.schedule(timerTask { cir1.fill= c("#CC4141") }, 1000)
-        timer.schedule(timerTask { cir2.fill=c("#CC4141") }, 2000)
-        timer.schedule(timerTask { cir3.fill=c("#CC4141") }, 3000)
+        timer.schedule(timerTask { cir1.fill= c("#CC4141") }, 0)
+        timer.schedule(timerTask { cir2.fill=c("#CC4141") }, 1000)
+        timer.schedule(timerTask { cir3.fill=c("#CC4141") }, 2000)
     }
 
 

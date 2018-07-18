@@ -17,7 +17,7 @@ class RectangleButton(color: String = "#FFFF", width: Double, myFill : String, i
 
     val mIcon = MaterialIconView(icon, iconSize)
 
-    val root = button("",mIcon) {
+    val root = button("CLOSE",mIcon) {
 
         style {
             backgroundColor+= c(color)

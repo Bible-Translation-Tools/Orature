@@ -1,6 +1,6 @@
 package widgets.RecordButton
 
-
+import com.example.demo.ViewModel.UserCreationViewModel
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
@@ -18,40 +18,30 @@ import kotlin.concurrent.timerTask
 class RecordButton : VBox() {
 
 
-     var numberText = ""
-
-
-
-     val circle = ViewMine()
-
+    val circle = ViewMine()
     val dotsAn = DotsAnimation()
-    //val micButton = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", myVariable = c("#FFFF"))
-     var icon =   MaterialIcon.MIC_NONE
+    val UserCreationViewModel = UserCreationViewModel()
 
-    var mIcon = MaterialIconView(icon, "65px")
+    val countdown = UserCreationViewModel.countdownTracker
 
-    val micButton = button(numberText, mIcon) {
-        //if (outerCircle) circle else circle.removeFromParent()
+    // val micButton = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", myVariable = c("#FFFF"))
+    val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "65px")
+    val micButton = button(countdown, micIcon){
         importStylesheet(RoundButtonStyle::class)
         addClass(RoundButtonStyle.RoundButton)
-        prefWidth = 152.68
-        prefHeight = 152.68
-        text= numberText
         style {
-            backgroundColor += c("#FFFF")
-            mIcon.fill = c("#CC4141")
+            backgroundColor += Color.WHITE
+            micIcon.fill = c("#CC4141")
             cursor = Cursor.HAND
-            fontSize = 6.em
+            minWidth = 152.0.px
+            minHeight = 152.0.px
+            fontSize = 8.em
             textFill = c("#CC4141")
 
         }
-        action {
-
-        }
-
-
     }
 
+    val stopIcon = MaterialIconView(MaterialIcon.STOP, "65px")
 
      val root = button {
          style {
@@ -61,74 +51,32 @@ class RecordButton : VBox() {
         alignment = Pos.CENTER
          stackpane {
 
-                 add(circle)
-                 add(micButton)
+             add(circle)
+             add(micButton)
 
          }
 
 
-         action{
-
-             mIcon.hide()
-             Platform.runLater { micButton.text = "3" }
-             dotsWrapper.show()
+         action {
              dotsAn.showCircles()
-
-
+             micIcon.hide()
              var timer = Timer()
-
-
-
-             timer.schedule(timerTask {
-
-
-                 Platform.runLater { micButton.text = "2" }
-             }, 1000)
-             timer.schedule(timerTask {
-
-
-                 Platform.runLater { micButton.text = "1" }
-                 println(numberText)
-             }, 2000)
-
-
-             timer.schedule(timerTask {
-
-                 var icon =   MaterialIcon.STOP
-
-                 var mIcon = MaterialIconView(icon, "75px")
-                 mIcon.fill = c("#CC4141")
-
-
-                 Platform.runLater { micButton.graphic = mIcon
-                     micButton.text = ""
-
+             UserCreationViewModel.countdown()
+             timer.schedule(timerTask { circle.animate() }, 3000)
+             timer.schedule(timerTask { Platform.runLater(Runnable() {
+                 run {
+                     micButton.graphic = stopIcon
+                     stopIcon.fill=c("#CC4141")
                  }
-                 circle.animate()
-
-             }, 3000)
-
-
-
-
-
+             }) }, 3000)
 
          }
-
 
 
     }
-
-
-
    val dotsWrapper = hbox {
        alignment = Pos.CENTER
        add(dotsAn)
    }
-
-
-
-
-
 
 }
