@@ -18,9 +18,9 @@ import widgets.ViewMine
 //For suggestions the best values to put in the parameter for certain buttons, scroll to bottom of this file
 
 class RoundButton(var buttonSize: Double= 64.0, var myVariable: Paint = c("#ffffff"),
-                  icon: MaterialIcon, var iconSize: String = "25px",
+                  var icon: MaterialIcon, var iconSize: String = "25px",
                   fillColor: String, operation: () -> Unit,
-                  var outerCircle: Boolean = false, var outerCircleRadius : Double = buttonSize - 30.0): StackPane() {
+                  var outerCircle: Boolean = false, var outerCircleRadius : Double = buttonSize - 30.0, var buttonText:String= ""): StackPane() {
 
         val circle = circle {
             radius = outerCircleRadius
@@ -29,7 +29,7 @@ class RoundButton(var buttonSize: Double= 64.0, var myVariable: Paint = c("#ffff
     init {
         val mIcon = MaterialIconView(icon, iconSize)
 
-        val svgButton = button("", mIcon) {
+        val svgButton = button(buttonText, mIcon) {
             if (outerCircle) circle else circle.removeFromParent()
             importStylesheet(RoundButtonStyle::class)
             addClass(RoundButtonStyle.RoundButton)
@@ -39,7 +39,7 @@ class RoundButton(var buttonSize: Double= 64.0, var myVariable: Paint = c("#ffff
                 backgroundColor += myVariable
                 mIcon.fill = c(fillColor)
                 cursor = Cursor.HAND
-                borderI
+
             }
             action {
                 operation()
