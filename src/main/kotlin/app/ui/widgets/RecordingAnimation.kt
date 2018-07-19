@@ -1,8 +1,6 @@
-package widgets;
+package app.ui.widgets;
 import javafx.geometry.Pos
-import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
-import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.shape.ArcType
 import tornadofx.*;

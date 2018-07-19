@@ -1,4 +1,4 @@
-package app.userCreation.ViewModel
+package app.ui.userCreation.ViewModel
 
 interface AudioInterface {
 

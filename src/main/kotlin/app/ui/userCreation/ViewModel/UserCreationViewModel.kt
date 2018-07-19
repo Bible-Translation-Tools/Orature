@@ -1,4 +1,4 @@
-package app.userCreation.ViewModel
+package app.ui.userCreation.ViewModel
 
 import javafx.application.Platform
 import javafx.beans.property.SimpleStringProperty

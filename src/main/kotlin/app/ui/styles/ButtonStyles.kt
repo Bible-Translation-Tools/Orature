@@ -1,4 +1,4 @@
-package styles
+package app.ui.styles
 
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow

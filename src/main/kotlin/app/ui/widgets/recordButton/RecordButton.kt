@@ -1,7 +1,7 @@
-package widgets.recordButton
+package app.ui.widgets.recordButton
 
-import app.userCreation.ViewModel.UserCreationViewModel
-import styles.ButtonStyles
+import app.ui.userCreation.ViewModel.UserCreationViewModel
+import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
@@ -10,7 +10,7 @@ import javafx.scene.Cursor
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
-import widgets.RecordingAnimation
+import app.ui.widgets.RecordingAnimation
 import java.util.*
 import kotlin.concurrent.timerTask
 

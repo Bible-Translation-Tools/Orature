@@ -1,4 +1,4 @@
-package widgets.profileIcon
+package app.ui.widgets.profileIcon
 
 import afester.javafx.svg.SvgLoader
 import tornadofx.*
