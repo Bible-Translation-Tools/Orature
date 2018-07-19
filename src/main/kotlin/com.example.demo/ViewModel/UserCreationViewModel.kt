@@ -1,15 +1,15 @@
 package com.example.demo.ViewModel
 
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ObservableStringValue
-import sun.jvm.hotspot.runtime.Thread
 import java.util.*
 import kotlin.concurrent.timerTask
 
 class UserCreationViewModel: AudioInterface {
 
     var countdownTracker = SimpleStringProperty("")
+
 
     override fun getAudio() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -33,32 +33,16 @@ class UserCreationViewModel: AudioInterface {
 
     fun countdown() {
 
+        Platform.runLater { countdownTracker.set("3") }
+        setCountDown("2", 1)         // time in seconds
+        setCountDown("1", 2)
+        setCountDown("", 3)
+
+    }
+
+    private fun setCountDown(text: String, time: Int){
         var timer = Timer()
-
-        Platform.runLater(Runnable() {
-            run {
-                countdownTracker.set("3")
-            }
-        })
-
-        timer.schedule(timerTask { Platform.runLater(Runnable() {
-            run {
-                countdownTracker.set("2")
-            }
-        })
-        }, 1000 )
-        timer.schedule(timerTask { Platform.runLater(Runnable() {
-            run {
-                countdownTracker.set("1")
-            }
-        })
-        }, 2000 )
-        timer.schedule(timerTask { Platform.runLater(Runnable() {
-            run {
-                countdownTracker.set("")
-            }
-        })
-        }, 3000 )
+        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, time.toLong() * 1000 )
 
     }
 

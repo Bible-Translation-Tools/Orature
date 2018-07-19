@@ -9,8 +9,13 @@ import widgets.RectangleButton
 import widgets.RoundButton.view.RoundButton
 import widgets.RecordButton.RecordButton
 import widgets.ViewMine
+import app.ui.ProgressBar
+import com.example.demo.ViewModel.UserCreationViewModel
 
 class UserCreation : View("My View") {
+    val UserCreationViewModel = UserCreationViewModel()
+
+
     override val root = borderpane {
 
         style{
@@ -30,6 +35,7 @@ class UserCreation : View("My View") {
 
 
         val jj = RecordButton()
+        val test = ProgressBar()
 
         top {
 
@@ -46,8 +52,11 @@ class UserCreation : View("My View") {
 
         }
         center{
-            add(RecordButton)
+
+            add(jj)
+            jj.alignment = Pos.CENTER
             RecordButton.alignment = Pos.CENTER
+
 
         }
     }

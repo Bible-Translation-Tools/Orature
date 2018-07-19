@@ -10,5 +10,5 @@ class MyApp: App(WelcomeScreen::class, Styles::class)
 
 //launch the app
 fun main(args: Array<String>) {
-    launch<MyApp>(args);
+    launch<MyApp>(args)
 }
