@@ -4,14 +4,15 @@ import com.example.demo.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
-import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
 import widgets.RecordButton.RecordButton
 
+
 class UserCreation : View("My View") {
     val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
+
 
     override val root = borderpane {
 
@@ -41,7 +42,6 @@ class UserCreation : View("My View") {
 
         val recordButton = RecordButton()
 
-
         top {
 
             hbox {
@@ -57,6 +57,7 @@ class UserCreation : View("My View") {
 
         }
         center{
+
             add(recordButton)
             recordButton.alignment = Pos.CENTER
 
