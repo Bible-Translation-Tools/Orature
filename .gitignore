@@ -7,6 +7,7 @@
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/**/vcs.xml
+.idea/**/kotlinc.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
