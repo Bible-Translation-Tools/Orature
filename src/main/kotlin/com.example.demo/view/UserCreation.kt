@@ -1,16 +1,18 @@
 package com.example.demo.view
 
+import com.example.demo.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
+import javafx.scene.Cursor
+import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
-import javafx.scene.shape.Arc
 import tornadofx.*
-import widgets.RectangleButton
-import widgets.RoundButton.view.RoundButton
 import widgets.RecordButton.RecordButton
-import widgets.ViewMine
 
 class UserCreation : View("My View") {
+    val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
+
     override val root = borderpane {
 
         style{
@@ -22,14 +24,23 @@ class UserCreation : View("My View") {
 
         }
 
-//        val RecordButtons = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", outerCircle = true, outerCircleRadius = 120.0)
-        val CloseButton = RectangleButton(width= 100.0,myFill = "#CC4141", icon = MaterialIcon.CLOSE, operation =::navHome )
+        val CloseButton = button("CLOSE",mIcon) {
+            importStylesheet(ButtonStyles::class)
+            addClass(ButtonStyles.rectangleButtonDefault)
 
-        val anim = ViewMine()
-        val RecordButton = RecordButton()
+            style {
+                alignment = Pos.CENTER
+                mIcon.fill = c("#CC4141")
+                effect = DropShadow(10.0, Color.GRAY)
 
+            }
+            action {
+                navHome()
+            }
+        }
 
-        val jj = RecordButton()
+        val recordButton = RecordButton()
+
 
         top {
 
@@ -46,8 +57,8 @@ class UserCreation : View("My View") {
 
         }
         center{
-            add(RecordButton)
-            RecordButton.alignment = Pos.CENTER
+            add(recordButton)
+            recordButton.alignment = Pos.CENTER
 
         }
     }

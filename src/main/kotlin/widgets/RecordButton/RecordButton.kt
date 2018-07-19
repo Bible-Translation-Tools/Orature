@@ -1,22 +1,18 @@
 package widgets.RecordButton
 
 import com.example.demo.ViewModel.UserCreationViewModel
-import com.github.thomasnield.rxkotlinfx.toObservable
+import com.example.demo.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
-import javafx.beans.value.ObservableStringValue
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
-import widgets.RoundButton.view.RoundButton
-import widgets.RoundButton.view.RoundButtonStyle
 import widgets.ViewMine
 import java.util.*
 import kotlin.concurrent.timerTask
-
 
 class RecordButton : VBox() {
 
@@ -27,11 +23,10 @@ class RecordButton : VBox() {
 
     val countdown = UserCreationViewModel.countdownTracker
 
-    // val micButton = RoundButton(buttonSize = 152.68, fillColor = "#CC4141", icon = MaterialIcon.MIC_NONE, operation = ::println, iconSize = "65px", myVariable = c("#FFFF"))
-    val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "65px")
+    val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
     val micButton = button(countdown, micIcon){
-        importStylesheet(RoundButtonStyle::class)
-        addClass(RoundButtonStyle.RoundButton)
+        importStylesheet(ButtonStyles::class)
+        addClass(ButtonStyles.roundButton)
         style {
             backgroundColor += Color.WHITE
             micIcon.fill = c("#CC4141")
@@ -44,7 +39,7 @@ class RecordButton : VBox() {
         }
     }
 
-    val stopIcon = MaterialIconView(MaterialIcon.STOP, "65px")
+    val stopIcon = MaterialIconView(MaterialIcon.STOP, "100px")
     val root = button {
 
 
@@ -65,11 +60,12 @@ class RecordButton : VBox() {
              micIcon.hide()
              var timer = Timer()
              UserCreationViewModel.countdown()
-             timer.schedule(timerTask { circle.animate() }, 3000)
              timer.schedule(timerTask { Platform.runLater(Runnable() {
                  run {
                      micButton.graphic = stopIcon
+                     circle.animate()
                      stopIcon.fill=c("#CC4141")
+                     dotsAn.invisible()
                  }
              }) }, 3000)
 

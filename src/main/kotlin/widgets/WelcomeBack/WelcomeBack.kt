@@ -8,7 +8,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
-import widgets.RectangleButton
 import widgets.profileIcon.view.ProfileIcon
 
 class WelcomeBack : HBox() {
@@ -22,8 +21,6 @@ class WelcomeBack : HBox() {
         }
 
         //make a big user icon
-
-
         val iconHash = ProfileIcon("12345678901", 150.0, true)
 
         //set its alignment to center it
@@ -32,14 +29,8 @@ class WelcomeBack : HBox() {
 
         iconHash.alignment = Pos.CENTER
 
-
-//        val myHomeWidget = RectangleButton("#CC4141", 175.0, "#FFFF", MaterialIcon.HOME, operation = ::println)
-
-
         //set its alignment to center it
         //alignment must be set on root, not on Widget itself
-//        myHomeWidget.alignment = Pos.CENTER
-
 
         top = iconHash
         center = label("Welcome Back!") {
@@ -59,8 +50,6 @@ class WelcomeBack : HBox() {
                 }
             }
         }
-
-
             //prevents from spreading out to take up whole screen when window maximized
             //note: 100 extra pixels hard coded in for space,
             // but we may change this val depending on size of home button and text

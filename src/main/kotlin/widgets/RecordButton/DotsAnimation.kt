@@ -2,6 +2,7 @@ package widgets.RecordButton
 
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
+import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import tornadofx.*
 import java.util.*
@@ -43,18 +44,22 @@ class DotsAnimation: HBox() {
             radius = 20.0
             fill = c("#EDEDED")
         }
-
-
-
     }
 
     fun showCircles() {
+        cir1.fill=c("#CC4141")
+        cir2.fill=c("#CC4141")
+        cir3.fill=c("#CC4141")
+
         var timer = Timer()
-        timer.schedule(timerTask { cir1.fill= c("#CC4141") }, 0)
-        timer.schedule(timerTask { cir2.fill=c("#CC4141") }, 1000)
-        timer.schedule(timerTask { cir3.fill=c("#CC4141") }, 2000)
+        timer.schedule(timerTask { cir3.fill= c("#EDEDED") }, 1000)
+        timer.schedule(timerTask { cir2.fill=c("#EDEDED") }, 2000)
+        timer.schedule(timerTask { cir1.fill=c("#EDEDED") }, 3000)
     }
 
-
-
+    fun invisible() {
+        cir1.fill= Color.WHITE
+        cir2.fill= Color.WHITE
+        cir3.fill= Color.WHITE
+    }
 }

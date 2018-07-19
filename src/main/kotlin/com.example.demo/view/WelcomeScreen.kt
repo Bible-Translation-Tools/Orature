@@ -1,4 +1,5 @@
 package com.example.demo.view
+import com.example.demo.styles.ButtonStyles
 import com.example.demo.styles.Styles.Companion.rectangleButtonDefault
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -9,12 +10,11 @@ import javafx.scene.paint.Color
 
 import javafx.stage.Screen
 import tornadofx.*;
-import widgets.RoundButton.view.RoundButtonStyle
 import widgets.UsersList.UsersList
 import widgets.WelcomeBack.WelcomeBack
 import java.awt.Window
 
-class WelcomeScreen: View("Datagrid Demo") {
+class WelcomeScreen: View("Welcome Screen") {
 
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
@@ -24,21 +24,15 @@ class WelcomeScreen: View("Datagrid Demo") {
 
     //the left half of the screen, which displays:
     //the last user to log in, a welcome message, and a button to go to that user's home
-    private val rad = 125.0
+    private val rad = 100.0
 
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
-    //private val plusButton = RoundButton(icon = MaterialIcon.GROUP_ADD, operation = ::navigate, fillColor = "#CC4141")
 
     val pad = 60.0
     private val welcomeScreen = hbox() {
 
-        style {
-
-            setMinWidth(Screen.getPrimary().bounds.width)
-
-        }
         vbox {
             alignment = Pos.CENTER
             stackpane {
@@ -47,29 +41,37 @@ class WelcomeScreen: View("Datagrid Demo") {
                     setMinHeight(Window.HEIGHT.toDouble())
                     backgroundColor += Color.WHITE
                     vgrow = Priority.ALWAYS
-                    setMinWidth(Screen.getPrimary().bounds.width/2)
+                    hgrow=Priority.ALWAYS
+                    //setMinWidth(Screen.getPrimary().bounds.width/2)
+                    prefWidth= 1200.px
                 }
             }
 
         }
 
-        vbox { add(UsersList())
+        vbox {
+            add(UsersList())
+            style {
+                prefWidth=1200.px
+                vgrow= Priority.ALWAYS
+                hgrow= Priority.ALWAYS
+            }
 
-            borderpane {
-
+            hbox {
+                val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
+                alignment = Pos.BOTTOM_RIGHT
                 style {
                     backgroundColor += c("#DFDEE3")
-                    vgrow= Priority.ALWAYS
-                    hgrow= Priority.ALWAYS
+                    vgrow = Priority.ALWAYS
+                    prefHeight = 50.0.px
+
                 }
 
-                val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
-                right= button("", addUserIcon) {
-                    addClass(rectangleButtonDefault)
+                button("", addUserIcon) {
                     alignment = Pos.CENTER
-                    style{
-                        importStylesheet(RoundButtonStyle::class)
-                        addClass(RoundButtonStyle.RoundButton)
+                    style {
+                        importStylesheet(ButtonStyles::class)
+                        addClass(ButtonStyles.roundButton)
                         addUserIcon.fill = c("#CC4141")
                     }
 
