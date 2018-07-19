@@ -7,7 +7,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.ArcType
 import tornadofx.*;
 
-class ViewMine: HBox() {
+class RecordingAnimation: HBox() {
 
 
     val bigCircle = circle{

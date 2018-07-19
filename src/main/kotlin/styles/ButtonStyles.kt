@@ -1,4 +1,4 @@
-package com.example.demo.styles
+package styles
 
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow

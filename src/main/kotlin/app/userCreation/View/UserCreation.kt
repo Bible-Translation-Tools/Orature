@@ -1,13 +1,14 @@
-package com.example.demo.view
+package app.userCreation
 
-import com.example.demo.styles.ButtonStyles
+import styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
-import widgets.RecordButton.RecordButton
+import widgets.recordButton.RecordButton
+import app.welcomeScreen.*
 
 
 class UserCreation : View("My View") {

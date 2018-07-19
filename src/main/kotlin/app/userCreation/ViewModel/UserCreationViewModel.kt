@@ -1,7 +1,6 @@
-package com.example.demo.ViewModel
+package app.userCreation.ViewModel
 
 import javafx.application.Platform
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import java.util.*
 import kotlin.concurrent.timerTask

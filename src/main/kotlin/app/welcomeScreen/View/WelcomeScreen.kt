@@ -1,6 +1,5 @@
-package com.example.demo.view
-import com.example.demo.styles.ButtonStyles
-import com.example.demo.styles.Styles.Companion.rectangleButtonDefault
+package app.welcomeScreen
+import styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 
@@ -8,11 +7,11 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 
-import javafx.stage.Screen
 import tornadofx.*;
-import widgets.UsersList.UsersList
-import widgets.WelcomeBack.WelcomeBack
+import widgets.usersList.UsersList
+import widgets.welcomeBack.WelcomeBack
 import java.awt.Window
+import app.userCreation.*
 
 class WelcomeScreen: View("Welcome Screen") {
 

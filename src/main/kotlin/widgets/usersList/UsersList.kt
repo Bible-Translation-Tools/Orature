@@ -1,6 +1,6 @@
-package widgets.UsersList
+package widgets.usersList
 
-import com.example.demo.styles.Styles
+import styles.Styles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.*
-import widgets.profileIcon.view.ProfileIcon
+import widgets.profileIcon.ProfileIcon
 
 class UsersList : HBox() {
 
@@ -60,7 +60,7 @@ class UsersList : HBox() {
                     alignment = Pos.CENTER
                     button("", homeIcon) {
                         alignment = Pos.CENTER
-                        addClass(Styles.rectangleButtonDefault)
+                        addClass(Styles.Styles.rectangleButtonDefault)
                         style {
                             homeIcon.fill = c("#CC4141")
                         }

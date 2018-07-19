@@ -1,8 +1,7 @@
-package com.example.demo.styles
+package styles
 
 import javafx.scene.Cursor
 import tornadofx.*
-import java.awt.Color
 
 class Styles: Stylesheet() {
 

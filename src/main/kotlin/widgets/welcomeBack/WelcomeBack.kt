@@ -1,6 +1,6 @@
-package widgets.WelcomeBack
+package widgets.welcomeBack
 
-import com.example.demo.styles.Styles.Companion.rectangleButtonAlternate
+import styles.Styles.Companion.rectangleButtonAlternate
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
-import widgets.profileIcon.view.ProfileIcon
+import widgets.profileIcon.ProfileIcon
 
 class WelcomeBack : HBox() {
     private val rad = 125.0
