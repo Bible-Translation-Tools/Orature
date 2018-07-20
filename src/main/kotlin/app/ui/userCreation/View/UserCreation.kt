@@ -1,6 +1,8 @@
 package app.ui.userCreation
 
 import app.ui.styles.ButtonStyles
+import app.ui.ProgressBar
+import app.ui.userCreation.ViewModel.UserCreationViewModel
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -9,10 +11,20 @@ import javafx.scene.paint.Color
 import tornadofx.*
 import app.ui.widgets.recordButton.RecordButton
 import app.ui.welcomeScreen.*
+import javafx.application.Platform
+import java.util.*
+import kotlin.concurrent.timerTask
 
 
-class UserCreation : View("My View") {
+class UserCreation : View("Creating User") {
+
+    val UserCreationViewModel = UserCreationViewModel()
+    val countdown = UserCreationViewModel.countdownTracker
     val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
+    val stopIcon = MaterialIconView(MaterialIcon.STOP, "100px")
+
+
+
 
 
     override val root = borderpane {
@@ -23,7 +35,6 @@ class UserCreation : View("My View") {
 
         fun navHome() {
             find(UserCreation::class).replaceWith(WelcomeScreen::class, ViewTransition.Slide(.9.seconds, ViewTransition.Direction.RIGHT))
-
         }
 
         val CloseButton = button("CLOSE",mIcon) {
@@ -37,6 +48,7 @@ class UserCreation : View("My View") {
 
             }
             action {
+
                 navHome()
             }
         }
@@ -63,6 +75,11 @@ class UserCreation : View("My View") {
             recordButton.alignment = Pos.CENTER
 
         }
+
+
+
     }
+
+
 }
 

@@ -2,6 +2,7 @@ package app.ui.userCreation.ViewModel
 
 import javafx.application.Platform
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.SimpleBooleanProperty
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -39,13 +40,16 @@ class UserCreationViewModel: AudioInterface {
 
     }
 
+
     private fun setCountDown(text: String, time: Int){
         var timer = Timer()
         timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, time.toLong() * 1000 )
 
     }
 
+
     fun changeIcon() {
+
 
     }
 
