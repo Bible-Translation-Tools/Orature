@@ -1,5 +1,6 @@
 package app.ui.widgets.recordButton
 
+import app.ui.ProgressBar
 import app.ui.userCreation.ViewModel.UserCreationViewModel
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -11,16 +12,19 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
 import app.ui.widgets.RecordingAnimation
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleStringProperty
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class RecordButton : VBox() {
+class RecordButton() : VBox() {
 
 
     val circle = RecordingAnimation()
     val dotsAn = DotsAnimation()
-    val UserCreationViewModel = UserCreationViewModel()
-    val countdown = UserCreationViewModel.countdownTracker
+    val RecordButtonViewModel = RecordButtonViewModel()
+    val countdown = RecordButtonViewModel.countdownTracker
+
 
     val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
     val stopIcon = MaterialIconView(MaterialIcon.STOP, "100px")
@@ -30,6 +34,7 @@ class RecordButton : VBox() {
              alignment = Pos.CENTER
 
              add(circle)
+
              button(countdown, micIcon){
                  importStylesheet(ButtonStyles::class)
                  addClass(ButtonStyles.roundButton)
@@ -47,27 +52,20 @@ class RecordButton : VBox() {
                  action {
                      dotsAn.showCircles()
                      micIcon.hide()
+                     RecordButtonViewModel.countdown()
+                     RecordButtonViewModel.rebind { recording = true }
                      var timer = Timer()
-                     UserCreationViewModel.countdown()
-
                      timer.schedule(timerTask { Platform.runLater {
                          circle.animate()
                          graphic = stopIcon
                          stopIcon.fill=c("#CC4141")
+                         dotsAn.hide()
 
                      } }, 3000)
-
-                     timer.schedule(timerTask {
-                         Platform.runLater {
-                             //find(userCreation().root).replaceWith(ProgressBar(), transition = ViewTransition.Fade(.2.seconds))
-
-                         }
-                     }, 6100)
                  }
              }
 
          }
-
 
 
    val dotsWrapper = hbox {

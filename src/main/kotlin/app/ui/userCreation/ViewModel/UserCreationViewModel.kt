@@ -1,13 +1,16 @@
 package app.ui.userCreation.ViewModel
 
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
+import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class UserCreationViewModel: AudioInterface {
+class UserCreationViewModel: ViewModel(), AudioInterface {
 
     var countdownTracker = SimpleStringProperty("")
+    var recordingDone = SimpleBooleanProperty(false)
 
 
     override fun getAudio() {
@@ -46,6 +49,8 @@ class UserCreationViewModel: AudioInterface {
     }
 
     fun changeIcon() {
+
+        recordingDone.set(true)
 
     }
 
