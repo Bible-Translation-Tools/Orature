@@ -53,13 +53,14 @@ class RecordButton() : VBox() {
                      dotsAn.showCircles()
                      micIcon.hide()
                      RecordButtonViewModel.countdown()
-                     RecordButtonViewModel.rebind { recording = true }
+                     RecordButtonViewModel.rebind { recording.setValue(true) }
                      var timer = Timer()
                      timer.schedule(timerTask { Platform.runLater {
                          circle.animate()
                          graphic = stopIcon
                          stopIcon.fill=c("#CC4141")
                          dotsAn.hide()
+                         println(RecordButtonViewModel.recording)
 
                      } }, 3000)
                  }
