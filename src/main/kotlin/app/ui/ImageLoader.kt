@@ -9,14 +9,13 @@ import java.io.File
 fun imageLoader(imagePathToLoad: File): Node {
     val ext: String = imagePathToLoad.extension
     when (ext) {
-        "svg" -> {
-            return SvgLoader().loadSvg(imagePathToLoad.toString())
-        };
-        "png","jpg" -> {
-            val image = Image(imagePathToLoad.inputStream())
-            val retImageView = ImageView(image)
-            return retImageView
-        };
+
+
+        "svg" -> return SvgLoader().loadSvg(imagePathToLoad.toString())
+
+
+        "png","jpg" -> return ImageView(Image(imagePathToLoad.inputStream()))
+
         else -> {
             println("ERROR")
             return ImageView(/*put a default image here*/)
