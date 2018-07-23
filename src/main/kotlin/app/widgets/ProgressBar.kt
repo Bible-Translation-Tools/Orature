@@ -37,12 +37,12 @@ class ProgressBar : VBox() {
             thread {
                 // change this to a "while profile is not generated"
                 // how will we know when it IS generated?
-               // while (!isItDone) {
+                while (!isItDone) {
                     for (i in 1..100) {
                         Platform.runLater { progress = i.toDouble() / 100.0 }
                         Thread.sleep(10)
                     }
-               // }
+                }
             }
         }
     }

@@ -18,9 +18,14 @@ import com.github.thomasnield.rxkotlinfx.actionEvents
 import io.reactivex.rxkotlin.subscribeBy
 import javafx.animation.Transition
 import java.awt.event.ActionEvent
+import app.ui.profilePreview.View.ProfilePreview
 
 
-class UserCreation : View("My View") {
+
+class UserCreation : View("Creating User") {
+
+    val UserCreationViewModel = UserCreationViewModel()
+    val countdown = UserCreationViewModel.countdownTracker
     val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
     val ViewModel : UserCreationViewModel  by inject ()
     var recordButton = RecordButton()
@@ -35,8 +40,10 @@ class UserCreation : View("My View") {
         }
 
         fun navHome() {
+
             find(UserCreation::class).replaceWith(WelcomeScreen::class)
             ViewModel.reset()
+
         }
 
         val closeButton = button("CLOSE", mIcon) {
@@ -50,6 +57,7 @@ class UserCreation : View("My View") {
 
             }
             action {
+
                 navHome()
             }
         }
@@ -84,7 +92,18 @@ class UserCreation : View("My View") {
                 doneRecording.subscribeBy(
                         onNext = {
                             if(it == true) {
-                                replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))}
+                                replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))
+
+                                var timer = Timer()
+                                timer.schedule(timerTask {
+                                    Platform.runLater {
+                                        find(UserCreation::class).replaceWith(ProfilePreview::class, transition = ViewTransition.NewsFlash(0.5.seconds))
+                                    }
+                                }, 1000)
+
+
+                            }
+
                         }
                 )
 
@@ -109,6 +128,14 @@ class UserCreation : View("My View") {
                 }
             }
         }
+
+
+
     }
+
+    override fun onUndock() {
+        ViewModel.reset()
+    }
+
 }
 

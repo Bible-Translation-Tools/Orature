@@ -1,6 +1,10 @@
 package app.widgets.recordButton
 
 import app.ui.styles.ButtonStyles
+
+import app.ui.userCreation.ViewModel.UserCreationViewModel
+import app.ui.profilePreview.View.ProfilePreview
+
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
@@ -21,6 +25,7 @@ class RecordButton() : VBox() {
     val dotsAn = DotsAnimation()
     val RecordButtonViewModel = RecordButtonViewModel()
     val countdown = RecordButtonViewModel.countdownTracker
+
 
 
     val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
@@ -72,5 +77,6 @@ class RecordButton() : VBox() {
        }
        add(dotsAn)
    }
+
 
 }

@@ -8,6 +8,7 @@ import io.reactivex.subjects.BehaviorSubject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
+
 import javafx.beans.value.ObservableBooleanValue
 import javafx.beans.value.ObservableValue
 import tornadofx.*
@@ -53,6 +54,7 @@ class UserCreationViewModel(): ViewModel(), AudioInterface {
         setCountDown("1", 2)
         setCountDown("", 3)
     }
+
 
     private fun setCountDown(text: String, time: Int){
         var timer = Timer()

@@ -3,20 +3,23 @@ package app.widgets.profileIcon
 import afester.javafx.svg.SvgLoader
 import tornadofx.*
 import javafx.scene.Group
+import javafx.scene.control.Button
 import javafx.scene.layout.StackPane
 import jdenticon.Jdenticon
 
 
-class ProfileIcon(svgHash: String, var buttonSize: Double= 150.0, var outerCircle: Boolean = false): StackPane() {
+class ProfileIcon(var svgHash: String, var buttonSize: Double= 150.0, var outerCircle: Boolean = false): StackPane() {
     var svgGroup = SvgLoader().loadSvg(Jdenticon.toSvg(hash = svgHash, size = buttonSize.toInt()).byteInputStream())
     val circle = circle {
         radius = buttonSize - 30.0
         fill = c("#E5E5E5") }
 
+    var profIcon: Button
+
 
     init{
 
-        val profIcon = button(graphic = svgGroup) {
+        profIcon = button(graphic = svgGroup) {
             if (outerCircle) circle else circle.removeFromParent()
             importStylesheet(ProfileIconStyle:: class)
             addClass(ProfileIconStyle.ProfileIcon)
