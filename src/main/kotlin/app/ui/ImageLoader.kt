@@ -6,14 +6,14 @@ import javafx.scene.image.ImageView
 
 import java.io.File
 
-fun blablabla(fileMine: File): Node {
-    val ext: String = fileMine.extension
+fun imageLoader(imagePathToLoad: File): Node {
+    val ext: String = imagePathToLoad.extension
     when (ext) {
         "svg" -> {
-            return SvgLoader().loadSvg(fileMine.toString())
+            return SvgLoader().loadSvg(imagePathToLoad.toString())
         };
         "png","jpg" -> {
-            val image = Image(fileMine.inputStream())
+            val image = Image(imagePathToLoad.inputStream())
             val retImageView = ImageView(image)
             return retImageView
         };
