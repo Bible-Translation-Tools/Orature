@@ -17,7 +17,7 @@ fun imageLoader(imagePathToLoad: File): Node {
         "png","jpg" -> return ImageView(Image(imagePathToLoad.inputStream()))
 
         else -> {
-            println("ERROR")
+            println("Error: Image file extension found is not svg, png, or jpg")
             return ImageView(/*put a default image here*/)
         }
     }
