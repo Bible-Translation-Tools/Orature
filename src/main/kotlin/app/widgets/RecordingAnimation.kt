@@ -1,4 +1,4 @@
-package app.ui.widgets;
+package app.widgets;
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color

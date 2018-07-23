@@ -1,4 +1,4 @@
-package app.ui.widgets.welcomeBack
+package app.widgets.welcomeBack
 
 import app.ui.styles.Styles.Companion.rectangleButtonAlternate
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -8,7 +8,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
-import app.ui.widgets.profileIcon.ProfileIcon
+import app.widgets.profileIcon.ProfileIcon
 
 class WelcomeBack : HBox() {
     private val rad = 125.0

@@ -8,8 +8,8 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 
 import tornadofx.*;
-import app.ui.widgets.usersList.UsersList
-import app.ui.widgets.welcomeBack.WelcomeBack
+import app.widgets.usersList.UsersList
+import app.widgets.welcomeBack.WelcomeBack
 import java.awt.Window
 import app.ui.userCreation.*
 
@@ -75,7 +75,7 @@ class WelcomeScreen: View("Welcome Screen") {
                     }
 
                     action {
-                        find(WelcomeScreen::class).replaceWith(UserCreation::class,transition = ViewTransition.Slide(.9.seconds))
+                        find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }
                 }
                 padding = insets(pad);

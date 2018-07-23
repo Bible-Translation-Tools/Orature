@@ -2,7 +2,7 @@ package app.ui.profilePreview.View
 import app.ui.userCreation.*
 import app.ui.styles.ButtonStyles
 import app.ui.profilePreview.ViewModel.ProfilePreviewViewModel
-import app.ui.widgets.profileIcon.ProfileIcon
+import app.widgets.profileIcon.ProfileIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.rxkotlin.subscribeBy

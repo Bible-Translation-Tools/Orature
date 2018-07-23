@@ -1,14 +1,28 @@
 package app.ui.userCreation.ViewModel
 
+import app.ui.userCreation.Model.UserCreationModel
+import io.reactivex.Observable
+import io.reactivex.ObservableEmitter
+import io.reactivex.ObservableOnSubscribe
+import io.reactivex.subjects.BehaviorSubject
 import javafx.application.Platform
-import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleStringProperty
+
+import javafx.beans.value.ObservableBooleanValue
+import javafx.beans.value.ObservableValue
+import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class UserCreationViewModel: AudioInterface {
+class UserCreationViewModel(): ViewModel(), AudioInterface {
 
     var countdownTracker = SimpleStringProperty("")
+    var recordingDone = SimpleBooleanProperty(false)
+    val model = UserCreationModel()
+    var isRecording = BehaviorSubject.create<Boolean>()
+    var doneRecording = BehaviorSubject.create<Boolean>()
+    var hasListened = BehaviorSubject.create<Boolean>()
 
 
     override fun getAudio() {
@@ -28,7 +42,9 @@ class UserCreationViewModel: AudioInterface {
     }
 
     override fun recordAudio() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+        model.audioFile = "recorded Audio"
     }
 
     fun countdown() {
@@ -37,7 +53,6 @@ class UserCreationViewModel: AudioInterface {
         setCountDown("2", 1)         // time in seconds
         setCountDown("1", 2)
         setCountDown("", 3)
-
     }
 
 
@@ -47,10 +62,30 @@ class UserCreationViewModel: AudioInterface {
 
     }
 
+    fun recordClicked() {
+        model.recordClicked()
+        isRecording.onNext(true)
+    }
 
     fun changeIcon() {
 
+        recordingDone.set(true)
+    }
 
+    fun reset() {
+        model.reset()
+        isRecording.onNext(false)
+        doneRecording.onNext(false)
+        hasListened.onNext(false)
+
+    }
+
+    fun doneRecording() {
+        doneRecording.onNext(true)
+    }
+
+    fun hasListened() {
+        hasListened.onNext(true)
     }
 
 }
