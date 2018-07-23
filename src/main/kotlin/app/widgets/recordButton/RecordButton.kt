@@ -1,7 +1,5 @@
-package app.ui.widgets.recordButton
+package app.widgets.recordButton
 
-import app.ui.ProgressBar
-import app.ui.userCreation.ViewModel.UserCreationViewModel
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -11,9 +9,8 @@ import javafx.scene.Cursor
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
-import app.ui.widgets.RecordingAnimation
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleStringProperty
+import app.widgets.RecordingAnimation
+import javafx.scene.control.Button
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -53,16 +50,15 @@ class RecordButton() : VBox() {
                      dotsAn.showCircles()
                      micIcon.hide()
                      RecordButtonViewModel.countdown()
-                     RecordButtonViewModel.rebind { recording.setValue(true) }
+//                     RecordButtonViewModel.recording.setValue(true)
                      var timer = Timer()
                      timer.schedule(timerTask { Platform.runLater {
                          circle.animate()
                          graphic = stopIcon
                          stopIcon.fill=c("#CC4141")
                          dotsAn.hide()
-                         println(RecordButtonViewModel.recording)
 
-                     } }, 3000)
+                    } }, 3000)
                  }
              }
 

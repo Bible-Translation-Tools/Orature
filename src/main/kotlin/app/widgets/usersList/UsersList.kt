@@ -1,4 +1,4 @@
-package app.ui.widgets.usersList
+package app.widgets.usersList
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -8,7 +8,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import app.ui.styles.ButtonStyles
 import tornadofx.*
-import app.ui.widgets.profileIcon.ProfileIcon
+import app.widgets.profileIcon.ProfileIcon
 
 class UsersList : HBox() {
 

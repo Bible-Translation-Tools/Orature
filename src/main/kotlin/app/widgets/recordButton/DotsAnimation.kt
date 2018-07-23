@@ -1,4 +1,4 @@
-package app.ui.widgets.recordButton
+package app.widgets.recordButton
 
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox

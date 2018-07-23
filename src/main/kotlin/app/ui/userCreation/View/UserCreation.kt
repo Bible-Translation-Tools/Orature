@@ -8,21 +8,27 @@ import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
-import app.ui.widgets.recordButton.RecordButton
+import app.widgets.recordButton.RecordButton
 import app.ui.welcomeScreen.*
-import com.github.thomasnield.rxkotlinfx.actionEvents
 import javafx.application.Platform
 import java.util.*
 import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
-
+import com.github.thomasnield.rxkotlinfx.actionEvents
+import io.reactivex.rxkotlin.subscribeBy
+import javafx.animation.Transition
+import java.awt.event.ActionEvent
 
 
 class UserCreation : View("My View") {
     val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
-    val UserCreationViewModel : UserCreationViewModel  by inject ()
-    val countdown = UserCreationViewModel.countdownTracker
-    val recordButton = RecordButton()
+    val ViewModel : UserCreationViewModel  by inject ()
+    var recordButton = RecordButton()
+    val progressBar = ProgressBar()
+    val example = ViewModel.isRecording
+    val doneRecording = ViewModel.doneRecording
+
+
 
 
     override val root = borderpane {
@@ -32,10 +38,11 @@ class UserCreation : View("My View") {
         }
 
         fun navHome() {
-            find(UserCreation::class).replaceWith(WelcomeScreen::class, ViewTransition.Slide(.9.seconds, ViewTransition.Direction.RIGHT))
+            find(UserCreation::class).replaceWith(WelcomeScreen::class)
+            ViewModel.reset()
         }
 
-        val closeButton = button("CLOSE",mIcon) {
+        val closeButton = button("CLOSE", mIcon) {
             importStylesheet(ButtonStyles::class)
             addClass(ButtonStyles.rectangleButtonDefault)
 
@@ -67,6 +74,24 @@ class UserCreation : View("My View") {
 
             button {
 
+                example.subscribeBy(
+                        onNext = {
+                            if (it == false) {
+                                recordButton = RecordButton()
+                                recordButton.alignment = Pos.CENTER
+                                progressBar.replaceWith(recordButton)
+                            }
+                        }
+                )
+
+                doneRecording.subscribeBy(
+                        onNext = {
+                            if(it == true) {
+                                replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))}
+                        }
+                )
+
+
                 add(recordButton)
                 recordButton.alignment = Pos.CENTER
 
@@ -76,18 +101,16 @@ class UserCreation : View("My View") {
                 }
 
                 action {
-                  //  UserCreationViewModel.countdown()
+                    ViewModel.recordAudio()
+                    ViewModel.recordClicked()
                     var timer = Timer()
                     timer.schedule(timerTask {
                         Platform.runLater {
-                            replaceWith(ProgressBar(), transition = ViewTransition.Fade(.2.seconds))
-
+                            ViewModel.doneRecording()
                         }
                     }, 6100)
                 }
             }
-
-            //actionEvents().subscribe(UserCreationViewModel.countdown())
         }
     }
 }

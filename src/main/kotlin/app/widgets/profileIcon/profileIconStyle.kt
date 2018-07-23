@@ -1,4 +1,4 @@
-package app.ui.widgets.profileIcon
+package app.widgets.profileIcon
 
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
