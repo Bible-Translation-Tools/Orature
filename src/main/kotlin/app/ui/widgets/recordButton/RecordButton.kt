@@ -1,11 +1,9 @@
 package app.ui.widgets.recordButton
 
-import app.ui.ProgressBar
 import app.ui.styles.ButtonStyles
-import app.ui.userCreation.UserCreation
 
 import app.ui.userCreation.ViewModel.UserCreationViewModel
-import app.ui.widgets.ProfilePreview
+import app.ui.profilePreview.View.ProfilePreview
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -16,7 +14,6 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
 import app.ui.widgets.RecordingAnimation
-import app.ui.widgets.profileIcon.ProfileIcon
 import java.util.*
 import kotlin.concurrent.timerTask
 
@@ -67,7 +64,7 @@ class RecordButton : VBox() {
                     val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
 
 
-                    replaceWith(ProfilePreview(randomNumber.toString()), transition = ViewTransition.Fade(.2.seconds))
+                    //replaceWith(ProfilePreview(randomNumber.toString()), transition = ViewTransition.Fade(.2.seconds))
 
                 }
             }, 6100)
