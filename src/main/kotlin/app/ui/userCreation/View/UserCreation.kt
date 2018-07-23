@@ -28,9 +28,6 @@ class UserCreation : View("My View") {
     val example = ViewModel.isRecording
     val doneRecording = ViewModel.doneRecording
 
-
-
-
     override val root = borderpane {
 
         style{
