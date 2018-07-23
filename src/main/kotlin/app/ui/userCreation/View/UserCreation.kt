@@ -137,6 +137,9 @@ class UserCreation : View("Creating User") {
 
     }
 
+    override fun onUndock() {
+        ViewModel.reset()
+    }
 
 }
 
