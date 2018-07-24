@@ -13,16 +13,13 @@ import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class RecordButton() : VBox() {
+class RecordButton(animationCompleted : () -> Unit) : VBox() {
 
 
     val circle = RecordingAnimation()
     val dotsAn = DotsAnimation()
     val RecordButtonViewModel = RecordButtonViewModel()
     val countdown = RecordButtonViewModel.countdownTracker
-
-
-
     val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
     val stopIcon = MaterialIconView(MaterialIcon.STOP, "100px")
 
@@ -46,7 +43,7 @@ class RecordButton() : VBox() {
                  }
 
                  action {
-                     dotsAn.showCircles()
+                     dotsAn.circleCountdown()
                      micIcon.hide()
                      RecordButtonViewModel.countdown()
                      var timer = Timer()
@@ -55,8 +52,10 @@ class RecordButton() : VBox() {
                          graphic = stopIcon
                          stopIcon.fill=c("#CC4141")
                          dotsAn.hide()
+                         animationCompleted()
 
                     } }, 3000)
+
                  }
              }
 

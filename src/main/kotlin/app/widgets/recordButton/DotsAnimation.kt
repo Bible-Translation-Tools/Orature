@@ -46,7 +46,7 @@ class DotsAnimation: HBox() {
         }
     }
 
-    fun showCircles() {
+    fun circleCountdown() {
         cir1.fill=c("#CC4141")
         cir2.fill=c("#CC4141")
         cir3.fill=c("#CC4141")

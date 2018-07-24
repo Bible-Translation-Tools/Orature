@@ -16,7 +16,7 @@ import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
 import io.reactivex.rxkotlin.subscribeBy
 import app.ui.profilePreview.View.ProfilePreview
-
+import javafx.scene.layout.VBox
 
 
 class UserCreation : View("Creating User") {
@@ -24,7 +24,7 @@ class UserCreation : View("Creating User") {
 
     private val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
     private val viewModel : UserCreationViewModel  by inject ()
-    private var recordButton = RecordButton()
+    lateinit var recordButton: VBox
     private val progressBar = ProgressBar()
     val isRecording = viewModel.isRecording
     val doneRecording = viewModel.doneRecording
@@ -72,10 +72,10 @@ class UserCreation : View("Creating User") {
 
                 isRecording.subscribeBy(
                         onNext = {
-                            if (it == false) { // if not recording provide a new recordButton Widget, wrapped in button for
-                                                //same as reason as above
+                            if (it == false) { // if not recording provide a new recordButton Widget, wrapped in button
+                                               // for same as reason as above
                                 progressBar.hide()
-                                val newRecordButton = RecordButton()
+                                val newRecordButton = RecordButton(::animationCompleted)
                                 newRecordButton.alignment = Pos.CENTER
                                 val newButton = button {
                                     add(newRecordButton)
@@ -86,6 +86,10 @@ class UserCreation : View("Creating User") {
                                 }
                                 progressBar.replaceWith(newButton)
                             }
+                        } ,
+
+                        onError = {
+                            println(it)
                         }
                 )
 
@@ -94,19 +98,22 @@ class UserCreation : View("Creating User") {
 
                             if(it == true) {
                                 //recordButton.replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))
-
                                 timer.schedule(timerTask {
                                     Platform.runLater {
-                                        find(UserCreation::class).replaceWith(ProfilePreview::class, transition = ViewTransition.Fade(0.3.seconds))
+                                        find(UserCreation::class).replaceWith(ProfilePreview::class,
+                                                transition = ViewTransition.Fade(0.3.seconds))
                                     }
                                 }, 500)
 
                             }
+                        },
+
+                onError = {
+                            println(it)
                         }
                 )
-              add(progressBar)
-              progressBar.hide()
 
+                recordButton = RecordButton(::animationCompleted)
               add(recordButton)
                 recordButton.alignment = Pos.CENTER
 
@@ -116,8 +123,9 @@ class UserCreation : View("Creating User") {
                 }
 
                 action {
+
                     viewModel.recordAudio()
-                    viewModel.recordClicked()
+
                     timer.schedule(timerTask {
                         Platform.runLater {
                             viewModel.doneRecording()
@@ -132,6 +140,7 @@ class UserCreation : View("Creating User") {
         viewModel.reset()
         timer.cancel()
         timer.purge()
+
     }
 
     override fun onDock() {
@@ -142,7 +151,9 @@ class UserCreation : View("Creating User") {
 
         find(UserCreation::class).replaceWith(WelcomeScreen::class)
         viewModel.reset()
-
     }
+
+    fun animationCompleted() { viewModel.recordClicked()}
+
 }
 
