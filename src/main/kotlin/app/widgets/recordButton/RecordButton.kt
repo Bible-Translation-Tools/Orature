@@ -2,9 +2,6 @@ package app.widgets.recordButton
 
 import app.ui.styles.ButtonStyles
 
-import app.ui.userCreation.ViewModel.UserCreationViewModel
-import app.ui.profilePreview.View.ProfilePreview
-
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
@@ -13,7 +10,6 @@ import javafx.scene.Cursor
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
-import app.widgets.RecordingAnimation
 import javafx.scene.control.Button
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -30,6 +26,7 @@ class RecordButton() : VBox() {
 
     val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
     val stopIcon = MaterialIconView(MaterialIcon.STOP, "100px")
+    lateinit var recordButton: Button
 
      val wrapper =
          stackpane {
@@ -37,7 +34,7 @@ class RecordButton() : VBox() {
 
              add(circle)
 
-             button(countdown, micIcon){
+             recordButton= button(countdown, micIcon){
                  importStylesheet(ButtonStyles::class)
                  addClass(ButtonStyles.roundButton)
                  style {

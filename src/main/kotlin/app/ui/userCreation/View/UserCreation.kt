@@ -85,6 +85,7 @@ class UserCreation : View("Creating User") {
 
                 example.subscribeBy(
                         onNext = {
+                            println(it)
                             if (it == false) {
                                 recordButton = RecordButton()
                                 recordButton.alignment = Pos.CENTER
@@ -96,12 +97,13 @@ class UserCreation : View("Creating User") {
                 doneRecording.subscribeBy(
                         onNext = {
                             if(it == true) {
+
                                 replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))
 
                                 var timer = Timer()
                                 timer.schedule(timerTask {
                                     Platform.runLater {
-                                        find(UserCreation::class).replaceWith(ProfilePreview::class, transition = ViewTransition.NewsFlash(0.5.seconds))
+                                        find(UserCreation::class).replaceWith(ProfilePreview::class, transition = ViewTransition.Fade(0.3.seconds))
                                     }
                                 }, 1000)
 

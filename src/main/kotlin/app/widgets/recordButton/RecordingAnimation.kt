@@ -1,4 +1,4 @@
-package app.widgets;
+package app.widgets.recordButton;
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
@@ -51,5 +51,8 @@ class RecordingAnimation: HBox() {
 
         }
     }
+
+
+
 
 }
