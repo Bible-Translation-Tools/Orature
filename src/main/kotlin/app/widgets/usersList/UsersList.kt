@@ -9,7 +9,6 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import app.ui.styles.ButtonStyles
 import tornadofx.*
-import app.widgets.profileIcon.ProfileIcon
 import java.io.File
 
 class UsersList : HBox() {
@@ -52,30 +51,23 @@ class UsersList : HBox() {
 
 
         cellFormat {
-
-            //each cell is a borderpane
             graphic = vbox(16) {
-
                 style{
                     backgroundColor += Color.valueOf("#DFDEE3")
+                    alignment = Pos.CENTER
                 }
 
-                //make a small icon
-//                val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
-//                val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 100.0)
-
-
-                //set its alignment to center so it shows up in the middle of the cell
-                //(otherwise shows up in left)
-//                currentSmallUserIcon.alignment = Pos.CENTER;
-                button {
-                    graphic = imageLoader(data.get())
+                //Small user icon in each cell
+                //it is equal the value of each iteration of datagrid parameter
+                button(graphic = imageLoader(it)) {
+                    style {
+                        borderColor += box(c("#ffffff"))
+                    }
                 }
-//                add(currentSmallUserIcon)
-
 
                 val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
                 hbox {
+                    this.alignment
                     alignment = Pos.CENTER
                     button("", homeIcon) {
                         alignment = Pos.CENTER
