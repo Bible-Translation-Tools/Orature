@@ -1,5 +1,6 @@
 package app.widgets.usersList
 
+import app.ui.imageLoader
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -9,13 +10,29 @@ import javafx.scene.paint.Color
 import app.ui.styles.ButtonStyles
 import tornadofx.*
 import app.widgets.profileIcon.ProfileIcon
+import java.io.File
 
 class UsersList : HBox() {
 
-    val data =listOf("11234567890", "12234567890", "12334567890", "12344567890", "12345567890", "02345667896", "12345677890", "02345678990", "12345678990")
+    val data =listOf(
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon2.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon3.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon4.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon5.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon6.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon7.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon8.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon9.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon10.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon11.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon12.svg"),
+            File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon13.svg")
+            )
     val gridWidth = 400.0
 
     val root  = datagrid(data) {
+
         verticalCellSpacing = 25.0
 
 
@@ -44,15 +61,17 @@ class UsersList : HBox() {
                 }
 
                 //make a small icon
-                val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
-                val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 100.0)
+//                val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
+//                val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 100.0)
 
 
                 //set its alignment to center so it shows up in the middle of the cell
                 //(otherwise shows up in left)
-                currentSmallUserIcon.alignment = Pos.CENTER;
-
-                add(currentSmallUserIcon)
+//                currentSmallUserIcon.alignment = Pos.CENTER;
+                button {
+                    graphic = imageLoader(data.get())
+                }
+//                add(currentSmallUserIcon)
 
 
                 val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
