@@ -38,4 +38,8 @@ class RecordButtonViewModel: ItemViewModel<Record>() {
 
     }
 
+    fun resetMic() {
+
+    }
+
 }

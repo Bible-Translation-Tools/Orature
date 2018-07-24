@@ -14,24 +14,37 @@ import javafx.application.Platform
 import java.util.*
 import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
-import com.github.thomasnield.rxkotlinfx.actionEvents
 import io.reactivex.rxkotlin.subscribeBy
-import javafx.animation.Transition
-import java.awt.event.ActionEvent
 import app.ui.profilePreview.View.ProfilePreview
 
 
 
 class UserCreation : View("Creating User") {
 
-    val UserCreationViewModel = UserCreationViewModel()
-    val countdown = UserCreationViewModel.countdownTracker
-    val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
-    val ViewModel : UserCreationViewModel  by inject ()
-    var recordButton = RecordButton()
-    val progressBar = ProgressBar()
-    val example = ViewModel.isRecording
-    val doneRecording = ViewModel.doneRecording
+
+    private val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
+    private val viewModel : UserCreationViewModel  by inject ()
+    private var recordButton = RecordButton()
+    private val progressBar = ProgressBar()
+    val isRecording = viewModel.isRecording
+    val doneRecording = viewModel.doneRecording
+    var timer = Timer()
+
+    //initialize close button to be used in top of borderpane
+    val closeButton = button("CLOSE", mIcon) {
+        importStylesheet(ButtonStyles::class)
+        addClass(ButtonStyles.rectangleButtonDefault)
+
+        style {
+            alignment = Pos.CENTER
+            mIcon.fill = c("#CC4141")
+            effect = DropShadow(10.0, Color.GRAY)
+
+        }
+        action {
+            navHome()
+        }
+    }
 
     override val root = borderpane {
 
@@ -39,31 +52,9 @@ class UserCreation : View("Creating User") {
             backgroundColor+= Color.WHITE
         }
 
-        fun navHome() {
-
-            find(UserCreation::class).replaceWith(WelcomeScreen::class)
-            ViewModel.reset()
-
-        }
-
-        val closeButton = button("CLOSE", mIcon) {
-            importStylesheet(ButtonStyles::class)
-            addClass(ButtonStyles.rectangleButtonDefault)
-
-            style {
-                alignment = Pos.CENTER
-                mIcon.fill = c("#CC4141")
-                effect = DropShadow(10.0, Color.GRAY)
-
-            }
-            action {
-
-                navHome()
-            }
-        }
-
         top {
 
+            //close button
             hbox {
                 alignment = Pos.BOTTOM_RIGHT
                 add(closeButton)
@@ -76,39 +67,47 @@ class UserCreation : View("Creating User") {
 
         }
         center{
-
+            // I wrap the record button inside another button in order to able to be able to use the button's action tag
             button {
 
-                example.subscribeBy(
+                isRecording.subscribeBy(
                         onNext = {
-                            if (it == false) {
-                                recordButton = RecordButton()
-                                recordButton.alignment = Pos.CENTER
-                                progressBar.replaceWith(recordButton)
+                            if (it == false) { // if not recording provide a new recordButton Widget, wrapped in button for
+                                                //same as reason as above
+                                progressBar.hide()
+                                val newRecordButton = RecordButton()
+                                newRecordButton.alignment = Pos.CENTER
+                                val newButton = button {
+                                    add(newRecordButton)
+                                    style {
+                                        backgroundColor += Color.TRANSPARENT
+                                        borderColor+= box(Color.TRANSPARENT)
+                                    }
+                                }
+                                progressBar.replaceWith(newButton)
                             }
                         }
                 )
 
                 doneRecording.subscribeBy(
                         onNext = {
-                            if(it == true) {
-                                replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))
 
-                                var timer = Timer()
+                            if(it == true) {
+                                //recordButton.replaceWith(progressBar, transition = ViewTransition.Fade(0.2.seconds))
+
                                 timer.schedule(timerTask {
                                     Platform.runLater {
-                                        find(UserCreation::class).replaceWith(ProfilePreview::class, transition = ViewTransition.NewsFlash(0.5.seconds))
+                                        find(UserCreation::class).replaceWith(ProfilePreview::class, transition = ViewTransition.Fade(0.3.seconds))
                                     }
-                                }, 1000)
-
+                                }, 500)
 
                             }
-
                         }
                 )
+              add(progressBar)
+              progressBar.hide()
 
-
-                add(recordButton)
+              add(recordButton)
                 recordButton.alignment = Pos.CENTER
 
                 style {
@@ -117,25 +116,33 @@ class UserCreation : View("Creating User") {
                 }
 
                 action {
-                    ViewModel.recordAudio()
-                    ViewModel.recordClicked()
-                    var timer = Timer()
+                    viewModel.recordAudio()
+                    viewModel.recordClicked()
                     timer.schedule(timerTask {
                         Platform.runLater {
-                            ViewModel.doneRecording()
+                            viewModel.doneRecording()
                         }
                     }, 6100)
                 }
             }
         }
-
-
-
     }
 
     override fun onUndock() {
-        ViewModel.reset()
+        viewModel.reset()
+        timer.cancel()
+        timer.purge()
     }
 
+    override fun onDock() {
+        timer = Timer()
+    }
+
+    fun navHome() {
+
+        find(UserCreation::class).replaceWith(WelcomeScreen::class)
+        viewModel.reset()
+
+    }
 }
 

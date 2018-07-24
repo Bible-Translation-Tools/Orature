@@ -62,4 +62,10 @@ class DotsAnimation: HBox() {
         cir2.fill= Color.WHITE
         cir3.fill= Color.WHITE
     }
+
+    fun resetCircles() {
+        cir1.fill=c("#EDEDED")
+        cir2.fill=c("#EDEDED")
+        cir3.fill=c("#EDEDED")
+    }
 }
