@@ -6,7 +6,9 @@
 .idea/**/tasks.xml
 .idea/**/dictionaries
 .idea/**/shelf
-.idea/vcs.xml
+.idea/**/vcs.xml
+.idea/**/compiler.xml
+.idea/**/codeStyleConfig.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
