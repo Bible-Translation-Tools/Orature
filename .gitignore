@@ -9,6 +9,7 @@
 .idea/**/vcs.xml
 .idea/**/compiler.xml
 .idea/**/codeStyleConfig.xml
+.idea/**/kotlinc.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
