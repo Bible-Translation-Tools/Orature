@@ -85,7 +85,6 @@ class UserCreation : View("Creating User") {
 
                 example.subscribeBy(
                         onNext = {
-                            println(it)
                             if (it == false) {
                                 recordButton = RecordButton()
                                 recordButton.alignment = Pos.CENTER
