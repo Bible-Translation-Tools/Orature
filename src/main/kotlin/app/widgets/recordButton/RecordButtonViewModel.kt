@@ -11,9 +11,8 @@ class RecordButtonViewModel: ItemViewModel<Record>() {
 
     var countdownTracker = SimpleStringProperty("")
     var recordingDone = SimpleBooleanProperty(false)
-    val audio = bind(Record::audio)
-    val image = bind(Record::image)
-    val recording = bind(Record::recording)
+    var isRecording = SimpleBooleanProperty(false)
+
 
 
 
@@ -36,6 +35,10 @@ class RecordButtonViewModel: ItemViewModel<Record>() {
 
         recordingDone.set(true)
 
+    }
+
+    fun isRecording( bool : Boolean) {
+        isRecording.set(bool)
     }
 
 }
