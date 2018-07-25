@@ -46,7 +46,7 @@ class DotsAnimation: HBox() {
         }
     }
 
-    fun showCircles() {
+    fun circleCountdown() {
         cir1.fill=c("#CC4141")
         cir2.fill=c("#CC4141")
         cir3.fill=c("#CC4141")
@@ -61,5 +61,11 @@ class DotsAnimation: HBox() {
         cir1.fill= Color.WHITE
         cir2.fill= Color.WHITE
         cir3.fill= Color.WHITE
+    }
+
+    fun resetCircles() {
+        cir1.fill=c("#EDEDED")
+        cir2.fill=c("#EDEDED")
+        cir3.fill=c("#EDEDED")
     }
 }

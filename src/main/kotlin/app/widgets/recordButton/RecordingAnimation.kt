@@ -46,6 +46,14 @@ class RecordingAnimation: HBox() {
         }
     }
 
+    fun resetAnimation() {
+        timeline {
+            keyframe(javafx.util.Duration.millis(0.0)) {
+                keyvalue(arc.lengthProperty(),-270.0)
+            }
+        }
+    }
+
     init {
         with(root) {
 

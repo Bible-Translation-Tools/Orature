@@ -68,8 +68,7 @@ class UserCreationViewModel(): ViewModel(), AudioInterface {
     }
 
     fun changeIcon() {
-
-        recordingDone.set(true)
+         recordingDone.set(true)
     }
 
     fun reset() {
@@ -82,10 +81,6 @@ class UserCreationViewModel(): ViewModel(), AudioInterface {
 
     fun doneRecording() {
         doneRecording.onNext(true)
-    }
-
-    fun hasListened() {
-        hasListened.onNext(true)
     }
 
 }

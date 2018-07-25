@@ -9,6 +9,7 @@ import jdenticon.Jdenticon
 
 
 class ProfileIcon(var svgHash: String, var buttonSize: Double= 150.0, var outerCircle: Boolean = false): StackPane() {
+
     var svgGroup = SvgLoader().loadSvg(Jdenticon.toSvg(hash = svgHash, size = buttonSize.toInt()).byteInputStream())
     val circle = circle {
         radius = buttonSize - 30.0
