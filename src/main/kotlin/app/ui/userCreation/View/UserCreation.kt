@@ -77,7 +77,7 @@ class UserCreation : View("Creating User") {
                 isRecording.subscribeBy(
                         onNext = {
                             if (it == false) { // if isRecording set to false create new RecordButton()
-                                val newRecordButton = RecordButton(::onClickListener, ::animationCompleted, ::stopClicked)
+                                val newRecordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
                                 newRecordButton.alignment = Pos.CENTER
                                 recordButton.replaceWith(newRecordButton)
                                 recordButton = newRecordButton
@@ -109,7 +109,7 @@ class UserCreation : View("Creating User") {
 
             // record button needs to be added here below bc the subjects haven't emitted anything yet
 
-                recordButton = RecordButton(::onClickListener,::animationCompleted, ::stopClicked)
+                recordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
                 add(recordButton)
                 recordButton.alignment = Pos.CENTER
 
@@ -134,7 +134,6 @@ class UserCreation : View("Creating User") {
     private fun navHome() {
 
         find(UserCreation::class).replaceWith(WelcomeScreen::class)
-        viewModel.reset()
     }
 
     private fun animationCompleted() {
@@ -148,7 +147,7 @@ class UserCreation : View("Creating User") {
                 transition = ViewTransition.Fade(0.3.seconds))
     }
 
-    private fun onClickListener() {
+    private fun onClickCallback() {
         viewModel.recordAudio()
         viewModel.recordClicked()
         timer.schedule(timerTask {

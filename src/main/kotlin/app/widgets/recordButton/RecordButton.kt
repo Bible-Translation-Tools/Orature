@@ -1,13 +1,9 @@
 package app.widgets.recordButton
 
 
-import app.ui.profilePreview.View.ProfilePreview
 import app.ui.styles.ButtonStyles
-import app.ui.userCreation.UserCreation
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.subjects.BehaviorSubject
 import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.Cursor
@@ -19,7 +15,7 @@ import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class RecordButton(onClickListener: () -> Unit,animationCompleted : () -> Unit, stopClicked: () -> Unit) : VBox() {
+class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCompletedCallback : () -> Unit = ::println, var stopClickedCallback: () -> Unit= ::println) : VBox() {
 
 
     val circle = RecordingAnimation()
@@ -55,7 +51,7 @@ class RecordButton(onClickListener: () -> Unit,animationCompleted : () -> Unit, 
                          dotsAn.circleCountdown()
                          micIcon.hide()
                          RecordButtonViewModel.countdown()
-                         onClickListener()
+                         onClickCallback()
                          timer.schedule(timerTask {
                              Platform.runLater {
                                  circle.animate()
@@ -70,7 +66,8 @@ class RecordButton(onClickListener: () -> Unit,animationCompleted : () -> Unit, 
                              /*if countdown.value = "" that means the countdown has finished
                              * therefore now the user is able to click stop to record
                              * */
-                             stopClicked()
+                                circle.stop()
+                                stopClickedCallback()
                          }
                      }
                  }
