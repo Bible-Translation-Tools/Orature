@@ -12,6 +12,7 @@ class ButtonStyles: Stylesheet() {
             val rectangleButtonAlternate by cssclass()
             val circleButton by cssclass()
             val roundButtonMedium by cssclass()
+            val roundButtonMini by cssclass()
         }
 
         init {
@@ -62,6 +63,24 @@ class ButtonStyles: Stylesheet() {
                 minHeight = 64.0.px
                 prefWidth = 125.0.px
                 prefHeight = 125.0.px
+                cursor = Cursor.HAND
+                backgroundColor += Color.WHITE
+                borderColor += box(Color.TRANSPARENT)
+
+                and(hover) {
+                    scaleX = 1.1
+                    scaleY = 1.1
+                }
+            }
+
+            roundButtonMini {
+                backgroundRadius += box(100.percent)
+                borderRadius += box(100.percent)
+                effect = DropShadow(10.0, Color.GRAY)
+                minWidth = 64.0.px
+                minHeight = 64.0.px
+                prefWidth = 64.0.px
+                prefHeight = 64.0.px
                 cursor = Cursor.HAND
                 backgroundColor += Color.WHITE
                 borderColor += box(Color.TRANSPARENT)
