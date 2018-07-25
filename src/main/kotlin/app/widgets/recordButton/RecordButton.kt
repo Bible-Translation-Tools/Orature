@@ -34,7 +34,7 @@ class RecordButton() : VBox() {
 
              button(countdown, micIcon){
                  importStylesheet(ButtonStyles::class)
-                 addClass(ButtonStyles.roundButton)
+                 addClass(ButtonStyles.roundButtonMedium)
                  style {
                      backgroundColor += Color.WHITE
                      micIcon.fill = c("#CC4141")

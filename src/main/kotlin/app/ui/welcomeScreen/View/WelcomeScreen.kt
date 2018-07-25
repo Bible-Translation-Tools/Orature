@@ -70,7 +70,7 @@ class WelcomeScreen: View("Welcome Screen") {
                     alignment = Pos.CENTER
                     style {
                         importStylesheet(ButtonStyles::class)
-                        addClass(ButtonStyles.roundButton)
+                        addClass(ButtonStyles.roundButtonMini)
                         addUserIcon.fill = c("#CC4141")
                     }
 
