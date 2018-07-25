@@ -1,6 +1,7 @@
 package app.widgets.welcomeBack
 
 import app.ui.imageLoader
+import app.ui.styles.ButtonStyles.Companion.roundButtonLarge
 import app.ui.styles.Styles.Companion.rectangleButtonAlternate
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -14,7 +15,7 @@ import java.io.File
 class WelcomeBack : HBox() {
     private val rad = 125.0
     private val bigIcons = borderpane() {
-
+    val filePathtoUserImage = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
         alignment = Pos.CENTER
 
         style {
@@ -28,10 +29,10 @@ class WelcomeBack : HBox() {
                 fill = c("#E5E5E5")
             }
             //Big Profile Icon
-            button {
-                graphic = imageLoader(File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg"))
-                graphic.scaleX = 1.2
-                graphic.scaleY = 1.2
+            button(graphic = imageLoader(filePathtoUserImage)) {
+                addClass(roundButtonLarge)
+                graphic.scaleX = 1.9
+                graphic.scaleY = 1.9
             }
             alignment = Pos.CENTER
         }
