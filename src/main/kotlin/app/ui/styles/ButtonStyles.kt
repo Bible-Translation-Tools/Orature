@@ -61,8 +61,8 @@ class ButtonStyles: Stylesheet() {
                 effect = DropShadow(10.0, Color.GRAY)
                 minWidth = 64.0.px
                 minHeight = 64.0.px
-                prefWidth = 125.0.px
-                prefHeight = 125.0.px
+                prefWidth = 120.0.px
+                prefHeight = 120.0.px
                 cursor = Cursor.HAND
                 backgroundColor += Color.WHITE
                 borderColor += box(Color.TRANSPARENT)
