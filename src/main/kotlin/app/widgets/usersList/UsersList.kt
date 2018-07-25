@@ -8,6 +8,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import app.ui.styles.ButtonStyles
+import app.ui.styles.ButtonStyles.Companion.roundButtonMedium
 import tornadofx.*
 import java.io.File
 
@@ -49,7 +50,6 @@ class UsersList : HBox() {
         maxCellsInRow = 3
         horizontalCellSpacing = 32.0
 
-
         cellFormat {
             graphic = vbox(16) {
                 style{
@@ -58,11 +58,9 @@ class UsersList : HBox() {
                 }
 
                 //Small user icon in each cell
-                //it is equal the value of each iteration of datagrid parameter
+                //"it" is equal the value of each iteration of datagrid parameter
                 button(graphic = imageLoader(it)) {
-                    style {
-                        borderColor += box(c("#ffffff"))
-                    }
+                    addClass(roundButtonMedium)
                 }
 
                 val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
