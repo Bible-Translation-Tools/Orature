@@ -13,9 +13,6 @@ class RecordButtonViewModel: ItemViewModel<Record>() {
     var recordingDone = SimpleBooleanProperty(false)
     var isRecording = SimpleBooleanProperty(false)
 
-
-
-
     fun countdown() {
 
         Platform.runLater { countdownTracker.set("3") }

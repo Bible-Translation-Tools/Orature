@@ -8,21 +8,22 @@ import javafx.scene.layout.StackPane
 import jdenticon.Jdenticon
 
 
-class ProfileIcon(var svgHash: String, var buttonSize: Double= 150.0, var outerCircle: Boolean = false): StackPane() {
+class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outerCircle: Boolean = false) : StackPane() {
 
     var svgGroup = SvgLoader().loadSvg(Jdenticon.toSvg(hash = svgHash, size = buttonSize.toInt()).byteInputStream())
     val circle = circle {
         radius = buttonSize - 30.0
-        fill = c("#E5E5E5") }
+        fill = c("#E5E5E5")
+    }
 
     var profIcon: Button
 
 
-    init{
+    init {
 
         profIcon = button(graphic = svgGroup) {
             if (outerCircle) circle else circle.removeFromParent()
-            importStylesheet(ProfileIconStyle:: class)
+            importStylesheet(ProfileIconStyle::class)
             addClass(ProfileIconStyle.ProfileIcon)
             prefWidth = buttonSize
             prefHeight = buttonSize

@@ -1,4 +1,5 @@
 package app.ui.profilePreview.View
+
 import app.ui.userCreation.*
 import app.ui.styles.ButtonStyles
 import app.ui.profilePreview.ViewModel.ProfilePreviewViewModel
@@ -14,7 +15,7 @@ import app.ui.welcomeScreen.WelcomeScreen
 import javafx.scene.paint.Color
 import tornadofx.*
 
-class ProfilePreview: View() {
+class ProfilePreview : View() {
 
     var iconHash = PublishSubject.create<String>()                // subject to get the user iconHash
     var onClickNext = PublishSubject.create<Boolean>()          // subject to check if the NEXT button was clicked
@@ -23,22 +24,20 @@ class ProfilePreview: View() {
 
     private val viewModel = ProfilePreviewViewModel(iconHash, onClickNext, onClickRedo, audioListened)
 
-    var NewUserButton = ProfileIcon("12345678901", 152.0)
-
+    var newUserButton = ProfileIcon("12345678901", 152.0)
     val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
     val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-    val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
-
+    val closeIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
 
     override val root = borderpane {
 
-        val closeButton = button("CLOSE", mIcon) {
+        val closeButton = button(messages["close"], closeIcon) {
             importStylesheet(ButtonStyles::class)
             addClass(ButtonStyles.rectangleButtonDefault)
 
             style {
                 alignment = Pos.CENTER
-                mIcon.fill = c("#CC4141")
+                closeIcon.fill = c("#CC4141")
                 effect = DropShadow(10.0, Color.GRAY)
 
             }
@@ -48,22 +47,20 @@ class ProfilePreview: View() {
             }
         }
 
-
-        top{
+        top {
 
             hbox {
                 alignment = Pos.BOTTOM_RIGHT
                 add(closeButton)
                 style {
                     alignment = Pos.BOTTOM_RIGHT
-                    paddingRight= 40.0
+                    paddingRight = 40.0
                     paddingTop = 40.0
                 }
             }
         }
 
-
-        center{
+        center {
 
             hbox {
                 spacing = 48.0
@@ -89,7 +86,6 @@ class ProfilePreview: View() {
 
                         button("", micIcon) {
 
-
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
@@ -109,7 +105,7 @@ class ProfilePreview: View() {
                         }
                     }
 
-                    label("REDO") {
+                    label(messages["redo"]) {
                         hide()
                         audioListened.subscribeBy(
                                 onNext = { if (it) show() else hide() }
@@ -128,17 +124,16 @@ class ProfilePreview: View() {
                     }
                     iconHash.subscribeBy(
                             onNext = {
-                                add(NewUserButton)
-                                NewUserButton.svgHash = it          // update iconhash from subject
+                                add(newUserButton)
+                                newUserButton.svgHash = it          // update iconhash from subject
                             }
                     )
 
 
-                    NewUserButton.profIcon.action {
+                    newUserButton.profIcon.action {
                         viewModel.listenedAudio(true)
                     }
                 }
-
 
                 vbox {
                     spacing = 12.0
@@ -159,7 +154,6 @@ class ProfilePreview: View() {
                         }
                         button("", rightArrow) {
 
-
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
@@ -170,16 +164,11 @@ class ProfilePreview: View() {
                                 fontSize = 2.em
                                 textFill = c("#CC4141")
                             }
-
-                            action {
-
-                            }
+                            // TODO("insert action here when user clicks next button")
                         }
-
-
                     }
 
-                    label("NEXT") {
+                    label(messages["next"]) {
                         hide()
                         audioListened.subscribeBy(
                                 onNext = {
@@ -192,15 +181,17 @@ class ProfilePreview: View() {
             }
 
         }
+    }
 
+<<<<<<< HEAD
 }
 
 
 
     init{
+=======
+    init {
+>>>>>>> origin/ns_login_mockup
         viewModel.newIconHash("12345678901") // set an icon hash string to the subject iconHash declared in top
     }
-
-
-
 }

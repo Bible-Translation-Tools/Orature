@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="WEB_MODULE" version="4">
+  <component name="ExternalSystem" externalSystem="GRADLE" externalSystemModuleGroup="com.kotlin.example" externalSystemModuleVersion="1.0-SNAPSHOT" linkedProjectId="8woc2018-jvm" linkedProjectPath="$MODULE_DIR$" rootProjectPath="$MODULE_DIR$" />
   <component name="FacetManager">
     <facet type="TornadoFX" name="TornadoFX">
       <configuration />

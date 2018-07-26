@@ -16,8 +16,6 @@ import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
 import io.reactivex.rxkotlin.subscribeBy
 import app.ui.profilePreview.View.ProfilePreview
-import javafx.geometry.NodeOrientation
-import javafx.scene.layout.VBox
 
 /*
 *  This View is used in the process of creating user profiles
@@ -26,21 +24,21 @@ import javafx.scene.layout.VBox
 *  gives the user visual feedback through the recording process
 *
 * */
-class UserCreation : View("Creating User") {
+class UserCreation : View() {
 
 
 
     private val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
-    private val viewModel : UserCreationViewModel  by inject ()
-    lateinit var recordButton: VBox
+    private val viewModel: UserCreationViewModel  by inject()
+    var recordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
     private val progressBar = ProgressBar()
     val isRecording = viewModel.isRecording
     val doneRecording = viewModel.doneRecording
     var timer = Timer()
+    val RECORDING_DONE: Long = 6100
 
 
     //initialize close button to be used in top of borderpane
-    //var messages = ResourceBundle.getBundle("MyView")
     val closeButton = button(messages["close"], mIcon) {
         importStylesheet(ButtonStyles::class)
         addClass(ButtonStyles.rectangleButtonDefault)
@@ -58,11 +56,10 @@ class UserCreation : View("Creating User") {
 
     override val root = borderpane {
 
-        //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT               //todo use this line to  implement RTL support
+        //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT
 
-
-        style{
-            backgroundColor+= Color.WHITE
+        style {
+            backgroundColor += Color.WHITE
         }
 
         top {
@@ -73,57 +70,54 @@ class UserCreation : View("Creating User") {
                 add(closeButton)
                 style {
                     alignment = Pos.BOTTOM_RIGHT
-                    paddingRight= 40.0
+                    paddingRight = 40.0
                     paddingTop = 40.0
                 }
             }
 
         }
-        center{
+        center {
 
-                isRecording.subscribeBy(
-                        onNext = {
-                            if (it == false) { // if isRecording set to false create new RecordButton()
-                                val newRecordButton = RecordButton(::onClickListener, ::animationCompleted, ::stopClicked)
-                                newRecordButton.alignment = Pos.CENTER
-                                recordButton.replaceWith(newRecordButton)
-                                recordButton = newRecordButton
-                            }
-                        } ,
-
-                        onError = {
-                            println(it)
+            isRecording.subscribeBy(
+                    onNext = {
+                        if (it == false) { // if isRecording set to false create new RecordButton()
+                            val newRecordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
+                            newRecordButton.alignment = Pos.CENTER
+                            recordButton.replaceWith(newRecordButton)
+                            recordButton = newRecordButton
                         }
-                )
+                    },
 
-                doneRecording.subscribeBy(
-                        onNext = {
-                                if(it == true) { //done recording = true? then navigate to profile preview
-                                timer.schedule(timerTask {
-                                    Platform.runLater {
-                                        find(UserCreation::class).replaceWith(ProfilePreview::class,
-                                                transition = ViewTransition.Fade(0.3.seconds))
-                                    }
-                                }, 500)
+                    onError = {
+                        println(it)
+                    }
+            )
 
-                            }
-                        },
+            doneRecording.subscribeBy(
+                    onNext = {
+                        if (it == true) { //done recording = true? then navigate to profile preview
+                            timer.schedule(timerTask {
+                                Platform.runLater {
+                                    find(UserCreation::class).replaceWith(ProfilePreview::class,
+                                            transition = ViewTransition.Fade(0.3.seconds))
+                                }
+                            }, 500)
 
-                onError = {
-                            println(it)
                         }
-                )
+                    },
 
-            // record button needs to be added here below bc the subjects haven't emitted anything yet
+                    onError = {
+                        println(it)
+                    }
+            )
 
-                recordButton = RecordButton(::onClickListener,::animationCompleted, ::stopClicked)
-                add(recordButton)
-                recordButton.alignment = Pos.CENTER
+            add(recordButton)
+            recordButton.alignment = Pos.CENTER
 
-                style {
-                    backgroundColor += Color.TRANSPARENT
-                    borderColor+= box(Color.TRANSPARENT)
-                }
+            style {
+                backgroundColor += Color.TRANSPARENT
+                borderColor += box(Color.TRANSPARENT)
+            }
         }
     }
 
@@ -141,11 +135,10 @@ class UserCreation : View("Creating User") {
     private fun navHome() {
 
         find(UserCreation::class).replaceWith(WelcomeScreen::class)
-        viewModel.reset()
     }
 
     private fun animationCompleted() {
-        TODO( "add code that runs when countdown animation is completed. Probably being audio recording" +
+        TODO("add code that runs when countdown animation is completed. Probably being audio recording" +
                 "function name might change")
         //viewModel.reset()
     }
@@ -155,14 +148,14 @@ class UserCreation : View("Creating User") {
                 transition = ViewTransition.Fade(0.3.seconds))
     }
 
-    private fun onClickListener() {
+    private fun onClickCallback() {
         viewModel.recordAudio()
         viewModel.recordClicked()
         timer.schedule(timerTask {
             Platform.runLater {
                 viewModel.doneRecording()
             }
-        }, 6100)
+        }, RECORDING_DONE)
     }
 
 }

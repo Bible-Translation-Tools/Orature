@@ -1,28 +1,21 @@
 package app.ui.userCreation.ViewModel
 
-import app.ui.userCreation.Model.UserCreationModel
-import io.reactivex.Observable
-import io.reactivex.ObservableEmitter
-import io.reactivex.ObservableOnSubscribe
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 
-import javafx.beans.value.ObservableBooleanValue
-import javafx.beans.value.ObservableValue
 import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class UserCreationViewModel(): ViewModel(), AudioInterface {
+class UserCreationViewModel() : ViewModel(), AudioInterface {
 
     var countdownTracker = SimpleStringProperty("")
     var recordingDone = SimpleBooleanProperty(false)
-    val model = UserCreationModel()
-    var isRecording = BehaviorSubject.create<Boolean>()
-    var doneRecording = BehaviorSubject.create<Boolean>()
-    var hasListened = BehaviorSubject.create<Boolean>()
+    var isRecording = PublishSubject.create<Boolean>()
+    var doneRecording = PublishSubject.create<Boolean>()
+    var hasListened = PublishSubject.create<Boolean>()
 
 
     override fun getAudio() {
@@ -43,8 +36,6 @@ class UserCreationViewModel(): ViewModel(), AudioInterface {
 
     override fun recordAudio() {
 //        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-
-        model.audioFile = "recorded Audio"
     }
 
     fun countdown() {
@@ -55,32 +46,27 @@ class UserCreationViewModel(): ViewModel(), AudioInterface {
         setCountDown("", 3)
     }
 
-
-    private fun setCountDown(text: String, time: Int){
+    private fun setCountDown(text: String, seconds: Int) {
         var timer = Timer()
-        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, time.toLong() * 1000 )
+        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, seconds.toLong() * 1000)
 
     }
 
     fun recordClicked() {
-        model.recordClicked()
         isRecording.onNext(true)
     }
 
     fun changeIcon() {
-         recordingDone.set(true)
+        recordingDone.set(true)
     }
 
     fun reset() {
-        model.reset()
         isRecording.onNext(false)
         doneRecording.onNext(false)
         hasListened.onNext(false)
-
     }
 
     fun doneRecording() {
         doneRecording.onNext(true)
     }
-
 }

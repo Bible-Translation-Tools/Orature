@@ -10,6 +10,7 @@ class ProfileIconStyle : Stylesheet() {
     companion object {
         val ProfileIcon by cssclass()
     }
+
     init {
         ProfileIcon {
             backgroundColor += c("#ffffff")

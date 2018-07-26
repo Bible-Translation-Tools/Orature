@@ -1,4 +1,5 @@
 package app.ui.welcomeScreen
+
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -12,9 +13,10 @@ import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
 import java.awt.Window
 import app.ui.userCreation.*
-import javafx.geometry.NodeOrientation
+import javafx.scene.text.FontWeight
 
-class WelcomeScreen: View("Welcome Screen") {
+
+class WelcomeScreen: View() {
 
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
@@ -43,11 +45,9 @@ class WelcomeScreen: View("Welcome Screen") {
                     backgroundColor += Color.WHITE
                     vgrow = Priority.ALWAYS
                     hgrow=Priority.ALWAYS
-                    //setMinWidth(Screen.getPrimary().bounds.width/2)
                     prefWidth= 1200.px
                 }
             }
-
         }
 
         vbox {
@@ -58,7 +58,7 @@ class WelcomeScreen: View("Welcome Screen") {
                 hgrow= Priority.ALWAYS
             }
 
-            hbox {
+            vbox (8){ //INSIDE an hbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 alignment = Pos.BOTTOM_RIGHT
                 style {
@@ -80,24 +80,25 @@ class WelcomeScreen: View("Welcome Screen") {
                         find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }
                 }
+
                 padding = insets(pad)
-           }
-
-        }
-
-        //make sure the plus button is in the bottom right
-        //BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT)
-        //bottom = plusButton
-        //put in some nice margins so it's not too crowded
-
+                label(messages["create"]) {
+                    alignment = Pos.CENTER
+                    style {
+                        fontWeight = FontWeight.BOLD
+                    }
+                }
+            }
     }
+
+ }
 
     //set the root of the view to the welcomeScreen
     override val root = welcomeScreen
 
     //DON'T MOVE THIS TO THE TOP
     //current window will be null unless init goes under setting of root
-    init{
+    init {
         //set minimum size of window so they can always see the last user and the grid of other users
         val minWidth = 3 * pad + 2 * rad + gridWidth
         //add 100 for home button and Welcome message; probably in real thing these will be vars
