@@ -13,9 +13,7 @@ import tornadofx.*
 import java.io.File
 
 class UsersList(listOfImageFiles: List<File>) : HBox() {
-
     val root  = datagrid(listOfImageFiles) {
-
         style{
             backgroundColor += Color.valueOf("#DFDEE3")
             hgrow = Priority.ALWAYS
@@ -25,16 +23,12 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
             verticalCellSpacing = 15.0.px
             horizontalCellSpacing = 20.0.px
         }
-
         cellFormat {
-
             graphic = vbox(16) {
-
                 style{
                     backgroundColor += Color.valueOf("#DFDEE3")
                     alignment = Pos.CENTER
                 }
-
                 //Small user icon in each cell
                 //"it" is equal the value of each iteration of datagrid parameter
                 button(graphic = imageLoader(it)) {
@@ -42,18 +36,16 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
                     graphic.scaleX = 1.5
                     graphic.scaleY = 1.5
                 }
-
                 //Home button in in each cell
                 val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
-                button("", homeIcon) {
+                button(graphic = homeIcon) {
                     addClass(rectangleButtonDefault)
-                    alignment = Pos.CENTER
+                    style {
+                        alignment = Pos.CENTER
+                    }
                     homeIcon.fill = c("#CC4141")
                 }
-
             }
-
         }
     }
-
 }
