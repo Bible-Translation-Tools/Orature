@@ -10,6 +10,9 @@
 .idea/**/compiler.xml
 .idea/**/codeStyleConfig.xml
 .idea/**/kotlinc.xml
+.idea/**/misc.xml
+.idea/**/8woc2018-jvm_main.iml
+.idea/**/8woc2018-jvm_test.iml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
