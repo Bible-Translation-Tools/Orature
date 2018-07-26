@@ -12,12 +12,11 @@ import javafx.scene.text.FontWeight
 import tornadofx.*
 import java.io.File
 
-class WelcomeBack : HBox() {
+class WelcomeBack(ImageFile: File) : HBox() {
     private val rad = 125.0
-    private val bigIcons = borderpane() {
-    val filePathtoUserImage = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
+    private val bigIcons = borderpane {
+        //alignment must be outside of "style {}"
         alignment = Pos.CENTER
-
         style {
             backgroundColor += Color.valueOf("#FFFFFF")
         }
@@ -29,7 +28,9 @@ class WelcomeBack : HBox() {
                 fill = c("#E5E5E5")
             }
             //Big Profile Icon
-            button(graphic = imageLoader(filePathtoUserImage)) {
+            //button( /* Insert "graphic = imageLoader(filePathtoUserImage)" here */)
+            //filePathtoUserImage should be File type from java.io.File
+            button(graphic = imageLoader(ImageFile)) {
                 addClass(roundButtonLarge)
                 graphic.scaleX = 1.9
                 graphic.scaleY = 1.9

@@ -1,5 +1,7 @@
 package app.ui.welcomeScreen
+import app.ui.imageLoader
 import app.ui.styles.ButtonStyles
+import app.ui.styles.ButtonStyles.Companion.roundButtonMini
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 
@@ -7,70 +9,76 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 
-import tornadofx.*;
+import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
-import java.awt.Window
 import app.ui.userCreation.*
+import java.io.File
 
 class WelcomeScreen: View("Welcome Screen") {
 
-    //grab the usernames from outside
-    //in the real thing, we'll grab icons and sound clips instead
-    //so replace this injection with whatever injection you do
-
+    private val rad = 100.0
+    val pad = 40.0
     val gridWidth = 400.0
 
-    //the left half of the screen, which displays:
-    //the last user to log in, a welcome message, and a button to go to that user's home
-    private val rad = 100.0
+//    WelcomeScreen splits the screen evenly with 2 subviews.
+//    first subview shows an image of most recent logged in user, greetings, and home button
+//    second subview shows a list of users created in the device, their own home buttons, and a button to create a new user
+    private val welcomeScreen = hbox {
 
-    //the grid of users
-    //hooked up to the list we pulled in up top from DataService
-    //right now it has just 9 elems but the real one will have who-knows-how-many
+        var data1: File? = null
+        var profileImages = mutableListOf<File>()
+        val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
 
-    val pad = 60.0
-    private val welcomeScreen = hbox() {
-
-        vbox {
-            alignment = Pos.CENTER
-            stackpane {
-                add(WelcomeBack());
-                style {
-                    setMinHeight(Window.HEIGHT.toDouble())
-                    backgroundColor += Color.WHITE
-                    vgrow = Priority.ALWAYS
-                    hgrow=Priority.ALWAYS
-                    //setMinWidth(Screen.getPrimary().bounds.width/2)
-                    prefWidth= 1200.px
-                }
-            }
-
+        importStylesheet(ButtonStyles::class)
+        style {
+            prefHeight = 700.px
         }
 
         vbox {
-            add(UsersList())
+
             style {
-                prefWidth=1200.px
-                vgrow= Priority.ALWAYS
-                hgrow= Priority.ALWAYS
+                prefWidth = 500.px
+                hgrow = Priority.ALWAYS
+            }
+
+            stackpane {
+                if ( data1 !== null ) add( WelcomeBack(data1) )
+
+                style {
+                    backgroundColor += Color.WHITE
+                    vgrow = Priority.ALWAYS
+                }
+
+            }
+        }
+
+        vbox {
+
+            style {
+                prefWidth = 500.px
+                hgrow = Priority.ALWAYS
+                padding = box(pad.px)
+                backgroundColor += c("#DFDEE3")
+
+            }
+
+            if (profileImages.isNotEmpty()) {
+                add(UsersList(profileImages))
             }
 
             hbox {
-                val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
-                alignment = Pos.BOTTOM_RIGHT
-                style {
-                    backgroundColor += c("#DFDEE3")
-                    vgrow = Priority.ALWAYS
-                    prefHeight = 50.0.px
 
+                style {
+                    vgrow = Priority.ALWAYS
+                    alignment = Pos.BOTTOM_RIGHT
+                    minHeight = 70.px
                 }
 
-                button("", addUserIcon) {
-                    alignment = Pos.CENTER
+                button(graphic = addUserIcon) {
+
                     style {
-                        importStylesheet(ButtonStyles::class)
-                        addClass(ButtonStyles.roundButtonMini)
+                        addClass(roundButtonMini)
                         addUserIcon.fill = c("#CC4141")
                     }
 
@@ -78,29 +86,22 @@ class WelcomeScreen: View("Welcome Screen") {
                         find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }
                 }
-                padding = insets(pad);
            }
 
         }
-
-        //make sure the plus button is in the bottom right
-        //BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
-        //bottom = plusButton;
-        //put in some nice margins so it's not too crowded
-
     }
 
     //set the root of the view to the welcomeScreen
-    override val root = welcomeScreen;
+    override val root = welcomeScreen
 
     //DON'T MOVE THIS TO THE TOP
     //current window will be null unless init goes under setting of root
     init{
         //set minimum size of window so they can always see the last user and the grid of other users
-        val minWidth = 3 * pad + 2 * rad + gridWidth;
+        val minWidth = 3 * pad + 2 * rad + gridWidth
         //add 100 for home button and Welcome message; probably in real thing these will be vars
-        val minHeight = 2 * pad + 2 * rad + 100.0;
-        setWindowMinSize(minWidth, minHeight);
+        val minHeight = 2 * pad + 2 * rad + 100.0
+        setWindowMinSize(minWidth, minHeight)
     }
 }
 
