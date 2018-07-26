@@ -16,6 +16,7 @@ import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
 import io.reactivex.rxkotlin.subscribeBy
 import app.ui.profilePreview.View.ProfilePreview
+import javafx.geometry.NodeOrientation
 import javafx.scene.layout.VBox
 
 /*
@@ -28,6 +29,7 @@ import javafx.scene.layout.VBox
 class UserCreation : View("Creating User") {
 
 
+
     private val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
     private val viewModel : UserCreationViewModel  by inject ()
     lateinit var recordButton: VBox
@@ -36,8 +38,10 @@ class UserCreation : View("Creating User") {
     val doneRecording = viewModel.doneRecording
     var timer = Timer()
 
+
     //initialize close button to be used in top of borderpane
-    val closeButton = button("CLOSE", mIcon) {
+    //var messages = ResourceBundle.getBundle("MyView")
+    val closeButton = button(messages["close"], mIcon) {
         importStylesheet(ButtonStyles::class)
         addClass(ButtonStyles.rectangleButtonDefault)
 
@@ -53,6 +57,9 @@ class UserCreation : View("Creating User") {
     }
 
     override val root = borderpane {
+
+        //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT               //todo use this line to  implement RTL support
+
 
         style{
             backgroundColor+= Color.WHITE

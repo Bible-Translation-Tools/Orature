@@ -45,7 +45,6 @@ class ProfilePreview: View() {
             action {
                 find(ProfilePreview::class).replaceWith(WelcomeScreen::class)  // navigate to home, todo implement ui navigator
                 viewModel.listenedAudio(false)                        // set listened audio false to reset the ui state and hide the next and redo buttons
-
             }
         }
 
@@ -194,9 +193,8 @@ class ProfilePreview: View() {
 
         }
 
-
-
 }
+
 
 
     init{

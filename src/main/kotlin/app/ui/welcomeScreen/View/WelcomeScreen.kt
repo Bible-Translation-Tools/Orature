@@ -7,11 +7,12 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 
-import tornadofx.*;
+import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
 import java.awt.Window
 import app.ui.userCreation.*
+import javafx.geometry.NodeOrientation
 
 class WelcomeScreen: View("Welcome Screen") {
 
@@ -31,11 +32,12 @@ class WelcomeScreen: View("Welcome Screen") {
 
     val pad = 60.0
     private val welcomeScreen = hbox() {
+        //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT               //todo use this line to  implement RTL support
 
         vbox {
             alignment = Pos.CENTER
             stackpane {
-                add(WelcomeBack());
+                add(WelcomeBack())
                 style {
                     setMinHeight(Window.HEIGHT.toDouble())
                     backgroundColor += Color.WHITE
@@ -78,29 +80,29 @@ class WelcomeScreen: View("Welcome Screen") {
                         find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }
                 }
-                padding = insets(pad);
+                padding = insets(pad)
            }
 
         }
 
         //make sure the plus button is in the bottom right
-        //BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT);
-        //bottom = plusButton;
+        //BorderPane.setAlignment(plusButton.root, Pos.BOTTOM_RIGHT)
+        //bottom = plusButton
         //put in some nice margins so it's not too crowded
 
     }
 
     //set the root of the view to the welcomeScreen
-    override val root = welcomeScreen;
+    override val root = welcomeScreen
 
     //DON'T MOVE THIS TO THE TOP
     //current window will be null unless init goes under setting of root
     init{
         //set minimum size of window so they can always see the last user and the grid of other users
-        val minWidth = 3 * pad + 2 * rad + gridWidth;
+        val minWidth = 3 * pad + 2 * rad + gridWidth
         //add 100 for home button and Welcome message; probably in real thing these will be vars
-        val minHeight = 2 * pad + 2 * rad + 100.0;
-        setWindowMinSize(minWidth, minHeight);
+        val minHeight = 2 * pad + 2 * rad + 100.0
+        setWindowMinSize(minWidth, minHeight)
     }
 }
 
