@@ -25,31 +25,3 @@ fun imageLoader(imagePathToLoad: File): Node {
         }
     }
 }
-
-
-//parameter example:
-//var imagePathToLoad = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\kotlin\\app\\ui\\micIcon-Copy.svg")
-
-//How to:
-
-
-//1. Load a SVG file inside a button
-
-//        button {
-//            graphic = imageLoader(imagePathToLoad)
-//        }
-
-//2. Load a SVG file inside a layout
-//        stackpane {
-//            add(imageLoader(imagePathToLoad))
-//        }
-
-//3. Load a PNG or JPG file inside a button
-//        button {
-//            graphic = imageLoader(imagePathToLoad)
-//        }
-
-//4. Load a PNG or JPG file inside a layout
-//        stackpane {
-//            imageLoader(imagePathToLoad)
-//          }
