@@ -1,6 +1,7 @@
 package app.widgets.recordButton
 
 
+import app.MyApp.Companion.Colors
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -35,13 +36,13 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
                     importStylesheet(ButtonStyles::class)
                     addClass(ButtonStyles.roundButton)
                     style {
-                        backgroundColor += Color.WHITE
-                        micIcon.fill = c("#CC4141")
+                        backgroundColor += c(Colors["base"])
+                        micIcon.fill = c(Colors["accent"])
                         cursor = Cursor.HAND
                         minWidth = 152.0.px
                         minHeight = 152.0.px
                         fontSize = 8.em
-                        textFill = c("#CC4141")
+                        textFill = c(Colors["accent"])
                     }
 
                     action {
@@ -55,7 +56,7 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
                                 Platform.runLater {
                                     circleAnimation.animate()
                                     graphic = stopIcon
-                                    stopIcon.fill = c("#CC4141")
+                                    stopIcon.fill =c(Colors["accent"])
                                     dotsAnimation.hide()
                                     //animationCompleted()
                                 }

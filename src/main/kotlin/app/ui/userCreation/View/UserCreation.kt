@@ -1,5 +1,6 @@
 package app.ui.userCreation
 
+import app.MyApp.Companion.Colors
 import app.ui.styles.ButtonStyles
 import app.ui.userCreation.ViewModel.UserCreationViewModel
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -43,7 +44,7 @@ class UserCreation : View() {
 
         style {
             alignment = Pos.CENTER
-            closeIcon.fill = c("#CC4141")
+            closeIcon.fill = c(Colors["accent"])
             effect = DropShadow(10.0, Color.GRAY)
 
         }
@@ -113,8 +114,8 @@ class UserCreation : View() {
             recordButton.alignment = Pos.CENTER
 
             style {
-                backgroundColor += Color.TRANSPARENT
-                borderColor += box(Color.TRANSPARENT)
+                backgroundColor += c(Colors["transparent"])
+                borderColor += box(c(Colors["transparent"]))
             }
         }
     }
@@ -147,7 +148,6 @@ class UserCreation : View() {
     }
 
     private fun onClickCallback() {
-        viewModel.recordAudio()
         viewModel.recordClicked()
         timer.schedule(timerTask {
             Platform.runLater {
@@ -155,6 +155,5 @@ class UserCreation : View() {
             }
         }, RECORDING_DONE)
     }
-
 }
 

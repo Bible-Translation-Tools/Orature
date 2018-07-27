@@ -1,5 +1,6 @@
 package app.widgets.usersList
 
+import app.MyApp.Companion.Colors
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -20,7 +21,7 @@ class UsersList : HBox() {
 
 
         style{
-            backgroundColor += Color.valueOf("#DFDEE3")
+            backgroundColor += c(Colors["mediumGray"])
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
             padding = box((width/40).px)
@@ -40,7 +41,7 @@ class UsersList : HBox() {
             graphic = vbox(16) {
 
                 style{
-                    backgroundColor += Color.valueOf("#DFDEE3")
+                    backgroundColor +=c(Colors["mediumGray"])
                 }
 
                 //make a small icon
@@ -63,7 +64,7 @@ class UsersList : HBox() {
                         importStylesheet(ButtonStyles::class)
                         addClass(ButtonStyles.rectangleButtonDefault)
                         style {
-                            homeIcon.fill = c("#CC4141")
+                            homeIcon.fill = c(Colors["accent"])
                         }
                     }
                 }
