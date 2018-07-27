@@ -24,9 +24,19 @@ class WelcomeScreen: View("Welcome Screen") {
     //second subview shows a list of users created in the device, their own home buttons, and a button to create a new user
     private val welcomeScreen = hbox {
         var data1: File? = null
-
         data1 = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
         var profileImages = mutableListOf<File>()
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
+        profileImages.add(data1)
         val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
         importStylesheet(ButtonStyles::class)
         importStylesheet(LayoutStyles:: class)

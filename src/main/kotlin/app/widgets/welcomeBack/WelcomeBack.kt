@@ -2,30 +2,29 @@ package app.widgets.welcomeBack
 
 import app.ui.imageLoader
 import app.ui.styles.ButtonStyles.Companion.roundButtonLarge
+import app.ui.styles.LayoutStyles.Companion.mostRecentUserContainer
+import app.ui.styles.LayoutStyles.Companion.welcomeBackText
 import app.ui.styles.Styles.Companion.rectangleButtonAlternate
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
-import javafx.scene.text.FontWeight
 import tornadofx.*
 import java.io.File
 
 class WelcomeBack(ImageFile: File) : HBox() {
+    init {
+        //sets component center horizontally
+        alignment = Pos.CENTER
+    }
     private val rad = 125.0
     val homeIcon = MaterialIconView(MaterialIcon.HOME,"25px")
-    private val bigIcons = vbox {
-        //alignment must be outside of "style {}"
-        //sets component center horizontally
-        parent.style {
-            alignment = Pos.CENTER
-        }
+
+    private val container = vbox {
         style {
+            addClass(mostRecentUserContainer)
             vgrow = Priority.SOMETIMES
-            alignment = Pos.CENTER
         }
         stackpane {
             //Outer circle
@@ -40,15 +39,11 @@ class WelcomeBack(ImageFile: File) : HBox() {
             }
         }
         label("Welcome Back!") {
-            style {
-                fontSize = 32.0.px
-                FontWeight.BOLD
-            }
+            addClass(welcomeBackText)
         }
         button(graphic = homeIcon) {
             addClass(rectangleButtonAlternate)
             style {
-                minWidth = 175.0.px
                 homeIcon.fill = c("#FFFFFF")
             }
         }

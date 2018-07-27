@@ -4,6 +4,7 @@ import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
 import tornadofx.*
 
 class LayoutStyles: Stylesheet() {
@@ -13,6 +14,10 @@ class LayoutStyles: Stylesheet() {
             val welcomeBackContainer by cssclass()
             val userListContainer by cssclass()
             val userListContainerBottom by cssclass()
+            val mostRecentUserContainer by cssclass()
+            val welcomeBackText by cssclass()
+            val usersListGrid by cssclass()
+            val usersListCell by cssclass()
         }
 
         init {
@@ -33,6 +38,25 @@ class LayoutStyles: Stylesheet() {
             userListContainerBottom {
                 alignment = Pos.BOTTOM_RIGHT
                 minHeight = 70.px
+            }
+            mostRecentUserContainer {
+                alignment = Pos.CENTER
+                spacing = 15.px
+            }
+            welcomeBackText {
+                fontSize = 32.0.px
+                FontWeight.BOLD
+            }
+            usersListGrid {
+                prefHeight = 900.0.px
+                cellHeight = 170.0.px
+                verticalCellSpacing = 15.0.px
+                horizontalCellSpacing = 20.0.px
+                backgroundColor += Color.valueOf("#DFDEE3")
+            }
+            usersListCell {
+                backgroundColor += Color.valueOf("#DFDEE3")
+                alignment = Pos.CENTER
             }
         }
     }

@@ -6,29 +6,23 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import app.ui.styles.ButtonStyles.Companion.rectangleButtonDefault
 import app.ui.styles.ButtonStyles.Companion.roundButtonMedium
+import app.ui.styles.LayoutStyles.Companion.usersListCell
+import app.ui.styles.LayoutStyles.Companion.usersListGrid
 import tornadofx.*
 import java.io.File
 
 class UsersList(listOfImageFiles: List<File>) : HBox() {
     val root  = datagrid(listOfImageFiles) {
         style{
-            backgroundColor += Color.valueOf("#DFDEE3")
+            addClass(usersListGrid)
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
-            prefHeight = 900.0.px
-            cellHeight = 170.0.px
-            verticalCellSpacing = 15.0.px
-            horizontalCellSpacing = 20.0.px
         }
         cellFormat {
             graphic = vbox(16) {
-                style{
-                    backgroundColor += Color.valueOf("#DFDEE3")
-                    alignment = Pos.CENTER
-                }
+                addClass(usersListCell)
                 //Small user icon in each cell
                 //"it" is equal the value of each iteration of datagrid parameter
                 button(graphic = imageLoader(it)) {
@@ -42,8 +36,8 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
                     addClass(rectangleButtonDefault)
                     style {
                         alignment = Pos.CENTER
+                        homeIcon.fill = c("#CC4141")
                     }
-                    homeIcon.fill = c("#CC4141")
                 }
             }
         }
