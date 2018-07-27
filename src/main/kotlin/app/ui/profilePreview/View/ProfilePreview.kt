@@ -25,16 +25,14 @@ class ProfilePreview : View() {
     private val viewModel = ProfilePreviewViewModel(iconHash, onClickNext, onClickRedo, audioListened)
 
     var newUserButton = ProfileIcon("12345678901", 152.0)
-    val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
-    val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-    val closeIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
+    private val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
+    private val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+    private val closeIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
 
     override val root = borderpane {
-
         val closeButton = button(messages["close"], closeIcon) {
             importStylesheet(ButtonStyles::class)
             addClass(ButtonStyles.rectangleButtonDefault)
-
             style {
                 alignment = Pos.CENTER
                 closeIcon.fill = c("#CC4141")
@@ -46,7 +44,6 @@ class ProfilePreview : View() {
                 viewModel.listenedAudio(false)                        // set listened audio false to reset the ui state and hide the next and redo buttons
             }
         }
-
         top {
 
             hbox {
@@ -59,37 +56,29 @@ class ProfilePreview : View() {
                 }
             }
         }
-
         center {
-
             hbox {
                 spacing = 48.0
                 alignment = Pos.CENTER
-
                 vbox {
                     micIcon.fill = c("#CC4141")
                     spacing = 12.0
                     alignment = Pos.CENTER
-
                     stackpane {
                         hide()                                                    // each ui element is hidden or showed individuallly because otherwise the middle widget button makes an unnatural shift
                         audioListened.subscribeBy(                                // subject used to verify if the audio has been listened
                                 onNext = { if (it) show() else hide() }           // check if the audio has been listened if so, display the button REDO if not just hide it
                         )
                         circle {
-
                             style {
                                 radius = 55.0
                                 fill = c("#E5E5E5")
                             }
                         }
-
                         button("", micIcon) {
-
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
-
                                 backgroundColor += Color.WHITE
                                 cursor = Cursor.HAND
                                 minWidth = 75.0.px
@@ -100,7 +89,6 @@ class ProfilePreview : View() {
                             action {
                                 viewModel.listenedAudio(false)
                                 find(ProfilePreview::class).replaceWith(UserCreation::class)
-
                             }
                         }
                     }
@@ -112,15 +100,12 @@ class ProfilePreview : View() {
                         )
                     }
                 }
-
                 stackpane {
                     circle {
-
                         style {
                             radius = 120.0
                             fill = c("#E5E5E5")
                         }
-
                     }
                     iconHash.subscribeBy(
                             onNext = {
@@ -128,13 +113,10 @@ class ProfilePreview : View() {
                                 newUserButton.svgHash = it          // update iconhash from subject
                             }
                     )
-
-
                     newUserButton.profIcon.action {
                         viewModel.listenedAudio(true)
                     }
                 }
-
                 vbox {
                     spacing = 12.0
                     alignment = Pos.CENTER
@@ -150,10 +132,8 @@ class ProfilePreview : View() {
                                 radius = 55.0
                                 fill = c("#E5E5E5")
                             }
-
                         }
                         button("", rightArrow) {
-
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
@@ -177,21 +157,12 @@ class ProfilePreview : View() {
                         )
                     }
                 }
-
             }
-
         }
     }
 
-<<<<<<< HEAD
-}
 
-
-
-    init{
-=======
     init {
->>>>>>> origin/ns_login_mockup
         viewModel.newIconHash("12345678901") // set an icon hash string to the subject iconHash declared in top
     }
 }

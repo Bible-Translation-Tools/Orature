@@ -26,9 +26,7 @@ import app.ui.profilePreview.View.ProfilePreview
 * */
 class UserCreation : View() {
 
-
-
-    private val mIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
+    private val closeIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
     private val viewModel: UserCreationViewModel  by inject()
     var recordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
     private val progressBar = ProgressBar()
@@ -39,13 +37,13 @@ class UserCreation : View() {
 
 
     //initialize close button to be used in top of borderpane
-    val closeButton = button(messages["close"], mIcon) {
+    val closeButton = button(messages["close"], closeIcon) {
         importStylesheet(ButtonStyles::class)
         addClass(ButtonStyles.rectangleButtonDefault)
 
         style {
             alignment = Pos.CENTER
-            mIcon.fill = c("#CC4141")
+            closeIcon.fill = c("#CC4141")
             effect = DropShadow(10.0, Color.GRAY)
 
         }

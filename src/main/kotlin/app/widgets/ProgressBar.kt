@@ -8,6 +8,7 @@ import javafx.scene.layout.VBox
 
 
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -19,7 +20,6 @@ class ProgressBar : VBox() {
     init {
 
         importStylesheet("/progressbar.css")
-        var messages = ResourceBundle.getBundle("MyView")
 
         var isItDone = false
 

@@ -9,7 +9,7 @@ import tornadofx.*
 
 class RecordingAnimation : HBox() {
 
-    lateinit var animation: Timeline
+     var animation: Timeline? = null
 
 
     val bigCircle = circle {
@@ -51,9 +51,9 @@ class RecordingAnimation : HBox() {
         }
 
     }
+    fun stop() {
+        animation?.pause()
 
-    fun stop(){
-        animation.pause()
     }
 
     init {
@@ -63,3 +63,5 @@ class RecordingAnimation : HBox() {
     }
 
 }
+
+

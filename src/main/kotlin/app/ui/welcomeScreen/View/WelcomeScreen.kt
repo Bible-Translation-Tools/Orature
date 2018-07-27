@@ -1,5 +1,6 @@
 package app.ui.welcomeScreen
 
+import app.MyApp.Companion.Colors
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -44,7 +45,7 @@ class WelcomeScreen: View() {
                 add(WelcomeBack())
                 style {
                     setMinHeight(Window.HEIGHT.toDouble())
-                    backgroundColor += Color.WHITE
+                    backgroundColor += c(Colors["base"])
                     vgrow = Priority.ALWAYS
                     hgrow=Priority.ALWAYS
                     prefWidth= 1200.px
@@ -64,7 +65,7 @@ class WelcomeScreen: View() {
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 alignment = Pos.BOTTOM_RIGHT
                 style {
-                    backgroundColor += c("#DFDEE3")
+                    backgroundColor += c(Colors["mediumGray"])
                     vgrow = Priority.ALWAYS
                     prefHeight = 50.0.px
                 }

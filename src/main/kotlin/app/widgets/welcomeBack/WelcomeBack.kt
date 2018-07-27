@@ -1,5 +1,6 @@
 package app.widgets.welcomeBack
 
+import app.MyApp.Companion.Colors
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -9,18 +10,18 @@ import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
 import app.widgets.profileIcon.ProfileIcon
+import tornadofx.FX.Companion.messages
 import java.awt.Button
 import java.util.*
 
 class WelcomeBack : HBox() {
     private val rad = 125.0
-    val messages = ResourceBundle.getBundle("Messages")
     private val bigIcons = borderpane() {
 
         alignment = Pos.CENTER
 
         style {
-            backgroundColor += Color.valueOf("#FFFFFF")
+            backgroundColor += c(Colors["base"])
         }
         val iconHash = ProfileIcon("12345678901", 150.0, true)
         iconHash.alignment = Pos.CENTER
@@ -40,7 +41,7 @@ class WelcomeBack : HBox() {
                 addClass(ButtonStyles.rectangleButtonAlternate)
                 style {
                     minWidth = 175.0.px
-                    homeIcon.fill = c("#FFFF")
+                    homeIcon.fill = c(Colors["accent"])
                 }
             }
         }

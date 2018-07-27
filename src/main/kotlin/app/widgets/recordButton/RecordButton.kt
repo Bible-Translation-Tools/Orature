@@ -17,8 +17,8 @@ import kotlin.concurrent.timerTask
 
 class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCompletedCallback: () -> Unit = ::println, var stopClickedCallback: () -> Unit = ::println) : VBox() {
 
-    val circle = RecordingAnimation()
-    val dotsAn = DotsAnimation()
+    val circleAnimation = RecordingAnimation()
+    val dotsAnimation = DotsAnimation()
     val RecordButtonViewModel = RecordButtonViewModel()
     val countdown = RecordButtonViewModel.countdownTracker
     val isRecording = RecordButtonViewModel.isRecording
@@ -30,7 +30,7 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
             stackpane {
                 alignment = Pos.CENTER
 
-                add(circle)
+                add(circleAnimation)
                 button(countdown, micIcon) {
                     importStylesheet(ButtonStyles::class)
                     addClass(ButtonStyles.roundButton)
@@ -47,16 +47,16 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
                     action {
                         if (isRecording.value == false) {
                             RecordButtonViewModel.isRecording(true)
-                            dotsAn.circleCountdown()
+                            dotsAnimation.circleCountdown()
                             micIcon.hide()
                             RecordButtonViewModel.countdown()
                             onClickCallback()
                             timer.schedule(timerTask {
                                 Platform.runLater {
-                                    circle.animate()
+                                    circleAnimation.animate()
                                     graphic = stopIcon
                                     stopIcon.fill = c("#CC4141")
-                                    dotsAn.hide()
+                                    dotsAnimation.hide()
                                     //animationCompleted()
                                 }
                             }, 3000)
@@ -65,7 +65,7 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
                                 /*if countdown.value = "" that means the countdown has finished
                                 * therefore now the user is able to click stop to record
                                 * */
-                                circle.stop()
+                                circleAnimation.stop()
                                 stopClickedCallback()
                             }
                         }
@@ -78,7 +78,7 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
         style {
             padding = box(20.px)
         }
-        add(dotsAn)
+        add(dotsAnimation)
     }
 
 }

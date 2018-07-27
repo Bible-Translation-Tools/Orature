@@ -22,9 +22,9 @@ class RecordButtonViewModel: ItemViewModel<Record>() {
 
     }
 
-    private fun setCountDown(text: String, time: Int){
+    private fun setCountDown(text: String, seconds: Int){
         var timer = Timer()
-        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, time.toLong() * 1000 )
+        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, seconds.toLong() * 1000 )
 
     }
 
