@@ -24,7 +24,6 @@ class WelcomeBack(ImageFile: File) : HBox() {
             alignment = Pos.CENTER
         }
         style {
-            backgroundColor += Color.valueOf("#FFFFFF")
             vgrow = Priority.SOMETIMES
             alignment = Pos.CENTER
         }

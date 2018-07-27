@@ -2,14 +2,13 @@ package app.ui.welcomeScreen
 import app.ui.styles.LayoutStyles
 import app.ui.styles.ButtonStyles
 import app.ui.styles.ButtonStyles.Companion.roundButtonMini
+import app.ui.styles.LayoutStyles.Companion.userListContainer
+import app.ui.styles.LayoutStyles.Companion.userListContainerBottom
+import app.ui.styles.LayoutStyles.Companion.welcomeBackContainer
 import app.ui.styles.LayoutStyles.Companion.windowView
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-
-import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-
 import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
@@ -34,29 +33,22 @@ class WelcomeScreen: View("Welcome Screen") {
         addClass(windowView)
         vbox {
             style {
+                addClass(welcomeBackContainer)
                 hgrow = Priority.SOMETIMES
                 vgrow = Priority.ALWAYS
-                alignment = Pos.CENTER
-                prefWidth = 500.px
-                backgroundColor += Color.WHITE
-                }
-                if (data1 !== null) add(WelcomeBack(data1))
             }
+            if (data1 !== null) add(WelcomeBack(data1))
+        }
         vbox {
             style {
-                prefWidth = 500.px
+                addClass(userListContainer)
                 hgrow = Priority.SOMETIMES
-                padding = box(pad.px)
-                backgroundColor += c("#DFDEE3")
             }
-            if (profileImages.isNotEmpty()) {
-                add(UsersList(profileImages))
-            }
+            if (profileImages.isNotEmpty()) add(UsersList(profileImages))
             hbox {
                 style {
+                    addClass(userListContainerBottom)
                     vgrow = Priority.ALWAYS
-                    alignment = Pos.BOTTOM_RIGHT
-                    minHeight = 70.px
                 }
                 button(graphic = addUserIcon) {
                     style {
