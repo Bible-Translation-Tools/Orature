@@ -1,6 +1,8 @@
 package app.ui.welcomeScreen
+import app.ui.styles.LayoutStyles
 import app.ui.styles.ButtonStyles
 import app.ui.styles.ButtonStyles.Companion.roundButtonMini
+import app.ui.styles.LayoutStyles.Companion.windowView
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 
@@ -12,6 +14,7 @@ import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
 import app.ui.userCreation.*
+import javafx.geometry.VPos
 import java.io.File
 
 class WelcomeScreen: View("Welcome Screen") {
@@ -23,29 +26,32 @@ class WelcomeScreen: View("Welcome Screen") {
     //second subview shows a list of users created in the device, their own home buttons, and a button to create a new user
     private val welcomeScreen = hbox {
         var data1: File? = null
+
+        data1 = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
         var profileImages = mutableListOf<File>()
         val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
         importStylesheet(ButtonStyles::class)
-        style {
-            prefHeight = 700.px
-        }
+        importStylesheet(LayoutStyles:: class)
+        addClass(windowView)
         vbox {
             style {
                 prefWidth = 500.px
-                hgrow = Priority.ALWAYS
-            }
-            stackpane {
-                style {
+                hgrow = Priority.SOMETIMES
+                //todo: uncomment if WelcomeBack Vbox conversion fail
+//            }
+//            stackpane {
+//                style {
                     backgroundColor += Color.WHITE
                     vgrow = Priority.ALWAYS
                 }
                 if (data1 !== null) add(WelcomeBack(data1))
             }
-        }
+
+//        }
         vbox {
             style {
                 prefWidth = 500.px
-                hgrow = Priority.ALWAYS
+                hgrow = Priority.SOMETIMES
                 padding = box(pad.px)
                 backgroundColor += c("#DFDEE3")
             }

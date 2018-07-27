@@ -7,6 +7,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
@@ -20,6 +21,7 @@ class WelcomeBack(ImageFile: File) : HBox() {
         alignment = Pos.CENTER
         style {
             backgroundColor += Color.valueOf("#FFFFFF")
+            vgrow = Priority.SOMETIMES
         }
         top = stackpane {
             style {
@@ -49,7 +51,7 @@ class WelcomeBack(ImageFile: File) : HBox() {
                 addClass(rectangleButtonAlternate)
                 style {
                     minWidth = 175.0.px
-                    homeIcon.fill = c("#FFFFF")
+                    homeIcon.fill = c("#FFFFFF")
                 }
             }
         }
