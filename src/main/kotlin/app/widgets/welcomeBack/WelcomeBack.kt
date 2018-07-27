@@ -8,6 +8,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
@@ -16,20 +17,20 @@ import java.io.File
 class WelcomeBack(ImageFile: File) : HBox() {
     private val rad = 125.0
     val homeIcon = MaterialIconView(MaterialIcon.HOME,"25px")
-    private val bigIcons = borderpane {
+    private val bigIcons = vbox {
         //alignment must be outside of "style {}"
-        alignment = Pos.CENTER
+        //sets component center horizontally
+        parent.style {
+            alignment = Pos.CENTER
+        }
         style {
             backgroundColor += Color.valueOf("#FFFFFF")
             vgrow = Priority.SOMETIMES
+            alignment = Pos.CENTER
         }
-        top = stackpane {
-            style {
-                alignment = Pos.CENTER
-            }
+        stackpane {
             //Outer circle
-            circle {
-                radius = 120.0
+            circle(radius = 120.0) {
                 fill = c("#E5E5E5")
             }
             //Big Profile Icon
@@ -39,22 +40,20 @@ class WelcomeBack(ImageFile: File) : HBox() {
                 graphic.scaleY = 1.9
             }
         }
-        center = label("Welcome Back!") {
+        label("Welcome Back!") {
             style {
                 fontSize = 32.0.px
                 FontWeight.BOLD
             }
         }
-        bottom = hbox {
-            alignment = Pos.CENTER
-            button("", homeIcon) {
-                addClass(rectangleButtonAlternate)
-                style {
-                    minWidth = 175.0.px
-                    homeIcon.fill = c("#FFFFFF")
-                }
+        button(graphic = homeIcon) {
+            addClass(rectangleButtonAlternate)
+            style {
+                minWidth = 175.0.px
+                homeIcon.fill = c("#FFFFFF")
             }
         }
+
         //prevents from spreading out to take up whole screen when window maximized
         //note: 100 extra pixels hard coded in for space,
         // but we may change this val depending on size of home button and text

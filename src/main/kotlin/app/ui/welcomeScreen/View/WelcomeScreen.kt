@@ -14,7 +14,6 @@ import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
 import app.ui.userCreation.*
-import javafx.geometry.VPos
 import java.io.File
 
 class WelcomeScreen: View("Welcome Screen") {
@@ -35,19 +34,14 @@ class WelcomeScreen: View("Welcome Screen") {
         addClass(windowView)
         vbox {
             style {
-                prefWidth = 500.px
                 hgrow = Priority.SOMETIMES
-                //todo: uncomment if WelcomeBack Vbox conversion fail
-//            }
-//            stackpane {
-//                style {
-                    backgroundColor += Color.WHITE
-                    vgrow = Priority.ALWAYS
+                vgrow = Priority.ALWAYS
+                alignment = Pos.CENTER
+                prefWidth = 500.px
+                backgroundColor += Color.WHITE
                 }
                 if (data1 !== null) add(WelcomeBack(data1))
             }
-
-//        }
         vbox {
             style {
                 prefWidth = 500.px
