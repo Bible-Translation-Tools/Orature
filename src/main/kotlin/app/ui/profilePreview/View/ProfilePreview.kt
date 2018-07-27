@@ -36,8 +36,8 @@ class ProfilePreview : View() {
             addClass(ButtonStyles.rectangleButtonDefault)
             style {
                 alignment = Pos.CENTER
-                closeIcon.fill =c(Colors["accent"])
-                effect = DropShadow(10.0, Color.GRAY)
+                closeIcon.fill =c(Colors["primary"])
+                effect = DropShadow(10.0, c(Colors["baseBackground"]))
 
             }
             action {
@@ -62,7 +62,7 @@ class ProfilePreview : View() {
                 spacing = 48.0
                 alignment = Pos.CENTER
                 vbox {
-                    micIcon.fill = c(Colors["accent"])
+                    micIcon.fill = c(Colors["primary"])
                     spacing = 12.0
                     alignment = Pos.CENTER
                     stackpane {
@@ -73,7 +73,7 @@ class ProfilePreview : View() {
                         circle {
                             style {
                                 radius = 55.0
-                                fill = c(Colors["lightGray"])
+                                fill = c(Colors["baseLight"])
                             }
                         }
                         button("", micIcon) {
@@ -85,7 +85,7 @@ class ProfilePreview : View() {
                                 minWidth = 75.0.px
                                 minHeight = 75.0.px
                                 fontSize = 2.em
-                                textFill = c(Colors["accent"])
+                                textFill = c(Colors["primary"])
                             }
                             action {
                                 viewModel.listenedAudio(false)
@@ -105,7 +105,7 @@ class ProfilePreview : View() {
                     circle {
                         style {
                             radius = 120.0
-                            fill = c(Colors["lightGray"])
+                            fill = c(Colors["baseLight"])
                         }
                     }
                     iconHash.subscribeBy(
@@ -131,19 +131,18 @@ class ProfilePreview : View() {
 
                             style {
                                 radius = 55.0
-                                fill = c(Colors["lightGray"])
+                                fill = c(Colors["baseLight"])
                             }
                         }
                         button("", rightArrow) {
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
-                                backgroundColor += c(Colors["accent"])
+                                backgroundColor += c(Colors["primary"])
                                 cursor = Cursor.HAND
                                 minWidth = 75.0.px
                                 minHeight = 75.0.px
                                 fontSize = 2.em
-                               // textFill = c("#CC4141")
                             }
                             // TODO("insert action here when user clicks next button")
                         }

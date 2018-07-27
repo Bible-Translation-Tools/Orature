@@ -44,7 +44,7 @@ class UserCreation : View() {
 
         style {
             alignment = Pos.CENTER
-            closeIcon.fill = c(Colors["accent"])
+            closeIcon.fill = c(Colors["primary"])
             effect = DropShadow(10.0, Color.GRAY)
 
         }

@@ -21,7 +21,7 @@ class UsersList : HBox() {
 
 
         style{
-            backgroundColor += c(Colors["mediumGray"])
+            backgroundColor += c(Colors["baseMedium"])
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
             padding = box((width/40).px)
@@ -41,7 +41,7 @@ class UsersList : HBox() {
             graphic = vbox(16) {
 
                 style{
-                    backgroundColor +=c(Colors["mediumGray"])
+                    backgroundColor +=c(Colors["baseMedium"])
                 }
 
                 //make a small icon
@@ -64,7 +64,7 @@ class UsersList : HBox() {
                         importStylesheet(ButtonStyles::class)
                         addClass(ButtonStyles.rectangleButtonDefault)
                         style {
-                            homeIcon.fill = c(Colors["accent"])
+                            homeIcon.fill = c(Colors["primary"])
                         }
                     }
                 }

@@ -16,13 +16,12 @@ class ButtonStyles : Stylesheet() {
     }
 
     init {
-
-        rectangleButtonDefault {
-            fill = c(Colors["accent"])
+       rectangleButtonDefault {
+            fill = c(Colors["primary"])
             backgroundColor += c(Colors["base"])
             minWidth = 100.0.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, c(Colors["dropShadow"]))
+            effect = DropShadow(10.0, c(Colors["baseBackground"]))
 
             and(hover) {
                 scaleX = 1.1
@@ -32,20 +31,19 @@ class ButtonStyles : Stylesheet() {
 
         rectangleButtonAlternate {
             fill = c(Colors["base"])
-            backgroundColor += c(Colors["accent"])
+            backgroundColor += c(Colors["primary"])
             minWidth = 100.0.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, c(Colors["dropShadow"]))
+            effect = DropShadow(10.0, Color.GRAY)
 
             and(hover) {
                 scaleX = 1.1
                 scaleY = 1.1
             }
-
         }
 
         circleButton {
-            fill = c(Colors["accent"])
+            fill = c(Colors["primary"])
             backgroundColor += c(Colors["base"])
             cursor = Cursor.HAND
         }
@@ -53,7 +51,7 @@ class ButtonStyles : Stylesheet() {
         roundButton {
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
-            effect = DropShadow(10.0,  c(Colors["dropShadow"]))
+            effect = DropShadow(10.0,  Color.GRAY)
             minWidth = 64.0.px
             minHeight = 64.0.px
             cursor = Cursor.HAND

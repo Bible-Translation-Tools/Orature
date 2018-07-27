@@ -37,12 +37,12 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
                     addClass(ButtonStyles.roundButton)
                     style {
                         backgroundColor += c(Colors["base"])
-                        micIcon.fill = c(Colors["accent"])
+                        micIcon.fill = c(Colors["primary"])
                         cursor = Cursor.HAND
                         minWidth = 152.0.px
                         minHeight = 152.0.px
                         fontSize = 8.em
-                        textFill = c(Colors["accent"])
+                        textFill = c(Colors["primary"])
                     }
 
                     action {
@@ -56,7 +56,7 @@ class RecordButton(var onClickCallback: () -> Unit = ::println, var animationCom
                                 Platform.runLater {
                                     circleAnimation.animate()
                                     graphic = stopIcon
-                                    stopIcon.fill =c(Colors["accent"])
+                                    stopIcon.fill =c(Colors["primary"])
                                     dotsAnimation.hide()
                                     //animationCompleted()
                                 }

@@ -38,7 +38,6 @@ class WelcomeScreen: View() {
     val pad = 60.0
     private val welcomeScreen = hbox() {
         //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT               //todo use this line to  implement RTL support
-
         vbox {
             alignment = Pos.CENTER
             stackpane {
@@ -63,10 +62,10 @@ class WelcomeScreen: View() {
 
             vbox (8){ //INSIDE a vbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
-                addUserIcon.fill = c(Colors["accent"])
+                addUserIcon.fill = c(Colors["primary"])
                 alignment = Pos.BOTTOM_RIGHT
                 style {
-                    backgroundColor += c(Colors["mediumGray"])
+                    backgroundColor += c(Colors["baseMedium"])
                     vgrow = Priority.ALWAYS
                     prefHeight = 50.0.px
                 }

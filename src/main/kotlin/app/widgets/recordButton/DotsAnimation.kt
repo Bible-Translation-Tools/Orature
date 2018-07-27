@@ -24,7 +24,7 @@ class DotsAnimation : HBox() {
             centerX = 10.0
             centerY = 20.0
             radius = 20.0
-            fill = c(Colors["lightGray"])
+            fill = c(Colors["baseBackground"])
         }
 
         cir2 = circle {
@@ -34,7 +34,7 @@ class DotsAnimation : HBox() {
             centerX = 100.0
             centerY = 20.0
             radius = 20.0
-            fill = c(Colors["lightGray"])
+            fill = c(Colors["baseBackground"])
         }
 
         cir3 = circle {
@@ -43,19 +43,19 @@ class DotsAnimation : HBox() {
             centerX = 200.0
             centerY = 20.0
             radius = 20.0
-            fill = c(Colors["lightGray"])
+            fill = c(Colors["baseBackground"])
         }
     }
 
     fun circleCountdown() {
-        cir1.fill = c(Colors["accent"])
-        cir2.fill = c(Colors["accent"])
-        cir3.fill = c(Colors["accent"])
+        cir1.fill = c(Colors["primary"])
+        cir2.fill = c(Colors["primary"])
+        cir3.fill = c(Colors["primary"])
 
         var timer = Timer()
-        timer.schedule(timerTask { cir3.fill = c(Colors["lightGray"])}, 1000)
-        timer.schedule(timerTask { cir2.fill = c(Colors["lightGray"]) }, 2000)
-        timer.schedule(timerTask { cir1.fill = c(Colors["lightGray"]) }, 3000)
+        timer.schedule(timerTask { cir3.fill = c(Colors["baseBackground"])}, 1000)
+        timer.schedule(timerTask { cir2.fill = c(Colors["baseBackground"]) }, 2000)
+        timer.schedule(timerTask { cir1.fill = c(Colors["baseBackground"]) }, 3000)
     }
 
     fun invisible() {
@@ -65,8 +65,8 @@ class DotsAnimation : HBox() {
     }
 
     fun resetCircles() {
-        cir1.fill = c(Colors["lightGray"])
-        cir2.fill = c(Colors["lightGray"])
-        cir3.fill = c(Colors["lightGray"])
+        cir1.fill = c(Colors["baseBackground"])
+        cir2.fill = c(Colors["baseBackground"])
+        cir3.fill = c(Colors["baseBackground"])
     }
 }

@@ -18,11 +18,11 @@ class RecordingAnimation : HBox() {
         centerX = 120.0
         centerY = 120.0
         radius = 120.0;
-        fill = c(Colors["lightGray"]);
+        fill = c(Colors["baseBackground"])
     }
 
     val arc = arc {
-        fill = c(Colors["accent"]);
+        fill = c(Colors["primary"])
         centerX = 120.0
         centerY = 120.0
         radiusX = 120.0
