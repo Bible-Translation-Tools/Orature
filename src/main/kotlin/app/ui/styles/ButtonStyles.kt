@@ -1,5 +1,6 @@
 package app.ui.styles
 
+import app.MyApp.Companion.Colors
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -17,11 +18,11 @@ class ButtonStyles : Stylesheet() {
     init {
 
         rectangleButtonDefault {
-            fill = c("#CC4141")
-            backgroundColor += c("#FFFF")
+            fill = c(Colors["accent"])
+            backgroundColor += c(Colors["base"])
             minWidth = 100.0.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, Color.GRAY)
+            effect = DropShadow(10.0, c(Colors["dropShadow"]))
 
             and(hover) {
                 scaleX = 1.1
@@ -30,11 +31,11 @@ class ButtonStyles : Stylesheet() {
         }
 
         rectangleButtonAlternate {
-            fill = c("#FFFF")
-            backgroundColor += c("#CC4141")
+            fill = c(Colors["base"])
+            backgroundColor += c(Colors["accent"])
             minWidth = 100.0.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, Color.GRAY)
+            effect = DropShadow(10.0, c(Colors["dropShadow"]))
 
             and(hover) {
                 scaleX = 1.1
@@ -44,20 +45,20 @@ class ButtonStyles : Stylesheet() {
         }
 
         circleButton {
-            fill = c("#CC4141")
-            backgroundColor += c("#FFFF")
+            fill = c(Colors["accent"])
+            backgroundColor += c(Colors["base"])
             cursor = Cursor.HAND
         }
 
         roundButton {
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
-            effect = DropShadow(10.0, Color.GRAY)
+            effect = DropShadow(10.0,  c(Colors["dropShadow"]))
             minWidth = 64.0.px
             minHeight = 64.0.px
             cursor = Cursor.HAND
-            backgroundColor += Color.WHITE
-            borderColor += box(Color.TRANSPARENT)
+            backgroundColor +=  c(Colors["base"])
+            borderColor += box(c(Colors["transparent"]))
 
             and(hover) {
                 scaleX = 1.1
