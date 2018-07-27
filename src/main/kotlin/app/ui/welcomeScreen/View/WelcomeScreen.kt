@@ -14,10 +14,12 @@ import app.widgets.welcomeBack.WelcomeBack
 import java.awt.Window
 import app.ui.userCreation.*
 import javafx.scene.text.FontWeight
+import java.util.*
 
 
 class WelcomeScreen: View() {
 
+    //val UIColors = ResourceBundle.getBundle("UIColors")
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
     //so replace this injection with whatever injection you do
@@ -58,14 +60,13 @@ class WelcomeScreen: View() {
                 hgrow= Priority.ALWAYS
             }
 
-            vbox (8){ //INSIDE an hbox to allow for alignment
+            vbox (8){ //INSIDE a vbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 alignment = Pos.BOTTOM_RIGHT
                 style {
                     backgroundColor += c("#DFDEE3")
                     vgrow = Priority.ALWAYS
                     prefHeight = 50.0.px
-
                 }
 
                 button("", addUserIcon) {
@@ -73,7 +74,6 @@ class WelcomeScreen: View() {
                     style {
                         importStylesheet(ButtonStyles::class)
                         addClass(ButtonStyles.roundButton)
-                        addUserIcon.fill = c("#CC4141")
                     }
 
                     action {
@@ -83,9 +83,10 @@ class WelcomeScreen: View() {
 
                 padding = insets(pad)
                 label(messages["create"]) {
-                    alignment = Pos.CENTER
                     style {
                         fontWeight = FontWeight.BOLD
+                        paddingRight = 4
+
                     }
                 }
             }
