@@ -47,7 +47,6 @@ class UserCreation : View() {
             alignment = Pos.CENTER
             closeIcon.fill = c(Colors["accent"])
             effect = DropShadow(10.0, Color.GRAY)
-
         }
         action {
             navHome()

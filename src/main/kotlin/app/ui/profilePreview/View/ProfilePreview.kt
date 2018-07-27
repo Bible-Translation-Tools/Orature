@@ -143,7 +143,6 @@ class ProfilePreview : View() {
                                 minWidth = 75.0.px
                                 minHeight = 75.0.px
                                 fontSize = 2.em
-                               // textFill = c("#CC4141")
                             }
                             // TODO("insert action here when user clicks next button")
                         }
