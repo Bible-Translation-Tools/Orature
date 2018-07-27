@@ -1,6 +1,7 @@
 package app.ui
 
 
+import app.MyApp.Companion.Colors
 import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
@@ -25,7 +26,7 @@ class ProgressBar : VBox() {
 
         style {
             alignment = Pos.CENTER
-            backgroundColor += c("#FFFFFF")
+            backgroundColor += c(Colors["base"])
         }
 
         label(messages["generatingProfileText"]) { addClass("headerText") }

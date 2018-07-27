@@ -1,6 +1,7 @@
 package app.widgets.profileIcon
 
 import afester.javafx.svg.SvgLoader
+import app.MyApp.Companion.Colors
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.control.Button
@@ -13,7 +14,7 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
     var svgGroup = SvgLoader().loadSvg(Jdenticon.toSvg(hash = svgHash, size = buttonSize.toInt()).byteInputStream())
     val circle = circle {
         radius = buttonSize - 30.0
-        fill = c("#E5E5E5")
+        fill = c(Colors["lightGray"])
     }
 
     var profIcon: Button
@@ -28,9 +29,7 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
             prefWidth = buttonSize
             prefHeight = buttonSize
             resizeSvg(svgGroup, buttonSize)
-            action {
 
-            }
         }
         add(profIcon)
     }

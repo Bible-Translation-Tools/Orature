@@ -1,5 +1,7 @@
 package app.widgets.recordButton;
 
+import app.MyApp
+import app.MyApp.Companion.Colors
 import javafx.animation.Timeline
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
@@ -15,11 +17,11 @@ class RecordingAnimation : HBox() {
         centerX = 120.0
         centerY = 120.0
         radius = 120.0;
-        fill = c("#EDEDED");
+        fill = c(Colors["lightGray"]);
     }
 
     val arc = arc {
-        fill = c("#CC4141");
+        fill = c(Colors["accent"]);
         centerX = 120.0
         centerY = 120.0
         radiusX = 120.0

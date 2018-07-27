@@ -41,7 +41,7 @@ class WelcomeBack : HBox() {
                 addClass(ButtonStyles.rectangleButtonAlternate)
                 style {
                     minWidth = 175.0.px
-                    homeIcon.fill = c(Colors["accent"])
+                    homeIcon.fill = c(Colors["base"])
                 }
             }
         }

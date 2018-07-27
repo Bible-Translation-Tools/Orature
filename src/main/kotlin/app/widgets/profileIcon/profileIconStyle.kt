@@ -1,5 +1,6 @@
 package app.widgets.profileIcon
 
+import app.MyApp.Companion.Colors
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -13,7 +14,7 @@ class ProfileIconStyle : Stylesheet() {
 
     init {
         ProfileIcon {
-            backgroundColor += c("#ffffff")
+            backgroundColor += c(Colors["base"])
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
             cursor = Cursor.HAND

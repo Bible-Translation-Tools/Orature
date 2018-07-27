@@ -61,6 +61,7 @@ class WelcomeScreen: View() {
 
             vbox (8){ //INSIDE a vbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
+                addUserIcon.fill = c(Colors["accent"])
                 alignment = Pos.BOTTOM_RIGHT
                 style {
                     backgroundColor += c(Colors["mediumGray"])

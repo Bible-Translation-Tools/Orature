@@ -1,5 +1,6 @@
 package app.ui.profilePreview.View
 
+import app.MyApp.Companion.Colors
 import app.ui.userCreation.*
 import app.ui.styles.ButtonStyles
 import app.ui.profilePreview.ViewModel.ProfilePreviewViewModel
@@ -35,7 +36,7 @@ class ProfilePreview : View() {
             addClass(ButtonStyles.rectangleButtonDefault)
             style {
                 alignment = Pos.CENTER
-                closeIcon.fill = c("#CC4141")
+                closeIcon.fill =c(Colors["accent"])
                 effect = DropShadow(10.0, Color.GRAY)
 
             }
@@ -61,7 +62,7 @@ class ProfilePreview : View() {
                 spacing = 48.0
                 alignment = Pos.CENTER
                 vbox {
-                    micIcon.fill = c("#CC4141")
+                    micIcon.fill = c(Colors["accent"])
                     spacing = 12.0
                     alignment = Pos.CENTER
                     stackpane {
@@ -72,19 +73,19 @@ class ProfilePreview : View() {
                         circle {
                             style {
                                 radius = 55.0
-                                fill = c("#E5E5E5")
+                                fill = c(Colors["lightGray"])
                             }
                         }
                         button("", micIcon) {
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
-                                backgroundColor += Color.WHITE
+                                backgroundColor += c(Colors["base"])
                                 cursor = Cursor.HAND
                                 minWidth = 75.0.px
                                 minHeight = 75.0.px
                                 fontSize = 2.em
-                                textFill = c("#CC4141")
+                                textFill = c(Colors["accent"])
                             }
                             action {
                                 viewModel.listenedAudio(false)
@@ -104,7 +105,7 @@ class ProfilePreview : View() {
                     circle {
                         style {
                             radius = 120.0
-                            fill = c("#E5E5E5")
+                            fill = c(Colors["lightGray"])
                         }
                     }
                     iconHash.subscribeBy(
@@ -120,7 +121,7 @@ class ProfilePreview : View() {
                 vbox {
                     spacing = 12.0
                     alignment = Pos.CENTER
-                    rightArrow.fill = c("#FFFFFF")
+                    rightArrow.fill = c(Colors["base"])
                     stackpane {
                         hide()
                         audioListened.subscribeBy(                           // check if the audio has been listened if so, display the button NEXT if not just hide it
@@ -130,19 +131,19 @@ class ProfilePreview : View() {
 
                             style {
                                 radius = 55.0
-                                fill = c("#E5E5E5")
+                                fill = c(Colors["lightGray"])
                             }
                         }
                         button("", rightArrow) {
                             importStylesheet(ButtonStyles::class)
                             addClass(ButtonStyles.roundButton)
                             style {
-                                backgroundColor += c("#CC4141")
+                                backgroundColor += c(Colors["accent"])
                                 cursor = Cursor.HAND
                                 minWidth = 75.0.px
                                 minHeight = 75.0.px
                                 fontSize = 2.em
-                                textFill = c("#CC4141")
+                               // textFill = c("#CC4141")
                             }
                             // TODO("insert action here when user clicks next button")
                         }
