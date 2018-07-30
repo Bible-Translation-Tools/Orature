@@ -49,6 +49,7 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4-rule:2.+'
     testCompile 'org.powermock:powermock-api-mockito2:2.+'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+    implementation 'com.github.WycliffeAssociates:8woc2018-common:-SNAPSHOT'
     implementation 'com.github.afester.FranzXaver:Examples:0.1'
 }
 

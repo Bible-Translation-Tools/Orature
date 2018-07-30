@@ -19,24 +19,13 @@ class WelcomeScreen: View("Welcome Screen") {
     private val rad = 100.0
     val pad = 40.0
     val gridWidth = 400.0
+//    val model = UserModel(Users())
     //WelcomeScreen splits the screen evenly with 2 subviews.
     //first subview shows an image of most recent logged in user, greetings, and home button
     //second subview shows a list of users created in the device, their own home buttons, and a button to create a new user
     private val welcomeScreen = hbox {
-        var data1: File? = null
-        data1 = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
+        var recentUser: File? = null
         var profileImages = mutableListOf<File>()
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
-        profileImages.add(data1)
         val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
         importStylesheet(ButtonStyles::class)
         importStylesheet(LayoutStyles:: class)
@@ -47,7 +36,7 @@ class WelcomeScreen: View("Welcome Screen") {
                 hgrow = Priority.SOMETIMES
                 vgrow = Priority.ALWAYS
             }
-            if (data1 !== null) add(WelcomeBack(data1))
+            recentUser?.let { add(WelcomeBack(recentUser)) }
         }
         vbox {
             style {
