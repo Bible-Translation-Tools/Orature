@@ -1,6 +1,6 @@
 package app.ui.profilePreview.View
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import app.ui.userCreation.*
 import app.ui.styles.ButtonStyles
 import app.ui.profilePreview.ViewModel.ProfilePreviewViewModel

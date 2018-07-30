@@ -1,18 +1,15 @@
 package app.widgets.welcomeBack
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
 import app.widgets.profileIcon.ProfileIcon
 import tornadofx.FX.Companion.messages
-import java.awt.Button
-import java.util.*
 
 class WelcomeBack : HBox() {
     private val rad = 125.0

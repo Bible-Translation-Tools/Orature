@@ -7,12 +7,8 @@ class ProfilePreviewViewModel(
         private val userIconHash: PublishSubject<String>,
         private val clickNext: PublishSubject<Boolean>,
         private val clickRedo: PublishSubject<Boolean>,
-        private val userListenedAudio: PublishSubject<Boolean>
-
-) {
-
+        private val userListenedAudio: PublishSubject<Boolean>) {
     private val model = ProfilePreviewModel()
-
     fun newIconHash(iconHash: String) {
         userIconHash.onNext(iconHash)
         model.userIconHash = iconHash
@@ -32,5 +28,4 @@ class ProfilePreviewViewModel(
         userListenedAudio.onNext(listened)
         model.listenedAudio = listened
     }
-
 }

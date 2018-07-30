@@ -1,9 +1,8 @@
 package app.ui.styles
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
-import javafx.scene.paint.Color
 import tornadofx.*
 
 class ButtonStyles : Stylesheet() {

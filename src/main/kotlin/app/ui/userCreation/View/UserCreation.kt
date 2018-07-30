@@ -1,6 +1,6 @@
 package app.ui.userCreation
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import app.ui.styles.ButtonStyles
 import app.ui.userCreation.ViewModel.UserCreationViewModel
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -17,7 +17,6 @@ import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
 import io.reactivex.rxkotlin.subscribeBy
 import app.ui.profilePreview.View.ProfilePreview
-import javafx.scene.layout.VBox
 
 /*
 *  This View is used in the process of creating user profiles
@@ -36,7 +35,7 @@ class UserCreation : View() {
     val isRecording = viewModel.isRecording
     val doneRecording = viewModel.doneRecording
     var timer = Timer()
-    val RECORDING_DONE: Long = 6100
+    val RECORDING_TIME: Long = 6100
 
     //initialize close button to be used in top of borderpane
     val closeButton = button(messages["close"], closeIcon) {
@@ -84,7 +83,6 @@ class UserCreation : View() {
                             recordButton = newRecordButton
                         }
                     },
-
                     onError = {
                         println(it)
                     }
@@ -95,11 +93,11 @@ class UserCreation : View() {
                         if (it == true) { //done recording = true? then navigate to profile preview
                             timer.schedule(timerTask {
                                 Platform.runLater {
-                                    find(UserCreation::class).replaceWith(ProfilePreview::class,
-                                            transition = ViewTransition.Fade(0.3.seconds))
-                                }
-                            }, 500)
-
+                                    find(UserCreation::class)
+                                        .replaceWith(ProfilePreview::class,
+                                        transition = ViewTransition.Fade(0.3.seconds))
+                                     }
+                                }, 500)
                         }
                     },
 
@@ -130,7 +128,6 @@ class UserCreation : View() {
     }
 
     private fun navHome() {
-
         find(UserCreation::class).replaceWith(WelcomeScreen::class)
     }
 
@@ -141,7 +138,8 @@ class UserCreation : View() {
     }
 
     private fun stopClicked() {
-        find(UserCreation::class).replaceWith(ProfilePreview::class,
+        find(UserCreation::class)
+                .replaceWith(ProfilePreview::class,
                 transition = ViewTransition.Fade(0.3.seconds))
     }
 
@@ -151,7 +149,7 @@ class UserCreation : View() {
             Platform.runLater {
                 viewModel.doneRecording()
             }
-        }, RECORDING_DONE)
+        }, RECORDING_TIME)
     }
 }
 

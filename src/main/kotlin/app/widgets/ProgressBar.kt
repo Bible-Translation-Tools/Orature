@@ -1,37 +1,29 @@
 package app.ui
 
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import javafx.application.Platform
 import javafx.geometry.Pos
-import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 
 
 import tornadofx.*
 import tornadofx.FX.Companion.messages
-import java.util.*
 import kotlin.concurrent.thread
 
 /**
  * sweet code for a heckin cool loading bar
  */
 class ProgressBar : VBox() {
-
     init {
-
         importStylesheet("/progressbar.css")
-
         var isItDone = false
 
         style {
             alignment = Pos.CENTER
             backgroundColor += c(Colors["base"])
         }
-
         label(messages["generatingProfileText"]) { addClass("headerText") }
-
-
         progressbar {
             addClass("progress-bar")
             //addClass(progressBarStyle)

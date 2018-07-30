@@ -1,6 +1,6 @@
 package app.widgets.profileIcon
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -11,7 +11,6 @@ class ProfileIconStyle : Stylesheet() {
     companion object {
         val ProfileIcon by cssclass()
     }
-
     init {
         ProfileIcon {
             backgroundColor += c(Colors["base"])

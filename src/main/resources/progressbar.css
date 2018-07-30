@@ -1,5 +1,3 @@
-
-
 .progress-bar{
     -fx-pref-width: 420;
     -fx-pref-height: 50;
@@ -7,20 +5,14 @@
     -fx-effect: dropshadow( gaussian , gray , 5 , 0.1 , 0 , 4 )
 
 }
-
 .progress-bar > .bar {
     -fx-background-color: #CC4141;
     -fx-background-radius: 45, 45, 0, 0;
-
-
 }
 .progress-bar > .track {
     -fx-background-radius: 45;
     -fx-background-color: #FFFFFF;
-
-
 }
-
 .headerText{
     -fx-font-size: 22px;
     -fx-padding: 20px;

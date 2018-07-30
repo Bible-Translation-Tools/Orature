@@ -1,7 +1,6 @@
 package app.widgets.recordButton;
 
-import app.MyApp
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import javafx.animation.Timeline
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
@@ -11,15 +10,13 @@ import tornadofx.*;
 
 class RecordingAnimation : HBox() {
 
-     var animation: Timeline? = null
-
+    var animation: Timeline? = null
     val bigCircle = circle {
         centerX = 120.0
         centerY = 120.0
         radius = 120.0;
         fill = c(Colors["lightGray"]);
     }
-
     val arc = arc {
         fill = c(Colors["accent"]);
         centerX = 120.0
@@ -32,13 +29,10 @@ class RecordingAnimation : HBox() {
         style {
             backgroundColor += Color.TRANSPARENT
         }
-
     }
 
     val root = pane {
-
         alignment = Pos.CENTER
-
         add(bigCircle)
         add(arc)
     }
