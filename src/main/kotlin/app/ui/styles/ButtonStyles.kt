@@ -16,30 +16,30 @@ class ButtonStyles : Stylesheet() {
     }
 
     init {
-       rectangleButtonDefault {
-            fill = c(Colors["primary"])
-            backgroundColor += c(Colors["base"])
-            minWidth = 100.0.px
-            cursor = Cursor.HAND
-            effect = DropShadow(10.0, c(Colors["baseBackground"]))
-
-            and(hover) {
-                scaleX = 1.1
-                scaleY = 1.1
-            }
-        }
-        rectangleButtonAlternate {
-            fill = c(Colors["base"])
-            backgroundColor += c(Colors["primary"])
-            minWidth = 100.0.px
-            cursor = Cursor.HAND
-            effect = DropShadow(10.0, Color.GRAY)
-
-            and(hover) {
-                scaleX = 1.1
-                scaleY = 1.1
-            }
-        }
+//       rectangleButtonDefault {
+//            fill = c(Colors["primary"])
+//            backgroundColor += c(Colors["base"])
+//            minWidth = 100.0.px
+//            cursor = Cursor.HAND
+//            effect = DropShadow(10.0, c(Colors["baseBackground"]))
+//
+//            and(hover) {
+//                scaleX = 1.1
+//                scaleY = 1.1
+//            }
+//        }
+//        rectangleButtonAlternate {
+//            fill = c(Colors["base"])
+//            backgroundColor += c(Colors["primary"])
+//            minWidth = 100.0.px
+//            cursor = Cursor.HAND
+//            effect = DropShadow(10.0, Color.GRAY)
+//
+//            and(hover) {
+//                scaleX = 1.1
+//                scaleY = 1.1
+//            }
+//        }
         circleButton {
             fill = c(Colors["primary"])
             backgroundColor += c(Colors["base"])

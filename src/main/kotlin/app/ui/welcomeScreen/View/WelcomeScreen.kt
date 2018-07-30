@@ -8,15 +8,15 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import tornadofx.*
 import app.widgets.usersList.UsersList
-import app.widgets.welcomeBack.WelcomeBack
-import java.awt.Window
 import app.ui.userCreation.*
 import javafx.scene.text.FontWeight
+import app.widgets.profileIcon.ProfileIcon
+import app.widgets.WidgetsStyles
+import app.ui.welcomeScreen.View.WelcomeScreenStyles
 
 
-class WelcomeScreen: View() {
+class WelcomeScreen : View() {
 
-    //val UIColors = ResourceBundle.getBundle("UIColors")
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
     //so replace this injection with whatever injection you do
@@ -27,59 +27,47 @@ class WelcomeScreen: View() {
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
-
     val pad = 60.0
-    private val welcomeScreen = hbox() {
+    private val welcomeScreen = hbox {
+        importStylesheet(WelcomeScreenStyles::class)
         vbox {
-            alignment = Pos.CENTER
-            stackpane {
-                add(WelcomeBack())
+            addClass(WelcomeScreenStyles.welcomeBack)
+            add(ProfileIcon("12345678901", 150.0, true))
+            label(FX.messages["welcome"]).addClass(WelcomeScreenStyles.welcomeLabel)
+            val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
+            button("", homeIcon) {
+                importStylesheet(WidgetsStyles::class)
+                addClass(WidgetsStyles.alternateRectangleButton)
                 style {
-                    setMinHeight(Window.HEIGHT.toDouble())
-                    backgroundColor += c(Colors["base"])
-                    vgrow = Priority.ALWAYS
-                    hgrow=Priority.ALWAYS
-                    prefWidth= 1200.px
+                    minWidth = 175.0.px
+                    homeIcon.fill = c(Colors["base"])
                 }
             }
         }
         vbox {
             add(UsersList())
             style {
-                prefWidth=1200.px
-                vgrow= Priority.ALWAYS
-                hgrow= Priority.ALWAYS
+                prefWidth = 1200.px
+                vgrow = Priority.ALWAYS
+                hgrow = Priority.ALWAYS
             }
-            vbox (8){ //INSIDE a vbox to allow for alignment
+            vbox(8) {
+                addClass(WelcomeScreenStyles.createVBox)
+                //INSIDE a vbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 addUserIcon.fill = c(Colors["primary"])
-                alignment = Pos.BOTTOM_RIGHT
-                style {
-                    backgroundColor += c(Colors["baseMedium"])
-                    vgrow = Priority.ALWAYS
-                    prefHeight = 50.0.px
-                }
                 button("", addUserIcon) {
-                    alignment = Pos.CENTER
-                    style {
                         importStylesheet(ButtonStyles::class)
                         addClass(ButtonStyles.roundButton)
-                    }
                     action {
                         find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }
                 }
                 padding = insets(pad)
-                label(messages["create"]) {
-                    style {
-                        fontWeight = FontWeight.BOLD
-                        paddingRight = 4
-                    }
-                }
+                label(messages["create"]).addClass(WelcomeScreenStyles.createLabel)
             }
+        }
     }
- }
-
     //set the root of the view to the welcomeScreen
     override val root = welcomeScreen
 

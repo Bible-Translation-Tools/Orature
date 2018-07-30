@@ -7,6 +7,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import app.ui.styles.ButtonStyles
+import app.widgets.WidgetsStyles
 import tornadofx.*
 import app.widgets.profileIcon.ProfileIcon
 
@@ -40,15 +41,15 @@ class UsersList : HBox() {
                 val currentSmallUserIcon = ProfileIcon(randomNumber.toString(), 100.0)
                 //set its alignment to center so it shows up in the middle of the cell
                 //(otherwise shows up in left)
-                currentSmallUserIcon.alignment = Pos.CENTER;
+                currentSmallUserIcon.alignment = Pos.CENTER
                 add(currentSmallUserIcon)
                 val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
                 hbox {
                     alignment = Pos.CENTER
                     button("", homeIcon) {
                         alignment = Pos.CENTER
-                        importStylesheet(ButtonStyles::class)
-                        addClass(ButtonStyles.rectangleButtonDefault)
+                        importStylesheet(WidgetsStyles::class)
+                        addClass(WidgetsStyles.rectangleButtonDefault)
                         style {
                             homeIcon.fill = c(Colors["primary"])
                         }

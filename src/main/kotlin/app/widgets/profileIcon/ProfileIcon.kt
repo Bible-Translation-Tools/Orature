@@ -2,6 +2,7 @@ package app.widgets.profileIcon
 
 import afester.javafx.svg.SvgLoader
 import app.UIColorsObject.Colors
+import app.widgets.WidgetsStyles
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.control.Button
@@ -21,8 +22,8 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
     init {
         profIcon = button(graphic = svgGroup) {
             if (outerCircle) circle else circle.removeFromParent()
-            importStylesheet(ProfileIconStyle::class)
-            addClass(ProfileIconStyle.ProfileIcon)
+            importStylesheet(WidgetsStyles::class)
+            addClass(WidgetsStyles.ProfileIcon)
             prefWidth = buttonSize
             prefHeight = buttonSize
             resizeSvg(svgGroup, buttonSize)
