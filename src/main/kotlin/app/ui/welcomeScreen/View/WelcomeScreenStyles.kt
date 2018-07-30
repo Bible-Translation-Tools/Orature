@@ -37,7 +37,4 @@ class WelcomeScreenStyles : Stylesheet() {
             padding = box(5.px)
         }
     }
-
-
-
 }
