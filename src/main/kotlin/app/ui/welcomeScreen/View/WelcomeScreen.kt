@@ -1,21 +1,17 @@
 package app.ui.welcomeScreen
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-
 import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
 import java.awt.Window
 import app.ui.userCreation.*
 import javafx.scene.text.FontWeight
-import java.util.*
 
 
 class WelcomeScreen: View() {
@@ -24,20 +20,16 @@ class WelcomeScreen: View() {
     //grab the usernames from outside
     //in the real thing, we'll grab icons and sound clips instead
     //so replace this injection with whatever injection you do
-
     val gridWidth = 400.0
-
     //the left half of the screen, which displays:
     //the last user to log in, a welcome message, and a button to go to that user's home
     private val rad = 100.0
-
     //the grid of users
     //hooked up to the list we pulled in up top from DataService
     //right now it has just 9 elems but the real one will have who-knows-how-many
 
     val pad = 60.0
     private val welcomeScreen = hbox() {
-        //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT               //todo use this line to  implement RTL support
         vbox {
             alignment = Pos.CENTER
             stackpane {
@@ -51,7 +43,6 @@ class WelcomeScreen: View() {
                 }
             }
         }
-
         vbox {
             add(UsersList())
             style {
@@ -59,7 +50,6 @@ class WelcomeScreen: View() {
                 vgrow= Priority.ALWAYS
                 hgrow= Priority.ALWAYS
             }
-
             vbox (8){ //INSIDE a vbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 addUserIcon.fill = c(Colors["primary"])
@@ -69,30 +59,25 @@ class WelcomeScreen: View() {
                     vgrow = Priority.ALWAYS
                     prefHeight = 50.0.px
                 }
-
                 button("", addUserIcon) {
                     alignment = Pos.CENTER
                     style {
                         importStylesheet(ButtonStyles::class)
                         addClass(ButtonStyles.roundButton)
                     }
-
                     action {
                         find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }
                 }
-
                 padding = insets(pad)
                 label(messages["create"]) {
                     style {
                         fontWeight = FontWeight.BOLD
                         paddingRight = 4
-
                     }
                 }
             }
     }
-
  }
 
     //set the root of the view to the welcomeScreen
@@ -108,4 +93,3 @@ class WelcomeScreen: View() {
         setWindowMinSize(minWidth, minHeight)
     }
 }
-

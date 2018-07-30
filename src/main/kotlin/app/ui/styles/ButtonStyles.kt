@@ -1,6 +1,6 @@
 package app.ui.styles
 
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -28,7 +28,6 @@ class ButtonStyles : Stylesheet() {
                 scaleY = 1.1
             }
         }
-
         rectangleButtonAlternate {
             fill = c(Colors["base"])
             backgroundColor += c(Colors["primary"])
@@ -41,13 +40,11 @@ class ButtonStyles : Stylesheet() {
                 scaleY = 1.1
             }
         }
-
         circleButton {
             fill = c(Colors["primary"])
             backgroundColor += c(Colors["base"])
             cursor = Cursor.HAND
         }
-
         roundButton {
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
@@ -63,7 +60,6 @@ class ButtonStyles : Stylesheet() {
                 scaleY = 1.1
             }
         }
-
     }
 }
 

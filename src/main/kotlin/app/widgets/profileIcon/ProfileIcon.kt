@@ -1,7 +1,7 @@
 package app.widgets.profileIcon
 
 import afester.javafx.svg.SvgLoader
-import app.MyApp.Companion.Colors
+import app.UIColorsObject.Colors
 import tornadofx.*
 import javafx.scene.Group
 import javafx.scene.control.Button
@@ -18,10 +18,7 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
     }
 
     var profIcon: Button
-
-
     init {
-
         profIcon = button(graphic = svgGroup) {
             if (outerCircle) circle else circle.removeFromParent()
             importStylesheet(ProfileIconStyle::class)
@@ -33,8 +30,6 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
         }
         add(profIcon)
     }
-
-
     fun resizeSvg(svgGroup: Group, size: Double = buttonSize) {
         // adapted from https://stackoverflow.com/questions/38953921/how-to-set-the-size-of-a-svgpath-in-javafx
         val currentWidth = svgGroup.prefWidth(-1.0) // get the default preferred width
