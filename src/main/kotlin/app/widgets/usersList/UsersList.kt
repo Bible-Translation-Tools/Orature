@@ -13,28 +13,22 @@ import app.widgets.profileIcon.ProfileIcon
 
 class UsersList : HBox() {
 
-    val data =listOf("11234567890", "12234567890", "12334567890", "12344567890", "12345567890", "02345667896", "12345677890", "02345678990", "12345678990")
+    val data = listOf("11234567890", "12234567890", "12334567890", "12344567890", "12345567890", "02345667896", "12345677890", "02345678990", "12345678990")
     val gridWidth = 400.0
 
-    val root  = datagrid(data) {
-        verticalCellSpacing = 25.0
-        style{
-            backgroundColor += c(Colors["baseMedium"])
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-            padding = box((width/40).px)
-            prefHeight = 800.0.px
+    val root = datagrid(data) {
+        addStylesheet(WidgetsStyles::class)
+        addClass(WidgetsStyles.UsersListGrid).style {
+            hgrow = Priority.ALWAYS                        // this styling cannot be added in the styles sheet
+            vgrow = Priority.ALWAYS                        // because it is a node property
+            padding = box((width / 40).px)
         }
-        //formats each cell; if not called, cells are just empty white squares
-        //the "it" inside is an item from data.numbers
-        verticalCellSpacing = 24.0
-        maxCellsInRow = 3
-        horizontalCellSpacing = 32.0
+
         cellFormat {
             //each cell is a borderpane
             graphic = vbox(16) {
-                style{
-                    backgroundColor +=c(Colors["baseMedium"])
+                style {
+                    backgroundColor += c(Colors["baseMedium"])
                 }
                 //make a small icon
                 val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash

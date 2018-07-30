@@ -27,7 +27,6 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
             prefWidth = buttonSize
             prefHeight = buttonSize
             resizeSvg(svgGroup, buttonSize)
-
         }
         add(profIcon)
     }
@@ -35,7 +34,6 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
         // adapted from https://stackoverflow.com/questions/38953921/how-to-set-the-size-of-a-svgpath-in-javafx
         val currentWidth = svgGroup.prefWidth(-1.0) // get the default preferred width
         val currentHeight = svgGroup.prefHeight(currentWidth) // get default preferred height
-
         //scales svg to 70% of the container
         svgGroup.scaleX = size / currentWidth * 0.70
         svgGroup.scaleY = size / currentHeight * 0.70

@@ -3,6 +3,7 @@ package app.widgets
 import app.UIColorsObject
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.*
 
@@ -12,6 +13,7 @@ class WidgetsStyles : Stylesheet() {
         val alternateRectangleButton by cssclass()
         val rectangleButtonDefault by cssclass()
         val ProfileIcon by cssclass()
+        val UsersListGrid by cssclass()
     }
 
     init {
@@ -54,6 +56,15 @@ class WidgetsStyles : Stylesheet() {
                 scaleX = 1.1
                 scaleY = 1.1
             }
+        }
+
+        UsersListGrid{
+            verticalCellSpacing = 25.0.px
+            backgroundColor += c(UIColorsObject.Colors["baseMedium"])
+            prefHeight = 800.0.px
+            verticalCellSpacing = 24.0.px
+            maxCellsInRow = 3
+            horizontalCellSpacing = 32.0.px
         }
     }
 }
