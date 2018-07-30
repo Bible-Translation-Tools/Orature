@@ -24,7 +24,7 @@ class ProfilePreviewViewModel(
         model.clickNext = clicked
     }
 
-    fun listenedAudio(listened: Boolean) {
+    fun hasBeenPlayed(listened: Boolean) {
         userListenedAudio.onNext(listened)
         model.listenedAudio = listened
     }

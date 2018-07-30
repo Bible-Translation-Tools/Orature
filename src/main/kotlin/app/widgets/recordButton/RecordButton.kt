@@ -26,44 +26,38 @@ class RecordButton(var onClickCallback: () -> Unit = ::println,
     var timer = Timer()
     init {
         stackpane {
-            alignment = Pos.CENTER
-            add(circleAnimation)
+//            alignment = Pos.CENTER
+//            add(circleAnimation)
             button(countdown, micIcon) {
                 importStylesheet(ButtonStyles::class)
                 addClass(ButtonStyles.roundButton)
-                style {
-                    backgroundColor += c(Colors["base"])
-                    micIcon.fill = c(Colors["primary"])
-                    cursor = Cursor.HAND
-                    minWidth = 152.0.px
-                    minHeight = 152.0.px
-                    fontSize = 8.em
-                    textFill = c(Colors["primary"])
-                }
-                action {
-                    if (isRecording.value == false) {
-                        RecordButtonViewModel.isRecording(true)
-                        dotsAnimation.circleCountdown()
-                        micIcon.hide()
-                        RecordButtonViewModel.countdown()
-                        onClickCallback()
-                        timer.schedule(timerTask {
-                            Platform.runLater {
-                                circleAnimation.animate()
-                                graphic = stopIcon
-                                stopIcon.fill = c(Colors["primary"])
-                                dotsAnimation.hide()
-                                //animationCompleted()
-                            }
-                        }, 3000)
-                    } else if (countdown.value == "") {
-                        /*if countdown.value = "" that means the countdown has finished
-                            * therefore now the user is able to click stop to record
-                            * */
-                        circleAnimation.stop()
-                        stopClickedCallback()
-                    }
-                }
+//                style {
+//
+//                }
+//                action {
+//                    if (isRecording.value == false) {
+//                        RecordButtonViewModel.isRecording(true)
+//                        dotsAnimation.circleCountdown()
+//                        micIcon.hide()
+//                        RecordButtonViewModel.countdown()
+//                        onClickCallback()
+//                        timer.schedule(timerTask {
+//                            Platform.runLater {
+//                                circleAnimation.animate()
+//                                graphic = stopIcon
+//                                stopIcon.fill = c(Colors["primary"])
+//                                dotsAnimation.hide()
+//                                //animationCompleted()
+//                            }
+//                        }, 3000)
+//                    } else if (countdown.value == "") {
+//                        /*if countdown.value = "" that means the countdown has finished
+//                            * therefore now the user is able to click stop to record
+//                            * */
+//                        circleAnimation.stop()
+//                        stopClickedCallback()
+//                    }
+//                }
             }
         }
     }
@@ -72,6 +66,6 @@ class RecordButton(var onClickCallback: () -> Unit = ::println,
         style {
             padding = box(20.px)
         }
-        add(dotsAnimation)
+       // add(dotsAnimation)
     }
 }

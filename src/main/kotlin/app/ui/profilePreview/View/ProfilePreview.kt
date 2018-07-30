@@ -42,7 +42,7 @@ class ProfilePreview : View() {
             }
             action {
                 find(ProfilePreview::class).replaceWith(WelcomeScreen::class)  // navigate to home, todo implement ui navigator
-                viewModel.listenedAudio(false)                        // set listened audio false to reset the ui state and hide the next and redo buttons
+                viewModel.hasBeenPlayed(false)                        // set listened audio false to reset the ui state and hide the next and redo buttons
             }
         }
         top {
@@ -88,7 +88,7 @@ class ProfilePreview : View() {
                                 textFill = c(Colors["primary"])
                             }
                             action {
-                                viewModel.listenedAudio(false)
+                                viewModel.hasBeenPlayed(false)
                                 find(ProfilePreview::class).replaceWith(UserCreation::class)
                             }
                         }
@@ -115,7 +115,7 @@ class ProfilePreview : View() {
                             }
                     )
                     newUserButton.profIcon.action {
-                        viewModel.listenedAudio(true)
+                        viewModel.hasBeenPlayed(true)
                     }
                 }
                 vbox {

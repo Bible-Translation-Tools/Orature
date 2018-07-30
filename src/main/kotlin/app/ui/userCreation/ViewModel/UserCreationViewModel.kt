@@ -13,11 +13,14 @@ class UserCreationViewModel() : ViewModel() {
 
     var countdownTracker = SimpleStringProperty("")
     var recordingDone = SimpleBooleanProperty(false)
-    var isRecording = PublishSubject.create<Boolean>()
+    var isRecording = SimpleBooleanProperty(false)
     var doneRecording = PublishSubject.create<Boolean>()
     var hasListened = PublishSubject.create<Boolean>()
+    var timer = Timer()
+
 
     fun countdown() {
+        timer = Timer()
         Platform.runLater { countdownTracker.set("3") }
         setCountDown("2", 1)         // time in seconds
         setCountDown("1", 2)
@@ -25,13 +28,16 @@ class UserCreationViewModel() : ViewModel() {
     }
 
     private fun setCountDown(text: String, seconds: Int) {
-        var timer = Timer()
         timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, seconds.toLong() * 1000)
-
+    }
+    fun stopCountdown() {
+        countdownTracker.set("")
+        timer?.cancel()
+        timer?.purge()
     }
 
     fun recordClicked() {
-        isRecording.onNext(true)
+        isRecording.set(true)
     }
 
     fun changeIcon() {
@@ -39,7 +45,7 @@ class UserCreationViewModel() : ViewModel() {
     }
 
     fun reset() {
-        isRecording.onNext(false)
+        isRecording.set(false)
         doneRecording.onNext(false)
         hasListened.onNext(false)
     }

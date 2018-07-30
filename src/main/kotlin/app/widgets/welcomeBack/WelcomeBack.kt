@@ -11,7 +11,7 @@ import tornadofx.*
 import app.widgets.profileIcon.ProfileIcon
 import tornadofx.FX.Companion.messages
 
-class WelcomeBack : HBox() {
+class WelcomeBack(var userProfile: ProfileIcon) : HBox() {
     private val rad = 125.0
     private val bigIcons = borderpane() {
 
@@ -20,10 +20,9 @@ class WelcomeBack : HBox() {
         style {
             backgroundColor += c(Colors["base"])
         }
-        val iconHash = ProfileIcon("12345678901", 150.0, true)
-        iconHash.alignment = Pos.CENTER
+        userProfile.alignment = Pos.CENTER
 
-        top = iconHash
+        top = userProfile
         center = label(messages["welcome"]) {
             style {
                 fontSize = 32.0.px

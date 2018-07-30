@@ -7,6 +7,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.ArcType
 import tornadofx.*
+import java.time.Duration
 
 class RecordingAnimation : HBox() {
     var animation: Timeline? = null
@@ -16,8 +17,7 @@ class RecordingAnimation : HBox() {
         radius = 120.0;
         fill = c(Colors["baseBackground"])
     }
-    val arc = arc {
-        fill = c(Colors["primary"])
+    var arc = arc {
         centerX = 120.0
         centerY = 120.0
         radiusX = 120.0
@@ -35,6 +35,7 @@ class RecordingAnimation : HBox() {
         add(arc)
     }
     fun animate() {
+        arc.fill = (c(Colors["primary"]))
         animation = timeline {
             keyframe(javafx.util.Duration.millis(3000.0)) {
                 keyvalue(arc.lengthProperty(), -360.0)
@@ -44,8 +45,12 @@ class RecordingAnimation : HBox() {
     fun stop() {
         animation?.pause()
     }
-    init {
-        with(root) {
+    fun reset() {
+        animation = timeline {
+            keyframe(javafx.util.Duration.millis(100.0)) {
+               // arc.fill = c("#EDEDED")
+                keyvalue(arc.lengthProperty(), 0.0)
+            }
         }
     }
 }

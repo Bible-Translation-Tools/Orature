@@ -12,6 +12,7 @@ import app.widgets.welcomeBack.WelcomeBack
 import java.awt.Window
 import app.ui.userCreation.*
 import javafx.scene.text.FontWeight
+import app.widgets.profileIcon.ProfileIcon
 
 
 class WelcomeScreen: View() {
@@ -29,11 +30,13 @@ class WelcomeScreen: View() {
     //right now it has just 9 elems but the real one will have who-knows-how-many
 
     val pad = 60.0
+    val userProfile = ProfileIcon("12345678901", 150.0, true)
+
     private val welcomeScreen = hbox() {
         vbox {
             alignment = Pos.CENTER
             stackpane {
-                add(WelcomeBack())
+                add(WelcomeBack(userProfile))
                 style {
                     setMinHeight(Window.HEIGHT.toDouble())
                     backgroundColor += c(Colors["base"])

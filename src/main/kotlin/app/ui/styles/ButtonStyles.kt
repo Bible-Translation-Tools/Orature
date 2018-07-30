@@ -40,11 +40,6 @@ class ButtonStyles : Stylesheet() {
                 scaleY = 1.1
             }
         }
-        circleButton {
-            fill = c(Colors["primary"])
-            backgroundColor += c(Colors["base"])
-            cursor = Cursor.HAND
-        }
         roundButton {
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
