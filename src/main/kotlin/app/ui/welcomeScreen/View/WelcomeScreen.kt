@@ -52,7 +52,7 @@ class WelcomeScreen : View() {
                 hgrow = Priority.ALWAYS
             }
             vbox(8) {
-                addClass(WelcomeScreenStyles.createVBox)
+                addClass(WelcomeScreenStyles.createVBox).style { vgrow = Priority.ALWAYS }
                 //INSIDE a vbox to allow for alignment
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 addUserIcon.fill = c(Colors["primary"])
