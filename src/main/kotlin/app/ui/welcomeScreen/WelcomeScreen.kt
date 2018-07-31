@@ -13,18 +13,31 @@ import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.widgets.welcomeBack.WelcomeBack
 import app.ui.userCreation.*
+import data.model.Language
+import data.model.User
+import data.model.UserPreferences
 import java.io.File
 
 class WelcomeScreen: View("Welcome Screen") {
     private val rad = 100.0
     val pad = 40.0
     val gridWidth = 400.0
-//    val model = UserModel(Users())
+//    var a = Language(0, "123", "asdasd", true, "123123")
+//    var b = MutableList<Language>(1) { a }
+//    var c = UserPreferences(0, a, a)
+//    val model = WelcomeScreenVM(User(0,
+//            "123123",
+//            "123123",
+//            "C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg",
+//            b, b,  c
+//            ))
     //WelcomeScreen splits the screen evenly with 2 subviews.
     //first subview shows an image of most recent logged in user, greetings, and home button
     //second subview shows a list of users created in the device, their own home buttons, and a button to create a new user
     private val welcomeScreen = hbox {
         var recentUser: File? = null
+//        recentUser = File(User::imagePath.toString())
+//        var recentUser: String? = model.imagePathProperty
         var profileImages = mutableListOf<File>()
         val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
         importStylesheet(ButtonStyles::class)
@@ -72,6 +85,10 @@ class WelcomeScreen: View("Welcome Screen") {
         //add 100 for home button and Welcome message; probably in real thing these will be vars
         val minHeight = 2 * pad + 2 * rad + 100.0
         setWindowMinSize(minWidth, minHeight)
+//        User("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
+
+//        var a = MutableList<Language>()
+//        a.add(Language(0, "asd", "asdas", true, "asdas"))
     }
 }
 

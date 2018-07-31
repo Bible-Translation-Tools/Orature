@@ -13,6 +13,7 @@ import javafx.scene.layout.Priority
 import tornadofx.*
 import java.io.File
 
+
 class WelcomeBack(ImageFile: File) : HBox() {
     init {
         //sets component center horizontally
