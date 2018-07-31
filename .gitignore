@@ -6,6 +6,7 @@
 .idea/**/tasks.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -91,3 +92,6 @@ gradle-app.setting
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+# DS_Store files for mac users
+*.DS_Store
