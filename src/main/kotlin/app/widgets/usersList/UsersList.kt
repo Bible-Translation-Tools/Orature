@@ -1,12 +1,10 @@
 package app.widgets.usersList
 
-import app.UIColorsObject.Colors
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import app.ui.styles.ButtonStyles
 import app.widgets.WidgetsStyles
 import tornadofx.*
 import app.widgets.profileIcon.ProfileIcon
@@ -28,7 +26,7 @@ class UsersList : HBox() {
             //each cell is a borderpane
             graphic = vbox(16) {
                 style {
-                    backgroundColor += c(Colors["baseMedium"])
+                    backgroundColor += c("#DFDEE3")
                 }
                 //make a small icon
                 val randomNumber = Math.floor(Math.random() * 9_000_000_0000L).toLong() + 1_000_000_0000L     // use for demo, replace with DB hash
@@ -45,7 +43,7 @@ class UsersList : HBox() {
                         importStylesheet(WidgetsStyles::class)
                         addClass(WidgetsStyles.rectangleButtonDefault)
                         style {
-                            homeIcon.fill = c(Colors["primary"])
+                            homeIcon.fill = c("#CC4141")
                         }
                     }
                 }

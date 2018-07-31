@@ -15,7 +15,7 @@ class ProfileIcon(var svgHash: String, var buttonSize: Double = 150.0, var outer
     var svgGroup = SvgLoader().loadSvg(Jdenticon.toSvg(hash = svgHash, size = buttonSize.toInt()).byteInputStream())
     val circle = circle {
         radius = buttonSize - 30.0
-        fill = c(Colors["baseBackground"])
+        fill = c("#EEEEEE")
     }
 
     var profIcon: Button

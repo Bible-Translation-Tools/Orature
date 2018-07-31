@@ -1,15 +1,12 @@
 package app.ui.welcomeScreen
 
 import app.UIColorsObject.Colors
-import app.ui.styles.ButtonStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import tornadofx.*
 import app.widgets.usersList.UsersList
 import app.ui.userCreation.*
-import javafx.scene.text.FontWeight
 import app.widgets.profileIcon.ProfileIcon
 import app.widgets.WidgetsStyles
 import app.ui.welcomeScreen.View.WelcomeScreenStyles
@@ -57,8 +54,8 @@ class WelcomeScreen : View() {
                 val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
                 addUserIcon.fill = c(Colors["primary"])
                 button("", addUserIcon) {
-                        importStylesheet(ButtonStyles::class)
-                        addClass(ButtonStyles.roundButton)
+                        importStylesheet(WidgetsStyles::class)
+                        addClass(WidgetsStyles.roundButton)
                     action {
                         find(WelcomeScreen::class).replaceWith(UserCreation::class)
                     }

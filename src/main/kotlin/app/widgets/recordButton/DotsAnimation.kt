@@ -41,4 +41,10 @@ class DotsAnimation(var color:String = "#EEEEEE", var fillColor:String= "#CC4141
         timer.schedule(timerTask { cir2.fill = c("#0000") }, 2000)
         timer.schedule(timerTask { cir1.fill = c("#0000") }, 3000)
     }
+
+    fun resetCircles() {
+        cir1.fill = c(color)
+        cir2.fill = c(color)
+        cir3.fill = c(color)
+    }
 }

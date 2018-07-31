@@ -21,7 +21,7 @@ class ProgressBar : VBox() {
 
         style {
             alignment = Pos.CENTER
-            backgroundColor += c(Colors["base"])
+            backgroundColor += c("#FFF")
         }
         label(messages["generatingProfileText"]) { addClass("headerText") }
         progressbar {
