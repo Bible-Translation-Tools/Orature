@@ -8,10 +8,7 @@
 .idea/**/shelf
 .idea/**/vcs.xml
 .idea/**/kotlinc.xml
-<<<<<<< HEAD
-=======
 .idea/
->>>>>>> update gitignore
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -103,3 +100,11 @@ hs_err_pid*
 # Database files
 *.sqlite
 *.sqlite3
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+*.mp4
+*.m4a
+*.aac
