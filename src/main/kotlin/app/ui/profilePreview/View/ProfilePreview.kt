@@ -2,7 +2,6 @@ package app.ui.profilePreview.View
 
 import app.UIColorsObject.Colors
 import app.ui.userCreation.*
-import app.ui.styles.ButtonStyles
 import app.ui.profilePreview.ViewModel.ProfilePreviewViewModel
 import app.widgets.profileIcon.ProfileIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -13,18 +12,16 @@ import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import app.ui.welcomeScreen.WelcomeScreen
-import javafx.scene.paint.Color
 import tornadofx.*
+import app.widgets.WidgetsStyles
 
 class ProfilePreview : View() {
 
-    var iconHash = PublishSubject.create<String>()                // subject to get the user iconHash
-    var onClickNext = PublishSubject.create<Boolean>()          // subject to check if the NEXT button was clicked
-    var onClickRedo = PublishSubject.create<Boolean>()             // subject to check if the REDO button was clicked
-    var audioListened = PublishSubject.create<Boolean>()            // subject to check if the audio was listened
-
-    private val viewModel = ProfilePreviewViewModel(iconHash, onClickNext, onClickRedo, audioListened)
-
+    private val viewModel = ProfilePreviewViewModel()
+    var iconHash = viewModel.userIconHash
+    var onClickNext = viewModel.onClickNext
+    var onClickRedo = viewModel.onClickRedo
+    var audioListened =viewModel.audioListened
     var newUserButton = ProfileIcon("12345678901", 152.0)
     private val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
     private val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
@@ -32,8 +29,8 @@ class ProfilePreview : View() {
 
     override val root = borderpane {
         val closeButton = button(messages["close"], closeIcon) {
-            importStylesheet(ButtonStyles::class)
-            addClass(ButtonStyles.rectangleButtonDefault)
+            importStylesheet(WidgetsStyles::class)
+            addClass(WidgetsStyles.rectangleButtonDefault)
             style {
                 alignment = Pos.CENTER
                 closeIcon.fill =c(Colors["primary"])
@@ -42,7 +39,7 @@ class ProfilePreview : View() {
             }
             action {
                 find(ProfilePreview::class).replaceWith(WelcomeScreen::class)  // navigate to home, todo implement ui navigator
-                viewModel.listenedAudio(false)                        // set listened audio false to reset the ui state and hide the next and redo buttons
+                viewModel.hasBeenPlayed(false)                        // set listened audio false to reset the ui state and hide the next and redo buttons
             }
         }
         top {
@@ -77,8 +74,8 @@ class ProfilePreview : View() {
                             }
                         }
                         button("", micIcon) {
-                            importStylesheet(ButtonStyles::class)
-                            addClass(ButtonStyles.roundButton)
+                            importStylesheet(WidgetsStyles::class)
+                            addClass(WidgetsStyles.roundButton)
                             style {
                                 backgroundColor += c(Colors["base"])
                                 cursor = Cursor.HAND
@@ -88,7 +85,7 @@ class ProfilePreview : View() {
                                 textFill = c(Colors["primary"])
                             }
                             action {
-                                viewModel.listenedAudio(false)
+                                viewModel.hasBeenPlayed(false)
                                 find(ProfilePreview::class).replaceWith(UserCreation::class)
                             }
                         }
@@ -115,7 +112,7 @@ class ProfilePreview : View() {
                             }
                     )
                     newUserButton.profIcon.action {
-                        viewModel.listenedAudio(true)
+                        viewModel.hasBeenPlayed(true)
                     }
                 }
                 vbox {
@@ -135,8 +132,8 @@ class ProfilePreview : View() {
                             }
                         }
                         button("", rightArrow) {
-                            importStylesheet(ButtonStyles::class)
-                            addClass(ButtonStyles.roundButton)
+                            importStylesheet(WidgetsStyles::class)
+                            addClass(WidgetsStyles.roundButton)
                             style {
                                 backgroundColor += c(Colors["primary"])
                                 cursor = Cursor.HAND

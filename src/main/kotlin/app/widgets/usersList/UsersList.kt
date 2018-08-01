@@ -1,8 +1,6 @@
 package app.widgets.usersList
 
-
 import app.ui.imageLoader
-
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
@@ -34,7 +32,6 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
         cellFormat {
             graphic = vbox(16) {
                 addClass(usersListCell)
-
 //
                 //Small user icon in each cell
                 //"it" is equal the value of each iteration of datagrid parameter
@@ -50,8 +47,6 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
                         alignment = Pos.CENTER
                         addClass(WidgetsStyles.rectangleButtonDefault)
                         homeIcon.fill = c("#CC4141")
-
-
 
                     }
                 }

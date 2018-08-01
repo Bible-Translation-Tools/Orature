@@ -1,22 +1,25 @@
 package app.ui.userCreation
 
 import app.UIColorsObject.Colors
-import app.ui.styles.ButtonStyles
 import app.ui.userCreation.ViewModel.UserCreationViewModel
+import app.ui.welcomeScreen.*
+import app.widgets.recordButton.RecordingAnimation
+import app.widgets.recordButton.DotsAnimation
+import app.ui.profilePreview.View.ProfilePreview
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
-import app.widgets.recordButton.RecordButton
-import app.ui.welcomeScreen.*
 import javafx.application.Platform
 import java.util.*
 import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
-import io.reactivex.rxkotlin.subscribeBy
-import app.ui.profilePreview.View.ProfilePreview
+import javafx.scene.Cursor
+import javafx.scene.control.Button
+import app.widgets.WidgetsStyles
+
 
 /*
 *  This View is used in the process of creating user profiles
@@ -29,18 +32,24 @@ class UserCreation : View() {
 
     private val closeIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
     private val viewModel: UserCreationViewModel  by inject()
-    var recordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
+    private val circleAnimation = RecordingAnimation()
+    private val dotsAnimation = DotsAnimation()
+    private val countdown = viewModel.countdownTracker
     private val progressBar = ProgressBar()
+    private var buttonIcon: MaterialIconView? = null
     val isRecording = viewModel.isRecording
     val doneRecording = viewModel.doneRecording
+    val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
+    val stopIcon = MaterialIconView(MaterialIcon.STOP, "100px")
     var timer = Timer()
     val RECORDING_TIME: Long = 6100
-
+    val COUNTDOWN_TIME: Long = 3000
+    var recordButton: Button? = null
 
     //initialize close button to be used in top of borderpane
     val closeButton = button(messages["close"], closeIcon) {
-        importStylesheet(ButtonStyles::class)
-        addClass(ButtonStyles.rectangleButtonDefault)
+        importStylesheet(WidgetsStyles::class)
+        addClass(WidgetsStyles.rectangleButtonDefault)
 
         style {
             alignment = Pos.CENTER
@@ -51,17 +60,11 @@ class UserCreation : View() {
             navHome()
         }
     }
-
     override val root = borderpane {
-
-        //nodeOrientationProperty().value = NodeOrientation.RIGHT_TO_LEFT
-
         style {
             backgroundColor += Color.WHITE
         }
-
         top {
-
             //close button
             hbox {
                 alignment = Pos.BOTTOM_RIGHT
@@ -72,57 +75,78 @@ class UserCreation : View() {
                     paddingTop = 40.0
                 }
             }
-
         }
         center {
 
-            isRecording.subscribeBy(
-                    onNext = {
-                        if (it == false) { // if isRecording set to false create new RecordButton()
-                            val newRecordButton = RecordButton(::onClickCallback, ::animationCompleted, ::stopClicked)
-                            newRecordButton.alignment = Pos.CENTER
-                            recordButton.replaceWith(newRecordButton)
-                            recordButton = newRecordButton
+            vbox(8) {
+                alignment = Pos.CENTER
+                stackpane {
+                    add(circleAnimation)
+                   recordButton = button(countdown, graphic = micIcon) {
+                        importStylesheet(WidgetsStyles::class)
+                        addClass(WidgetsStyles.roundButton)
+                        style {
+                            backgroundColor += c(Colors["base"])
+                            micIcon.fill = c(Colors["primary"])
+                            cursor = Cursor.HAND
+                            minWidth = 152.0.px
+                            minHeight = 152.0.px
+                            fontSize = 8.em
+                            textFill = c(Colors["primary"])
+                            fill = c(Colors["primary"])
                         }
-                    },
-                    onError = {
-                        println(it)
-                    }
-            )
-
-            doneRecording.subscribeBy(
-                    onNext = {
-                        if (it == true) { //done recording = true? then navigate to profile preview
-                            timer.schedule(timerTask {
-                                Platform.runLater {
-                                    find(UserCreation::class)
-                                        .replaceWith(ProfilePreview::class,
-                                        transition = ViewTransition.Fade(0.3.seconds))
-                                     }
-                                }, 500)
+                        action {
+                            if (isRecording.value == false) {
+                                graphic.hide()
+                                dotsAnimation.circleCountdown()
+                                viewModel.countdown()
+                                viewModel.recordClicked()
+                                timer.schedule(timerTask {
+                                    Platform.runLater {
+                                        circleAnimation.animate()
+                                        stopIcon.fill = c(Colors["primary"])
+                                        dotsAnimation.hide()
+                                        graphic = stopIcon
+                                        graphic.show()
+                                    }
+                                }, COUNTDOWN_TIME)
+                                timer.schedule(timerTask {
+                                    Platform.runLater {
+                                        find(UserCreation::class).replaceWith(ProfilePreview::class)
+                                        val newMicIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
+                                        newMicIcon.fill=c(Colors["primary"])
+                                        graphic = newMicIcon
+                                        dotsAnimation.show()
+                                    }
+                                }, RECORDING_TIME)
+                            } else if (countdown.value == "") {
+                                dotsAnimation.show()
+                                circleAnimation.stop()
+                                val newMicIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
+                                newMicIcon.fill=c(Colors["primary"])
+                                graphic = newMicIcon
+                                find(UserCreation::class).replaceWith(ProfilePreview::class)
+                            }
                         }
-                    },
-
-                    onError = {
-                        println(it)
                     }
-            )
-
-            add(recordButton)
-            recordButton.alignment = Pos.CENTER
-
-            style {
-                backgroundColor += c(Colors["transparent"])
-                borderColor += box(c(Colors["transparent"]))
+                }
+                add(dotsAnimation)
+                dotsAnimation.style {
+                    backgroundColor += c(Colors["transparent"])
+                    borderColor += box(c(Colors["transparent"]))
+                }
             }
         }
     }
 
     override fun onUndock() { //clean up on view exit
         viewModel.reset()
+        viewModel.stopCountdown()
+        circleAnimation.stop()
+        circleAnimation.reset()
+        dotsAnimation.resetCircles()
         timer.cancel()
         timer.purge()
-
     }
 
     override fun onDock() { //set up on view entry
@@ -131,27 +155,15 @@ class UserCreation : View() {
 
     private fun navHome() {
         find(UserCreation::class).replaceWith(WelcomeScreen::class)
+        dotsAnimation.show()
+        val newMicIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
+        newMicIcon.fill=c(Colors["primary"])
+        recordButton?.graphic = newMicIcon
     }
 
     private fun animationCompleted() {
-        TODO("add code that runs when countdown animation is completed. Probably being audio recording" +
-                "function name might change")
+        // TODO("add code that runs when countdown animation is completed. Probably being audio recording" +
+        //         "function name might change")
         //viewModel.reset()
     }
-
-    private fun stopClicked() {
-        find(UserCreation::class)
-                .replaceWith(ProfilePreview::class,
-                transition = ViewTransition.Fade(0.3.seconds))
-    }
-
-    private fun onClickCallback() {
-        viewModel.recordClicked()
-        timer.schedule(timerTask {
-            Platform.runLater {
-                viewModel.doneRecording()
-            }
-        }, RECORDING_TIME)
-    }
 }
-

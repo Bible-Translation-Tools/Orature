@@ -1,21 +1,8 @@
 package app.ui.welcomeScreen
-import app.ui.styles.LayoutStyles
-import app.ui.styles.ButtonStyles
 //import app.ui.styles.ButtonStyles.Companion.roundButtonMini
-import app.ui.styles.LayoutStyles.Companion.userListContainer
-import app.ui.styles.LayoutStyles.Companion.userListContainerBottom
-import app.ui.styles.LayoutStyles.Companion.welcomeBackContainer
-import app.ui.styles.LayoutStyles.Companion.windowView
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.scene.layout.Priority
-import tornadofx.*
-import app.widgets.usersList.UsersList
-import app.ui.userCreation.*
 //import data.model.Language
 //import data.model.User
 //import data.model.UserPreferences
-import java.io.File
 
 //class WelcomeScreen: View("Welcome Screen") {
 //    private val rad = 100.0

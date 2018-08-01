@@ -37,8 +37,14 @@ class DotsAnimation(var color:String = "#EEEEEE", var fillColor:String= "#CC4141
 
         var timer = Timer()
         // the color is always going to be #0000 because it is transparent, this code makes the dots disappear
-        timer.schedule(timerTask { cir3.fill = c("#0000") }, 1000)
-        timer.schedule(timerTask { cir2.fill = c("#0000") }, 2000)
-        timer.schedule(timerTask { cir1.fill = c("#0000") }, 3000)
+        timer.schedule(timerTask { cir3.fill = c(color) }, 1000)
+        timer.schedule(timerTask { cir2.fill = c(color) }, 2000)
+        timer.schedule(timerTask { cir1.fill = c(color) }, 3000)
+    }
+
+    fun resetCircles() {
+        cir1.fill = c(color)
+        cir2.fill = c(color)
+        cir3.fill = c(color)
     }
 }

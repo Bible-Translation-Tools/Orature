@@ -6,7 +6,6 @@ import tornadofx.*
 import java.util.*
 
 class MyApp : App(WelcomeScreen::class)
-
 //launch the app
 fun main(args: Array<String>) {
     launch<MyApp>(args)

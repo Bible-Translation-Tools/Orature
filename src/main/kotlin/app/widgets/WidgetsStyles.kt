@@ -1,10 +1,8 @@
 package app.widgets
 
 import app.UIColorsObject
-import app.ui.styles.ButtonStyles
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.*
 
@@ -18,6 +16,7 @@ class WidgetsStyles : Stylesheet() {
         val roundButtonLarge by cssclass()
         val roundButtonMedium by cssclass()
         val roundButtonMini by cssclass()
+        val roundButton by cssclass()
     }
 
     init {
@@ -48,7 +47,7 @@ class WidgetsStyles : Stylesheet() {
         }
 
         ProfileIcon {
-            backgroundColor += c(UIColorsObject.Colors["base"])
+            backgroundColor += c("#FFF")
             backgroundRadius += box(100.percent)
             borderRadius += box(100.percent)
             cursor = Cursor.HAND
@@ -110,11 +109,27 @@ class WidgetsStyles : Stylesheet() {
 
         UsersListGrid{
             verticalCellSpacing = 25.0.px
-            backgroundColor += c(UIColorsObject.Colors["baseMedium"])
+            backgroundColor += c("#DFDEE3")
             prefHeight = 800.0.px
             verticalCellSpacing = 24.0.px
             maxCellsInRow = 3
             horizontalCellSpacing = 32.0.px
+        }
+
+        roundButton {
+            backgroundRadius += box(100.percent)
+            borderRadius += box(100.percent)
+            effect = DropShadow(10.0,  Color.GRAY)
+            minWidth = 64.0.px
+            minHeight = 64.0.px
+            cursor = Cursor.HAND
+            backgroundColor +=  c("#FFF")
+            borderColor += box(c("#0000"))
+
+            and(hover) {
+                scaleX = 1.1
+                scaleY = 1.1
+            }
         }
     }
 }
