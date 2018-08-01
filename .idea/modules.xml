@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/8woc2018-jvm.iml" filepath="$PROJECT_DIR$/8woc2018-jvm.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/8woc2018-jvm_main.iml" filepath="$PROJECT_DIR$/.idea/modules/8woc2018-jvm_main.iml" group="8woc2018-jvm" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/8woc2018-jvm_test.iml" filepath="$PROJECT_DIR$/.idea/modules/8woc2018-jvm_test.iml" group="8woc2018-jvm" />
     </modules>
   </component>
 </project>
