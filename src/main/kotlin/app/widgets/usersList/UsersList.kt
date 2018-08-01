@@ -17,22 +17,15 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
     val root  = datagrid(listOfImageFiles) {
         addStylesheet(WidgetsStyles::class)
 
-//        addClass(WidgetsStyles.UsersListGrid).style {
-//            hgrow = Priority.ALWAYS                        // this styling cannot be added in the styles sheet
-//            vgrow = Priority.ALWAYS                        // because it is a node property
-//            padding = box((width / 40).px)
-//        }
-
-
-        style{
-            addClass(usersListGrid)
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
+        addClass(WidgetsStyles.UsersListGrid).style {
+            hgrow = Priority.ALWAYS                        // this styling cannot be added in the styles sheet
+            vgrow = Priority.ALWAYS                        // because it is a node property
+            padding = box((width / 40).px)
         }
+
         cellFormat {
             graphic = vbox(16) {
                 addClass(usersListCell)
-//
                 //Small user icon in each cell
                 //"it" is equal the value of each iteration of datagrid parameter
                 button(graphic = imageLoader(it)) {

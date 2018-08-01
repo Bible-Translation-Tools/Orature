@@ -33,10 +33,10 @@ class WelcomeScreen : View() {
         importStylesheet(WelcomeScreenStyles::class)
         importStylesheet(WidgetsStyles::class)
         var recentUser: File? = null
-        recentUser = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
+       // recentUser = File("/Users/antoniolopez/Documents/Work/8woc2018-jvm/src/main/resources/userIcons/userIcon1.svg")
 //        var recentUser: String? = model.imagePathProperty
         var profileImages = mutableListOf<File>()
-        profileImages.add(File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg"))
+       // profileImages.add(File("/Users/antoniolopez/Documents/Work/8woc2018-jvm/src/main/resources/userIcons/userIcon1.svg"))
         val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
         importStylesheet(LayoutStyles:: class)
         addClass(windowView)
