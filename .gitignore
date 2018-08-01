@@ -95,8 +95,16 @@ gradle-app.setting
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-*.DS_STORE
+*.DS_Store
 
 # Database files
 *.sqlite
 *.sqlite3
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+*.mp4
+*.m4a
+*.aac
