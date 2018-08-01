@@ -35,7 +35,7 @@ class RecordingAnimation : HBox() {
         add(arc)
     }
     fun animate() {
-        arc.fill = (c(Colors["primary"]))
+        arc.fill = (c("#CC4141"))
         animation = timeline {
             keyframe(javafx.util.Duration.millis(3000.0)) {
                 keyvalue(arc.lengthProperty(), -360.0)

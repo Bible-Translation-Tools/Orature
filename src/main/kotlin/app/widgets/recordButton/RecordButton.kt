@@ -1,16 +1,12 @@
 package app.widgets.recordButton
 
-import app.UIColorsObject.Colors
-import app.ui.styles.ButtonStyles
+import app.widgets.WidgetsStyles
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.application.Platform
 import javafx.geometry.Pos
-import javafx.scene.Cursor
 import javafx.scene.layout.VBox
 import tornadofx.*
 import java.util.*
-import kotlin.concurrent.timerTask
 
 class RecordButton(var onClickCallback: () -> Unit = ::println,
                    var animationCompletedCallback: () -> Unit = ::println,
@@ -29,8 +25,8 @@ class RecordButton(var onClickCallback: () -> Unit = ::println,
 //            alignment = Pos.CENTER
 //            add(circleAnimation)
             button(countdown, micIcon) {
-                importStylesheet(ButtonStyles::class)
-                addClass(ButtonStyles.roundButton)
+                importStylesheet(WidgetsStyles::class)
+                addClass(WidgetsStyles.roundButton)
 //                style {
 //
 //                }

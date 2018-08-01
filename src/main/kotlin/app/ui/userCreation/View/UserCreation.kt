@@ -1,9 +1,7 @@
 package app.ui.userCreation
 
 import app.UIColorsObject.Colors
-import app.ui.styles.ButtonStyles
 import app.ui.userCreation.ViewModel.UserCreationViewModel
-import app.widgets.recordButton.RecordButton
 import app.ui.welcomeScreen.*
 import app.widgets.recordButton.RecordingAnimation
 import app.widgets.recordButton.DotsAnimation
@@ -18,9 +16,9 @@ import javafx.application.Platform
 import java.util.*
 import kotlin.concurrent.timerTask
 import app.ui.ProgressBar
-import io.reactivex.rxkotlin.subscribeBy
 import javafx.scene.Cursor
 import javafx.scene.control.Button
+import app.widgets.WidgetsStyles
 
 
 /*
@@ -50,8 +48,8 @@ class UserCreation : View() {
 
     //initialize close button to be used in top of borderpane
     val closeButton = button(messages["close"], closeIcon) {
-        importStylesheet(ButtonStyles::class)
-        addClass(ButtonStyles.rectangleButtonDefault)
+        importStylesheet(WidgetsStyles::class)
+        addClass(WidgetsStyles.rectangleButtonDefault)
 
         style {
             alignment = Pos.CENTER
@@ -85,8 +83,8 @@ class UserCreation : View() {
                 stackpane {
                     add(circleAnimation)
                    recordButton = button(countdown, graphic = micIcon) {
-                        importStylesheet(ButtonStyles::class)
-                        addClass(ButtonStyles.roundButton)
+                        importStylesheet(WidgetsStyles::class)
+                        addClass(WidgetsStyles.roundButton)
                         style {
                             backgroundColor += c(Colors["base"])
                             micIcon.fill = c(Colors["primary"])
