@@ -1,6 +1,7 @@
 package app.widgets
 
 import app.UIColorsObject
+import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -17,6 +18,7 @@ class WidgetsStyles : Stylesheet() {
         val roundButtonMedium by cssclass()
         val roundButtonMini by cssclass()
         val roundButton by cssclass()
+        val usersListCell by cssclass()
     }
 
     init {
@@ -130,6 +132,10 @@ class WidgetsStyles : Stylesheet() {
                 scaleX = 1.1
                 scaleY = 1.1
             }
+        }
+        usersListCell {
+            backgroundColor += Color.valueOf("#DFDEE3")
+            alignment = Pos.CENTER
         }
     }
 }

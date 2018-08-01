@@ -11,8 +11,6 @@ import app.widgets.profileIcon.ProfileIcon
 import app.widgets.WidgetsStyles
 import app.ui.welcomeScreen.View.WelcomeScreenStyles
 import java.io.File
-import app.ui.styles.LayoutStyles.Companion.windowView
-import app.ui.styles.LayoutStyles
 import app.ui.imageLoader
 
 
@@ -33,13 +31,8 @@ class WelcomeScreen : View() {
         importStylesheet(WelcomeScreenStyles::class)
         importStylesheet(WidgetsStyles::class)
         var recentUser: File? = null
-       // recentUser = File("/Users/antoniolopez/Documents/Work/8woc2018-jvm/src/main/resources/userIcons/userIcon1.svg")
-//        var recentUser: String? = model.imagePathProperty
         var profileImages = mutableListOf<File>()
-       // profileImages.add(File("/Users/antoniolopez/Documents/Work/8woc2018-jvm/src/main/resources/userIcons/userIcon1.svg"))
-        val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
-        importStylesheet(LayoutStyles:: class)
-        addClass(windowView)
+        addClass(WelcomeScreenStyles.windowView)
         vbox {
             addClass(WelcomeScreenStyles.welcomeBack)
             recentUser?.let {

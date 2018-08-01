@@ -8,8 +8,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import app.widgets.WidgetsStyles
 import tornadofx.*
-import app.ui.styles.LayoutStyles.Companion.usersListCell
-import app.ui.styles.LayoutStyles.Companion.usersListGrid
 import java.io.File
 
 class UsersList(listOfImageFiles: List<File>) : HBox() {
@@ -25,7 +23,7 @@ class UsersList(listOfImageFiles: List<File>) : HBox() {
 
         cellFormat {
             graphic = vbox(16) {
-                addClass(usersListCell)
+                addClass(WidgetsStyles.usersListCell)
                 //Small user icon in each cell
                 //"it" is equal the value of each iteration of datagrid parameter
                 button(graphic = imageLoader(it)) {

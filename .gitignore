@@ -114,3 +114,5 @@ hs_err_pid*
 *.mp4
 *.m4a
 *.aac
+
+/resources/userIcons
