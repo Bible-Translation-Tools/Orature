@@ -14,7 +14,7 @@ jobs:
       script: ./gradlew test
     - stage: build
       script: 
-        - .gradlew build
+        - ./gradlew build
 stages:
   - build
   - test
