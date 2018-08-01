@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4">
+  <component name="ExternalSystem" externalSystemModuleType="sourceSet" />
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
       <configuration version="3" platform="JVM 1.8" useProjectSettings="false">
@@ -24,4 +25,5 @@
       </configuration>
     </facet>
   </component>
+  <component name="TestModuleProperties" production-module="8woc2018-jvm_main" />
 </module>

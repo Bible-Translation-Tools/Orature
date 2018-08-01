@@ -10,9 +10,11 @@
 .idea/**/compiler.xml
 .idea/**/codeStyleConfig.xml
 .idea/**/kotlinc.xml
+
 .idea/**/misc.xml
 .idea/**/8woc2018-jvm_main.iml
 .idea/**/8woc2018-jvm_test.iml
+.idea/
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -98,3 +100,17 @@ gradle-app.setting
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+*.DS_STORE
+
+# Database files
+*.sqlite
+*.sqlite3
+
+# Audio files
+*.wav
+*.mp3
+*.flac
+*.mp4
+*.m4a
+*.aac

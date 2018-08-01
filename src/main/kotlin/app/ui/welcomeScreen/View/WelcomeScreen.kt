@@ -13,6 +13,10 @@ import javafx.scene.text.FontWeight
 import app.widgets.profileIcon.ProfileIcon
 import app.widgets.WidgetsStyles
 import app.ui.welcomeScreen.View.WelcomeScreenStyles
+import java.io.File
+import app.ui.styles.LayoutStyles.Companion.windowView
+import app.ui.styles.LayoutStyles
+import app.ui.imageLoader
 
 
 class WelcomeScreen : View() {
@@ -30,22 +34,46 @@ class WelcomeScreen : View() {
     val pad = 60.0
     private val welcomeScreen = hbox {
         importStylesheet(WelcomeScreenStyles::class)
+        importStylesheet(WidgetsStyles::class)
+        var recentUser: File? = null
+        recentUser = File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg")
+//        var recentUser: String? = model.imagePathProperty
+        var profileImages = mutableListOf<File>()
+        profileImages.add(File("C:\\Users\\fucat\\Documents\\repositories\\8woc2018-jvm\\src\\main\\resources\\userIcons\\userIcon1.svg"))
+        val addUserIcon = MaterialIconView(MaterialIcon.GROUP_ADD, "25px")
+        importStylesheet(ButtonStyles::class)
+        importStylesheet(LayoutStyles:: class)
+        addClass(windowView)
         vbox {
             addClass(WelcomeScreenStyles.welcomeBack)
-            add(ProfileIcon("12345678901", 150.0, true))
-            label(FX.messages["welcome"]).addClass(WelcomeScreenStyles.welcomeLabel)
-            val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
-            button("", homeIcon) {
-                importStylesheet(WidgetsStyles::class)
-                addClass(WidgetsStyles.alternateRectangleButton)
-                style {
-                    minWidth = 175.0.px
-                    homeIcon.fill = c(Colors["base"])
+            recentUser?.let {
+                add(stackpane {
+                    circle {
+                        radius = 120.0
+                        fill = c(Colors["baseBackground"])
+                    }
+                    button(graphic = imageLoader(recentUser)) {
+                        addClass(WidgetsStyles.roundButtonLarge)
+                    graphic.scaleX = 1.9
+                    graphic.scaleY = 1.9
+                    }
+                })
+                label(FX.messages["welcome"]).addClass(WelcomeScreenStyles.welcomeLabel)
+                val homeIcon = MaterialIconView(MaterialIcon.HOME, "25px")
+                button("", homeIcon) {
+                    importStylesheet(WidgetsStyles::class)
+                    addClass(WidgetsStyles.alternateRectangleButton)
+                    style {
+                        minWidth = 175.0.px
+                        homeIcon.fill = c(Colors["base"])
+                    }
                 }
             }
+
+
         }
         vbox {
-            add(UsersList())
+            if (profileImages.isNotEmpty()) add(UsersList(profileImages))
             style {
                 prefWidth = 1200.px
                 vgrow = Priority.ALWAYS

@@ -13,7 +13,7 @@ class RecordingAnimation : HBox() {
     val bigCircle = circle {
         centerX = 120.0
         centerY = 120.0
-        radius = 120.0;
+        radius = 120.0
         fill = c(Colors["baseBackground"])
     }
     val arc = arc {

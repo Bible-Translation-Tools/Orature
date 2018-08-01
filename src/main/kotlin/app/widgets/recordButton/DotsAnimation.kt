@@ -1,65 +1,44 @@
 package app.widgets.recordButton
 
+import app.UIColorsObject.Colors
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
-import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class DotsAnimation: HBox() {
+class DotsAnimation(var color:String = "#EEEEEE", var fillColor:String= "#CC4141") : HBox() {
+    var cir1: Circle
+    var cir2: Circle
+    var cir3: Circle
 
-
-    lateinit var cir1 :Circle
-    lateinit var cir2 :Circle
-    lateinit var cir3 :Circle
-
-    init{
-        spacing= 25.0
+    init {
+        spacing = 25.0
         alignment = Pos.CENTER
-         cir1 = circle{
-            //hide()
-            centerX = 10.0
-            centerY = 20.0
+        cir1 = circle {
             radius = 20.0
-            fill = c("#EDEDED")
+            fill = c(color)
         }
-
-         cir2= circle{
-             //hide()
-
-            isVisible = true
-            centerX = 100.0
-            centerY = 20.0
+        cir2 = circle {
             radius = 20.0
-            fill = c("#EDEDED")
+            fill = c(color)
         }
-
-         cir3=circle{
-            // hide()
-            isVisible = true
-            centerX = 200.0
-            centerY = 20.0
+        cir3 = circle {
             radius = 20.0
-            fill = c("#EDEDED")
+            fill = c(color)
         }
     }
 
-    fun showCircles() {
-        cir1.fill=c("#CC4141")
-        cir2.fill=c("#CC4141")
-        cir3.fill=c("#CC4141")
+    fun circleCountdown() {
+        cir1.fill = c(fillColor)
+        cir2.fill = c(fillColor)
+        cir3.fill = c(fillColor)
 
         var timer = Timer()
-        timer.schedule(timerTask { cir3.fill= c("#EDEDED") }, 1000)
-        timer.schedule(timerTask { cir2.fill=c("#EDEDED") }, 2000)
-        timer.schedule(timerTask { cir1.fill=c("#EDEDED") }, 3000)
-    }
-
-    fun invisible() {
-        cir1.fill= Color.WHITE
-        cir2.fill= Color.WHITE
-        cir3.fill= Color.WHITE
+        // the color is always going to be #0000 because it is transparent, this code makes the dots disappear
+        timer.schedule(timerTask { cir3.fill = c("#0000") }, 1000)
+        timer.schedule(timerTask { cir2.fill = c("#0000") }, 2000)
+        timer.schedule(timerTask { cir1.fill = c("#0000") }, 3000)
     }
 }

@@ -6,7 +6,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/8woc2018-jvm_main.iml" filepath="$PROJECT_DIR$/.idea/modules/8woc2018-jvm_main.iml" group="8woc2018-jvm" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/8woc2018-jvm_test.iml" filepath="$PROJECT_DIR$/.idea/modules/8woc2018-jvm_test.iml" group="8woc2018-jvm" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_main.iml" filepath="$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_main.iml" group="8woc2018-jvm" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_main~1.iml" filepath="$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_main~1.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_test.iml" filepath="$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_test.iml" group="8woc2018-jvm" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_test~1.iml" filepath="$PROJECT_DIR$/.idea/modules/repositories-8woc2018-jvm_test~1.iml" />
     </modules>
   </component>
 </project>

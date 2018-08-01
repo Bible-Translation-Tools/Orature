@@ -1,11 +1,11 @@
 package app
 
+import app.ui.profilePreview.View.ProfilePreview
 import app.ui.welcomeScreen.*
-import tornadofx.*;
+import tornadofx.*
+import java.util.*
 
-//Put the view you want before the double colon
-//Sub in other views to test them out by themselves
-class MyApp: App(WelcomeScreen::class)
+class MyApp : App(WelcomeScreen::class)
 
 //launch the app
 fun main(args: Array<String>) {

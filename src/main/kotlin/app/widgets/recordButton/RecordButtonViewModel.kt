@@ -7,35 +7,29 @@ import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class RecordButtonViewModel: ItemViewModel<Record>() {
+class RecordButtonViewModel : ItemViewModel<RecordState>() {
 
     var countdownTracker = SimpleStringProperty("")
     var recordingDone = SimpleBooleanProperty(false)
-    val audio = bind(Record::audio)
-    val image = bind(Record::image)
-    val recording = bind(Record::recording)
-
-
+    var isRecording = SimpleBooleanProperty(false)
 
     fun countdown() {
-
         Platform.runLater { countdownTracker.set("3") }
         setCountDown("2", 1)         // time in seconds
         setCountDown("1", 2)
         setCountDown("", 3)
-
     }
 
-    private fun setCountDown(text: String, time: Int){
+    private fun setCountDown(text: String, seconds: Int) {
         var timer = Timer()
-        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, time.toLong() * 1000 )
-
+        timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, seconds.toLong() * 1000)
     }
 
     fun changeIcon() {
-
         recordingDone.set(true)
-
     }
 
+    fun isRecording(bool: Boolean) {
+        isRecording.set(bool)
+    }
 }
