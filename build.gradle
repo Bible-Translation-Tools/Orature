@@ -3,6 +3,7 @@ buildscript {
 
     repositories {
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -22,12 +23,37 @@ sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    jcenter()
+    maven { url 'https://jitpack.io'}
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url 'https://mvnrepository.com/artifac/'}
+    maven { url  "https://dl.bintray.com/kotlin/exposed" }
+    maven { url  "https://dl.bintray.com/dua3/public" }
+
 }
 
 dependencies {
+    compile 'com.jfoenix:jfoenix:8.0.4'
+    compile "com.github.thomasnield:rxkotlinfx:2.2.2"
+    compile "io.reactivex.rxjava2:rxkotlin:2.2.0"
+    compile "no.tornado:tornadofx:1.7.16"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile "no.tornado:tornadofx:1.7.16"
+    compile 'io.reactivex.rxjava2:rxkotlin:2.2.0'
+    compile 'de.jensd:fontawesomefx-commons:9.1.2-jpms'
+    compile 'de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2-jpms'
+    compile 'de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms'
+    implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+    implementation 'com.github.afester.FranzXaver:Examples:0.1'
+    compile "com.github.thomasnield:rxkotlinfx:2.2.2" // optional
+    compile 'com.jfoenix:jfoenix:8.0.5' // Java 8
+    testCompile "org.mockito:mockito-core:2.+"
+    testCompile 'org.powermock:powermock-module-junit4:2.+'
+    testCompile 'org.powermock:powermock-module-junit4-rule:2.+'
+    testCompile 'org.powermock:powermock-api-mockito2:2.+'
 }
+
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
