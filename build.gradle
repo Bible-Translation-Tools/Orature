@@ -1,22 +1,33 @@
+import groovy.sql.Sql
+import org.ibex.nestedvm.util.Seekable
+
 buildscript {
     ext.kotlin_version = '1.2.41'
+    ext.requery_version = '1.5.1'
+    ext.sqlite_jdbc = '3.7.2'
+    ext.rxkotlin_version = '2.2.0'
 
     repositories {
         mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
+        classpath 'org.jooq:jooq-codegen:3.11.2'
+        classpath 'org.xerial:sqlite-jdbc:3.7.2'
     }
 }
 
 plugins {
     id 'java'
+    id 'nu.studer.jooq' version '3.0.1'
 }
 
 group 'org.wycliffeassociates.translationrecorder'
-version '1.0-SNAPSHOT'
+
 
 apply plugin: 'kotlin'
+apply plugin: 'kotlin-kapt'
 
 sourceCompatibility = 1.8
 
@@ -25,8 +36,35 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
+allprojects {
+    repositories {
+        maven { url "https://jitpack.io" }
+    }
+}
+
+configurations {
+    sqllite
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
+    compile "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
+    compile 'org.jooq:jooq:3.11.2'
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
+    jooqRuntime 'org.xerial:sqlite-jdbc:3.7.2'
+    sqllite 'org.xerial:sqlite-jdbc:3.7.2'
+    compile "com.squareup.retrofit2:retrofit:2.0.0"
+    compile "com.squareup.retrofit2:converter-moshi:2.0.0"
+    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    compile 'com.google.dagger:dagger:2.16'
+    kapt 'com.google.dagger:dagger-compiler:2.16'
+    testCompile "org.mockito:mockito-core:2.+"
+    implementation 'com.github.WycliffeAssociates:8woc2018-common:dev-SNAPSHOT'
+    kapt "io.requery:requery-processor:$requery_version"
+    compile "com.squareup.retrofit2:retrofit:2.0.0"
+    compile "com.squareup.retrofit2:converter-moshi:2.0.0"
+    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile 'no.tornado:tornadofx:1.7.16'
     implementation 'com.github.afester.FranzXaver:Examples:0.1'
@@ -39,6 +77,61 @@ dependencies {
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
-compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+URLClassLoader loader = GroovyObject.class.classLoader
+configurations.sqllite.each { File file ->
+    loader.addURL(file.toURL())
+}
+
+ext {
+    sqlDirPath = "src" + File.separator + "main" + File.separator + "Resources" + File.separator + "TestAppDbInit.sql"
+}
+
+
+task createDb {
+    def driverName = 'org.sqlite.JDBC'
+    Class.forName(driverName)
+    def sql = Sql.newInstance('jdbc:sqlite:test.sqlite', "org.sqlite.JDBC")
+    String[] text = new File(sqlDirPath).text.split(';')
+    text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
+        sql = Sql.newInstance('jdbc:sqlite:test.sqlite', "org.sqlite.JDBC")
+        sql.execute(it)
+        sql.close()
+    }
+}
+compileKotlin.dependsOn createDb
+
+
+jooq {
+    version = '3.11.2'
+    edition = 'OSS'
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.sqlite.JDBC'
+            url = 'jdbc:sqlite:test.sqlite'
+        }
+        generator {
+            database {
+                name = 'org.jooq.meta.sqlite.SQLiteDatabase'
+            }
+            generate {
+                pojos = true
+                daos = true
+            }
+
+            target {
+                packageName = 'jooq'
+                directory = 'src/main/java'
+            }
+        }
+    }
+}
+compileKotlin.dependsOn generateSampleJooqSchemaSource
+
+clean.doLast {
+    project.file('src/main/java/jooq').deleteDir()
 }
