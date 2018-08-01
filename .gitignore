@@ -7,13 +7,7 @@
 .idea/**/dictionaries
 .idea/**/shelf
 .idea/**/vcs.xml
-.idea/**/compiler.xml
-.idea/**/codeStyleConfig.xml
 .idea/**/kotlinc.xml
-
-.idea/**/misc.xml
-.idea/**/8woc2018-jvm_main.iml
-.idea/**/8woc2018-jvm_test.iml
 .idea/
 
 # Sensitive or high-churn files
@@ -101,7 +95,9 @@ gradle-app.setting
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-*.DS_STORE
+
+# DS_Store for mac users
+*.DS_Store
 
 # Database files
 *.sqlite
@@ -115,4 +111,8 @@ hs_err_pid*
 *.m4a
 *.aac
 
-/resources/userIcons
+
+# ignores jooq generated files
+/src/main/java/jooq/
+
+*.iml
