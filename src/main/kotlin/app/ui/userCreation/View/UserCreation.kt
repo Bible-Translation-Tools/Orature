@@ -19,6 +19,7 @@ import app.ui.ProgressBar
 import javafx.scene.Cursor
 import javafx.scene.control.Button
 import app.widgets.WidgetsStyles
+import javafx.scene.shape.Circle
 
 
 /*
@@ -36,7 +37,6 @@ class UserCreation : View() {
     private val dotsAnimation = DotsAnimation()
     private val countdown = viewModel.countdownTracker
     private val progressBar = ProgressBar()
-    private var buttonIcon: MaterialIconView? = null
     val isRecording = viewModel.isRecording
     val doneRecording = viewModel.doneRecording
     val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
@@ -81,8 +81,12 @@ class UserCreation : View() {
             vbox(8) {
                 alignment = Pos.CENTER
                 stackpane {
-                    add(circleAnimation)
-                   recordButton = button(countdown, graphic = micIcon) {
+                       alignment=Pos.CENTER
+                           add(circleAnimation)
+                           circleAnimation.children.style {
+                               fill = c(Colors["baseBackground"])
+                           }
+                    recordButton = button(countdown, graphic = micIcon) {
                         importStylesheet(WidgetsStyles::class)
                         addClass(WidgetsStyles.roundButton)
                         style {
@@ -98,15 +102,15 @@ class UserCreation : View() {
                         action {
                             if (isRecording.value == false) {
                                 graphic.hide()
-                                dotsAnimation.circleCountdown()
+                                dotsAnimation.circleCountdown(Colors["primary"])
                                 viewModel.countdown()
                                 viewModel.recordClicked()
                                 timer.schedule(timerTask {
                                     Platform.runLater {
-                                        circleAnimation.animate()
+                                        circleAnimation.animate(Colors["primary"])
                                         stopIcon.fill = c(Colors["primary"])
-                                        dotsAnimation.hide()
                                         graphic = stopIcon
+                                        dotsAnimation.hide()
                                         graphic.show()
                                     }
                                 }, COUNTDOWN_TIME)
@@ -114,7 +118,7 @@ class UserCreation : View() {
                                     Platform.runLater {
                                         find(UserCreation::class).replaceWith(ProfilePreview::class)
                                         val newMicIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
-                                        newMicIcon.fill=c(Colors["primary"])
+                                        newMicIcon.fill = c(Colors["primary"])
                                         graphic = newMicIcon
                                         dotsAnimation.show()
                                     }
@@ -123,7 +127,7 @@ class UserCreation : View() {
                                 dotsAnimation.show()
                                 circleAnimation.stop()
                                 val newMicIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
-                                newMicIcon.fill=c(Colors["primary"])
+                                newMicIcon.fill = c(Colors["primary"])
                                 graphic = newMicIcon
                                 find(UserCreation::class).replaceWith(ProfilePreview::class)
                             }
@@ -131,9 +135,8 @@ class UserCreation : View() {
                     }
                 }
                 add(dotsAnimation)
-                dotsAnimation.style {
-                    backgroundColor += c(Colors["transparent"])
-                    borderColor += box(c(Colors["transparent"]))
+                dotsAnimation.children.style {
+                    fill = c(Colors["baseBackground"])
                 }
             }
         }
@@ -144,7 +147,7 @@ class UserCreation : View() {
         viewModel.stopCountdown()
         circleAnimation.stop()
         circleAnimation.reset()
-        dotsAnimation.resetCircles()
+        dotsAnimation.resetCircles(Colors["baseBackground"])
         timer.cancel()
         timer.purge()
     }
@@ -157,7 +160,7 @@ class UserCreation : View() {
         find(UserCreation::class).replaceWith(WelcomeScreen::class)
         dotsAnimation.show()
         val newMicIcon = MaterialIconView(MaterialIcon.MIC_NONE, "100px")
-        newMicIcon.fill=c(Colors["primary"])
+        newMicIcon.fill = c(Colors["primary"])
         recordButton?.graphic = newMicIcon
     }
 

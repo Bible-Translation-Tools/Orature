@@ -8,7 +8,7 @@ import tornadofx.*
 import java.util.*
 import kotlin.concurrent.timerTask
 
-class DotsAnimation(var color:String = "#EEEEEE", var fillColor:String= "#CC4141") : HBox() {
+class DotsAnimation : HBox() {
     var cir1: Circle
     var cir2: Circle
     var cir3: Circle
@@ -18,33 +18,30 @@ class DotsAnimation(var color:String = "#EEEEEE", var fillColor:String= "#CC4141
         alignment = Pos.CENTER
         cir1 = circle {
             radius = 20.0
-            fill = c(color)
         }
         cir2 = circle {
             radius = 20.0
-            fill = c(color)
         }
         cir3 = circle {
             radius = 20.0
-            fill = c(color)
         }
     }
 
-    fun circleCountdown() {
+    fun circleCountdown(fillColor: String = "#CC4141", emptyFill: String = "#EDEDED") {
         cir1.fill = c(fillColor)
         cir2.fill = c(fillColor)
         cir3.fill = c(fillColor)
 
         var timer = Timer()
         // the color is always going to be #0000 because it is transparent, this code makes the dots disappear
-        timer.schedule(timerTask { cir3.fill = c(color) }, 1000)
-        timer.schedule(timerTask { cir2.fill = c(color) }, 2000)
-        timer.schedule(timerTask { cir1.fill = c(color) }, 3000)
+        timer.schedule(timerTask { cir3.fill = c(emptyFill) }, 1000)
+        timer.schedule(timerTask { cir2.fill = c(emptyFill) }, 2000)
+        timer.schedule(timerTask { cir1.fill = c(emptyFill) }, 3000)
     }
 
-    fun resetCircles() {
-        cir1.fill = c(color)
-        cir2.fill = c(color)
-        cir3.fill = c(color)
+    fun resetCircles(emptyFill: String = "#EDEDED") {
+        cir1.fill = c(emptyFill)
+        cir2.fill = c(emptyFill)
+        cir3.fill = c(emptyFill)
     }
 }

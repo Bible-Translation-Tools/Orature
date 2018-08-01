@@ -35,7 +35,6 @@ class ProfilePreview : View() {
                 alignment = Pos.CENTER
                 closeIcon.fill =c(Colors["primary"])
                 effect = DropShadow(10.0, c(Colors["baseBackground"]))
-
             }
             action {
                 find(ProfilePreview::class).replaceWith(WelcomeScreen::class)  // navigate to home, todo implement ui navigator
@@ -157,8 +156,6 @@ class ProfilePreview : View() {
             }
         }
     }
-
-
     init {
         viewModel.newIconHash("12345678901") // set an icon hash string to the subject iconHash declared in top
     }

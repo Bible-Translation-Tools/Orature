@@ -30,10 +30,11 @@ class UserCreationViewModel() : ViewModel() {
     private fun setCountDown(text: String, seconds: Int) {
         timer.schedule(timerTask { Platform.runLater { countdownTracker.set(text) } }, seconds.toLong() * 1000)
     }
+
     fun stopCountdown() {
         countdownTracker.set("")
-        timer?.cancel()
-        timer?.purge()
+        timer.cancel()
+        timer.purge()
     }
 
     fun recordClicked() {
