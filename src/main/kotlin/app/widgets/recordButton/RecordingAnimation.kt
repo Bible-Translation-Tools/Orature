@@ -13,35 +13,35 @@ import java.time.Duration
 
 class RecordingAnimation : HBox() {
     var animation: Timeline? = null
-    var arc: Arc? = null
-    var circle: Circle? = null
+    var arc = arc {
+        centerX = 120.0
+        centerY = 120.0
+        radiusX = 120.0
+        radiusY = 120.0
+        startAngle = -270.0
+        type = ArcType.ROUND
+    }
+    var circle = circle {
+        centerX = 120.0
+        centerY = 120.0
+        radius = 120.0
+        fill = c("#EDEDED")
+    }
 
 
     init {
         alignment = Pos.CENTER
         pane {
-            circle {
-                centerX = 120.0
-                centerY = 120.0
-                radius = 120.0
-                fill = c("#EDEDED")
-            }
-            arc = arc {
-                centerX = 120.0
-                centerY = 120.0
-                radiusX = 120.0
-                radiusY = 120.0
-                startAngle = -270.0
-                type = ArcType.ROUND
-            }
+            add(circle)
+            add(arc)
         }
     }
 
     fun animate(arcFill: String) {
-        arc?.fill = (c(arcFill))
+        arc.fill = (c(arcFill))
         animation = timeline {
             keyframe(javafx.util.Duration.millis(3000.0)) {
-                keyvalue(arc!!.lengthProperty(), -360.0)
+                keyvalue(arc.lengthProperty(), -360.0)
             }
         }
     }
@@ -53,7 +53,7 @@ class RecordingAnimation : HBox() {
     fun reset() {
         animation = timeline {
             keyframe(javafx.util.Duration.millis(100.0)) {
-                keyvalue(arc!!.lengthProperty(), 0.0)
+                keyvalue(arc.lengthProperty(), 0.0)
             }
         }
     }
