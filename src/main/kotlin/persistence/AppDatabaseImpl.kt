@@ -1,6 +1,5 @@
 package persistence
 
-import app.filesystem.DirectoryProvider
 import data.dao.Dao
 import data.dao.LanguageDao
 import data.model.*
@@ -34,7 +33,7 @@ object AppDatabaseImpl : AppDatabase {
 
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:${DirectoryProvider("8woc2018")
-                .getAppDataDirectory("", false)}${FileSystems.getDefault().separator}content.sqlite"
+                .getAppDataDirectory()}${FileSystems.getDefault().separator}content.sqlite"
         sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
         config = DSL.using(sqLiteDataSource, SQLDialect.SQLITE).configuration()
         val file = File("src${File.separator}main${File.separator}Resources${File.separator}TestAppDbInit.sql")
