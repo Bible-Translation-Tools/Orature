@@ -17,7 +17,7 @@ import app.widgets.WidgetsStyles
 
 class ProfilePreview : View() {
 
-    private val viewModel = ProfilePreviewViewModel()
+    private val viewModel :  ProfilePreviewViewModel by inject()
     var iconHash = viewModel.userIconHash
     var onClickNext = viewModel.onClickNext
     var onClickRedo = viewModel.onClickRedo
