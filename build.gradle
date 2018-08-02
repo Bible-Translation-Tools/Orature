@@ -103,8 +103,6 @@ task createDb {
         sql.close()
     }
 }
-compileKotlin.dependsOn createDb
-
 
 jooq {
     version = '3.11.2'
@@ -130,7 +128,9 @@ jooq {
         }
     }
 }
+generateSampleJooqSchemaSource.dependsOn createDb
 compileKotlin.dependsOn generateSampleJooqSchemaSource
+
 
 clean.doLast {
     project.file('src/main/java/jooq').deleteDir()
