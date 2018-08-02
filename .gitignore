@@ -111,8 +111,8 @@ hs_err_pid*
 *.m4a
 *.aac
 
+
 # ignores jooq generated files
 /src/main/java/jooq/
 
 *.iml
-
