@@ -95,3 +95,5 @@ hs_err_pid*
 
 # DS_Store files for mac users
 *.DS_Store
+
+*.iml
