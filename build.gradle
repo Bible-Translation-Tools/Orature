@@ -25,7 +25,7 @@ plugins {
 }
 
 group 'org.wycliffeassociates.translationrecorder'
-version '1.0-SNAPSHOT'
+
 
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
@@ -58,6 +58,23 @@ dependencies {
     compile "io.reactivex.rxjava2:rxkotlin:2.2.0"
     compile "no.tornado:tornadofx:1.7.16"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
+    compile "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
+    compile 'org.jooq:jooq:3.11.2'
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
+    jooqRuntime 'org.xerial:sqlite-jdbc:3.7.2'
+    sqllite 'org.xerial:sqlite-jdbc:3.7.2'
+    compile "com.squareup.retrofit2:retrofit:2.0.0"
+    compile "com.squareup.retrofit2:converter-moshi:2.0.0"
+    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    compile 'com.google.dagger:dagger:2.16'
+    kapt 'com.google.dagger:dagger-compiler:2.16'
+    testCompile "org.mockito:mockito-core:2.+"
+    implementation 'com.github.WycliffeAssociates:8woc2018-common:dev-SNAPSHOT'
+    kapt "io.requery:requery-processor:$requery_version"
+    compile "com.squareup.retrofit2:retrofit:2.0.0"
+    compile "com.squareup.retrofit2:converter-moshi:2.0.0"
+    compile 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile "no.tornado:tornadofx:1.7.16"
     compile 'io.reactivex.rxjava2:rxkotlin:2.2.0'
@@ -108,7 +125,11 @@ configurations.sqllite.each { File file ->
 }
 
 ext {
+<<<<<<< HEAD
     sqlDirPath = "src" + File.separator + "main" + File.separator + "resources" + File.separator + "TestAppDbInit.sql"
+=======
+    sqlDirPath = "src" + File.separator + "main" + File.separator + "Resources" + File.separator + "TestAppDbInit.sql"
+>>>>>>> 3d990f4ffda9ed2596a3b8109c514ccb1c48109e
 }
 
 
@@ -155,3 +176,4 @@ compileKotlin.dependsOn generateSampleJooqSchemaSource
 clean.doLast {
     project.file('src/main/java/jooq').deleteDir()
 }
+
