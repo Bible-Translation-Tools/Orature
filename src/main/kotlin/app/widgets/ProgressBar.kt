@@ -15,9 +15,10 @@ import kotlin.concurrent.thread
  * sweet code for a heckin cool loading bar
  */
 class ProgressBar : VBox() {
+    @Volatile var isItDone = false
+
     init {
         importStylesheet("/progressbar.css")
-        var isItDone = false
 
         style {
             alignment = Pos.CENTER
