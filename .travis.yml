@@ -10,11 +10,8 @@ cache:
     - $HOME/.gradle/wrapper
 jobs:
   include:
-    - stage: test
-      script: ./gradlew test
     - stage: build
       script: 
         - ./gradlew build
 stages:
   - build
-  - test
