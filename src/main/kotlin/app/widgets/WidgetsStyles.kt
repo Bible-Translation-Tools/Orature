@@ -1,8 +1,9 @@
 package app.widgets
 
-import app.UIColorsObject
+import app.UIColorsObject.Colors
 import javafx.geometry.Pos
 import javafx.scene.Cursor
+import javafx.scene.control.ContentDisplay
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import tornadofx.*
@@ -19,13 +20,17 @@ class WidgetsStyles : Stylesheet() {
         val roundButtonMini by cssclass()
         val roundButton by cssclass()
         val usersListCell by cssclass()
+        val nextButtonReady by cssclass()
+        val nextButtonNotReady by cssclass()
+
+        val nextArrow by cssid("nextArrow")
     }
 
     init {
         val rectangleButtonStyle = mixin {
             minWidth = 100.0.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, c(UIColorsObject.Colors["baseBackground"]))
+            effect = DropShadow(10.0, c(Colors["baseBackground"]))
             and(hover) {
                 scaleX = 1.1
                 scaleY = 1.1
@@ -100,6 +105,38 @@ class WidgetsStyles : Stylesheet() {
         usersListCell {
             backgroundColor += Color.valueOf("#DFDEE3")
             alignment = Pos.CENTER
+        }
+        nextButtonReady {
+            alignment = Pos.CENTER
+            contentDisplay = ContentDisplay.RIGHT
+            textFill = c(Colors["base"])
+            backgroundColor += c(Colors["primary"])
+            minWidth = 200.px
+            cursor = Cursor.HAND
+            opacity = 0.75
+
+            s(nextArrow) {
+                fill = c(Colors["base"])
+            }
+
+            and(hover) {
+                opacity = 1.0
+                scaleX = 1.1
+                scaleY = 1.1
+                effect = DropShadow(5.0, c(Colors["primary"]))
+            }
+        }
+        nextButtonNotReady {
+            alignment = Pos.CENTER
+            contentDisplay = ContentDisplay.RIGHT
+            textFill = c(Colors["baseText"])
+            backgroundColor += c(Colors["baseMedium"])
+            minWidth = 200.px
+            cursor = Cursor.HAND
+
+            s(nextArrow) {
+                fill = c(Colors["baseText"])
+            }
         }
     }
 }

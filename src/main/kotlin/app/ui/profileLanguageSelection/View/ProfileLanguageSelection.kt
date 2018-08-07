@@ -19,7 +19,9 @@ class ProfileLanguageSelection : View() {
     private val compositeDisposable = CompositeDisposable()
     private val viewModel = ProfileLanguageSelectionViewModel()
 
-    private val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+    private val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px").apply {
+        this.id = "nextArrow"
+    }
     private val closeIcon = MaterialIconView(MaterialIcon.CLOSE, "25px")
 
     private val hint = messages["languageSelectorHint"]
@@ -35,31 +37,63 @@ class ProfileLanguageSelection : View() {
                     viewModel.updateSelectedTargetLanguages(it)
                 },
                 viewModel.updatePreferredTarget.subscribe {
-                    viewModel.updateSelectedSourceLanguages(it)
+                    viewModel.updatePreferredTargetLanguage(it)
                 },
                 viewModel.updateSelectedSources.subscribe {
-                    viewModel.updatePreferredTargetLanguages(it)
+                    viewModel.updateSelectedSourceLanguages(it)
                 },
                 viewModel.updatePreferredSource.subscribe {
-                    viewModel.updatePreferredSourceLanguages(it)
+                    viewModel.updatePreferredSourceLanguage(it)
                 }
         )
 
         with(root) {
             importStylesheet(LanguageSelectorStyle::class)
 
+            // close button
+            top = hbox {
+                alignment = Pos.BOTTOM_RIGHT
+                button(messages["close"], closeIcon) {
+                    importStylesheet(WidgetsStyles::class)
+                    addClass(WidgetsStyles.rectangleButtonDefault)
+                    style {
+                        alignment = Pos.CENTER
+                        closeIcon.fill =c(Colors["primary"])
+                        effect = DropShadow(10.0, c(Colors["baseMedium"]))
+                    }
+                    action {
+                        find(ProfileLanguageSelection::class).replaceWith(WelcomeScreen::class)
+                    }
+                }
+
+                style {
+                    alignment = javafx.geometry.Pos.BOTTOM_RIGHT
+                    paddingRight = 40.0
+                    paddingTop = 40.0
+                }
+            }
+
+            // next button
             bottom = hbox {
                 alignment = Pos.TOP_RIGHT
                 button(messages["next"], rightArrow) {
-                    addClass(WidgetsStyles.rectangleButtonDefault)
-                    /*style {
-                        backgroundColor = multi(c(Colors["primaryShade"]), c(Colors["primary"]))
-                        textFill = c(Colors["base"])
-                        alignment = Pos.CENTER
-                        rightArrow.fill = c(Colors["base"])
-                        minWidth = 200.px
-                    }*/
+                    disableProperty().bind(!viewModel.isNextAvailable)
+
+                    importStylesheet(WidgetsStyles::class)
+                    addClass(WidgetsStyles.nextButtonNotReady)
+
+                }.apply {
+                    disabledProperty().onChange {
+                        if (it) {
+                            removeClass(WidgetsStyles.nextButtonReady)
+                            addClass(WidgetsStyles.nextButtonNotReady)
+                        } else {
+                            removeClass(WidgetsStyles.nextButtonNotReady)
+                            addClass(WidgetsStyles.nextButtonReady)
+                        }
+                    }
                 }
+
                 style {
                     alignment = javafx.geometry.Pos.TOP_RIGHT
                     paddingRight = 40.0
@@ -67,25 +101,7 @@ class ProfileLanguageSelection : View() {
                     paddingTop = 40.0
                 }
             }
-            top = hbox {
-                alignment = Pos.BOTTOM_RIGHT
-                button(messages["close"], closeIcon) {
-                    addClass(WidgetsStyles.rectangleButtonDefault)
-                    style {
-                        alignment = Pos.CENTER
-                        closeIcon.fill = c(Colors["primary"])
-                        effect = DropShadow(10.0, c(Colors["baseMedium"]))
-                    }
-                    action {
-                        find(ProfileLanguageSelection::class).replaceWith(WelcomeScreen::class)
-                    }
-                }
-                style {
-                    alignment = javafx.geometry.Pos.BOTTOM_RIGHT
-                    paddingRight = 40.0
-                    paddingTop = 40.0
-                }
-            }
+
             // target languages
             left = LanguageSelector(
                     viewModel.getTargetLanguageOptions(),

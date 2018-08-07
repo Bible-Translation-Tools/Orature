@@ -14,7 +14,7 @@ class ProfileLanguageSelectionViewModel {
     val updatePreferredTarget = PublishSubject.create<Language>()
     val updatePreferredSource = PublishSubject.create<Language>()
 
-    val isNextAvailible = SimpleBooleanProperty(false)
+    val isNextAvailable = SimpleBooleanProperty(false)
 
     fun getTargetLanguageOptions() : List<Language> {
         return model.languageVals //normally would be non gateway languages
@@ -42,15 +42,16 @@ class ProfileLanguageSelectionViewModel {
         languagesSelected()
     }
 
-    fun updatePreferredTargetLanguages(language : Language) {
+    fun updatePreferredTargetLanguage(language : Language) {
         model.preferredTargetLanguage = language
     }
 
-    fun updatePreferredSourceLanguages(language : Language) {
+    fun updatePreferredSourceLanguage(language : Language) {
         model.preferredSourceLanguage = language
     }
 
     private fun languagesSelected() {
-        isNextAvailible.set(model.selectedSourceLanguages.isNotEmpty() && model.selectedTargetLanguages.isNotEmpty())
+        isNextAvailable.set(model.selectedSourceLanguages.isNotEmpty() && model.selectedTargetLanguages.isNotEmpty())
     }
+
 }
