@@ -36,7 +36,7 @@ object AppDatabaseImpl : AppDatabase {
                 .getAppDataDirectory()}${FileSystems.getDefault().separator}content.sqlite"
         sqLiteDataSource.config.toProperties().setProperty("foreign_keys", "true")
         config = DSL.using(sqLiteDataSource, SQLDialect.SQLITE).configuration()
-        val file = File("src${File.separator}main${File.separator}Resources${File.separator}TestAppDbInit.sql")
+        val file = File("src${File.separator}main${File.separator}Resources${File.separator}createAppDb.sql")
         var sql = StringBuffer()
         file.forEachLine {
             sql.append(it)
