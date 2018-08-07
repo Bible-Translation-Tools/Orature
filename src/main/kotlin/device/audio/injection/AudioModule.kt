@@ -4,7 +4,6 @@ import dagger.Module
 import dagger.Provides
 import device.IAudioRecorder
 import device.IAudioPlayer
-import device.IAudioPlayer
 import device.audio.AudioPlayer
 import device.audio.AudioRecorderImpl
 import javax.inject.Singleton

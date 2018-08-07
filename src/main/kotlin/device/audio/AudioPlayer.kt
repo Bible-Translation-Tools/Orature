@@ -11,7 +11,7 @@ class AudioPlayer: IAudioPlayer {
 
     private var clip: Clip = AudioSystem.getClip()
 
-    fun load(file: File): Completable {
+    override fun load(file: File): Completable {
         pause()
         if (clip.isOpen) clip.close()
         clip = AudioSystem.getClip()
@@ -21,32 +21,32 @@ class AudioPlayer: IAudioPlayer {
         }.subscribeOn(Schedulers.io())
     }
 
-    fun play() {
+    override fun play() {
         if (!clip.isRunning) clip.start()
     }
 
-    fun pause() {
+    override fun pause() {
         if (clip.isRunning) clip.stop()
     }
 
-    fun stop() {
+    override fun stop() {
         pause()
         clip.framePosition = 0
     }
 
-    fun getAbsoluteDurationInFrames(): Int {
+    override fun getAbsoluteDurationInFrames(): Int {
         return clip.frameLength
     }
 
-    fun getAbsoluteDurationMs(): Int {
+    override fun getAbsoluteDurationMs(): Int {
         return (getAbsoluteDurationInFrames() / 44.1).toInt()
     }
 
-    fun getAbsoluteLocationInFrames(): Int {
+    override fun getAbsoluteLocationInFrames(): Int {
         return clip.framePosition
     }
 
-    fun getAbsoluteLocationMs(): Int {
+    override fun getAbsoluteLocationMs(): Int {
         return (getAbsoluteLocationInFrames() / 44.1).toInt()
     }
 }
