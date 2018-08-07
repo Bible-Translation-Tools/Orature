@@ -61,6 +61,48 @@ class TestDirectoryProvider {
             )
     )
 
+    val USERIMAGE_TESTS_TABLE = listOf(
+            mapOf(
+                    "expected" to "/Users/edvin/Library/Application Support/translationRecorder/users/images",
+                    "os" to "Mac OS X",
+                    "separator" to "/",
+                    "appdata" to "/Users/edvin"
+            ),
+            mapOf(
+                    "expected" to "/home/edvin/.config/translationRecorder/users/images",
+                    "os" to "Linux",
+                    "separator" to "/",
+                    "appdata" to "/home/edvin"
+            ),
+            mapOf(
+                    "expected" to "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\users\\images",
+                    "os" to "Windows 10",
+                    "separator" to "\\",
+                    "appdata" to "C:\\Users\\Edvin\\AppData\\Roaming"
+            )
+    )
+
+    val USERAUDIO_TESTS_TABLE = listOf(
+            mapOf(
+                    "expected" to "/Users/edvin/Library/Application Support/translationRecorder/users/audio",
+                    "os" to "Mac OS X",
+                    "separator" to "/",
+                    "appdata" to "/Users/edvin"
+            ),
+            mapOf(
+                    "expected" to "/home/edvin/.config/translationRecorder/users/audio",
+                    "os" to "Linux",
+                    "separator" to "/",
+                    "appdata" to "/home/edvin"
+            ),
+            mapOf(
+                    "expected" to "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\users\\audio",
+                    "os" to "Windows 10",
+                    "separator" to "\\",
+                    "appdata" to "C:\\Users\\Edvin\\AppData\\Roaming"
+            )
+    )
+
     @Before
     fun setup() {
         // setup up the mock of System
@@ -71,7 +113,7 @@ class TestDirectoryProvider {
     }
 
     @Test
-    fun testIfCorrectAppDataDirectoryPathIsReturnedForEachPlatform() {
+    fun testIfCorrectAppDataDirectoryIsReturnedForEachPlatform() {
         for (testCase in APPDATA_TESTS_TABLE) {
             // define the expected result
             val expected = File(testCase["expected"])
@@ -85,24 +127,25 @@ class TestDirectoryProvider {
             }
 
             // get the result
-            val result = DirectoryProvider("translationRecorder")
+            val fileResult = DirectoryProvider("translationRecorder")
                     .getAppDataDirectory("database")
 
             // assert
             try {
-                assertEquals(expected, result)
+                assertEquals(expected, fileResult)
             } catch (e: AssertionError) {
                 // failed the assert
                 println("Input OS: ${testCase["os"]}")
                 println("Expected: $expected")
-                println("Result:   $result")
+                println("Result:   $fileResult")
                 throw e
             }
+            if (fileResult.exists()) fileResult.delete()
         }
     }
 
     @Test
-    fun testIfCorrectUserDataDirectoryPathIsReturnedForEachPlatform() {
+    fun testIfCorrectUserDataDirectoryIsReturnedForEachPlatform() {
         for (testCase in USERDATA_TESTS_TABLE) {
             // configure for OS responses
             Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
@@ -110,18 +153,73 @@ class TestDirectoryProvider {
             Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["home"])
 
             // get the result
-            val result = DirectoryProvider("translationRecorder")
+            val fileResult = DirectoryProvider("translationRecorder")
                     .getUserDataDirectory("Projects")
 
             // assert
             try {
-                assertEquals(File(testCase["expected"]), result)
+                assertEquals(File(testCase["expected"]), fileResult)
             } catch (e: AssertionError) {
                 println("Input OS: ${testCase["os"]}")
                 println("Expected: ${testCase["expected"]}")
-                println("Result:   $result")
+                println("Result:   $fileResult")
                 throw e
             }
+            if (fileResult.exists()) fileResult.delete()
+        }
+    }
+
+    @Test
+    fun testIfCorrectUserProfileImageDirectoryIsReturnedForEachPlatform() {
+        for (testCase in USERIMAGE_TESTS_TABLE) {
+            // configure for OS responses
+            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
+            BDDMockito.`when`(mockFileSystem.separator).thenReturn(testCase["separator"])
+            when (testCase["os"]) {
+                "Windows 10" -> Mockito.`when`(System.getenv("APPDATA")).thenReturn(testCase["appdata"])
+                else -> Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["appdata"])
+            }
+
+            // get the result
+            val fileResult = DirectoryProvider("translationRecorder").userProfileImageDirectory
+
+            // assert
+            try {
+                assertEquals(File(testCase["expected"]), fileResult)
+            } catch (e: AssertionError) {
+                println("Input OS: ${testCase["os"]}")
+                println("Expected: ${testCase["expected"]}")
+                println("Result:   $fileResult")
+                throw e
+            }
+            if (fileResult.exists()) fileResult.delete()
+        }
+    }
+
+    @Test
+    fun testIfCorrectUserProfileAudioDirectoryIsReturnedForEachPlatform() {
+        for (testCase in USERAUDIO_TESTS_TABLE) {
+            // configure for OS responses
+            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
+            BDDMockito.`when`(mockFileSystem.separator).thenReturn(testCase["separator"])
+            when (testCase["os"]) {
+                "Windows 10" -> Mockito.`when`(System.getenv("APPDATA")).thenReturn(testCase["appdata"])
+                else -> Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["appdata"])
+            }
+
+            // get the result
+            val fileResult = DirectoryProvider("translationRecorder").userProfileAudioDirectory
+
+            // assert
+            try {
+                assertEquals(File(testCase["expected"]), fileResult)
+            } catch (e: AssertionError) {
+                println("Input OS: ${testCase["os"]}")
+                println("Expected: ${testCase["expected"]}")
+                println("Result:   $fileResult")
+                throw e
+            }
+            if (fileResult.exists()) fileResult.delete()
         }
     }
 
