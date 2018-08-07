@@ -2,14 +2,14 @@ package usecases
 
 import api.Door43Client
 import api.model.Door43Mapper
-import persistence.injection.DaggerDatabaseComponent
+import persistence.injection.DaggerPersistenceComponent
 
 class InitializeLanguageDatabaseUseCase {
 
-    private val languageDao = DaggerDatabaseComponent
+    private val languageDao = DaggerPersistenceComponent
             .builder()
             .build()
-            .inject()
+            .injectDatabase()
             .getLanguageDao()
 
     private val door43Client = Door43Client()
