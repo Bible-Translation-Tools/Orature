@@ -9,4 +9,7 @@ interface IDirectoryProvider {
 
     // create a directory to store the application's private data
     fun getAppDataDirectory(appendedPath: String = "") : File
+
+    val userProfileImageDirectory: File
+    val userProfileAudioDirectory: File
 }
