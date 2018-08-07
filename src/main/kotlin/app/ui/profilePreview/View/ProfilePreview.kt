@@ -1,13 +1,13 @@
 package app.ui.profilePreview.View
 
 import app.UIColorsObject.Colors
-import app.ui.userCreation.*
+import app.ui.userCreation.UserCreation
 import app.ui.profilePreview.ViewModel.ProfilePreviewViewModel
+import app.ui.profileLanguageSelection.View.ProfileLanguageSelection
 import app.widgets.profileIcon.ProfileIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.subjects.PublishSubject
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
@@ -21,7 +21,7 @@ class ProfilePreview : View() {
     var iconHash = viewModel.userIconHash
     var onClickNext = viewModel.onClickNext
     var onClickRedo = viewModel.onClickRedo
-    var audioListened =viewModel.audioListened
+    var audioListened = viewModel.audioListened
     var newUserButton = ProfileIcon("12345678901", 152.0)
     private val micIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
     private val rightArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
@@ -141,6 +141,10 @@ class ProfilePreview : View() {
                                 fontSize = 2.em
                             }
                             // TODO("insert action here when user clicks next button")
+                            action {
+                                viewModel.hasBeenPlayed(false)
+                                find(ProfilePreview::class).replaceWith(ProfileLanguageSelection::class)
+                            }
                         }
                     }
 
@@ -159,4 +163,6 @@ class ProfilePreview : View() {
     init {
         viewModel.newIconHash("12345678901") // set an icon hash string to the subject iconHash declared in top
     }
+
 }
+

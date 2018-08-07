@@ -1,7 +1,7 @@
-package app.ui
+package app.ui.languageSelectorFragment
 
 import data.model.Language
-import widgets.ComboBoxSelectionItem
+import app.widgets.filterableComboBox.ComboBoxSelectionItem
 
 /**
  * This class takes in a language object, creates a string to be displayed in the ComboBox, and creates a list

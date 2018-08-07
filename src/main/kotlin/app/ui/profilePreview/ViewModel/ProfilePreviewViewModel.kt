@@ -1,6 +1,7 @@
 package app.ui.profilePreview.ViewModel
 
 import app.ui.profilePreview.Model.ProfilePreviewModel
+import data.model.Language
 import io.reactivex.subjects.PublishSubject
 import tornadofx.ViewModel
 
@@ -10,7 +11,6 @@ class ProfilePreviewViewModel: ViewModel() {
     var onClickNext = PublishSubject.create<Boolean>()          // subject to check if the NEXT button was clicked
     var onClickRedo = PublishSubject.create<Boolean>()             // subject to check if the REDO button was clicked
     var audioListened = PublishSubject.create<Boolean>()            // subject to check if the audio was listened
-
 
     fun newIconHash(iconHash: String) {
         userIconHash.onNext(iconHash)

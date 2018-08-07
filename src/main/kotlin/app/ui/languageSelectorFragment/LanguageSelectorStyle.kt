@@ -1,4 +1,4 @@
-package widgets
+package app.ui.languageSelectorFragment
 
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
@@ -27,7 +27,10 @@ class LanguageSelectorStyle : Stylesheet() {
 
     init {
         s(filterableComboBox) {
+            backgroundColor = multi(Color.TRANSPARENT)
+            focusColor = Color.TRANSPARENT
             faintFocusColor = Color.TRANSPARENT
+            borderWidth = multi(box(2.px))
 
             s(arrowButton) {
                 backgroundColor = multi(Color.TRANSPARENT)
@@ -50,7 +53,7 @@ class LanguageSelectorStyle : Stylesheet() {
 
             s(button) {
                 backgroundColor = multi(Color.TRANSPARENT)
-                opacity = 0.65
+                opacity = 0.25
                 alignment = Pos.CENTER_RIGHT
                 padding = box(10.px, 10.px, 5.px, 10.px)
 

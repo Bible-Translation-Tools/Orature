@@ -1,4 +1,4 @@
-package widgets
+package app.widgets.filterableComboBox
 
 /**
  * This interface is used to hold the data that is selected from within the widget.

@@ -1,7 +1,7 @@
-package app.ui
+package app.ui.languageSelectorFragment
 
 import data.model.Language
-import widgets.ComboBoxSelectionItem
+import app.widgets.filterableComboBox.ComboBoxSelectionItem
 
 /**
  * This class holds a list of selected languages and tracks which one is the preferred language.

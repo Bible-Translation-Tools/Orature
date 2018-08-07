@@ -1,6 +1,9 @@
-package app.ui
+package app.ui.languageSelectorFragment
 
-import UIColorsManager.Colors
+import app.UIColorsObject.Colors
+import app.widgets.chip.Chip
+import app.widgets.filterableComboBox.FilterableComboBox
+import app.widgets.filterableComboBox.ComboBoxSelectionItem
 import data.model.Language
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.disposables.CompositeDisposable
@@ -12,7 +15,6 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
-import widgets.*
 
 /**
  * This class creates a Fragment containing a FilterableComboBox that allows the user to select an item from a dropdown
@@ -65,7 +67,6 @@ class LanguageSelector(
 
             hbox {
                 id = "labelIconHBox"
-
                 this += labelIcon.apply { fill = colorAccent }
 
                 label(" $label") {
@@ -78,8 +79,7 @@ class LanguageSelector(
 
             this += FilterableComboBox(selectionData, hint, viewModel::addNewValue).apply {
                 style {
-                    focusColor = colorAccent
-                    borderColor = multi(box(colorAccent))
+                    borderColor = multi(box(Color.TRANSPARENT, Color.TRANSPARENT, colorAccent, Color.TRANSPARENT))
                 }
             }
 
@@ -124,9 +124,9 @@ class LanguageSelector(
                         }
                 )
 
+                //me.paddingTopProperty.bind(prefHeightProperty())
                 vgrow = Priority.ALWAYS
                 hgap = 6.0
-                vgap = 6.0
             }
 
             padding = Insets(40.0)
@@ -138,11 +138,11 @@ class LanguageSelector(
     private fun newSelected(language: String) {
         for (chip in chips) {
             if (chip.mainText == language) {
-                chip.mainLabel.textFill = c(Colors["UI_NEUTRAL"])
+                chip.mainLabel.textFill = c(Colors["base"])
                 chip.button.fill = colorAccent
             } else {
-                chip.mainLabel.textFill = c(Colors["UI_NEUTRAL_TEXT"])
-                chip.button.fill = c(Colors["UI_NEUTRAL"])
+                chip.mainLabel.textFill = c(Colors["baseText"])
+                chip.button.fill = c(Colors["base"])
             }
         }
     }

@@ -1,4 +1,4 @@
-package widgets
+package app.widgets.chip
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView

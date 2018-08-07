@@ -1,9 +1,8 @@
-package app.ui
+package app.ui.languageSelectorFragment
 
 import data.model.Language
 import io.reactivex.subjects.PublishSubject
-import widgets.Chip
-import widgets.ComboBoxSelectionItem
+import app.widgets.filterableComboBox.ComboBoxSelectionItem
 
 /**
  * This class is used by the LanguageSelector fragment as the go-between for the view and the model, taking in

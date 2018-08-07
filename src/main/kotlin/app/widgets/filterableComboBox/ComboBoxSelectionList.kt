@@ -1,4 +1,4 @@
-package widgets
+package app.widgets.filterableComboBox
 
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
