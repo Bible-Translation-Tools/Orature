@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui
 
 import org.wycliffeassociates.otter.jvm.app.ui.languageSelectorFragment.LanguageSelectionItem
 import org.wycliffeassociates.otter.jvm.app.ui.languageSelectorFragment.LanguageSelectorModel
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import org.junit.Test
 
 class TestLanguageSelectorModel {

@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.persistence.repo
 
-import data.model.User
-import data.dao.Dao
+import org.wycliffeassociates.otter.common.data.model.User
+import org.wycliffeassociates.otter.common.data.dao.Dao
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers

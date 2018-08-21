@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.persistence.mapping
 
-import data.model.Language
-import data.model.UserPreferences
-import data.dao.Dao
-import data.mapping.Mapper
+import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.model.UserPreferences
+import org.wycliffeassociates.otter.common.data.dao.Dao
+import org.wycliffeassociates.otter.common.data.mapping.Mapper
 import jooq.tables.pojos.UserPreferencesEntity
 import io.reactivex.Observable
 import io.reactivex.functions.BiFunction

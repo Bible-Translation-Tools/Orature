@@ -6,7 +6,7 @@ import io.reactivex.subjects.PublishSubject
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.TargetDataLine
-import device.IAudioRecorder
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioRecorderImpl : IAudioRecorder {
 

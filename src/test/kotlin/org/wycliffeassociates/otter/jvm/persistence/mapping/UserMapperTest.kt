@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.persistence.mapping
 
-import data.model.User
-import data.model.UserPreferences
+import org.wycliffeassociates.otter.common.data.model.User
+import org.wycliffeassociates.otter.common.data.model.UserPreferences
 import io.reactivex.Observable
 
 import org.junit.Assert

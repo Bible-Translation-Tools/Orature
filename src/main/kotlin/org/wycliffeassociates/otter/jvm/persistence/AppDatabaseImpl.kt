@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.persistence
 
-import data.dao.Dao
-import data.dao.LanguageDao
-import data.model.*
-import data.persistence.AppDatabase
+import org.wycliffeassociates.otter.common.data.dao.Dao
+import org.wycliffeassociates.otter.common.data.dao.LanguageDao
+import org.wycliffeassociates.otter.common.data.model.*
+import org.wycliffeassociates.otter.common.data.persistence.AppDatabase
 import org.jooq.Configuration
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL

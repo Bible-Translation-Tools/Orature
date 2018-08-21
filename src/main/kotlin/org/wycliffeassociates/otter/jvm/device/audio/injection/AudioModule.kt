@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.jvm.device.audio.injection
 
 import dagger.Module
 import dagger.Provides
-import device.IAudioRecorder
-import device.IAudioPlayer
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorderImpl
 import javax.inject.Singleton

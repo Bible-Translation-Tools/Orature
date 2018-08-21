@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.profileLanguageSelection.Model
 
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 
 class ProfileLanguageSelectionModel {
 

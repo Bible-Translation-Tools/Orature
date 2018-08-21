@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.persistence.data
 
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 
 class LanguageStore {
     companion object {

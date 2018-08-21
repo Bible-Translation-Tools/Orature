@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.persistence
 
-import data.persistence.AppPreferences
+import org.wycliffeassociates.otter.common.data.persistence.AppPreferences
 import java.util.prefs.Preferences
 
 // preferences object that stores user-independent preference data

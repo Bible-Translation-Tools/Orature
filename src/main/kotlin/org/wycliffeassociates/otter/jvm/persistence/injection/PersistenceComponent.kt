@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.persistence.injection
 
 import dagger.Component
-import data.persistence.AppDatabase
-import data.persistence.AppPreferences
-import persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.data.persistence.AppDatabase
+import org.wycliffeassociates.otter.common.data.persistence.AppPreferences
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import javax.inject.Singleton
 
 @Component(modules = [PersistenceModule::class])

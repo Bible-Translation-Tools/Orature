@@ -4,7 +4,7 @@ import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import org.wycliffeassociates.otter.jvm.app.widgets.chip.Chip
 import org.wycliffeassociates.otter.jvm.app.widgets.filterableComboBox.FilterableComboBox
 import org.wycliffeassociates.otter.jvm.app.widgets.filterableComboBox.ComboBoxSelectionItem
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject

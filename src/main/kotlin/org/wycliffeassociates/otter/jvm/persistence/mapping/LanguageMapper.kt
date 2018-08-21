@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.persistence.mapping
 
-import data.model.Language
-import data.mapping.Mapper
+import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.mapping.Mapper
 import jooq.tables.pojos.LanguageEntity
 
 class LanguageMapper : Mapper<LanguageEntity, Language> {

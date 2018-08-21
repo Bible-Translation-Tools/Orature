@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.persistence.mapping
 
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.jvm.persistence.JooqAssert

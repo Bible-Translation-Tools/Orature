@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.profilePreview.ViewModel
 
 import org.wycliffeassociates.otter.jvm.app.ui.profilePreview.Model.ProfilePreviewModel
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import io.reactivex.subjects.PublishSubject
 import tornadofx.ViewModel
 

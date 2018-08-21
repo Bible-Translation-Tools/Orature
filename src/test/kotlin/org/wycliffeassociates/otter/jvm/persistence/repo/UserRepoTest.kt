@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.persistence.repo
 
-import data.model.User
-import data.model.UserPreferences
+import org.wycliffeassociates.otter.common.data.model.User
+import org.wycliffeassociates.otter.common.data.model.UserPreferences
 import org.jooq.Configuration
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL

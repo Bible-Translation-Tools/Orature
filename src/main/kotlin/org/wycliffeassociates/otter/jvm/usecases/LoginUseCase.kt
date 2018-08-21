@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.usecases
 
-import data.model.User
 import device.audio.injection.DaggerAudioComponent
+import org.wycliffeassociates.otter.common.data.model.User
 import io.reactivex.Observable
 import persistence.injection.DaggerPersistenceComponent
 import java.io.File

@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.persistence.repo
 
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.junit.Assert

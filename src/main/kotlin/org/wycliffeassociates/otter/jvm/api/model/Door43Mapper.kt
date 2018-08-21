@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.api.model
 import org.wycliffeassociates.otter.jvm.api.Door43Language
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 
 object Door43Mapper {
 

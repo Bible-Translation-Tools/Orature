@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.profileLanguageSelection.ViewModel
 
 import org.wycliffeassociates.otter.jvm.app.ui.profileLanguageSelection.Model.ProfileLanguageSelectionModel
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 

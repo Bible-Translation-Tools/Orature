@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.usecases
 
-import data.model.User
-import data.persistence.AppPreferences
+import org.wycliffeassociates.otter.common.data.model.User
+import org.wycliffeassociates.otter.common.data.persistence.AppPreferences
 import io.reactivex.Observable
 import org.junit.Assert
 import org.junit.Before
@@ -11,8 +11,8 @@ import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
-import persistence.injection.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.persistence.repo.UserRepo
+import persistence.injection.DaggerPersistenceComponent
 
 @RunWith(PowerMockRunner::class)
 @PrepareForTest(DaggerPersistenceComponent::class, DaggerPersistenceComponent::class)

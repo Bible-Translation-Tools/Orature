@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.persistence
 
-import persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.nio.file.FileSystems
 
