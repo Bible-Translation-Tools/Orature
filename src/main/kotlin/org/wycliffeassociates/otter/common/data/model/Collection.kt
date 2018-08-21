@@ -1,4 +1,4 @@
-package data.model
+package org.wycliffeassociates.otter.common.data.model
 
 open class Collection (
         val id: Int = 0,

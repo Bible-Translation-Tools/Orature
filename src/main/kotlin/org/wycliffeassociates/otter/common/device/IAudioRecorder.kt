@@ -1,4 +1,4 @@
-package device
+package org.wycliffeassociates.otter.common.device
 
 import io.reactivex.Observable
 

@@ -1,4 +1,4 @@
-package data.dao
+package org.wycliffeassociates.otter.common.data.dao
 
 import io.reactivex.Completable
 import io.reactivex.Observable

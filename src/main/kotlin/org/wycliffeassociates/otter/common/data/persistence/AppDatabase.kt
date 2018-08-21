@@ -1,8 +1,8 @@
-package data.persistence
+package org.wycliffeassociates.otter.common.data.persistence
 
-import data.dao.Dao
-import data.dao.LanguageDao
-import data.model.*
+import org.wycliffeassociates.otter.common.data.dao.Dao
+import org.wycliffeassociates.otter.common.data.dao.LanguageDao
+import org.wycliffeassociates.otter.common.data.model.*
 
 interface AppDatabase {
     fun getUserDao(): Dao<User>

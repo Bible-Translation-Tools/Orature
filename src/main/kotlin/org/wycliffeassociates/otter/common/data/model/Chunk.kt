@@ -1,4 +1,4 @@
-package data.model
+package org.wycliffeassociates.otter.common.data.model
 
 data class Chunk(
         var id: Int = 0,

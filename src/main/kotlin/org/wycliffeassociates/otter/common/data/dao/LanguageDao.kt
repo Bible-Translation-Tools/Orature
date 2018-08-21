@@ -1,6 +1,6 @@
-package data.dao
+package org.wycliffeassociates.otter.common.data.dao
 
-import data.model.Language
+import org.wycliffeassociates.otter.common.data.model.Language
 import io.reactivex.Observable
 import java.util.*
 
