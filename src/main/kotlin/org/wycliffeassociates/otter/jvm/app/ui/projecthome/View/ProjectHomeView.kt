@@ -3,9 +3,8 @@ package org.wycliffeassociates.otter.jvm.app.ui.projecthome.View
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
+import org.wycliffeassociates.otter.common.ui.widgets.IProjectCard
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ViewModel.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.userCreation.UserCreation
-import org.wycliffeassociates.otter.jvm.app.ui.welcomeScreen.WelcomeScreen
 import org.wycliffeassociates.otter.jvm.app.widgets.ProjectCard
 import tornadofx.*
 
@@ -34,8 +33,4 @@ class ProjectHomeView : View(), IProjectCard {
         //TODO("waiting on next view") //To change body of created functions use File | Settings | File Templates.
 //        workspace.dock<Tothenextscreen>()
     }
-}
-
-interface IProjectCard {
-    fun openProject()
 }
