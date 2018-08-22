@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.usecases
 
 import org.wycliffeassociates.otter.jvm.api.Door43Client
 import org.wycliffeassociates.otter.jvm.api.model.Door43Mapper
-import persistence.injection.DaggerPersistenceComponent
+import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 
 class InitializeLanguageDatabaseUseCase {
 

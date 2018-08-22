@@ -78,7 +78,6 @@ class ProfileLanguageSelection : View() {
                 alignment = Pos.TOP_RIGHT
                 button(messages["next"], rightArrow) {
                     disableProperty().bind(!viewModel.isNextAvailable)
-
                     importStylesheet(WidgetsStyles::class)
                     addClass(WidgetsStyles.nextButtonNotReady)
 
