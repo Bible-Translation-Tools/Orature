@@ -1,15 +1,14 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
+import org.wycliffeassociates.otter.common.data.model.Project
 import tornadofx.*
 
-class ProjectCard(value : String, openProject: ()-> Unit) : Fragment(){
+class ProjectCard(project : Project, openProject: ()-> Unit) : Fragment(){
     override val root = vbox(20) {
         alignment = Pos.CENTER
-        label(value)
-        label("English")
+        label(project.book.toString())
+        label(project.targetLanguage.toString())
         button ("LOAD") {
             action {
                 openProject()
