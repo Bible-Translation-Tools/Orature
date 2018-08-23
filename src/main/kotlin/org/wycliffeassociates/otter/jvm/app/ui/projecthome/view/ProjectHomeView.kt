@@ -25,7 +25,7 @@ class ProjectHomeView : View() {
                             cellCache {
                                 ProjectCard(it).apply {
                                     action {
-                                        workspace.dock<UserCreation>()
+                                      //TODO  workspace.dock<navigate to view>()
                                     }
                                 }
                             }
