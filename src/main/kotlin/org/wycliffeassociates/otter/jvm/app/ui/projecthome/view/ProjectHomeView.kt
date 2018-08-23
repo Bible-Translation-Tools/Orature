@@ -1,15 +1,10 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecthome.View
 
-import com.github.thomasnield.rxkotlinfx.actionEvents
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.rxkotlin.subscribeBy
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.input.MouseEvent
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ViewModel.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.userCreation.UserCreation
 import org.wycliffeassociates.otter.jvm.app.widgets.ProjectCard
 import tornadofx.*
 
