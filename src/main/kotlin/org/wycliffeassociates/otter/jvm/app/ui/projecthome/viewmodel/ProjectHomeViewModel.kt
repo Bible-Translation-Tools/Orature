@@ -10,6 +10,6 @@ import java.util.*
 
 class ProjectHomeViewModel: ViewModel() {
     // TODO(need repo)?
-    val getProjectsUseCase = GetProjectsUseCase()
-    val projects : List<Project> = getProjectsUseCase.getProjects().toList().blockingGet().flatMap{it}
+    var projectUseCase: GetProjectsUseCase? = null
+    val projects : Observable<List<Project>>? = projectUseCase?.getProjects()
 }
