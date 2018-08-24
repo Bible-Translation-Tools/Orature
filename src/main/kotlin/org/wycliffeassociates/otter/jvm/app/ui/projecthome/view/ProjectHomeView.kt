@@ -14,19 +14,7 @@ class ProjectHomeView : View() {
 
     override val root = borderpane {
         center {
-            projects.subscribeBy(
-                    onNext = {
-                        datagrid(it) {
-                            cellCache {
-                                ProjectCard(it).apply {
-                                    loadProjectButton.action {
-                                      //TODO  workspace.dock<navigate to view>()
-                                    }
-                                }
-                            }
-                        }
-                    }
-            )
+            datagrid(viewModel.items)
         }
         bottom {
             hbox {
