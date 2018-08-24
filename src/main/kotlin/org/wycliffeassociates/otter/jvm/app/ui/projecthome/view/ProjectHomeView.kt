@@ -19,7 +19,7 @@ class ProjectHomeView : View() {
                         datagrid(it) {
                             cellCache {
                                 ProjectCard(it).apply {
-                                    action {
+                                    loadProjectButton.action {
                                       //TODO  workspace.dock<navigate to view>()
                                     }
                                 }
@@ -31,14 +31,10 @@ class ProjectHomeView : View() {
         bottom {
             hbox {
                 alignment = Pos.BOTTOM_RIGHT
-                padding = insets(10)
+                padding = insets(15)
                 this += button("", MaterialIconView(MaterialIcon.ADD)) {
                 }
             }
         }
-    }
-
-    fun openProject() {
-        //TODO open selected Project, need to construct view
     }
 }

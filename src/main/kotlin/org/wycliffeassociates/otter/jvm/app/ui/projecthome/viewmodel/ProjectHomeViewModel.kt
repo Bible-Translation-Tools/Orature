@@ -12,5 +12,5 @@ import java.util.*
 class ProjectHomeViewModel: ViewModel() {
     // TODO(need repo)?
     var projectUseCase = GetProjectsUseCase(Injector.projectDao)
-    val projects : Observable<List<Project>>? = projectUseCase?.getProjects()
+    val projects : Observable<List<Project>> = projectUseCase.getProjects()
 }
