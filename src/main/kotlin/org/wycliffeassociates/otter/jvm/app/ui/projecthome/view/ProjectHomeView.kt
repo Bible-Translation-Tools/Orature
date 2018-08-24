@@ -2,10 +2,8 @@ package org.wycliffeassociates.otter.jvm.app.ui.projecthome.View
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import io.reactivex.rxkotlin.subscribeBy
 import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ViewModel.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.ProjectCard
 import tornadofx.*
 
 class ProjectHomeView : View() {
