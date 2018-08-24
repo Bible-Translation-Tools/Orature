@@ -14,7 +14,7 @@ class ProjectHomeView : View() {
 
     override val root = borderpane {
         center {
-            projects?.subscribeBy(
+            projects.subscribeBy(
                     onNext = {
                         datagrid(it) {
                             cellCache {
