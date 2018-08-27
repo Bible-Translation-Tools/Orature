@@ -1,9 +1,9 @@
-package org.wycliffeassociates.otter.jvm.usecases
+package org.wycliffeassociates.otter.jvm
 
-import device.audio.injection.DaggerAudioComponent
 import org.wycliffeassociates.otter.common.data.model.User
 import io.reactivex.Observable
-import persistence.injection.DaggerPersistenceComponent
+import org.wycliffeassociates.otter.jvm.device.audio.injection.DaggerAudioComponent
+import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 import java.io.File
 
 class LoginUseCase {

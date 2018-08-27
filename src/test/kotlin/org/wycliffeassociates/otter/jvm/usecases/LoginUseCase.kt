@@ -11,8 +11,9 @@ import org.mockito.Mockito
 import org.powermock.api.mockito.PowerMockito
 import org.powermock.core.classloader.annotations.PrepareForTest
 import org.powermock.modules.junit4.PowerMockRunner
+import org.wycliffeassociates.otter.jvm.LoginUseCase
+import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.persistence.repo.UserRepo
-import persistence.injection.DaggerPersistenceComponent
 
 @RunWith(PowerMockRunner::class)
 @PrepareForTest(DaggerPersistenceComponent::class, DaggerPersistenceComponent::class)
