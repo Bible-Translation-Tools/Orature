@@ -1,11 +1,10 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projecthome.ViewModel
+package org.wycliffeassociates.otter.jvm.app.ui.home.ViewModel
 
 import org.wycliffeassociates.otter.common.data.model.Project
 import org.wycliffeassociates.otter.common.domain.GetProjectsUseCase
 import tornadofx.*
 import io.reactivex.Observable
 import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.widgets.ProjectCard
 
