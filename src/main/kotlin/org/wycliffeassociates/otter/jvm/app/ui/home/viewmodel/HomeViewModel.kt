@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.view.ChapterPage
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.widgets.ProjectCard
 
-class ProjectHomeViewModel: ViewModel() {
+class HomeViewModel: ViewModel() {
     var projectUseCase = GetProjectsUseCase(Injector.projectDao)
     val projects : Observable<List<Project>> = projectUseCase.getProjects()
     val items = FXCollections.observableArrayList<ProjectCard>()!!

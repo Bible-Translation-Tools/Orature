@@ -4,10 +4,12 @@ import io.reactivex.rxkotlin.subscribeBy
 import javafx.collections.FXCollections
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.ChapterPageModel
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
+import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.*
 
 class ChapterPageViewModel : ViewModel() {
     val model = ChapterPageModel()
+//    val chapterPageUseCase = ChapterPageUseCase(Injector.chapterDao)
     private val modelChapters = model.chapters
     val activeChapter = model.activeChapter
     val selectedTab = model.selectedTab

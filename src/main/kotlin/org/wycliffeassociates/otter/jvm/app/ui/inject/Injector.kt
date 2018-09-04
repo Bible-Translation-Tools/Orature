@@ -8,4 +8,27 @@ object Injector {
             .build()
             .injectDatabase()
             .getProjectDao()
+    val chapterDao = DaggerPersistenceComponent
+            .builder()
+            .build()
+            .injectDatabase()
+            .getChapterDao()
+
+    val bookDao = DaggerPersistenceComponent
+            .builder()
+            .build()
+            .injectDatabase()
+            .getBookDao()
+
+    val chunkDao = DaggerPersistenceComponent
+            .builder()
+            .build()
+            .injectDatabase()
+            .getChunkDao()
+
+    val takesDao = DaggerPersistenceComponent
+            .builder()
+            .build()
+            .injectDatabase()
+            .getTakesDao()
 }

@@ -9,11 +9,11 @@ import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class VerseCard(verse: Verse, color: String, icon: MaterialIcon, text: String, default: Boolean) : VBox() {
+class VerseCard(verse: Verse, color: String, icon: MaterialIcon, text: String, recordVerseCard: Boolean) : VBox() {
 
     init {
         with(root) {
-            when (default) { //used for takes and edit contexts
+            when (!recordVerseCard) { //used for takes and edit contexts
                 true -> {
                     when (verse.selected_take) {
                         true -> {

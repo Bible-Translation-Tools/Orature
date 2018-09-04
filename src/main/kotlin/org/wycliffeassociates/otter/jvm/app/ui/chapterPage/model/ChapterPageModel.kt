@@ -5,11 +5,10 @@ import io.reactivex.subjects.PublishSubject
 class ChapterPageModel {
     var activeChapter = PublishSubject.create<Int>()
     var selectedTab = PublishSubject.create<String>()
-    //    TODO("Need Use case for ChaptersPage")
-//    val book: Observable<Book> = bookRepo.getBookById()
+//    val book: Observable<Book>
 //    val project:Project
-//    val chapters : Observable<List<Chapters>> = chaptersRepo.getChaptersById()
-//    val verses: Observable<List<Verses>> = getVersesForChapter
+//    val chapters : Observable<List<Chapters>>
+//    val verses: Observable<List<Verses>>
 
 //    Demo Data
     val bookTitle = "Romans"
