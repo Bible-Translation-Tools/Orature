@@ -28,7 +28,7 @@ class ChapterPageViewModel : ViewModel() {
     private fun mapChapters() {
         var selectedChapter: Int
         modelChapters.map {
-            // list the chapters before PublishSubject makes first push
+            //map list of chapters to an observable Array List, prepend "Chapter" string
             chapters.addAll(
                     messages["chapter"] + "\t" + it.chapterNumber.toString()
             )
