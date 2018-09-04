@@ -58,11 +58,11 @@ class ChapterPage : View() {
                 )
             }
 
-            add(ActivityPanel(MaterialIconView(MaterialIcon.MIC_NONE, "25px"),
-                    MaterialIconView(MaterialIcon.APPS, "25px"),
-                    MaterialIconView(MaterialIcon.EDIT, "25px"), MaterialIconView(MaterialIcon.FACE, "25px"),
-                    c(Colors["primary"]), c(Colors["secondary"]),
-                    c(Colors["tertiary"]), c(Colors["accent1"])).apply {
+            add(ActivityPanel(MaterialIconView(MaterialIcon.MIC_NONE, "25px"),c(Colors["primary"]),
+                    MaterialIconView(MaterialIcon.APPS, "25px"),c(Colors["secondary"]),
+                    MaterialIconView(MaterialIcon.EDIT, "25px"),c(Colors["tertiary"]),
+                    MaterialIconView(MaterialIcon.BLOCK, "25px"), c(Colors["baseBackground"])).apply {
+
                 alignment = Pos.CENTER
                 buttonLeft.action {
                     viewModel.changeContext("record")

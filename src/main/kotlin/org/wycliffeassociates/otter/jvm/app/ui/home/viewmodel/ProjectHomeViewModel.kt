@@ -5,6 +5,7 @@ import org.wycliffeassociates.otter.common.domain.GetProjectsUseCase
 import tornadofx.*
 import io.reactivex.Observable
 import javafx.collections.FXCollections
+import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.view.ChapterPage
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.widgets.ProjectCard
 

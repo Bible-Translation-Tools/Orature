@@ -8,11 +8,11 @@ import tornadofx.*
 
 class ChapterPageViewModel : ViewModel() {
     val model = ChapterPageModel()
-    val modelCh = model.chapters.observable()
-    val chapters = FXCollections.observableArrayList<String>()!!
-    val verses = FXCollections.observableArrayList<Verse>()!!
+    private val modelChapters = model.chapters
     val activeChapter = model.activeChapter
     val selectedTab = model.selectedTab
+    val chapters = FXCollections.observableArrayList<String>()!!
+    val verses = FXCollections.observableArrayList<Verse>()!!
     val bookTitle = model.bookTitle
 
     fun changeContext(context: String) {
@@ -25,10 +25,12 @@ class ChapterPageViewModel : ViewModel() {
 
     private fun mapChapters() {
         var selectedChapter: Int
-        modelCh.map { // list the chapters before PublishSubject makes first push
+        modelChapters.map {
+            // list the chapters before PublishSubject makes first push
             chapters.addAll(
                     messages["chapter"] + "\t" + it.chapterNumber.toString()
-            )}
+            )
+        }
 
         //use observer to switch verses that are in verses observableList
         activeChapter.subscribeBy(
@@ -36,7 +38,7 @@ class ChapterPageViewModel : ViewModel() {
                     selectedChapter = it
                     //clear the arrayList to prevent verse duplications
                     verses.clear()
-                    modelCh.map {
+                    modelChapters.map {
                         verses.addAll(
                                 when (it.chapterNumber) {
                                     selectedChapter -> it.verses

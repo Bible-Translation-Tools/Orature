@@ -11,25 +11,27 @@ import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles.Companion.acti
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class ActivityPanel(graphicLeft: Node, graphicMiddleLeft: Node,
-                    graphicMiddleRight: Node, graphicRight: Node,
-                    buttonLeftColor: Color, buttonMidLeftColor: Color,
-                    buttonMidRightColor: Color, buttonRightColor: Color) : HBox() {
-    val buttonLeft = button("", graphicLeft){
+class ActivityPanel(graphicLeft: Node, buttonLeftColor: Color,
+                    graphicMiddleLeft: Node, buttonMidLeftColor: Color,
+                    graphicMiddleRight: Node, buttonMidRightColor: Color,
+                    graphicRight: Node, buttonRightColor: Color) : HBox() {
+
+
+    val buttonLeft = button("", graphicLeft) {
         importStylesheet(WidgetsStyles::class)
-        style{
+        style {
             backgroundColor += buttonLeftColor
         }
         addClass(WidgetsStyles.activityPanelButton)
     }
-    val buttonCenterLeft = button("", graphicMiddleLeft){
-        style{
+    val buttonCenterLeft = button("", graphicMiddleLeft) {
+        style {
             backgroundColor += buttonMidLeftColor
         }
         addClass(WidgetsStyles.activityPanelButton)
     }
-    val buttonCenterRight = button("", graphicMiddleRight){
-        style{
+    val buttonCenterRight = button("", graphicMiddleRight) {
+        style {
             backgroundColor += buttonMidRightColor
         }
         addClass(WidgetsStyles.activityPanelButton)
@@ -40,6 +42,7 @@ class ActivityPanel(graphicLeft: Node, graphicMiddleLeft: Node,
         }
         addClass(WidgetsStyles.activityPanelButton)
     }
+
     init {
         with(root) {
             spacing = 10.0
