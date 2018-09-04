@@ -1,51 +1,31 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.scene.Node
+
+import io.reactivex.subjects.PublishSubject
+import javafx.geometry.Pos
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
-import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles.Companion.activityPanelButton
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class ActivityPanel(graphicLeft: Node, buttonLeftColor: Color,
-                    graphicMiddleLeft: Node, buttonMidLeftColor: Color,
-                    graphicMiddleRight: Node, buttonMidRightColor: Color,
-                    graphicRight: Node, buttonRightColor: Color) : HBox() {
-
-
-    val buttonLeft = button("", graphicLeft) {
-        importStylesheet(WidgetsStyles::class)
-        style {
-            backgroundColor += buttonLeftColor
-        }
-        addClass(WidgetsStyles.activityPanelButton)
-    }
-    val buttonCenterLeft = button("", graphicMiddleLeft) {
-        style {
-            backgroundColor += buttonMidLeftColor
-        }
-        addClass(WidgetsStyles.activityPanelButton)
-    }
-    val buttonCenterRight = button("", graphicMiddleRight) {
-        style {
-            backgroundColor += buttonMidRightColor
-        }
-        addClass(WidgetsStyles.activityPanelButton)
-    }
-    val buttonRight = button("", graphicRight) {
-        style {
-            backgroundColor += buttonRightColor
-        }
-        addClass(WidgetsStyles.activityPanelButton)
-    }
+class ActivityPanel : HBox() {
+    var tabs= PublishSubject.create<ArrayList<ActivityTab>>()
 
     init {
         with(root) {
             spacing = 10.0
+            alignment = Pos.CENTER
+            tabs.subscribe {
+                it.forEach{
+                    add(it)
+                }
+            }
         }
     }
 }
+
+fun activitypanel(init: ActivityPanel.() -> Unit) : ActivityPanel {
+    val ap = ActivityPanel()
+    ap.init()
+    return ap
+}
+

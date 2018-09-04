@@ -4,23 +4,35 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.rxkotlin.subscribeBy
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Border
 import javafx.scene.layout.Priority
 import javafx.scene.text.TextAlignment
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.viewModel.ChapterPageViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.ActivityPanel
-import org.wycliffeassociates.otter.jvm.app.widgets.VerseCard
+import org.wycliffeassociates.otter.jvm.app.widgets.*
 import tornadofx.*
 
 class ChapterPage : View() {
     private val viewModel: ChapterPageViewModel by inject()
     private val defaultGrid = datagrid(viewModel.verses) {
         cellCache {
-            VerseCard(it,Colors["primary"], MaterialIcon.MIC_NONE, messages["record"], false)
+            if(it.hasSelectedTake) {
+                versecard {
+                    title = messages["verses"]
+                    selectedTake = it.verseNumber
+                }
+            }
+                else {
+                    versecard{
+
+                    }
+                }
+
+            }
         }
-    }
+
     override val root = hbox {
         vbox {
             label(viewModel.bookTitle) {
@@ -29,7 +41,7 @@ class ChapterPage : View() {
             listview(viewModel.chapters) {
                 vgrow = Priority.ALWAYS
                 addEventFilter(MouseEvent.MOUSE_CLICKED) {
-                    viewModel.selectedChapter(viewModel.chapters.indexOf(this.selectedItem))
+                    viewModel.selectedChapter(viewModel.chapters.indexOf(this.selectedItem) + 1)
                 }
             }
         }
@@ -47,36 +59,69 @@ class ChapterPage : View() {
                                 vgrow = Priority.ALWAYS
                                 cellCache {
                                     when (context) {
-                                        "record" -> VerseCard(it,Colors["primary"], MaterialIcon.MIC_NONE, messages["record"], false)
-                                        "viewtakes" -> VerseCard(it,Colors["secondary"], MaterialIcon.APPS, messages["viewTakes"], true)
-                                        "edit" -> VerseCard(it,Colors["tertiary"], MaterialIcon.EDIT, messages["edit"], true)
-                                        else -> VerseCard(it,Colors["primary"], MaterialIcon.MIC_NONE, messages["record"], false)
+                                        Contexts.RECORD.label -> {
+                                            versecard {
+                                                title = messages["verses"]
+                                                selectedTake = it.verseNumber
+                                            }
+                                        }
+                                        Contexts.VIEW_TAKES.label -> {
+                                            versecard {
+                                                title = messages["verses"]
+                                                selectedTake = it.verseNumber
+                                            }
+                                        }
+                                        Contexts.EDIT_TAKES.label -> {
+                                            versecard {
+                                                title = messages["verses"]
+                                                selectedTake = it.verseNumber
+                                            }
+                                        }
+                                        else -> {
+                                            versecard{
+                                                title = messages["verses"]
+                                                selectedTake = it.verseNumber
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                 )
             }
+            val tabList = arrayListOf(
+                    activityTab {
+                        graphic = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
+                        style {
+                            backgroundColor += c(Colors["primary"])
+                        }
+                        action {
+                            viewModel.changeContext(Contexts.RECORD.label)
+                        }
+                    },
+                    activityTab {
+                        graphic = MaterialIconView(MaterialIcon.APPS, "25px")
+                        style {
+                            backgroundColor += c(Colors["secondary"])
+                        }
+                        action {
+                            viewModel.changeContext(Contexts.VIEW_TAKES.label)
+                        }
+                    },
+                    activityTab {
+                        graphic = MaterialIconView(MaterialIcon.EDIT, "25px")
+                        style {
+                            backgroundColor += c(Colors["tertiary"])
+                        }
+                        action{
+                            viewModel.changeContext(Contexts.EDIT_TAKES.label)
+                        }
+                    })
+            add(activitypanel {
+                tabs.onNext(tabList)
+            }
+            )
 
-            add(ActivityPanel(MaterialIconView(MaterialIcon.MIC_NONE, "25px"),c(Colors["primary"]),
-                    MaterialIconView(MaterialIcon.APPS, "25px"),c(Colors["secondary"]),
-                    MaterialIconView(MaterialIcon.EDIT, "25px"),c(Colors["tertiary"]),
-                    MaterialIconView(MaterialIcon.BLOCK, "25px"), c(Colors["baseBackground"])).apply {
-
-                alignment = Pos.CENTER
-                buttonLeft.action {
-                    viewModel.changeContext("record")
-                }
-                buttonCenterLeft.action {
-                    viewModel.changeContext("viewtakes")
-                }
-                buttonCenterRight.action {
-                    viewModel.changeContext("edit")
-                }
-                buttonRight.action {
-
-                }
-            })
         }
     }
 }

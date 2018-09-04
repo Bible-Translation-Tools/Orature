@@ -3,13 +3,6 @@ package org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model
 import io.reactivex.subjects.PublishSubject
 
 class ChapterPageModel {
-    var activeChapter = PublishSubject.create<Int>()
-    var selectedTab = PublishSubject.create<String>()
-//    val book: Observable<Book>
-//    val project:Project
-//    val chapters : Observable<List<Chapters>>
-//    val verses: Observable<List<Verses>>
-
 //    Demo Data
     val bookTitle = "Romans"
 
@@ -35,7 +28,7 @@ data class Chapter(
 
 //demo verse
 data class Verse(
-        val selected_take: Boolean,
+        val hasSelectedTake: Boolean,
         val text: String,
         val verseNumber: Int
 )

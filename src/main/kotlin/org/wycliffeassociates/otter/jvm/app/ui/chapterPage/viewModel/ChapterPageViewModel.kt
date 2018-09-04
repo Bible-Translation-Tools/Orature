@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.chapterPage.viewModel
 
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.subjects.PublishSubject
 import javafx.collections.FXCollections
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.ChapterPageModel
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
@@ -9,10 +10,8 @@ import tornadofx.*
 
 class ChapterPageViewModel : ViewModel() {
     val model = ChapterPageModel()
-//    val chapterPageUseCase = ChapterPageUseCase(Injector.chapterDao)
-    private val modelChapters = model.chapters
-    val activeChapter = model.activeChapter
-    val selectedTab = model.selectedTab
+    var activeChapter = PublishSubject.create<Int>()
+    var selectedTab = PublishSubject.create<String>()
     val chapters = FXCollections.observableArrayList<String>()!!
     val verses = FXCollections.observableArrayList<Verse>()!!
     val bookTitle = model.bookTitle
@@ -22,37 +21,33 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     init {
-        mapChapters()
+        initalizeChapterPage()
     }
 
-    private fun mapChapters() {
+    private fun initalizeChapterPage() {
         var selectedChapter: Int
-        modelChapters.map {
+        model.chapters.forEach {
             //map list of chapters to an observable Array List, prepend "Chapter" string
             chapters.addAll(
-                    messages["chapter"] + "\t" + it.chapterNumber.toString()
+                    messages["chapter"] + " " + it.chapterNumber.toString()
             )
         }
 
         //use observer to switch verses that are in verses observableList
-        activeChapter.subscribeBy(
-                onNext = {
-                    selectedChapter = it
-                    //clear the arrayList to prevent verse duplications
-                    verses.clear()
-                    modelChapters.map {
-                        verses.addAll(
-                                when (it.chapterNumber) {
-                                    selectedChapter -> it.verses
-                                    else -> listOf()
-                                }
-                        )
-                    }
-                }
-        )
+        activeChapter.subscribe {
+                selectedChapter = it
+                //clear the arrayList to prevent verse duplications
+                verses.clear()
+                verses.addAll(
+                        model.chapters
+                                .filter { it.chapterNumber == selectedChapter }
+                                .first()
+                                .verses
+                )
+            }
     }
 
     fun selectedChapter(chapterIndex: Int) {
-        activeChapter.onNext(chapterIndex + 1)
+        activeChapter.onNext(chapterIndex)
     }
 }
