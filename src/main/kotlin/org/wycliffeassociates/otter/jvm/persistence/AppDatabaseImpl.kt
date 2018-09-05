@@ -75,7 +75,7 @@ object AppDatabaseImpl : AppDatabase {
     }
 
     override fun getProjectDao(): Dao<Project> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("Project Data tables not implemented")
     }
 
     override fun getTakesDao(): Dao<Take> {
