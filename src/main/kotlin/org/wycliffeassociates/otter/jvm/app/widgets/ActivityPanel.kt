@@ -6,7 +6,7 @@ import javafx.scene.layout.HBox
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class ActivityPanel(tabs:ArrayList<ActivityTab>) : HBox() {
+class ActivityPanel(tabs:List<ActivityTab>) : HBox() {
     init {
         with(root) {
             spacing = 10.0
@@ -18,7 +18,7 @@ class ActivityPanel(tabs:ArrayList<ActivityTab>) : HBox() {
     }
 }
 
-fun activitypanel(list: ArrayList<ActivityTab>,init: ActivityPanel.() -> Unit) : ActivityPanel {
+fun activitypanel(list: List<ActivityTab>,init: ActivityPanel.() -> Unit) : ActivityPanel {
     val ap = ActivityPanel(list)
     ap.init()
     return ap

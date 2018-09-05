@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.chapterPage.viewModel
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.subjects.PublishSubject
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.ChapterPageModel
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.view.Contexts
@@ -11,10 +12,10 @@ import tornadofx.*
 
 class ChapterPageViewModel : ViewModel() {
     val model = ChapterPageModel()
-    var activeChapter = PublishSubject.create<Int>()
-    var selectedTab = PublishSubject.create<Contexts>()
-    val chapters = FXCollections.observableArrayList<String>()!!
-    val verses = FXCollections.observableArrayList<Verse>()!!
+    private var activeChapter:PublishSubject<Int> = PublishSubject.create<Int>()
+    var selectedTab: PublishSubject<Contexts> = PublishSubject.create<Contexts>()
+    val chapters: ObservableList<String> = FXCollections.observableArrayList<String>()
+    val verses: ObservableList<Verse> = FXCollections.observableArrayList<Verse>()
     val bookTitle = model.bookTitle
 
     fun changeContext(context: Contexts) {

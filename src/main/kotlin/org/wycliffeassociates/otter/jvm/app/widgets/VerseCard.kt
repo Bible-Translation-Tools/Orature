@@ -17,7 +17,7 @@ class VerseCard(verse: Verse) : VBox() {
     init {
         with(root) {
             alignment = Pos.CENTER
-            spacing = 10.0 //label(title)
+            spacing = 10.0
             label(" Verse " + title.toString())
             if (hasSelectedTake) label("Take " + selectedTake.toString())
             add(actionButton)
