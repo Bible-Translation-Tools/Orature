@@ -18,20 +18,32 @@ class ChapterPage : View() {
     private val viewModel: ChapterPageViewModel by inject()
     private val defaultGrid = datagrid(viewModel.verses) {
         cellCache {
-            if(it.hasSelectedTake) {
-                versecard {
-                    title = messages["verses"]
-                    selectedTake = it.verseNumber
+            if (it.hasSelectedTake) {
+                versecard(it) {
+                    actionButton.apply {
+                        graphic = MaterialIconView(MaterialIcon.MIC_NONE)
+                        text = messages["record"]
+                        style {
+                            backgroundColor += c(Colors["base"])
+                            textFill = c(Colors["primary"])
+                            borderColor += box(c(Colors["primary"]))
+                        }
+                    }
                 }
-            }
-                else {
-                    versecard{
-
+            } else {
+                versecard(it) {
+                    actionButton.apply {
+                        graphic = MaterialIconView(MaterialIcon.MIC_NONE)
+                        text = messages["record"]
+                        style {
+                            backgroundColor += c(Colors["primary"])
+                        }
                     }
                 }
 
             }
         }
+    }
 
     override val root = hbox {
         vbox {
@@ -50,7 +62,7 @@ class ChapterPage : View() {
             hgrow = Priority.ALWAYS
             vbox {
                 add(defaultGrid)
-                var context: String
+                var context: Contexts
                 viewModel.selectedTab.subscribeBy( //use observer to update verse cards in view when context changes
                         onNext = {
                             clear()
@@ -59,28 +71,73 @@ class ChapterPage : View() {
                                 vgrow = Priority.ALWAYS
                                 cellCache {
                                     when (context) {
-                                        Contexts.RECORD.label -> {
-                                            versecard {
-                                                title = messages["verses"]
-                                                selectedTake = it.verseNumber
+                                        Contexts.RECORD -> {
+                                            if (it.hasSelectedTake) {
+                                                versecard(it) {
+                                                    actionButton.apply {
+                                                        graphic = MaterialIconView(MaterialIcon.MIC_NONE)
+                                                        text = messages["record"]
+                                                        style {
+                                                            backgroundColor += c(Colors["base"])
+                                                            textFill = c(Colors["primary"])
+                                                            borderColor += box(c(Colors["primary"]))
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                versecard(it) {
+                                                    actionButton.apply {
+                                                        graphic = MaterialIconView(MaterialIcon.MIC_NONE)
+                                                        text = messages["record"]
+                                                        style {
+                                                            backgroundColor += c(Colors["primary"])
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+
+                                        }
+                                        Contexts.VIEW_TAKES -> {
+                                            if (it.hasSelectedTake) {
+                                                versecard(it) {
+                                                    actionButton.apply {
+                                                        graphic = MaterialIconView(MaterialIcon.APPS)
+                                                        text = messages["viewTakes"]
+                                                        style {
+                                                            backgroundColor += c(Colors["secondary"])
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                versecard(it) {
+                                                    actionButton.hide()
+                                                    style {
+                                                        backgroundColor += c(Colors["baseBackground"])
+                                                    }
+                                                }
+
                                             }
                                         }
-                                        Contexts.VIEW_TAKES.label -> {
-                                            versecard {
-                                                title = messages["verses"]
-                                                selectedTake = it.verseNumber
-                                            }
-                                        }
-                                        Contexts.EDIT_TAKES.label -> {
-                                            versecard {
-                                                title = messages["verses"]
-                                                selectedTake = it.verseNumber
-                                            }
-                                        }
-                                        else -> {
-                                            versecard{
-                                                title = messages["verses"]
-                                                selectedTake = it.verseNumber
+                                        Contexts.EDIT_TAKES -> {
+                                            if (it.hasSelectedTake) {
+                                                versecard(it) {
+                                                    actionButton.apply {
+                                                        graphic = MaterialIconView(MaterialIcon.EDIT)
+                                                        text = messages["edit"]
+                                                        style {
+                                                            backgroundColor += c(Colors["tertiary"])
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                versecard(it) {
+                                                    actionButton.hide()
+                                                    style {
+                                                        backgroundColor += c(Colors["baseBackground"])
+                                                    }
+                                                }
+
                                             }
                                         }
                                     }
@@ -96,7 +153,7 @@ class ChapterPage : View() {
                             backgroundColor += c(Colors["primary"])
                         }
                         action {
-                            viewModel.changeContext(Contexts.RECORD.label)
+                            viewModel.changeContext(Contexts.RECORD)
                         }
                     },
                     activityTab {
@@ -105,7 +162,7 @@ class ChapterPage : View() {
                             backgroundColor += c(Colors["secondary"])
                         }
                         action {
-                            viewModel.changeContext(Contexts.VIEW_TAKES.label)
+                            viewModel.changeContext(Contexts.VIEW_TAKES)
                         }
                     },
                     activityTab {
@@ -113,15 +170,11 @@ class ChapterPage : View() {
                         style {
                             backgroundColor += c(Colors["tertiary"])
                         }
-                        action{
-                            viewModel.changeContext(Contexts.EDIT_TAKES.label)
+                        action {
+                            viewModel.changeContext(Contexts.EDIT_TAKES)
                         }
                     })
-            add(activitypanel {
-                tabs.onNext(tabList)
-            }
-            )
-
+            add(activitypanel(tabList) {})
         }
     }
 }

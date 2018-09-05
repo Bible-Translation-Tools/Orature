@@ -1,30 +1,25 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
 
-import io.reactivex.subjects.PublishSubject
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class ActivityPanel : HBox() {
-    var tabs= PublishSubject.create<ArrayList<ActivityTab>>()
-
+class ActivityPanel(tabs:ArrayList<ActivityTab>) : HBox() {
     init {
         with(root) {
             spacing = 10.0
             alignment = Pos.CENTER
-            tabs.subscribe {
-                it.forEach{
-                    add(it)
-                }
+            tabs.forEach{
+                add(it)
             }
         }
     }
 }
 
-fun activitypanel(init: ActivityPanel.() -> Unit) : ActivityPanel {
-    val ap = ActivityPanel()
+fun activitypanel(list: ArrayList<ActivityTab>,init: ActivityPanel.() -> Unit) : ActivityPanel {
+    val ap = ActivityPanel(list)
     ap.init()
     return ap
 }

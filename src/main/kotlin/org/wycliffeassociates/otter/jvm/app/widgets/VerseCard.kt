@@ -1,36 +1,32 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
+
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class VerseCard : VBox() {
-    var title: String = ""
-    var selectedTake: Int = 0
-    var buttonColor: Color = c("")
+class VerseCard(verse: Verse) : VBox() {
+    var title = verse.verseNumber
+    var hasSelectedTake = verse.hasSelectedTake
+    var selectedTake = verse.selectedTakeNum
+    var actionButton = Button()
 
     init {
         with(root) {
             alignment = Pos.CENTER
-            spacing = 10.0
-            label(title)
-            label(selectedTake.toString())
-            button{
-                style {
-                    backgroundColor += buttonColor
-                }
-            }
+            spacing = 10.0 //label(title)
+            label(" Verse " + title.toString())
+            if (hasSelectedTake) label("Take " + selectedTake.toString())
+            add(actionButton)
         }
     }
 }
 
-fun versecard(init: VerseCard.() -> Unit): VerseCard {
-    val vc = VerseCard()
+fun versecard(verse: Verse, init: VerseCard.() -> Unit): VerseCard {
+    val vc = VerseCard(verse)
     vc.init()
     return vc
 }
