@@ -2,7 +2,9 @@ package org.wycliffeassociates.otter.jvm.app.ui.chapterPage.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.geometry.Orientation
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Chapter
 import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
@@ -42,35 +44,44 @@ class ProjectPage : View() {
                 }
                 add(verseGrid)
             }
-            val tabList = arrayListOf(
-                    activityTab {
-                        graphic = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
-                        style {
-                            backgroundColor += c(Colors["primary"])
-                        }
-                        action {
-                            viewModel.changeContext(ChapterContext.RECORD)
-                        }
-                    },
-                    activityTab {
-                        graphic = MaterialIconView(MaterialIcon.APPS, "25px")
-                        style {
-                            backgroundColor += c(Colors["secondary"])
-                        }
-                        action {
-                            viewModel.changeContext(ChapterContext.VIEW_TAKES)
-                        }
-                    },
-                    activityTab {
-                        graphic = MaterialIconView(MaterialIcon.EDIT, "25px")
-                        style {
-                            backgroundColor += c(Colors["tertiary"])
-                        }
-                        action {
-                            viewModel.changeContext(ChapterContext.EDIT_TAKES)
-                        }
-                    })
-            add(activitypanel(tabList) {})
+            listmenu {
+                orientation = Orientation.HORIZONTAL
+                useMaxWidth = true
+                style {
+                    backgroundColor += Color.WHITE
+                }
+                item(graphic = MaterialIconView(MaterialIcon.MIC_NONE, "25px")) {
+                    activeItem = this
+                    whenSelected { viewModel.changeContext(ChapterContext.RECORD) }
+                    style {
+                        backgroundColor += c(Colors["primary"])
+                        padding = box(20.px)
+                    }
+                    parent.layoutBoundsProperty().onChange { newBounds ->
+                        newBounds?.let { prefWidth = it.width / items.size }
+                    }
+                }
+                item(graphic = MaterialIconView(MaterialIcon.APPS, "25px")) {
+                    whenSelected { viewModel.changeContext(ChapterContext.VIEW_TAKES) }
+                    style {
+                        backgroundColor += c(Colors["secondary"])
+                        padding = box(20.px)
+                    }
+                    parent.layoutBoundsProperty().onChange { newBounds ->
+                        newBounds?.let { prefWidth = it.width / items.size }
+                    }
+                }
+                item(graphic = MaterialIconView(MaterialIcon.EDIT, "25px")) {
+                    whenSelected { viewModel.changeContext(ChapterContext.EDIT_TAKES) }
+                    style {
+                        backgroundColor += c(Colors["tertiary"])
+                        padding = box(20.px)
+                    }
+                    parent.layoutBoundsProperty().onChange { newBounds ->
+                        newBounds?.let { prefWidth = it.width / items.size }
+                    }
+                }
+            }
         }
     }
 
@@ -81,7 +92,7 @@ class ProjectPage : View() {
             vgrow = Priority.ALWAYS
             cellCache {
                 val verseCard = VerseCard(it)
-                when (viewModel.contextProperty.value) {
+                when (viewModel.contextProperty.value ?: ChapterContext.RECORD) {
                     ChapterContext.RECORD -> {
                         with(verseCard) {
                             actionButton.apply {
