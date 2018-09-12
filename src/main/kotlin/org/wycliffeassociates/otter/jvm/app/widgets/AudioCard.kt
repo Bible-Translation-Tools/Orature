@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.widgets
 import com.jfoenix.controls.JFXProgressBar
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.Pane
@@ -46,6 +47,7 @@ class AudioCard(private val audioFile: File, private val player: IAudioPlayer) :
                     // start updating progress
                     disposable = Observable
                             .interval(15, TimeUnit.MILLISECONDS)
+                            .observeOn(JavaFxScheduler.platform())
                             .subscribe {
                                 progress.progress = player
                                         .getAbsoluteLocationInFrames()
