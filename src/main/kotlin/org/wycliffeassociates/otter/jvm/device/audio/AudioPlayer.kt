@@ -37,7 +37,6 @@ class AudioPlayer: IAudioPlayer {
         }
         clip = AudioSystem.getClip()
         clip.addLineListener { lineEvent ->
-            println(lineEvent)
             if (lineEvent.type == LineEvent.Type.STOP && clip.framePosition == clip.frameLength) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                 // Rewind file
