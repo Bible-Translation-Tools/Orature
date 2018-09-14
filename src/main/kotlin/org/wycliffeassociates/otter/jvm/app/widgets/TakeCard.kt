@@ -1,10 +1,14 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.event.ActionEvent
+import javafx.geometry.Pos
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
@@ -14,12 +18,15 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
     private val badge = stackpane {
         style {
             backgroundColor += c(Colors["primary"])
-            padding = box(10.px)
             backgroundRadius += box(0.px, 10.px, 0.px, 10.px)
+            padding = box(8.px)
         }
-        label("NEW").style {
-            textFill = Color.WHITE
+        val icon = MaterialDesignIconView(MaterialDesignIcon.CREATION)
+        icon.size = "18px"
+        icon.style(true) {
+            fill = Color.WHITE
         }
+        add(icon)
         isVisible = !take.played
     }
 
@@ -27,17 +34,23 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
     init {
         setRightAnchor(badge, 0.0)
         setTopAnchor(badge, 0.0)
-        vbox {
+        style {
+            minWidth = 250.px
+            maxWidth = minWidth
+            minHeight = 100.px
+            maxHeight = minHeight
+            backgroundColor += Color.WHITE
+            backgroundRadius += box(10.px)
+        }
+        val content = vbox {
             style {
-                maxWidth = 300.px
-                maxHeight = 200.px
-                backgroundColor += Color.WHITE
-                backgroundRadius += box(10.px)
                 padding = box(10.px)
             }
             hbox {
+                vgrow = Priority.ALWAYS
                 style {
                     spacing = 10.px
+                    alignment = Pos.CENTER_LEFT
                 }
                 label("%02d".format(take.number)) {
                     style {
@@ -51,6 +64,10 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
                 }
             }
             simpleaudioplayer(take.file, player) {
+                vgrow = Priority.ALWAYS
+                style {
+                    alignment = Pos.CENTER_LEFT
+                }
                 playGraphic = MaterialIconView(MaterialIcon.PLAY_CIRCLE_OUTLINE, "30px")
                 playGraphic?.apply {
                     style(true) {
@@ -76,6 +93,11 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
                 }
             }
         }
+        setTopAnchor(content, 0.0)
+        setRightAnchor(content, 0.0)
+        setBottomAnchor(content, 0.0)
+        setLeftAnchor(content, 0.0)
+
         // Make sure badge appears on top
         badge.toFront()
     }

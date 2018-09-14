@@ -1,28 +1,23 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
 import com.jfoenix.controls.JFXProgressBar
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
 import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
-import javafx.scene.control.Label
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
-import javafx.scene.layout.VBox
-import javafx.scene.media.Media
-import javafx.scene.media.MediaPlayer
-import javafx.util.Duration
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.TimeUnit
 
+// Named "Simple" since just displays a progress bar and play/pause button
+// No waveform view
 class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioPlayer) : HBox() {
     val playPauseButton = Button()
     val progressBar = JFXProgressBar()
@@ -50,8 +45,10 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
         add(playPauseButton)
         add(progressBar)
 
-        // Show indefinite loading bar
+        // Set up indefinite loading bar
         progressBar.progress = -1.0
+        progressBar.hgrow = Priority.ALWAYS
+        progressBar.maxWidth = Double.MAX_VALUE
 
         player.load(audioFile).subscribe()
 
