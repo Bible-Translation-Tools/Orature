@@ -9,7 +9,7 @@ import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
 class ProjectCard(project: Project) : VBox() {
-    val loadButton = Button("Load")
+    val loadButton = Button()
 
     init {
         with(root) {

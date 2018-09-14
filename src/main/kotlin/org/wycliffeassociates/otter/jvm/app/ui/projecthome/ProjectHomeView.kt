@@ -16,7 +16,9 @@ class ProjectHomeView : View() {
             datagrid<Project> {
                 items = viewModel.projects
                 cellCache {
-                    projectcard(it)
+                    projectcard(it) {
+                        loadButton.text = "Load" // Replace with localized key later
+                    }
                 }
             }
         }
