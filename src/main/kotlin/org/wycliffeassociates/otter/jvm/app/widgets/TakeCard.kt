@@ -21,8 +21,7 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
             backgroundRadius += box(0.px, 10.px, 0.px, 10.px)
             padding = box(8.px)
         }
-        val icon = MaterialDesignIconView(MaterialDesignIcon.CREATION)
-        icon.size = "18px"
+        val icon = MaterialDesignIconView(MaterialDesignIcon.CREATION, "18px")
         icon.style(true) {
             fill = Color.WHITE
         }
@@ -46,10 +45,9 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
             style {
                 padding = box(10.px)
             }
-            hbox {
+            hbox(10) {
                 vgrow = Priority.ALWAYS
                 style {
-                    spacing = 10.px
                     alignment = Pos.CENTER_LEFT
                 }
                 label("%02d".format(take.number)) {
