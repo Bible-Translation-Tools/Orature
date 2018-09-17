@@ -17,7 +17,7 @@ class ProjectHomeView : View() {
                 items = viewModel.projects
                 cellCache {
                     projectcard(it) {
-                        loadButton.text = "Load" // Replace with localized key later
+                        loadButton.text = messages["load"] // Replace with localized key later
                     }
                 }
             }
