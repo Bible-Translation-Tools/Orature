@@ -3,32 +3,16 @@ package org.wycliffeassociates.otter.jvm.app.ui.inject
 import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 
 object Injector {
-    val projectDao = DaggerPersistenceComponent
+    private val database = DaggerPersistenceComponent
             .builder()
             .build()
             .injectDatabase()
-            .getProjectDao()
-    val chapterDao = DaggerPersistenceComponent
-            .builder()
-            .build()
-            .injectDatabase()
-            .getChapterDao()
+    val projectDao = database.getProjectDao()
+    val chapterDao =database.getChapterDao()
 
-    val bookDao = DaggerPersistenceComponent
-            .builder()
-            .build()
-            .injectDatabase()
-            .getBookDao()
+    val bookDao = database.getBookDao()
 
-    val chunkDao = DaggerPersistenceComponent
-            .builder()
-            .build()
-            .injectDatabase()
-            .getChunkDao()
+    val chunkDao = database.getChunkDao()
 
-    val takesDao = DaggerPersistenceComponent
-            .builder()
-            .build()
-            .injectDatabase()
-            .getTakesDao()
+    val takesDao = database.getTakesDao()
 }
