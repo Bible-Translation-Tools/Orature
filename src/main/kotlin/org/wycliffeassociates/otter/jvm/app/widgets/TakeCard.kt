@@ -11,13 +11,12 @@ import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import tornadofx.*
 
 class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
     private val badge = stackpane {
         style {
-            backgroundColor += c(Colors["primary"])
+            backgroundColor += Color.DARKGRAY
             backgroundRadius += box(0.px, 10.px, 0.px, 10.px)
             padding = box(8.px)
         }
@@ -67,17 +66,7 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
                     alignment = Pos.CENTER_LEFT
                 }
                 playGraphic = MaterialIconView(MaterialIcon.PLAY_CIRCLE_OUTLINE, "30px")
-                playGraphic?.apply {
-                    style(true) {
-                        fill = c(Colors["primary"])
-                    }
-                }
                 pauseGraphic = MaterialIconView(MaterialIcon.PAUSE_CIRCLE_OUTLINE, "30px")
-                pauseGraphic?.apply {
-                    style(true) {
-                        fill = c(Colors["primary"])
-                    }
-                }
                 with(playPauseButton) {
                     style(true) {
                         backgroundColor += Color.TRANSPARENT
