@@ -25,7 +25,7 @@ class UserRepo(
 
     /**
      * function to create and insert a user into the database
-     * takes in a audioHash and a path to a recording to creaete
+     * takes in a audioHash and a path to a recording to create
      */
     override fun insert(user: User): Observable<Int> {
         // creates observable to return generated int

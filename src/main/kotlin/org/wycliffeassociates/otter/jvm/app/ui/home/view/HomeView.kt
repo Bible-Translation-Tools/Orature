@@ -1,13 +1,13 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projecthome.View
+package org.wycliffeassociates.otter.jvm.app.ui.home.View
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ViewModel.ProjectHomeViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.home.ViewModel.HomeViewModel
 import tornadofx.*
 
-class ProjectHomeView : View() {
-    private val viewModel: ProjectHomeViewModel by inject()
+class HomeView : View() {
+    private val viewModel: HomeViewModel by inject()
     val projects = viewModel.projects
 
     override val root = borderpane {
