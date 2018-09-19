@@ -1,0 +1,10 @@
+---
+    name: ocenaudio
+    version: 0.0.1
+    canEdit: true
+    canRecord: false
+    executable:
+        macos: /Applications/ocenaudio.app/Contents/MacOS/ocenaudio
+        windows: C:\Program Files (x86)\ocenaudio\ocenaudio.exe
+        linux: ocenaudio
+    args: []
