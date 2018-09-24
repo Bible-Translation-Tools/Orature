@@ -36,7 +36,7 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
             }
         }
 
-    private var isPlaying = false
+    @Volatile private var isPlaying = false
 
     init {
         style {
