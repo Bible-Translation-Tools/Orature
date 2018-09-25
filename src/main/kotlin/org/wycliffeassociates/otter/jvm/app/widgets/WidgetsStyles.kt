@@ -5,6 +5,7 @@ import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.control.ContentDisplay
 import javafx.scene.effect.DropShadow
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import tornadofx.*
 
@@ -22,7 +23,7 @@ class WidgetsStyles : Stylesheet() {
         val usersListCell by cssclass()
         val nextButtonReady by cssclass()
         val nextButtonNotReady by cssclass()
-
+        val activityPanelButton by cssclass()
         val nextArrow by cssid("nextArrow")
     }
 
@@ -137,6 +138,10 @@ class WidgetsStyles : Stylesheet() {
             s(nextArrow) {
                 fill = c(Colors["baseText"])
             }
+        }
+        activityPanelButton {
+            prefHeight = 75.0.px
+            prefWidth = 100.0.px
         }
     }
 }
