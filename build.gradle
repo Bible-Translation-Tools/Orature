@@ -89,6 +89,7 @@ dependencies {
     compile "de.jensd:fontawesomefx-commons:9.1.2-jpms"
     compile "de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2-jpms"
     compile "de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms"
+    compile "de.jensd:fontawesomefx-materialdesignfont:1.7.22-4"
 
     //Jooq
     compile group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
