@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.common.data.model
 
-open class Collection (
-        val id: Int = 0,
-        val labelKey: String,
-        val titleKey: String,
-        val sort: Int
+data class Collection(
+        var sort: Int,
+        var slug: String,
+        var labelKey: String,
+        var titleKey: String,
+        var resourceContainer: ResourceContainer,
+        var id: Int = 0
 )

@@ -1,8 +1,14 @@
 package org.wycliffeassociates.otter.common.data.model
 
+import java.io.File
+import java.util.Calendar
+
 data class Take(
-        var id: Int = 0,
-        val filePath: String,
-        val sort: Int,
-        var played: Boolean
+        var filename: String,
+        var path: File,
+        var number: Int,
+        var timestamp: Calendar,
+        var isUnheard: Boolean,
+        var markers: List<Marker>,
+        var id: Int = 0
 )

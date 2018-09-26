@@ -1,11 +1,10 @@
 package org.wycliffeassociates.otter.common.data.model
 
 data class Chunk(
-        var id: Int = 0,
-        val start: Int,
-        val end: Int,
-        val sort: Int,
-        var recorded: Boolean,
-        var edited: Boolean,
-        var completed: Boolean
+        var sort: Int,
+        var labelKey: String,
+        var start: Int,
+        var end: Int,
+        var selectedTake: Take?,
+        var id: Int = 0
 )
