@@ -10,6 +10,7 @@ interface IDirectoryProvider {
     // create a directory to store the application's private org.wycliffeassociates.otter.common.data
     fun getAppDataDirectory(appendedPath: String = "") : File
 
+    val resourceContainerDirectory: File
     val userProfileImageDirectory: File
     val userProfileAudioDirectory: File
     val audioPluginDirectory: File

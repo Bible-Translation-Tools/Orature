@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.41'
+    ext.kotlin_version = '1.2.71'
     ext.rxkotlin_version= '2.2.0'
 
     repositories {
@@ -14,14 +14,14 @@ plugins {
     id 'java'
 }
 
-group 'org.wycliffeassociates.translationrecorder'
+group 'org.wycliffeassociates'
 
 apply plugin: 'kotlin'
 
 sourceCompatibility = 1.8
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -34,6 +34,9 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4:2.+'
     testCompile 'org.powermock:powermock-module-junit4-rule:2.+'
     testCompile 'org.powermock:powermock-api-mockito2:2.+'
+
+    //resource container
+    implementation 'org.wycliffeassociates:kotlin-resource-container'
 }
 
 compileKotlin {

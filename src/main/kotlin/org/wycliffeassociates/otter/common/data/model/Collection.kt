@@ -5,6 +5,6 @@ data class Collection(
         var slug: String,
         var labelKey: String,
         var titleKey: String,
-        var resourceContainer: ResourceContainer,
+        var resourceContainer: ResourceMetadata,
         var id: Int = 0
 )

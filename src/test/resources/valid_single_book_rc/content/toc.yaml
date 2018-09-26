@@ -1,0 +1,25 @@
+---
+  title: "Sample toc with random content"
+  sub-title: ""
+  link: ""
+  sections:
+    -
+      title: "Introduction to translationAcademy"
+      sub-title: "This page answers the question: What is in the Introduction?"
+      link: ""
+      sections:
+        -
+          title: "Introduction"
+          sub-title: ""
+          link: ""
+          sections:
+            -
+              title: ""
+              sub-title: ""
+              link: "ta-intro"
+              sections: []
+            -
+              title: ""
+              sub-title: ""
+              link: "uw-intro"
+              sections: []

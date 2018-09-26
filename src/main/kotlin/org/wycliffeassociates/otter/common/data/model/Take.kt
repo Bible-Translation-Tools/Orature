@@ -1,14 +1,14 @@
 package org.wycliffeassociates.otter.common.data.model
 
 import java.io.File
-import java.util.Calendar
+import java.time.LocalDate
 
 data class Take(
         var filename: String,
         var path: File,
         var number: Int,
-        var timestamp: Calendar,
-        var isUnheard: Boolean,
+        var timestamp: LocalDate,
+        var played: Boolean,
         var markers: List<Marker>,
         var id: Int = 0
 )
