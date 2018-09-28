@@ -19,7 +19,7 @@ class ImportResourceContainerTest {
 
     val mockLanguageRepo = MockLanguageRepository()
     val mockMetadataRepo = MockResourceMetadataRepository()
-    val mockCollectionRepo = MockCollectionDao()
+    val mockCollectionRepo = MockCollectionRepository()
     val mockDirectoryProvider = Mockito.mock(IDirectoryProvider::class.java)
 
     // Required in Kotlin to use Mockito any() argument matcher
@@ -55,7 +55,7 @@ class ImportResourceContainerTest {
 
 }
 
-class MockCollectionDao: ICollectionRepository {
+class MockCollectionRepository: ICollectionRepository {
     override fun getChildren(collection: Collection): Single<List<Collection>> {
         return Single.just(listOf(Mockito.mock(Collection::class.java)))
     }
