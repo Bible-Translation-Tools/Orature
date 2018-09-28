@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.repositories
+package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.model.Chunk

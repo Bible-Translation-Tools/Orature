@@ -4,7 +4,7 @@ import io.reactivex.Completable
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.repositories.*
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -14,7 +14,6 @@ import org.wycliffeassociates.resourcecontainer.errors.RCException
 
 import java.io.File
 import java.io.IOException
-import java.time.LocalDate
 import java.time.ZonedDateTime
 
 class ImportResourceContainer(

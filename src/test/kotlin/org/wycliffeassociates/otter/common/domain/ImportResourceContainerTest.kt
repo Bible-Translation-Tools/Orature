@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
-import io.reactivex.Observable
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -10,7 +9,7 @@ import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.repositories.*
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
