@@ -1,11 +1,10 @@
 package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.domain.repositories.Dao
-import org.wycliffeassociates.otter.common.domain.repositories.LanguageDao
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.repositories.*
 
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -15,11 +14,12 @@ import org.wycliffeassociates.resourcecontainer.errors.RCException
 
 import java.io.File
 import java.io.IOException
+import java.time.LocalDate
 
 class ImportResourceContainer(
-        private val languageDao: LanguageDao,
-        private val metadataDao: Dao<ResourceMetadata>,
-        private val collectionDao: Dao<Collection>,
+        private val languageRepository: ILanguageRepository,
+        private val metadataRepository: IResourceMetadataRepository,
+        private val collectionRepository: ICollectionRepository,
         directoryProvider: IDirectoryProvider
 ) {
 
@@ -55,12 +55,11 @@ class ImportResourceContainer(
         val dc = rc.manifest.dublinCore
 
         return Completable.fromCallable {
-            languageDao.getBySlug(dc.language.identifier).subscribe {
-                val resourceMetadata = dc.mapToMetadata(container, it)
-                //set the id in the resourceMetadata object once it returns from the insert call
+            languageRepository.getBySlug(dc.language.identifier).subscribe { language ->
+                val resourceMetadata = dc.mapToMetadata(container, language)
                 //metadata id is going to be needed for the collection insert
-                metadataDao.insert(resourceMetadata).subscribe {
-                    resourceMetadata.id = it
+                //metadata id is set by the repository
+                metadataRepository.insert(resourceMetadata).subscribe {
                     for (p in rc.manifest.projects) {
                         importProject(p, resourceMetadata)
                     }
@@ -70,7 +69,7 @@ class ImportResourceContainer(
     }
 
     private fun importProject(p: Project, resourceMetadata: ResourceMetadata) {
-        collectionDao.insert(p.mapToCollection(resourceMetadata.type, resourceMetadata))
+        collectionRepository.insert(p.mapToCollection(resourceMetadata.type, resourceMetadata))
     }
 }
 
