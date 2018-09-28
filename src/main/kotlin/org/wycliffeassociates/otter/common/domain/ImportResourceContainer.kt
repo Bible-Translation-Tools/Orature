@@ -58,8 +58,8 @@ class ImportResourceContainer(
             languageRepository.getBySlug(dc.language.identifier).subscribe { language ->
                 val resourceMetadata = dc.mapToMetadata(container, language)
                 //metadata id is going to be needed for the collection insert
-                //metadata id is set by the repository
-                metadataRepository.insert(resourceMetadata).subscribe {
+                metadataRepository.insert(resourceMetadata).subscribe { id ->
+                    resourceMetadata.id = id
                     for (p in rc.manifest.projects) {
                         importProject(p, resourceMetadata)
                     }

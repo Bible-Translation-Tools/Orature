@@ -80,8 +80,8 @@ class MockCollectionRepository: ICollectionRepository {
         return Completable.complete()
     }
 
-    override fun insert(obj: Collection): Completable {
-        return Completable.complete()
+    override fun insert(obj: Collection): Single<Int> {
+        return Single.just(1)
     }
 }
 
@@ -110,8 +110,8 @@ class MockLanguageRepository: ILanguageRepository {
         return Completable.complete()
     }
 
-    override fun insert(obj: Language): Completable {
-        return Completable.complete()
+    override fun insert(obj: Language): Single<Int> {
+        return Single.just(1)
     }
 }
 
@@ -129,7 +129,7 @@ class MockResourceMetadataRepository: IResourceMetadataRepository {
         return Completable.complete()
     }
 
-    override fun insert(obj: ResourceMetadata): Completable {
-        return Completable.complete()
+    override fun insert(obj: ResourceMetadata): Single<Int> {
+        return Single.just(1)
     }
 }
