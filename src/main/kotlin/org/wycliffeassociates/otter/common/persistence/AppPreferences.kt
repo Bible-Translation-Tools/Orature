@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.persistence
+package org.wycliffeassociates.otter.common.persistence
 
 // interface to getting user-independent app preferences
 interface AppPreferences {

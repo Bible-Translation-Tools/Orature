@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.data.dao.Dao
-import org.wycliffeassociates.otter.common.data.dao.LanguageDao
+import org.wycliffeassociates.otter.common.domain.repositories.Dao
+import org.wycliffeassociates.otter.common.domain.repositories.LanguageDao
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -15,7 +15,6 @@ import org.wycliffeassociates.resourcecontainer.errors.RCException
 
 import java.io.File
 import java.io.IOException
-import java.time.LocalDate
 
 class ImportResourceContainer(
         private val languageDao: LanguageDao,

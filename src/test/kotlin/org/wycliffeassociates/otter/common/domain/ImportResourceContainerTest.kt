@@ -2,14 +2,13 @@ package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
-import org.wycliffeassociates.otter.common.data.dao.Dao
-import org.wycliffeassociates.otter.common.data.dao.LanguageDao
+import org.wycliffeassociates.otter.common.domain.repositories.Dao
+import org.wycliffeassociates.otter.common.domain.repositories.LanguageDao
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
