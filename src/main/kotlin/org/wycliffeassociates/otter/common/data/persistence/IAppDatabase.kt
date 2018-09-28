@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.data.dao.LanguageDao
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 
-interface AppDatabase {
+interface IAppDatabase {
     fun getLanguageDao(): LanguageDao
     fun getMetadataDao(): Dao<ResourceMetadata>
     fun getCollectionDao(): Dao<Collection>

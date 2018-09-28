@@ -16,6 +16,7 @@ import org.wycliffeassociates.resourcecontainer.errors.RCException
 import java.io.File
 import java.io.IOException
 import java.time.LocalDate
+import java.time.ZonedDateTime
 
 class ImportResourceContainer(
         private val languageDao: LanguageDao,
@@ -92,9 +93,9 @@ private fun DublinCore.mapToMetadata(dir: File, lang: Language): ResourceMetadat
             description,
             format,
             identifier,
-            LocalDate.parse(issued),
+            ZonedDateTime.parse(issued),
             lang,
-            LocalDate.parse(modified),
+            ZonedDateTime.parse(modified),
             publisher,
             subject,
             type,

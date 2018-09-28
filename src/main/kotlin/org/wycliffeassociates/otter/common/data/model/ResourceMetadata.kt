@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.data.model
 
 import java.io.File
-import java.time.LocalDate
+import java.time.ZonedDateTime
 
 data class ResourceMetadata(
         var conformsTo: String,
@@ -9,9 +9,9 @@ data class ResourceMetadata(
         var description: String,
         var format: String,
         var identifier: String,
-        var issued: LocalDate,
+        var issued: ZonedDateTime,
         var language: Language,
-        var modified: LocalDate,
+        var modified: ZonedDateTime,
         var publisher: String,
         var subject: String,
         var type: String,

@@ -2,8 +2,7 @@ package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
-import junit.framework.Assert.assertTrue
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
