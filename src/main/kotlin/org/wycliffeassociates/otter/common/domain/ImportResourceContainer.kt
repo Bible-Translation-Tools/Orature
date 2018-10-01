@@ -39,7 +39,7 @@ class ImportResourceContainer(
                     throw IOException("Could not copy resource container ${dir.name} to resource container directory")
                 }
             }
-            importResourceContainer(File(rcDirectory, dir.name))
+            importResourceContainer(File(rcDirectory, dir.name)).subscribe { println("imported") }
         } else {
             throw RCException("Missing manifest.yaml")
         }
@@ -69,7 +69,7 @@ class ImportResourceContainer(
     }
 
     private fun importProject(p: Project, resourceMetadata: ResourceMetadata) {
-        collectionRepository.insert(p.mapToCollection(resourceMetadata.type, resourceMetadata))
+        collectionRepository.insert(p.mapToCollection(resourceMetadata.type, resourceMetadata)).subscribe()
     }
 }
 
@@ -90,9 +90,9 @@ private fun DublinCore.mapToMetadata(dir: File, lang: Language): ResourceMetadat
             description,
             format,
             identifier,
-            ZonedDateTime.parse(issued),
+            ZonedDateTime.now(),
             lang,
-            ZonedDateTime.parse(modified),
+            ZonedDateTime.now(),
             publisher,
             subject,
             type,
