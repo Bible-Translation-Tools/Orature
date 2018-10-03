@@ -11,8 +11,9 @@ interface IResourceRepository : IRepository<Resource> {
     fun getByChunk(chunk: Chunk): Single<List<Resource>>
     // Get resources for a collection
     fun getByCollection(collection: Collection): Single<List<Resource>>
-    // Set the chunk link (removes collection link)
-    fun updateChunkLink(resource: Resource, chunk: Chunk): Completable
-    // Set the collection link (removes chunk link)
-    fun updateCollectionLink(resource: Resource, collection: Collection): Completable
+    // Link/Unlink
+    fun linkToChunk(resource: Resource, chunk: Chunk): Completable
+    fun unlinkFromChunk(resource: Resource, chunk: Chunk): Completable
+    fun linkToCollection(resource: Resource, collection: Collection): Completable
+    fun unlinkFromCollection(resource: Resource, collection: Collection): Completable
 }

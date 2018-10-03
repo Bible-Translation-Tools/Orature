@@ -6,6 +6,7 @@ import org.wycliffeassociates.otter.common.data.model.ProjectCollection
 import org.wycliffeassociates.otter.common.data.model.SourceCollection
 
 interface IProjectRepository : IRepository<ProjectCollection> {
+    fun insert(project: ProjectCollection): Single<Int>
     fun getAllRoot(): Single<List<ProjectCollection>>
     fun getChildren(project: ProjectCollection): Single<List<ProjectCollection>>
     fun updateSource(project: ProjectCollection, newSource: SourceCollection): Completable
