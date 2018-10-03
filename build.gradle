@@ -37,6 +37,10 @@ dependencies {
 
     //resource container
     implementation 'org.wycliffeassociates:kotlin-resource-container'
+    
+    //json parsing
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.6"
+
 }
 
 compileKotlin {
