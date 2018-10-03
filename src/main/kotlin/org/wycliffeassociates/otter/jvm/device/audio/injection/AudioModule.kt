@@ -5,13 +5,13 @@ import dagger.Provides
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioPlayer
-import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorderImpl
+import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
 import javax.inject.Singleton
 
 @Module
 class AudioModule {
     @Provides
-    fun providesRecorder(): IAudioRecorder = AudioRecorderImpl()
+    fun providesRecorder(): IAudioRecorder = AudioRecorder()
 
     @Provides
     fun providesPlayer(): IAudioPlayer = AudioPlayer()

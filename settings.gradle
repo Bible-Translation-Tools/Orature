@@ -1,2 +1,3 @@
 rootProject.name = '8woc2018-jvm'
-
+includeBuild '../kotlin-resource-container'
+includeBuild '../8woc2018-common'

@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.persistence
 import org.junit.After
 import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.jvm.persistence.AppPreferencesImpl
 import java.util.prefs.Preferences
 
 class AppPreferencesTest {
@@ -13,7 +12,7 @@ class AppPreferencesTest {
         val input = 5
         val expected = input
 
-        val appPreferences = AppPreferencesImpl
+        val appPreferences = AppPreferences
         appPreferences.setCurrentUserId(input)
         val result = appPreferences.getCurrentUserId()
         Assert.assertEquals(expected, result)
@@ -23,7 +22,7 @@ class AppPreferencesTest {
     fun testIfGetCurrentUserIdWhenNoExistingIdReturnsNull() {
         val expected = null
 
-        val appPreferences = AppPreferencesImpl
+        val appPreferences = AppPreferences
         val result = appPreferences.getCurrentUserId()
 
         Assert.assertEquals(expected, result)
@@ -31,6 +30,6 @@ class AppPreferencesTest {
 
     @After
     fun tearDown() {
-        Preferences.userNodeForPackage(AppPreferencesImpl::class.java).clear()
+        Preferences.userNodeForPackage(AppPreferences::class.java).clear()
     }
 }

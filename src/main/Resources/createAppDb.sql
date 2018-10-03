@@ -1,32 +1,99 @@
-CREATE TABLE if NOT EXISTS "LANGUAGE ENTITY"
-(
-  id INTEGER primary key autoincrement,
-  slug VARCHAR(8)  not null UNIQUE,
-  name VARCHAR(50) not null,
-  isGateway INT default 0 not null,
-  anglicizedName VARCHAR(50) not null
+CREATE TABLE IF NOT EXISTS language_entity (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  slug          TEXT  NOT NULL UNIQUE,
+  name          TEXT NOT NULL,
+  gateway       INTEGER DEFAULT 0 NOT NULL,
+  anglicized    TEXT NOT NULL,
+  direction     TEXT NOT NULL
 );
 
-CREATE TABLE if NOT EXISTS "USER ENTITY"
-(
-  id INTEGER primary key autoincrement,
-  audioHash VARCHAR(50) not null UNIQUE ,
-  audioPath VARCHAR(255) not null UNIQUE ,
-  imgPath VARCHAR(255) NOT NULL UNIQUE
+CREATE TABLE IF NOT EXISTS dublin_core_entity (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    conformsTo  TEXT NOT NULL,
+    creator     TEXT NOT NULL,
+    description TEXT NOT NULL,
+    format      TEXT NOT NULL,
+    identifier  TEXT NOT NULL,
+    issued      TEXT NOT NULL,
+    language_fk INTEGER NOT NULL REFERENCES language_entity(id),
+    modified    TEXT NOT NULL,
+    publisher   TEXT NOT NULL,
+    subject     TEXT NOT NULL,
+    type        TEXT NOT NULL,
+    title       TEXT NOT NULL,
+    version     TEXT NOT NULL,
+    path        TEXT NOT NULL
 );
 
-CREATE TABLE if NOT EXISTS "USER PREFERENCES ENTITY"
-(
-  userfk INTEGER PRIMARY KEY references "USER ENTITY" ON DELETE CASCADE ,
-  sourceLanguagefk INTEGER references "LANGUAGE ENTITY" ON DELETE CASCADE ,
-  targetLanguagefk INTEGER references "LANGUAGE ENTITY" ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS rc_link_entity (
+    rc1_fk      INTEGER NOT NULL REFERENCES dublin_core_entity(id) ON DELETE CASCADE,
+    rc2_fk      INTEGER NOT NULL REFERENCES dublin_core_entity(id) ON DELETE CASCADE,
+    PRIMARY KEY (rc1_fk, rc2_fk),
+    CONSTRAINT directionless CHECK (rc1_fk < rc2_fk)
 );
 
-CREATE TABLE if NOT EXISTS "USER LANGUAGES ENTITY"
-(
-  userfk INTEGER references "USER ENTITY" ON DELETE CASCADE ,
-  languagefk INTEGER references "LANGUAGE ENTITY" ON DELETE CASCADE ,
-  isSource INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (userfk, languagefk, isSource)
+CREATE TABLE IF NOT EXISTS collection_entity (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    parent_fk     INTEGER REFERENCES collection_entity(id),
+    source_fk     INTEGER REFERENCES collection_entity(id),
+    label         TEXT NOT NULL,
+    title         TEXT NOT NULL,
+    slug          TEXT NOT NULL,
+    sort          INTEGER NOT NULL,
+    rc_fk         INTEGER NOT NULL REFERENCES dublin_core_entity(id)
 );
 
+CREATE TABLE IF NOT EXISTS content_entity (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    collection_fk    INTEGER NOT NULL REFERENCES collection_entity(id) ON DELETE CASCADE,
+    label            TEXT NOT NULL,
+    selected_take_fk INTEGER REFERENCES take_entity(id),
+    start            INTEGER NOT NULL,
+    sort             INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS content_derivative (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    content_fk       INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE,
+    source_fk        INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS take_entity (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    content_fk       INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE,
+    filename         TEXT NOT NULL,
+    path             TEXT NOT NULL,
+    number           INTEGER NOT NULL,
+    timestamp        TEXT NOT NULL,
+    played           INTEGER DEFAULT 0 NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS marker_entity (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    take_fk          INTEGER NOT NULL REFERENCES take_entity(id) ON DELETE CASCADE,
+    number           INTEGER NOT NULL,
+    position         INTEGER NOT NULL,
+    label            TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS resource_link (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    resource_content_fk INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE,
+    content_fk          INTEGER REFERENCES content_entity(id) ON DELETE CASCADE,
+    collection_fk       INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
+    UNIQUE (resource_content_fk, content_fk, collection_fk),
+    CONSTRAINT ensure_at_least_one_not_null
+        CHECK ((collection_fk is NOT NULL) or (content_fk is NOT NULL)),
+    CONSTRAINT prevent_both_not_null
+        CHECK ((collection_fk is NULL) or (content_fk is NULL))
+);
+
+CREATE TABLE IF NOT EXISTS audio_plugin_entity (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name                TEXT NOT NULL,
+    version             TEXT NOT NULL,
+    bin                 TEXT NOT NULL,
+    args                TEXT NOT NULL,
+    record              INTEGER DEFAULT 0 NOT NULL,
+    edit                INTEGER DEFAULT 0 NOT NULL
+);

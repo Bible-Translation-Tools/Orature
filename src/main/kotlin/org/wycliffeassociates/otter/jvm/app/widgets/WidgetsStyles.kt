@@ -7,6 +7,7 @@ import javafx.scene.control.ContentDisplay
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.jvm.app.UIColorsObject
 import tornadofx.*
 
 
@@ -24,6 +25,10 @@ class WidgetsStyles : Stylesheet() {
         val nextButtonReady by cssclass()
         val nextButtonNotReady by cssclass()
         val activityPanelButton by cssclass()
+        val wizardCard by cssclass()
+        val wizardCardButton by cssclass()
+        val progressStepperBar by cssclass()
+        val progressStepperStep by cssclass()
         val nextArrow by cssid("nextArrow")
     }
 
@@ -143,5 +148,42 @@ class WidgetsStyles : Stylesheet() {
             prefHeight = 75.0.px
             prefWidth = 100.0.px
         }
+
+        wizardCard {
+            maxHeight = 364.0.px
+            prefHeight = 364.0.px
+            prefWidth  = 364.0.px
+            backgroundRadius += box(12.0.px)
+            backgroundColor += c("#CC4141")
+            textFill = c("#FFFF")
+            fontSize = 24.px
+            effect = DropShadow(10.0, Color.GRAY)
+            cursor = Cursor.HAND
+        }
+
+        wizardCardButton {
+            prefHeight = 40.0.px
+            prefWidth = 164.0.px
+            backgroundColor += c("#FFFF")
+            textFill = c("#CC4141")
+        }
+
+        progressStepperBar {
+            bar {
+                padding = box(1.0.px)
+                backgroundInsets += box(0.0.px)
+            }
+
+            backgroundRadius += box(100.0.px)
+            prefHeight = 10.0.px
+            cellHeight = 10.0.px
+            arcHeight = 10.0.px
+            accentColor = c("#CC4141")
+        }
+
+        progressStepperStep {
+
+        }
+
     }
 }

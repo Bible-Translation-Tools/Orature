@@ -1,4 +1,4 @@
-//import org.wycliffeassociates.otter.jvm.app.ui.welcomeScreen.WelcomeScreen
+//import org.wycliffeassociates.otter.jvm.app.ui.welcomescreen.WelcomeScreen
 //import tornadofx.App
 //import tornadofx.launch
 //

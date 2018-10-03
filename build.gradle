@@ -10,7 +10,7 @@ buildscript {
     ext.jfoenix_version = '8.0.4'
     ext.requery_version = '1.5.1'
     ext.sqlite_jdbc = '3.7.2'
-    ext.sqlDirPath = "src" + File.separator + "main" + File.separator + "Resources" + File.separator + "TestAppDbInit.sql"
+    ext.sqlDirPath = "src" + File.separator + "main" + File.separator + "Resources" + File.separator + "CreateAppDb.sql"
 
 
     repositories {
@@ -117,8 +117,9 @@ dependencies {
     testCompile 'org.powermock:powermock-module-junit4:2.+'
     testCompile 'org.powermock:powermock-module-junit4-rule:2.+'
     testCompile 'org.powermock:powermock-api-mockito2:2.+'
+    
     //WA Libraries
-    implementation 'com.github.WycliffeAssociates:8woc2018-common:dev-SNAPSHOT'
+    implementation 'org.wycliffeassociates:8woc2018-common'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
 }
 
@@ -169,10 +170,6 @@ jooq {
         generator {
             database {
                 name = 'org.jooq.meta.sqlite.SQLiteDatabase'
-            }
-            generate {
-                pojos = true
-                daos = true
             }
 
             target {

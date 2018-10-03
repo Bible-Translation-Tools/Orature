@@ -1,12 +1,9 @@
-package org.wycliffeassociates.otter.jvm.app.ui.welcomeScreen.View
+package org.wycliffeassociates.otter.jvm.app.ui.welcomescreen.view
 
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import tornadofx.*
-import java.awt.Window
 
 class WelcomeScreenStyles : Stylesheet() {
 

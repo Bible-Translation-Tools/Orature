@@ -7,26 +7,26 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
-import org.wycliffeassociates.otter.common.data.dao.Dao
+import io.reactivex.Single
 import org.wycliffeassociates.otter.common.domain.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.jvm.device.audioplugin.parser.ParsedAudioPluginDataMapper
+import org.wycliffeassociates.otter.jvm.persistence.repositories.AudioPluginRepository
 import java.io.File
 
 // Imports plugin data files into database
-class AudioPluginRegistrar(private val pluginDataDao: Dao<AudioPluginData>) : IAudioPluginRegistrar {
+class AudioPluginRegistrar(private val audioPluginRepository: AudioPluginRepository) : IAudioPluginRegistrar {
     // Configure Jackson YAML processor
     private val mapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
 
     override fun import(pluginFile: File): Completable {
-        return Completable.fromObservable(
-                Observable
+        return Completable.fromSingle(
+                Single
                         .fromCallable {
                             val parsedAudioPlugin: ParsedAudioPluginData = mapper.readValue(pluginFile)
                             ParsedAudioPluginDataMapper().mapToAudioPluginData(parsedAudioPlugin, pluginFile)
                         }
                         .flatMap {
-                            pluginDataDao.insert(it)
+                            audioPluginRepository.insert(it)
                         }
         )
     }

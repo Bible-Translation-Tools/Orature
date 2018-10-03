@@ -4,7 +4,7 @@ package org.wycliffeassociates.otter.jvm.app.widgets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.jvm.app.ui.chapterPage.model.Verse
+import org.wycliffeassociates.otter.jvm.app.ui.chapterpage.model.Verse
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 

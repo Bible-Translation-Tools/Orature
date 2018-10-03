@@ -1,15 +1,14 @@
-package org.wycliffeassociates.otter.jvm.app.ui.welcomeScreen
+package org.wycliffeassociates.otter.jvm.app.ui.welcomescreen
 
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.layout.Priority
 import tornadofx.*
-import org.wycliffeassociates.otter.jvm.app.widgets.usersList.UsersList
-import org.wycliffeassociates.otter.jvm.app.ui.userCreation.*
-import org.wycliffeassociates.otter.jvm.app.widgets.profileIcon.ProfileIcon
+import org.wycliffeassociates.otter.jvm.app.widgets.userslist.UsersList
+import org.wycliffeassociates.otter.jvm.app.ui.usercreation.*
 import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles
-import org.wycliffeassociates.otter.jvm.app.ui.welcomeScreen.View.WelcomeScreenStyles
+import org.wycliffeassociates.otter.jvm.app.ui.welcomescreen.view.WelcomeScreenStyles
 import java.io.File
 import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 
@@ -83,7 +82,7 @@ class WelcomeScreen : View() {
             }
         }
     }
-    //set the root of the view to the welcomeScreen
+    //set the root of the view to the welcomescreen
     override val root = welcomeScreen
 
     //DON'T MOVE THIS TO THE TOP
