@@ -15,7 +15,7 @@ class ProjectCard(project: Project) : VBox() {
         with(root) {
             vbox(20) {
                 alignment = Pos.CENTER
-                label(project.book.titleKey)
+                label(project.book.title)
                 label(project.targetLanguage.name)
                 add(loadButton)
             }
