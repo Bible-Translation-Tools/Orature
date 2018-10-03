@@ -20,13 +20,7 @@ class ImportLanguages(val file: File, val languageRepo: ILanguageRepository) {
             val languages = file.bufferedReader().use {
                 mapper.readValue(it, Array<Door43Lanuage>::class.java)
             }
-            Observable.fromIterable(languages.toList())
-                    .map {
-                        it.toLanguage()
-                    }
-                    .subscribe {
-                        languageRepo.insert(it).blockingGet()
-                    }
+            languageRepo.insertAll(languages.toList().map { it.toLanguage() }).blockingGet()
         }.subscribeOn(Schedulers.io())
     }
 }
