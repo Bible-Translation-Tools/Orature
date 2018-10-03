@@ -56,7 +56,7 @@ class ImportResourceContainer(
         val dc = rc.manifest.dublinCore
 
         return Completable.fromCallable {
-            languageRepository.getBySlug(dc.language.identifier).subscribe { language ->
+            languageRepository.getBySlug(dc.language!!.identifier).subscribe { language ->
                 val resourceMetadata = dc.mapToMetadata(container, language)
                 //metadata id is going to be needed for the collection insert
                 metadataRepository.insert(resourceMetadata).subscribe { id ->
