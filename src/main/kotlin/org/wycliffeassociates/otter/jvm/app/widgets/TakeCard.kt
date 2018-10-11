@@ -4,22 +4,26 @@ import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon
 import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import tornadofx.*
 
-class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
+class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
+    val playedProperty = SimpleBooleanProperty(take.played)
     private val badge = stackpane {
+        // custom css class
         style {
-            backgroundColor += Color.DARKGRAY
             backgroundRadius += box(0.px, 10.px, 0.px, 10.px)
             padding = box(8.px)
         }
+        addClass("badge")
         val icon = MaterialDesignIconView(MaterialDesignIcon.CREATION, "18px")
         icon.style(true) {
             fill = Color.WHITE
@@ -54,13 +58,13 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
                         fontSize = 20.px
                     }
                 }
-                label("%tD".format(take.date)) {
+                label(take.timestamp.toString()) {
                     style {
                         fontSize = 12.px
                     }
                 }
             }
-            simpleaudioplayer(take.file, player) {
+            simpleaudioplayer(take.path, player) {
                 vgrow = Priority.ALWAYS
                 style {
                     alignment = Pos.CENTER_LEFT
@@ -76,6 +80,7 @@ class TakeCard(take: Take, player: IAudioPlayer) : AnchorPane() {
                             take.played = true
                             badge.isVisible = false
                         }
+                        playedProperty.value = take.played
                     }
                 }
             }

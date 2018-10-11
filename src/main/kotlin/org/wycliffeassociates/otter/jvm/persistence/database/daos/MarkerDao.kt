@@ -76,6 +76,7 @@ class MarkerDao(
                 .set(MARKER_ENTITY.NUMBER, entity.number)
                 .set(MARKER_ENTITY.POSITION, entity.position)
                 .set(MARKER_ENTITY.LABEL, entity.label)
+                .where(MARKER_ENTITY.ID.eq(entity.id))
                 .execute()
     }
 

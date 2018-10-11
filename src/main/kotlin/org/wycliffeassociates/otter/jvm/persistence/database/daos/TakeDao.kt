@@ -80,6 +80,7 @@ class TakeDao(
                 .set(TAKE_ENTITY.NUMBER, entity.number)
                 .set(TAKE_ENTITY.TIMESTAMP, entity.timestamp)
                 .set(TAKE_ENTITY.PLAYED, entity.played)
+                .where(TAKE_ENTITY.ID.eq(entity.id))
                 .execute()
     }
 

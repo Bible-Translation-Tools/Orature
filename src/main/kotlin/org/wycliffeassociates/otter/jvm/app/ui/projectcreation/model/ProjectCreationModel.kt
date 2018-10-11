@@ -4,7 +4,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
-import org.wycliffeassociates.otter.jvm.app.ui.chapterpage.model.Project
 import tornadofx.*
 
 class ProjectCreationModel {
@@ -16,7 +15,7 @@ class ProjectCreationModel {
 //    var resource by resourceProperty
    // var resourceProperty = getProperty(ProjectCreationModel::resourceSelected)
 
-    private var project: ObservableList<Project> by property(
+    private var project: ObservableList<Collection> by property(
             FXCollections.observableList(ProjectList().projectList
             )
     )
