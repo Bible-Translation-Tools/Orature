@@ -1,66 +1,66 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox
 
-import javafx.application.Platform
+import javafx.beans.property.Property
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
+import javafx.event.EventTarget
 import javafx.scene.control.ComboBox
-import javafx.scene.paint.Color
+import javafx.scene.layout.Pane
 import tornadofx.*
 
 /**
- * This class contains a comboBox that is searchable and filterable through a text field. It selects and passes an item
- * if a valid on is in the text field when the drop box closes and auto selects any text in the field when refocusing
- * back on the comboBox
+ * This class contains a comboBox that is searchable and filterable through a text field.
+ * It auto selects any text in the field when refocusing back on the comboBox
  *
  * @author Caleb Benedick
- *
- * @param selectionData The list of ComboBoxSelectionItems to be selected from in the comboBox
- * @param hint The display text in an empty comboBox text field
- * @param onComboBoxHidden The function to call when the comboBox drop down is closed and a valid item is in the text
- * field
+ * @author Matthew Russell
  */
-class FilterableComboBox (
-        selectionData: List<ComboBoxSelectionItem>,
-        hint: String,
-        onComboBoxHidden : (ComboBoxSelectionItem) -> Unit
-) : ComboBox<String>() {
-
+class FilterableComboBox<T> : ComboBox<T>() {
+    private val filterItems = FXCollections.observableArrayList<FilterableItem<T>>()
+    var filterConverter: (T) -> List<String> = { item -> listOf(item.toString()) }
     init {
-        val comboBoxSelectionList = ComboBoxSelectionList(selectionData)
-        items = comboBoxSelectionList.observableList
-
         /** Set up filterable comboBox based on the incoming data to select from */
         isEditable = true
-        promptText = hint
-        makeAutocompletable(false) {
-            comboBoxSelectionList.dataList.filter { current ->
-                current.filterText.contains(it) ||
-                        current.labelText.contains(it, true)
-            }.map { it.labelText }.sorted()
+        makeAutocompletable(false) { input ->
+            filterItems
+                    .filter { it.filterText.joinToString("&").contains(input, true) }
+                    .sortedBy { it.filterText.joinToString("&").indexOf(input, ignoreCase = true) }
+                    .map { it.item }
         }
 
-        editor.style {
-            backgroundColor = multi(Color.TRANSPARENT)
+        itemsProperty().addListener { _ ->
+            items.onChange { _ ->
+                refreshFilterItems()
+            }
+        }
+        items.onChange { _ ->
+            refreshFilterItems()
         }
 
         /** Select any text in the editor when it is refocused */
-        editor.focusedProperty().addListener { _, _, _ ->
-            run {
-                Platform.runLater {
-                    if (editor.isFocused && !editor.text.isEmpty()) {
-                        editor.selectAll()
-                    }
-                }
-            }
-        }
-
-        /** Set the comboBox selected value to the value in the text editor */
-        editor.textProperty().addListener { _, _, newText -> value = newText }
-
-        /** Add selected item if valid when the comboBox dropdown closes */
-        addEventFilter(ComboBox.ON_HIDDEN) {
-            if (comboBoxSelectionList.observableList.contains(value)) {
-                val index = comboBoxSelectionList.observableList.indexOf(value)
-                onComboBoxHidden(comboBoxSelectionList.dataList[index])
+        editor.focusedProperty().onChange {
+            if (editor.isFocused && !editor.text.isEmpty()) {
+                editor.selectAll()
             }
         }
     }
+
+    private fun refreshFilterItems() {
+        filterItems.setAll(
+                items.map { FilterableItem(it, filterConverter(it)) }
+        )
+    }
+}
+
+fun <T> EventTarget.filterablecombobox(
+        property: Property<T>? = null,
+        values: List<T>? = null,
+        init: FilterableComboBox<T>.() -> Unit = {}
+): FilterableComboBox<T> {
+    val box = FilterableComboBox<T>()
+    box.init()
+    if (values != null) box.items = (values as? ObservableList<T>) ?: values.observable()
+    if (property != null) box.bind(property)
+    add(box)
+    return box
 }

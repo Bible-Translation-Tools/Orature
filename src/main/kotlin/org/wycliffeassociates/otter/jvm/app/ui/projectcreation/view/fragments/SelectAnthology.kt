@@ -3,71 +3,72 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.event.ActionEvent
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.control.ContentDisplay
-import javafx.scene.layout.HBox
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
+import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum.*
+import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import tornadofx.*
-import tornadofx.Stylesheet.Companion.root
 import java.io.File
 
 class SelectAnthology : View() {
     val viewModel: ProjectCreationViewModel by inject()
+    override val complete = viewModel.anthologySelected
+
+    init {
+        importStylesheet<ProjectWizardStyles>()
+    }
     override val root = hbox(40) {
         alignment = Pos.CENTER
         togglegroup {
 
-            addEventHandler(ActionEvent.ACTION) {
-            }
+            viewModel.anthologyList.onChange {
+                clear() //clear to ensure that we create duplicate anthologies
+                viewModel.anthologyList.forEach {
+                    togglebutton {
+                        isSelected = false
+                        contentDisplay = ContentDisplay.TOP
+                        graphic = resourceGraphic(it.slug)
 
-            togglebutton {
-                contentDisplay = ContentDisplay.TOP
-                //graphic = imageLoader(File("/Users/nathanshanko/Downloads/Old Testament.svg"))
-                if (isSelected) {
-                    addClass(ResourceStyles.selectedCard)
-                } else {
-                    addClass(ResourceStyles.unselectedCard)
-                }
-                text = messages["bible"]
-                alignment = Pos.CENTER
+                        if (isSelected) {
+                            addClass(ProjectWizardStyles.selectedCard)
+                        } else {
+                            addClass(ProjectWizardStyles.unselectedCard)
+                        }
+                        text = it.titleKey
+                        alignment = Pos.CENTER
 
-                selectedProperty().onChange {
-                    if (it) {
-                        removeClass(ResourceStyles.unselectedCard)
-                        addClass(ResourceStyles.selectedCard)
-                    } else {
-                        removeClass(ResourceStyles.selectedCard)
-                        addClass(ResourceStyles.unselectedCard)
+                        selectedProperty().onChange {
+                            if (it) {
+                                removeClass(ProjectWizardStyles.unselectedCard)
+                                addClass(ProjectWizardStyles.selectedCard)
+                            } else {
+                                removeClass(ProjectWizardStyles.selectedCard)
+                                addClass(ProjectWizardStyles.unselectedCard)
+                            }
+                        }
+                        action {
+                            viewModel.selectedAnthologyProperty.value = it
+                        }
                     }
                 }
-
-            }
-
-            togglebutton {
-                contentDisplay = ContentDisplay.TOP
-                //graphic = imageLoader(File("/Users/nathanshanko/Downloads/Cross.svg"))
-                if (isSelected) {
-                    addClass(ResourceStyles.selectedCard)
-                } else {
-                    addClass(ResourceStyles.unselectedCard)
-                }
-                text = messages["obs"]
-                alignment = Pos.CENTER
-                selectedProperty().onChange {
-                    if (it) {
-                        removeClass(ResourceStyles.unselectedCard)
-                        addClass(ResourceStyles.selectedCard)
-                    } else {
-                        removeClass(ResourceStyles.selectedCard)
-                        addClass(ResourceStyles.unselectedCard)
-                    }
-                }
-
             }
         }
+    }
 
+    private fun resourceGraphic(resourceSlug: String): Node {
+
+        return when (resourceSlug) {
+            OT.slug ->  imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
+            NT.slug ->  imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
+
+            else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK)
+        }
+    }
+
+    override fun onSave() {
+        viewModel.getBooks()
     }
 }

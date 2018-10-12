@@ -3,147 +3,71 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments
 import tornadofx.*
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.beans.property.ObjectProperty
-import javafx.event.ActionEvent
-import javafx.event.EventType
 import javafx.geometry.Pos
-import javafx.scene.Cursor
-import javafx.scene.control.Button
+import javafx.scene.Node
 import javafx.scene.control.ContentDisplay
-import javafx.scene.control.ToggleGroup
-import javafx.scene.effect.DropShadow
-import javafx.scene.paint.Color
-import org.omg.CORBA.Object
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
+import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
+import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum.*
+import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.WizardCard
-import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
-import javax.annotation.Resource
+import java.io.File
 
 class SelectResource : View() {
     val viewModel: ProjectCreationViewModel by inject()
-    val toggleGroup = ToggleGroup()
-//    override val complete = viewmodel.valid(viewmodel.resource)
-    override val root =  hbox(40) {
-                alignment = Pos.CENTER
-//                wizardcard {
-//                    text = "Bible"
-//                    selected = true
-//                    // image = imageLoader(File("/Users/NathanShanko/Downloads/OBS.svg"))
-//                }
-                togglegroup {
+    override val complete = viewModel.resourceSelected
+    override val root = hbox(40) {
+        alignment = Pos.CENTER
+        togglegroup {
 
-                    addEventHandler(ActionEvent.ACTION) {
-                    }
-
+            viewModel.resourceListProperty.onChange {
+                viewModel.resourceListProperty.value.forEach {
                     togglebutton {
+                        isSelected = false //no initial selection
                         contentDisplay = ContentDisplay.TOP
-                        graphic = MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK)
+                        graphic = resourceGraphic(it.slug)
                         if (isSelected) {
-                            addClass(ResourceStyles.selectedCard)
+                            addClass(ProjectWizardStyles.selectedCard)
                         } else {
-                            addClass(ResourceStyles.unselectedCard)
+                            addClass(ProjectWizardStyles.unselectedCard)
                         }
-                        text = messages["bible"]
+                        text = it.titleKey
                         alignment = Pos.CENTER
 
                         selectedProperty().onChange {
                             if (it) {
-                                removeClass(ResourceStyles.unselectedCard)
-                                addClass(ResourceStyles.selectedCard)
+                                removeClass(ProjectWizardStyles.unselectedCard)
+                                addClass(ProjectWizardStyles.selectedCard)
                             } else {
-                                removeClass(ResourceStyles.selectedCard)
-                                addClass(ResourceStyles.unselectedCard)
+                                removeClass(ProjectWizardStyles.selectedCard)
+                                addClass(ProjectWizardStyles.unselectedCard)
                             }
                         }
-
-                    }
-
-                    togglebutton {
-                        contentDisplay = ContentDisplay.TOP
-                        //graphic = imageLoader(File("/Users/NathanShanko/Downloads/OBS.svg"))
-                        if (isSelected) {
-                            addClass(ResourceStyles.selectedCard)
-                        } else {
-                            addClass(ResourceStyles.unselectedCard)
+                        action {
+                            if (isSelected) viewModel.selectedResourceProperty.value = it
                         }
-                        text = messages["obs"]
-                        alignment = Pos.CENTER
-                        selectedProperty().onChange {
-                            if (it) {
-                                removeClass(ResourceStyles.unselectedCard)
-                                addClass(ResourceStyles.selectedCard)
-                            } else {
-                                removeClass(ResourceStyles.selectedCard)
-                                addClass(ResourceStyles.unselectedCard)
-                            }
-                        }
-
-                    }
-
-                    togglebutton {
-                        contentDisplay = ContentDisplay.TOP
-                        //graphic = imageLoader(File("/Users/NathanShanko/Downloads/tW.svg"))
-                        if (isSelected) {
-                            addClass(ResourceStyles.selectedCard)
-                        } else {
-                            addClass(ResourceStyles.unselectedCard)
-                        }
-                        text = messages["other"]
-                        alignment = Pos.CENTER
-
-                        selectedProperty().onChange {
-                            if (it) {
-                                removeClass(ResourceStyles.unselectedCard)
-                                addClass(ResourceStyles.selectedCard)
-                            } else {
-                                removeClass(ResourceStyles.selectedCard)
-                                addClass(ResourceStyles.unselectedCard)
-                            }
-                        }
-
                     }
                 }
             }
-
-    init {
-        importStylesheet<ResourceStyles>()
-    }
-
-    private fun WizardCard.select() {
-
-    }
-}
-
-class ResourceStyles : Stylesheet() {
-
-    companion object {
-        val selectedCard by cssclass()
-        val unselectedCard by cssclass()
+        }
     }
 
     init {
-        selectedCard {
-            prefHeight = 364.0.px
-            prefWidth = 364.0.px
-            backgroundRadius += box(12.0.px)
-            backgroundColor += c(Colors["primary"])
-            textFill = c(Colors["base"])
-            fontSize = 24.px
-            effect = DropShadow(10.0, Color.GRAY)
-            cursor = Cursor.HAND
-        }
+        importStylesheet<ProjectWizardStyles>()
+    }
 
-        unselectedCard {
-            prefHeight = 364.0.px
-            prefWidth = 364.0.px
-            backgroundRadius += box(12.0.px)
-            backgroundColor += c(Colors["base"])
-            textFill = c(Colors["primary"])
-            fontSize = 24.px
-            effect = DropShadow(10.0, Color.GRAY)
-            cursor = Cursor.HAND
+    private fun resourceGraphic(resourceSlug: String): Node {
+
+        return when (resourceSlug) {
+            ULB.slug -> MaterialIconView(MaterialIcon.BOOK)
+            OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
+            TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
+
+            else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK)
         }
+    }
+
+    override fun onSave() {
+        viewModel.getResourceChildren()
     }
 
 }

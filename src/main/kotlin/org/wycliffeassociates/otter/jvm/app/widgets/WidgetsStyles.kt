@@ -27,8 +27,6 @@ class WidgetsStyles : Stylesheet() {
         val activityPanelButton by cssclass()
         val wizardCard by cssclass()
         val wizardCardButton by cssclass()
-        val progressStepperBar by cssclass()
-        val progressStepperStep by cssclass()
         val nextArrow by cssid("nextArrow")
     }
 
@@ -167,23 +165,5 @@ class WidgetsStyles : Stylesheet() {
             backgroundColor += c("#FFFF")
             textFill = c("#CC4141")
         }
-
-        progressStepperBar {
-            bar {
-                padding = box(1.0.px)
-                backgroundInsets += box(0.0.px)
-            }
-
-            backgroundRadius += box(100.0.px)
-            prefHeight = 10.0.px
-            cellHeight = 10.0.px
-            arcHeight = 10.0.px
-            accentColor = c("#CC4141")
-        }
-
-        progressStepperStep {
-
-        }
-
     }
 }

@@ -1,29 +1,36 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ProjectCollection
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.root
 
-class ProjectCard(project: Collection) : VBox() {
-    val loadButton = Button()
+class ProjectCard(project: ProjectCollection) : VBox() {
+    var buttonTextProperty = SimpleStringProperty("")
+    var buttonText by buttonTextProperty
+    lateinit var cardButton: Button
 
     init {
         with(root) {
+            alignment = Pos.BOTTOM_CENTER
             vbox(20) {
-                alignment = Pos.CENTER
+                alignment= Pos.CENTER
                 label(project.titleKey)
+                label(project.labelKey)
                 label(project.resourceContainer.language.name)
-                add(loadButton)
+                cardButton =  button(buttonTextProperty)
+
             }
         }
     }
 }
 
-fun Pane.projectcard(project: Collection, init: ProjectCard.() -> Unit = {}): ProjectCard {
+fun Pane.projectcard(project: ProjectCollection, init: ProjectCard.() -> Unit = {}): ProjectCard {
+
     val projectCard = ProjectCard(project)
     projectCard.init()
     add(projectCard)
