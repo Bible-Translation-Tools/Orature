@@ -41,6 +41,7 @@ class ProjectPage : View() {
                 childrenList = listview {
                     items = viewModel.children
                     vgrow = Priority.ALWAYS
+                    addClass(ProjectPageStylesheet.chapterList)
                     cellCache {
                         // TODO: Localization
                         label(it.titleKey) {

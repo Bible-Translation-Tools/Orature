@@ -16,7 +16,8 @@ class ProjectCreationModel {
             Injector.collectionRepo,
             Injector.projectRepo,
             Injector.chunkRepository,
-            Injector.metadataRepo
+            Injector.metadataRepo,
+            Injector.directoryProvider
     )
     var sourceLanguageProperty: Language by property()
     var targetLanguageProperty: Language by property()

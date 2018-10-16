@@ -1,16 +1,13 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecthome
 
+import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
-import javafx.scene.text.Font
-import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.style.ProjectHomeStyles
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
 import tornadofx.*
@@ -23,19 +20,17 @@ class ProjectHomeView : View() {
 
     val viewModel: ProjectHomeViewModel by inject()
     override val root = borderpane {
+        style {
+            setPrefSize(1200.0, 800.0)
+        }
         top = hbox {
             alignment = Pos.CENTER_RIGHT
-            button(messages["refresh"]) {
+            add(JFXButton(messages["refresh"], MaterialIconView(MaterialIcon.REFRESH, "25px")).apply {
                 addClass(AppStyles.refreshButton)
                 action {
                     viewModel.getAllProjects()
                 }
-                style {
-                    backgroundColor += c(Colors["base"])
-                    textFill = c(Colors["primary"])
-                }
-
-            }
+            })
             style {
                 padding = box(15.0.px)
             }
@@ -55,22 +50,13 @@ class ProjectHomeView : View() {
                     bindChildren(viewModel.allProjects) {
                         hbox {
                             projectcard(it) {
-                                style {
-                                    prefHeight = 250.0.px
-                                    prefWidth = 232.0.px
-                                    backgroundColor += c(Colors["base"])
-                                    backgroundRadius += box(10.0.px)
-                                    borderRadius += box(10.0.px)
-                                    effect = DropShadow(4.0, 2.0, 4.0, Color.GRAY)
-                                }
-                                buttonText = messages["loadProject"]
+                                addClass(AppStyles.projectCard)
                                 cardButton.apply {
-                                    addClass(AppStyles.cardButton)
-                                    style {
-                                        effect = DropShadow(0.0, Color.TRANSPARENT)
-                                        backgroundColor += c(Colors["primary"])
-                                        textFill = c(Colors["base"])
-                                    }
+                                    text = messages["loadProject"]
+                                }
+                                graphicContainer.apply {
+                                    addClass(AppStyles.projectGraphicContainer)
+                                    add(MaterialIconView(MaterialIcon.IMAGE, "75px"))
                                 }
                             }
                         }
@@ -84,15 +70,15 @@ class ProjectHomeView : View() {
                 padding = box(25.0.px)
             }
             alignment = Pos.BOTTOM_RIGHT
-            val icon = MaterialIconView(MaterialIcon.ADD)
-            icon.fill = c(Colors["base"])
-            button("", icon) {
+            val icon = MaterialIconView(MaterialIcon.ADD, "25px")
+            add(JFXButton("", icon).apply {
                 addClass(AppStyles.addProjectButton)
                 action {
                     viewModel.createProject()
                 }
-            }
+            })
         }
+
     }
 
     override fun onDock() {
