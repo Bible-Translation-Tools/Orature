@@ -82,4 +82,7 @@ class SelectLanguage : View() {
             }
         }
     }
+    init {
+        importStylesheet<ProjectWizardStyles>()
+    }
 }

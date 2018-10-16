@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
+import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.model.ProjectCreationModel
 import tornadofx.*
 
@@ -13,9 +14,12 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     var selectedAnthologyProperty = bind(ProjectCreationModel::selectedAnthology, true)
     val selectedBookProperty = bind(ProjectCreationModel::selectedBook, true)
     val resourceListProperty = bind(ProjectCreationModel::resources)
+    val collectionList = item.collectionList
     val languagesList = item.languages
     val anthologyList = item.anthologyList
     val bookList = item.bookList
+    val goNextPage = item.goNextPage
+
 
     val allPagesComplete = SimpleBooleanProperty(false)
     val resourceSelected = SimpleBooleanProperty(false)
@@ -40,7 +44,7 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
         }
     }
 
-    fun getResourceChildren() = bind(ProjectCreationModel::getResourceChildren)
+    fun checkLevel(selectedCollection: Collection) = item.checkLevel(selectedCollection)
     fun getBooks() = bind(ProjectCreationModel::getBooks)
     fun createProject() = bind(ProjectCreationModel::createProject)
 }

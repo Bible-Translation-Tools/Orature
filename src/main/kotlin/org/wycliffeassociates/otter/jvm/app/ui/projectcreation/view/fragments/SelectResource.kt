@@ -15,7 +15,7 @@ import java.io.File
 class SelectResource : View() {
     val viewModel: ProjectCreationViewModel by inject()
     override val complete = viewModel.resourceSelected
-    override val root = hbox(40) {
+    override val root =  flowpane {
         alignment = Pos.CENTER
         togglegroup {
 
@@ -51,10 +51,6 @@ class SelectResource : View() {
         }
     }
 
-    init {
-        importStylesheet<ProjectWizardStyles>()
-    }
-
     private fun resourceGraphic(resourceSlug: String): Node {
 
         return when (resourceSlug) {
@@ -66,8 +62,8 @@ class SelectResource : View() {
         }
     }
 
-    override fun onSave() {
-        viewModel.getResourceChildren()
-    }
+//    override fun onSave() {
+//        viewModel.getResourceChildren()
+//    }
 
 }

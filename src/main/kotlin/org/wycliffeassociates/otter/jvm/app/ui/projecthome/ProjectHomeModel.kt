@@ -22,6 +22,6 @@ class ProjectHomeModel {
     }
 
     fun createProject(workspace: Workspace) {
-        workspace.dockInNewScope<ProjectCreationWizard>()
+        workspace.dock<ProjectCreationWizard>()
     }
 }

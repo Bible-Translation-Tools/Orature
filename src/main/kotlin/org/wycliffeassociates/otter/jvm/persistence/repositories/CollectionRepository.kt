@@ -5,6 +5,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
@@ -19,6 +20,10 @@ class CollectionRepository(
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
+    override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private val collectionDao = database.getCollectionDao()
     private val metadataDao = database.getResourceMetadataDao()
     private val languageDao = database.getLanguageDao()

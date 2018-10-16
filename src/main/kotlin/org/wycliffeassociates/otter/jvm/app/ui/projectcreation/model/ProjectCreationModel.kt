@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.model
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.beans.binding.BooleanExpression
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -22,9 +24,14 @@ class ProjectCreationModel {
     var selectedBook: Collection by property()
     var anthologyList: ObservableList<Collection> by property(FXCollections.observableArrayList())
     var bookList: ObservableList<Collection> by property(FXCollections.observableArrayList())
+    var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
+
+    var goNextPage = SimpleBooleanProperty(false)
 
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
     val resources: ObservableList<Collection> = FXCollections.observableArrayList()
+
+    val bookLevelReached = SimpleBooleanProperty(false)
 
     init {
         creationUseCase.getAllLanguages()
@@ -36,15 +43,27 @@ class ProjectCreationModel {
         creationUseCase.getSourceRepos()
                 .observeOnFx()
                 .subscribe { retrieved ->
-                    resources.setAll(retrieved)
+                    collectionList.setAll(retrieved)
                 }
     }
 
-    fun getResourceChildren() {
-        creationUseCase.getResourceChildren(selectedResource)
+    fun checkLevel(selectedCollection: Collection) {
+        if(anthologyList[0].labelKey == "book") {
+
+        }
+        else {
+            goNextPage.set(true)
+            getResourceChildren(selectedCollection)
+        }
+    }
+
+
+    fun getResourceChildren(parentCollection: Collection) {
+        creationUseCase.getResourceChildren(parentCollection)
                 .observeOnFx()
                 .doOnSuccess {
-                    anthologyList.setAll(it)
+                    collectionList.setAll(it)
+                    goNextPage.set(false)
                 }
                 .subscribe()
     }
@@ -74,4 +93,5 @@ class ProjectCreationModel {
                 }
                 .subscribe()
     }
+
 }
