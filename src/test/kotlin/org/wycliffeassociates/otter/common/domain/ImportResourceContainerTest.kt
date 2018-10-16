@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -19,6 +21,7 @@ class ImportResourceContainerTest {
     val mockLanguageRepo = MockLanguageRepository()
     val mockMetadataRepo = MockResourceMetadataRepository()
     val mockCollectionRepo = MockCollectionRepository()
+    val mockContentRepo = MockContentRepository()
     val mockDirectoryProvider = Mockito.mock(IDirectoryProvider::class.java)
 
     // Required in Kotlin to use Mockito any() argument matcher
@@ -45,6 +48,7 @@ class ImportResourceContainerTest {
                 mockLanguageRepo,
                 mockMetadataRepo,
                 mockCollectionRepo,
+                mockContentRepo,
                 mockDirectoryProvider
         )
 
@@ -54,7 +58,42 @@ class ImportResourceContainerTest {
 
 }
 
+class MockContentRepository: IChunkRepository {
+    override fun insertForCollection(chunk: Chunk, collection: Collection): Single<Int> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getByCollection(collection: Collection): Single<List<Chunk>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getSources(chunk: Chunk): Single<List<Chunk>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun updateSources(chunk: Chunk, sourceChunks: List<Chunk>): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getAll(): Single<List<Chunk>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun update(obj: Chunk): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun delete(obj: Chunk): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+}
+
+
 class MockCollectionRepository: ICollectionRepository {
+    override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun getChildren(collection: Collection): Single<List<Collection>> {
         return Single.just(listOf(Mockito.mock(Collection::class.java)))
     }
@@ -85,6 +124,10 @@ class MockCollectionRepository: ICollectionRepository {
 }
 
 class MockLanguageRepository: ILanguageRepository {
+    override fun insertAll(languages: List<Language>): Single<List<Int>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun getGateway(): Single<List<Language>> {
         return Single.just(listOf(Mockito.mock(Language::class.java)))
     }
@@ -115,6 +158,17 @@ class MockLanguageRepository: ILanguageRepository {
 }
 
 class MockResourceMetadataRepository: IResourceMetadataRepository {
+    override fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun removeLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getLinked(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     override fun getAll(): Single<List<ResourceMetadata>> {
         return Single.just(listOf(Mockito.mock(ResourceMetadata::class.java)))
