@@ -29,6 +29,17 @@ class CollectionDao(
                 }
     }
 
+    override fun fetchBySlugAndContainerId(slug: String, containerId: Int): CollectionEntity {
+        return dsl
+                .select()
+                .from(COLLECTION_ENTITY)
+                .where(COLLECTION_ENTITY.SLUG.eq(slug).and(COLLECTION_ENTITY.RC_FK.eq(containerId)))
+                .fetchOne {
+                    RecordMappers.mapToCollectionEntity(it)
+                }
+    }
+
+    @Synchronized
     override fun insert(entity: CollectionEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 

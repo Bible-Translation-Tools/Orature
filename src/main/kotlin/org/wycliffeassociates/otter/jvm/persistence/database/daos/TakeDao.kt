@@ -19,6 +19,7 @@ class TakeDao(
                 }
     }
 
+    @Synchronized
     override fun insert(entity: TakeEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 

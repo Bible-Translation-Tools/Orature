@@ -52,6 +52,7 @@ class ResourceMetadataDao(
         }
     }
 
+    @Synchronized
     override fun insert(entity: ResourceMetadataEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 

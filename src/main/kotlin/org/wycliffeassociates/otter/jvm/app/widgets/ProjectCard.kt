@@ -21,7 +21,7 @@ class ProjectCard(project: ProjectCollection) : VBox() {
                 alignment= Pos.CENTER
                 label(project.titleKey)
                 label(project.labelKey)
-                label(project.resourceContainer.language.name)
+                label(project.resourceContainer!!.language.name)
                 cardButton =  button(buttonTextProperty)
 
             }

@@ -29,6 +29,7 @@ class ResourceLinkDao(
                 }
     }
 
+    @Synchronized
     override fun insert(entity: ResourceLinkEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 

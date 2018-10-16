@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.LanguageEntity
 class AudioPluginDao(
         private val dsl: DSLContext
 ) : IDao<AudioPluginEntity> {
+    @Synchronized
     override fun insert(entity: AudioPluginEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 

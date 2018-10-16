@@ -10,8 +10,7 @@ buildscript {
     ext.jfoenix_version = '8.0.4'
     ext.requery_version = '1.5.1'
     ext.sqlite_jdbc = '3.7.2'
-    ext.sqlDirPath = "src" + File.separator + "main" + File.separator + "Resources" + File.separator + "CreateAppDb.sql"
-
+    ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "CreateAppDb.sql"].join(File.separator)
 
     repositories {
         mavenCentral()

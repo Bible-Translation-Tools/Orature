@@ -5,6 +5,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.model.ProjectCollection
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.repositories.IProjectRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
@@ -104,11 +105,13 @@ class ProjectRepository(
     }
 
     private fun buildProjectCollection(entity: CollectionEntity): ProjectCollection {
-        val metadataEntity = metadataDao
-                .fetchById(entity.metadataFk)
-        val language = languageMapper.mapFromEntity(
-                languageDao.fetchById(metadataEntity.languageFk)
-        )
-        return collectionMapper.mapFromEntity(entity, metadataMapper.mapFromEntity(metadataEntity, language))
+        var metadata: ResourceMetadata? = null
+        entity.metadataFk?.let {
+            val metadataEntity = metadataDao.fetchById(it)
+            val language = languageMapper.mapFromEntity(languageDao.fetchById(metadataEntity.languageFk))
+            metadata = metadataMapper.mapFromEntity(metadataEntity, language)
+        }
+
+        return collectionMapper.mapFromEntity(entity, metadata)
     }
 }

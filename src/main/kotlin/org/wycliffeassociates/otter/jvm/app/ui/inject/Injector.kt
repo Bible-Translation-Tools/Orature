@@ -15,6 +15,7 @@ object Injector {
     val resourceContainerDirectory = directoryProvider.resourceContainerDirectory
     val languageRepo = LanguageRepository(database, LanguageMapper())
     val collectionRepo = CollectionRepository(database, CollectionMapper(), ResourceMetadataMapper(), LanguageMapper())
+    val chunkRepo = ChunkRepository(database)
     val metadataRepo = ResourceMetadataRepository(database, ResourceMetadataMapper(), LanguageMapper())
     val sourceRepo = SourceRepository(database)
     val projectRepo = ProjectRepository(database)
