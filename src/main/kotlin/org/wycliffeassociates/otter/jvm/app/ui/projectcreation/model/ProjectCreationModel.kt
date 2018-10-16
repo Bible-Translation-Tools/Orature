@@ -13,7 +13,10 @@ class ProjectCreationModel {
     private val creationUseCase = CreateProject(
             Injector.languageRepo,
             Injector.sourceRepo,
-            Injector.collectionRepo, Injector.projectRepo
+            Injector.collectionRepo,
+            Injector.projectRepo,
+            Injector.chunkRepository,
+            Injector.metadataRepo
     )
     var sourceLanguageProperty: Language by property()
     var targetLanguageProperty: Language by property()
@@ -60,18 +63,7 @@ class ProjectCreationModel {
 
     fun createProject() {
         creationUseCase
-                .newProject(
-                        Collection(
-                                selectedBook.sort,
-                                selectedBook.slug,
-                                "project",
-                                selectedBook.titleKey,
-                                selectedBook.resourceContainer
-                        )
-                )
-                .flatMapCompletable {
-                    creationUseCase.updateSource(it, selectedBook)
-                }
+                .newProject(selectedBook, targetLanguageProperty)
                 .subscribe()
     }
 }
