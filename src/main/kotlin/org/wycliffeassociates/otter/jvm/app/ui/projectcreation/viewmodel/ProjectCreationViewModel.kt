@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel
 
-import javafx.beans.property.SimpleBooleanProperty
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.model.ProjectCreationModel
 import tornadofx.*
@@ -9,15 +8,13 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
 
     var sourceLanguage = bind(ProjectCreationModel::sourceLanguageProperty, true)
     var targetLanguage = bind(ProjectCreationModel::targetLanguageProperty, true)
+    val creaionDepthProperty = bind(ProjectCreationModel::creationDepth)
 
-    val resourceListProperty = bind(ProjectCreationModel::resources)
     val collectionList = item.collectionList
     val languagesList = item.languages
-    val anthologyList = item.anthologyList
-    val bookList = item.bookList
-
 
     fun checkLevel(selectedCollection: Collection) = item.checkLevel(selectedCollection, this.workspace)
-    fun createProject() = bind(ProjectCreationModel::createProject)
+    fun goBack(wizard: Wizard) = item.getPreviousCollections(wizard)
     fun getSourceRepos() = bind(ProjectCreationModel::getSourceRepos)
+    fun getDepth(selectedCollection: Collection) = item.getDepth(selectedCollection)
 }
