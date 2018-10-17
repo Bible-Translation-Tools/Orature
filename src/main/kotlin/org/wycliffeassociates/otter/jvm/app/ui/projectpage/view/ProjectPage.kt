@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectpage.view
 
+import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Orientation
@@ -10,6 +11,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.viewmodel.ProjectPageViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
 import org.wycliffeassociates.otter.jvm.app.widgets.*
 import tornadofx.*
 
@@ -50,13 +52,26 @@ class ProjectPage : View() {
                     }
                     selectionModel.selectedIndexProperty().onChange {
                         // Tell the view model which child was selected
-                        viewModel.selectChildCollection(viewModel.children[it])
+                        if (it >= 0) viewModel.selectChildCollection(viewModel.children[it])
                     }
                 }
             }
 
             vbox {
                 hgrow = Priority.ALWAYS
+                hbox {
+                    style {
+                        padding = box(20.px)
+                    }
+                    alignment = Pos.CENTER_RIGHT
+                    // Back button
+                    add(JFXButton(messages["back"], MaterialIconView(MaterialIcon.ARROW_BACK)).apply {
+                        action {
+                            workspace.navigateBack()
+                        }
+                        addClass(ViewTakesStylesheet.backButton)
+                    })
+                }
                 vbox {
                     vgrow = Priority.ALWAYS
                     viewModel.contextProperty.onChange {

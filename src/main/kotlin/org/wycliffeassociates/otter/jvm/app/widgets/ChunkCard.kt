@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 import tornadofx.Stylesheet.Companion.root
 
 class ChunkCard(val chunk: Chunk) : VBox() {
@@ -16,14 +17,13 @@ class ChunkCard(val chunk: Chunk) : VBox() {
         with(root) {
             alignment = Pos.CENTER
             spacing = 10.0
-            // TODO: Localization
-            label(chunk.labelKey) {
+            label("${messages[chunk.labelKey]} ${chunk.start}") {
                 vgrow = Priority.ALWAYS
                 maxHeight = Double.MAX_VALUE
                 addClass("title")
             }
             chunk.selectedTake?.let {
-                label("Take ${it.number}") {
+                label("${messages["take"]} ${it.number}") {
                     vgrow = Priority.ALWAYS
                     maxHeight = Double.MAX_VALUE
                     addClass("selected-take")

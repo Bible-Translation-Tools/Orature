@@ -8,6 +8,7 @@ import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.ProjectPageActions
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
@@ -16,7 +17,6 @@ import tornadofx.*
 import java.time.LocalDate
 
 class ProjectPageModel {
-    // TODO: Get project from scope from home page
     val projectRepository = Injector.projectRepo
     val directoryProvider = Injector.directoryProvider
     val collectionRepository = Injector.collectionRepo
@@ -24,7 +24,8 @@ class ProjectPageModel {
     val takeRepository = Injector.takeRepository
     val pluginRepository = Injector.pluginRepository
 
-    var project: Collection? = null
+    // Inject the selected project from the project home view model
+    val projectProperty = find<ProjectHomeViewModel>().selectedProjectProperty
 
     // setup model with fx properties
     var projectTitle: String by property()
@@ -64,28 +65,23 @@ class ProjectPageModel {
             pluginRepository
     )
 
-
     init {
-        // TODO: Get from scope (passed from home) instead of first from repo
-        projectRepository
-                .getAllRoot()
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    initializeView(retrieved.first())
-                }
+        setTitleAndChapters()
+        projectProperty.onChange { setTitleAndChapters() }
     }
 
-    private fun initializeView(newProject: Collection) {
-        project = newProject
-        projectTitle = newProject.titleKey
-        projectPageActions
-                .getChildren(newProject)
-                .observeOnFx()
-                .subscribe { childCollections ->
-                    // Now we have the children of the project collection
-                    children.clear()
-                    children.addAll(childCollections)
-                }
+    private fun setTitleAndChapters() {
+        projectTitle = projectProperty.value.titleKey
+        children.clear()
+        if (projectProperty.value != null) {
+            projectPageActions
+                    .getChildren(projectProperty.value)
+                    .observeOnFx()
+                    .subscribe { childCollections ->
+                        // Now we have the children of the project collection
+                        children.addAll(childCollections.sortedBy { it.sort })
+                    }
+        }
     }
 
     fun selectChildCollection(child: Collection) {
@@ -121,7 +117,7 @@ class ProjectPageModel {
     }
 
     private fun recordChunk() {
-        project?.let { project ->
+        projectProperty.value?.let { project ->
             showPluginActive = true
             projectPageActions
                     .createNewTake(activeChunk, project, activeChild)

@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.common.domain.ViewTakesActions
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.viewmodel.ProjectPageViewModel
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class ViewTakesModel {
 
@@ -60,8 +61,7 @@ class ViewTakesModel {
         alternateTakes.clear()
         selectedTakeProperty.value = null
         chunkProperty.value?.let { populateTakes(it) }
-        // TODO: Use localized key
-        title = chunkProperty.value?.labelKey ?: "View Takes"
+        title = "${messages[chunkProperty.value?.labelKey ?: "verse"]} ${ chunkProperty.value?.start ?: "" }"
     }
 }
 

@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.inject
 
 import org.wycliffeassociates.otter.jvm.device.audio.injection.DaggerAudioComponent
+import org.wycliffeassociates.otter.jvm.device.audioplugin.injection.DaggerAudioPluginComponent
 import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
@@ -10,6 +11,12 @@ import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.Resourc
 object Injector {
     private val persistenceComponent = DaggerPersistenceComponent.builder().build()
     private val database = persistenceComponent.injectDatabase()
+    private val audioComponent = DaggerAudioComponent
+            .builder()
+            .build()
+    private val audioPluginComponent = DaggerAudioPluginComponent
+            .builder()
+            .build()
 
     val directoryProvider = persistenceComponent.injectDirectoryProvider()
     val resourceContainerDirectory = directoryProvider.resourceContainerDirectory
@@ -23,10 +30,8 @@ object Injector {
     val takeRepository = TakeRepository(database)
     val pluginRepository = AudioPluginRepository(database)
 
-    private val audioComponent = DaggerAudioComponent
-            .builder()
-            .build()
-
     val audioPlayer
         get() = audioComponent.injectPlayer()
+
+    val audioPluginRegistrar = audioPluginComponent.injectRegistrar()
 }

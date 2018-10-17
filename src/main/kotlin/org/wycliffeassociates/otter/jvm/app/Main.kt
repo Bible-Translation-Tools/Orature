@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.domain.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.PluginActions
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
@@ -46,7 +47,8 @@ private fun initApp() {
             .onErrorComplete()
             .subscribe()
 
-    PluginActions(Injector.pluginRepository)
-            .initializeDefault()
+    ImportAudioPlugins(Injector.audioPluginRegistrar, Injector.directoryProvider)
+            .importAll()
+            .andThen(PluginActions(Injector.pluginRepository).initializeDefault())
             .subscribe()
 }

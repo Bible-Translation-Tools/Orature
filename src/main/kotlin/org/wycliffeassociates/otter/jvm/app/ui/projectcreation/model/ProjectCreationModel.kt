@@ -62,7 +62,7 @@ class ProjectCreationModel {
                 .observeOnFx()
                 .doOnSuccess {
                     collectionStore.add(it)
-                    collectionList.setAll(collectionStore[collectionStore.size - 1])
+                    collectionList.setAll(collectionStore[collectionStore.size - 1].sortedBy { it.sort })
                     getDepth(parentCollection)
                 }
                 .subscribe()
@@ -71,7 +71,7 @@ class ProjectCreationModel {
     fun getPreviousCollections(projectWizard: Wizard) {
         if (collectionStore.size > 1) {
             collectionStore.removeAt(collectionStore.size - 1)
-            collectionList.setAll(collectionStore[collectionStore.size - 1])
+            collectionList.setAll(collectionStore[collectionStore.size - 1].sortedBy { it.sort })
         } else {
             projectWizard.back()
         }
