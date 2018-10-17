@@ -30,4 +30,6 @@ class ProjectPageViewModel: ViewModel() {
     fun setWorkspace(workspace: Workspace) {
         model.workspace = workspace
     }
+
+    fun initializeView() = model.initializeView()
 }

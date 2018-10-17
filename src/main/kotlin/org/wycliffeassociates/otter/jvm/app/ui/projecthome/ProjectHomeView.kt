@@ -53,6 +53,9 @@ class ProjectHomeView : View() {
                                 addClass(AppStyles.projectCard)
                                 cardButton.apply {
                                     text = messages["loadProject"]
+                                    action {
+                                        viewModel.openProject(it)
+                                    }
                                 }
                                 graphicContainer.apply {
                                     addClass(AppStyles.projectGraphicContainer)

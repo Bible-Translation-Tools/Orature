@@ -50,7 +50,7 @@ class ProjectPage : View() {
                     }
                     selectionModel.selectedIndexProperty().onChange {
                         // Tell the view model which child was selected
-                        viewModel.selectChildCollection(viewModel.children[it])
+                        if (it >= 0) viewModel.selectChildCollection(viewModel.children[it])
                     }
                 }
             }
