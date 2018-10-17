@@ -5,6 +5,7 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject
+import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import tornadofx.*
 
 class AppStyles : Stylesheet() {
@@ -14,6 +15,9 @@ class AppStyles : Stylesheet() {
         val addProjectButton by cssclass()
         val refreshButton by cssclass()
         val cardButton by cssclass()
+        val wizardCardGraphicsContainer by cssclass()
+        val wizardCard by cssclass()
+        val noResource by cssclass()
     }
 
     init {
@@ -60,6 +64,39 @@ class AppStyles : Stylesheet() {
             fontSize = (16.0.px)
             fontWeight = FontWeight.BLACK
         }
-    }
 
+        wizardCard {
+            prefWidth = 300.px
+            prefHeight = 320.px
+            backgroundColor += c(UIColorsObject.Colors["base"])
+            padding = box(10.px)
+            backgroundRadius += box(10.px)
+            spacing = 10.px
+            wizardCardGraphicsContainer {
+                backgroundRadius += box(10.px)
+                backgroundColor += c(UIColorsObject.Colors["base"])
+            }
+            label {
+                textFill = Color.BLACK
+            }
+            s(".jfx-button") {
+                minHeight = 40.0.px
+                maxWidth = Double.MAX_VALUE.px
+                backgroundColor += c(UIColorsObject.Colors["primary"])
+                textFill = c(UIColorsObject.Colors["base"])
+                cursor = Cursor.HAND
+                fontSize = (16.0.px)
+                fontWeight = FontWeight.BLACK
+            }
+        }
+
+        noResource {
+            padding = box(50.px)
+            backgroundColor += c(Colors["base"])
+            fontSize = 24.px
+            fontWeight = FontWeight.BOLD
+            textFill = c(Colors["primary"])
+        }
+
+    }
 }

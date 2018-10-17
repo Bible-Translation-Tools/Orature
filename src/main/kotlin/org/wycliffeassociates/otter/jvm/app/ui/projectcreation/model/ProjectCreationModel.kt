@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.CreateProject
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
 import tornadofx.*
 
 class ProjectCreationModel {
@@ -19,19 +20,16 @@ class ProjectCreationModel {
     )
     var sourceLanguageProperty: Language by property()
     var targetLanguageProperty: Language by property()
-    var selectedResource: Collection by property()
-    var selectedAnthology: Collection by property()
-    var selectedBook: Collection by property()
     var anthologyList: ObservableList<Collection> by property(FXCollections.observableArrayList())
     var bookList: ObservableList<Collection> by property(FXCollections.observableArrayList())
     var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
-
-    var goNextPage = SimpleBooleanProperty(false)
 
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
     val resources: ObservableList<Collection> = FXCollections.observableArrayList()
 
     val bookLevelReached = SimpleBooleanProperty(false)
+
+//    val collectionArray : Array<ObservableList<Collection>> =
 
     init {
         creationUseCase.getAllLanguages()
@@ -39,20 +37,23 @@ class ProjectCreationModel {
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
                 }
+    }
 
+    fun getSourceRepos() {
         creationUseCase.getSourceRepos()
                 .observeOnFx()
                 .subscribe { retrieved ->
-                    collectionList.setAll(retrieved)
+                    collectionList.setAll(retrieved.filter {
+                        it.resourceContainer.language == sourceLanguageProperty
+                    })
                 }
     }
 
-    fun checkLevel(selectedCollection: Collection) {
-        if(anthologyList[0].labelKey == "book") {
-
-        }
-        else {
-            goNextPage.set(true)
+    fun checkLevel(selectedCollection: Collection, workspace: Workspace) {
+        if (collectionList[0].labelKey == "book") {
+            createProject(selectedCollection)
+            workspace.dock<ProjectHomeView>()
+        } else {
             getResourceChildren(selectedCollection)
         }
     }
@@ -63,33 +64,23 @@ class ProjectCreationModel {
                 .observeOnFx()
                 .doOnSuccess {
                     collectionList.setAll(it)
-                    goNextPage.set(false)
                 }
                 .subscribe()
     }
 
-    fun getBooks() {
-        creationUseCase.getResourceChildren(selectedAnthology)
-                .observeOnFx()
-                .doOnSuccess {
-                    bookList.setAll(it)
-                }
-                .subscribe()
-    }
-
-    fun createProject() {
+    fun createProject(selectedCollection: Collection) {
         creationUseCase
                 .newProject(
                         Collection(
-                                selectedBook.sort,
-                                selectedBook.slug,
+                                selectedCollection.sort,
+                                selectedCollection.slug,
                                 "project",
-                                selectedBook.titleKey,
-                                selectedBook.resourceContainer
+                                selectedCollection.titleKey,
+                                selectedCollection.resourceContainer
                         )
                 )
                 .flatMapCompletable {
-                    creationUseCase.updateSource(it, selectedBook)
+                    creationUseCase.updateSource(it, selectedCollection)
                 }
                 .subscribe()
     }

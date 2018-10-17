@@ -10,41 +10,14 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     var sourceLanguage = bind(ProjectCreationModel::sourceLanguageProperty, true)
     var targetLanguage = bind(ProjectCreationModel::targetLanguageProperty, true)
 
-    var selectedResourceProperty = bind(ProjectCreationModel::selectedResource, true)
-    var selectedAnthologyProperty = bind(ProjectCreationModel::selectedAnthology, true)
-    val selectedBookProperty = bind(ProjectCreationModel::selectedBook, true)
     val resourceListProperty = bind(ProjectCreationModel::resources)
     val collectionList = item.collectionList
     val languagesList = item.languages
     val anthologyList = item.anthologyList
     val bookList = item.bookList
-    val goNextPage = item.goNextPage
 
 
-    val allPagesComplete = SimpleBooleanProperty(false)
-    val resourceSelected = SimpleBooleanProperty(false)
-    val anthologySelected = SimpleBooleanProperty(false)
-
-    init {
-        selectedBookProperty.onChange {
-            if (it != null) {
-                allPagesComplete.set(true)
-            }
-        }
-        selectedResourceProperty.onChange {
-            if(it != null) {
-                resourceSelected.set(true)
-            }
-        }
-
-        selectedAnthologyProperty.onChange {
-            if(it != null) {
-                anthologySelected.set(true)
-            }
-        }
-    }
-
-    fun checkLevel(selectedCollection: Collection) = item.checkLevel(selectedCollection)
-    fun getBooks() = bind(ProjectCreationModel::getBooks)
+    fun checkLevel(selectedCollection: Collection) = item.checkLevel(selectedCollection, this.workspace)
     fun createProject() = bind(ProjectCreationModel::createProject)
+    fun getSourceRepos() = bind(ProjectCreationModel::getSourceRepos)
 }

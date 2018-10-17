@@ -14,7 +14,7 @@ import java.io.File
 
 class SelectResource : View() {
     val viewModel: ProjectCreationViewModel by inject()
-    override val complete = viewModel.resourceSelected
+//    override val complete = viewModel.resourceSelected
     override val root =  flowpane {
         alignment = Pos.CENTER
         togglegroup {
@@ -43,7 +43,7 @@ class SelectResource : View() {
                             }
                         }
                         action {
-                            if (isSelected) viewModel.selectedResourceProperty.value = it
+//                            if (isSelected) viewModel.selectedResourceProperty.value = it
                         }
                     }
                 }

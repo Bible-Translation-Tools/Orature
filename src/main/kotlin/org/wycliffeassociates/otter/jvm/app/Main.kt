@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenu
 import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenuStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ProjectPage
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ProjectPageStylesheet
+import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
 import org.wycliffeassociates.otter.jvm.persistence.DefaultPluginPreference
 import sun.plugin2.main.server.Plugin
@@ -20,6 +21,7 @@ class MyApp : App(Workspace::class) {
         importStylesheet(ProjectPageStylesheet::class)
         importStylesheet(ViewTakesStylesheet::class)
         importStylesheet(MainMenuStylesheet::class)
+        importStylesheet(AppStyles::class)
         workspace.header.removeFromParent()
         workspace.add(MainMenu())
     }

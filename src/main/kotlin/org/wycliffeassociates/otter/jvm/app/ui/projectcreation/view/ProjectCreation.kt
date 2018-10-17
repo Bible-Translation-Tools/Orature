@@ -25,7 +25,7 @@ class ProjectCreationWizard : Wizard() {
             MaterialIconView(MaterialIcon.BOOK, "16px")
     )
     override val canGoNext = currentPageComplete
-    override val canFinish = creationViewModel.allPagesComplete
+//    override val canFinish = creationViewModel.allPagesComplete
 
     init {
         showStepsHeader = false
@@ -46,10 +46,11 @@ class ProjectCreationWizard : Wizard() {
             buttonbar {
                 padding = Insets(10.0)
 
-                button(messages["back"]){
+                button(messages["restart"]){
                     addClass(ProjectWizardStyles.wizardButton)
                     enableWhen(canGoBack)
                     action {
+                        creationViewModel.getSourceRepos()
                         back()
                     }
                 }
@@ -58,6 +59,7 @@ class ProjectCreationWizard : Wizard() {
                     addClass(ProjectWizardStyles.wizardButton)
                     enableWhen(canGoNext.and(hasNext))
                     action {
+                        creationViewModel.getSourceRepos()
                         next()
                     }
                 }
@@ -73,11 +75,6 @@ class ProjectCreationWizard : Wizard() {
 
         add(SelectLanguage::class)
         add(SelectChildren::class)
-//        canGoNext.onChangeOnce {  add(SelectResource::class)
-//            pages.map { println(it) }
-//        }
-        //add(SelectAnthology::class)
-       // add(SelectBook::class)
     }
 
     override fun onCancel() {

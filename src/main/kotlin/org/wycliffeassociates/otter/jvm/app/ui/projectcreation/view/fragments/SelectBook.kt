@@ -45,7 +45,7 @@ class SelectBook : View() {
                                         textFill = c(Colors["base"])
                                     }
                                     action {
-                                        viewModel.selectedBookProperty.value = it
+//                                        viewModel.selectedBookProperty.value = it
                                         onSave()
                                     }
                                 }

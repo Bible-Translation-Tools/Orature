@@ -15,7 +15,7 @@ import java.io.File
 
 class SelectAnthology : View() {
     val viewModel: ProjectCreationViewModel by inject()
-    override val complete = viewModel.anthologySelected
+//    override val complete = viewModel.anthologySelected
 
     init {
         importStylesheet<ProjectWizardStyles>()
@@ -50,7 +50,7 @@ class SelectAnthology : View() {
                             }
                         }
                         action {
-                            viewModel.selectedAnthologyProperty.value = it
+//                            viewModel.selectedAnthologyProperty.value = it
                         }
                     }
                 }
@@ -69,6 +69,6 @@ class SelectAnthology : View() {
     }
 
     override fun onSave() {
-        viewModel.getBooks()
+//        viewModel.getBooks()
     }
 }
