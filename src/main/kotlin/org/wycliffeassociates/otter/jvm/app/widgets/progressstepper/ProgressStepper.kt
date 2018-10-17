@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.progressstepper
 
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.collections.ObservableList
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.*
@@ -12,7 +11,7 @@ import tornadofx.Stylesheet.Companion.line
 import tornadofx.Stylesheet.Companion.root
 
 
-class ProgressStepper(private val steps: ObservableList<Node>) : HBox() {
+class ProgressStepper(private val steps: List<Node>) : HBox() {
 
     var activeIndex: Int by property(0)
     val activeIndexProperty = getProperty(ProgressStepper::activeIndex)
@@ -53,11 +52,11 @@ class ProgressStepper(private val steps: ObservableList<Node>) : HBox() {
             }
         }
     }
+}
 
-    fun Pane.progressstepper(steps: ObservableList<Node>, init: ProgressStepper.() -> Unit): ProgressStepper {
-        val ps = ProgressStepper(steps)
-        ps.init()
-        add(ps)
-        return ps
-    }
+fun Pane.progressstepper(steps: List<Node>, init: ProgressStepper.() -> Unit): ProgressStepper {
+    val ps = ProgressStepper(steps)
+    ps.init()
+    add(ps)
+    return ps
 }
