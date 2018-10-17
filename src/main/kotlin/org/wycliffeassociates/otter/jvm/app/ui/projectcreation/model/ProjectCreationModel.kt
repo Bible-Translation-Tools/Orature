@@ -1,10 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.model
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
-import javafx.beans.binding.BooleanExpression
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -29,8 +25,7 @@ class ProjectCreationModel {
     var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
     var collectionStore: ArrayList<List<Collection>> = ArrayList()
-    //var creationDepthProperty = SimpleIntegerProperty(0)
-    var creationDepth: Int = 0
+    var creationDepth: Int = 1
     var bookDepthReached = false
 
     init {
@@ -68,6 +63,7 @@ class ProjectCreationModel {
                 .doOnSuccess {
                     collectionStore.add(it)
                     collectionList.setAll(collectionStore[collectionStore.size - 1])
+                    getDepth(parentCollection)
                 }
                 .subscribe()
     }
@@ -82,20 +78,19 @@ class ProjectCreationModel {
     }
 
     fun getDepth(selectedCollection: Collection) {
-        if (creationDepth.equals(0)) {
-            while (!bookDepthReached) {
+        if (creationDepth == 1) {
                 creationUseCase.getResourceChildren(selectedCollection)
-                        .observeOn(JavaFxScheduler.platform())
+                        .observeOnFx()
                         .subscribe { retrieved ->
-                            if (retrieved.get(0).labelKey == "book") {
+                            if (retrieved[0].labelKey == "book") {
                                 bookDepthReached = true
                             } else {
                                 creationDepth++
+                                print(creationDepth)
+                                getDepth(retrieved[0])
                             }
-
                         }
             }
-        }
     }
 
     private fun createProject(selectedCollection: Collection) {

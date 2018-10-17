@@ -53,11 +53,11 @@ class ProgressStepper(private val steps: ObservableList<Node>) : HBox() {
             }
         }
     }
-}
 
-fun Pane.progressstepper(steps: ObservableList<Node>, init: ProgressStepper.() -> Unit): ProgressStepper {
-    val ps = ProgressStepper(steps)
-    ps.init()
-    add(ps)
-    return ps
+    fun Pane.progressstepper(steps: ObservableList<Node>, init: ProgressStepper.() -> Unit): ProgressStepper {
+        val ps = ProgressStepper(steps)
+        ps.init()
+        add(ps)
+        return ps
+    }
 }

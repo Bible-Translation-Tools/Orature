@@ -33,16 +33,20 @@ class ProjectCreationWizard : Wizard() {
         showSteps = false
         showHeader = true
         enableStepLinks = true
-        root.top =
-                ProgressStepper(steps).apply {
-                    currentPageProperty.onChange {
-                        activeIndex = pages.indexOf(currentPage)
-                    }
-                    addEventHandler(ActionEvent.ACTION) {
-                        currentPage = pages[activeIndex]
-                    }
-                    addClass(ProjectWizardStyles.stepper)
-                }
+//        root.top =
+//                ProgressStepper(steps).apply {
+//                    currentPageProperty.onChange {
+//                        activeIndex = pages.indexOf(currentPage)
+//                    }
+//                    addEventHandler(ActionEvent.ACTION) {
+//                        currentPage = pages[activeIndex]
+//                    }
+//
+//                    creationViewModel.creaionDepthProperty.onChange {
+//                        steps.add(MaterialIconView(MaterialIcon.ARROW_BACK))
+//                    }
+//                    addClass(ProjectWizardStyles.stepper)
+//                }
         root.bottom {
             buttonbar {
                 padding = Insets(10.0)
