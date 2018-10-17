@@ -33,20 +33,6 @@ class ProjectCreationWizard : Wizard() {
         showSteps = false
         showHeader = true
         enableStepLinks = true
-//        root.top =
-//                ProgressStepper(steps).apply {
-//                    currentPageProperty.onChange {
-//                        activeIndex = pages.indexOf(currentPage)
-//                    }
-//                    addEventHandler(ActionEvent.ACTION) {
-//                        currentPage = pages[activeIndex]
-//                    }
-//
-//                    creationViewModel.creaionDepthProperty.onChange {
-//                        steps.add(MaterialIconView(MaterialIcon.ARROW_BACK))
-//                    }
-//                    addClass(ProjectWizardStyles.stepper)
-//                }
         root.bottom {
             buttonbar {
                 padding = Insets(10.0)
@@ -76,29 +62,6 @@ class ProjectCreationWizard : Wizard() {
                 }
             }
         }
-
-//        val buttonBar = root.bottom as ButtonBar
-//        backButtonTextProperty.set(messages["back"])
-//        nextButtonTextProperty.set(messages["next"])
-//        cancelButtonTextProperty.set(messages["cancel"])
-//
-//        buttonBar.buttonOrder = listOf(
-//                ButtonBar.ButtonData.BACK_PREVIOUS.typeCode,
-//                ButtonBar.ButtonData.BIG_GAP.typeCode,
-//                ButtonBar.ButtonData.NEXT_FORWARD.typeCode,
-//                ButtonBar.ButtonData.CANCEL_CLOSE.typeCode
-//        ).joinToString("")
-//
-//        buttonBar.buttons.forEach {
-//            val button = it as Button
-//            val data = ButtonBar.getButtonData(button)
-//            when(data) {
-//                ButtonBar.ButtonData.NEXT_FORWARD -> {
-//                    button.addClass(ProjectWizardStyles.nextButton)
-//                }
-//                else -> {}
-//            }
-//        }
 
         add(SelectLanguage::class)
         add(SelectChildren::class)
