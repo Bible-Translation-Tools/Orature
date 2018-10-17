@@ -30,7 +30,7 @@ class AppDatabase(
         dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
 
         // Check if the database file exists
-        val schemaFile = File(listOf("src", "main", "Resources", "CreateAppDb.sql").joinToString(File.separator))
+        val schemaFile = File(ClassLoader.getSystemResource("CreateAppDb.sql").toURI().path)
 
         // Make sure the database file has the tables we need
         val sqlStatements = schemaFile

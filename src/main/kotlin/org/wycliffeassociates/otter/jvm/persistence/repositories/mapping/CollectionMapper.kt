@@ -5,7 +5,7 @@ import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
 
 class CollectionMapper {
-    fun mapFromEntity(entity: CollectionEntity, metadata: ResourceMetadata): Collection {
+    fun mapFromEntity(entity: CollectionEntity, metadata: ResourceMetadata?): Collection {
         return Collection(
                 entity.sort,
                 entity.slug,
@@ -26,7 +26,7 @@ class CollectionMapper {
                 obj.titleKey,
                 obj.slug,
                 obj.sort,
-                obj.resourceContainer.id
+                metadataFk = obj.resourceContainer?.id ?: null
         )
     }
 

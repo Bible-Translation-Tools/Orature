@@ -5,4 +5,5 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
 interface ICollectionDao : IDao<CollectionEntity> {
     fun fetchChildren(entity: CollectionEntity): List<CollectionEntity>
     fun fetchSource(entity: CollectionEntity): CollectionEntity
+    fun fetchBySlugAndContainerId(slug: String, containerId: Int): CollectionEntity
 }

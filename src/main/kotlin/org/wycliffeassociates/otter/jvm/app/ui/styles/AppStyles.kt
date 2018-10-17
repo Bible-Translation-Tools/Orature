@@ -11,58 +11,64 @@ import tornadofx.*
 class AppStyles : Stylesheet() {
 
     companion object {
-        val datagridStyle by cssclass()
         val addProjectButton by cssclass()
         val refreshButton by cssclass()
         val cardButton by cssclass()
         val wizardCardGraphicsContainer by cssclass()
         val wizardCard by cssclass()
         val noResource by cssclass()
+        val projectCard by cssclass()
+        val projectGraphicContainer by cssclass()
     }
 
     init {
-        datagridStyle {
-            cell {
-                backgroundColor += Color.TRANSPARENT
-            }
-            effect = DropShadow(8.0, 3.0, 3.0, c(UIColorsObject.Colors["dropShadow"]))
-            backgroundRadius += box(10.0.px)
-            borderRadius += box(10.0.px)
-            cellHeight = 250.0.px
-            cellWidth = 232.0.px
-            horizontalCellSpacing = 10.0.px
-        }
-
         addProjectButton {
-            padding = box(15.0.px)
-            backgroundRadius += box(100.0.px)
-            borderRadius += box(100.0.px)
+            backgroundRadius += box(25.px)
+            borderRadius += box(25.px)
             backgroundColor += c(UIColorsObject.Colors["primary"])
-            effect = DropShadow(8.0, c(UIColorsObject.Colors["dropShadow"]))
-            prefHeight = 50.0.px
-            prefWidth = 50.0.px
+            minHeight = 50.px
+            minWidth = 50.px
+            maxHeight = 50.px
+            maxWidth = 50.px
             cursor = Cursor.HAND
+            unsafe("-jfx-button-type", raw("RAISED"))
+            child("*") {
+                fill = c(UIColorsObject.Colors["base"])
+            }
         }
 
         refreshButton {
-            prefWidth = 232.0.px
             prefHeight = 40.0.px
-            backgroundColor += c(UIColorsObject.Colors["base"])
-            textFill = c(UIColorsObject.Colors["primary"])
-            effect = DropShadow(2.0, c(UIColorsObject.Colors["dropShadow"]))
-            backgroundRadius += box(5.0.px)
-            borderRadius += box(5.0.px)
-            cursor = Cursor.HAND
+            //backgroundColor += c(UIColorsObject.Colors["primary"])
+            unsafe("-jfx-button-type", raw("FLAT"))
+            child("*") {
+                fill = c(UIColorsObject.Colors["primary"])
+            }
         }
 
-        cardButton {
-            prefWidth = 232.0.px
-            prefHeight = 40.0.px
-            backgroundColor += c(UIColorsObject.Colors["primary"])
-            textFill = c(UIColorsObject.Colors["base"])
-            cursor = Cursor.HAND
-            fontSize = (16.0.px)
-            fontWeight = FontWeight.BLACK
+        projectCard {
+            prefWidth = 232.px
+            prefHeight = 300.px
+            backgroundColor += c(UIColorsObject.Colors["base"])
+            padding = box(10.px)
+            backgroundRadius += box(10.px)
+            spacing = 10.px
+            projectGraphicContainer {
+                backgroundRadius += box(10.px)
+                backgroundColor += c(UIColorsObject.Colors["baseLight"])
+            }
+            label {
+                textFill = Color.BLACK
+            }
+            s(".jfx-button") {
+                minHeight = 40.0.px
+                maxWidth = Double.MAX_VALUE.px
+                backgroundColor += c(UIColorsObject.Colors["primary"])
+                textFill = c(UIColorsObject.Colors["base"])
+                cursor = Cursor.HAND
+                fontSize = (16.0.px)
+                fontWeight = FontWeight.BLACK
+            }
         }
 
         wizardCard {

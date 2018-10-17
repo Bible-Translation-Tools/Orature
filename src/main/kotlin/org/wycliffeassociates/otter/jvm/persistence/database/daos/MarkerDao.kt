@@ -21,6 +21,7 @@ class MarkerDao(
                 }
     }
 
+    @Synchronized
     override fun insert(entity: MarkerEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 

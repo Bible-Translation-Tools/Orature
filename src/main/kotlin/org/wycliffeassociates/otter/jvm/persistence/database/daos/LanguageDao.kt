@@ -42,6 +42,7 @@ class LanguageDao(
                 }
     }
 
+    @Synchronized
     override fun insert(entity: LanguageEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
@@ -73,6 +74,7 @@ class LanguageDao(
                 }
     }
 
+    @Synchronized
     override fun insertAll(entities: List<LanguageEntity>): List<Int> {
         val initialLargest = dsl
                 .select(max(LANGUAGE_ENTITY.ID))

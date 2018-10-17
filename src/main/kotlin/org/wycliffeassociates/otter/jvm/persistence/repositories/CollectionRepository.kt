@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
+import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
@@ -20,9 +21,6 @@ class CollectionRepository(
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
-    override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     private val collectionDao = database.getCollectionDao()
     private val metadataDao = database.getResourceMetadataDao()
@@ -43,6 +41,15 @@ class CollectionRepository(
                             .fetchAll()
                             .map(this::buildCollection)
                 }
+                .subscribeOn(Schedulers.io())
+    }
+
+    override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
+        return Maybe
+                .fromCallable {
+                    buildCollection(collectionDao.fetchBySlugAndContainerId(slug, container.id))
+                }
+                .onErrorComplete()
                 .subscribeOn(Schedulers.io())
     }
 
@@ -97,12 +104,13 @@ class CollectionRepository(
     }
 
     private fun buildCollection(entity: CollectionEntity): Collection {
-        val metadataEntity = metadataDao
-                .fetchById(entity.metadataFk)
-        val language = languageMapper.mapFromEntity(languageDao
-                .fetchById(metadataEntity.languageFk)
-        )
-        return collectionMapper
-                .mapFromEntity(entity, metadataMapper.mapFromEntity(metadataEntity, language))
+        var metadata: ResourceMetadata? = null
+        entity.metadataFk?.let {
+            val metadataEntity = metadataDao.fetchById(it)
+            val language = languageMapper.mapFromEntity(languageDao.fetchById(metadataEntity.languageFk))
+            metadata = metadataMapper.mapFromEntity(metadataEntity, language)
+        }
+
+        return collectionMapper.mapFromEntity(entity, metadata)
     }
 }

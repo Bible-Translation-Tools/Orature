@@ -30,6 +30,8 @@ class ProjectPageStylesheet : Stylesheet() {
         val active by csspseudoclass("active")
 
         val listmenu by cssclass("list-menu")
+
+        val chapterList by cssclass()
     }
 
     init {
@@ -145,7 +147,7 @@ class ProjectPageStylesheet : Stylesheet() {
             }
         }
 
-        listView {
+        chapterList {
             focusColor = Color.TRANSPARENT
             faintFocusColor = Color.TRANSPARENT
             borderWidth += box(0.px)

@@ -56,6 +56,7 @@ class ChunkDao(
         }
     }
 
+    @Synchronized
     override fun insert(entity: ChunkEntity): Int {
         if (entity.id != 0) throw InsertionException("Entity ID was not 0")
 

@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.menu
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import io.reactivex.schedulers.Schedulers
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.common.domain.ImportResourceContainer
@@ -16,6 +17,7 @@ class MainMenu : MenuBar() {
     val languageRepo = Injector.languageRepo
     val metadataRepo = Injector.metadataRepo
     val collectionRepo = Injector.collectionRepo
+    val chunkRepo = Injector.chunkRepo
     val directoryProvider = Injector.directoryProvider
     val pluginRepository = Injector.pluginRepository
 
@@ -27,8 +29,16 @@ class MainMenu : MenuBar() {
                     action {
                         val file = chooseDirectory("Please Select Resource Container to Import")
                         file?.let {
-                            val importer = ImportResourceContainer(languageRepo, metadataRepo, collectionRepo, directoryProvider)
+                            val importer = ImportResourceContainer(
+                                    languageRepo,
+                                    metadataRepo,
+                                    collectionRepo,
+                                    chunkRepo,
+                                    directoryProvider
+                            )
                             importer.import(file)
+                                    .subscribeOn(Schedulers.io()).observeOnFx()
+                                    .subscribe { println("done")}
                         }
                     }
                 }
