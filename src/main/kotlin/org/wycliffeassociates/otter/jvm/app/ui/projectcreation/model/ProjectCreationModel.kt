@@ -48,7 +48,7 @@ class ProjectCreationModel {
         creationUseCase.getResourceChildren(selectedResource)
                 .observeOnFx()
                 .doOnSuccess {
-                    anthologyList.setAll(it)
+                    anthologyList.setAll(it.sortedBy { it.sort })
                 }
                 .subscribe()
     }
@@ -57,7 +57,7 @@ class ProjectCreationModel {
         creationUseCase.getResourceChildren(selectedAnthology)
                 .observeOnFx()
                 .doOnSuccess {
-                    bookList.setAll(it)
+                    bookList.setAll(it.sortedBy { it.sort })
                 }
                 .subscribe()
     }

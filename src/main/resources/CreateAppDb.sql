@@ -96,5 +96,6 @@ CREATE TABLE IF NOT EXISTS audio_plugin_entity (
     bin                 TEXT NOT NULL,
     args                TEXT NOT NULL,
     record              INTEGER DEFAULT 0 NOT NULL,
-    edit                INTEGER DEFAULT 0 NOT NULL
+    edit                INTEGER DEFAULT 0 NOT NULL,
+    UNIQUE (name, version)
 );

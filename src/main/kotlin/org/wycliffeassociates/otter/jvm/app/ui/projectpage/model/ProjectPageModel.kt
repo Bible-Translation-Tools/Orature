@@ -79,7 +79,7 @@ class ProjectPageModel {
                     .observeOnFx()
                     .subscribe { childCollections ->
                         // Now we have the children of the project collection
-                        children.addAll(childCollections)
+                        children.addAll(childCollections.sortedBy { it.sort })
                     }
         }
     }
