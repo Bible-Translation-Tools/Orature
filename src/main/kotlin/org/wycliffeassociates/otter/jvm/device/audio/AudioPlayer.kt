@@ -8,6 +8,7 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import javax.sound.sampled.DataLine
 import javax.sound.sampled.LineEvent
 
 class AudioPlayer: IAudioPlayer {
@@ -35,7 +36,9 @@ class AudioPlayer: IAudioPlayer {
             clip.flush()
             clip.close()
         }
-        clip = AudioSystem.getClip()
+        val audioInputStream = AudioSystem.getAudioInputStream(file)
+        val info = DataLine.Info(Clip::class.java, audioInputStream.format)
+        clip = AudioSystem.getLine(info) as Clip
         clip.addLineListener { lineEvent ->
             if (lineEvent.type == LineEvent.Type.STOP && clip.framePosition == clip.frameLength) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
@@ -43,13 +46,12 @@ class AudioPlayer: IAudioPlayer {
                 clip.framePosition = 0
             }
         }
-        val audioInputStream = AudioSystem.getAudioInputStream(file)
         return Completable.fromAction {
             clip.open(audioInputStream)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
         }.subscribeOn(Schedulers.io())
     }
-
+    
     override fun play() {
         if (!clip.isRunning) {
             clip.start()
