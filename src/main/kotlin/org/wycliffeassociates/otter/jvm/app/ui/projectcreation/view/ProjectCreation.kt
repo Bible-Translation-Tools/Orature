@@ -42,7 +42,7 @@ class ProjectCreationWizard : Wizard() {
                     addClass(ProjectWizardStyles.wizardButton)
                     enableWhen(canGoNext.and(hasNext))
                     action {
-                        creationViewModel.getSourceRepos()
+                        creationViewModel.getRootSources()
                         next()
                     }
                 }

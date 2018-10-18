@@ -68,7 +68,7 @@ class ProjectCreationModel {
                 .subscribe()
     }
 
-    fun getPreviousCollections(projectWizard: Wizard) {
+    fun goBack(projectWizard: Wizard) {
         if (collectionStore.size > 1) {
             collectionStore.removeAt(collectionStore.size - 1)
             collectionList.setAll(collectionStore.last().sortedBy { it.sort })
