@@ -147,23 +147,5 @@ class WidgetsStyles : Stylesheet() {
             prefWidth = 100.0.px
         }
 
-        wizardCard {
-            maxHeight = 320.0.px
-            prefHeight = 320.0.px
-            prefWidth  = 300.0.px
-            backgroundRadius += box(12.0.px)
-            backgroundColor += c("#FFFF")
-            textFill = c("#CC4141")
-            fontSize = 24.px
-            effect = DropShadow(10.0, Color.GRAY)
-        }
-
-        wizardCardButton {
-            prefHeight = 40.0.px
-            prefWidth = 250.0.px
-            backgroundColor += c("#CC4141")
-            textFill = c("#FFFF")
-            cursor = Cursor.HAND
-        }
     }
 }

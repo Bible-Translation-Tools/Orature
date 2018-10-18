@@ -20,16 +20,15 @@ class ProjectCreationModel {
             Injector.metadataRepo,
             Injector.directoryProvider
     )
-    var sourceLanguageProperty: Language by property()
-    var targetLanguageProperty: Language by property()
+    var sourceLanguage: Language by property()
+    var targetLanguage: Language by property()
     var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
     var collectionStore: ArrayList<List<Collection>> = ArrayList()
-    var creationDepth: Int = 1
-    var bookDepthReached = false
 
     init {
-        creationUseCase.getAllLanguages()
+        creationUseCase
+                .getAllLanguages()
                 .observeOnFx()
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
@@ -37,11 +36,12 @@ class ProjectCreationModel {
     }
 
     fun getSourceRepos() {
-        creationUseCase.getSourceRepos()
+        creationUseCase
+                .getSourceRepos()
                 .observeOnFx()
                 .subscribe { retrieved ->
                     collectionStore.add(retrieved.filter {
-                        it.resourceContainer?.language == sourceLanguageProperty
+                        it.resourceContainer?.language == sourceLanguage
                     })
                     collectionList.setAll(collectionStore[collectionStore.size - 1])
                 }
@@ -52,18 +52,18 @@ class ProjectCreationModel {
             createProject(selectedCollection)
             workspace.dock<ProjectHomeView>()
         } else {
-            getResourceChildren(selectedCollection)
+            showCollectionChildren(selectedCollection)
         }
     }
 
 
-    private fun getResourceChildren(parentCollection: Collection) {
-        creationUseCase.getResourceChildren(parentCollection)
+    private fun showCollectionChildren(parentCollection: Collection) {
+        creationUseCase
+                .getResourceChildren(parentCollection)
                 .observeOnFx()
                 .doOnSuccess {
                     collectionStore.add(it)
                     collectionList.setAll(collectionStore[collectionStore.size - 1].sortedBy { it.sort })
-                    getDepth(parentCollection)
                 }
                 .subscribe()
     }
@@ -76,26 +76,9 @@ class ProjectCreationModel {
             projectWizard.back()
         }
     }
-
-    fun getDepth(selectedCollection: Collection) {
-        if (creationDepth == 1) {
-                creationUseCase.getResourceChildren(selectedCollection)
-                        .observeOnFx()
-                        .subscribe { retrieved ->
-                            if (retrieved[0].labelKey == "book") {
-                                bookDepthReached = true
-                            } else {
-                                creationDepth++
-                                print(creationDepth)
-                                getDepth(retrieved[0])
-                            }
-                        }
-            }
-    }
-
     private fun createProject(selectedCollection: Collection) {
         creationUseCase
-                .newProject(selectedCollection, targetLanguageProperty)
+                .newProject(selectedCollection, targetLanguage)
                 .subscribe()
     }
 

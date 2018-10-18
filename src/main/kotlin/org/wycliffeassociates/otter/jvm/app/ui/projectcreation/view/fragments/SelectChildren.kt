@@ -39,7 +39,6 @@ class SelectChildren : View() {
                                     text = messages["select"]
                                     action {
                                         viewModel.checkLevel(it)
-                                        //viewModel.getDepth(it)
                                     }
                                 }
                                 graphicContainer.apply {
@@ -56,13 +55,11 @@ class SelectChildren : View() {
                             }
                         }
                         viewModel.collectionList.onChange {
+                            clear()
                             if (viewModel.collectionList.isEmpty()) {
-                                clear()
                                 label(messages["noResources"]) {
                                     addClass(AppStyles.noResource)
                                 }
-                            } else {
-                                clear()
                             }
                         }
                     }
@@ -72,19 +69,19 @@ class SelectChildren : View() {
         }
 
     }
-}
 
-private fun resourceGraphic(resourceSlug: String): Node {
+    private fun resourceGraphic(resourceSlug: String): Node {
 
-    return when (resourceSlug) {
-        SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
-        SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()), 2.0)
-        SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()), 2.0)
-        SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()), 2.0)
-        SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()), 2.0)
+        return when (resourceSlug) {
+            SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
+            SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()), 2.0)
+            SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()), 2.0)
+            SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()), 2.0)
+            SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()), 2.0)
 
 
-        else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
+            else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
+        }
     }
 }
 

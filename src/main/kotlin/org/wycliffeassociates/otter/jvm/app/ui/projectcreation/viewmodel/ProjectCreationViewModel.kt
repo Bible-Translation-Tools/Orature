@@ -6,9 +6,8 @@ import tornadofx.*
 
 class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCreationModel()) {
 
-    var sourceLanguage = bind(ProjectCreationModel::sourceLanguageProperty, true)
-    var targetLanguage = bind(ProjectCreationModel::targetLanguageProperty, true)
-    val creaionDepthProperty = bind(ProjectCreationModel::creationDepth)
+    var sourceLanguage = bind(ProjectCreationModel::sourceLanguage, true)
+    var targetLanguage = bind(ProjectCreationModel::targetLanguage, true)
 
     val collectionList = item.collectionList
     val languagesList = item.languages
@@ -16,5 +15,4 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     fun checkLevel(selectedCollection: Collection) = item.checkLevel(selectedCollection, this.workspace)
     fun goBack(wizard: Wizard) = item.getPreviousCollections(wizard)
     fun getSourceRepos() = bind(ProjectCreationModel::getSourceRepos)
-    fun getDepth(selectedCollection: Collection) = item.getDepth(selectedCollection)
 }

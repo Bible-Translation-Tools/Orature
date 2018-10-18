@@ -72,8 +72,8 @@ class AppStyles : Stylesheet() {
         }
 
         wizardCard {
-            prefWidth = 300.px
-            prefHeight = 320.px
+            prefWidth = 280.px
+            prefHeight = 300.px
             backgroundColor += c(UIColorsObject.Colors["base"])
             padding = box(10.px)
             backgroundRadius += box(10.px)
