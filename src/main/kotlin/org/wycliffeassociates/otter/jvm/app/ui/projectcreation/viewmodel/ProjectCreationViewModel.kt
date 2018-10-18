@@ -12,7 +12,7 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     val collectionList = item.collectionList
     val languagesList = item.languages
 
-    fun checkLevel(selectedCollection: Collection) = item.checkLevel(selectedCollection, this.workspace)
+    fun doOnUserSelection(selectedCollection: Collection) = item.doOnUserSelection(selectedCollection, this.workspace)
     fun goBack(wizard: Wizard) = item.getPreviousCollections(wizard)
-    fun getSourceRepos() = bind(ProjectCreationModel::getSourceRepos)
+    fun getSourceRepos() = bind(ProjectCreationModel::getRootSources)
 }

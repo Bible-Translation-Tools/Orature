@@ -3,20 +3,13 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.collections.FXCollections
-import javafx.event.ActionEvent
 import javafx.geometry.Insets
-import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.control.Button
-import javafx.scene.control.ButtonBar
-import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.*
 import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.widgets.progressstepper.ProgressStepper
 import tornadofx.*
-import java.io.File
 
 class ProjectCreationWizard : Wizard() {
 
@@ -64,11 +57,10 @@ class ProjectCreationWizard : Wizard() {
         }
 
         add(SelectLanguage::class)
-        add(SelectChildren::class)
+        add(SelectCollection::class)
     }
 
     override fun onCancel() {
-//        this.close()
         workspace.dock<ProjectHomeView>()
     }
 

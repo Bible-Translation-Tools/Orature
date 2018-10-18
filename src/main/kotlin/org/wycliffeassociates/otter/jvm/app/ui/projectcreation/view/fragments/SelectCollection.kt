@@ -5,18 +5,15 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.control.ContentDisplay
-import javafx.scene.control.Label
 import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
 import java.io.File
 
-class SelectChildren : View() {
+class SelectCollection : View() {
 
     private val viewModel: ProjectCreationViewModel by inject()
     override val root = borderpane {
@@ -38,7 +35,7 @@ class SelectChildren : View() {
                                 cardButton.apply {
                                     text = messages["select"]
                                     action {
-                                        viewModel.checkLevel(it)
+                                        viewModel.doOnUserSelection(it)
                                     }
                                 }
                                 graphicContainer.apply {

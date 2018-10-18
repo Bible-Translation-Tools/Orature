@@ -35,7 +35,7 @@ class ProjectCreationModel {
                 }
     }
 
-    fun getSourceRepos() {
+    fun getRootSources() {
         creationUseCase
                 .getSourceRepos()
                 .observeOnFx()
@@ -43,12 +43,12 @@ class ProjectCreationModel {
                     collectionStore.add(retrieved.filter {
                         it.resourceContainer?.language == sourceLanguage
                     })
-                    collectionList.setAll(collectionStore[collectionStore.size - 1])
+                    collectionList.setAll(collectionStore.last())
                 }
     }
 
-    fun checkLevel(selectedCollection: Collection, workspace: Workspace) {
-        if (collectionList[0].labelKey == "book") {
+    fun doOnUserSelection(selectedCollection: Collection, workspace: Workspace) {
+        if (selectedCollection.labelKey == "book") {
             createProject(selectedCollection)
             workspace.dock<ProjectHomeView>()
         } else {
@@ -63,7 +63,7 @@ class ProjectCreationModel {
                 .observeOnFx()
                 .doOnSuccess {
                     collectionStore.add(it)
-                    collectionList.setAll(collectionStore[collectionStore.size - 1].sortedBy { it.sort })
+                    collectionList.setAll(collectionStore.last().sortedBy { it.sort })
                 }
                 .subscribe()
     }
@@ -71,7 +71,7 @@ class ProjectCreationModel {
     fun getPreviousCollections(projectWizard: Wizard) {
         if (collectionStore.size > 1) {
             collectionStore.removeAt(collectionStore.size - 1)
-            collectionList.setAll(collectionStore[collectionStore.size - 1].sortedBy { it.sort })
+            collectionList.setAll(collectionStore.last().sortedBy { it.sort })
         } else {
             projectWizard.back()
         }
