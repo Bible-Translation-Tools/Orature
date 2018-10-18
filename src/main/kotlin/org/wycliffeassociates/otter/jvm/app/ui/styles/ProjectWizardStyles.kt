@@ -19,6 +19,7 @@ class ProjectWizardStyles : Stylesheet() {
         val stepper by cssclass()
         val filterableComboBox by cssclass()
         val wizardButton by cssclass()
+        val nextButton by cssclass()
     }
 
     init {
@@ -97,6 +98,15 @@ class ProjectWizardStyles : Stylesheet() {
             textFill = c(Colors["base"])
             cursor = Cursor.HAND
         }
+
+        nextButton {
+            prefHeight = 40.0.px
+            prefWidth = 100.0.px
+            backgroundColor += c(Colors["primary"])
+            textFill = c(Colors["base"])
+            cursor = Cursor.HAND
+        }
     }
+
 
 }

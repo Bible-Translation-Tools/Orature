@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.CreateProject
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
 import tornadofx.*
 
 class ProjectCreationModel {
@@ -19,52 +20,66 @@ class ProjectCreationModel {
             Injector.metadataRepo,
             Injector.directoryProvider
     )
-    var sourceLanguageProperty: Language by property()
-    var targetLanguageProperty: Language by property()
-    var selectedResource: Collection by property()
-    var selectedAnthology: Collection by property()
-    var selectedBook: Collection by property()
-    var anthologyList: ObservableList<Collection> by property(FXCollections.observableArrayList())
-    var bookList: ObservableList<Collection> by property(FXCollections.observableArrayList())
-
+    var sourceLanguage: Language by property()
+    var targetLanguage: Language by property()
+    var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
-    val resources: ObservableList<Collection> = FXCollections.observableArrayList()
+    var collectionStore: ArrayList<List<Collection>> = ArrayList()
 
     init {
-        creationUseCase.getAllLanguages()
+        creationUseCase
+                .getAllLanguages()
                 .observeOnFx()
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
                 }
+    }
 
-        creationUseCase.getSourceRepos()
+    fun getRootSources() {
+        creationUseCase
+                .getSourceRepos()
                 .observeOnFx()
                 .subscribe { retrieved ->
-                    resources.setAll(retrieved)
+                    collectionStore.add(retrieved.filter {
+                        it.resourceContainer?.language == sourceLanguage
+                    })
+                    collectionList.setAll(collectionStore.last())
                 }
     }
 
-    fun getResourceChildren() {
-        creationUseCase.getResourceChildren(selectedResource)
-                .observeOnFx()
-                .doOnSuccess {
-                    anthologyList.setAll(it.sortedBy { it.sort })
-                }
-                .subscribe()
+    fun doOnUserSelection(selectedCollection: Collection, workspace: Workspace) {
+        if (selectedCollection.labelKey == "book") {
+            createProject(selectedCollection)
+            workspace.dock<ProjectHomeView>()
+        } else {
+            showCollectionChildren(selectedCollection)
+        }
     }
 
-    fun getBooks() {
-        creationUseCase.getResourceChildren(selectedAnthology)
-                .observeOnFx()
-                .doOnSuccess {
-                    bookList.setAll(it.sortedBy { it.sort })
-                }
-                .subscribe()
-    }
 
-    fun createProject() {
+    private fun showCollectionChildren(parentCollection: Collection) {
         creationUseCase
-                .newProject(selectedBook, targetLanguageProperty)
+                .getResourceChildren(parentCollection)
+                .observeOnFx()
+                .doOnSuccess {
+                    collectionStore.add(it)
+                    collectionList.setAll(collectionStore.last().sortedBy { it.sort })
+                }
                 .subscribe()
     }
+
+    fun goBack(projectWizard: Wizard) {
+        if (collectionStore.size > 1) {
+            collectionStore.removeAt(collectionStore.size - 1)
+            collectionList.setAll(collectionStore.last().sortedBy { it.sort })
+        } else {
+            projectWizard.back()
+        }
+    }
+    private fun createProject(selectedCollection: Collection) {
+        creationUseCase
+                .newProject(selectedCollection, targetLanguage)
+                .subscribe()
+    }
+
 }
