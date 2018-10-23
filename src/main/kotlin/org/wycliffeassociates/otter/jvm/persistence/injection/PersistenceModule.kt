@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.persistence.injection
 
 import dagger.Module
 import dagger.Provides
-import org.wycliffeassociates.otter.common.data.persistence.IAppPreferences
+import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.jvm.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.persistence.DirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
