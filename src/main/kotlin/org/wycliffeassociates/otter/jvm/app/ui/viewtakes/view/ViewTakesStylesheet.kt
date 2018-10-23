@@ -27,7 +27,7 @@ class ViewTakesStylesheet : Stylesheet() {
             borderWidth += box(1.px, 0.px, 0.px, 0.px)
             backgroundColor += Color.WHITE
             spacing = 10.px
-            padding = box(20.px)
+            padding = box(100.px)
         }
         button {
             and(backButton) {
