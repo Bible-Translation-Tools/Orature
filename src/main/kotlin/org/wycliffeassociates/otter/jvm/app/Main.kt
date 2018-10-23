@@ -36,7 +36,6 @@ class MyApp : App(Workspace::class) {
 //launch the org.wycliffeassociates.otter.jvm.app
 fun main(args: Array<String>) {
     initApp()
-    FX.locale = Locale.FRANCE
     launch<MyApp>(args)
 }
 
