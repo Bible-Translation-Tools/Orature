@@ -68,7 +68,6 @@ class SelectCollection : View() {
     }
 
     private fun resourceGraphic(resourceSlug: String): Node {
-
         return when (resourceSlug) {
             SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
             SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()), 2.0)

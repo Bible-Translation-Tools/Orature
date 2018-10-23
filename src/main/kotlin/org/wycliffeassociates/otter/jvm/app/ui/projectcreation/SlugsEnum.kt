@@ -4,6 +4,6 @@ enum class SlugsEnum(val slug: String) {
     ULB("ulb"),
     TW("tw"),
     OBS("obs"),
-    OT("ot"),
-    NT("nt"),
+    OT("bible-ot"),
+    NT("bible-nt"),
 }

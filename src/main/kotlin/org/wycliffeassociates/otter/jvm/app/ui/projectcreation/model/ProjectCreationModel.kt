@@ -72,7 +72,12 @@ class ProjectCreationModel {
         if (collectionStore.size > 1) {
             collectionStore.removeAt(collectionStore.size - 1)
             collectionList.setAll(collectionStore.last().sortedBy { it.sort })
-        } else {
+        }
+        else if(collectionStore.size == 1) {
+            collectionStore.removeAt(0)
+            projectWizard.back()
+        }
+        else {
             projectWizard.back()
         }
     }
