@@ -6,6 +6,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.animation.Interpolator
 import javafx.animation.Timeline
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
