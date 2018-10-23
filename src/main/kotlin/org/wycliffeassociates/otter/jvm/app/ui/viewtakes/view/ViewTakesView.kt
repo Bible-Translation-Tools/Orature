@@ -6,6 +6,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.animation.Interpolator
 import javafx.animation.Timeline
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -240,7 +241,7 @@ class ViewTakesView : View() {
 
         // Remove from the flow pane
         val takeCard = target.findParentOfType(TakeCard::class) as TakeCard
-        if (takeCard.parent == takesFlowPane) {
+        if (takeCard.parent == takesFlowPane && proposedTakeProperty.value == null) {
             takeCard.removeFromParent()
             draggingTakeProperty.value = takeCard
         }
@@ -263,7 +264,7 @@ class ViewTakesView : View() {
     }
 
     private fun completeDrag(evt: MouseEvent) {
-        if (dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY))) {
+        if (dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY)) && proposedTakeProperty.value == null) {
             proposedTakeProperty.value = draggingTakeProperty.value
             draggingTakeProperty.value = null
         } else cancelDrag(evt)
