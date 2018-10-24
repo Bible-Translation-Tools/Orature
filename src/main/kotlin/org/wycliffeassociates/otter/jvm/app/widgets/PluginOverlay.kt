@@ -1,9 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.widgets
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Pane
@@ -13,13 +9,8 @@ import javafx.scene.paint.Color
 import tornadofx.*
 
 class PluginOverlay: StackPane() {
-    val iconProperty = SimpleObjectProperty<Node>(MaterialIconView(MaterialIcon.ACCESSIBLE))
-    var icon by iconProperty
 
     var graphic : Node = StackPane()
-
-    val visibleProperty = SimpleBooleanProperty(false)
-    var overlayVisible by visibleProperty
 
     init {
         style {
@@ -37,7 +28,6 @@ class PluginOverlay: StackPane() {
                 progressColor = Color.WHITE
             }
         }
-        isVisible = visibleProperty.value
     }
 }
 
