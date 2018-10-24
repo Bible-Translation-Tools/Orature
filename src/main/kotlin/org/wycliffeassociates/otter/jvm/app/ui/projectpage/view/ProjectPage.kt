@@ -11,6 +11,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.viewmodel.ProjectPageViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
 import org.wycliffeassociates.otter.jvm.app.widgets.*
 import tornadofx.*
@@ -122,22 +123,14 @@ class ProjectPage : View() {
         }
         // Plugin active cover
         pluginOverlay {
-            graphic.apply {
-                add(MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                        .apply {
-                            style(true) {
-                                fill = Color.WHITE
-                            }
-                            viewModel.contextProperty.onChange { newContext ->
-                                when (newContext) {
-                                    ChapterContext.RECORD -> setIcon(MaterialIcon.MIC_NONE)
-                                    ChapterContext.EDIT_TAKES -> setIcon(MaterialIcon.EDIT)
-                                    else -> {
-                                        setIcon(MaterialIcon.ACCESS_ALARM)
-                                    }
-                                }
-                            }
-                        })
+            addClass(AppStyles.pluginOverlay)
+            icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+            viewModel.contextProperty.onChange { newContext ->
+                when (newContext) {
+                    ChapterContext.RECORD -> icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+                    ChapterContext.EDIT_TAKES -> icon = MaterialIconView(MaterialIcon.EDIT, "60px")
+                    else -> { }
+                }
             }
             visibleProperty().bind(viewModel.showPluginActiveProperty)
         }

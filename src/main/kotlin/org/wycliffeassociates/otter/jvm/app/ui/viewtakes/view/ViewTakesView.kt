@@ -233,14 +233,8 @@ class ViewTakesView : View() {
         }
 
         pluginOverlay {
-            graphic.apply {
-                add(MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                        .apply {
-                            style(true) {
-                                fill = Color.WHITE
-                            }
-                        })
-            }
+            addClass(AppStyles.pluginOverlay)
+            icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
             visibleProperty().bind(viewModel.showPluginActiveProperty)
         }
     }

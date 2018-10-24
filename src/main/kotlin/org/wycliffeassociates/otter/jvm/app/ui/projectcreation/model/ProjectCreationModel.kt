@@ -69,18 +69,22 @@ class ProjectCreationModel {
     }
 
     fun goBack(projectWizard: Wizard) {
-        if (collectionStore.size > 1) {
-            collectionStore.removeAt(collectionStore.size - 1)
-            collectionList.setAll(collectionStore.last().sortedBy { it.sort })
-        }
-        else if(collectionStore.size == 1) {
-            collectionStore.removeAt(0)
-            projectWizard.back()
-        }
-        else {
-            projectWizard.back()
+        when {
+            collectionStore.size > 1 -> {
+                collectionStore.removeAt(collectionStore.size - 1)
+                collectionList.setAll(collectionStore.last().sortedBy { it.sort })
+            }
+
+            collectionStore.size == 1 -> {
+                collectionStore.removeAt(0)
+                projectWizard.back()
+            }
+            else -> {
+                projectWizard.back()
+            }
         }
     }
+
     private fun createProject(selectedCollection: Collection) {
         creationUseCase
                 .newProject(selectedCollection, targetLanguage)
