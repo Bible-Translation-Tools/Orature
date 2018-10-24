@@ -6,14 +6,11 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Pane
-import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import tornadofx.*
 
-class PluginOverlay : StackPane() {
-
-    var graphic: Node = StackPane()
+class ProgressOverlay : StackPane() {
 
     var iconProperty = SimpleObjectProperty<Node>(MaterialIconView(MaterialIcon.MIC_NONE, "60px"))
     var icon by iconProperty
@@ -47,9 +44,9 @@ class PluginOverlay : StackPane() {
     }
 }
 
-fun Pane.pluginOverlay(init: PluginOverlay.() -> Unit = {}): PluginOverlay {
-    val pluginOverlay = PluginOverlay()
-    pluginOverlay.init()
-    add(pluginOverlay)
-    return pluginOverlay
+fun Pane.progressOverlay(init: ProgressOverlay.() -> Unit = {}): ProgressOverlay {
+    val progressOverlay = ProgressOverlay()
+    progressOverlay.init()
+    add(progressOverlay)
+    return progressOverlay
 }

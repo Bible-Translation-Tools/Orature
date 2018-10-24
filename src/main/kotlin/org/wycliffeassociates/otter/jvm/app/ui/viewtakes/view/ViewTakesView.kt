@@ -9,10 +9,8 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
-import javafx.scene.effect.DropShadow
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
@@ -20,7 +18,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel.ViewTakesViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.pluginOverlay
+import org.wycliffeassociates.otter.jvm.app.widgets.progressOverlay
 import tornadofx.*
 
 class ViewTakesView : View() {
@@ -232,7 +230,7 @@ class ViewTakesView : View() {
             }
         }
 
-        pluginOverlay {
+        progressOverlay {
             addClass(AppStyles.pluginOverlay)
             icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
             visibleProperty().bind(viewModel.showPluginActiveProperty)
