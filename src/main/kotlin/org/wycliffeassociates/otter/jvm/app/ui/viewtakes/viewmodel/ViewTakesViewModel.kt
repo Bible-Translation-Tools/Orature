@@ -26,6 +26,6 @@ class ViewTakesViewModel : ViewModel() {
         model.reset()
     }
 
-    fun recordTake() = model.recordChunk()
+    fun recordChunk() = model.recordChunk()
 
 }

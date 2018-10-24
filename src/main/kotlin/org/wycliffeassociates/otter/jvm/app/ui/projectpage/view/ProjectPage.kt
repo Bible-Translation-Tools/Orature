@@ -120,35 +120,24 @@ class ProjectPage : View() {
                 }
             }
         }
-
         // Plugin active cover
-        stackpane {
-            style {
-                alignment = Pos.CENTER
-                backgroundColor += Color.BLACK
-                        .deriveColor(0.0, 0.0, 0.0, 0.5)
-            }
-            val icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                    .apply {
-                        style(true) {
-                            fill = Color.WHITE
-                        }
-                        // Update the icon when the context changes
-                        viewModel.contextProperty.onChange { newContext ->
-                            when(newContext) {
-                                ChapterContext.RECORD -> setIcon(MaterialIcon.MIC_NONE)
-                                ChapterContext.EDIT_TAKES -> setIcon(MaterialIcon.EDIT)
-                                else -> {}
+        pluginOverlay {
+            graphic.apply {
+                add(MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+                        .apply {
+                            style(true) {
+                                fill = Color.WHITE
                             }
-                        }
-                    }
-            add(icon)
-            progressindicator {
-                style {
-                    maxWidth = 125.px
-                    maxHeight = 125.px
-                    progressColor = Color.WHITE
-                }
+                            viewModel.contextProperty.onChange { newContext ->
+                                when (newContext) {
+                                    ChapterContext.RECORD -> setIcon(MaterialIcon.MIC_NONE)
+                                    ChapterContext.EDIT_TAKES -> setIcon(MaterialIcon.EDIT)
+                                    else -> {
+                                        setIcon(MaterialIcon.ACCESS_ALARM)
+                                    }
+                                }
+                            }
+                        })
             }
             visibleProperty().bind(viewModel.showPluginActiveProperty)
         }
@@ -214,5 +203,6 @@ class ProjectPage : View() {
         return dataGrid
     }
 }
+
 
 

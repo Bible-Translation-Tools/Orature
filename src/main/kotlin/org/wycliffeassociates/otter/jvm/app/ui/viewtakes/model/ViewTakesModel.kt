@@ -28,7 +28,7 @@ class ViewTakesModel {
 
     val chunkProperty = find(ProjectPageViewModel::class).activeChunkProperty
     val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
-    var activeChild = find(ProjectPageViewModel::class).activeChild.value
+    var activeChild = find(ProjectPageViewModel::class).activeChildProperty
 
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
@@ -90,44 +90,29 @@ class ViewTakesModel {
         alternateTakes.clear()
         selectedTakeProperty.value = null
         chunkProperty.value?.let { populateTakes(it) }
-        title = "${messages[chunkProperty.value?.labelKey ?: "verse"]} ${ chunkProperty.value?.start ?: "" }"
+        title = "${messages[chunkProperty.value?.labelKey ?: "verse"]} ${chunkProperty.value?.start ?: ""}"
     }
 
 
-     fun recordChunk() {
+    fun recordChunk() {
         projectProperty.value?.let { project ->
             showPluginActive = true
             projectPageActions
-                    .createNewTake(chunkProperty.value, project, activeChild)
+                    .createNewTake(chunkProperty.value, project, activeChild.value)
                     .flatMap { take ->
                         projectPageActions
                                 .launchDefaultPluginForTake(take)
                                 .toSingle { take }
                     }
-                    .flatMap {take ->
+                    .flatMap { take ->
                         projectPageActions.insertTake(take, chunkProperty.value)
                     }
                     .observeOnFx()
                     .subscribe { _ ->
                         showPluginActive = false
-                        selectChildCollection(activeChild)
+                        populateTakes(chunkProperty.value)
                     }
         }
-    }
-    fun selectChildCollection(child: Collection) {
-        activeChild = child
-        // Remove existing chunks so the user knows they are outdated
-        alternateTakes.clear()
-        projectPageActions
-                .getChunks(child)
-                .flatMapObservable {
-                    Observable.fromIterable(it)
-                }
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    alternateTakes.clear() // Make sure any take cards that might have been added are removed
-                    populateTakes(retrieved)
-                }
     }
 }
 

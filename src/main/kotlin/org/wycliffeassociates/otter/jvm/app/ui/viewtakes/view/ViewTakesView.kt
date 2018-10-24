@@ -6,7 +6,6 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.animation.Interpolator
 import javafx.animation.Timeline
 import javafx.beans.property.SimpleObjectProperty
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -18,9 +17,10 @@ import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ChapterContext
+import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel.ViewTakesViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.TakeCard
+import org.wycliffeassociates.otter.jvm.app.widgets.pluginOverlay
 import tornadofx.*
 
 class ViewTakesView : View() {
@@ -205,22 +205,13 @@ class ViewTakesView : View() {
             // Record button?
             val recordIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
             recordButton = button("", recordIcon) {
+                addClass(AppStyles.recordButton)
                 anchorpaneConstraints {
                     bottomAnchor = 25.0
                     rightAnchor = 25.0
                 }
-                style {
-                    backgroundColor += c(Colors["base"])
-                    recordIcon.fill = c(Colors["primary"])
-                    backgroundRadius += box(100.0.px)
-                    borderRadius += box(100.0.px)
-                    prefHeight = 50.px
-                    prefWidth = 50.px
-                    effect = DropShadow(10.0, Color.GRAY)
-                }
-
                 action {
-                    viewModel.recordTake()
+                    viewModel.recordChunk()
                 }
             }
 
@@ -241,25 +232,14 @@ class ViewTakesView : View() {
             }
         }
 
-        stackpane {
-            style {
-                alignment = Pos.CENTER
-                backgroundColor += Color.BLACK
-                        .deriveColor(0.0, 0.0, 0.0, 0.5)
-            }
-            val icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                    .apply {
-                        style(true) {
-                            fill = Color.WHITE
-                        }
-                    }
-            add(icon)
-            progressindicator {
-                style {
-                    maxWidth = 125.px
-                    maxHeight = 125.px
-                    progressColor = Color.WHITE
-                }
+        pluginOverlay {
+            graphic.apply {
+                add(MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+                        .apply {
+                            style(true) {
+                                fill = Color.WHITE
+                            }
+                        })
             }
             visibleProperty().bind(viewModel.showPluginActiveProperty)
         }

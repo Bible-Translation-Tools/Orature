@@ -18,6 +18,7 @@ class AppStyles : Stylesheet() {
         val wizardCard by cssclass()
         val noResource by cssclass()
         val projectCard by cssclass()
+        val recordButton by cssclass()
         val projectGraphicContainer by cssclass()
     }
 
@@ -34,6 +35,22 @@ class AppStyles : Stylesheet() {
             unsafe("-jfx-button-type", raw("RAISED"))
             child("*") {
                 fill = c(UIColorsObject.Colors["base"])
+            }
+        }
+
+        recordButton {
+            backgroundRadius += box(25.px)
+            borderRadius += box(25.px)
+            backgroundColor += c(UIColorsObject.Colors["base"])
+            minHeight = 50.px
+            minWidth = 50.px
+            maxHeight = 50.px
+            maxWidth = 50.px
+            cursor = Cursor.HAND
+            effect = DropShadow(10.0, Color.GRAY)
+            unsafe("-jfx-button-type", raw("RAISED"))
+            child("*") {
+                fill = c(UIColorsObject.Colors["primary"])
             }
         }
 
