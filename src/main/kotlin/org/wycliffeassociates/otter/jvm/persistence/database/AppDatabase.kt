@@ -10,7 +10,7 @@ import java.io.File
 
 class AppDatabase(
         databaseFile: File
-) : IAppDatabase {
+) {
     private val dsl: DSLContext
 
     init {
@@ -55,13 +55,21 @@ class AppDatabase(
     private val markerDao = MarkerDao(dsl)
     private val audioPluginDao = AudioPluginDao(dsl)
 
-    // Override the getters
-    override fun getLanguageDao(): ILanguageDao = languageDao
-    override fun getResourceMetadataDao(): IResourceMetadataDao = resourceMetadataDao
-    override fun getCollectionDao(): ICollectionDao = collectionDao
-    override fun getChunkDao(): IChunkDao = chunkDao
-    override fun getResourceLinkDao(): IResourceLinkDao = resourceLinkDao
-    override fun getTakeDao(): ITakeDao = takeDao
-    override fun getMarkerDao(): IMarkerDao = markerDao
-    override fun getAudioPluginDao(): IDao<AudioPluginEntity> = audioPluginDao
+    // the getters
+    fun getLanguageDao() = languageDao
+    fun getResourceMetadataDao() = resourceMetadataDao
+    fun getCollectionDao() = collectionDao
+    fun getChunkDao() = chunkDao
+    fun getResourceLinkDao() = resourceLinkDao
+    fun getTakeDao() = takeDao
+    fun getMarkerDao() = markerDao
+    fun getAudioPluginDao() = audioPluginDao
+
+    // Transaction support
+    fun transaction(block: (DSLContext) -> Unit) {
+        dsl.transaction { config ->
+            // Create local transaction DSL and pass to block
+            block(DSL.using(config))
+        }
+    }
 }

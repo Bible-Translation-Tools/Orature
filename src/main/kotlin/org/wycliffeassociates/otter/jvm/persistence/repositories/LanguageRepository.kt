@@ -5,11 +5,11 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
-import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
 
 class LanguageRepository(
-        database: IAppDatabase,
+        database: AppDatabase,
         private val mapper: LanguageMapper = LanguageMapper()
 ) : ILanguageRepository {
     private val languageDao = database.getLanguageDao()

@@ -7,9 +7,9 @@ import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
 
 class ResourceLinkDao(
-        private val dsl: DSLContext
-) : IResourceLinkDao {
-    override fun fetchByChunkId(id: Int): List<ResourceLinkEntity> {
+        private val instanceDsl: DSLContext
+) {
+    fun fetchByChunkId(id: Int, dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
         return dsl
                 .select()
                 .from(RESOURCE_LINK)
@@ -19,7 +19,7 @@ class ResourceLinkDao(
                 }
     }
 
-    override fun fetchByCollectionId(id: Int): List<ResourceLinkEntity> {
+    fun fetchByCollectionId(id: Int, dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
         return dsl
                 .select()
                 .from(RESOURCE_LINK)
@@ -30,7 +30,7 @@ class ResourceLinkDao(
     }
 
     @Synchronized
-    override fun insert(entity: ResourceLinkEntity): Int {
+    fun insert(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the resource link entity
@@ -57,7 +57,7 @@ class ResourceLinkDao(
                 }
     }
 
-    override fun fetchById(id: Int): ResourceLinkEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceLinkEntity {
         return dsl
                 .select()
                 .from(RESOURCE_LINK)
@@ -67,7 +67,7 @@ class ResourceLinkDao(
                 }
     }
 
-    override fun fetchAll(): List<ResourceLinkEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
         return dsl
                 .select()
                 .from(RESOURCE_LINK)
@@ -76,7 +76,7 @@ class ResourceLinkDao(
                 }
     }
 
-    override fun update(entity: ResourceLinkEntity) {
+    fun update(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(RESOURCE_LINK)
                 .set(RESOURCE_LINK.RESOURCE_CONTENT_FK, entity.resourceChunkFk)
@@ -86,7 +86,7 @@ class ResourceLinkDao(
                 .execute()
     }
 
-    override fun delete(entity: ResourceLinkEntity) {
+    fun delete(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(RESOURCE_LINK)
                 .where(RESOURCE_LINK.ID.eq(entity.id))

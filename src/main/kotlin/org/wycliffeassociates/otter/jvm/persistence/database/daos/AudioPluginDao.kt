@@ -1,19 +1,16 @@
 package org.wycliffeassociates.otter.jvm.persistence.database.daos
 
 import jooq.Tables.AUDIO_PLUGIN_ENTITY
-import jooq.Tables.LANGUAGE_ENTITY
 import org.jooq.DSLContext
-import org.jooq.Record
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.AudioPluginEntity
-import org.wycliffeassociates.otter.jvm.persistence.entities.LanguageEntity
 
 class AudioPluginDao(
-        private val dsl: DSLContext
-) : IDao<AudioPluginEntity> {
+        private val instanceDsl: DSLContext
+) {
     @Synchronized
-    override fun insert(entity: AudioPluginEntity): Int {
+    fun insert(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the plugin entity
@@ -46,7 +43,7 @@ class AudioPluginDao(
                 }
     }
 
-    override fun fetchById(id: Int): AudioPluginEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): AudioPluginEntity {
         return dsl
                 .select()
                 .from(AUDIO_PLUGIN_ENTITY)
@@ -56,7 +53,7 @@ class AudioPluginDao(
                 }
     }
 
-    override fun fetchAll(): List<AudioPluginEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<AudioPluginEntity> {
         return dsl
                 .select()
                 .from(AUDIO_PLUGIN_ENTITY)
@@ -65,7 +62,7 @@ class AudioPluginDao(
                 }
     }
 
-    override fun update(entity: AudioPluginEntity) {
+    fun update(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(AUDIO_PLUGIN_ENTITY)
                 .set(AUDIO_PLUGIN_ENTITY.NAME, entity.name)
@@ -78,7 +75,7 @@ class AudioPluginDao(
                 .execute()
     }
 
-    override fun delete(entity: AudioPluginEntity) {
+    fun delete(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(AUDIO_PLUGIN_ENTITY)
                 .where(AUDIO_PLUGIN_ENTITY.ID.eq(entity.id))

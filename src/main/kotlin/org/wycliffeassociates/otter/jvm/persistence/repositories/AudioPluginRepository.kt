@@ -9,11 +9,11 @@ import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.persistence.DefaultPluginPreference
 import org.wycliffeassociates.otter.jvm.device.audioplugin.AudioPlugin
-import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.AudioPluginDataMapper
 
 class AudioPluginRepository(
-        database: IAppDatabase,
+        database: AppDatabase,
         private val mapper: AudioPluginDataMapper = AudioPluginDataMapper()
 ) : IAudioPluginRepository {
     private val audioPluginDao = database.getAudioPluginDao()

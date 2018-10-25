@@ -4,13 +4,13 @@ import dagger.Component
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import javax.inject.Singleton
 
 @Component(modules = [PersistenceModule::class])
 @Singleton
 interface PersistenceComponent {
-    fun injectDatabase(): IAppDatabase
+    fun injectDatabase(): AppDatabase
     fun injectPreferences(): IAppPreferences
     fun injectDirectoryProvider(): IDirectoryProvider
     // Need inject for audio plugin repo so audio plugin registrar can be built

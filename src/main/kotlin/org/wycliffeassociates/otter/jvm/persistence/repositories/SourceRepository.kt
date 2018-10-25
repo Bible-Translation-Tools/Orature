@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.common.data.model.ProjectCollection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.model.SourceCollection
 import org.wycliffeassociates.otter.common.persistence.repositories.ISourceRepository
-import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.Resourc
 
 
 class SourceRepository(
-        database: IAppDatabase,
+        database: AppDatabase,
         private val collectionMapper: CollectionMapper = CollectionMapper(),
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()

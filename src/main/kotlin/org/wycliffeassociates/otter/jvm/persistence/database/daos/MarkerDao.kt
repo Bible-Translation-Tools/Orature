@@ -1,17 +1,15 @@
 package org.wycliffeassociates.otter.jvm.persistence.database.daos
 
 import jooq.Tables.MARKER_ENTITY
-import jooq.Tables.TAKE_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.MarkerEntity
-import org.wycliffeassociates.otter.jvm.persistence.entities.TakeEntity
 
 class MarkerDao(
-        private val dsl: DSLContext
-) : IMarkerDao {
-    override fun fetchByTakeId(id: Int): List<MarkerEntity> {
+        private val instanceDsl: DSLContext
+) {
+    fun fetchByTakeId(id: Int, dsl: DSLContext = instanceDsl): List<MarkerEntity> {
         return dsl
                 .select()
                 .from(MARKER_ENTITY)
@@ -22,7 +20,7 @@ class MarkerDao(
     }
 
     @Synchronized
-    override fun insert(entity: MarkerEntity): Int {
+    fun insert(entity: MarkerEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the marker entity
@@ -51,7 +49,7 @@ class MarkerDao(
                 }
     }
 
-    override fun fetchById(id: Int): MarkerEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): MarkerEntity {
         return dsl
                 .select()
                 .from(MARKER_ENTITY)
@@ -61,7 +59,7 @@ class MarkerDao(
                 }
     }
 
-    override fun fetchAll(): List<MarkerEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<MarkerEntity> {
         return dsl
                 .select()
                 .from(MARKER_ENTITY)
@@ -70,7 +68,7 @@ class MarkerDao(
                 }
     }
 
-    override fun update(entity: MarkerEntity) {
+    fun update(entity: MarkerEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(MARKER_ENTITY)
                 .set(MARKER_ENTITY.TAKE_FK, entity.takeFk)
@@ -81,7 +79,7 @@ class MarkerDao(
                 .execute()
     }
 
-    override fun delete(entity: MarkerEntity) {
+    fun delete(entity: MarkerEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(MARKER_ENTITY)
                 .where(MARKER_ENTITY.ID.eq(entity.id))

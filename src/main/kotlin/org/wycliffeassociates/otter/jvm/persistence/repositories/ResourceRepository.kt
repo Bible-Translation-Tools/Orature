@@ -4,13 +4,11 @@ import io.reactivex.Completable
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import jooq.tables.ResourceLink
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Resource
-import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
-import org.wycliffeassociates.otter.jvm.persistence.database.IAppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
@@ -18,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.MarkerM
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.TakeMapper
 
 class ResourceRepository(
-        database: IAppDatabase,
+        database: AppDatabase,
         private val chunkMapper: ChunkMapper = ChunkMapper(),
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()

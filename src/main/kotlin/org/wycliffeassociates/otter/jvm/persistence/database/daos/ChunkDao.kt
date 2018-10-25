@@ -8,9 +8,9 @@ import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
 
 class ChunkDao(
-        private val dsl: DSLContext
-) : IChunkDao {
-    override fun fetchByCollectionId(collectionId: Int): List<ChunkEntity> {
+        private val instanceDsl: DSLContext
+) {
+    fun fetchByCollectionId(collectionId: Int, dsl: DSLContext = instanceDsl): List<ChunkEntity> {
         return dsl
                 .select()
                 .from(CONTENT_ENTITY)
@@ -20,7 +20,7 @@ class ChunkDao(
                 }
     }
 
-    override fun fetchSources(entity: ChunkEntity): List<ChunkEntity> {
+    fun fetchSources(entity: ChunkEntity, dsl: DSLContext = instanceDsl): List<ChunkEntity> {
         val sourceIds = dsl
                 .select(CONTENT_DERIVATIVE.SOURCE_FK)
                 .from(CONTENT_DERIVATIVE)
@@ -38,7 +38,7 @@ class ChunkDao(
                 }
     }
 
-    override fun updateSources(entity: ChunkEntity, sources: List<ChunkEntity>) {
+    fun updateSources(entity: ChunkEntity, sources: List<ChunkEntity>, dsl: DSLContext = instanceDsl) {
         // Delete the existing sources
         dsl
                 .deleteFrom(CONTENT_DERIVATIVE)
@@ -57,7 +57,7 @@ class ChunkDao(
     }
 
     @Synchronized
-    override fun insert(entity: ChunkEntity): Int {
+    fun insert(entity: ChunkEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID was not 0")
 
         // Insert the new chunk entity
@@ -88,7 +88,7 @@ class ChunkDao(
                 }
     }
 
-    override fun fetchById(id: Int): ChunkEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ChunkEntity {
         return dsl
                 .select()
                 .from(CONTENT_ENTITY)
@@ -98,7 +98,7 @@ class ChunkDao(
                 }
     }
 
-    override fun fetchAll(): List<ChunkEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<ChunkEntity> {
         return dsl
                 .select()
                 .from(CONTENT_ENTITY)
@@ -107,7 +107,7 @@ class ChunkDao(
                 }
     }
 
-    override fun update(entity: ChunkEntity) {
+    fun update(entity: ChunkEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(CONTENT_ENTITY)
                 .set(CONTENT_ENTITY.SORT, entity.sort)
@@ -119,7 +119,7 @@ class ChunkDao(
                 .execute()
     }
 
-    override fun delete(entity: ChunkEntity) {
+    fun delete(entity: ChunkEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.ID.eq(entity.id))
