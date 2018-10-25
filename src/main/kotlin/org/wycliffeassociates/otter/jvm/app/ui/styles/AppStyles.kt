@@ -20,7 +20,7 @@ class AppStyles : Stylesheet() {
         val projectCard by cssclass()
         val recordButton by cssclass()
         val projectGraphicContainer by cssclass()
-        val pluginOverlay by cssclass()
+        val progressOverlay by cssclass()
     }
 
     init {
@@ -122,7 +122,7 @@ class AppStyles : Stylesheet() {
             textFill = c(Colors["primary"])
         }
 
-        pluginOverlay {
+        progressOverlay {
             s("*") {
                 fill = Color.WHITE
             }

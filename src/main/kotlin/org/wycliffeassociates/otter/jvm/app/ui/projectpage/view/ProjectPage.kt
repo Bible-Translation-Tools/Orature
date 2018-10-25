@@ -123,7 +123,7 @@ class ProjectPage : View() {
         }
         // Plugin active cover
         progressOverlay {
-            addClass(AppStyles.pluginOverlay)
+            addClass(AppStyles.progressOverlay)
             icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
             viewModel.contextProperty.onChange { newContext ->
                 when (newContext) {

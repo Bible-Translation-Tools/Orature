@@ -231,7 +231,7 @@ class ViewTakesView : View() {
         }
 
         progressOverlay {
-            addClass(AppStyles.pluginOverlay)
+            addClass(AppStyles.progressOverlay)
             icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
             visibleProperty().bind(viewModel.showPluginActiveProperty)
         }

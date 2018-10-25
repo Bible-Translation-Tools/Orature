@@ -79,9 +79,7 @@ class ProjectCreationModel {
                 collectionStore.removeAt(0)
                 projectWizard.back()
             }
-            else -> {
-                projectWizard.back()
-            }
+            else -> projectWizard.back()
         }
     }
 
