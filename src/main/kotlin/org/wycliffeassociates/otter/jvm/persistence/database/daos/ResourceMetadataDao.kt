@@ -8,10 +8,10 @@ import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceMetadataEntity
 
 class ResourceMetadataDao(
-        private val dsl: DSLContext
-) : IResourceMetadataDao {
+        private val instanceDsl: DSLContext
+) {
 
-    override fun fetchLinks(entityId: Int): List<ResourceMetadataEntity> {
+    fun fetchLinks(entityId: Int, dsl: DSLContext = instanceDsl): List<ResourceMetadataEntity> {
         val linkIds = dsl
                 .select()
                 .from(RC_LINK_ENTITY)
@@ -29,7 +29,8 @@ class ResourceMetadataDao(
                 }
     }
 
-    override fun addLink(entity1Id: Int, entity2Id: Int) {
+    @Synchronized
+    fun addLink(entity1Id: Int, entity2Id: Int, dsl: DSLContext = instanceDsl) {
         try {
             dsl
                     .insertInto(RC_LINK_ENTITY, RC_LINK_ENTITY.RC1_FK, RC_LINK_ENTITY.RC2_FK)
@@ -40,7 +41,7 @@ class ResourceMetadataDao(
         }
     }
 
-    override fun removeLink(entity1Id: Int, entity2Id: Int) {
+    fun removeLink(entity1Id: Int, entity2Id: Int, dsl: DSLContext = instanceDsl) {
         try {
             dsl
                     .deleteFrom(RC_LINK_ENTITY)
@@ -53,7 +54,7 @@ class ResourceMetadataDao(
     }
 
     @Synchronized
-    override fun insert(entity: ResourceMetadataEntity): Int {
+    fun insert(entity: ResourceMetadataEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the resource metadata entity
@@ -102,7 +103,7 @@ class ResourceMetadataDao(
                 }
     }
 
-    override fun fetchById(id: Int): ResourceMetadataEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceMetadataEntity {
         return dsl
                 .select()
                 .from(DUBLIN_CORE_ENTITY)
@@ -112,7 +113,7 @@ class ResourceMetadataDao(
                 }
     }
 
-    override fun fetchAll(): List<ResourceMetadataEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<ResourceMetadataEntity> {
         return dsl
                 .select()
                 .from(DUBLIN_CORE_ENTITY)
@@ -121,7 +122,7 @@ class ResourceMetadataDao(
                 }
     }
 
-    override fun update(entity: ResourceMetadataEntity) {
+    fun update(entity: ResourceMetadataEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(DUBLIN_CORE_ENTITY)
                 .set(DUBLIN_CORE_ENTITY.CONFORMSTO, entity.conformsTo)
@@ -142,7 +143,7 @@ class ResourceMetadataDao(
                 .execute()
     }
 
-    override fun delete(entity: ResourceMetadataEntity) {
+    fun delete(entity: ResourceMetadataEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(DUBLIN_CORE_ENTITY)
                 .where(DUBLIN_CORE_ENTITY.ID.eq(entity.id))

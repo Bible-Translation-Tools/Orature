@@ -7,9 +7,9 @@ import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.TakeEntity
 
 class TakeDao(
-        private val dsl: DSLContext
-) : ITakeDao {
-    override fun fetchByChunkId(id: Int): List<TakeEntity> {
+        private val instanceDsl: DSLContext
+) {
+    fun fetchByChunkId(id: Int, dsl: DSLContext = instanceDsl): List<TakeEntity> {
         return dsl
                 .select()
                 .from(TAKE_ENTITY)
@@ -20,7 +20,7 @@ class TakeDao(
     }
 
     @Synchronized
-    override fun insert(entity: TakeEntity): Int {
+    fun insert(entity: TakeEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the take entity
@@ -53,7 +53,7 @@ class TakeDao(
                 }
     }
 
-    override fun fetchById(id: Int): TakeEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TakeEntity {
         return dsl
                 .select()
                 .from(TAKE_ENTITY)
@@ -63,7 +63,7 @@ class TakeDao(
                 }
     }
 
-    override fun fetchAll(): List<TakeEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<TakeEntity> {
         return dsl
                 .select()
                 .from(TAKE_ENTITY)
@@ -72,7 +72,7 @@ class TakeDao(
                 }
     }
 
-    override fun update(entity: TakeEntity) {
+    fun update(entity: TakeEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(TAKE_ENTITY)
                 .set(TAKE_ENTITY.CONTENT_FK, entity.contentFk)
@@ -85,7 +85,7 @@ class TakeDao(
                 .execute()
     }
 
-    override fun delete(entity: TakeEntity) {
+    fun delete(entity: TakeEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(TAKE_ENTITY)
                 .where(TAKE_ENTITY.ID.eq(entity.id))

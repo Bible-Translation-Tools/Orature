@@ -2,17 +2,16 @@ package org.wycliffeassociates.otter.jvm.persistence.database.daos
 
 import jooq.Tables.LANGUAGE_ENTITY
 import org.jooq.DSLContext
-import org.jooq.Record
 import org.jooq.impl.DSL
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.LanguageEntity
 
 class LanguageDao(
-        private val dsl: DSLContext
-) : ILanguageDao {
+        private val instanceDsl: DSLContext
+) {
 
-    override fun fetchGateway(): List<LanguageEntity> {
+    fun fetchGateway(dsl: DSLContext = instanceDsl): List<LanguageEntity> {
         return dsl
                 .select()
                 .from(LANGUAGE_ENTITY)
@@ -22,7 +21,7 @@ class LanguageDao(
                 }
     }
 
-    override fun fetchTargets(): List<LanguageEntity> {
+    fun fetchTargets(dsl: DSLContext = instanceDsl): List<LanguageEntity> {
         return dsl
                 .select()
                 .from(LANGUAGE_ENTITY)
@@ -32,7 +31,7 @@ class LanguageDao(
                 }
     }
 
-    override fun fetchBySlug(slug: String): LanguageEntity {
+    fun fetchBySlug(slug: String, dsl: DSLContext = instanceDsl): LanguageEntity {
         return dsl
                 .select()
                 .from(LANGUAGE_ENTITY)
@@ -43,7 +42,7 @@ class LanguageDao(
     }
 
     @Synchronized
-    override fun insert(entity: LanguageEntity): Int {
+    fun insert(entity: LanguageEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the language entity
@@ -75,7 +74,7 @@ class LanguageDao(
     }
 
     @Synchronized
-    override fun insertAll(entities: List<LanguageEntity>): List<Int> {
+    fun insertAll(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl): List<Int> {
         val initialLargest = dsl
                 .select(max(LANGUAGE_ENTITY.ID))
                 .from(LANGUAGE_ENTITY)
@@ -117,7 +116,7 @@ class LanguageDao(
         return ((initialLargest + 1)..finalLargest).toList()
     }
 
-    override fun fetchById(id: Int): LanguageEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity {
         return dsl
                 .select()
                 .from(LANGUAGE_ENTITY)
@@ -127,7 +126,7 @@ class LanguageDao(
                 }
     }
 
-    override fun fetchAll(): List<LanguageEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<LanguageEntity> {
         return dsl
                 .select()
                 .from(LANGUAGE_ENTITY)
@@ -136,7 +135,7 @@ class LanguageDao(
                 }
     }
 
-    override fun update(entity: LanguageEntity) {
+    fun update(entity: LanguageEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(LANGUAGE_ENTITY)
                 .set(LANGUAGE_ENTITY.SLUG, entity.slug)
@@ -148,7 +147,7 @@ class LanguageDao(
                 .execute()
     }
 
-    override fun delete(entity: LanguageEntity) {
+    fun delete(entity: LanguageEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(LANGUAGE_ENTITY)
                 .where(LANGUAGE_ENTITY.ID.eq(entity.id))

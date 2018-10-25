@@ -7,9 +7,9 @@ import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
 
 class CollectionDao(
-        private val dsl: DSLContext
-) : ICollectionDao {
-    override fun fetchChildren(entity: CollectionEntity): List<CollectionEntity> {
+        private val instanceDsl: DSLContext
+) {
+    fun fetchChildren(entity: CollectionEntity, dsl: DSLContext = instanceDsl): List<CollectionEntity> {
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
@@ -19,7 +19,7 @@ class CollectionDao(
                 }
     }
 
-    override fun fetchSource(entity: CollectionEntity): CollectionEntity {
+    fun fetchSource(entity: CollectionEntity, dsl: DSLContext = instanceDsl): CollectionEntity {
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
@@ -29,7 +29,7 @@ class CollectionDao(
                 }
     }
 
-    override fun fetchBySlugAndContainerId(slug: String, containerId: Int): CollectionEntity {
+    fun fetchBySlugAndContainerId(slug: String, containerId: Int, dsl: DSLContext = instanceDsl): CollectionEntity {
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
@@ -40,7 +40,7 @@ class CollectionDao(
     }
 
     @Synchronized
-    override fun insert(entity: CollectionEntity): Int {
+    fun insert(entity: CollectionEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
         // Insert the collection entity
@@ -75,7 +75,7 @@ class CollectionDao(
                 }
     }
 
-    override fun fetchById(id: Int): CollectionEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): CollectionEntity {
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
@@ -85,7 +85,7 @@ class CollectionDao(
                 }
     }
 
-    override fun fetchAll(): List<CollectionEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<CollectionEntity> {
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
@@ -94,7 +94,7 @@ class CollectionDao(
                 }
     }
 
-    override fun update(entity: CollectionEntity) {
+    fun update(entity: CollectionEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(COLLECTION_ENTITY)
                 .set(COLLECTION_ENTITY.PARENT_FK, entity.parentFk)
@@ -108,11 +108,10 @@ class CollectionDao(
                 .execute()
     }
 
-    override fun delete(entity: CollectionEntity) {
+    fun delete(entity: CollectionEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(COLLECTION_ENTITY)
                 .where(COLLECTION_ENTITY.ID.eq(entity.id))
                 .execute()
     }
-
 }
