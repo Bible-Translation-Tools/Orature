@@ -61,6 +61,10 @@ class ProjectPageStylesheet : Stylesheet() {
             borderRadius += box(10.px)
             padding = box(10.px)
 
+            label {
+                textFill = c(Colors["baseText"])
+            }
+
             and(disabledCard) {
                 backgroundColor += c(Colors["baseBackground"])
             }
