@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.styles
 
+import com.jfoenix.controls.JFXListView
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -102,6 +103,23 @@ class AppStyles : Stylesheet() {
             fontSize = 24.px
             fontWeight = FontWeight.BOLD
             textFill = c(Colors["primary"])
+        }
+
+        // Material design scroll bar
+        scrollBar {
+            backgroundColor += Color.TRANSPARENT
+            padding = box(0.px, 4.px)
+            prefWidth = 16.px
+            thumb {
+                backgroundColor += Color.DARKGRAY
+                backgroundRadius += box(10.px)
+            }
+            incrementArrow {
+               visibility = FXVisibility.COLLAPSE
+            }
+            decrementArrow {
+                visibility = FXVisibility.COLLAPSE
+            }
         }
 
     }

@@ -155,8 +155,9 @@ class ProjectPageStylesheet : Stylesheet() {
             focusColor = Color.TRANSPARENT
             faintFocusColor = Color.TRANSPARENT
             borderWidth += box(0.px)
-            padding = box(20.px)
+            padding = box(10.px, 0.px, 0.px, 10.px)
             listCell {
+                padding = box(0.px, 0.px, 0.px, 20.px)
                 backgroundColor += Color.WHITE
                 backgroundRadius += box(10.px)
                 fontSize = 14.px
