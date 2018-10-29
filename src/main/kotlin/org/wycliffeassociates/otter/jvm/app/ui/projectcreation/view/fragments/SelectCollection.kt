@@ -5,6 +5,8 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
+import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ProjectCollection
 import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
@@ -29,6 +31,9 @@ class SelectCollection : View() {
                     bindChildren(viewModel.collectionList) {
                         hbox {
                             wizardcard {
+                                var projectExists = false
+                                if(it.labelKey == "book") { //only check if project exists when we are at book level
+                                 projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)}
                                 addClass(AppStyles.wizardCard)
                                 text = it.titleKey
                                 buttonText = messages["select"]
@@ -37,6 +42,7 @@ class SelectCollection : View() {
                                     action {
                                         viewModel.doOnUserSelection(it)
                                     }
+                                    isDisable = projectExists
                                 }
                                 graphicContainer.apply {
                                     addClass(AppStyles.wizardCardGraphicsContainer)
@@ -78,6 +84,15 @@ class SelectCollection : View() {
 
             else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
         }
+    }
+
+    private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
+        for (project in projectList) {
+            if (project.titleKey == (thisCollection.titleKey)) {
+                return true
+            }
+        }
+        return false
     }
 }
 
