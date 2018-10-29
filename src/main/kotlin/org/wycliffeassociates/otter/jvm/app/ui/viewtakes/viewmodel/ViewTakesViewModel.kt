@@ -12,6 +12,7 @@ class ViewTakesViewModel : ViewModel() {
     val titleProperty = bind { model.titleProperty }
     val selectedTakeProperty = bind(autocommit = true) { model.selectedTakeProperty }
     val alternateTakes = model.alternateTakes
+    val showPluginActiveProperty = model.showPluginActiveProperty
 
     fun acceptTake(take: Take) {
         model.acceptTake(take)
@@ -24,4 +25,7 @@ class ViewTakesViewModel : ViewModel() {
     fun reset() {
         model.reset()
     }
+
+    fun recordChunk() = model.recordChunk()
+
 }

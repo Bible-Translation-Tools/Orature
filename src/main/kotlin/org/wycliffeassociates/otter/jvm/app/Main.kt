@@ -18,6 +18,7 @@ import org.wycliffeassociates.otter.jvm.persistence.DefaultPluginPreference
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
+import java.util.*
 
 class MyApp : App(Workspace::class) {
     init {
@@ -35,7 +36,6 @@ class MyApp : App(Workspace::class) {
 //launch the org.wycliffeassociates.otter.jvm.app
 fun main(args: Array<String>) {
     initApp()
-
     launch<MyApp>(args)
 }
 

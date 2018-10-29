@@ -1,20 +1,35 @@
 package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.model
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.domain.ProjectPageActions
 import org.wycliffeassociates.otter.common.domain.ViewTakesActions
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeModel
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ProjectPage
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.viewmodel.ProjectPageViewModel
+import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ViewTakesModel {
+    private val directoryProvider = Injector.directoryProvider
+    private val collectionRepository = Injector.collectionRepo
+    private val chunkRepository = Injector.chunkRepository
+    private val takeRepository = Injector.takeRepository
+    private val pluginRepository = Injector.pluginRepository
 
     val chunkProperty = find(ProjectPageViewModel::class).activeChunkProperty
+    val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
+    var activeChild = find(ProjectPageViewModel::class).activeChildProperty
+
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
 
@@ -22,6 +37,19 @@ class ViewTakesModel {
 
     var title: String by property("View Takes")
     val titleProperty = getProperty(ViewTakesModel::title)
+
+    // Whether the UI should show the plugin as active
+    var showPluginActive: Boolean by property(false)
+    var showPluginActiveProperty = getProperty(ViewTakesModel::showPluginActive)
+
+    val projectPageActions = ProjectPageActions(
+            directoryProvider,
+            WaveFileCreator(),
+            collectionRepository,
+            chunkRepository,
+            takeRepository,
+            pluginRepository
+    )
 
     private val viewTakesActions = ViewTakesActions(
             Injector.chunkRepository,
@@ -58,10 +86,33 @@ class ViewTakesModel {
     }
 
     fun reset() {
+
         alternateTakes.clear()
         selectedTakeProperty.value = null
         chunkProperty.value?.let { populateTakes(it) }
-        title = "${messages[chunkProperty.value?.labelKey ?: "verse"]} ${ chunkProperty.value?.start ?: "" }"
+        title = "${messages[chunkProperty.value?.labelKey ?: "verse"]} ${chunkProperty.value?.start ?: ""}"
+    }
+
+
+    fun recordChunk() {
+        projectProperty.value?.let { project ->
+            showPluginActive = true
+            projectPageActions
+                    .createNewTake(chunkProperty.value, project, activeChild.value)
+                    .flatMap { take ->
+                        projectPageActions
+                                .launchDefaultPluginForTake(take)
+                                .toSingle { take }
+                    }
+                    .flatMap { take ->
+                        projectPageActions.insertTake(take, chunkProperty.value)
+                    }
+                    .observeOnFx()
+                    .subscribe { _ ->
+                        showPluginActive = false
+                        populateTakes(chunkProperty.value)
+                    }
+        }
     }
 }
 

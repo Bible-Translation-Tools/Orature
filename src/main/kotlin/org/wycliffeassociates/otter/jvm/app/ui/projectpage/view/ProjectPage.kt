@@ -11,6 +11,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.viewmodel.ProjectPageViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
 import org.wycliffeassociates.otter.jvm.app.widgets.*
 import tornadofx.*
@@ -120,34 +121,15 @@ class ProjectPage : View() {
                 }
             }
         }
-
         // Plugin active cover
-        stackpane {
-            style {
-                alignment = Pos.CENTER
-                backgroundColor += Color.BLACK
-                        .deriveColor(0.0, 0.0, 0.0, 0.5)
-            }
-            val icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                    .apply {
-                        style(true) {
-                            fill = Color.WHITE
-                        }
-                        // Update the icon when the context changes
-                        viewModel.contextProperty.onChange { newContext ->
-                            when(newContext) {
-                                ChapterContext.RECORD -> setIcon(MaterialIcon.MIC_NONE)
-                                ChapterContext.EDIT_TAKES -> setIcon(MaterialIcon.EDIT)
-                                else -> {}
-                            }
-                        }
-                    }
-            add(icon)
-            progressindicator {
-                style {
-                    maxWidth = 125.px
-                    maxHeight = 125.px
-                    progressColor = Color.WHITE
+        progressOverlay {
+            addClass(AppStyles.progressOverlay)
+            icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+            viewModel.contextProperty.onChange { newContext ->
+                when (newContext) {
+                    ChapterContext.RECORD -> icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+                    ChapterContext.EDIT_TAKES -> icon = MaterialIconView(MaterialIcon.EDIT, "60px")
+                    else -> { }
                 }
             }
             visibleProperty().bind(viewModel.showPluginActiveProperty)
@@ -214,5 +196,6 @@ class ProjectPage : View() {
         return dataGrid
     }
 }
+
 
 

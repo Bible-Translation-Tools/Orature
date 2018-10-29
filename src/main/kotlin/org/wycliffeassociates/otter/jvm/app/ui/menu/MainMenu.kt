@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.common.domain.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.PluginActions
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 
 class MainMenu : MenuBar() {
@@ -23,11 +24,11 @@ class MainMenu : MenuBar() {
 
     init {
         with(this) {
-            menu("File") {
-                item("Import Resource Container") {
+            menu(messages["file"]) {
+                item(messages["importResource"]) {
                     graphic = MaterialIconView(MaterialIcon.INPUT, "20px")
                     action {
-                        val file = chooseDirectory("Please Select Resource Container to Import")
+                        val file = chooseDirectory(messages["importResourceTip"])
                         file?.let {
                             val importer = ImportResourceContainer(
                                     languageRepo,
@@ -42,7 +43,7 @@ class MainMenu : MenuBar() {
                         }
                     }
                 }
-                menu("Default Audio Plugin") {
+                menu(messages["defaultAudioPlugin"]) {
                     graphic = MaterialIconView(MaterialIcon.MIC, "20px")
                     val pluginToggleGroup = ToggleGroup()
 
