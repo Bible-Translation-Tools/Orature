@@ -27,22 +27,26 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
 
         val upperOS = os.toUpperCase()
 
-        val pathComponents = mutableListOf(appName)
+        val pathComponents = mutableListOf<String>()
+
+        when {
+            upperOS.contains("WIN") -> pathComponents.add(System.getenv("APPDATA"))
+            upperOS.contains("MAC") -> {
+                // use /Users/<user>/Library/Application Support/ for macOS
+                pathComponents.add(System.getProperty("user.home"))
+                pathComponents.add("Library")
+                pathComponents.add("Application Support")
+            }
+            upperOS.contains("LINUX") -> {
+                pathComponents.add(System.getProperty("user.home"))
+                pathComponents.add(".config")
+            }
+        }
+
+        pathComponents.add(appName)
 
         if (appendedPath.isNotEmpty()) pathComponents.add(appendedPath)
 
-        if (upperOS.contains("WIN")) {
-            // on windows use org.wycliffeassociates.otter.jvm.app data
-            pathComponents.add(0, System.getenv("APPDATA"))
-        } else if (upperOS.contains("MAC")) {
-            // use /Users/<user>/Library/Application Support/ for macOS
-            pathComponents.add(0, "Application Support")
-            pathComponents.add(0, "Library")
-            pathComponents.add(0, System.getProperty("user.home"))
-        } else if (upperOS.contains("LINUX")) {
-            pathComponents.add(0, ".config")
-            pathComponents.add(0, System.getProperty("user.home"))
-        }
         // create the directory if it does not exist
         val pathString = pathComponents.joinToString(separator)
         val file = File(pathString)
@@ -50,14 +54,18 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
         return file
     }
 
-    override fun getProjectAudioDirectory(project: Collection, subcollections: List<Collection>): File {
-        // `subcollections` is a list of the collection hierarchy
-        // e.g., [ chapterCollection ]
-        var path = getUserDataDirectory("projects").resolve("${project.slug}_${project.id}")
-        // Build the folder structure
-        subcollections.forEach {
-            path = path.resolve(it.slug)
-        }
+    override fun getProjectAudioDirectory(
+            book: Collection,
+            chapterDirName: String
+    ): File {
+        // <user data directory>/{language slug}/{rc slug}/{book slug}/{%02d, chapter number}/
+        val appendedPath = listOf(
+                book.resourceContainer?.language?.slug ?: "no_language",
+                book.resourceContainer?.identifier ?: "no_rc",
+                book.slug,
+                chapterDirName
+        ).joinToString(separator)
+        val path = getUserDataDirectory(appendedPath)
         path.mkdirs()
         return path
     }
@@ -72,6 +80,6 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
         get() = getAppDataDirectory("users${separator}images")
 
     override val audioPluginDirectory: File
-        get() = getUserDataDirectory("plugins")
+        get() = getAppDataDirectory("plugins")
 
 }

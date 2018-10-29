@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.device.audioplugin.injection
 
 import dagger.Module
 import dagger.Provides
-import org.wycliffeassociates.otter.common.domain.IAudioPluginRegistrar
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.device.audioplugin.AudioPluginRegistrar
 import org.wycliffeassociates.otter.jvm.persistence.injection.PersistenceModule
