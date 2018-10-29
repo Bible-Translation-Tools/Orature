@@ -58,10 +58,13 @@ class ProjectCreationWizard : Wizard() {
 
         add(SelectLanguage::class)
         add(SelectCollection::class)
+
     }
 
     override fun onCancel() {
-        workspace.dock<ProjectHomeView>()
+        creationViewModel.reset()
+        currentPage = pages[0]
+        close()
     }
 
 }
