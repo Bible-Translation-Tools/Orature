@@ -13,7 +13,6 @@ import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStyleshee
 import tornadofx.*
 import java.io.File
 
-
 class MyApp : App(Workspace::class) {
     init {
         importStylesheet(ProjectPageStylesheet::class)
