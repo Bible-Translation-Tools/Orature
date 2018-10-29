@@ -98,6 +98,7 @@ hs_err_pid*
 
 # DS_Store for mac users
 *.DS_Store
+.dsp_cache
 
 # Database files
 *.sqlite

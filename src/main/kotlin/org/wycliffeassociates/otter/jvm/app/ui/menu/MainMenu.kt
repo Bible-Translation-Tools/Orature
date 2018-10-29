@@ -7,11 +7,10 @@ import io.reactivex.schedulers.Schedulers
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.common.domain.ImportResourceContainer
-import org.wycliffeassociates.otter.common.domain.PluginActions
+import org.wycliffeassociates.otter.common.domain.plugins.AccessPlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.*
 import tornadofx.FX.Companion.messages
-
 
 class MainMenu : MenuBar() {
 
@@ -48,8 +47,8 @@ class MainMenu : MenuBar() {
                     val pluginToggleGroup = ToggleGroup()
 
                     // Get the plugins from the use case
-                    val pluginActions = PluginActions(pluginRepository)
-                    pluginActions
+                    val accessPlugins = AccessPlugins(pluginRepository)
+                    accessPlugins
                             .getAllPluginData()
                             .observeOnFx()
                             .doOnSuccess { pluginData ->
@@ -57,7 +56,7 @@ class MainMenu : MenuBar() {
                                     radiomenuitem(it.name) {
                                         userData = it
                                         action {
-                                            pluginActions.setDefaultPluginData(it).subscribe()
+                                            accessPlugins.setDefaultPluginData(it).subscribe()
                                         }
                                         toggleGroup = pluginToggleGroup
                                     }
@@ -65,7 +64,7 @@ class MainMenu : MenuBar() {
                             }
                             // Select the default plugin
                             .flatMapMaybe {
-                                pluginActions.getDefaultPluginData()
+                                accessPlugins.getDefaultPluginData()
                             }
                             .observeOnFx()
                             .subscribe { plugin ->

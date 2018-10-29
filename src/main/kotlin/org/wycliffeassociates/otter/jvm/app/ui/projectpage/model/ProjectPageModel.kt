@@ -6,7 +6,10 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.domain.ProjectPageActions
+import org.wycliffeassociates.otter.common.domain.content.GetContent
+import org.wycliffeassociates.otter.common.domain.content.RecordTake
+import org.wycliffeassociates.otter.common.domain.content.EditTake
+import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ChapterContext
@@ -14,10 +17,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
-import java.time.LocalDate
-
 class ProjectPageModel {
-    val projectRepository = Injector.projectRepo
     val directoryProvider = Injector.directoryProvider
     val collectionRepository = Injector.collectionRepo
     val chunkRepository = Injector.chunkRepository
@@ -56,13 +56,24 @@ class ProjectPageModel {
     // Keep a view context to start transitions
     var workspace: Workspace? = null
 
-    val projectPageActions = ProjectPageActions(
-            directoryProvider,
-            WaveFileCreator(),
+    // Create the use cases we need
+    val getContent = GetContent(
+            collectionRepository,
+            chunkRepository,
+            takeRepository
+    )
+    val launchPlugin = LaunchPlugin(pluginRepository)
+    val recordTake = RecordTake(
             collectionRepository,
             chunkRepository,
             takeRepository,
-            pluginRepository
+            directoryProvider,
+            WaveFileCreator(),
+            launchPlugin
+    )
+    val editTake = EditTake(
+            takeRepository,
+            launchPlugin
     )
 
     init {
@@ -74,8 +85,8 @@ class ProjectPageModel {
         projectTitle = projectProperty.value.titleKey
         children.clear()
         if (projectProperty.value != null) {
-            projectPageActions
-                    .getChildren(projectProperty.value)
+            getContent
+                    .getSubcollections(projectProperty.value)
                     .observeOnFx()
                     .subscribe { childCollections ->
                         // Now we have the children of the project collection
@@ -88,13 +99,13 @@ class ProjectPageModel {
         activeChild = child
         // Remove existing chunks so the user knows they are outdated
         chunks.clear()
-        projectPageActions
+        getContent
                 .getChunks(child)
                 .flatMapObservable {
                     Observable.fromIterable(it)
                 }
                 .flatMapSingle { chunk ->
-                    projectPageActions
+                    getContent
                             .getTakeCount(chunk)
                             .map { Pair(chunk, it > 0) }
                 }
@@ -119,18 +130,10 @@ class ProjectPageModel {
     private fun recordChunk() {
         projectProperty.value?.let { project ->
             showPluginActive = true
-            projectPageActions
-                    .createNewTake(activeChunk, project, activeChild)
-                    .flatMap { take ->
-                        projectPageActions
-                                .launchDefaultPluginForTake(take)
-                                .toSingle { take }
-                    }
-                    .flatMap {take ->
-                        projectPageActions.insertTake(take, activeChunk)
-                    }
+            recordTake
+                    .recordForChunk(project, activeChild, activeChunk)
                     .observeOnFx()
-                    .subscribe { _ ->
+                    .subscribe {
                         showPluginActive = false
                         selectChildCollection(activeChild)
                     }
@@ -145,12 +148,9 @@ class ProjectPageModel {
 
     private fun editChunk() {
         activeChunk.selectedTake?.let { take ->
-            // Update the timestamp
-            take.timestamp = LocalDate.now()
             showPluginActive = true
-            projectPageActions
-                    .launchDefaultPluginForTake(take)
-                    .mergeWith(projectPageActions.updateTake(take))
+            editTake
+                    .edit(take)
                     .observeOnFx()
                     .subscribe {
                         showPluginActive = false
