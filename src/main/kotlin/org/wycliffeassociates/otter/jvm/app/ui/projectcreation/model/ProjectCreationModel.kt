@@ -101,4 +101,10 @@ class ProjectCreationModel {
                 .subscribe()
     }
 
+    fun reset() {
+        collectionList = FXCollections.observableArrayList()
+        collectionStore = ArrayList()
+        selectedLanguageProjectsProperty.value = null
+    }
+
 }

@@ -20,6 +20,7 @@ class SelectLanguage : View() {
         alignment = Pos.CENTER
         style {
             padding = box(100.0.px)
+            setPrefSize(1200.0, 800.0)
         }
         hbox(100.0) {
             anchorpaneConstraints {
@@ -81,6 +82,7 @@ class SelectLanguage : View() {
                 }.required()
             }
         }
+
     }
     init {
         importStylesheet<ProjectWizardStyles>()

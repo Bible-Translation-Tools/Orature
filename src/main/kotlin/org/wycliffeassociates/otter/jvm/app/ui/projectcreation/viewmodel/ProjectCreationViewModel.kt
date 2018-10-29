@@ -16,4 +16,8 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     fun doOnUserSelection(selectedCollection: Collection) = item.doOnUserSelection(selectedCollection, this.workspace)
     fun goBack(wizard: Wizard) = item.goBack(wizard)
     fun getRootSources() = bind(ProjectCreationModel::getRootSources)
+    fun reset() {
+        rollback()
+        item.reset()
+    }
 }
