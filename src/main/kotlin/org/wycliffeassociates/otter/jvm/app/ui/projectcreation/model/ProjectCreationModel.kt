@@ -33,7 +33,7 @@ class ProjectCreationModel {
     var selectedLanguageProjects: List<ProjectCollection> by property()
     var selectedLanguageProjectsProperty = getProperty(ProjectCreationModel::selectedLanguageProjects)
     var showOverlayProperty = SimpleBooleanProperty(false)
-    var creationCompletedProperty = SimpleBooleanProperty(true)
+    var creationCompletedProperty = SimpleBooleanProperty(false)
     init {
         creationUseCase
                 .getAllLanguages()

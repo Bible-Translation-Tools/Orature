@@ -59,6 +59,14 @@ class ProjectCreationWizard : Wizard() {
         add(SelectLanguage::class)
         add(SelectCollection::class)
 
+        creationViewModel.creationCompletedProperty.onChange {
+            if(it) {
+               runLater {
+                   close()
+               }
+            }
+        }
+
     }
 
     override fun onCancel() {

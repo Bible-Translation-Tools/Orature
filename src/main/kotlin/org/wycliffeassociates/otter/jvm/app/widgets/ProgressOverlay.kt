@@ -4,15 +4,16 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.layout.Pane
-import javafx.scene.layout.StackPane
-import javafx.scene.layout.VBox
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
+import javafx.scene.text.TextAlignment
 import tornadofx.*
 
-class ProgressOverlay : StackPane() {
+class ProgressOverlay : BorderPane() {
 
     var iconProperty = SimpleObjectProperty<Node>(VBox())
     var icon by iconProperty
@@ -27,33 +28,43 @@ class ProgressOverlay : StackPane() {
                     .deriveColor(0.0, 0.0, 0.0, 0.5)
         }
 
-        hbox {
-            alignment = Pos.CENTER
-            add(iconProperty.value)
-            iconProperty.onChange {
-                clear()
+        center {
+            vbox {
+                alignment = Pos.CENTER
                 stackpane {
-                    add(iconProperty.value)
+                    alignment = Pos.CENTER
+                    style {
+                        prefWidth = 250.px
+                        prefHeight = 250.px
+                    }
+                    hbox {
+                        alignment = Pos.CENTER
+                        add(iconProperty.value)
+                        iconProperty.onChange {
+                            this.clear()
+                            stackpane {
+                                add(iconProperty.value)
+                            }
+                        }
+                    }
+                    progressindicator {
+                        style {
+                            maxWidth = 125.px
+                            maxHeight = 125.px
+                            progressColor = Color.WHITE
+                        }
+                    }
+                }
+                label(textProperty) {
+                    alignment = Pos.TOP_CENTER
+                    textAlignment = TextAlignment.CENTER
+                    style {
+                        fontWeight = FontWeight.BOLD
+                        fontSize = 18.px
+                    }
                 }
             }
         }
-       // vbox {
-         //   alignment = Pos.CENTER
-           // style {
-             //   prefWidth = 250.px
-               // prefHeight = 250.px
-            //}
-            progressindicator {
-                style {
-                    maxWidth = 125.px
-                    maxHeight = 125.px
-                    progressColor = Color.WHITE
-                }
-            }
-            label(textProperty)
-        //}
-
-
     }
 }
 

@@ -19,14 +19,6 @@ import java.io.File
 class SelectCollection : View() {
     private val viewModel: ProjectCreationViewModel by inject()
 
-    init {
-        viewModel.creationCompletedProperty.onChange {
-            if(it) {
-                close()
-            }
-        }
-    }
-
     override val root = stackpane {
         borderpane {
             center {
@@ -88,27 +80,31 @@ class SelectCollection : View() {
             text = "Please wait while we finish creating your project"
             visibleProperty().bind(viewModel.showOverlayProperty)
         }
-    }
 
-    private fun resourceGraphic(resourceSlug: String): Node {
-        return when (resourceSlug) {
-            SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
-            SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
-            SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
-            SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
-            SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
-            else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
+        closeableWhen {
+            viewModel.creationCompletedProperty
         }
     }
+}
 
-    private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
-        for (project in projectList) {
-            if (project.titleKey == (thisCollection.titleKey)) {
-                return true
-            }
-        }
-        return false
+private fun resourceGraphic(resourceSlug: String): Node {
+    return when (resourceSlug) {
+        SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
+        SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
+        SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
+        SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
+        SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
+        else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
     }
+}
+
+private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
+    for (project in projectList) {
+        if (project.titleKey == (thisCollection.titleKey)) {
+            return true
+        }
+    }
+    return false
 }
 
 
