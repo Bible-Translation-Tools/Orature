@@ -40,7 +40,10 @@ class SelectCollection : View() {
                                 }
                                 graphicContainer.apply {
                                     addClass(AppStyles.wizardCardGraphicsContainer)
-                                    add(resourceGraphic(it.slug))
+                                    add(resourceGraphic(it.slug).apply {
+                                        minWidth = 50.0
+                                        minHeight = 50.0
+                                    })
                                 }
                             }
                         }
@@ -70,12 +73,10 @@ class SelectCollection : View() {
     private fun resourceGraphic(resourceSlug: String): Node {
         return when (resourceSlug) {
             SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
-            SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()), 2.0)
-            SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()), 2.0)
-            SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()), 2.0)
-            SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()), 2.0)
-
-
+            SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
+            SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
+            SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
+            SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
             else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
         }
     }
