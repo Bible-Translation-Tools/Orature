@@ -17,6 +17,9 @@ class TakeRepository(
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
 ) : ITakeRepository {
+    override fun removeNonExistentTakes(): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()

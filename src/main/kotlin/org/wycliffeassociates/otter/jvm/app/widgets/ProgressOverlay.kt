@@ -3,17 +3,22 @@ package org.wycliffeassociates.otter.jvm.app.widgets
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Pane
 import javafx.scene.layout.StackPane
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
 
 class ProgressOverlay : StackPane() {
 
-    var iconProperty = SimpleObjectProperty<Node>(MaterialIconView(MaterialIcon.MIC_NONE, "60px"))
+    var iconProperty = SimpleObjectProperty<Node>(VBox())
     var icon by iconProperty
+
+    var textProperty = SimpleStringProperty()
+    var text by textProperty
 
     init {
         style {
@@ -32,13 +37,21 @@ class ProgressOverlay : StackPane() {
                 }
             }
         }
-        progressindicator {
-            style {
-                maxWidth = 125.px
-                maxHeight = 125.px
-                progressColor = Color.WHITE
+       // vbox {
+         //   alignment = Pos.CENTER
+           // style {
+             //   prefWidth = 250.px
+               // prefHeight = 250.px
+            //}
+            progressindicator {
+                style {
+                    maxWidth = 125.px
+                    maxHeight = 125.px
+                    progressColor = Color.WHITE
+                }
             }
-        }
+            label(textProperty)
+        //}
 
 
     }

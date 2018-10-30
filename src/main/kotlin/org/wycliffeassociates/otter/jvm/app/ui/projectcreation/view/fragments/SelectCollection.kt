@@ -11,69 +11,83 @@ import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
+import org.wycliffeassociates.otter.jvm.app.widgets.progressOverlay
 import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
 import java.io.File
 
 class SelectCollection : View() {
-
     private val viewModel: ProjectCreationViewModel by inject()
-    override val root = borderpane {
-        center {
-            scrollpane {
-                isFitToHeight = true
-                isFitToWidth = true
-                flowpane {
-                    vgap = 16.0
-                    hgap = 16.0
-                    alignment = Pos.CENTER
-                    padding = Insets(10.0)
-                    bindChildren(viewModel.collectionList) {
-                        hbox {
-                            wizardcard {
-                                var projectExists = false
-                                if(it.labelKey == "book") { //only check if project exists when we are at book level
-                                 projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)}
-                                addClass(AppStyles.wizardCard)
-                                text = it.titleKey
-                                buttonText = messages["select"]
-                                cardButton.apply {
-                                    text = messages["select"]
-                                    action {
-                                        viewModel.doOnUserSelection(it)
+
+    init {
+        viewModel.creationCompletedProperty.onChange {
+            if(it) {
+                close()
+            }
+        }
+    }
+
+    override val root = stackpane {
+        borderpane {
+            center {
+                scrollpane {
+                    isFitToHeight = true
+                    isFitToWidth = true
+                    flowpane {
+                        vgap = 16.0
+                        hgap = 16.0
+                        alignment = Pos.CENTER
+                        padding = Insets(10.0)
+                        bindChildren(viewModel.collectionList) {
+                            hbox {
+                                wizardcard {
+                                    var projectExists = false
+                                    if (it.labelKey == "book") { //only check if project exists when we are at book level
+                                        projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)
                                     }
-                                    isDisable = projectExists
-                                }
-                                graphicContainer.apply {
-                                    addClass(AppStyles.wizardCardGraphicsContainer)
-                                    add(resourceGraphic(it.slug).apply {
-                                        minWidth = 50.0
-                                        minHeight = 50.0
-                                    })
+                                    addClass(AppStyles.wizardCard)
+                                    text = it.titleKey
+                                    buttonText = messages["select"]
+                                    cardButton.apply {
+                                        text = messages["select"]
+                                        action {
+                                            viewModel.doOnUserSelection(it)
+                                        }
+                                        isDisable = projectExists
+                                    }
+                                    graphicContainer.apply {
+                                        addClass(AppStyles.wizardCardGraphicsContainer)
+                                        add(resourceGraphic(it.slug))
+                                    }
                                 }
                             }
                         }
-                    }
-                    hbox {
-                        if (viewModel.collectionList.isEmpty()) { //if user selects resource with no children initially
-                            label(messages["noResources"]) {
-                                addClass(AppStyles.noResource)
-                            }
-                        }
-                        viewModel.collectionList.onChange {
-                            clear()
-                            if (viewModel.collectionList.isEmpty()) {
+                        hbox {
+                            if (viewModel.collectionList.isEmpty()) { //if user selects resource with no children initially
                                 label(messages["noResources"]) {
                                     addClass(AppStyles.noResource)
+                                }
+                            }
+                            viewModel.collectionList.onChange {
+                                clear()
+                                if (viewModel.collectionList.isEmpty()) {
+                                    label(messages["noResources"]) {
+                                        addClass(AppStyles.noResource)
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
+            }
         }
 
+        progressOverlay {
+            addClass(AppStyles.progressOverlay)
+            text = "Please wait while we finish creating your project"
+            visibleProperty().bind(viewModel.showOverlayProperty)
+        }
     }
 
     private fun resourceGraphic(resourceSlug: String): Node {
