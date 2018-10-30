@@ -12,6 +12,8 @@ import tornadofx.*
 class AppStyles : Stylesheet() {
 
     companion object {
+        val noProjectsLabel by cssclass()
+        val tryCreatingLabel by cssclass()
         val addProjectButton by cssclass()
         val refreshButton by cssclass()
         val wizardCardGraphicsContainer by cssclass()
@@ -26,6 +28,15 @@ class AppStyles : Stylesheet() {
     }
 
     init {
+        noProjectsLabel {
+            fontSize = 30.px
+            fontWeight = FontWeight.BOLD
+        }
+
+        tryCreatingLabel {
+            fontSize = 20.px
+        }
+
         addProjectButton {
             backgroundRadius += box(25.px)
             borderRadius += box(25.px)
