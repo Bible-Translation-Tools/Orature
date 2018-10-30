@@ -32,8 +32,9 @@ class SelectCollection : View() {
                         hbox {
                             wizardcard {
                                 var projectExists = false
-                                if(it.labelKey == "book") { //only check if project exists when we are at book level
-                                 projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)}
+                                if (it.labelKey == "book") { //only check if project exists when we are at book level
+                                    projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)
+                                }
                                 addClass(AppStyles.wizardCard)
                                 text = it.titleKey
                                 buttonText = messages["select"]
@@ -87,12 +88,7 @@ class SelectCollection : View() {
     }
 
     private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
-        for (project in projectList) {
-            if (project.titleKey == (thisCollection.titleKey)) {
-                return true
-            }
-        }
-        return false
+       return projectList.map {it.titleKey}.contains(thisCollection.titleKey)
     }
 }
 
