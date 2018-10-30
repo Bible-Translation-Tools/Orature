@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain
+package org.wycliffeassociates.otter.common.domain.plugins
 
 import io.reactivex.Completable
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider

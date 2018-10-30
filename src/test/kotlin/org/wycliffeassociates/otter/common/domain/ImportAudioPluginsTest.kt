@@ -6,6 +6,8 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
+import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
