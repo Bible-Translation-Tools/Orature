@@ -131,7 +131,7 @@ class ProjectPageModel {
         projectProperty.value?.let { project ->
             showPluginActive = true
             recordTake
-                    .recordForChunk(project, activeChild, activeChunk)
+                    .record(project, activeChild, activeChunk)
                     .observeOnFx()
                     .subscribe {
                         showPluginActive = false
