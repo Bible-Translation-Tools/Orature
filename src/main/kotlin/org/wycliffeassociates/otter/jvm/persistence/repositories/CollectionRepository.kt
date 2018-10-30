@@ -98,9 +98,7 @@ class CollectionRepository(
         return Completable
                 .fromAction {
                     val entity = collectionDao.fetchById(obj.id)
-                    val newEntity = collectionMapper.mapToEntity(obj)
-                    newEntity.parentFk = entity.parentFk
-                    newEntity.sourceFk = entity.sourceFk
+                    val newEntity = collectionMapper.mapToEntity(obj, entity.parentFk, entity.sourceFk)
                     collectionDao.update(newEntity)
                 }
                 .subscribeOn(Schedulers.io())
