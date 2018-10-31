@@ -24,49 +24,49 @@ class ProjectCreationWizard : Wizard() {
     override val canGoNext = currentPageComplete
 
     init {
-            showStepsHeader = false
-            showSteps = false
-            showHeader = true
-            enableStepLinks = true
-            root.bottom {
-                buttonbar {
-                    padding = Insets(10.0)
+        showStepsHeader = false
+        showSteps = false
+        showHeader = true
+        enableStepLinks = true
+        root.bottom {
+            buttonbar {
+                padding = Insets(10.0)
 
-                    button(messages["back"]) {
-                        addClass(ProjectWizardStyles.wizardButton)
-                        enableWhen(canGoBack)
-                        action {
-                            creationViewModel.goBack(this@ProjectCreationWizard)
-                        }
+                button(messages["back"]) {
+                    addClass(ProjectWizardStyles.wizardButton)
+                    enableWhen(canGoBack)
+                    action {
+                        creationViewModel.goBack(this@ProjectCreationWizard)
                     }
+                }
 
-                    button(messages["next"]) {
-                        addClass(ProjectWizardStyles.wizardButton)
-                        enableWhen(canGoNext.and(hasNext))
-                        action {
-                            next()
-                        }
+                button(messages["next"]) {
+                    addClass(ProjectWizardStyles.wizardButton)
+                    enableWhen(canGoNext.and(hasNext))
+                    action {
+                        next()
                     }
+                }
 
-                    button(messages["cancel"]) {
-                        addClass(ProjectWizardStyles.wizardButton)
-                        action {
-                            onCancel()
-                        }
+                button(messages["cancel"]) {
+                    addClass(ProjectWizardStyles.wizardButton)
+                    action {
+                        onCancel()
                     }
                 }
             }
+        }
 
-            add(SelectLanguage::class)
-            add(SelectCollection::class)
+        add(SelectLanguage::class)
+        add(SelectCollection::class)
 
-            creationViewModel.creationCompletedProperty.onChange {
-                if (it) {
-                    runLater {
-                        close()
-                    }
+        creationViewModel.creationCompletedProperty.onChange {
+            if (it) {
+                runLater {
+                    close()
                 }
             }
+        }
     }
 
     override fun onCancel() {

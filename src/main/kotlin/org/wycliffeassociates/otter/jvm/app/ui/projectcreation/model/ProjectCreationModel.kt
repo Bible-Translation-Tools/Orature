@@ -95,7 +95,6 @@ class ProjectCreationModel {
                 projectWizard.back()
             }
             else -> projectWizard.back()
-
         }
     }
 
