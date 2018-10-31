@@ -44,4 +44,8 @@ private fun initApp() {
             .importAll()
             .andThen(InitializePlugins(Injector.pluginRepository).initDefault())
             .subscribe()
+
+    Injector.takeRepository
+            .removeNonExistentTakes()
+            .subscribe()
 }

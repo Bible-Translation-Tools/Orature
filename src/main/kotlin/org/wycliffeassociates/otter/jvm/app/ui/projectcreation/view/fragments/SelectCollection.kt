@@ -7,6 +7,9 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ProjectCollection
+import javafx.scene.layout.StackPane
+import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.jvm.app.ui.SVGImage
 import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
@@ -47,10 +50,12 @@ class SelectCollection : View() {
                                 }
                                 graphicContainer.apply {
                                     addClass(AppStyles.wizardCardGraphicsContainer)
-                                    add(resourceGraphic(it.slug).apply {
-                                        minWidth = 50.0
-                                        minHeight = 50.0
-                                    })
+                                    val icon = resourceGraphic(it.slug)
+                                    if (icon is SVGImage) {
+                                        icon.maxWidth = 50.0
+                                        icon.maxHeight = 50.0
+                                    }
+                                    add(icon)
                                 }
                             }
                         }

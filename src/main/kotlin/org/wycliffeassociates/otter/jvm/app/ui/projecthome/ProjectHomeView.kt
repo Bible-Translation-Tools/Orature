@@ -11,6 +11,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.jvm.app.ui.SVGImage
 import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
@@ -116,6 +117,7 @@ class ProjectHomeView : View() {
                                     .toURI()
                     )
             ).apply {
+                if (this is SVGImage) preserveAspect = false
                 root.widthProperty().onChange {
                     anchorpaneConstraints { leftAnchor = it / 2.0 }
                 }

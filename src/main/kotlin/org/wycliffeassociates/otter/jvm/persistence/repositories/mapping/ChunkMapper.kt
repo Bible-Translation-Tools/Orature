@@ -16,13 +16,13 @@ class ChunkMapper {
         )
     }
 
-    fun mapToEntity(obj: Chunk): ChunkEntity {
+    fun mapToEntity(obj: Chunk, collectionFk: Int = 0): ChunkEntity {
         return ChunkEntity(
                 obj.id,
                 obj.sort,
                 obj.labelKey,
                 obj.start,
-                0,
+                collectionFk,
                 obj.selectedTake?.id
         )
     }

@@ -5,6 +5,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
@@ -20,6 +21,9 @@ class CollectionRepository(
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
+    override fun deriveProject(source: Collection, language: Language): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     private val collectionDao = database.getCollectionDao()
     private val metadataDao = database.getResourceMetadataDao()
@@ -94,9 +98,7 @@ class CollectionRepository(
         return Completable
                 .fromAction {
                     val entity = collectionDao.fetchById(obj.id)
-                    val newEntity = collectionMapper.mapToEntity(obj)
-                    newEntity.parentFk = entity.parentFk
-                    newEntity.sourceFk = entity.sourceFk
+                    val newEntity = collectionMapper.mapToEntity(obj, entity.parentFk, entity.sourceFk)
                     collectionDao.update(newEntity)
                 }
                 .subscribeOn(Schedulers.io())

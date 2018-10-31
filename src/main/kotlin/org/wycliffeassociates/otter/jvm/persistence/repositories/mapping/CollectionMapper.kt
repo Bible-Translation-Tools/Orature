@@ -17,16 +17,16 @@ class CollectionMapper {
 
     }
 
-    fun mapToEntity(obj: Collection): CollectionEntity {
+    fun mapToEntity(obj: Collection, parentFk: Int? = null, sourceFk: Int? = null): CollectionEntity {
         return CollectionEntity(
                 obj.id,
-                null, // filled in by dao when needed
-                null,
+                parentFk,
+                sourceFk,
                 obj.labelKey,
                 obj.titleKey,
                 obj.slug,
                 obj.sort,
-                metadataFk = obj.resourceContainer?.id ?: null
+                metadataFk = obj.resourceContainer?.id
         )
     }
 
