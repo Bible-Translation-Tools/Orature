@@ -5,6 +5,8 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
+import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ProjectCollection
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.ui.SVGImage
@@ -32,6 +34,10 @@ class SelectCollection : View() {
                     bindChildren(viewModel.collectionList) {
                         hbox {
                             wizardcard {
+                                var projectExists = false
+                                if (it.labelKey == "book") { //only check if project exists when we are at book level
+                                    projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)
+                                }
                                 addClass(AppStyles.wizardCard)
                                 text = it.titleKey
                                 buttonText = messages["select"]
@@ -40,6 +46,7 @@ class SelectCollection : View() {
                                     action {
                                         viewModel.doOnUserSelection(it)
                                     }
+                                    isDisable = projectExists
                                 }
                                 graphicContainer.apply {
                                     addClass(AppStyles.wizardCardGraphicsContainer)
@@ -84,6 +91,10 @@ class SelectCollection : View() {
             SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
             else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
         }
+    }
+
+    private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
+       return projectList.map {it.titleKey}.contains(thisCollection.titleKey)
     }
 }
 

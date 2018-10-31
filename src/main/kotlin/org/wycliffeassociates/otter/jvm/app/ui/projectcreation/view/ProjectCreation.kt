@@ -42,7 +42,6 @@ class ProjectCreationWizard : Wizard() {
                     addClass(ProjectWizardStyles.wizardButton)
                     enableWhen(canGoNext.and(hasNext))
                     action {
-                        creationViewModel.getRootSources()
                         next()
                     }
                 }
@@ -58,10 +57,13 @@ class ProjectCreationWizard : Wizard() {
 
         add(SelectLanguage::class)
         add(SelectCollection::class)
+
     }
 
     override fun onCancel() {
-        workspace.dock<ProjectHomeView>()
+        creationViewModel.reset()
+        currentPage = pages[0]
+        close()
     }
 
 }

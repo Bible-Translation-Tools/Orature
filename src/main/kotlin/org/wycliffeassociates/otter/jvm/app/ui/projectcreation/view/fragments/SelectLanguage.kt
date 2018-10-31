@@ -12,14 +12,14 @@ import org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox.filterabl
 import tornadofx.*
 
 class SelectLanguage : View() {
-    val viewModel: ProjectCreationViewModel by inject()
+    private val viewModel: ProjectCreationViewModel by inject()
 
     override val complete = viewModel.valid(viewModel.sourceLanguage, viewModel.targetLanguage)
-
     override val root = hbox {
         alignment = Pos.CENTER
         style {
             padding = box(100.0.px)
+            setPrefSize(1200.0, 800.0)
         }
         hbox(100.0) {
             anchorpaneConstraints {
@@ -81,8 +81,14 @@ class SelectLanguage : View() {
                 }.required()
             }
         }
+
     }
     init {
         importStylesheet<ProjectWizardStyles>()
+    }
+
+    override fun onSave() {
+        viewModel.commit(viewModel.sourceLanguage, viewModel.targetLanguage)
+        viewModel.getRootSources()
     }
 }

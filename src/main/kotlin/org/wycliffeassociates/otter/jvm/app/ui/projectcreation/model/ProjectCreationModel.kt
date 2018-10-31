@@ -5,9 +5,11 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.model.ProjectCollection
 import org.wycliffeassociates.otter.common.domain.CreateProject
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
 import tornadofx.*
 
 class ProjectCreationModel {
@@ -20,11 +22,15 @@ class ProjectCreationModel {
             Injector.metadataRepo,
             Injector.directoryProvider
     )
-    var sourceLanguage: Language by property()
-    var targetLanguage: Language by property()
+    var sourceLanguage: Language? by property()
+    var targetLanguage: Language? by property()
+    var targetLanguageProperty = getProperty(ProjectCreationModel::targetLanguage)
     var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
-    var collectionStore: ArrayList<List<Collection>> = ArrayList()
+    private var collectionStore: ArrayList<List<Collection>> = ArrayList()
+    private var allProjects = find(ProjectHomeViewModel::class).allProjects
+    var selectedLanguageProjects: List<ProjectCollection> by property()
+    var selectedLanguageProjectsProperty = getProperty(ProjectCreationModel::selectedLanguageProjects)
 
     init {
         creationUseCase
@@ -33,6 +39,12 @@ class ProjectCreationModel {
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
                 }
+
+        targetLanguageProperty.onChange {
+            selectedLanguageProjects = allProjects.filter {
+                it.resourceContainer?.language == targetLanguage
+            }
+        }
     }
 
     fun getRootSources() {
@@ -84,9 +96,19 @@ class ProjectCreationModel {
     }
 
     private fun createProject(selectedCollection: Collection) {
-        creationUseCase
-                .newProject(selectedCollection, targetLanguage)
-                .subscribe()
+        if(targetLanguage != null) {
+            creationUseCase
+                    .newProject(selectedCollection, targetLanguage!!)
+                    .subscribe()
+        }
+    }
+
+    fun reset() {
+        sourceLanguage = null
+        targetLanguage = null
+        collectionList.setAll()
+        collectionStore = ArrayList()
+        selectedLanguageProjectsProperty.value = listOf()
     }
 
 }
