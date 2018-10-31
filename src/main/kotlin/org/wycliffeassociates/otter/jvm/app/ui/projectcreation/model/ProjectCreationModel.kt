@@ -23,8 +23,8 @@ class ProjectCreationModel {
             Injector.metadataRepo,
             Injector.directoryProvider
     )
-    var sourceLanguage: Language by property()
-    var targetLanguage: Language by property()
+    var sourceLanguage: Language? by property()
+    var targetLanguage: Language? by property()
     var targetLanguageProperty = getProperty(ProjectCreationModel::targetLanguage)
     var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
@@ -34,6 +34,7 @@ class ProjectCreationModel {
     var selectedLanguageProjectsProperty = getProperty(ProjectCreationModel::selectedLanguageProjects)
     var showOverlayProperty = SimpleBooleanProperty(false)
     var creationCompletedProperty = SimpleBooleanProperty(false)
+
     init {
         creationUseCase
                 .getAllLanguages()
@@ -64,7 +65,7 @@ class ProjectCreationModel {
     fun doOnUserSelection(selectedCollection: Collection, workspace: Workspace) {
         if (selectedCollection.labelKey == "book") {
             createProject(selectedCollection)
-            workspace.dock<ProjectHomeView>()
+            showOverlayProperty.set(true)
         } else {
             showCollectionChildren(selectedCollection)
         }
@@ -99,20 +100,23 @@ class ProjectCreationModel {
     }
 
     private fun createProject(selectedCollection: Collection) {
-        showOverlayProperty.set(true)
-        creationUseCase
-                .newProject(selectedCollection, targetLanguage)
-                .subscribe{
-                    showOverlayProperty.set(false)
-                    find(ProjectHomeViewModel::class).getAllProjects()
-                    creationCompletedProperty.set(true)
-                }
+        if(targetLanguage != null) {
+            creationUseCase
+                    .newProject(selectedCollection, targetLanguage!!)
+                    .subscribe{
+                        find(ProjectHomeViewModel::class).getAllProjects()
+                        showOverlayProperty.set(false)
+                        creationCompletedProperty.set(true)
+                    }
+        }
     }
 
     fun reset() {
-        collectionList = FXCollections.observableArrayList()
+        sourceLanguage = null
+        targetLanguage = null
+        collectionList.setAll()
         collectionStore = ArrayList()
-        selectedLanguageProjectsProperty.value = null
+        selectedLanguageProjectsProperty.value = listOf()
     }
 
 }

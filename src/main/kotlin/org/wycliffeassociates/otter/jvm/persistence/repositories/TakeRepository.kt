@@ -11,19 +11,17 @@ import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.TakeEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.TakeMapper
+import java.io.File
 
 class TakeRepository(
-        database: AppDatabase,
+        private val database: AppDatabase,
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
 ) : ITakeRepository {
-    override fun removeNonExistentTakes(): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()
-
+    private val chunkDao = database.getChunkDao()
     override fun delete(obj: Take): Completable {
         return Completable
                 .fromAction {
@@ -52,15 +50,14 @@ class TakeRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun insertForChunk(obj: Take, chunk: Chunk): Single<Int> {
+    override fun insertForChunk(take: Take, chunk: Chunk): Single<Int> {
         return Single
                 .fromCallable {
-                    val takeId = takeDao.insert(takeMapper.mapToEntity(obj).apply { contentFk = chunk.id })
+                    val takeId = takeDao.insert(takeMapper.mapToEntity(take, chunk.id))
                     // Insert the markers
-                    obj.markers.forEach {
-                        val entity = markerMapper.mapToEntity(it)
+                    take.markers.forEach {
+                        val entity = markerMapper.mapToEntity(it, takeId)
                         entity.id = 0
-                        entity.takeFk = takeId
                         markerDao.insert(entity)
                     }
                     takeId
@@ -72,8 +69,7 @@ class TakeRepository(
         return Completable
                 .fromAction {
                     val existing = takeDao.fetchById(obj.id)
-                    val entity = takeMapper.mapToEntity(obj)
-                    entity.contentFk = existing.contentFk
+                    val entity = takeMapper.mapToEntity(obj, existing.contentFk)
                     takeDao.update(entity)
 
                     // Delete and replace markers
@@ -84,10 +80,31 @@ class TakeRepository(
                             }
 
                     obj.markers.forEach {
-                        val markerEntity = markerMapper.mapToEntity(it)
+                        val markerEntity = markerMapper.mapToEntity(it, obj.id)
                         markerEntity.id = 0
-                        markerEntity.takeFk = obj.id
                         markerDao.insert(markerEntity)
+                    }
+                }
+                .subscribeOn(Schedulers.io())
+    }
+
+    override fun removeNonExistentTakes(): Completable {
+        return Completable
+                .fromAction {
+                    database.transaction { dsl ->
+                        val takes = takeDao.fetchAll(dsl)
+                        for (take in takes) {
+                            val takeFile = File(take.filepath)
+                            if (!takeFile.exists()) {
+                                // Take does not exist anymore
+                                // Reset the selected take if necessary to satisfy foreign key constraints
+                                val chunk = chunkDao.fetchById(take.contentFk, dsl)
+                                if (chunk.selectedTakeFk == take.id) chunk.selectedTakeFk = null
+                                chunkDao.update(chunk, dsl)
+                                // Remove the take from the database
+                                takeDao.delete(take, dsl)
+                            }
+                        }
                     }
                 }
                 .subscribeOn(Schedulers.io())

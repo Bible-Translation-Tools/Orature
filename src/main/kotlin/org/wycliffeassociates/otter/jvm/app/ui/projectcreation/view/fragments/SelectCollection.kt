@@ -18,7 +18,6 @@ import java.io.File
 
 class SelectCollection : View() {
     private val viewModel: ProjectCreationViewModel by inject()
-
     override val root = stackpane {
         borderpane {
             center {
@@ -77,34 +76,24 @@ class SelectCollection : View() {
 
         progressOverlay {
             addClass(AppStyles.progressOverlay)
-            text = "Please wait while we finish creating your project"
+            text = messages["pleaseWaitCreatingProject"]
             visibleProperty().bind(viewModel.showOverlayProperty)
         }
+    }
 
-        closeableWhen {
-            viewModel.creationCompletedProperty
+
+    private fun resourceGraphic(resourceSlug: String): Node {
+        return when (resourceSlug) {
+            SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
+            SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
+            SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
+            SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
+            SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
+            else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
         }
     }
-}
 
-private fun resourceGraphic(resourceSlug: String): Node {
-    return when (resourceSlug) {
-        SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
-        SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
-        SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
-        SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
-        SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
-        else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
+    private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
+        return projectList.map { it.titleKey }.contains(thisCollection.titleKey)
     }
 }
-
-private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
-    for (project in projectList) {
-        if (project.titleKey == (thisCollection.titleKey)) {
-            return true
-        }
-    }
-    return false
-}
-
-

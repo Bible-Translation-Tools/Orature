@@ -12,10 +12,9 @@ import org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox.filterabl
 import tornadofx.*
 
 class SelectLanguage : View() {
-    val viewModel: ProjectCreationViewModel by inject()
+    private val viewModel: ProjectCreationViewModel by inject()
 
     override val complete = viewModel.valid(viewModel.sourceLanguage, viewModel.targetLanguage)
-
     override val root = hbox {
         alignment = Pos.CENTER
         style {
@@ -86,5 +85,10 @@ class SelectLanguage : View() {
     }
     init {
         importStylesheet<ProjectWizardStyles>()
+    }
+
+    override fun onSave() {
+        viewModel.commit(viewModel.sourceLanguage, viewModel.targetLanguage)
+        viewModel.getRootSources()
     }
 }

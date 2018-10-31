@@ -46,7 +46,10 @@ class ChunkRepository(
     override fun updateSources(chunk: Chunk, sourceChunks: List<Chunk>): Completable {
         return Completable
                 .fromAction {
-                    chunkDao.updateSources(chunkMapper.mapToEntity(chunk), sourceChunks.map(chunkMapper::mapToEntity))
+                    chunkDao.updateSources(
+                            chunkMapper.mapToEntity(chunk),
+                            sourceChunks.map { chunkMapper.mapToEntity(it )}
+                    )
                 }
                 .subscribeOn(Schedulers.io())
     }

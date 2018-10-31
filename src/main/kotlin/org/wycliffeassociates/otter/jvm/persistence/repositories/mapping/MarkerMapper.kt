@@ -13,10 +13,10 @@ class MarkerMapper {
         )
     }
 
-    fun mapToEntity(type: Marker): MarkerEntity {
+    fun mapToEntity(type: Marker, takeFk: Int? = null): MarkerEntity {
         return MarkerEntity(
                 type.id,
-                null,
+                takeFk,
                 type.number,
                 type.position,
                 type.label
