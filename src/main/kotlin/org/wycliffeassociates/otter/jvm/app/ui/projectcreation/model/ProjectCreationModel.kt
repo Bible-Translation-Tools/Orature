@@ -22,8 +22,8 @@ class ProjectCreationModel {
             Injector.metadataRepo,
             Injector.directoryProvider
     )
-    var sourceLanguage: Language by property()
-    var targetLanguage: Language by property()
+    var sourceLanguage: Language? by property()
+    var targetLanguage: Language? by property()
     var targetLanguageProperty = getProperty(ProjectCreationModel::targetLanguage)
     var collectionList: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
@@ -97,14 +97,16 @@ class ProjectCreationModel {
 
     private fun createProject(selectedCollection: Collection) {
         creationUseCase
-                .newProject(selectedCollection, targetLanguage)
+                .newProject(selectedCollection, targetLanguage!!)
                 .subscribe()
     }
 
     fun reset() {
-        collectionList = FXCollections.observableArrayList()
+        sourceLanguage = null
+        targetLanguage = null
+        collectionList.setAll()
         collectionStore = ArrayList()
-        selectedLanguageProjectsProperty.value = null
+        selectedLanguageProjectsProperty.value = listOf()
     }
 
 }
