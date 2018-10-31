@@ -96,9 +96,11 @@ class ProjectCreationModel {
     }
 
     private fun createProject(selectedCollection: Collection) {
-        creationUseCase
-                .newProject(selectedCollection, targetLanguage!!)
-                .subscribe()
+        if(targetLanguage != null) {
+            creationUseCase
+                    .newProject(selectedCollection, targetLanguage!!)
+                    .subscribe()
+        }
     }
 
     fun reset() {
