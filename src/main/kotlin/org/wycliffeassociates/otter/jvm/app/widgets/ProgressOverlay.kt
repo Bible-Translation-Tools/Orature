@@ -60,7 +60,7 @@ class ProgressOverlay : BorderPane() {
                     textAlignment = TextAlignment.CENTER
                     style {
                         fontWeight = FontWeight.BOLD
-                        fontSize = 18.px
+                        fontSize =24.px
                     }
                 }
             }

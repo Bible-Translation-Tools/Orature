@@ -132,7 +132,6 @@ class ProjectPage : View() {
                     else -> { }
                 }
             }
-            text = "TEST"
             visibleProperty().bind(viewModel.showPluginActiveProperty)
         }
     }
