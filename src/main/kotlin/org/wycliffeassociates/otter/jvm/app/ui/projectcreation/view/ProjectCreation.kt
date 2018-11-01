@@ -34,7 +34,7 @@ class ProjectCreationWizard : Wizard() {
 
                 button(messages["back"]) {
                     addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(canGoBack)
+                    enableWhen(canGoBack.and(!creationViewModel.showOverlayProperty))
                     action {
                         creationViewModel.goBack(this@ProjectCreationWizard)
                     }
@@ -50,6 +50,7 @@ class ProjectCreationWizard : Wizard() {
 
                 button(messages["cancel"]) {
                     addClass(ProjectWizardStyles.wizardButton)
+                    enableWhen(!creationViewModel.showOverlayProperty)
                     action {
                         onCancel()
                     }
@@ -63,6 +64,8 @@ class ProjectCreationWizard : Wizard() {
         creationViewModel.creationCompletedProperty.onChange {
             if (it) {
                 runLater {
+                    creationViewModel.reset()
+                    currentPage = pages[0]
                     close()
                 }
             }

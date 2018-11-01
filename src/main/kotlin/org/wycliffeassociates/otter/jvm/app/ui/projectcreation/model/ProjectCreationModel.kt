@@ -65,7 +65,6 @@ class ProjectCreationModel {
     fun doOnUserSelection(selectedCollection: Collection, workspace: Workspace) {
         if (selectedCollection.labelKey == "book") {
             createProject(selectedCollection)
-            showOverlayProperty.set(true)
         } else {
             showCollectionChildren(selectedCollection)
         }
@@ -100,6 +99,7 @@ class ProjectCreationModel {
 
     private fun createProject(selectedCollection: Collection) {
         if(targetLanguage != null) {
+            showOverlayProperty.set(true)
             creationUseCase
                     .newProject(selectedCollection, targetLanguage!!)
                     .subscribe{
@@ -116,6 +116,7 @@ class ProjectCreationModel {
         collectionList.setAll()
         collectionStore = ArrayList()
         selectedLanguageProjectsProperty.value = listOf()
+        creationCompletedProperty.set(false)
     }
 
 }
