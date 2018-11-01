@@ -21,10 +21,6 @@ class CollectionRepository(
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
-    override fun deriveProject(source: Collection, language: Language): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     private val collectionDao = database.getCollectionDao()
     private val metadataDao = database.getResourceMetadataDao()
     private val languageDao = database.getLanguageDao()

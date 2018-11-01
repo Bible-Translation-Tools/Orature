@@ -146,6 +146,8 @@ class AppStyles : Stylesheet() {
             textFill = c(Colors["primary"])
         }
         progressOverlay {
+            fillHeight = true
+            fillWidth = true
             s("*") {
                 fill = Color.WHITE
             }

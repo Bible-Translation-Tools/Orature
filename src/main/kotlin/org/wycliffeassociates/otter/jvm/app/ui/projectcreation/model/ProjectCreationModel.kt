@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.model
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -31,6 +32,8 @@ class ProjectCreationModel {
     private var allProjects = find(ProjectHomeViewModel::class).allProjects
     var selectedLanguageProjects: List<ProjectCollection> by property()
     var selectedLanguageProjectsProperty = getProperty(ProjectCreationModel::selectedLanguageProjects)
+    var showOverlayProperty = SimpleBooleanProperty(false)
+    var creationCompletedProperty = SimpleBooleanProperty(false)
 
     init {
         creationUseCase
@@ -62,7 +65,6 @@ class ProjectCreationModel {
     fun doOnUserSelection(selectedCollection: Collection, workspace: Workspace) {
         if (selectedCollection.labelKey == "book") {
             createProject(selectedCollection)
-            workspace.dock<ProjectHomeView>()
         } else {
             showCollectionChildren(selectedCollection)
         }
@@ -97,9 +99,14 @@ class ProjectCreationModel {
 
     private fun createProject(selectedCollection: Collection) {
         if(targetLanguage != null) {
+            showOverlayProperty.set(true)
             creationUseCase
                     .newProject(selectedCollection, targetLanguage!!)
-                    .subscribe()
+                    .subscribe{
+                        find(ProjectHomeViewModel::class).getAllProjects()
+                        showOverlayProperty.set(false)
+                        creationCompletedProperty.set(true)
+                    }
         }
     }
 
@@ -109,6 +116,7 @@ class ProjectCreationModel {
         collectionList.setAll()
         collectionStore = ArrayList()
         selectedLanguageProjectsProperty.value = listOf()
+        creationCompletedProperty.set(false)
     }
 
 }

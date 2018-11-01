@@ -12,6 +12,9 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     val collectionList = item.collectionList
     val languagesList = item.languages
     val selectedLanguageProjects = item.selectedLanguageProjectsProperty
+    val showOverlayProperty = item.showOverlayProperty
+    val creationCompletedProperty = item.creationCompletedProperty
+
 
     fun doOnUserSelection(selectedCollection: Collection) = item.doOnUserSelection(selectedCollection, this.workspace)
     fun goBack(wizard: Wizard) = item.goBack(wizard)
