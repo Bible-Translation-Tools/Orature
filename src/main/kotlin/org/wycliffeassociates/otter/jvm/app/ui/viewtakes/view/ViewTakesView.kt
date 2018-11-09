@@ -5,8 +5,8 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.animation.Interpolator
 import javafx.animation.Timeline
+import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
-import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -18,10 +18,11 @@ import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel.ViewTakesViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.progressOverlay
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import tornadofx.*
 
 class ViewTakesView : View() {
@@ -163,10 +164,12 @@ class ViewTakesView : View() {
             }
         }
 
-        progressOverlay {
-            addClass(AppStyles.progressOverlay)
-            icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-            visibleProperty().bind(viewModel.showPluginActiveProperty)
+        // Plugin active cover
+        val dialog = progressdialog {
+            graphic = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+        }
+        viewModel.showPluginActiveProperty.onChange {
+            Platform.runLater { if (it == true) dialog.open() else dialog.close() }
         }
     }
 

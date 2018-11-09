@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectpage.view
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.application.Platform
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
@@ -122,17 +123,18 @@ class ProjectPage : View() {
             }
         }
         // Plugin active cover
-        progressOverlay {
-            addClass(AppStyles.progressOverlay)
-            icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+        val dialog = progressdialog {
+            graphic = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
             viewModel.contextProperty.onChange { newContext ->
                 when (newContext) {
-                    ChapterContext.RECORD -> icon = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                    ChapterContext.EDIT_TAKES -> icon = MaterialIconView(MaterialIcon.EDIT, "60px")
+                    ChapterContext.RECORD -> graphic = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+                    ChapterContext.EDIT_TAKES -> graphic = MaterialIconView(MaterialIcon.EDIT, "60px")
                     else -> { }
                 }
             }
-            visibleProperty().bind(viewModel.showPluginActiveProperty)
+        }
+        viewModel.showPluginActiveProperty.onChange {
+            Platform.runLater { if (it == true) dialog.open() else dialog.close() }
         }
     }
 

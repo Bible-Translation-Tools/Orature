@@ -67,7 +67,6 @@ class ProjectCreationModel {
         }
     }
 
-
     private fun showCollectionChildren(parentCollection: Collection) {
         creationUseCase
                 .getResourceChildren(parentCollection)

@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
 import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ProjectPageStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
+import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles
 import tornadofx.*
 import java.io.File
 
@@ -19,6 +20,7 @@ class MyApp : App(Workspace::class) {
         importStylesheet(ViewTakesStylesheet::class)
         importStylesheet(MainMenuStylesheet::class)
         importStylesheet(AppStyles::class)
+        importStylesheet<WidgetsStyles>()
         workspace.header.removeFromParent()
         workspace.add(MainMenu())
     }

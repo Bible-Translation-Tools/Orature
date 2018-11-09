@@ -36,7 +36,6 @@ class WizardCard : VBox() {
 
     init {
         spacing = 10.0
-        importStylesheet<WidgetsStyles>()
         addClass(WidgetsStyles.wizardCard)
 
         graphicContainer = stackpane {

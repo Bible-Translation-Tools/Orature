@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.application.Platform
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -11,7 +12,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
-import org.wycliffeassociates.otter.jvm.app.widgets.progressOverlay
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
 import java.io.File
@@ -74,10 +75,11 @@ class SelectCollection : View() {
             }
         }
 
-        progressOverlay {
-            addClass(AppStyles.progressOverlay)
+        val dialog = progressdialog {
             text = messages["pleaseWaitCreatingProject"]
-            visibleProperty().bind(viewModel.showOverlayProperty)
+        }
+        viewModel.showOverlayProperty.onChange { it: Boolean ->
+            Platform.runLater { if (it) dialog.open() else dialog.close() }
         }
     }
 

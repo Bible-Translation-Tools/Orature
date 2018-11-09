@@ -6,9 +6,12 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.schedulers.Schedulers
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
+import javafx.stage.Modality
+import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.domain.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.plugins.AccessPlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -29,6 +32,12 @@ class MainMenu : MenuBar() {
                     action {
                         val file = chooseDirectory(messages["importResourceTip"])
                         file?.let {
+                            val dialog = progressdialog {
+                                text = "Importing resource container"
+                                graphic = MaterialIconView(MaterialIcon.INPUT, "60px")
+                            }
+                            dialog.openModal(modality = Modality.WINDOW_MODAL, stageStyle = StageStyle.UNDECORATED)
+
                             val importer = ImportResourceContainer(
                                     languageRepo,
                                     metadataRepo,
@@ -36,9 +45,10 @@ class MainMenu : MenuBar() {
                                     chunkRepo,
                                     directoryProvider
                             )
+
                             importer.import(file)
                                     .subscribeOn(Schedulers.io()).observeOnFx()
-                                    .subscribe { println("done")}
+                                    .subscribe { dialog.close() }
                         }
                     }
                 }

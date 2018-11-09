@@ -8,9 +8,6 @@ import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.*
 import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
-import org.wycliffeassociates.otter.jvm.app.widgets.progressOverlay
 import tornadofx.*
 
 class ProjectCreationWizard : Wizard() {
