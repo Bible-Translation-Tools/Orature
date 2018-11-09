@@ -8,12 +8,17 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
+import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 
 class ImportResourceContainerTest {
@@ -90,6 +95,14 @@ class MockContentRepository: IChunkRepository {
 
 
 class MockCollectionRepository: ICollectionRepository {
+    override fun deriveProject(source: Collection, language: Language): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun importResourceContainer(rc: ResourceContainer, tree: Tree, languageSlug: String): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
