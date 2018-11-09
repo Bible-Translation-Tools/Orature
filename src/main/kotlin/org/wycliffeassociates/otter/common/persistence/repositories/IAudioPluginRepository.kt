@@ -9,7 +9,11 @@ import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
 interface IAudioPluginRepository : IRepository<AudioPluginData> {
     fun insert(data: AudioPluginData): Single<Int>
     fun getAllPlugins(): Single<List<IAudioPlugin>>
-    fun setDefaultPluginData(default: AudioPluginData?): Completable
-    fun getDefaultPluginData(): Maybe<AudioPluginData>
-    fun getDefaultPlugin(): Maybe<IAudioPlugin>
+    fun setEditorData(default: AudioPluginData): Completable
+    fun getEditorData(): Maybe<AudioPluginData>
+    fun getEditor(): Maybe<IAudioPlugin>
+    fun setRecorderData(default: AudioPluginData): Completable
+    fun getRecorderData(): Maybe<AudioPluginData>
+    fun getRecorder(): Maybe<IAudioPlugin>
+    fun initSelected(): Completable
 }

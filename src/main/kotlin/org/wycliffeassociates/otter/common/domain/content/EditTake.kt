@@ -13,7 +13,7 @@ class EditTake(
     fun edit(take: Take): Completable {
         take.timestamp = LocalDate.now()
         return launchPlugin
-                .launchDefaultPlugin(take.path)
+                .launchEditor(take.path)
                 .concatWith(takeRepository.update(take))
     }
 }

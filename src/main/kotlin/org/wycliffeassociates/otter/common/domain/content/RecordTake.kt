@@ -123,7 +123,7 @@ class RecordTake(
         return create(project, chapter, chunk)
                 .flatMap { take ->
                     launchPlugin
-                            .launchDefaultPlugin(take.path)
+                            .launchRecorder(take.path)
                             .toSingle { take }
                 }
                 .flatMapCompletable { take ->

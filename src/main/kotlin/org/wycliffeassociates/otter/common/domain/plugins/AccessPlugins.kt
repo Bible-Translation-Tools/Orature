@@ -13,11 +13,23 @@ class AccessPlugins(
         return pluginRepository.getAll()
     }
 
-    fun getDefaultPluginData(): Maybe<AudioPluginData> {
-        return pluginRepository.getDefaultPluginData()
+    fun getEditorData(): Maybe<AudioPluginData> {
+        return pluginRepository.getEditorData()
     }
 
-    fun setDefaultPluginData(default: AudioPluginData?): Completable {
-        return pluginRepository.setDefaultPluginData(default)
+    fun setEditorData(default: AudioPluginData): Completable {
+        return pluginRepository.setEditorData(default)
+    }
+
+    fun getRecorderData(): Maybe<AudioPluginData> {
+        return pluginRepository.getRecorderData()
+    }
+
+    fun setRecorderData(default: AudioPluginData): Completable {
+        return pluginRepository.setRecorderData(default)
+    }
+
+    fun delete(plugin: AudioPluginData): Completable {
+        return pluginRepository.delete(plugin)
     }
 }

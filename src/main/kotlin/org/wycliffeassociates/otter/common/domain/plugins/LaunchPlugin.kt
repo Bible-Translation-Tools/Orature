@@ -7,7 +7,11 @@ import java.io.File
 class LaunchPlugin(
         private val pluginRepository: IAudioPluginRepository
 ) {
-    fun launchDefaultPlugin(file: File): Completable = pluginRepository
-                .getDefaultPlugin()
+    fun launchRecorder(file: File): Completable = pluginRepository
+                .getRecorder()
                 .flatMapCompletable { it.launch(file) }
+
+    fun launchEditor(file: File): Completable = pluginRepository
+            .getEditor()
+            .flatMapCompletable { it.launch(file) }
 }
