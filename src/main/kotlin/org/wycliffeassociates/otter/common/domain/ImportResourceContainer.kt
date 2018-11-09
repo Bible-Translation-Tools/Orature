@@ -1,21 +1,24 @@
 package org.wycliffeassociates.otter.common.domain
 
-import io.reactivex.*
+import io.reactivex.Completable
+import org.wycliffeassociates.otter.common.collections.tree.Tree
+import org.wycliffeassociates.otter.common.collections.tree.TreeNode
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.usfm.ParseUsfm
-import org.wycliffeassociates.otter.common.persistence.repositories.*
-
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import org.wycliffeassociates.resourcecontainer.errors.RCException
-
 import java.io.File
-import java.io.FileFilter
 import java.io.IOException
+
 
 class ImportResourceContainer(
         private val languageRepository: ILanguageRepository,
@@ -24,6 +27,8 @@ class ImportResourceContainer(
         private val chunkRepository: IChunkRepository,
         directoryProvider: IDirectoryProvider
 ) {
+
+    private val rcDirectory = File(directoryProvider.getAppDataDirectory(), "rc")
 
     //TODO: Remove this when Bible, OT, NT are included as part of a resource container
     fun importBible(meta: ResourceMetadata) {
@@ -40,8 +45,6 @@ class ImportResourceContainer(
         collectionRepository.updateParent(ot, bible).subscribe()
         collectionRepository.updateParent(nt, bible).subscribe()
     }
-
-    private val rcDirectory = File(directoryProvider.getAppDataDirectory(), "rc")
 
     fun import(file: File): Completable {
         return when {
@@ -77,22 +80,80 @@ class ImportResourceContainer(
             expandResourceContainerBundle(rc)
         }
 
-        return languageRepository.getBySlug(dc.language.identifier).map {
-            dc.mapToMetadata(container, it)
-        }.flatMap {
-            val resourceMetadata = it
-            //metadata id is going to be needed for the collection insert
-            return@flatMap metadataRepository.insert(resourceMetadata).map {
-                resourceMetadata.id = it
-                return@map resourceMetadata
-            }
-        }.flatMapCompletable {
-            val resourceMetadata = it
-            importBible(resourceMetadata)
-            return@flatMapCompletable Observable.fromIterable(rc.manifest.projects).flatMapCompletable {
-                importProject(it, resourceMetadata).doOnError { println(it) }
+        val tree = constructContainerTree(rc)
+        return collectionRepository.importResourceContainer(rc, tree, dc.language.identifier)
+    }
+
+    private fun constructContainerTree(rc: ResourceContainer): Tree {
+        val root = constructRoot(rc)
+        val nodes = getCategories(rc)
+                .map { category ->
+                    val categoryTree = Tree(category)
+                    categoryTree.addAll(
+                            getProjectsInCategory(rc.manifest, category.slug)
+                                    .map {
+                                        constructProjectTree(rc.dir, it, rc.type())
+                                    }
+                    )
+                    return@map categoryTree
+                }
+                .plus(
+                        getProjectsWithoutCategory(rc.manifest)
+                                .map {
+                                    constructProjectTree(rc.dir, it, rc.type())
+                                }
+                )
+        root.addAll(nodes)
+        return root
+    }
+
+    private fun constructProjectTree(containerDir: File, project: Project, type: String): Tree {
+        val projectDir = File(containerDir, project.path)
+        val files = projectDir.listFiles()
+        val book = Tree(Collection(project.sort, project.identifier, type, project.title, null))
+        val chapters = arrayListOf<Tree>()
+        for (file in files) {
+            val doc = ParseUsfm(file).parse()
+            for (chapter in doc.chapters) {
+                val slug = "${project.identifier}_${chapter.key}"
+                val col = Collection(chapter.key, slug, "chapter", chapter.key.toString(), null)
+                val tree = Tree(col)
+                for (verse in chapter.value.values) {
+                    val con = Chunk(verse.number, "verse", verse.number, verse.number, null)
+                    tree.addChild(TreeNode(con))
+                }
+                chapters.add(tree)
             }
         }
+        book.addAll(chapters)
+        return book
+    }
+
+
+    private fun constructRoot(rc: ResourceContainer): Tree {
+        val dc = rc.manifest.dublinCore
+        val slug = dc.identifier
+        val title = dc.title
+        val label = dc.type
+        val collection = Collection(0, slug, label, title, null)
+        return Tree(collection)
+    }
+
+    private fun getCategories(rc: ResourceContainer): List<Collection> {
+        return arrayListOf(
+                Collection(1, "bible-ot", "bible-ot", "Old Testament", null),
+                Collection(2, "bible-nt", "bible-nt", "New Testament", null)
+        )
+    }
+
+    private fun getProjectsInCategory(manifest: Manifest, categorySlug: String): List<Project> {
+        val projects = manifest.projects.filter { it.categories.contains(categorySlug) }
+        return projects
+    }
+
+    private fun getProjectsWithoutCategory(manifest: Manifest): List<Project> {
+        val projects = manifest.projects.filter { it.categories.isEmpty() }
+        return projects
     }
 
     fun expandResourceContainerBundle(rc: ResourceContainer) {
@@ -131,84 +192,4 @@ class ImportResourceContainer(
         }
         project.path = "./${project.identifier}"
     }
-
-    private fun importProject(p: Project, resourceMetadata: ResourceMetadata): Completable {
-        return Observable.just(p.mapToCollection(resourceMetadata.type, resourceMetadata))
-                .flatMap(
-                        { book ->
-                            collectionRepository.insert(book).toObservable()
-                        },
-                        { book: Collection, result: Int -> Pair(book, result) }
-                )
-                .map {
-                    val book = it.first
-                    book.id = it.second
-                    return@map book
-                }.flatMap(
-                        { book: Collection ->
-                            collectionRepository.getBySlugAndContainer(p.categories.first(), book.resourceContainer!!).toObservable()
-                        },
-                        { book: Collection, result: Collection -> Pair(book, result) }
-                ).flatMapSingle { (book, parent): Pair<Collection, Collection> ->
-                    val book = book
-                    return@flatMapSingle collectionRepository.updateParent(book, parent).toSingle { Pair(book, parent) }
-                }.flatMapCompletable { (book, res) ->
-                    importChapters(p, book, resourceMetadata)
-                }
-
-    }
-
-    private fun importChapters(project: Project, book: Collection, meta: ResourceMetadata): Completable {
-        val root = File(meta.path, project.path)
-        val files = root.listFiles(FileFilter { it.extension == "usfm" })
-        val obs = Observable.fromIterable(files.toList())
-        return obs.map {
-            //parse each chapter usfm file
-            ParseUsfm(it).parse()
-        }.flatMap {
-            //iterate over each chapter
-            Observable.fromIterable(it.chapters.toList())
-        }.flatMapSingle {
-            // create a collection out of each chapter to store in the database
-            val chapter = it
-            val ch = Collection(
-                    chapter.first,
-                    "${meta.language.slug}_${book.slug}_ch${chapter.first}",
-                    "chapter",
-                    chapter.first.toString(),
-                    meta
-            )
-            return@flatMapSingle collectionRepository.insert(ch).map {
-                ch.id = it //set the id allocated by the repository
-                return@map Pair(chapter, ch) //return both the chapter and the collection
-            }
-        }.flatMapSingle {
-            //update parent, pass the chapter/collection further down the chain
-            collectionRepository.updateParent(it.second, book).toSingle { it }
-        }.flatMap {
-            val chapter = it.first
-            val chapterCollection = it.second
-            return@flatMap Observable.fromIterable(chapter.second.values).flatMapSingle {
-                //map each verse to a chunk and insert
-                val vs = Chunk(
-                        it.number,
-                        "verse",
-                        it.number,
-                        it.number,
-                        null
-                )
-                return@flatMapSingle chunkRepository.insertForCollection(vs, chapterCollection)
-            }
-        }.toList().toCompletable()
-    }
-}
-
-private fun Project.mapToCollection(type: String, metadata: ResourceMetadata): Collection {
-    return Collection(
-            sort,
-            identifier,
-            type,
-            title,
-            metadata
-    )
 }

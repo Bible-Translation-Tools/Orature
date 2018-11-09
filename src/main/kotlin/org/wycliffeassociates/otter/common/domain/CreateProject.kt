@@ -1,14 +1,12 @@
 package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
-import java.io.File
-import java.time.LocalDate
+
 
 class CreateProject(
         val languageRepo: ILanguageRepository,
