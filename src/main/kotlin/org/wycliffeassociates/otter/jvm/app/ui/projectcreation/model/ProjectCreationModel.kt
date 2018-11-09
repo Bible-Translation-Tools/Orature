@@ -59,8 +59,8 @@ class ProjectCreationModel {
                 }
     }
 
-    fun doOnUserSelection(selectedCollection: Collection, workspace: Workspace) {
-        if (selectedCollection.labelKey == "book") {
+    fun doOnUserSelection(selectedCollection: Collection) {
+        if (selectedCollection.labelKey == "project") {
             createProject(selectedCollection)
         } else {
             showCollectionChildren(selectedCollection)
