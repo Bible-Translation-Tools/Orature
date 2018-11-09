@@ -139,7 +139,7 @@ class CollectionRepository(
                         identifier = metadata.identifier
                         issued = LocalDate.now().toString()
                         modified = LocalDate.now().toString()
-                        language = org.wycliffeassociates.resourcecontainer.entity.language {
+                        language = language {
                             identifier = targetLanguage.slug
                             direction = targetLanguage.direction
                             title = targetLanguage.name

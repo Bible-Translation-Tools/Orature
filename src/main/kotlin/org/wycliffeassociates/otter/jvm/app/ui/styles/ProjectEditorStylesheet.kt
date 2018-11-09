@@ -1,8 +1,7 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projectpage.view
+package org.wycliffeassociates.otter.jvm.app.ui.styles
 
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
@@ -15,10 +14,10 @@ class ProjectPageStylesheet : Stylesheet() {
         val cardTitleLabel by cssclass("title")
         val selectedTakeLabel by cssclass("selected-take")
 
-        val recordCardButton by cssclass()
+        val recordContext by cssclass()
         val hasTakes by cssclass()
-        val editCardButton by cssclass()
-        val viewCardButton by cssclass()
+        val editContext by cssclass()
+        val viewContext by cssclass()
 
         val recordMenuItem by cssclass()
         val editMenuItem by cssclass()
@@ -32,6 +31,8 @@ class ProjectPageStylesheet : Stylesheet() {
         val listmenu by cssclass("list-menu")
 
         val chapterList by cssclass()
+
+        val chunkLoadingProgress by cssclass()
     }
 
     init {
@@ -45,7 +46,7 @@ class ProjectPageStylesheet : Stylesheet() {
             prefHeight = 100.px
         }
         chunkGridContainer {
-            padding = box(20.px)
+            padding = box(0.px, 20.px)
         }
         datagrid {
             cellWidth = 200.px
@@ -78,19 +79,21 @@ class ProjectPageStylesheet : Stylesheet() {
             }
 
             button {
-                and(recordCardButton, editCardButton, viewCardButton) {
-                    unsafe("-jfx-button-type", raw("RAISED"))
-                    textFill = Color.WHITE
-                    fontSize = 16.px
-                    child("*") {
-                        fill = Color.WHITE
-                    }
-                    maxWidth = Double.MAX_VALUE.px
-                    fillWidth = true
+                unsafe("-jfx-button-type", raw("RAISED"))
+                textFill = Color.WHITE
+                fontSize = 16.px
+                child("*") {
+                    fill = Color.WHITE
                 }
-                and(recordCardButton) {
+                maxWidth = Double.MAX_VALUE.px
+                fillWidth = true
+            }
+            and(recordContext) {
+                button {
                     backgroundColor += c(Colors["primary"])
-                    and(hasTakes) {
+                }
+                and(hasTakes) {
+                    button {
                         backgroundColor += Color.WHITE
                         borderRadius += box(3.px)
                         borderColor += box(c(Colors["primary"]))
@@ -100,13 +103,16 @@ class ProjectPageStylesheet : Stylesheet() {
                         }
                     }
                 }
-                and(viewCardButton) {
+            }
+            and(viewContext) {
+                button {
                     backgroundColor += c(Colors["secondary"])
                 }
-                and(editCardButton) {
+            }
+            and(editContext) {
+                button {
                     backgroundColor += c(Colors["tertiary"])
                 }
-
             }
         }
 
@@ -174,6 +180,10 @@ class ProjectPageStylesheet : Stylesheet() {
                     textFill = Color.WHITE
                 }
             }
+        }
+
+        chunkLoadingProgress {
+            progressColor = c(Colors["primary"])
         }
     }
 }

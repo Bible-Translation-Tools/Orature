@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenu
 import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenuStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ProjectPageStylesheet
+import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectPageStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
 import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles

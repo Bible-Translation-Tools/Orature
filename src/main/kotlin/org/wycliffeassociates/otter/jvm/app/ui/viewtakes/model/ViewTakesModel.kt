@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projectpage.viewmodel.ProjectPageViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -23,9 +23,9 @@ class ViewTakesModel {
     private val takeRepository = Injector.takeRepository
     private val pluginRepository = Injector.pluginRepository
 
-    val chunkProperty = find(ProjectPageViewModel::class).activeChunkProperty
+    val chunkProperty = find(ProjectEditorViewModel::class).activeChunkProperty
     val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
-    var activeChild = find(ProjectPageViewModel::class).activeChildProperty
+    var activeChild = find(ProjectEditorViewModel::class).activeChildProperty
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
 

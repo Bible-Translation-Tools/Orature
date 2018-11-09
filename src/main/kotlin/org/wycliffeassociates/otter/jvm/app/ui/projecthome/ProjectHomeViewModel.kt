@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecthome
 
 import javafx.beans.property.SimpleObjectProperty
-import org.wycliffeassociates.otter.jvm.app.ui.projectpage.view.ProjectPage
+import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view.ProjectEditor
 import tornadofx.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 
@@ -15,6 +15,6 @@ class ProjectHomeViewModel : ViewModel() {
 
     fun openProject(project: Collection) {
         selectedProjectProperty.set(project)
-        workspace.dock<ProjectPage>()
+        workspace.dock<ProjectEditor>()
     }
 }
