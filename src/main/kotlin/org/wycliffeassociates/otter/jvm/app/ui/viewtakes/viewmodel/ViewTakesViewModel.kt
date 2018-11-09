@@ -28,4 +28,6 @@ class ViewTakesViewModel : ViewModel() {
 
     fun recordChunk() = model.recordChunk()
 
+    fun delete(take: Take) = model.delete(take)
+
 }

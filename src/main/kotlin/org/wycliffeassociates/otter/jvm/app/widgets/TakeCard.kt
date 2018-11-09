@@ -7,6 +7,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
@@ -32,6 +33,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
         isVisible = !take.played
     }
 
+    var deleteButton: Button by singleAssign()
 
     init {
         setRightAnchor(badge, 0.0)
@@ -63,24 +65,34 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                         fontSize = 12.px
                     }
                 }
+
             }
-            simpleaudioplayer(take.path, player) {
-                vgrow = Priority.ALWAYS
-                style {
-                    alignment = Pos.CENTER_LEFT
-                }
-                playGraphic = MaterialIconView(MaterialIcon.PLAY_CIRCLE_OUTLINE, "30px")
-                pauseGraphic = MaterialIconView(MaterialIcon.PAUSE_CIRCLE_OUTLINE, "30px")
-                with(playPauseButton) {
-                    style(true) {
-                        backgroundColor += Color.TRANSPARENT
+            hbox {
+                alignment = Pos.CENTER
+                simpleaudioplayer(take.path, player) {
+                    vgrow = Priority.ALWAYS
+                    style {
+                        alignment = Pos.CENTER_LEFT
                     }
-                    addEventHandler(ActionEvent.ACTION) {
-                        if (!take.played) {
-                            take.played = true
-                            badge.isVisible = false
+                    playGraphic = MaterialIconView(MaterialIcon.PLAY_CIRCLE_OUTLINE, "30px")
+                    pauseGraphic = MaterialIconView(MaterialIcon.PAUSE_CIRCLE_OUTLINE, "30px")
+                    with(playPauseButton) {
+                        style(true) {
+                            backgroundColor += Color.TRANSPARENT
                         }
-                        playedProperty.value = take.played
+                        addEventHandler(ActionEvent.ACTION) {
+                            if (!take.played) {
+                                take.played = true
+                                badge.isVisible = false
+                            }
+                            playedProperty.value = take.played
+                        }
+                    }
+                }
+                deleteButton = button {
+                    graphic = MaterialIconView(MaterialIcon.DELETE, "25px")
+                    style {
+                        backgroundColor += Color.TRANSPARENT
                     }
                 }
             }

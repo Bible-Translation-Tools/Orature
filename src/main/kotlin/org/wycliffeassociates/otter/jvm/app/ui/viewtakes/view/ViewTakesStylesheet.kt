@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
 
 import javafx.geometry.Pos
+import javafx.scene.effect.BlurType
+import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import tornadofx.Stylesheet
@@ -11,6 +13,7 @@ class ViewTakesStylesheet : Stylesheet() {
         val backButton by cssclass()
         val acceptButton by cssclass()
         val rejectButton by cssclass()
+        val deleteButton by cssclass()
         val actionButtonsContainer by cssclass()
         val dragTarget by cssclass()
         val takeCard by cssclass()
@@ -19,15 +22,16 @@ class ViewTakesStylesheet : Stylesheet() {
         val placeholder by cssclass()
         val headerContainer by cssclass()
         val takeFlowPane by cssclass()
+        val glow by cssclass()
     }
 
     init {
         takeFlowPane {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(1.px, 0.px, 0.px, 0.px)
-            backgroundColor += Color.WHITE
+            backgroundColor += Color.TRANSPARENT
             spacing = 10.px
-            padding = box(100.px)
+            padding = box(20.px)
         }
         button {
             and(backButton) {
@@ -61,29 +65,42 @@ class ViewTakesStylesheet : Stylesheet() {
                 }
             }
 
+            and(deleteButton) {
+                child("*") {
+                    fill = c(Colors["baseText"])
+                }
+            }
         }
 
         actionButtonsContainer {
             alignment = Pos.CENTER
         }
 
+        glow {
+            effect = DropShadow(5.0, c(Colors["secondary"]))
+        }
+
         dragTarget {
-            backgroundColor += c(Colors["baseBackground"])
+            backgroundColor += c(Colors["base"]).deriveColor(0.0, 1.0, 1.0, 0.8)
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
             maxHeight = 100.px
-            prefWidth = 250.px
+            maxWidth = 250.px
             label {
                 fontSize = 16.px
+            }
+            child("*") {
+                fill = c(Colors["secondary"])
             }
         }
 
         takeCard {
-            borderColor += box(Color.BLACK)
+            borderColor += box(c(Colors["baseText"]))
             borderWidth += box(1.px)
             borderRadius += box(10.px)
             minHeight = 100.px
-
+            minWidth = 250.px
+            maxWidth = 250.px
             badge {
                 backgroundColor += c(Colors["primary"])
             }
@@ -105,7 +122,6 @@ class ViewTakesStylesheet : Stylesheet() {
         headerContainer {
             backgroundColor += Color.WHITE
             padding = box(20.px)
-            minHeight = 200.px
         }
     }
 }

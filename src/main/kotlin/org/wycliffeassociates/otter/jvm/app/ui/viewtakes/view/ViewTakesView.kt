@@ -10,8 +10,10 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.ButtonType
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
+import javafx.scene.paint.Color
 import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
@@ -28,9 +30,7 @@ class ViewTakesView : View() {
     // The currently selected take
     var selectedTakeProperty = SimpleObjectProperty<TakeCard>()
     // Take at the top to compare to an existing selected take
-    var proposedTakeProperty = SimpleObjectProperty<TakeCard>()
     var draggingTakeProperty = SimpleObjectProperty<TakeCard>()
-    var proposedTakeContainer = VBox()
 
     // Drag target to show when drag action in progress
     var dragTarget: StackPane by singleAssign()
@@ -81,100 +81,24 @@ class ViewTakesView : View() {
 
                 // Top items above the alternate takes
                 // Drag target and/or selected take
-                hbox {
+                stackpane {
+                    alignment = Pos.CENTER_LEFT
                     addClass(ViewTakesStylesheet.headerContainer)
-                    // Create the drag target
-                    dragTarget = stackpane {
-                        addClass(ViewTakesStylesheet.dragTarget)
-                        label("Drag Here")
-                        // Initially hide the drag target
-                        hide()
-                        draggingTakeProperty.onChange {
-                            if (it == null) {
-                                // Nothing to drag
-                                hide()
-                            } else {
-                                // Something is being dragged
-                                show()
-                            }
-                        }
-                    }
 
-                    // Container for proposed take and buttons
-                    proposedTakeContainer = vbox(10.0) {
-                        proposedTakeProperty.onChange {
-                            if (it != null) {
-                                add(it)
-                                // Create the accept/reject buttons
-                                var actionButtons = HBox()
-                                actionButtons = hbox(10.0) {
-                                    addClass(ViewTakesStylesheet.actionButtonsContainer)
-                                    button("", MaterialIconView(MaterialIcon.CLOSE)) {
-                                        addClass(ViewTakesStylesheet.rejectButton)
-                                        action {
-                                            actionButtons.removeFromParent()
-                                            // Add back to the flow pane
-                                            takesFlowPane.add(it)
-                                            sortTakesFlowPane()
-                                            proposedTakeProperty.value = null
-                                        }
-                                    }
-                                    button("", MaterialIconView(MaterialIcon.CHECK)) {
-                                        addClass(ViewTakesStylesheet.acceptButton)
-                                        action {
-                                            actionButtons.removeFromParent()
-                                            // Move the old selected take back to the flow pane
-                                            if (selectedTakeProperty.value != null) {
-                                                takesFlowPane.add(selectedTakeProperty.value)
-                                                sortTakesFlowPane()
-                                            }
-                                            // Put in the new selected take
-                                            selectedTakeProperty.value = it
-                                            proposedTakeProperty.value = null
-                                        }
-                                    }
-                                }
-                            } else {
-                                // No more proposed take
-                                clear()
-                            }
-                        }
+                    // drag target glow
+                    stackpane {
+                        addClass(ViewTakesStylesheet.dragTarget, ViewTakesStylesheet.glow)
+                        visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
                     }
-
-                    // Container to show arrows
-                    hbox {
-                        addClass(ViewTakesStylesheet.arrowContainer)
-                        for (i in 0..2) {
-                            val arrow = MaterialIconView(MaterialIcon.PLAY_ARROW, "25px")
-                            arrow.opacity = 0.0
-                            timeline {
-                                keyframe(Duration.seconds(i * 0.5)) {
-                                    keyvalue(arrow.opacityProperty(), 0.0, Interpolator.LINEAR)
-                                }
-                                keyframe(Duration.seconds(0.5 * (i + 1))) {
-                                    keyvalue(arrow.opacityProperty(), 1.0, Interpolator.LINEAR)
-                                }
-                                keyframe(1.5.seconds) {
-                                    keyvalue(arrow.opacityProperty(), 1.0, Interpolator.LINEAR)
-                                }
-                                keyframe(2.seconds) {
-                                    keyvalue(arrow.opacityProperty(), 0.0, Interpolator.LINEAR)
-                                }
-                                cycleCount = Timeline.INDEFINITE
-                            }
-                            add(arrow)
-                        }
-                        hiddenWhen(draggingTakeProperty.isNull.and(proposedTakeProperty.isNull))
-                    }
-
-                    // Does a selected take exist?
                     vbox {
                         // Check if the selected take card has changed
+                        isFillWidth = false
                         val placeholder = vbox {
                             addClass(ViewTakesStylesheet.placeholder)
                             vgrow = Priority.NEVER
                         }
 
+                        // Listen for changes when the drag and drop occurs
                         selectedTakeProperty.onChange {
                             clear()
                             if (it == null) {
@@ -194,6 +118,14 @@ class ViewTakesView : View() {
                                 selectedTakeProperty.value = createTakeCard(it)
                             } else if (it == null) selectedTakeProperty.value = null
                         }
+                    }
+
+                    // Create the drag target
+                    dragTarget = stackpane {
+                        addClass(ViewTakesStylesheet.dragTarget)
+                        add(MaterialIconView(MaterialIcon.ADD, "30px"))
+                        // Initially hide the drag target
+                        visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
                     }
                 }
 
@@ -244,7 +176,7 @@ class ViewTakesView : View() {
 
         // Remove from the flow pane
         val takeCard = target.findParentOfType(TakeCard::class) as TakeCard
-        if (takeCard.parent == takesFlowPane && proposedTakeProperty.value == null) {
+        if (takeCard.parent == takesFlowPane) {
             takeCard.removeFromParent()
             draggingTakeProperty.value = takeCard
         }
@@ -267,8 +199,8 @@ class ViewTakesView : View() {
     }
 
     private fun completeDrag(evt: MouseEvent) {
-        if (dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY)) && proposedTakeProperty.value == null) {
-            proposedTakeProperty.value = draggingTakeProperty.value
+        if (dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY))) {
+            selectedTakeProperty.value = draggingTakeProperty.value
             draggingTakeProperty.value = null
         } else cancelDrag(evt)
     }
@@ -284,9 +216,9 @@ class ViewTakesView : View() {
             // Update the takes displayed
             viewModel.alternateTakes.onChange {
                 clear()
-                it.list.forEach {
+                it.list.forEach { take ->
                     // Add a new take card
-                    add(createTakeCard(it))
+                    add(createTakeCard(take))
                 }
                 sortTakesFlowPane()
             }
@@ -307,6 +239,20 @@ class ViewTakesView : View() {
                     viewModel.setTakePlayed(take)
                 }
             }
+            deleteButton.apply {
+                addClass(ViewTakesStylesheet.deleteButton)
+                action {
+                    error(
+                            messages["deleteTakePrompt"],
+                            messages["cannotBeUndone"],
+                            ButtonType.YES,
+                            ButtonType.NO,
+                            title = messages["deleteTakePrompt"]
+                    ) { button: ButtonType ->
+                        if (button == ButtonType.YES) viewModel.delete(take)
+                    }
+                }
+            }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }
     }
@@ -314,9 +260,5 @@ class ViewTakesView : View() {
     override fun onDock() {
         // Reset the model
         viewModel.reset()
-    }
-
-    override fun onUndock() {
-        proposedTakeProperty.value = null
     }
 }

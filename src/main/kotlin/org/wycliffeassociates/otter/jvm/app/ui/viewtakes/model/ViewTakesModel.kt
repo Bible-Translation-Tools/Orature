@@ -6,7 +6,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Take
-import org.wycliffeassociates.otter.common.domain.ViewTakesActions
+import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
@@ -26,7 +26,6 @@ class ViewTakesModel {
     val chunkProperty = find(ProjectPageViewModel::class).activeChunkProperty
     val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
     var activeChild = find(ProjectPageViewModel::class).activeChildProperty
-
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
 
@@ -48,7 +47,7 @@ class ViewTakesModel {
             LaunchPlugin(pluginRepository)
     )
 
-    private val viewTakesActions = ViewTakesActions(
+    private val accessTakes = AccessTakes(
             Injector.chunkRepository,
             Injector.takeRepository
     )
@@ -58,8 +57,8 @@ class ViewTakesModel {
     }
 
     private fun populateTakes(chunk: Chunk) {
-        viewTakesActions
-                .getTakes(chunk)
+        accessTakes
+                .getByChunk(chunk)
                 .observeOnFx()
                 .subscribe { retrievedTakes ->
                     alternateTakes.clear()
@@ -70,15 +69,21 @@ class ViewTakesModel {
 
     fun acceptTake(take: Take) {
         val chunk = chunkProperty.value
-        viewTakesActions
-                .updateChunkSelectedTake(chunk, take)
+        // Move the old selected take back to the alternates (if not null)
+        if (selectedTakeProperty.value != null) alternateTakes.add(selectedTakeProperty.value)
+        // Do the database action
+        accessTakes
+                .setSelectedTake(chunk, take)
                 .subscribe()
+        // Set the new selected take value
         selectedTakeProperty.value = take
+        // Remove the new selected take from the alternates
+        alternateTakes.remove(take)
     }
 
     fun setTakePlayed(take: Take) {
-        viewTakesActions
-                .updateTakePlayed(take, true)
+        accessTakes
+                .setTakePlayed(take, true)
                 .subscribe()
     }
 
@@ -101,6 +106,23 @@ class ViewTakesModel {
                         populateTakes(chunkProperty.value)
                     }
         }
+    }
+
+    fun delete(take: Take) {
+        if (take == selectedTakeProperty.value) {
+            // Delete the selected take
+            accessTakes
+                    .setSelectedTake(chunkProperty.value, null)
+                    .concatWith(accessTakes.delete(take))
+                    .subscribe()
+            selectedTakeProperty.value = null
+        } else {
+            alternateTakes.remove(take)
+            accessTakes
+                    .delete(take)
+                    .subscribe()
+        }
+
     }
 }
 
