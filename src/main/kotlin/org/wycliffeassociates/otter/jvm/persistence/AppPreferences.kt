@@ -7,6 +7,8 @@ import java.util.prefs.Preferences
 object AppPreferences : IAppPreferences {
     private val CURRENT_USER_ID_KEY = "currentUserId"
     private val APP_INIT_KEY = "appInitialized"
+    private val EDITOR_PLUGIN_ID_KEY = "editorPluginId"
+    private val RECORDER_PLUGIN_ID_KEY = "recorderPluginId"
     private val preferences = Preferences.userNodeForPackage(AppPreferences::class.java)
 
     override fun getCurrentUserId(): Int? {
@@ -25,4 +27,23 @@ object AppPreferences : IAppPreferences {
     override fun setAppInitialized(initialized: Boolean) {
         preferences.putBoolean(APP_INIT_KEY, initialized)
     }
+
+    override fun getEditorPluginId(): Int? {
+        val editorId = preferences.getInt(EDITOR_PLUGIN_ID_KEY, -1)
+        return if (editorId < 0) null else editorId
+    }
+
+    override fun setEditorPluginId(id: Int) {
+        preferences.putInt(EDITOR_PLUGIN_ID_KEY, id)
+    }
+
+    override fun getRecorderPluginId(): Int? {
+        val recorderId = preferences.getInt(RECORDER_PLUGIN_ID_KEY, -1)
+        return if (recorderId < 0) null else recorderId
+    }
+
+    override fun setRecorderPluginId(id: Int) {
+        preferences.putInt(RECORDER_PLUGIN_ID_KEY, id)
+    }
+
 }

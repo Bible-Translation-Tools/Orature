@@ -7,8 +7,8 @@ import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.jvm.persistence.DefaultPluginPreference
 import org.wycliffeassociates.otter.jvm.device.audioplugin.AudioPlugin
+import org.wycliffeassociates.otter.jvm.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.AudioPluginDataMapper
 
@@ -59,24 +59,62 @@ class AudioPluginRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getDefaultPlugin(): Maybe<IAudioPlugin> {
-        return if (DefaultPluginPreference.defaultPlugin == null)
-            Maybe.empty()
-        else
-            Maybe.just(DefaultPluginPreference.defaultPlugin)
-    }
-
-    override fun getDefaultPluginData(): Maybe<AudioPluginData> {
-        return if (DefaultPluginPreference.defaultPluginData == null)
-            Maybe.empty()
-        else
-            Maybe.just(DefaultPluginPreference.defaultPluginData)
-    }
-
-    override fun setDefaultPluginData(default: AudioPluginData?): Completable {
+    override fun initSelected(): Completable {
         return Completable
                 .fromAction {
-                    DefaultPluginPreference.defaultPluginData = default
+                    val allPlugins = audioPluginDao.fetchAll()
+                    if (allPlugins.isNotEmpty()) {
+                        if (AppPreferences.getEditorPluginId() == null) {
+                            AppPreferences.setEditorPluginId(allPlugins.first().id)
+                        }
+                        if (AppPreferences.getRecorderPluginId() == null) {
+                            AppPreferences.setRecorderPluginId(allPlugins.first().id)
+                        }
+                    }
+                }
+    }
+
+    override fun getEditorData(): Maybe<AudioPluginData> {
+        val editorId = AppPreferences.getEditorPluginId()
+        return if (editorId == null)
+            Maybe.empty()
+        else {
+            Maybe.fromCallable {
+                mapper.mapFromEntity(audioPluginDao.fetchById(editorId))
+            }
+                    .onErrorComplete()
+                    .subscribeOn(Schedulers.io())
+        }
+    }
+
+    override fun getEditor(): Maybe<IAudioPlugin> = getEditorData().map { AudioPlugin(it) }
+
+    override fun setEditorData(default: AudioPluginData): Completable {
+        return Completable
+                .fromAction {
+                    if (default.canEdit) AppPreferences.setEditorPluginId(default.id)
+                }
+    }
+
+    override fun getRecorderData(): Maybe<AudioPluginData> {
+        val recorderId = AppPreferences.getRecorderPluginId()
+        return if (recorderId == null)
+            Maybe.empty()
+        else {
+            Maybe.fromCallable {
+                mapper.mapFromEntity(audioPluginDao.fetchById(recorderId))
+            }
+                    .onErrorComplete()
+                    .subscribeOn(Schedulers.io())
+        }
+    }
+
+    override fun getRecorder(): Maybe<IAudioPlugin> = getRecorderData().map { AudioPlugin(it) }
+
+    override fun setRecorderData(default: AudioPluginData): Completable {
+        return Completable
+                .fromAction {
+                    if (default.canRecord) AppPreferences.setRecorderPluginId(default.id)
                 }
     }
 }

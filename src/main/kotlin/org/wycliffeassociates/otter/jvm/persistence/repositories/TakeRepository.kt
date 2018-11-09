@@ -18,7 +18,6 @@ class TakeRepository(
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
 ) : ITakeRepository {
-
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()
     private val chunkDao = database.getChunkDao()
