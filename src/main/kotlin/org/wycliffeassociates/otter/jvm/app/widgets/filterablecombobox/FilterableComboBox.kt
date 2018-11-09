@@ -3,10 +3,13 @@ package org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.control.ComboBox
-import javafx.scene.layout.Pane
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import tornadofx.*
+
 
 /**
  * This class contains a comboBox that is searchable and filterable through a text field.
@@ -37,18 +40,34 @@ class FilterableComboBox<T> : ComboBox<T>() {
             refreshFilterItems()
         }
 
-        /** Select any text in the editor when it is refocused */
         editor.focusedProperty().onChange {
-            if (editor.isFocused && !editor.text.isEmpty()) {
-                editor.selectAll()
+            if (it && items.isNotEmpty()) {
+                // Trigger the dropdown
+                show()
             }
         }
     }
 
     private fun refreshFilterItems() {
-        filterItems.setAll(
-                items.map { FilterableItem(it, filterConverter(it)) }
-        )
+        filterItems.setAll(items.map { FilterableItem(it, filterConverter(it)) })
+        if (editor.isFocused && items.isNotEmpty()) show()
+    }
+
+    override fun show() {
+        super.show()
+        if (editor.text.isEmpty()) {
+            // Change the editor's text so the filter handler thinks it needs to display new suggestions
+            editor.text = "a" 
+            // Fire a fake key released event to trigger the autocomplete handler
+            editor.fireEvent(KeyEvent(
+                    KeyEvent.KEY_RELEASED,
+                    "a", "a",
+                    KeyCode.A,
+                    false, false, false, false
+            ))
+            // Clear the text of the fake 'a'
+            editor.clear()
+        }
     }
 }
 

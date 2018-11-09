@@ -79,7 +79,7 @@ class ProjectWizardStyles : Stylesheet() {
             backgroundColor += Color.TRANSPARENT
             borderColor += box(null, null, c(UIColorsObject.Colors["primary"]), null)
             borderWidth += box(0.px, 0.px, 2.px, 0.px)
-            prefWidth = 250.px
+            minWidth = 350.px
             child(".text-input") {
                 backgroundColor += Color.TRANSPARENT
             }

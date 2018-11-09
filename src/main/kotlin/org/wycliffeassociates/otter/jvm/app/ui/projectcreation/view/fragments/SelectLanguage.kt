@@ -29,34 +29,7 @@ class SelectLanguage : View() {
             setPrefSize(600.0, 200.0)
 
             vbox {
-                button("Target Language", MaterialIconView(MaterialIcon.RECORD_VOICE_OVER, "25px")) {
-                    style {
-                        backgroundColor += Color.TRANSPARENT
-                    }
-                }
-                filterablecombobox(viewModel.targetLanguage, viewModel.languagesList) {
-                    converter = object: StringConverter<Language>() {
-                        override fun fromString(string: String?): Language? {
-                            return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
-                        }
-
-                        override fun toString(language: Language?): String {
-                            return "${language?.name} (${language?.slug})"
-                        }
-                    }
-
-                    filterConverter = { language ->
-                        listOf(language.name, language.anglicizedName, language.slug)
-                    }
-
-                    addClass(ProjectWizardStyles.filterableComboBox)
-                    promptText = "Try typing \"English\" or \"EN\""
-                }.required()
-            }
-
-            vbox {
-
-                button("Source Language", MaterialIconView(MaterialIcon.HEARING, "25px")) {
+                label(messages["sourceLanguage"], MaterialIconView(MaterialIcon.HEARING, "25px")) {
                     style {
                         backgroundColor += Color.TRANSPARENT
                     }
@@ -77,7 +50,33 @@ class SelectLanguage : View() {
                     }
 
                     addClass(ProjectWizardStyles.filterableComboBox)
-                    promptText = "Try typing \"English\" or \"EN\""
+                    promptText = messages["comboBoxPrompt"]
+                }.required()
+            }
+
+            vbox {
+                label(messages["targetLanguage"], MaterialIconView(MaterialIcon.RECORD_VOICE_OVER, "25px")) {
+                    style {
+                        backgroundColor += Color.TRANSPARENT
+                    }
+                }
+                filterablecombobox(viewModel.targetLanguage, viewModel.languagesList) {
+                    converter = object: StringConverter<Language>() {
+                        override fun fromString(string: String?): Language? {
+                            return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
+                        }
+
+                        override fun toString(language: Language?): String {
+                            return "${language?.name} (${language?.slug})"
+                        }
+                    }
+
+                    filterConverter = { language ->
+                        listOf(language.name, language.anglicizedName, language.slug)
+                    }
+
+                    addClass(ProjectWizardStyles.filterableComboBox)
+                    promptText = messages["comboBoxPrompt"]
                 }.required()
             }
         }
