@@ -8,6 +8,8 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper
+install:
+  - git clone --branch=master https://github.com/WycliffeAssociates/kotlin-resource-container.git ../kotlin-resource-container
 jobs:
   include:
     - stage: test
