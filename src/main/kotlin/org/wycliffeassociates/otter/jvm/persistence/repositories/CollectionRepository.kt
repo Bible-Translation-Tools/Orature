@@ -21,30 +21,35 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
+import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.*
+import org.wycliffeassociates.resourcecontainer.entity.Checking
+import org.wycliffeassociates.resourcecontainer.entity.Manifest
+import org.wycliffeassociates.resourcecontainer.entity.dublincore
+import org.wycliffeassociates.resourcecontainer.entity.project
 import java.io.File
 import java.lang.NullPointerException
 import java.time.LocalDate
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
 import kotlin.system.measureTimeMillis
 
+
 class CollectionRepository(
         private val database: AppDatabase,
         private val directoryProvider: IDirectoryProvider,
         private val collectionMapper: CollectionMapper = CollectionMapper(),
+        private val chunkMapper: ChunkMapper = ChunkMapper(),
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper(),
         private val chunkMapper: ChunkMapper = ChunkMapper()
 ) : ICollectionRepository {
-
     private val collectionDao = database.getCollectionDao()
+    private val chunkDao = database.getChunkDao()
     private val metadataDao = database.getResourceMetadataDao()
     private val languageDao = database.getLanguageDao()
-    private val chunkDao = database.getChunkDao()
 
     override fun delete(obj: Collection): Completable {
         return Completable
@@ -364,6 +369,7 @@ class CollectionRepository(
 
         return collectionMapper.mapFromEntity(entity, metadata)
     }
+  
     override fun importResourceContainer(rc: ResourceContainer, rcTree: Tree, languageSlug: String): Completable {
         return Completable.fromAction {
             database.transaction { dsl ->
@@ -371,13 +377,7 @@ class CollectionRepository(
                 val metadata = rc.manifest.dublinCore.mapToMetadata(rc.dir, language)
                 val metadataId = metadataDao.insert(metadataMapper.mapToEntity(metadata), dsl)
 
-                val root = rcTree.value as Collection
-                val rootEntity = collectionMapper.mapToEntity(root)
-                rootEntity.metadataFk = metadataId
-                val rootId = collectionDao.insert(rootEntity, dsl)
-                for (node in rcTree.children) {
-                    importNode(rootId, metadataId, node, dsl)
-                }
+                importCollection(null, metadataId, rcTree, dsl)
             }
         }.subscribeOn(Schedulers.io())
     }
@@ -393,21 +393,25 @@ class CollectionRepository(
         }
     }
 
-    private fun importCollection(parentId: Int, metadataId: Int, node: Tree, dsl: DSLContext){
-        val collection = node.value as Collection
-        val entity = collectionMapper.mapToEntity(collection)
-        entity.parentFk = parentId
-        entity.metadataFk = metadataId
-        val id = collectionDao.insert(entity, dsl)
-        for (node in node.children) {
-            importNode(id, metadataId, node, dsl)
+    private fun importCollection(parentId: Int?, metadataId: Int, node: Tree, dsl: DSLContext){
+        val collection = node.value
+        if (collection is Collection) {
+            val entity = collectionMapper.mapToEntity(collection)
+            entity.parentFk = parentId
+            entity.metadataFk = metadataId
+            val id = collectionDao.insert(entity, dsl)
+            for (node in node.children) {
+                importNode(id, metadataId, node, dsl)
+            }
         }
     }
 
     private fun importChunk(parentId: Int, node: TreeNode, dsl: DSLContext) {
-        val chunk = node.value as Chunk
-        val entity = chunkMapper.mapToEntity(chunk)
-        entity.collectionFk = parentId
-        chunkDao.insert(entity, dsl)
+        val chunk = node.value
+        if (chunk is Chunk) {
+            val entity = chunkMapper.mapToEntity(chunk)
+            entity.collectionFk = parentId
+            chunkDao.insert(entity, dsl)
+        }
     }
 }
