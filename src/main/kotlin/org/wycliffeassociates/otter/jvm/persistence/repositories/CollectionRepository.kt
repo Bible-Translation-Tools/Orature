@@ -26,15 +26,10 @@ import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.Collect
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.Checking
-import org.wycliffeassociates.resourcecontainer.entity.Manifest
-import org.wycliffeassociates.resourcecontainer.entity.dublincore
-import org.wycliffeassociates.resourcecontainer.entity.project
+import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
 import java.lang.NullPointerException
 import java.time.LocalDate
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
-import kotlin.system.measureTimeMillis
 
 
 class CollectionRepository(
@@ -43,8 +38,7 @@ class CollectionRepository(
         private val collectionMapper: CollectionMapper = CollectionMapper(),
         private val chunkMapper: ChunkMapper = ChunkMapper(),
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
-        private val languageMapper: LanguageMapper = LanguageMapper(),
-        private val chunkMapper: ChunkMapper = ChunkMapper()
+        private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
     private val collectionDao = database.getCollectionDao()
     private val chunkDao = database.getChunkDao()
