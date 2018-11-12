@@ -11,5 +11,6 @@ class CreatePlugin(
         return pluginRepository
                 .insert(data)
                 .toCompletable()
+                .concatWith(pluginRepository.initSelected())
     }
 }

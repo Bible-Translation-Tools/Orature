@@ -26,7 +26,6 @@ class ParseUsfm(val file: File) {
     val chapters: UsfmDocument = UsfmDocument()
 
     fun parse(): ParseUsfm {
-        println(file.absolutePath)
         val reader = file.bufferedReader()
         reader.use {
             it.forEachLine {
