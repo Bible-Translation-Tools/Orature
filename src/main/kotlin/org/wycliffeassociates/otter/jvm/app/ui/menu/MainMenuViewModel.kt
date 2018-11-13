@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.menu
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
@@ -26,6 +27,8 @@ class MainMenuViewModel : ViewModel() {
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val showImportDialogProperty = SimpleBooleanProperty(false)
+
     init {
         refreshPlugins()
     }
@@ -38,9 +41,12 @@ class MainMenuViewModel : ViewModel() {
                 chunkRepo,
                 directoryProvider
         )
+        showImportDialogProperty.value = true
         importer.import(dir)
-                .subscribeOn(Schedulers.io()).observeOnFx()
-                .subscribe()
+                .observeOnFx()
+                .subscribe {
+                    showImportDialogProperty.value = false
+                }
     }
 
     fun refreshPlugins() {

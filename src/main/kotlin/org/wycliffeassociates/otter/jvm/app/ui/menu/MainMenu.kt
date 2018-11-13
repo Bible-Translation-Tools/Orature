@@ -2,10 +2,12 @@ package org.wycliffeassociates.otter.jvm.app.ui.menu
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.application.Platform
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view.RemovePluginsView
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -18,6 +20,13 @@ class MainMenu : MenuBar() {
             menu(messages["file"]) {
                 item(messages["importResource"]) {
                     graphic = MaterialIconView(MaterialIcon.INPUT, "20px")
+                    val dialog = progressdialog {
+                        text = messages["importResource"]
+                        graphic = MaterialIconView(MaterialIcon.INPUT, "60px")
+                    }
+                    viewModel.showImportDialogProperty.onChange {
+                        Platform.runLater { if (it) dialog.open() else dialog.close() }
+                    }
                     action {
                         val file = chooseDirectory(messages["importResourceTip"])
                         file?.let {

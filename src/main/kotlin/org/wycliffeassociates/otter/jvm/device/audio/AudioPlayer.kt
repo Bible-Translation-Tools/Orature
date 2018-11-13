@@ -53,7 +53,7 @@ class AudioPlayer: IAudioPlayer {
     }
     
     override fun play() {
-        if (!clip.isRunning) {
+        if (!clip.isRunning && clip.frameLength > 0) {
             clip.start()
             listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
         }

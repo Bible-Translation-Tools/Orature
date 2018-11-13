@@ -64,11 +64,13 @@ class AudioPluginRepository(
                 .fromAction {
                     val allPlugins = audioPluginDao.fetchAll()
                     if (allPlugins.isNotEmpty()) {
-                        if (AppPreferences.getEditorPluginId() == null) {
-                            AppPreferences.setEditorPluginId(allPlugins.first().id)
+                        val editPlugins = allPlugins.filter { it.edit == 1 }
+                        val recordPlugins = allPlugins.filter { it.record == 1 }
+                        if (AppPreferences.getEditorPluginId() == null && editPlugins.isNotEmpty()) {
+                            AppPreferences.setEditorPluginId(editPlugins.first().id)
                         }
-                        if (AppPreferences.getRecorderPluginId() == null) {
-                            AppPreferences.setRecorderPluginId(allPlugins.first().id)
+                        if (AppPreferences.getRecorderPluginId() == null && recordPlugins.isNotEmpty()) {
+                            AppPreferences.setRecorderPluginId(recordPlugins.first().id)
                         }
                     }
                 }

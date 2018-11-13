@@ -38,6 +38,7 @@ class RemovePluginsView : View() {
                     }
                     add(JFXButton().apply {
                         graphic = MaterialIconView(MaterialIcon.DELETE, "20px")
+                        isDisableVisualFocus = true
                         addClass(RemovePluginStyles.deleteButton)
                         action {
                             viewModel.remove(it)

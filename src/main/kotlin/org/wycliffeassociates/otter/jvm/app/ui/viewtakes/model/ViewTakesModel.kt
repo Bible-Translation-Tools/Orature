@@ -122,7 +122,7 @@ class ViewTakesModel {
                     .delete(take)
                     .subscribe()
         }
-
+        if (take.path.exists()) take.path.delete()
     }
 }
 

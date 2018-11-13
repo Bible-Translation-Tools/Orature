@@ -32,6 +32,7 @@ class ChunkCard(initialChunk: Chunk? = null) : VBox() {
             maxHeight = Double.MAX_VALUE
             addClass("selected-take")
         }
+        actionButton.isDisableVisualFocus = true
         add(actionButton)
     }
 }

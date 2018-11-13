@@ -97,6 +97,7 @@ class ProjectHomeView : View() {
 
         add(JFXButton("", MaterialIconView(MaterialIcon.ADD, "25px")).apply {
             addClass(AppStyles.addProjectButton)
+            isDisableVisualFocus = true
             anchorpaneConstraints {
                 bottomAnchor = 25
                 rightAnchor = 25
@@ -137,6 +138,7 @@ class ProjectHomeView : View() {
 
     override fun onDock() {
         viewModel.getAllProjects()
+
     }
 
 }
