@@ -21,6 +21,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
         classpath "edu.sc.seis.gradle:launch4j:2.4.4"
         classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
         classpath 'org.jooq:jooq-codegen:3.11.2'
@@ -31,12 +32,14 @@ buildscript {
 plugins {
     id 'java'
     id 'nu.studer.jooq' version '3.0.1'
+    id 'application'
 }
 
 group 'org.wycliffeassociates'
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'edu.sc.seis.launch4j'
+apply plugin: 'javafx-gradle-plugin'
 
 sourceCompatibility = 1.8
 
@@ -79,7 +82,7 @@ dependencies {
     compile "no.tornado:tornadofx:$tornado_version"
 
     //SVG Loader
-    implementation 'com.github.afester.FranzXaver:Examples:0.1'
+    compile 'com.github.afester.FranzXaver:Examples:0.1'
 
     //JFoenix
     compile "com.jfoenix:jfoenix:$jfoenix_version"
@@ -118,9 +121,34 @@ dependencies {
     testCompile 'org.powermock:powermock-api-mockito2:2.+'
     
     //WA Libraries
-    implementation 'org.wycliffeassociates:8woc2018-common'
-    implementation 'org.wycliffeassociates:kotlin-resource-container'
-    implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+    compile 'org.wycliffeassociates:8woc2018-common'
+    compile 'org.wycliffeassociates:kotlin-resource-container'
+    compile 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+}
+
+//Application plugin setting
+mainClassName = "org.wycliffeassociates.otter.jvm.app.MainKt"
+
+//tell gradle what to put in the jar
+jar {
+    manifest {
+        attributes(
+        'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+        'Main-Class': mainClassName
+        )
+    }
+    from (configurations.compile.collect { zipTree(it) }) {
+        exclude "META-INF/MANIFEST.MF"
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+}
+
+jfx {
+    mainClass = "org.wycliffeassociates.otter.jvm.app.MainKt"
+    // minimal requirement for jfxNative-task
+    vendor = 'org.wycliffeassociates'
 }
 
 //////////////////////////////////// Custom Tasks ///////////////////////////////////////////
