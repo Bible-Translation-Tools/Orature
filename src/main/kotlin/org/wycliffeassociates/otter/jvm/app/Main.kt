@@ -35,9 +35,7 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    ImportLanguages(
-            File(ClassLoader.getSystemResource("langnames.json").toURI()),
-            Injector.languageRepo)
+    ImportLanguages(ClassLoader.getSystemResourceAsStream("langnames.json"), Injector.languageRepo)
             .import()
             .onErrorComplete()
             .subscribe()

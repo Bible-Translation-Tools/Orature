@@ -6,13 +6,10 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.*
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.jvm.app.ui.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.SVGImage
-import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
 import tornadofx.*
@@ -110,12 +107,9 @@ class ProjectHomeView : View() {
 
     init {
         with(root) {
-            add(imageLoader(
-                    File(
-                            ClassLoader
-                                    .getSystemResource("assets${File.separator}project_home_arrow.svg")
-                                    .toURI()
-                    )
+            add(ImageLoader.load(
+                    ClassLoader.getSystemResourceAsStream("assets${File.separator}project_home_arrow.svg"),
+                    ImageLoader.Format.SVG
             ).apply {
                 if (this is SVGImage) preserveAspect = false
                 root.widthProperty().onChange {
