@@ -34,7 +34,7 @@ class SelectCollection : View() {
                             hbox {
                                 wizardcard {
                                     var projectExists = false
-                                    if (it.labelKey == "book") { //only check if project exists when we are at book level
+                                    if (it.labelKey == "project") { //only check if project exists when we are at project level
                                         projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)
                                     }
                                     addClass(AppStyles.wizardCard)

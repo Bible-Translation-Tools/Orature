@@ -16,7 +16,7 @@ class ProjectCreationViewModel : ItemViewModel<ProjectCreationModel>(ProjectCrea
     val creationCompletedProperty = item.creationCompletedProperty
 
 
-    fun doOnUserSelection(selectedCollection: Collection) = item.doOnUserSelection(selectedCollection, this.workspace)
+    fun doOnUserSelection(selectedCollection: Collection) = item.doOnUserSelection(selectedCollection)
     fun goBack(wizard: Wizard) = item.goBack(wizard)
     fun getRootSources() = bind(ProjectCreationModel::getRootSources)
     fun reset() {
