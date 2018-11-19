@@ -4,7 +4,6 @@ import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXCheckBox
 import com.jfoenix.controls.JFXTextField
 import javafx.geometry.Pos
-import org.wycliffeassociates.otter.jvm.app.ui.addplugin.AddPluginStyles
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import tornadofx.*
 

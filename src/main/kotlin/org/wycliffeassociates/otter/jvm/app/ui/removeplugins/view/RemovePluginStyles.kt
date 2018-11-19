@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.removeplugins
+package org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view
 
 import javafx.geometry.Pos
 import javafx.scene.paint.Color

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.addplugin
+package org.wycliffeassociates.otter.jvm.app.ui.addplugin.view
 
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors

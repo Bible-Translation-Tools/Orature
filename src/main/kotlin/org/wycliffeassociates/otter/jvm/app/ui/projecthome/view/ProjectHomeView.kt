@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projecthome
+package org.wycliffeassociates.otter.jvm.app.ui.projecthome.view
 
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
@@ -6,13 +6,11 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.*
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.jvm.app.ui.SVGImage
-import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
+import org.wycliffeassociates.otter.jvm.app.images.SVGImage
+import org.wycliffeassociates.otter.jvm.app.images.imageLoader
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
 import tornadofx.*
@@ -20,8 +18,8 @@ import java.io.File
 
 class ProjectHomeView : View() {
 
-    val viewModel: ProjectHomeViewModel by inject()
-    val noProjectsProperty: ReadOnlyBooleanProperty
+    private val viewModel: ProjectHomeViewModel by inject()
+    private val noProjectsProperty: ReadOnlyBooleanProperty
 
     init {
         importStylesheet<AppStyles>()
@@ -29,7 +27,7 @@ class ProjectHomeView : View() {
         // https://stackoverflow.com/questions/21612969/is-it-possible-to-bind-the-non-empty-state-of-
         // an-observablelist-inside-an-object
         val listProperty = SimpleListProperty<Collection>()
-        listProperty.bind(SimpleObjectProperty(viewModel.allProjects))
+        listProperty.bind(SimpleObjectProperty(viewModel.projects))
         noProjectsProperty = listProperty.emptyProperty()
     }
 
@@ -52,7 +50,7 @@ class ProjectHomeView : View() {
                 alignment = Pos.TOP_LEFT
                 // Add larger padding on bottom to keep FAB from blocking last row cards
                 padding = Insets(10.0, 10.0, 95.0, 10.0)
-                bindChildren(viewModel.allProjects) {
+                bindChildren(viewModel.projects) {
                     hbox {
                         projectcard(it) {
                             addClass(AppStyles.projectCard)
@@ -106,7 +104,6 @@ class ProjectHomeView : View() {
                 viewModel.createProject()
             }
         })
-
     }
 
     init {
@@ -137,8 +134,7 @@ class ProjectHomeView : View() {
     }
 
     override fun onDock() {
-        viewModel.getAllProjects()
-
+        viewModel.loadProjects()
     }
 
 }

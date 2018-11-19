@@ -1,25 +1,16 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.collections.FXCollections
 import javafx.geometry.Insets
-import javafx.scene.Node
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.*
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
+import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.SelectCollection
+import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import tornadofx.*
 
 class ProjectCreationWizard : Wizard() {
 
-    val creationViewModel: ProjectCreationViewModel by inject()
-
-    val steps = FXCollections.observableArrayList<Node>(
-            MaterialIconView(MaterialIcon.RECORD_VOICE_OVER, "16px"),
-            MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "16px")
-    )
+    private val creationViewModel: ProjectCreationViewModel by inject()
     override val canGoNext = currentPageComplete
-
     init {
         showStepsHeader = false
         showSteps = false
@@ -74,5 +65,4 @@ class ProjectCreationWizard : Wizard() {
         currentPage = pages[0]
         close()
     }
-
 }

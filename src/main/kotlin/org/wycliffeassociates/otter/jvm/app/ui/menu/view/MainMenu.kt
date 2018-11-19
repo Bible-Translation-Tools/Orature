@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.menu
+package org.wycliffeassociates.otter.jvm.app.ui.menu.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -6,6 +6,7 @@ import javafx.application.Platform
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
+import org.wycliffeassociates.otter.jvm.app.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view.RemovePluginsView
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import tornadofx.*

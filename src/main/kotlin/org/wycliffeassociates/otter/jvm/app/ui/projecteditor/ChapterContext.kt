@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view
+package org.wycliffeassociates.otter.jvm.app.ui.projecteditor
 
 enum class ChapterContext {
     RECORD,

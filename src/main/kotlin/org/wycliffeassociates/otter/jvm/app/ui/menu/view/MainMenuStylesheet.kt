@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.menu
+package org.wycliffeassociates.otter.jvm.app.ui.menu.view
 
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors

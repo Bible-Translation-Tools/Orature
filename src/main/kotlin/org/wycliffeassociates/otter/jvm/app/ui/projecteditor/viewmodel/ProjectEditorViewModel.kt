@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -8,13 +9,15 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.domain.collections.GetCollections
+import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.GetContent
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view.ChapterContext
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
@@ -60,11 +63,9 @@ class ProjectEditorViewModel: ViewModel() {
     val loadingProperty = getProperty(ProjectEditorViewModel::loading)
 
     // Create the use cases we need (the model layer)
-    private val getContent = GetContent(
-            collectionRepository,
-            chunkRepository,
-            takeRepository
-    )
+    private val accessTakes = AccessTakes(chunkRepository, takeRepository)
+    private val getContent = GetContent(chunkRepository)
+    private val getCollections = GetCollections(collectionRepository)
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
             collectionRepository,
@@ -74,14 +75,10 @@ class ProjectEditorViewModel: ViewModel() {
             WaveFileCreator(),
             launchPlugin
     )
-    private val editTake = EditTake(
-            takeRepository,
-            launchPlugin
-    )
+    private val editTake = EditTake(takeRepository, launchPlugin)
 
     init {
-        setTitleAndChapters()
-        projectProperty.onChange { setTitleAndChapters() }
+        projectProperty.toObservable().subscribe { setTitleAndChapters() }
     }
 
     private fun setTitleAndChapters() {
@@ -89,8 +86,8 @@ class ProjectEditorViewModel: ViewModel() {
         children.clear()
         chunks.clear()
         if (projectProperty.value != null) {
-            getContent
-                    .getSubcollections(projectProperty.value)
+            getCollections
+                    .subcollectionsOf(projectProperty.value)
                     .observeOnFx()
                     .subscribe { childCollections ->
                         // Now we have the children of the project collection
@@ -114,7 +111,7 @@ class ProjectEditorViewModel: ViewModel() {
                     Observable.fromIterable(it)
                 }
                 .flatMapSingle { chunk ->
-                    getContent
+                    accessTakes
                             .getTakeCount(chunk)
                             .map { Pair(chunk.toProperty(), SimpleBooleanProperty(it > 0)) }
                 }

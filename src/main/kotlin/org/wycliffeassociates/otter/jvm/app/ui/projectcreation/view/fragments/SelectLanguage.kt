@@ -11,10 +11,14 @@ import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox.filterablecombobox
 import tornadofx.*
 
-class SelectLanguage : View() {
+class SelectLanguage : Fragment() {
     private val viewModel: ProjectCreationViewModel by inject()
 
-    override val complete = viewModel.valid(viewModel.sourceLanguage, viewModel.targetLanguage)
+    override val complete = viewModel.valid(
+            viewModel.sourceLanguageProperty,
+            viewModel.targetLanguageProperty
+    )
+
     override val root = hbox {
         alignment = Pos.CENTER
         style {
@@ -34,7 +38,7 @@ class SelectLanguage : View() {
                         backgroundColor += Color.TRANSPARENT
                     }
                 }
-                filterablecombobox(viewModel.sourceLanguage, viewModel.languagesList) {
+                filterablecombobox(viewModel.sourceLanguageProperty, viewModel.languages) {
                     converter = object: StringConverter<Language>() {
                         override fun fromString(string: String?): Language? {
                             return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
@@ -60,7 +64,7 @@ class SelectLanguage : View() {
                         backgroundColor += Color.TRANSPARENT
                     }
                 }
-                filterablecombobox(viewModel.targetLanguage, viewModel.languagesList) {
+                filterablecombobox(viewModel.targetLanguageProperty, viewModel.languages) {
                     converter = object: StringConverter<Language>() {
                         override fun fromString(string: String?): Language? {
                             return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
@@ -87,7 +91,7 @@ class SelectLanguage : View() {
     }
 
     override fun onSave() {
-        viewModel.commit(viewModel.sourceLanguage, viewModel.targetLanguage)
+        viewModel.commit(viewModel.sourceLanguageProperty, viewModel.targetLanguageProperty)
         viewModel.getRootSources()
     }
 }

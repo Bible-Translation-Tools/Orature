@@ -8,8 +8,8 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ProjectCollection
-import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
+import org.wycliffeassociates.otter.jvm.app.images.imageLoader
+import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
@@ -17,7 +17,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
 import java.io.File
 
-class SelectCollection : View() {
+class SelectCollection : Fragment() {
     private val viewModel: ProjectCreationViewModel by inject()
     override val root = stackpane {
         borderpane {
@@ -30,12 +30,12 @@ class SelectCollection : View() {
                         hgap = 16.0
                         alignment = Pos.CENTER
                         padding = Insets(10.0)
-                        bindChildren(viewModel.collectionList) {
+                        bindChildren(viewModel.collections) {
                             hbox {
                                 wizardcard {
                                     var projectExists = false
                                     if (it.labelKey == "project") { //only check if project exists when we are at project level
-                                        projectExists = doesProjectExist(viewModel.selectedLanguageProjects.value, it)
+                                        projectExists = doesProjectExist(viewModel.existingProjects, it)
                                     }
                                     addClass(AppStyles.wizardCard)
                                     text = it.titleKey
@@ -55,14 +55,14 @@ class SelectCollection : View() {
                             }
                         }
                         hbox {
-                            if (viewModel.collectionList.isEmpty()) { //if user selects resource with no children initially
+                            if (viewModel.collections.isEmpty()) { //if user selects resource with no children initially
                                 label(messages["noResources"]) {
                                     addClass(AppStyles.noResource)
                                 }
                             }
-                            viewModel.collectionList.onChange {
+                            viewModel.collections.onChange {
                                 clear()
-                                if (viewModel.collectionList.isEmpty()) {
+                                if (viewModel.collections.isEmpty()) {
                                     label(messages["noResources"]) {
                                         addClass(AppStyles.noResource)
                                     }

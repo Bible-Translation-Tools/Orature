@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view
 
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -13,16 +14,17 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.jvm.app.extensions.listen
+import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectPageStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
-import org.wycliffeassociates.otter.jvm.app.widgets.*
+import org.wycliffeassociates.otter.jvm.app.widgets.ChunkCard
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import tornadofx.*
 
 class ProjectEditor : View() {
     private val viewModel: ProjectEditorViewModel by inject()
-    private var childrenList = ListView<Collection>()
+    private var childrenList by singleAssign<ListView<Collection>>()
 
     override fun onDock() {
         super.onDock()
@@ -94,7 +96,7 @@ class ProjectEditor : View() {
                             chunkCard.bindClass(cardContextCssRuleProperty())
                             chunkCard.bindClass(disabledCssRuleProperty(item.second))
                             chunkCard.bindClass(hasTakesCssRuleProperty(item.second))
-                            viewModel.contextProperty.listen { context ->
+                            viewModel.contextProperty.toObservable().subscribe { context ->
                                 chunkCard.actionButton.isVisible =
                                         (item.second.value == true || context == ChapterContext.RECORD)
                                 when (context ?: ChapterContext.RECORD) {
@@ -175,7 +177,7 @@ class ProjectEditor : View() {
 
     private fun cardContextCssRuleProperty(): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
-        viewModel.contextProperty.listen {
+        viewModel.contextProperty.toObservable().subscribe {
             cssRuleProperty.value = when (it ?: ChapterContext.RECORD) {
                 ChapterContext.RECORD -> ProjectPageStylesheet.recordContext
                 ChapterContext.VIEW_TAKES -> ProjectPageStylesheet.viewContext
@@ -189,7 +191,7 @@ class ProjectEditor : View() {
             hasTakesProperty: SimpleBooleanProperty
     ): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
-        hasTakesProperty.listen {
+        hasTakesProperty.toObservable().subscribe {
             cssRuleProperty.value = if (it == true) ProjectPageStylesheet.hasTakes else null
         }
         return cssRuleProperty
@@ -199,7 +201,7 @@ class ProjectEditor : View() {
             hasTakesProperty: SimpleBooleanProperty
     ): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
-        viewModel.contextProperty.listen {
+        viewModel.contextProperty.toObservable().subscribe {
             cssRuleProperty.value = when (it ?: ChapterContext.RECORD) {
                 ChapterContext.RECORD -> null
                 ChapterContext.VIEW_TAKES, ChapterContext.EDIT_TAKES -> {

@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.app
 
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
-import org.wycliffeassociates.otter.common.domain.ImportLanguages
+import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.InitializePlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenu
-import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenuStylesheet
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
+import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
+import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenuStylesheet
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.view.ProjectHomeView
 import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectPageStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
