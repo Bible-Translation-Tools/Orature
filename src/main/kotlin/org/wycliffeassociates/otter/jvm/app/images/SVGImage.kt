@@ -11,6 +11,7 @@ class SVGImage(svgGroup: Group) : StackPane() {
     private val svgAspectRatio = svgGroup.boundsInLocal.width / svgGroup.boundsInLocal.height
     var preserveAspect: Boolean by property(true)
     fun preserveAspectProperty() = getProperty(SVGImage::preserveAspect)
+
     init {
         // Setup bindings so svg scales to fit Node
         svgGroup.scaleXProperty().bind(
@@ -28,7 +29,7 @@ class SVGImage(svgGroup: Group) : StackPane() {
                     var scaleY = (it?.toDouble() ?: 0.0) / svgGroup.boundsInLocal.height
                     if (preserveAspect && width / height < svgAspectRatio) {
                         // Taller than it should be
-                        scaleY =  (width / svgAspectRatio) / svgGroup.boundsInLocal.height
+                        scaleY = (width / svgAspectRatio) / svgGroup.boundsInLocal.height
                     }
                     return@doubleBinding scaleY
                 }
