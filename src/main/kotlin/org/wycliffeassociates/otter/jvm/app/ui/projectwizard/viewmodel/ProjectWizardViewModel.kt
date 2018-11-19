@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel
+package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHome
 import tornadofx.ViewModel
 import tornadofx.Wizard
 
-class ProjectCreationViewModel : ViewModel() {
+class ProjectWizardViewModel : ViewModel() {
     private val languageRepo = Injector.languageRepo
     private val collectionRepo = Injector.collectionRepo
 
@@ -29,7 +29,7 @@ class ProjectCreationViewModel : ViewModel() {
 
     private val projects = FXCollections.observableArrayList<Collection>()
 
-    val existingProjects: ObservableList<Collection> = FXCollections.observableArrayList()
+    private val existingProjects: ObservableList<Collection> = FXCollections.observableArrayList()
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
@@ -79,18 +79,18 @@ class ProjectCreationViewModel : ViewModel() {
         getCollections
                 .subcollectionsOf(collection)
                 .observeOnFx()
-                .doOnSuccess {
-                    collectionHierarchy.add(it)
+                .doOnSuccess { subcollections ->
+                    collectionHierarchy.add(subcollections)
                     collections.setAll(collectionHierarchy.last().sortedBy { it.sort })
                 }
                 .subscribe()
     }
 
     private fun createProject(selectedCollection: Collection) {
-        if (targetLanguageProperty.value != null) {
+        targetLanguageProperty.value?.let { language ->
             showOverlayProperty.value = true
             creationUseCase
-                    .create(selectedCollection, targetLanguageProperty.value!!)
+                    .create(selectedCollection, language)
                     .subscribe {
                         tornadofx.find(ProjectHomeViewModel::class).loadProjects()
                         showOverlayProperty.value = false
@@ -111,6 +111,10 @@ class ProjectCreationViewModel : ViewModel() {
             }
             else -> projectWizard.back()
         }
+    }
+
+    fun doesProjectExist(project: Collection): Boolean {
+        return existingProjects.map { project.titleKey }.contains(project.titleKey)
     }
 
     fun reset() {

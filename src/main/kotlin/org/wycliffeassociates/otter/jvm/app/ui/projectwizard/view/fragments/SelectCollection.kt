@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
+import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
@@ -34,9 +35,9 @@ class SelectCollection : Fragment() {
                                 wizardcard {
                                     var projectExists = false
                                     if (it.labelKey == "project") { //only check if project exists when we are at project level
-                                        projectExists = doesProjectExist(viewModel.existingProjects, it)
+                                        projectExists = viewModel.doesProjectExist(it)
                                     }
-                                    addClass(AppStyles.wizardCard)
+                                    addClass(ProjectWizardStyles.wizardCard)
                                     text = it.titleKey
                                     buttonText = messages["select"]
                                     cardButton.apply {
@@ -47,7 +48,7 @@ class SelectCollection : Fragment() {
                                         isDisable = projectExists
                                     }
                                     graphicContainer.apply {
-                                        addClass(AppStyles.wizardCardGraphicsContainer)
+                                        addClass(ProjectWizardStyles.wizardCardGraphicsContainer)
                                         add(resourceGraphic(it.slug))
                                     }
                                 }
@@ -56,14 +57,14 @@ class SelectCollection : Fragment() {
                         hbox {
                             if (viewModel.collections.isEmpty()) { //if user selects resource with no children initially
                                 label(messages["noResources"]) {
-                                    addClass(AppStyles.noResource)
+                                    addClass(ProjectWizardStyles.noResource)
                                 }
                             }
                             viewModel.collections.onChange {
                                 clear()
                                 if (viewModel.collections.isEmpty()) {
                                     label(messages["noResources"]) {
-                                        addClass(AppStyles.noResource)
+                                        addClass(ProjectWizardStyles.noResource)
                                     }
                                 }
                             }
@@ -104,9 +105,5 @@ class SelectCollection : Fragment() {
             )
             else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
         }
-    }
-
-    private fun doesProjectExist(projectList: List<ProjectCollection>, thisCollection: Collection): Boolean {
-        return projectList.map { it.titleKey }.contains(thisCollection.titleKey)
     }
 }

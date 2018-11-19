@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view
+package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view
 //
 enum class SlugsEnum(val slug: String) {
     ULB("ulb"),

@@ -33,7 +33,7 @@ class ProjectEditorViewModel: ViewModel() {
     private val projectProperty = tornadofx.find<ProjectHomeViewModel>().selectedProjectProperty
 
     // setup model with fx properties
-    var projectTitle: String by property()
+    private var projectTitle: String by property()
     val projectTitleProperty = getProperty(ProjectEditorViewModel::projectTitle)
 
     // List of collection children (i.e. the chapters) to display in the list
@@ -82,18 +82,19 @@ class ProjectEditorViewModel: ViewModel() {
     }
 
     private fun setTitleAndChapters() {
-        projectTitle = projectProperty.value.titleKey
-        children.clear()
-        chunks.clear()
-        if (projectProperty.value != null) {
-            getCollections
-                    .subcollectionsOf(projectProperty.value)
-                    .observeOnFx()
-                    .subscribe { childCollections ->
-                        // Now we have the children of the project collection
-                        children.addAll(childCollections.sortedBy { it.sort })
-                    }
-        }
+        val project = projectProperty.value
+        if (project != null) {
+            projectTitle = project.titleKey
+            children.clear()
+            chunks.clear()
+                getCollections
+                        .subcollectionsOf(project)
+                        .observeOnFx()
+                        .subscribe { childCollections ->
+                            // Now we have the children of the project collection
+                            children.addAll(childCollections.sortedBy { it.sort })
+                        }
+            }
     }
 
     fun changeContext(newContext: ChapterContext) {

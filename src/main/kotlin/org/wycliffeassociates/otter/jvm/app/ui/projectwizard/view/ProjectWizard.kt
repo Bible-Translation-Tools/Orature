@@ -1,17 +1,17 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view
+package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view
 
 import javafx.geometry.Insets
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.SelectCollection
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments.SelectLanguage
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectCollection
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectLanguage
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
 import tornadofx.*
 
-class ProjectCreationWizard : Wizard() {
+class ProjectWizard : Wizard() {
 
-    private val creationViewModel: ProjectCreationViewModel by inject()
+    private val wizardViewModel: ProjectWizardViewModel by inject()
     override val canGoNext = currentPageComplete
     init {
+        importStylesheet<ProjectWizardStyles>()
         showStepsHeader = false
         showSteps = false
         showHeader = true
@@ -22,9 +22,9 @@ class ProjectCreationWizard : Wizard() {
 
                 button(messages["back"]) {
                     addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(canGoBack.and(!creationViewModel.showOverlayProperty))
+                    enableWhen(canGoBack.and(!wizardViewModel.showOverlayProperty))
                     action {
-                        creationViewModel.goBack(this@ProjectCreationWizard)
+                        wizardViewModel.goBack(this@ProjectWizard)
                     }
                 }
 
@@ -38,7 +38,7 @@ class ProjectCreationWizard : Wizard() {
 
                 button(messages["cancel"]) {
                     addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(!creationViewModel.showOverlayProperty)
+                    enableWhen(!wizardViewModel.showOverlayProperty)
                     action {
                         onCancel()
                     }
@@ -49,10 +49,10 @@ class ProjectCreationWizard : Wizard() {
         add(SelectLanguage::class)
         add(SelectCollection::class)
 
-        creationViewModel.creationCompletedProperty.onChange {
+        wizardViewModel.creationCompletedProperty.onChange {
             if (it) {
                 runLater {
-                    creationViewModel.reset()
+                    wizardViewModel.reset()
                     currentPage = pages[0]
                     close()
                 }
@@ -61,7 +61,7 @@ class ProjectCreationWizard : Wizard() {
     }
 
     override fun onCancel() {
-        creationViewModel.reset()
+        wizardViewModel.reset()
         currentPage = pages[0]
         close()
     }

@@ -17,7 +17,6 @@ class AddPluginView : View() {
         importStylesheet<AddPluginStyles>()
     }
 
-
     private val viewModel: AddPluginViewModel by inject()
 
     override val root = form {

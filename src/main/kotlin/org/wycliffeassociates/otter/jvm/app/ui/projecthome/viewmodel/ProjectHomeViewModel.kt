@@ -9,7 +9,7 @@ import tornadofx.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.collections.GetCollections
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.ProjectCreationWizard
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizard
 
 class ProjectHomeViewModel : ViewModel() {
     private val collectionRepo = Injector.collectionRepo
@@ -30,7 +30,7 @@ class ProjectHomeViewModel : ViewModel() {
     }
 
     fun createProject() {
-        workspace.find<ProjectCreationWizard>().openModal()
+        workspace.find<ProjectWizard>().openModal()
     }
 
     fun openProject(project: Collection) {

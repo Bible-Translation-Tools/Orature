@@ -1,18 +1,19 @@
-package org.wycliffeassociates.otter.jvm.app.ui.styles
+package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
+import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStyles
 import tornadofx.*
 
-class ProjectPageStylesheet : Stylesheet() {
+class ProjectEditorStyles : Stylesheet() {
     companion object {
         val chunkCard by cssclass()
         val disabledCard by cssclass()
-        val cardTitleLabel by cssclass("title")
-        val selectedTakeLabel by cssclass("selected-take")
 
         val recordContext by cssclass()
         val hasTakes by cssclass()
@@ -28,11 +29,17 @@ class ProjectPageStylesheet : Stylesheet() {
 
         val active by csspseudoclass("active")
 
-        val listmenu by cssclass("list-menu")
-
         val chapterList by cssclass()
 
-        val chunkLoadingProgress by cssclass()
+        val chunksLoadingProgress by cssclass()
+
+        val backButtonContainer by cssclass()
+        val contextMenu by cssclass()
+
+        // Icons
+        fun recordIcon(size: String) = MaterialIconView(MaterialIcon.MIC_NONE, size)
+        fun editIcon(size: String) = MaterialIconView(MaterialIcon.EDIT, size)
+        fun viewTakesIcon(size: String) = MaterialIconView(MaterialIcon.APPS, size)
     }
 
     init {
@@ -45,9 +52,11 @@ class ProjectPageStylesheet : Stylesheet() {
             alignment = Pos.BOTTOM_LEFT
             prefHeight = 100.px
         }
+
         chunkGridContainer {
             padding = box(0.px, 20.px)
         }
+
         datagrid {
             cellWidth = 200.px
             cellHeight = 200.px
@@ -55,12 +64,10 @@ class ProjectPageStylesheet : Stylesheet() {
                 backgroundColor += Color.TRANSPARENT
             }
         }
+
         chunkCard {
             backgroundColor += c(Colors["base"])
             effect = DropShadow(10.0, Color.LIGHTGRAY)
-            backgroundRadius += box(10.px)
-            borderRadius += box(10.px)
-            padding = box(10.px)
 
             label {
                 textFill = c(Colors["baseText"])
@@ -70,24 +77,6 @@ class ProjectPageStylesheet : Stylesheet() {
                 backgroundColor += c(Colors["baseBackground"])
             }
 
-            cardTitleLabel {
-                fontSize = 20.px
-            }
-
-            selectedTakeLabel {
-                fontSize = 15.px
-            }
-
-            button {
-                unsafe("-jfx-button-type", raw("RAISED"))
-                textFill = Color.WHITE
-                fontSize = 16.px
-                child("*") {
-                    fill = Color.WHITE
-                }
-                maxWidth = Double.MAX_VALUE.px
-                fillWidth = true
-            }
             and(recordContext) {
                 button {
                     backgroundColor += c(Colors["primary"])
@@ -116,10 +105,6 @@ class ProjectPageStylesheet : Stylesheet() {
             }
         }
 
-        listmenu {
-            effect = DropShadow(10.0, Color.LIGHTGRAY)
-        }
-
         s(recordMenuItem, viewMenuItem, editMenuItem) {
             padding = box(20.px)
             backgroundColor += Color.WHITE
@@ -128,6 +113,10 @@ class ProjectPageStylesheet : Stylesheet() {
                     fill = Color.WHITE
                 }
             }
+        }
+
+        contextMenu {
+            padding = box(0.px)
         }
 
         recordMenuItem {
@@ -182,8 +171,13 @@ class ProjectPageStylesheet : Stylesheet() {
             }
         }
 
-        chunkLoadingProgress {
+        chunksLoadingProgress {
             progressColor = c(Colors["primary"])
+        }
+
+        backButtonContainer {
+            padding = box(20.px)
+            alignment = Pos.CENTER_RIGHT
         }
     }
 }

@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.images.SVGImage
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
 import tornadofx.*
 import java.io.File
@@ -22,7 +21,7 @@ class ProjectHomeView : View() {
     private val noProjectsProperty: ReadOnlyBooleanProperty
 
     init {
-        importStylesheet<AppStyles>()
+        importStylesheet<ProjectHomeStyles>()
         // Setup property bindings to bind to empty property
         // https://stackoverflow.com/questions/21612969/is-it-possible-to-bind-the-non-empty-state-of-
         // an-observablelist-inside-an-object
@@ -53,9 +52,9 @@ class ProjectHomeView : View() {
                 bindChildren(viewModel.projects) {
                     hbox {
                         projectcard(it) {
-                            addClass(AppStyles.projectCard)
-                            titleLabel.addClass(AppStyles.projectCardTitle)
-                            languageLabel.addClass(AppStyles.projectCardLanguage)
+                            addClass(ProjectHomeStyles.projectCard)
+                            titleLabel.addClass(ProjectHomeStyles.projectCardTitle)
+                            languageLabel.addClass(ProjectHomeStyles.projectCardLanguage)
                             cardButton.apply {
                                 text = messages["loadProject"]
                                 action {
@@ -63,7 +62,7 @@ class ProjectHomeView : View() {
                                 }
                             }
                             graphicContainer.apply {
-                                addClass(AppStyles.projectGraphicContainer)
+                                addClass(ProjectHomeStyles.projectGraphicContainer)
                                 add(MaterialIconView(MaterialIcon.IMAGE, "75px"))
                             }
                         }
@@ -83,10 +82,10 @@ class ProjectHomeView : View() {
             alignment = Pos.CENTER
             vgrow = Priority.ALWAYS
             label(messages["noProjects"]) {
-                addClass(AppStyles.noProjectsLabel)
+                addClass(ProjectHomeStyles.noProjectsLabel)
             }
             label(messages["noProjectsSubtitle"]) {
-                addClass(AppStyles.tryCreatingLabel)
+                addClass(ProjectHomeStyles.tryCreatingLabel)
             }
 
             visibleProperty().bind(noProjectsProperty)
@@ -94,7 +93,7 @@ class ProjectHomeView : View() {
         }
 
         add(JFXButton("", MaterialIconView(MaterialIcon.ADD, "25px")).apply {
-            addClass(AppStyles.addProjectButton)
+            addClass(ProjectHomeStyles.addProjectButton)
             isDisableVisualFocus = true
             anchorpaneConstraints {
                 bottomAnchor = 25

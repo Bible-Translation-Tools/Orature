@@ -1,10 +1,9 @@
 package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
 
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.animation.Interpolator
-import javafx.animation.Timeline
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
@@ -12,37 +11,43 @@ import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.*
-import javafx.scene.paint.Color
-import javafx.util.Duration
+import javafx.scene.layout.FlowPane
+import javafx.scene.layout.Priority
+import javafx.scene.layout.StackPane
+import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel.ViewTakesViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCardStyles
 import tornadofx.*
 
 class ViewTakesView : View() {
-    val viewModel: ViewTakesViewModel by inject()
+    private val viewModel: ViewTakesViewModel by inject()
 
     // The currently selected take
-    var selectedTakeProperty = SimpleObjectProperty<TakeCard>()
+    private var selectedTakeProperty = SimpleObjectProperty<TakeCard>()
     // Take at the top to compare to an existing selected take
-    var draggingTakeProperty = SimpleObjectProperty<TakeCard>()
+    private var draggingTakeProperty = SimpleObjectProperty<TakeCard>()
 
     // Drag target to show when drag action in progress
-    var dragTarget: StackPane by singleAssign()
+    private var dragTarget: StackPane by singleAssign()
 
     // Drag shadow (node that actually moves with cursor)
-    var dragShadow: Node = VBox()
+    private var dragShadow: Node = VBox()
 
     // Record button?
-    var recordButton: Button by singleAssign()
+    private var recordButton: Button by singleAssign()
 
     // Flow pane of available takes
     private var takesFlowPane = createTakesFlowPane()
+
+    init {
+        importStylesheet<ViewTakesStyles>()
+    }
 
     override val root = stackpane {
         anchorpane {
@@ -75,7 +80,7 @@ class ViewTakesView : View() {
                         action {
                             workspace.navigateBack()
                         }
-                        addClass(ViewTakesStylesheet.backButton)
+                        addClass(AppStyles.backButton)
                     })
                 }
 
@@ -83,18 +88,18 @@ class ViewTakesView : View() {
                 // Drag target and/or selected take
                 stackpane {
                     alignment = Pos.CENTER_LEFT
-                    addClass(ViewTakesStylesheet.headerContainer)
+                    addClass(ViewTakesStyles.headerContainer)
 
                     // drag target glow
                     stackpane {
-                        addClass(ViewTakesStylesheet.dragTarget, ViewTakesStylesheet.glow)
+                        addClass(ViewTakesStyles.dragTarget, ViewTakesStyles.glow)
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
                     }
                     vbox {
                         // Check if the selected take card has changed
                         isFillWidth = false
                         val placeholder = vbox {
-                            addClass(ViewTakesStylesheet.placeholder)
+                            addClass(ViewTakesStyles.placeholder)
                             vgrow = Priority.NEVER
                         }
 
@@ -122,7 +127,7 @@ class ViewTakesView : View() {
 
                     // Create the drag target
                     dragTarget = stackpane {
-                        addClass(ViewTakesStylesheet.dragTarget)
+                        addClass(ViewTakesStyles.dragTarget)
                         add(MaterialIconView(MaterialIcon.ADD, "30px"))
                         // Initially hide the drag target
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
@@ -134,9 +139,8 @@ class ViewTakesView : View() {
             }
 
             // Record button?
-            val recordIcon = MaterialIconView(MaterialIcon.MIC_NONE, "25px")
-            recordButton = button("", recordIcon) {
-                addClass(AppStyles.recordButton)
+            recordButton = button("", ViewTakesStyles.recordIcon("25px")) {
+                addClass(ViewTakesStyles.recordButton)
                 anchorpaneConstraints {
                     bottomAnchor = 25.0
                     rightAnchor = 25.0
@@ -165,10 +169,12 @@ class ViewTakesView : View() {
 
         // Plugin active cover
         val dialog = progressdialog {
-            graphic = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
+            graphic = ViewTakesStyles.recordIcon("60px")
         }
         viewModel.showPluginActiveProperty.onChange {
-            Platform.runLater { if (it == true) dialog.open() else dialog.close() }
+            Platform.runLater {
+                if (it == true) dialog.open() else dialog.close()
+            }
         }
     }
 
@@ -196,7 +202,7 @@ class ViewTakesView : View() {
 
     private fun cancelDrag(evt: MouseEvent) {
         takesFlowPane.add(draggingTakeProperty.value)
-        sortTakesFlowPane()
+        sortTakesFlowPane(takesFlowPane)
         draggingTakeProperty.value = null
     }
 
@@ -209,12 +215,9 @@ class ViewTakesView : View() {
 
     // Create the flow pane of alternate takes
     private fun createTakesFlowPane(): FlowPane {
-        val flowpane = FlowPane()
-        flowpane.apply {
-            vgap = 16.0
-            hgap = 16.0
+        return FlowPane().apply {
             vgrow = Priority.ALWAYS
-            addClass(ViewTakesStylesheet.takeFlowPane)
+            addClass(ViewTakesStyles.takeFlowPane)
             // Update the takes displayed
             viewModel.alternateTakes.onChange {
                 clear()
@@ -222,27 +225,25 @@ class ViewTakesView : View() {
                     // Add a new take card
                     add(createTakeCard(take))
                 }
-                sortTakesFlowPane()
+                sortTakesFlowPane(takesFlowPane)
             }
         }
-        return flowpane
     }
 
-    private fun sortTakesFlowPane() {
-        takesFlowPane.children.setAll(takesFlowPane.children.sortedBy { (it as TakeCard).take.number })
+    private fun sortTakesFlowPane(flowPane: FlowPane) {
+        flowPane.children.setAll(flowPane.children.sortedBy { (it as TakeCard).take.number })
     }
 
     private fun createTakeCard(take: Take): TakeCard {
         return TakeCard(take, Injector.audioPlayer).apply {
-            addClass(ViewTakesStylesheet.takeCard)
+            addClass(ViewTakesStyles.takeCard)
+            badge.addClass(ViewTakesStyles.badge)
+            simpleAudioPlayer.playPauseButton.addClass(ViewTakesStyles.playPauseButton)
             playedProperty.onChange {
-                if (it) {
-                    // Take has been played
-                    viewModel.setTakePlayed(take)
-                }
+                if (it) viewModel.setTakePlayed(take)
             }
             deleteButton.apply {
-                addClass(ViewTakesStylesheet.deleteButton)
+                addClass(ViewTakesStyles.deleteButton)
                 action {
                     error(
                             messages["deleteTakePrompt"],
@@ -260,6 +261,7 @@ class ViewTakesView : View() {
     }
 
     override fun onDock() {
+        super.onDock()
         // Reset the model
         viewModel.reset()
     }

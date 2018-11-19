@@ -5,22 +5,15 @@ import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.InitializePlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
-import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenuStylesheet
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.view.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectPageStylesheet
-import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
-import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.ProgressDialogStyles
 import tornadofx.*
-import java.io.File
 
 class MyApp : App(Workspace::class) {
     init {
-        importStylesheet(ProjectPageStylesheet::class)
-        importStylesheet(ViewTakesStylesheet::class)
-        importStylesheet(MainMenuStylesheet::class)
-        importStylesheet(AppStyles::class)
-        importStylesheet<WidgetsStyles>()
+        importStylesheet<AppStyles>()
+        importStylesheet<ProgressDialogStyles>()
         workspace.header.removeFromParent()
         workspace.add(MainMenu())
     }

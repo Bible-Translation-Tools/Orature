@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.menu.view
 
+import com.github.thomasnield.rxkotlinfx.toObservable
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
@@ -8,7 +9,7 @@ import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view.RemovePluginsView
-import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -17,6 +18,7 @@ class MainMenu : MenuBar() {
     private val viewModel: MainMenuViewModel = find()
 
     init {
+        importStylesheet<MainMenuStylesheet>()
         with(this) {
             menu(messages["file"]) {
                 item(messages["importResource"]) {
@@ -61,14 +63,13 @@ class MainMenu : MenuBar() {
                     val pluginToggleGroup = ToggleGroup()
                     viewModel.recorderPlugins.onChange { _ ->
                         items.clear()
-                        items.setAll(viewModel.recorderPlugins.map {
-                            radiomenuitem(it.name) {
-                                userData = it
-                                action { if (isSelected) viewModel.selectRecorder(it) }
+                        items.setAll(viewModel.recorderPlugins.map { pluginData ->
+                            radiomenuitem(pluginData.name) {
+                                userData = pluginData
+                                action { if (isSelected) viewModel.selectRecorder(pluginData) }
                                 toggleGroup = pluginToggleGroup
-                                isSelected = viewModel.selectedRecorderProperty.value == it
-                                viewModel.selectedRecorderProperty.onChange {
-                                    isSelected = viewModel.selectedRecorderProperty.value == it
+                                viewModel.selectedRecorderProperty.toObservable().subscribe {
+                                    isSelected = (it == pluginData)
                                 }
                             }
                         })
@@ -80,14 +81,13 @@ class MainMenu : MenuBar() {
                     val pluginToggleGroup = ToggleGroup()
                     viewModel.editorPlugins.onChange { _ ->
                         items.clear()
-                        items.setAll(viewModel.editorPlugins.map {
-                            radiomenuitem(it.name) {
-                                userData = it
-                                action { if (isSelected) viewModel.selectEditor(it) }
+                        items.setAll(viewModel.editorPlugins.map { pluginData ->
+                            radiomenuitem(pluginData.name) {
+                                userData = pluginData
+                                action { if (isSelected) viewModel.selectEditor(pluginData) }
                                 toggleGroup = pluginToggleGroup
-                                isSelected = viewModel.selectedEditorProperty.value == it
-                                viewModel.selectedEditorProperty.onChange {
-                                    isSelected = viewModel.selectedEditorProperty.value == it
+                                viewModel.selectedEditorProperty.toObservable().subscribe {
+                                    isSelected = (it == pluginData)
                                 }
                             }
                         })

@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.binding.BooleanBinding
-import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.AccessPlugins
 import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
@@ -12,7 +12,7 @@ import tornadofx.*
 import java.io.File
 
 class AddPluginViewModel : ViewModel() {
-    val pluginRepository = Injector.pluginRepository
+    private val pluginRepository = Injector.pluginRepository
 
     var name: String by property("")
     val nameProperty = getProperty(AddPluginViewModel::name)
@@ -23,7 +23,7 @@ class AddPluginViewModel : ViewModel() {
     var canRecord: Boolean by property(false)
     val canRecordProperty = getProperty(AddPluginViewModel::canRecord)
 
-    val plugins = FXCollections.observableArrayList<AudioPluginData>()
+    val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
 
     init {
         AccessPlugins(pluginRepository)

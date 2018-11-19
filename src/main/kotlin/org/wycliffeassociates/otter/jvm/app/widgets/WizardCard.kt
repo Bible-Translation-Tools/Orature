@@ -36,8 +36,6 @@ class WizardCard : VBox() {
 
     init {
         spacing = 10.0
-        addClass(WidgetsStyles.wizardCard)
-
         graphicContainer = stackpane {
             vgrow = Priority.ALWAYS
         }

@@ -1,49 +1,42 @@
 package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
 
-import javafx.geometry.Pos
-import javafx.scene.effect.BlurType
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.jvm.app.UIColorsObject
 import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
-import tornadofx.Stylesheet
 import tornadofx.*
 
-class ViewTakesStylesheet : Stylesheet() {
+class ViewTakesStyles : Stylesheet() {
     companion object {
-        val backButton by cssclass()
         val acceptButton by cssclass()
         val rejectButton by cssclass()
         val deleteButton by cssclass()
-        val actionButtonsContainer by cssclass()
         val dragTarget by cssclass()
         val takeCard by cssclass()
-        val badge by cssclass("badge")
-        val arrowContainer by cssclass()
+        val badge by cssclass()
         val placeholder by cssclass()
         val headerContainer by cssclass()
         val takeFlowPane by cssclass()
         val glow by cssclass()
+        val recordButton by cssclass()
+        val playPauseButton by cssclass()
+        fun recordIcon(size: String) = MaterialIconView(MaterialIcon.MIC_NONE, size)
     }
 
     init {
         takeFlowPane {
             borderColor += box(Color.LIGHTGRAY)
-            borderWidth += box(1.px, 0.px, 0.px, 0.px)
+            borderWidth += box(0.px, 0.px, 0.px, 0.px)
             backgroundColor += Color.TRANSPARENT
             spacing = 10.px
             padding = box(20.px)
+            vgap = 16.px
+            hgap = 16.px
         }
         button {
-            and(backButton) {
-               minWidth = 230.px
-               textFill = Color.WHITE
-               child("*") {
-                   fill = Color.WHITE
-               }
-               backgroundColor += c(Colors["primary"])
-               unsafe("-jfx-button-type", raw("RAISED"))
-            }
-
             and(acceptButton, rejectButton) {
                 padding = box(5.px, 30.px)
                 backgroundRadius += box(5.px)
@@ -64,16 +57,6 @@ class ViewTakesStylesheet : Stylesheet() {
                     fill = c(Colors["primary"])
                 }
             }
-
-            and(deleteButton) {
-                child("*") {
-                    fill = c(Colors["baseText"])
-                }
-            }
-        }
-
-        actionButtonsContainer {
-            alignment = Pos.CENTER
         }
 
         glow {
@@ -95,20 +78,24 @@ class ViewTakesStylesheet : Stylesheet() {
         }
 
         takeCard {
+            borderRadius += box(10.px)
             borderColor += box(c(Colors["baseText"]))
             borderWidth += box(1.px)
-            borderRadius += box(10.px)
-            minHeight = 100.px
-            minWidth = 250.px
-            maxWidth = 250.px
             badge {
                 backgroundColor += c(Colors["primary"])
             }
-        }
-
-        arrowContainer {
-            alignment = Pos.CENTER
-            maxHeight = 100.px
+            button {
+                and(deleteButton) {
+                    child("*") {
+                        fill = c(Colors["baseText"])
+                    }
+                }
+                and(playPauseButton) {
+                    child("*") {
+                        fill = c(Colors["primary"])
+                    }
+                }
+            }
         }
 
         placeholder {
@@ -122,6 +109,22 @@ class ViewTakesStylesheet : Stylesheet() {
         headerContainer {
             backgroundColor += Color.WHITE
             padding = box(20.px)
+        }
+
+        recordButton {
+            backgroundRadius += box(25.px)
+            borderRadius += box(25.px)
+            backgroundColor += c(UIColorsObject.Colors["base"])
+            minHeight = 50.px
+            minWidth = 50.px
+            maxHeight = 50.px
+            maxWidth = 50.px
+            cursor = Cursor.HAND
+            effect = DropShadow(10.0, Color.GRAY)
+            unsafe("-jfx-button-type", raw("RAISED"))
+            child("*") {
+                fill = c(UIColorsObject.Colors["primary"])
+            }
         }
     }
 }

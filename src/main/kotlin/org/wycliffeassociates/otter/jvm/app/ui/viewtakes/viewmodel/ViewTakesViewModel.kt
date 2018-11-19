@@ -23,9 +23,9 @@ class ViewTakesViewModel : ViewModel() {
     private val takeRepository = Injector.takeRepository
     private val pluginRepository = Injector.pluginRepository
 
-    val chunkProperty = find(ProjectEditorViewModel::class).activeChunkProperty
-    val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
-    var chapterProperty = find(ProjectEditorViewModel::class).activeChildProperty
+    private val chunkProperty = find(ProjectEditorViewModel::class).activeChunkProperty
+    private val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
+    private var chapterProperty = find(ProjectEditorViewModel::class).activeChildProperty
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
 
@@ -35,7 +35,7 @@ class ViewTakesViewModel : ViewModel() {
     val titleProperty = getProperty(ViewTakesViewModel::title)
 
     // Whether the UI should show the plugin as active
-    var showPluginActive: Boolean by property(false)
+    private var showPluginActive: Boolean by property(false)
     var showPluginActiveProperty = getProperty(ViewTakesViewModel::showPluginActive)
 
     private val recordTake = RecordTake(

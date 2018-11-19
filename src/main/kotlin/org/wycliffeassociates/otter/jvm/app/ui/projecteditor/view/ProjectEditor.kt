@@ -9,22 +9,24 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.geometry.Orientation
-import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectPageStylesheet
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
-import org.wycliffeassociates.otter.jvm.app.widgets.ChunkCard
-import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
+import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStyles
+import org.wycliffeassociates.otter.jvm.app.widgets.chunkcard.ChunkCard
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import tornadofx.*
 
 class ProjectEditor : View() {
     private val viewModel: ProjectEditorViewModel by inject()
     private var childrenList by singleAssign<ListView<Collection>>()
+
+    init {
+        importStylesheet<ProjectEditorStyles>()
+    }
 
     override fun onDock() {
         super.onDock()
@@ -44,14 +46,13 @@ class ProjectEditor : View() {
             vbox {
                 label {
                     textProperty().bind(viewModel.projectTitleProperty)
-                    addClass(ProjectPageStylesheet.projectTitle)
+                    addClass(ProjectEditorStyles.projectTitle)
                 }
                 childrenList = listview {
                     items = viewModel.children
                     vgrow = Priority.ALWAYS
-                    addClass(ProjectPageStylesheet.chapterList)
+                    addClass(ProjectEditorStyles.chapterList)
                     cellCache {
-                        // TODO: Localization
                         label(it.titleKey) {
                             graphic = MaterialIconView(MaterialIcon.CHROME_READER_MODE, "20px")
                         }
@@ -66,25 +67,21 @@ class ProjectEditor : View() {
             vbox {
                 hgrow = Priority.ALWAYS
                 hbox {
-                    style {
-                        padding = box(20.px)
-                    }
-                    alignment = Pos.CENTER_RIGHT
+                    addClass(ProjectEditorStyles.backButtonContainer)
                     // Back button
                     add(JFXButton(messages["back"], MaterialIconView(MaterialIcon.ARROW_BACK)).apply {
                         action {
                             workspace.navigateBack()
                         }
-                        addClass(ViewTakesStylesheet.backButton)
+                        addClass(AppStyles.backButton)
                     })
                 }
                 vbox {
                     vgrow = Priority.ALWAYS
-                    alignment = Pos.CENTER
                     progressindicator {
                         visibleProperty().bind(viewModel.loadingProperty)
                         managedProperty().bind(visibleProperty())
-                        addClass(ProjectPageStylesheet.chunkLoadingProgress)
+                        addClass(ProjectEditorStyles.chunksLoadingProgress)
                     }
                     datagrid(viewModel.chunks) {
                         vgrow = Priority.ALWAYS
@@ -122,36 +119,34 @@ class ProjectEditor : View() {
                             }
                             chunkCard.actionButton.action { viewModel.doChunkContextualAction(chunkCard.chunk) }
                             // Add common classes
-                            chunkCard.addClass(ProjectPageStylesheet.chunkCard)
+                            chunkCard.addClass(ProjectEditorStyles.chunkCard)
                             return@cellCache chunkCard
                         }
                     }
-                    addClass(ProjectPageStylesheet.chunkGridContainer)
+                    addClass(ProjectEditorStyles.chunkGridContainer)
                 }
                 listmenu {
                     orientation = Orientation.HORIZONTAL
                     useMaxWidth = true
-                    style {
-                        backgroundColor += Color.WHITE
-                    }
-                    item(graphic = MaterialIconView(MaterialIcon.MIC_NONE, "25px")) {
+                    addClass(ProjectEditorStyles.contextMenu)
+                    item(graphic = ProjectEditorStyles.recordIcon("25px")) {
                         activeItem = this
                         whenSelected { viewModel.changeContext(ChapterContext.RECORD) }
-                        addClass(ProjectPageStylesheet.recordMenuItem)
+                        addClass(ProjectEditorStyles.recordMenuItem)
                         parent.layoutBoundsProperty().onChange { newBounds ->
                             newBounds?.let { prefWidth = it.width / items.size }
                         }
                     }
-                    item(graphic = MaterialIconView(MaterialIcon.APPS, "25px")) {
+                    item(graphic = ProjectEditorStyles.viewTakesIcon("25px")) {
                         whenSelected { viewModel.changeContext(ChapterContext.VIEW_TAKES) }
-                        addClass(ProjectPageStylesheet.viewMenuItem)
+                        addClass(ProjectEditorStyles.viewMenuItem)
                         parent.layoutBoundsProperty().onChange { newBounds ->
                             newBounds?.let { prefWidth = it.width / items.size }
                         }
                     }
-                    item(graphic = MaterialIconView(MaterialIcon.EDIT, "25px")) {
+                    item(graphic = ProjectEditorStyles.editIcon("25px")) {
                         whenSelected { viewModel.changeContext(ChapterContext.EDIT_TAKES) }
-                        addClass(ProjectPageStylesheet.editMenuItem)
+                        addClass(ProjectEditorStyles.editMenuItem)
                         parent.layoutBoundsProperty().onChange { newBounds ->
                             newBounds?.let { prefWidth = it.width / items.size }
                         }
@@ -159,29 +154,35 @@ class ProjectEditor : View() {
                 }
             }
         }
-        // Plugin active cover
+
         val dialog = progressdialog {
-            graphic = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-            viewModel.contextProperty.onChange { newContext ->
+            viewModel.contextProperty.toObservable().subscribe { newContext ->
                 when (newContext) {
-                    ChapterContext.RECORD -> graphic = MaterialIconView(MaterialIcon.MIC_NONE, "60px")
-                    ChapterContext.EDIT_TAKES -> graphic = MaterialIconView(MaterialIcon.EDIT, "60px")
+                    ChapterContext.RECORD -> graphic = ProjectEditorStyles.recordIcon("60px")
+                    ChapterContext.EDIT_TAKES -> graphic = ProjectEditorStyles.editIcon("60px")
                     else -> { }
                 }
             }
         }
-        viewModel.showPluginActiveProperty.onChange {
-            Platform.runLater { if (it == true) dialog.open() else dialog.close() }
+        viewModel.showPluginActiveProperty.onChange { value ->
+            Platform.runLater {
+                if (value == true) {
+                    dialog.open()
+                } else {
+                    dialog.close()
+                }
+            }
         }
+
     }
 
     private fun cardContextCssRuleProperty(): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
         viewModel.contextProperty.toObservable().subscribe {
             cssRuleProperty.value = when (it ?: ChapterContext.RECORD) {
-                ChapterContext.RECORD -> ProjectPageStylesheet.recordContext
-                ChapterContext.VIEW_TAKES -> ProjectPageStylesheet.viewContext
-                ChapterContext.EDIT_TAKES -> ProjectPageStylesheet.editContext
+                ChapterContext.RECORD -> ProjectEditorStyles.recordContext
+                ChapterContext.VIEW_TAKES -> ProjectEditorStyles.viewContext
+                ChapterContext.EDIT_TAKES -> ProjectEditorStyles.editContext
             }
         }
         return cssRuleProperty
@@ -192,7 +193,7 @@ class ProjectEditor : View() {
     ): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
         hasTakesProperty.toObservable().subscribe {
-            cssRuleProperty.value = if (it == true) ProjectPageStylesheet.hasTakes else null
+            cssRuleProperty.value = if (it == true) ProjectEditorStyles.hasTakes else null
         }
         return cssRuleProperty
     }
@@ -205,11 +206,7 @@ class ProjectEditor : View() {
             cssRuleProperty.value = when (it ?: ChapterContext.RECORD) {
                 ChapterContext.RECORD -> null
                 ChapterContext.VIEW_TAKES, ChapterContext.EDIT_TAKES -> {
-                    if (hasTakesProperty.value) {
-                        null
-                    } else {
-                        ProjectPageStylesheet.disabledCard
-                    }
+                    if (hasTakesProperty.value) null else ProjectEditorStyles.disabledCard
                 }
             }
         }

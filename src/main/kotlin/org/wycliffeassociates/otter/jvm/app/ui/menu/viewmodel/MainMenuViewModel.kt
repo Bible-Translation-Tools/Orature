@@ -5,6 +5,7 @@ import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.plugins.AccessPlugins
@@ -22,8 +23,8 @@ class MainMenuViewModel : ViewModel() {
 
     private val accessPlugins = AccessPlugins(pluginRepository)
 
-    val editorPlugins = FXCollections.observableArrayList<AudioPluginData>()
-    val recorderPlugins = FXCollections.observableArrayList<AudioPluginData>()
+    val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
+    val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
 
