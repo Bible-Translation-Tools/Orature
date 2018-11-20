@@ -27,16 +27,28 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
-            .import()
-            .onErrorComplete()
-            .subscribe()
+    if (!Injector.preferences.getAppInitialized()) {
+        println("Running one-time initialization")
+        // Needs initialization
+        ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
+                .import()
+                .onErrorComplete()
+                .subscribe()
 
+        Injector.database.setup()
+
+        Injector.preferences.setAppInitialized(true)
+    } else {
+        println("App already initialized")
+    }
+
+    // Always import new plugins
     ImportAudioPlugins(Injector.audioPluginRegistrar, Injector.directoryProvider)
             .importAll()
             .andThen(InitializePlugins(Injector.pluginRepository).init())
             .subscribe()
 
+    // Always clean up database
     Injector.takeRepository
             .removeNonExistentTakes()
             .subscribe()

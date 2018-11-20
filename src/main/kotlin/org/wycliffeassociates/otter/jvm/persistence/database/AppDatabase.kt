@@ -27,8 +27,10 @@ class AppDatabase(
 
         // Create the jooq dsl
         dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
+    }
 
-        // Check if the database file exists
+    fun setup() {
+        // Setup the tables
         val schemaFileStream = ClassLoader.getSystemResourceAsStream("sql/CreateAppDb.sql")
 
         // Make sure the database file has the tables we need
