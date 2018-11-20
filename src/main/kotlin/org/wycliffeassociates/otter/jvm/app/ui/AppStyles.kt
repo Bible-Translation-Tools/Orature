@@ -1,15 +1,18 @@
-package org.wycliffeassociates.otter.jvm.app.theme
+package org.wycliffeassociates.otter.jvm.app.ui
 
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.ProgressDialogStyles
 import tornadofx.*
 
 class AppStyles : Stylesheet() {
 
     companion object {
         val backButton by cssclass()
+        val appBackground by cssclass()
+        val progressDialog by cssclass()
     }
 
     init {
@@ -37,14 +40,33 @@ class AppStyles : Stylesheet() {
         button {
             and(backButton) {
                 minWidth = 230.px
-                textFill = Color.WHITE
+                textFill = AppTheme.colors.white
                 child("*") {
-                    fill = Color.WHITE
+                    fill = AppTheme.colors.white
                 }
-                backgroundColor += c(UIColorsObject.Colors["primary"])
+                backgroundColor += AppTheme.colors.appRed
                 unsafe("-jfx-button-type", raw("RAISED"))
             }
         }
+
+        appBackground {
+            backgroundColor += AppTheme.colors.defaultBackground
+        }
+
+        progressDialog {
+            ProgressDialogStyles.progressGraphic {
+                fill = AppTheme.colors.defaultText
+            }
+            backgroundColor += AppTheme.colors.base
+            progressIndicator {
+                progressColor = AppTheme.colors.defaultText
+            }
+
+            label {
+                textFill = AppTheme.colors.defaultText
+            }
+        }
+
 
         // Load the fonts
         Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Regular.ttf"), 10.0)
