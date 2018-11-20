@@ -10,6 +10,7 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.images.SVGImage
+import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
 import tornadofx.*
@@ -31,6 +32,7 @@ class ProjectHomeView : View() {
     }
 
     override val root = anchorpane {
+        addClass(AppStyles.appBackground)
         style {
             setPrefSize(1200.0, 800.0)
         }
@@ -44,6 +46,7 @@ class ProjectHomeView : View() {
                 rightAnchor = 0
             }
             content = flowpane {
+                addClass(AppStyles.appBackground)
                 vgap = 16.0
                 hgap = 16.0
                 alignment = Pos.TOP_LEFT

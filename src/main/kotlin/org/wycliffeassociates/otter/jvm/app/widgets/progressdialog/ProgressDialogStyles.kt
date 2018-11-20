@@ -1,32 +1,22 @@
-package org.wycliffeassociates.otter.jvm.app.widgets
+package org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
 import javafx.geometry.Pos
-import javafx.scene.Cursor
-import javafx.scene.control.ContentDisplay
-import javafx.scene.effect.DropShadow
-import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
 
 class ProgressDialogStyles : Stylesheet() {
     companion object {
-        val default by cssclass()
+        val defaultProgressDialog by cssclass()
+        val progressGraphic by cssclass()
     }
 
     init {
-        default {
+        defaultProgressDialog {
             // Graphic
-            child("*") {
-                fill = c(Colors["baseText"])
-            }
-            backgroundColor += c(Colors["base"])
             progressIndicator {
-                progressColor = c(Colors["baseText"])
                 maxWidth = 125.px
                 maxHeight = 125.px
             }
@@ -44,6 +34,5 @@ class ProgressDialogStyles : Stylesheet() {
                 wrapText = true
             }
         }
-
     }
 }

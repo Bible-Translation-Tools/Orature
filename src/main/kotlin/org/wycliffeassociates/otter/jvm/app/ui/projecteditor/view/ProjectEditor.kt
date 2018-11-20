@@ -12,10 +12,9 @@ import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.chunkcard.ChunkCard
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import tornadofx.*
@@ -42,6 +41,7 @@ class ProjectEditor : View() {
     }
 
     override val root = stackpane {
+        addClass(AppStyles.appBackground)
         hbox {
             vbox {
                 label {
@@ -156,6 +156,7 @@ class ProjectEditor : View() {
         }
 
         val dialog = progressdialog {
+            root.addClass(AppStyles.progressDialog)
             viewModel.contextProperty.toObservable().subscribe { newContext ->
                 when (newContext) {
                     ChapterContext.RECORD -> graphic = ProjectEditorStyles.recordIcon("60px")

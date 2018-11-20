@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view
 
 import javafx.geometry.Insets
+import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectCollection
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
@@ -16,6 +17,8 @@ class ProjectWizard : Wizard() {
         showSteps = false
         showHeader = true
         enableStepLinks = true
+        showHeader = false
+        root.addClass(AppStyles.appBackground)
         root.bottom {
             buttonbar {
                 padding = Insets(10.0)

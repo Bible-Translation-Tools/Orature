@@ -5,14 +5,12 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
 class ViewTakesStyles : Stylesheet() {
     companion object {
-        val acceptButton by cssclass()
-        val rejectButton by cssclass()
+        val viewTakesTitle by cssclass()
         val deleteButton by cssclass()
         val dragTarget by cssclass()
         val takeCard by cssclass()
@@ -27,6 +25,10 @@ class ViewTakesStyles : Stylesheet() {
     }
 
     init {
+        viewTakesTitle {
+            fontSize = 40.px
+            textFill = AppTheme.colors.defaultText
+        }
         takeFlowPane {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
@@ -36,35 +38,13 @@ class ViewTakesStyles : Stylesheet() {
             vgap = 16.px
             hgap = 16.px
         }
-        button {
-            and(acceptButton, rejectButton) {
-                padding = box(5.px, 30.px)
-                backgroundRadius += box(5.px)
-                borderRadius += box(5.px)
-                borderColor += box(c(Colors["primary"]))
-            }
-
-            and(acceptButton) {
-                backgroundColor += c(Colors["primary"])
-                child("*") {
-                    fill = Color.WHITE
-                }
-            }
-
-            and(rejectButton) {
-                backgroundColor += Color.WHITE
-                child("*") {
-                    fill = c(Colors["primary"])
-                }
-            }
-        }
 
         glow {
-            effect = DropShadow(5.0, c(Colors["secondary"]))
+            effect = DropShadow(5.0, AppTheme.colors.appBlue)
         }
 
         dragTarget {
-            backgroundColor += c(Colors["base"]).deriveColor(0.0, 1.0, 1.0, 0.8)
+            backgroundColor += AppTheme.colors.cardBackground.deriveColor(0.0, 1.0, 1.0, 0.8)
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
             maxHeight = 100.px
@@ -73,33 +53,37 @@ class ViewTakesStyles : Stylesheet() {
                 fontSize = 16.px
             }
             child("*") {
-                fill = c(Colors["secondary"])
+                fill = AppTheme.colors.appBlue
             }
         }
 
         takeCard {
             borderRadius += box(10.px)
-            borderColor += box(c(Colors["baseText"]))
+            borderColor += box(AppTheme.colors.defaultText)
             borderWidth += box(1.px)
+            backgroundColor += AppTheme.colors.cardBackground
+            label {
+                textFill = AppTheme.colors.defaultText
+            }
             badge {
-                backgroundColor += c(Colors["primary"])
+                backgroundColor += AppTheme.colors.appRed
             }
             button {
                 and(deleteButton) {
                     child("*") {
-                        fill = c(Colors["baseText"])
+                        fill = AppTheme.colors.defaultText
                     }
                 }
                 and(playPauseButton) {
                     child("*") {
-                        fill = c(Colors["primary"])
+                        fill = AppTheme.colors.appRed
                     }
                 }
             }
         }
 
         placeholder {
-            backgroundColor += c(Colors["neutralTone"])
+            backgroundColor += AppTheme.colors.disabledCardBackground
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
             minHeight = 100.px
@@ -107,23 +91,26 @@ class ViewTakesStyles : Stylesheet() {
         }
 
         headerContainer {
-            backgroundColor += Color.WHITE
+            backgroundColor += AppTheme.colors.defaultBackground
             padding = box(20.px)
+            label {
+                textFill = AppTheme.colors.defaultText
+            }
         }
 
         recordButton {
             backgroundRadius += box(25.px)
             borderRadius += box(25.px)
-            backgroundColor += c(UIColorsObject.Colors["base"])
+            backgroundColor += AppTheme.colors.base
             minHeight = 50.px
             minWidth = 50.px
             maxHeight = 50.px
             maxWidth = 50.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, Color.GRAY)
+            effect = DropShadow(10.0, AppTheme.colors.dropShadow)
             unsafe("-jfx-button-type", raw("RAISED"))
             child("*") {
-                fill = c(UIColorsObject.Colors["primary"])
+                fill = AppTheme.colors.appRed
             }
         }
     }

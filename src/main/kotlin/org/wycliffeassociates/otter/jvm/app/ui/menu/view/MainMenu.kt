@@ -6,6 +6,8 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view.RemovePluginsView
@@ -26,6 +28,7 @@ class MainMenu : MenuBar() {
                     val dialog = progressdialog {
                         text = messages["importResource"]
                         graphic = MaterialIconView(MaterialIcon.INPUT, "60px")
+                        root.addClass(AppStyles.progressDialog)
                     }
                     viewModel.showImportDialogProperty.onChange {
                         Platform.runLater { if (it) dialog.open() else dialog.close() }
@@ -35,6 +38,13 @@ class MainMenu : MenuBar() {
                         file?.let {
                             viewModel.importContainerDirectory(file)
                         }
+                    }
+                }
+                checkmenuitem(messages["nightMode"]) {
+                    graphic = MaterialIconView(MaterialIcon.BRIGHTNESS_3, "20px")
+                    action {
+                        if (isSelected) AppTheme.useDarkColors() else AppTheme.useLightColors()
+                        scene.reloadStylesheets()
                     }
                 }
             }

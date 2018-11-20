@@ -6,14 +6,13 @@ import org.wycliffeassociates.otter.common.domain.plugins.InitializePlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.view.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.ProgressDialogStyles
 import tornadofx.*
 
 class MyApp : App(Workspace::class) {
     init {
         importStylesheet<AppStyles>()
-        importStylesheet<ProgressDialogStyles>()
         workspace.header.removeFromParent()
         workspace.add(MainMenu())
     }

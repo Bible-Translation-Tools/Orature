@@ -10,7 +10,6 @@ class AppStyles : Stylesheet() {
 
     companion object {
         val backButton by cssclass()
-
     }
 
     init {

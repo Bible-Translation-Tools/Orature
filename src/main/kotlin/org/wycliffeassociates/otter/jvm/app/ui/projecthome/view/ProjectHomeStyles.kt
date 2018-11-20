@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projecthome.view
 import javafx.scene.Cursor
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
 class ProjectHomeStyles : Stylesheet() {
@@ -21,55 +21,60 @@ class ProjectHomeStyles : Stylesheet() {
         noProjectsLabel {
             fontSize = 30.px
             fontWeight = FontWeight.BOLD
+            textFill = AppTheme.colors.defaultText
         }
 
         tryCreatingLabel {
             fontSize = 20.px
+            textFill = AppTheme.colors.defaultText
         }
 
         addProjectButton {
+            unsafe("-jfx-button-type", raw("RAISED"))
             backgroundRadius += box(25.px)
             borderRadius += box(25.px)
-            backgroundColor += c(UIColorsObject.Colors["primary"])
+            backgroundColor += AppTheme.colors.appRed
             minHeight = 50.px
             minWidth = 50.px
             maxHeight = 50.px
             maxWidth = 50.px
             cursor = Cursor.HAND
-            unsafe("-jfx-button-type", raw("RAISED"))
             child("*") {
-                fill = c(UIColorsObject.Colors["base"])
+                fill = AppTheme.colors.white
             }
         }
 
         projectCard {
             prefWidth = 232.px
             prefHeight = 300.px
-            backgroundColor += c(UIColorsObject.Colors["base"])
+            backgroundColor += AppTheme.colors.cardBackground
             padding = box(10.px)
             backgroundRadius += box(10.px)
             spacing = 10.px
             projectGraphicContainer {
                 backgroundRadius += box(10.px)
-                backgroundColor += c(UIColorsObject.Colors["baseLight"])
+                backgroundColor += AppTheme.colors.imagePlaceholder
+                child("*") {
+                    fill = AppTheme.colors.defaultText
+                }
             }
             label {
-                textFill = c(UIColorsObject.Colors["baseText"])
+                textFill = AppTheme.colors.defaultText
                 and(projectCardTitle) {
                     fontWeight = FontWeight.BOLD
                     fontSize = 16.px
                 }
                 and(projectCardLanguage) {
                     fontWeight = FontWeight.NORMAL
-                    textFill = Color.GRAY
+                    textFill = AppTheme.colors.gray
                 }
             }
 
             s(".jfx-button") {
                 minHeight = 40.px
                 maxWidth = Double.MAX_VALUE.px
-                backgroundColor += c(UIColorsObject.Colors["primary"])
-                textFill = c(UIColorsObject.Colors["base"])
+                backgroundColor += AppTheme.colors.appRed
+                textFill = AppTheme.colors.white
                 cursor = Cursor.HAND
                 fontSize = 16.px
                 fontWeight = FontWeight.BOLD

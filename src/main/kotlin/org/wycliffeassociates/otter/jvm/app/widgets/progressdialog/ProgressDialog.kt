@@ -1,5 +1,6 @@
-package org.wycliffeassociates.otter.jvm.app.widgets
+package org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 
+import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventTarget
@@ -18,17 +19,21 @@ class ProgressDialog : Fragment() {
     val textProperty = SimpleStringProperty()
     var text by textProperty
 
+    init {
+        importStylesheet<ProgressDialogStyles>()
+    }
+
     override val root = borderpane {
-        addClass(WidgetsStyles.progressDialog)
+        addClass(ProgressDialogStyles.defaultProgressDialog)
         center {
             stackpane {
                 progressindicator()
                 hbox {
                     alignment = Pos.CENTER
-                    add(graphic)
-                    graphicProperty.onChange {
+                    graphicProperty.toObservable().subscribe {
                         clear()
-                        add(graphic)
+                        it.addClass(ProgressDialogStyles.progressGraphic)
+                        add(it)
                     }
                 }
             }

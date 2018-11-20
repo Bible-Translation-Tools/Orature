@@ -114,7 +114,7 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun doesProjectExist(project: Collection): Boolean {
-        return existingProjects.map { project.titleKey }.contains(project.titleKey)
+        return existingProjects.map { it.titleKey }.contains(project.titleKey)
     }
 
     fun reset() {

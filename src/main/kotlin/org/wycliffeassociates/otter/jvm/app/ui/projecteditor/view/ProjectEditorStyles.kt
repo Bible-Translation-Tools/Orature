@@ -6,8 +6,7 @@ import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStyles
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
 class ProjectEditorStyles : Stylesheet() {
@@ -46,8 +45,8 @@ class ProjectEditorStyles : Stylesheet() {
         projectTitle {
             fontSize = 20.px
             padding = box(10.px)
-            backgroundColor += Color.DARKGRAY
-            textFill = Color.WHITE
+            backgroundColor += AppTheme.colors.imagePlaceholder
+            textFill = AppTheme.colors.defaultText
             maxWidth = Double.MAX_VALUE.px
             alignment = Pos.BOTTOM_LEFT
             prefHeight = 100.px
@@ -66,51 +65,51 @@ class ProjectEditorStyles : Stylesheet() {
         }
 
         chunkCard {
-            backgroundColor += c(Colors["base"])
-            effect = DropShadow(10.0, Color.LIGHTGRAY)
+            backgroundColor += AppTheme.colors.cardBackground
+            effect = DropShadow(10.0, AppTheme.colors.dropShadow)
 
             label {
-                textFill = c(Colors["baseText"])
+                textFill = AppTheme.colors.defaultText
             }
 
             and(disabledCard) {
-                backgroundColor += c(Colors["baseBackground"])
+                backgroundColor += AppTheme.colors.disabledCardBackground
             }
 
             and(recordContext) {
                 button {
-                    backgroundColor += c(Colors["primary"])
+                    backgroundColor += AppTheme.colors.appRed
                 }
                 and(hasTakes) {
                     button {
-                        backgroundColor += Color.WHITE
+                        backgroundColor += AppTheme.colors.cardBackground
                         borderRadius += box(3.px)
-                        borderColor += box(c(Colors["primary"]))
-                        textFill = c(Colors["primary"])
+                        borderColor += box(AppTheme.colors.appRed)
+                        textFill = AppTheme.colors.appRed
                         child("*") {
-                            fill = c(Colors["primary"])
+                            fill = AppTheme.colors.appRed
                         }
                     }
                 }
             }
             and(viewContext) {
                 button {
-                    backgroundColor += c(Colors["secondary"])
+                    backgroundColor += AppTheme.colors.appBlue
                 }
             }
             and(editContext) {
                 button {
-                    backgroundColor += c(Colors["tertiary"])
+                    backgroundColor += AppTheme.colors.appGreen
                 }
             }
         }
 
         s(recordMenuItem, viewMenuItem, editMenuItem) {
             padding = box(20.px)
-            backgroundColor += Color.WHITE
+            backgroundColor += AppTheme.colors.base
             and(hover, active) {
                 child("*") {
-                    fill = Color.WHITE
+                    fill = AppTheme.colors.white
                 }
             }
         }
@@ -121,28 +120,28 @@ class ProjectEditorStyles : Stylesheet() {
 
         recordMenuItem {
             and(hover, active) {
-                backgroundColor += c(Colors["primary"])
+                backgroundColor += AppTheme.colors.appRed
             }
             child("*") {
-                fill = c(Colors["primary"])
+                fill = AppTheme.colors.appRed
             }
         }
 
         viewMenuItem {
             and(hover, active) {
-                backgroundColor += c(Colors["secondary"])
+                backgroundColor += AppTheme.colors.appBlue
             }
             child("*") {
-                fill = c(Colors["secondary"])
+                fill = AppTheme.colors.appBlue
             }
         }
 
         editMenuItem {
             and(hover, active) {
-                backgroundColor += c(Colors["tertiary"])
+                backgroundColor += AppTheme.colors.appGreen
             }
             child("*") {
-                fill = c(Colors["tertiary"])
+                fill = AppTheme.colors.appGreen
             }
         }
 
@@ -151,28 +150,38 @@ class ProjectEditorStyles : Stylesheet() {
             faintFocusColor = Color.TRANSPARENT
             borderWidth += box(0.px)
             padding = box(10.px, 0.px, 0.px, 10.px)
+            backgroundColor += AppTheme.colors.base
             listCell {
                 padding = box(0.px, 0.px, 0.px, 20.px)
-                backgroundColor += Color.WHITE
+                backgroundColor += AppTheme.colors.base
                 backgroundRadius += box(10.px)
                 fontSize = 14.px
                 fontWeight = FontWeight.BOLD
                 prefHeight = 40.px
+                label {
+                    textFill = AppTheme.colors.defaultText
+                    child("*") {
+                        fill = AppTheme.colors.defaultText
+                    }
+                }
+
                 and(hover) {
-                    backgroundColor += Color.WHITE.deriveColor(
-                            1.0, 1.0,
-                            0.95, 1.0
-                    )
+                    backgroundColor += AppTheme.colors.defaultBackground
                 }
                 and(selected) {
-                    backgroundColor += c(Colors["primary"])
-                    textFill = Color.WHITE
+                    backgroundColor += AppTheme.colors.appRed
+                    label {
+                        textFill = AppTheme.colors.white
+                        child("*") {
+                            fill = AppTheme.colors.white
+                        }
+                    }
                 }
             }
         }
 
         chunksLoadingProgress {
-            progressColor = c(Colors["primary"])
+            progressColor = AppTheme.colors.appRed
         }
 
         backButtonContainer {

@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.addplugin.view
 
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
 class AddPluginStyles : Stylesheet() {
@@ -13,17 +13,17 @@ class AddPluginStyles : Stylesheet() {
 
     init {
         form {
-            backgroundColor += c(Colors["base"])
+            backgroundColor += AppTheme.colors.defaultBackground
         }
         button {
             unsafe("-jfx-button-type", raw("FLAT"))
-            backgroundColor += c(Colors["baseMedium"])
+            backgroundColor += AppTheme.colors.colorlessButton
             fontWeight = FontWeight.BOLD
-            textFill = c(Colors["primary"])
+            textFill = AppTheme.colors.appRed
             padding = box(5.px, 10.px)
             and(saveButton) {
-                textFill = c(Colors["base"])
-                backgroundColor += c(Colors["primary"])
+                textFill = AppTheme.colors.white
+                backgroundColor += AppTheme.colors.appRed
                 unsafe("-jfx-button-type", raw("RAISED"))
                 and(disabled) {
                     unsafe("-jfx-button-type", raw("FLAT"))
@@ -31,11 +31,13 @@ class AddPluginStyles : Stylesheet() {
             }
         }
         jfxCheckBox {
-            unsafe("-jfx-checked-color", raw(Colors["primary"]))
+            unsafe("-jfx-checked-color", AppTheme.colors.appRed.css)
+            textFill = AppTheme.colors.defaultText
         }
         jfxTextField {
-            unsafe("-jfx-focus-color", raw(Colors["primary"]))
+            unsafe("-jfx-focus-color", AppTheme.colors.appRed.css)
             padding = box(15.px, 0.px, 0.px, 0.px)
+            textFill = AppTheme.colors.defaultText
         }
     }
 }

@@ -3,8 +3,11 @@ package org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.UIColorsObject.Colors
-import tornadofx.*
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import tornadofx.Stylesheet
+import tornadofx.box
+import tornadofx.cssclass
+import tornadofx.px
 
 class RemovePluginStyles : Stylesheet() {
     companion object {
@@ -24,20 +27,21 @@ class RemovePluginStyles : Stylesheet() {
             focusColor = Color.TRANSPARENT
             faintFocusColor = Color.TRANSPARENT
             listCell {
-                backgroundColor += c(Colors["base"])
+                backgroundColor += AppTheme.colors.defaultBackground
             }
         }
 
         pluginListCell {
-            backgroundColor += c(Colors["base"])
+            backgroundColor += AppTheme.colors.defaultBackground
             alignment = Pos.CENTER_LEFT
             padding = box(5.px)
             label {
                 fontWeight = FontWeight.BOLD
+                textFill = AppTheme.colors.defaultText
             }
             button {
                 child("*") {
-                    fill = Color.RED
+                    fill = AppTheme.colors.appRed
                 }
             }
         }

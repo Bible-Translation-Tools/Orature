@@ -1,18 +1,15 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projectcreation.view.fragments
+package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
-import javafx.scene.paint.Color
 import javafx.util.StringConverter
 import org.wycliffeassociates.otter.common.data.model.Language
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectWizardStyles
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox.filterablecombobox
 import tornadofx.*
 
 class SelectLanguage : Fragment() {
-    private val viewModel: ProjectCreationViewModel by inject()
+    private val viewModel: ProjectWizardViewModel by inject()
 
     override val complete = viewModel.valid(
             viewModel.sourceLanguageProperty,
@@ -33,10 +30,8 @@ class SelectLanguage : Fragment() {
             setPrefSize(600.0, 200.0)
 
             vbox {
-                label(messages["sourceLanguage"], MaterialIconView(MaterialIcon.HEARING, "25px")) {
-                    style {
-                        backgroundColor += Color.TRANSPARENT
-                    }
+                label(messages["sourceLanguage"], ProjectWizardStyles.sourceLanguageIcon()) {
+                    addClass(ProjectWizardStyles.languageBoxLabel)
                 }
                 filterablecombobox(viewModel.sourceLanguageProperty, viewModel.languages) {
                     converter = object: StringConverter<Language>() {
@@ -59,10 +54,8 @@ class SelectLanguage : Fragment() {
             }
 
             vbox {
-                label(messages["targetLanguage"], MaterialIconView(MaterialIcon.RECORD_VOICE_OVER, "25px")) {
-                    style {
-                        backgroundColor += Color.TRANSPARENT
-                    }
+                label(messages["targetLanguage"], ProjectWizardStyles.targetLanguageIcon()) {
+                    addClass(ProjectWizardStyles.languageBoxLabel)
                 }
                 filterablecombobox(viewModel.targetLanguageProperty, viewModel.languages) {
                     converter = object: StringConverter<Language>() {
