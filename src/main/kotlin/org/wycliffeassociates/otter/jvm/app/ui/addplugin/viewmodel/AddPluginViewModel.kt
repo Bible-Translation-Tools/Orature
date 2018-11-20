@@ -64,7 +64,7 @@ class AddPluginViewModel : ViewModel() {
                     canRecord,
                     path,
                     listOf(),
-                    File("")
+                    null
             )
             CreatePlugin(pluginRepository)
                     .create(pluginData)

@@ -1,12 +1,10 @@
 package org.wycliffeassociates.otter.jvm.persistence.repositories
 
 import io.reactivex.Completable
-
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Resource
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
@@ -26,7 +24,7 @@ class ResourceRepository(
     private val markerDao = database.getMarkerDao()
     private val resourceLinkDao = database.getResourceLinkDao()
 
-    override fun delete(obj: Resource): Completable {
+    override fun delete(obj: Chunk): Completable {
         return Completable
                 .fromAction {
                     chunkDao.delete(chunkMapper.mapToEntity(obj))
@@ -34,7 +32,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getAll(): Single<List<Resource>> {
+    override fun getAll(): Single<List<Chunk>> {
         return Single
                 .fromCallable {
                     chunkDao
@@ -44,7 +42,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getByCollection(collection: Collection): Single<List<Resource>> {
+    override fun getByCollection(collection: Collection): Single<List<Chunk>> {
         return Single
                 .fromCallable {
                     resourceLinkDao
@@ -57,7 +55,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getByChunk(chunk: Chunk): Single<List<Resource>> {
+    override fun getByChunk(chunk: Chunk): Single<List<Chunk>> {
         return Single
                 .fromCallable {
                     resourceLinkDao
@@ -70,7 +68,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun linkToChunk(resource: Resource, chunk: Chunk): Completable {
+    override fun linkToChunk(resource: Chunk, chunk: Chunk): Completable {
         return Completable
                 .fromAction {
                     // Check if already exists
@@ -95,7 +93,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun linkToCollection(resource: Resource, collection: Collection): Completable {
+    override fun linkToCollection(resource: Chunk, collection: Collection): Completable {
         return Completable
                 .fromAction {
                     // Check if already exists
@@ -120,7 +118,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun unlinkFromChunk(resource: Resource, chunk: Chunk): Completable {
+    override fun unlinkFromChunk(resource: Chunk, chunk: Chunk): Completable {
         return Completable
                 .fromAction {
                     // Check if exists
@@ -138,7 +136,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun unlinkFromCollection(resource: Resource, collection: Collection): Completable {
+    override fun unlinkFromCollection(resource: Chunk, collection: Collection): Completable {
         return Completable
                 .fromAction {
                     // Check if exists
@@ -156,7 +154,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun update(obj: Resource): Completable {
+    override fun update(obj: Chunk): Completable {
         return Completable
                 .fromAction {
                     val existing = chunkDao.fetchById(obj.id)
@@ -168,7 +166,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    private fun buildResource(entity: ChunkEntity): Resource {
+    private fun buildResource(entity: ChunkEntity): Chunk {
         // Check for sources
         val sources = chunkDao.fetchSources(entity)
         val chunkEnd = sources.map { it.start }.max() ?: entity.start

@@ -16,7 +16,7 @@ class AudioPluginDataMapper : Mapper<AudioPluginEntity, AudioPluginData> {
                 type.record == 1,
                 type.bin,
                 listOf(type.args),
-                File("") // TODO: entity plugin path
+                type.path?.let { File(type.path) }
         )
     }
 
@@ -28,7 +28,8 @@ class AudioPluginDataMapper : Mapper<AudioPluginEntity, AudioPluginData> {
                 type.executable,
                 type.args.firstOrNull() ?: "",
                 if (type.canEdit) 1 else 0,
-                if (type.canRecord) 1 else 0
+                if (type.canRecord) 1 else 0,
+                type.pluginFile?.toURI()?.path
         )
     }
 

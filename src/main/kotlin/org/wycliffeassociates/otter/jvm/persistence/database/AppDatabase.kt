@@ -19,6 +19,8 @@ class AppDatabase(
                 .newInstance()
 
         // Create a new sqlite data source
+        val dbDoesNotExist = !databaseFile.exists()
+
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
 
@@ -27,6 +29,8 @@ class AppDatabase(
 
         // Create the jooq dsl
         dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
+
+        if (dbDoesNotExist) setup()
     }
 
     fun setup() {

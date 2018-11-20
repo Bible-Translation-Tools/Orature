@@ -28,18 +28,13 @@ fun main(args: Array<String>) {
 
 private fun initApp() {
     if (!Injector.preferences.getAppInitialized()) {
-        println("Running one-time initialization")
         // Needs initialization
         ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
                 .import()
                 .onErrorComplete()
                 .subscribe()
 
-        Injector.database.setup()
-
         Injector.preferences.setAppInitialized(true)
-    } else {
-        println("App already initialized")
     }
 
     // Always import new plugins

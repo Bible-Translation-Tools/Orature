@@ -33,7 +33,7 @@ class ProjectWizardViewModel : ViewModel() {
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
-    private val creationUseCase = CreateProject(languageRepo, collectionRepo)
+    private val creationUseCase = CreateProject(collectionRepo)
     private val getCollections = GetCollections(collectionRepo)
 
     init {

@@ -4,7 +4,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.injection.DaggerAudioCompon
 import org.wycliffeassociates.otter.jvm.device.audioplugin.injection.DaggerAudioPluginComponent
 import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.persistence.repositories.*
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
 

@@ -97,5 +97,6 @@ CREATE TABLE IF NOT EXISTS audio_plugin_entity (
     args                TEXT NOT NULL,
     record              INTEGER DEFAULT 0 NOT NULL,
     edit                INTEGER DEFAULT 0 NOT NULL,
+    path                TEXT,
     UNIQUE (name, version)
 );

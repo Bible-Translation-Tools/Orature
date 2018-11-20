@@ -10,7 +10,7 @@ buildscript {
     ext.jfoenix_version = '8.0.4'
     ext.requery_version = '1.5.1'
     ext.sqlite_jdbc = '3.25.2'
-    ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "CreateAppDb.sql"].join(File.separator)
+    ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
 
     repositories {
         mavenCentral()
@@ -181,6 +181,7 @@ jooq {
 }
 
 clean.doLast {
+    project.file('test.sqlite').delete()
     project.file('src/main/java/jooq').deleteDir()
 }
 /////////////////////// Define Task Orders ///////////////////////////////
