@@ -10,11 +10,10 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.images.SVGImage
-import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
 import tornadofx.*
-import java.io.File
 
 class ProjectHomeView : View() {
 

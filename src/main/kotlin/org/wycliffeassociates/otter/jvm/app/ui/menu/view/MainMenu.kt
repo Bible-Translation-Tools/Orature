@@ -7,7 +7,7 @@ import javafx.application.Platform
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view.RemovePluginsView

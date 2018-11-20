@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view
 
 import javafx.geometry.Insets
-import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectCollection
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel

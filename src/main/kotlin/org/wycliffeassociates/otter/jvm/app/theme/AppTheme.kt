@@ -17,6 +17,7 @@ object AppTheme {
         override val colorlessButton: Color = c("#DFDEE3")
         override val dropShadow: Color = c("#9e9e9e")
         override val imagePlaceholder: Color = c("#DFDEE3")
+        override val subtitle: Color = c("#AAA")
     }
 
     private class DarkColors : AppColors() {
@@ -28,6 +29,7 @@ object AppTheme {
         override val colorlessButton: Color = c("#DFDEE3")
         override val dropShadow: Color = Color.BLACK
         override val imagePlaceholder: Color = c("#555")
+        override val subtitle: Color = c("#AAA")
     }
 
     fun useDarkColors() {

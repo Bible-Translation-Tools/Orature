@@ -12,7 +12,7 @@ import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.jvm.app.ui.AppStyles
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.chunkcard.ChunkCard

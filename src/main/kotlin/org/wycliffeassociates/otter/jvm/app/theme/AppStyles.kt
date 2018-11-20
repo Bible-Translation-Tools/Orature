@@ -1,9 +1,8 @@
-package org.wycliffeassociates.otter.jvm.app.ui
+package org.wycliffeassociates.otter.jvm.app.theme
 
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.ProgressDialogStyles
 import tornadofx.*
 

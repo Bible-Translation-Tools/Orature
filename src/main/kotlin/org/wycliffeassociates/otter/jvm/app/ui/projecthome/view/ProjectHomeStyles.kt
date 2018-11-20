@@ -66,7 +66,7 @@ class ProjectHomeStyles : Stylesheet() {
                 }
                 and(projectCardLanguage) {
                     fontWeight = FontWeight.NORMAL
-                    textFill = AppTheme.colors.gray
+                    textFill = AppTheme.colors.subtitle
                 }
             }
 
