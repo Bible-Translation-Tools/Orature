@@ -81,19 +81,19 @@ class SelectCollection : Fragment() {
         return when (resourceSlug) {
             SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
             SlugsEnum.OBS.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("assets/OBS.svg"),
+                    ClassLoader.getSystemResourceAsStream("images/obs.svg"),
                     ImageLoader.Format.SVG
             )
             SlugsEnum.TW.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("assets/tW.svg"),
+                    ClassLoader.getSystemResourceAsStream("images/tw.svg"),
                     ImageLoader.Format.SVG
             )
             SlugsEnum.OT.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("assets/Old_Testament.svg"),
+                    ClassLoader.getSystemResourceAsStream("images/old_testament.svg"),
                     ImageLoader.Format.SVG
             )
             SlugsEnum.NT.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("assets/Cross.svg"),
+                    ClassLoader.getSystemResourceAsStream("images/cross.svg"),
                     ImageLoader.Format.SVG
             )
             else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")

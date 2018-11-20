@@ -111,7 +111,7 @@ class ProjectHomeView : View() {
     init {
         with(root) {
             add(ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("assets${File.separator}project_home_arrow.svg"),
+                    ClassLoader.getSystemResourceAsStream("images/project_home_arrow.svg"),
                     ImageLoader.Format.SVG
             ).apply {
                 if (this is SVGImage) preserveAspect = false

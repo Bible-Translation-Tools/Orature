@@ -27,7 +27,7 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    ImportLanguages(ClassLoader.getSystemResourceAsStream("langnames.json"), Injector.languageRepo)
+    ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
             .import()
             .onErrorComplete()
             .subscribe()
