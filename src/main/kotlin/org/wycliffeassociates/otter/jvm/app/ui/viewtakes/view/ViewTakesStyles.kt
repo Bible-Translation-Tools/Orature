@@ -59,7 +59,7 @@ class ViewTakesStyles : Stylesheet() {
 
         takeCard {
             borderRadius += box(10.px)
-            borderColor += box(AppTheme.colors.defaultText)
+            borderColor += box(AppTheme.colors.imagePlaceholder)
             borderWidth += box(1.px)
             backgroundColor += AppTheme.colors.cardBackground
             label {
@@ -83,7 +83,7 @@ class ViewTakesStyles : Stylesheet() {
         }
 
         placeholder {
-            backgroundColor += AppTheme.colors.disabledCardBackground
+            backgroundColor += AppTheme.colors.imagePlaceholder
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
             minHeight = 100.px
