@@ -14,6 +14,7 @@ class AddPluginStyles : Stylesheet() {
     init {
         form {
             backgroundColor += AppTheme.colors.defaultBackground
+            prefWidth = 500.px
         }
         button {
             unsafe("-jfx-button-type", raw("FLAT"))

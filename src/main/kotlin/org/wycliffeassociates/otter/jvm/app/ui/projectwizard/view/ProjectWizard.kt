@@ -22,7 +22,6 @@ class ProjectWizard : Wizard() {
         root.bottom {
             buttonbar {
                 padding = Insets(10.0)
-
                 button(messages["back"]) {
                     addClass(ProjectWizardStyles.wizardButton)
                     enableWhen(canGoBack.and(!wizardViewModel.showOverlayProperty))

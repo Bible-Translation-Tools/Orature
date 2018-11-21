@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import io.reactivex.Observable
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -38,6 +39,7 @@ class ProjectEditor : View() {
             it.first.value = null
             it.first.value = tmp
         }
+        viewModel.refreshActiveChunk()
     }
 
     override val root = stackpane {
@@ -54,7 +56,7 @@ class ProjectEditor : View() {
                     addClass(ProjectEditorStyles.chapterList)
                     cellCache {
                         label(it.titleKey) {
-                            graphic = MaterialIconView(MaterialIcon.CHROME_READER_MODE, "20px")
+                            graphic = AppStyles.chapterIcon("20px")
                         }
                     }
                     selectionModel.selectedIndexProperty().onChange {
@@ -94,8 +96,9 @@ class ProjectEditor : View() {
                             chunkCard.bindClass(disabledCssRuleProperty(item.second))
                             chunkCard.bindClass(hasTakesCssRuleProperty(item.second))
                             viewModel.contextProperty.toObservable().subscribe { context ->
-                                chunkCard.actionButton.isVisible =
-                                        (item.second.value == true || context == ChapterContext.RECORD)
+                                chunkCard.actionButton.visibleProperty().bind(
+                                        item.second.or(viewModel.contextProperty.isEqualTo(ChapterContext.RECORD))
+                                )
                                 when (context ?: ChapterContext.RECORD) {
                                     ChapterContext.RECORD -> {
                                         chunkCard.actionButton.apply {
@@ -129,7 +132,7 @@ class ProjectEditor : View() {
                     orientation = Orientation.HORIZONTAL
                     useMaxWidth = true
                     addClass(ProjectEditorStyles.contextMenu)
-                    item(graphic = ProjectEditorStyles.recordIcon("25px")) {
+                    item(graphic = AppStyles.recordIcon("25px")) {
                         activeItem = this
                         whenSelected { viewModel.changeContext(ChapterContext.RECORD) }
                         addClass(ProjectEditorStyles.recordMenuItem)
@@ -137,14 +140,14 @@ class ProjectEditor : View() {
                             newBounds?.let { prefWidth = it.width / items.size }
                         }
                     }
-                    item(graphic = ProjectEditorStyles.viewTakesIcon("25px")) {
+                    item(graphic = AppStyles.viewTakesIcon("25px")) {
                         whenSelected { viewModel.changeContext(ChapterContext.VIEW_TAKES) }
                         addClass(ProjectEditorStyles.viewMenuItem)
                         parent.layoutBoundsProperty().onChange { newBounds ->
                             newBounds?.let { prefWidth = it.width / items.size }
                         }
                     }
-                    item(graphic = ProjectEditorStyles.editIcon("25px")) {
+                    item(graphic = AppStyles.editIcon("25px")) {
                         whenSelected { viewModel.changeContext(ChapterContext.EDIT_TAKES) }
                         addClass(ProjectEditorStyles.editMenuItem)
                         parent.layoutBoundsProperty().onChange { newBounds ->
@@ -159,8 +162,8 @@ class ProjectEditor : View() {
             root.addClass(AppStyles.progressDialog)
             viewModel.contextProperty.toObservable().subscribe { newContext ->
                 when (newContext) {
-                    ChapterContext.RECORD -> graphic = ProjectEditorStyles.recordIcon("60px")
-                    ChapterContext.EDIT_TAKES -> graphic = ProjectEditorStyles.editIcon("60px")
+                    ChapterContext.RECORD -> graphic = AppStyles.recordIcon("60px")
+                    ChapterContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
                     else -> { }
                 }
             }
@@ -203,8 +206,9 @@ class ProjectEditor : View() {
             hasTakesProperty: SimpleBooleanProperty
     ): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
-        viewModel.contextProperty.toObservable().subscribe {
-            cssRuleProperty.value = when (it ?: ChapterContext.RECORD) {
+        // Merge the observable to detect changes on either property
+        Observable.merge(viewModel.contextProperty.toObservable(), hasTakesProperty.toObservable()).subscribe {
+            cssRuleProperty.value = when (viewModel.contextProperty.value ?: ChapterContext.RECORD) {
                 ChapterContext.RECORD -> null
                 ChapterContext.VIEW_TAKES, ChapterContext.EDIT_TAKES -> {
                     if (hasTakesProperty.value) null else ProjectEditorStyles.disabledCard

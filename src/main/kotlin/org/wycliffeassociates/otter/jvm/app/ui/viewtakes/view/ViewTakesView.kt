@@ -55,11 +55,8 @@ class ViewTakesView : View() {
                 topAnchor = 0.0
                 bottomAnchor = 0.0
             }
-            hbox(20.0) {
-                style {
-                    padding = box(20.px)
-                }
-                alignment = Pos.CENTER_LEFT
+            hbox {
+                addClass(ViewTakesStyles.headerContainer)
                 // Title label
                 label(viewModel.titleProperty) {
                     hgrow = Priority.ALWAYS
@@ -68,10 +65,8 @@ class ViewTakesView : View() {
                 }
 
                 // Back button
-                add(JFXButton(messages["back"], MaterialIconView(MaterialIcon.ARROW_BACK)).apply {
-                    action {
-                        workspace.navigateBack()
-                    }
+                add(JFXButton(messages["back"], AppStyles.backIcon()).apply {
+                    action { workspace.navigateBack() }
                     isDisableVisualFocus = true
                     addClass(AppStyles.backButton)
                 })
@@ -80,8 +75,7 @@ class ViewTakesView : View() {
             // Top items above the alternate takes
             // Drag target and/or selected take
             stackpane {
-                alignment = Pos.CENTER_LEFT
-                addClass(ViewTakesStyles.headerContainer)
+                addClass(ViewTakesStyles.selectedTakeContainer)
 
                 // drag target glow
                 stackpane {
@@ -132,7 +126,7 @@ class ViewTakesView : View() {
         }
 
         // Record button?
-        recordButton = button("", ViewTakesStyles.recordIcon("25px")) {
+        recordButton = button("", AppStyles.recordIcon("25px")) {
             addClass(ViewTakesStyles.recordButton)
             anchorpaneConstraints {
                 bottomAnchor = 25.0
@@ -162,7 +156,7 @@ class ViewTakesView : View() {
         // Plugin active cover
         val dialog = progressdialog {
             root.addClass(AppStyles.progressDialog)
-            graphic = ViewTakesStyles.recordIcon("60px")
+            graphic = AppStyles.recordIcon("60px")
         }
         viewModel.showPluginActiveProperty.onChange {
             Platform.runLater {

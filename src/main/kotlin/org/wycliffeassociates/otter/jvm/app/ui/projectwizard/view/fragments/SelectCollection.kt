@@ -1,16 +1,9 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
-import javafx.geometry.Insets
-import javafx.geometry.Pos
-import javafx.scene.Node
-import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.SlugsEnum
-import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
@@ -23,10 +16,7 @@ class SelectCollection : Fragment() {
         addClass(AppStyles.appBackground)
         flowpane {
             addClass(AppStyles.appBackground)
-            vgap = 16.0
-            hgap = 16.0
-            alignment = Pos.CENTER
-            padding = Insets(10.0)
+            addClass(ProjectWizardStyles.collectionFlowPane)
             bindChildren(viewModel.collections) {
                 hbox {
                     wizardcard {
@@ -46,7 +36,7 @@ class SelectCollection : Fragment() {
                         }
                         graphicContainer.apply {
                             addClass(ProjectWizardStyles.wizardCardGraphicsContainer)
-                            add(resourceGraphic(it.slug))
+                            add(ProjectWizardStyles.resourceGraphic(it.slug))
                         }
                     }
                 }
@@ -75,28 +65,5 @@ class SelectCollection : Fragment() {
             Platform.runLater { if (it) dialog.open() else dialog.close() }
         }
 
-    }
-
-    private fun resourceGraphic(resourceSlug: String): Node {
-        return when (resourceSlug) {
-            SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
-            SlugsEnum.OBS.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("images/obs.svg"),
-                    ImageLoader.Format.SVG
-            )
-            SlugsEnum.TW.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("images/tw.svg"),
-                    ImageLoader.Format.SVG
-            )
-            SlugsEnum.OT.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("images/old_testament.svg"),
-                    ImageLoader.Format.SVG
-            )
-            SlugsEnum.NT.slug -> ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("images/cross.svg"),
-                    ImageLoader.Format.SVG
-            )
-            else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
-        }
     }
 }

@@ -20,7 +20,6 @@ class AddPluginView : View() {
     private val viewModel: AddPluginViewModel by inject()
 
     override val root = form {
-        prefWidth = 500.0
         fieldset {
             field {
                 nameField = JFXTextField().apply {
@@ -67,7 +66,6 @@ class AddPluginView : View() {
                 addClass(AddPluginStyles.saveButton)
                 action {
                     viewModel.save()
-
                     close()
                 }
                 enableWhen { viewModel.validated() }

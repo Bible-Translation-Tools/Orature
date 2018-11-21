@@ -4,7 +4,7 @@ import javafx.scene.paint.Color
 import tornadofx.c
 
 object AppTheme {
-    private var _colors: AppColors = LightColors()
+    private var _colors: AppColors = DarkColors()
     val colors: AppColors
         get() = _colors
 

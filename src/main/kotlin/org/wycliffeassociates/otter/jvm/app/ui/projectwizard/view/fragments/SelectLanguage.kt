@@ -16,71 +16,59 @@ class SelectLanguage : Fragment() {
             viewModel.targetLanguageProperty
     )
 
-    override val root = hbox {
-        alignment = Pos.CENTER
-        style {
-            padding = box(100.0.px)
-            setPrefSize(1200.0, 800.0)
-        }
-        hbox(100.0) {
-            anchorpaneConstraints {
-                leftAnchor = 50.0
-                topAnchor = 250.0
-            }
-            setPrefSize(600.0, 200.0)
-
-            vbox {
-                label(messages["sourceLanguage"], ProjectWizardStyles.sourceLanguageIcon()) {
-                    addClass(ProjectWizardStyles.languageBoxLabel)
-                }
-                filterablecombobox(viewModel.sourceLanguageProperty, viewModel.languages) {
-                    converter = object: StringConverter<Language>() {
-                        override fun fromString(string: String?): Language? {
-                            return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
-                        }
-
-                        override fun toString(language: Language?): String {
-                            return "${language?.name} (${language?.slug})"
-                        }
-                    }
-
-                    filterConverter = { language ->
-                        listOf(language.name, language.anglicizedName, language.slug)
-                    }
-
-                    addClass(ProjectWizardStyles.filterableComboBox)
-                    promptText = messages["comboBoxPrompt"]
-                }.required()
-            }
-
-            vbox {
-                label(messages["targetLanguage"], ProjectWizardStyles.targetLanguageIcon()) {
-                    addClass(ProjectWizardStyles.languageBoxLabel)
-                }
-                filterablecombobox(viewModel.targetLanguageProperty, viewModel.languages) {
-                    converter = object: StringConverter<Language>() {
-                        override fun fromString(string: String?): Language? {
-                            return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
-                        }
-
-                        override fun toString(language: Language?): String {
-                            return "${language?.name} (${language?.slug})"
-                        }
-                    }
-
-                    filterConverter = { language ->
-                        listOf(language.name, language.anglicizedName, language.slug)
-                    }
-
-                    addClass(ProjectWizardStyles.filterableComboBox)
-                    promptText = messages["comboBoxPrompt"]
-                }.required()
-            }
-        }
-
-    }
     init {
         importStylesheet<ProjectWizardStyles>()
+    }
+
+    override val root = hbox {
+        addClass(ProjectWizardStyles.selectLanguageRoot)
+        vbox {
+            label(messages["sourceLanguage"], ProjectWizardStyles.sourceLanguageIcon()) {
+                addClass(ProjectWizardStyles.languageBoxLabel)
+            }
+            filterablecombobox(viewModel.sourceLanguageProperty, viewModel.languages) {
+                converter = object: StringConverter<Language>() {
+                    override fun fromString(string: String?): Language? {
+                        return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
+                    }
+
+                    override fun toString(language: Language?): String {
+                        return "${language?.name} (${language?.slug})"
+                    }
+                }
+
+                filterConverter = { language ->
+                    listOf(language.name, language.anglicizedName, language.slug)
+                }
+
+                addClass(ProjectWizardStyles.filterableComboBox)
+                promptText = messages["comboBoxPrompt"]
+            }.required()
+        }
+
+        vbox {
+            label(messages["targetLanguage"], ProjectWizardStyles.targetLanguageIcon()) {
+                addClass(ProjectWizardStyles.languageBoxLabel)
+            }
+            filterablecombobox(viewModel.targetLanguageProperty, viewModel.languages) {
+                converter = object: StringConverter<Language>() {
+                    override fun fromString(string: String?): Language? {
+                        return items.filter { string?.contains("(${it.slug})") ?: false }.firstOrNull()
+                    }
+
+                    override fun toString(language: Language?): String {
+                        return "${language?.name} (${language?.slug})"
+                    }
+                }
+
+                filterConverter = { language ->
+                    listOf(language.name, language.anglicizedName, language.slug)
+                }
+
+                addClass(ProjectWizardStyles.filterableComboBox)
+                promptText = messages["comboBoxPrompt"]
+            }.required()
+        }
     }
 
     override fun onSave() {

@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
@@ -34,11 +32,6 @@ class ProjectEditorStyles : Stylesheet() {
 
         val backButtonContainer by cssclass()
         val contextMenu by cssclass()
-
-        // Icons
-        fun recordIcon(size: String) = MaterialIconView(MaterialIcon.MIC_NONE, size)
-        fun editIcon(size: String) = MaterialIconView(MaterialIcon.EDIT, size)
-        fun viewTakesIcon(size: String) = MaterialIconView(MaterialIcon.APPS, size)
     }
 
     init {

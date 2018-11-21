@@ -6,7 +6,6 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.viewmodel.MainMenuViewModel
@@ -20,14 +19,14 @@ class MainMenu : MenuBar() {
     private val viewModel: MainMenuViewModel = find()
 
     init {
-        importStylesheet<MainMenuStylesheet>()
+        importStylesheet<MainMenuStyles>()
         with(this) {
             menu(messages["file"]) {
                 item(messages["importResource"]) {
-                    graphic = MaterialIconView(MaterialIcon.INPUT, "20px")
+                    graphic = MainMenuStyles.importIcon("20px")
                     val dialog = progressdialog {
                         text = messages["importResource"]
-                        graphic = MaterialIconView(MaterialIcon.INPUT, "60px")
+                        graphic = MainMenuStyles.importIcon( "60px")
                         root.addClass(AppStyles.progressDialog)
                     }
                     viewModel.showImportDialogProperty.onChange {
@@ -40,17 +39,10 @@ class MainMenu : MenuBar() {
                         }
                     }
                 }
-                checkmenuitem(messages["nightMode"]) {
-                    graphic = MaterialIconView(MaterialIcon.BRIGHTNESS_3, "20px")
-                    action {
-                        if (isSelected) AppTheme.useDarkColors() else AppTheme.useLightColors()
-                        scene.reloadStylesheets()
-                    }
-                }
             }
             menu(messages["audioPlugins"]) {
                 item(messages["new"]) {
-                    graphic = MaterialIconView(MaterialIcon.ADD, "20px")
+                    graphic = MainMenuStyles.addPluginIcon("20px")
                     action {
                         find<AddPluginView>().apply {
                             whenUndocked { viewModel.refreshPlugins() }
@@ -59,7 +51,7 @@ class MainMenu : MenuBar() {
                     }
                 }
                 item(messages["remove"]) {
-                    graphic = MaterialIconView(MaterialIcon.DELETE, "20px")
+                    graphic = MainMenuStyles.removePluginIcon("20px")
                     action {
                         find<RemovePluginsView>().apply {
                             whenUndocked { viewModel.refreshPlugins() }
@@ -69,7 +61,7 @@ class MainMenu : MenuBar() {
                 }
                 separator()
                 menu(messages["audioRecorder"]) {
-                    graphic = MaterialIconView(MaterialIcon.MIC, "20px")
+                    graphic = MainMenuStyles.recorderIcon("20px")
                     val pluginToggleGroup = ToggleGroup()
                     viewModel.recorderPlugins.onChange { _ ->
                         items.clear()
@@ -87,7 +79,7 @@ class MainMenu : MenuBar() {
 
                 }
                 menu(messages["audioEditor"]) {
-                    graphic = MaterialIconView(MaterialIcon.MODE_EDIT, "20px")
+                    graphic = MainMenuStyles.editorIcon("20px")
                     val pluginToggleGroup = ToggleGroup()
                     viewModel.editorPlugins.onChange { _ ->
                         items.clear()

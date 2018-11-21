@@ -32,9 +32,7 @@ class ProjectHomeView : View() {
 
     override val root = anchorpane {
         addClass(AppStyles.appBackground)
-        style {
-            setPrefSize(1200.0, 800.0)
-        }
+        addClass(ProjectHomeStyles.homeAnchorPane)
         scrollpane {
             isFitToHeight = true
             isFitToWidth = true
@@ -46,11 +44,7 @@ class ProjectHomeView : View() {
             }
             content = flowpane {
                 addClass(AppStyles.appBackground)
-                vgap = 16.0
-                hgap = 16.0
-                alignment = Pos.TOP_LEFT
-                // Add larger padding on bottom to keep FAB from blocking last row cards
-                padding = Insets(10.0, 10.0, 95.0, 10.0)
+                addClass(ProjectHomeStyles.projectsFlowPane)
                 bindChildren(viewModel.projects) {
                     hbox {
                         projectcard(it) {
@@ -80,7 +74,6 @@ class ProjectHomeView : View() {
                 bottomAnchor = 0
                 rightAnchor = 0
             }
-
             alignment = Pos.CENTER
             vgrow = Priority.ALWAYS
             label(messages["noProjects"]) {
@@ -101,9 +94,7 @@ class ProjectHomeView : View() {
                 bottomAnchor = 25
                 rightAnchor = 25
             }
-            action {
-                viewModel.createProject()
-            }
+            action { viewModel.createProject() }
         })
     }
 

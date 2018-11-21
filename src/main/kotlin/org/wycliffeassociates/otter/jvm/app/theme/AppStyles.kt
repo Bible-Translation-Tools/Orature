@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.theme
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
@@ -12,6 +14,13 @@ class AppStyles : Stylesheet() {
         val backButton by cssclass()
         val appBackground by cssclass()
         val progressDialog by cssclass()
+
+        // Icons
+        fun recordIcon(size: String) = MaterialIconView(MaterialIcon.MIC_NONE, size)
+        fun editIcon(size: String) = MaterialIconView(MaterialIcon.EDIT, size)
+        fun viewTakesIcon(size: String) = MaterialIconView(MaterialIcon.APPS, size)
+        fun backIcon() = MaterialIconView(MaterialIcon.ARROW_BACK)
+        fun chapterIcon(size: String) = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
     }
 
     init {

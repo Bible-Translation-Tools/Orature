@@ -81,6 +81,21 @@ class ProjectEditorViewModel: ViewModel() {
         projectProperty.toObservable().subscribe { setTitleAndChapters() }
     }
 
+    fun refreshActiveChunk() {
+        // See if takes still exist for this chunk
+        activeChunkProperty.value?.let {
+            accessTakes
+                    .getTakeCount(activeChunk)
+                    .observeOnFx()
+                    .subscribe { count ->
+                        if (count == 0) {
+                            // No more takes. Update hasTakes property
+                            chunks.filter { it.first.value == activeChunk }.first().second.value = false
+                        }
+                    }
+        }
+    }
+
     private fun setTitleAndChapters() {
         val project = projectProperty.value
         if (project != null) {

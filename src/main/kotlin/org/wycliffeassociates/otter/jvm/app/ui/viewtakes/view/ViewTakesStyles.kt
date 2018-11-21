@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import tornadofx.*
+import tornadofx.Stylesheet
+import tornadofx.box
+import tornadofx.cssclass
+import tornadofx.px
 
 class ViewTakesStyles : Stylesheet() {
     companion object {
@@ -17,11 +19,11 @@ class ViewTakesStyles : Stylesheet() {
         val badge by cssclass()
         val placeholder by cssclass()
         val headerContainer by cssclass()
+        val selectedTakeContainer by cssclass()
         val takeFlowPane by cssclass()
         val glow by cssclass()
         val recordButton by cssclass()
         val playPauseButton by cssclass()
-        fun recordIcon(size: String) = MaterialIconView(MaterialIcon.MIC_NONE, size)
     }
 
     init {
@@ -91,8 +93,15 @@ class ViewTakesStyles : Stylesheet() {
         }
 
         headerContainer {
+            padding = box(20.px)
+            spacing = 20.px
+            alignment = Pos.CENTER_LEFT
+        }
+
+        selectedTakeContainer {
             backgroundColor += AppTheme.colors.defaultBackground
             padding = box(20.px)
+            alignment = Pos.CENTER_LEFT
             label {
                 textFill = AppTheme.colors.defaultText
             }

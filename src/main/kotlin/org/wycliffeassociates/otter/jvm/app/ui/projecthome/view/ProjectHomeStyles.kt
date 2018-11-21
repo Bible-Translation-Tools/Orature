@@ -1,13 +1,18 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecthome.view
 
+import javafx.geometry.Pos
 import javafx.scene.Cursor
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import tornadofx.*
+import tornadofx.Stylesheet
+import tornadofx.box
+import tornadofx.cssclass
+import tornadofx.px
 
 class ProjectHomeStyles : Stylesheet() {
     companion object {
+        val homeAnchorPane by cssclass()
+        val projectsFlowPane by cssclass()
         val noProjectsLabel by cssclass()
         val tryCreatingLabel by cssclass()
         val addProjectButton by cssclass()
@@ -18,6 +23,19 @@ class ProjectHomeStyles : Stylesheet() {
     }
 
     init {
+        homeAnchorPane {
+            prefWidth = 1200.px
+            prefHeight = 800.px
+        }
+
+        projectsFlowPane {
+            vgap = 16.px
+            hgap = 16.px
+            alignment = Pos.TOP_LEFT
+            // Add larger padding on bottom to keep FAB from blocking last row cards
+            padding = box(10.px, 20.px, 95.px, 20.px)
+        }
+
         noProjectsLabel {
             fontSize = 30.px
             fontWeight = FontWeight.BOLD
