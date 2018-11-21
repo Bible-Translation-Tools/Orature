@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    if (!Injector.preferences.getAppInitialized()) {
+//    if (!Injector.preferences.getAppInitialized()) {
         // Needs initialization
         ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
                 .import()
@@ -34,7 +34,7 @@ private fun initApp() {
                 .subscribe()
 
         Injector.preferences.setAppInitialized(true)
-    }
+//    }
 
     // Always import new plugins
     ImportAudioPlugins(Injector.audioPluginRegistrar, Injector.directoryProvider)

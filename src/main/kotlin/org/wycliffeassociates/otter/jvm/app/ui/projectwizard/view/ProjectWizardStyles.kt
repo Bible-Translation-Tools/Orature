@@ -54,11 +54,14 @@ class ProjectWizardStyles : Stylesheet() {
     init {
         wizard {
             backgroundColor += AppTheme.colors.defaultBackground
+            prefWidth = 1000.px
+            prefHeight = 800.px
         }
 
         selectLanguageRoot {
             alignment = Pos.CENTER
             spacing = 100.px
+            padding = box(50.px, 0.px, 0.px, 0.px)
         }
 
         label {
