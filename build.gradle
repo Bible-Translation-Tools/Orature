@@ -24,7 +24,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-// commenting out the jfx plugin for now since we are bundling the Oracle JRE in dev
+// commenting out the jfx plugin for now since we are bundling the Oracle JRE
 //        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
         classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
         classpath 'org.jooq:jooq-codegen:3.11.2'
@@ -37,7 +37,6 @@ plugins {
     id 'java'
     id 'java-library'
     id 'nu.studer.jooq' version '3.0.1'
-    id 'application'
 }
 
 group 'org.wycliffeassociates'
@@ -126,20 +125,16 @@ dependencies {
     testCompile 'org.powermock:powermock-api-mockito2:2.+'
     
     //WA Libraries
-    api 'org.wycliffeassociates:8woc2018-common'
-    api 'org.wycliffeassociates:kotlin-resource-container'
-    api 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+    implementation 'org.wycliffeassociates:8woc2018-common'
+    implementation 'org.wycliffeassociates:kotlin-resource-container'
+    implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
 }
-
-//Application plugin setting
-mainClassName = "org.wycliffeassociates.otter.jvm.app.MainKt"
 
 //tell gradle what to put in the jar
 jar {
     manifest {
         attributes(
-        'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-        'Main-Class': mainClassName
+        'Main-Class': "org.wycliffeassociates.otter.jvm.app.MainKt"
         )
     }
     from (configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
@@ -153,7 +148,7 @@ jar {
 //install4j tasks for building win/nix/mac installers. Executable jar can be built without it
 install4j {
         installDir = file('/opt/install4j7')
-        //license must be passed via gradlew commandline -P as it can't be commit to source control
+        //license must be passed via gradlew commandline -P as it can't be commit to public source control
         if(project.hasProperty('gradlewCommandLicenseProp'))
         {
           license = gradlewCommandLicenseProp
