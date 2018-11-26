@@ -23,7 +23,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
     val playedProperty = SimpleBooleanProperty(take.played)
     val badge = stackpane {
         addClass(TakeCardStyles.badge)
-        val icon = MaterialDesignIconView(MaterialDesignIcon.CREATION, "18px")
+        val icon = TakeCardStyles.badgeIcon()
         icon.addClass(TakeCardStyles.iconStyle)
         add(icon)
         isVisible = !take.played

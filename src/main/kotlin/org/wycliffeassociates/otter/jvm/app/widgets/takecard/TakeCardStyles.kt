@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon
+import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.paint.Color
@@ -20,6 +22,7 @@ class TakeCardStyles : Stylesheet() {
         fun playIcon() = MaterialIconView(MaterialIcon.PLAY_CIRCLE_OUTLINE, "30px")
         fun pauseIcon() = MaterialIconView(MaterialIcon.PAUSE_CIRCLE_OUTLINE, "30px")
         fun deleteIcon() = MaterialIconView(MaterialIcon.DELETE, "25px")
+        fun badgeIcon() = MaterialDesignIconView(MaterialDesignIcon.CREATION, "18px")
     }
 
     init {
