@@ -7,6 +7,7 @@ import tornadofx.*
 class AddPluginStyles : Stylesheet() {
     companion object {
         val saveButton by cssclass()
+        val browseButton by cssclass()
         val jfxCheckBox by cssclass("jfx-check-box")
         val jfxTextField by cssclass("jfx-text-field")
     }
@@ -17,17 +18,19 @@ class AddPluginStyles : Stylesheet() {
             prefWidth = 500.px
         }
         button {
-            unsafe("-jfx-button-type", raw("FLAT"))
-            backgroundColor += AppTheme.colors.colorlessButton
-            fontWeight = FontWeight.BOLD
-            textFill = AppTheme.colors.appRed
-            padding = box(5.px, 10.px)
-            and(saveButton) {
-                textFill = AppTheme.colors.white
-                backgroundColor += AppTheme.colors.appRed
-                unsafe("-jfx-button-type", raw("RAISED"))
-                and(disabled) {
-                    unsafe("-jfx-button-type", raw("FLAT"))
+            and(saveButton, browseButton) {
+                unsafe("-jfx-button-type", raw("FLAT"))
+                backgroundColor += AppTheme.colors.colorlessButton
+                fontWeight = FontWeight.BOLD
+                textFill = AppTheme.colors.appRed
+                padding = box(5.px, 10.px)
+                and(saveButton) {
+                    textFill = AppTheme.colors.white
+                    backgroundColor += AppTheme.colors.appRed
+                    unsafe("-jfx-button-type", raw("RAISED"))
+                    and(disabled) {
+                        unsafe("-jfx-button-type", raw("FLAT"))
+                    }
                 }
             }
         }

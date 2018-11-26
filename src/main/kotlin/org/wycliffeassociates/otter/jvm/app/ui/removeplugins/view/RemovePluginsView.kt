@@ -14,6 +14,7 @@ class RemovePluginsView : View() {
 
     override val root = stackpane {
         title = messages["remove"]
+        addClass(RemovePluginsStyles.removePluginsRoot)
         label(messages["noPlugins"]) {
             addClass(RemovePluginsStyles.noPluginLabel)
             visibleProperty().bind(viewModel.noPluginsProperty)

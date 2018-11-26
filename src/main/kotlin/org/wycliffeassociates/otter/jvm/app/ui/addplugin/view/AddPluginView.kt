@@ -39,6 +39,7 @@ class AddPluginView : View() {
                 }
                 add(executableField)
                 add(JFXButton(messages["browse"].toUpperCase()).apply {
+                    addClass(AddPluginStyles.browseButton)
                     action {
                         val files = chooseFile(
                                 messages["chooseExecutable"],

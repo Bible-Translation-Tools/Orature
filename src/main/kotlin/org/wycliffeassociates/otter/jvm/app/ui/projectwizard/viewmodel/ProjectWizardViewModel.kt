@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -125,4 +126,6 @@ class ProjectWizardViewModel : ViewModel() {
         existingProjects.clear()
         creationCompletedProperty.value = false
     }
+
+    fun languagesValid() = valid(sourceLanguageProperty, targetLanguageProperty)
 }

@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments
 
-import javafx.geometry.Pos
+import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.util.StringConverter
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
@@ -11,10 +11,7 @@ import tornadofx.*
 class SelectLanguage : Fragment() {
     private val viewModel: ProjectWizardViewModel by inject()
 
-    override val complete = viewModel.valid(
-            viewModel.sourceLanguageProperty,
-            viewModel.targetLanguageProperty
-    )
+    override val complete = viewModel.languagesValid()
 
     init {
         importStylesheet<ProjectWizardStyles>()
@@ -72,7 +69,6 @@ class SelectLanguage : Fragment() {
     }
 
     override fun onSave() {
-        viewModel.commit(viewModel.sourceLanguageProperty, viewModel.targetLanguageProperty)
         viewModel.getRootSources()
     }
 }
