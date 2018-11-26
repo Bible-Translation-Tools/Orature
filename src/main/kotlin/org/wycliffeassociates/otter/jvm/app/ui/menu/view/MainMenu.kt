@@ -66,10 +66,9 @@ class MainMenu : MenuBar() {
                     viewModel.recorderPlugins.onChange { _ ->
                         items.clear()
                         items.setAll(viewModel.recorderPlugins.map { pluginData ->
-                            radiomenuitem(pluginData.name) {
+                            radiomenuitem(pluginData.name, pluginToggleGroup) {
                                 userData = pluginData
                                 action { if (isSelected) viewModel.selectRecorder(pluginData) }
-                                toggleGroup = pluginToggleGroup
                                 viewModel.selectedRecorderProperty.toObservable().subscribe {
                                     isSelected = (it == pluginData)
                                 }
@@ -84,10 +83,9 @@ class MainMenu : MenuBar() {
                     viewModel.editorPlugins.onChange { _ ->
                         items.clear()
                         items.setAll(viewModel.editorPlugins.map { pluginData ->
-                            radiomenuitem(pluginData.name) {
+                            radiomenuitem(pluginData.name, pluginToggleGroup) {
                                 userData = pluginData
                                 action { if (isSelected) viewModel.selectEditor(pluginData) }
-                                toggleGroup = pluginToggleGroup
                                 viewModel.selectedEditorProperty.toObservable().subscribe {
                                     isSelected = (it == pluginData)
                                 }

@@ -16,11 +16,11 @@ class AppStyles : Stylesheet() {
         val progressDialog by cssclass()
 
         // Icons
-        fun recordIcon(size: String) = MaterialIconView(MaterialIcon.MIC_NONE, size)
-        fun editIcon(size: String) = MaterialIconView(MaterialIcon.EDIT, size)
-        fun viewTakesIcon(size: String) = MaterialIconView(MaterialIcon.APPS, size)
+        fun recordIcon(size: String = "") = MaterialIconView(MaterialIcon.MIC_NONE, size)
+        fun editIcon(size: String = "") = MaterialIconView(MaterialIcon.EDIT, size)
+        fun viewTakesIcon(size: String = "") = MaterialIconView(MaterialIcon.APPS, size)
         fun backIcon() = MaterialIconView(MaterialIcon.ARROW_BACK)
-        fun chapterIcon(size: String) = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
+        fun chapterIcon(size: String = "") = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
     }
 
     init {

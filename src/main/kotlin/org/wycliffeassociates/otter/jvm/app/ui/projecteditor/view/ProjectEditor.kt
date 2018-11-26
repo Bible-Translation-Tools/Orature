@@ -71,7 +71,7 @@ class ProjectEditor : View() {
                 hbox {
                     addClass(ProjectEditorStyles.backButtonContainer)
                     // Back button
-                    add(JFXButton(messages["back"], MaterialIconView(MaterialIcon.ARROW_BACK)).apply {
+                    add(JFXButton(messages["back"], AppStyles.backIcon()).apply {
                         action {
                             workspace.navigateBack()
                         }
@@ -102,19 +102,19 @@ class ProjectEditor : View() {
                                 when (context ?: ChapterContext.RECORD) {
                                     ChapterContext.RECORD -> {
                                         chunkCard.actionButton.apply {
-                                            graphic = MaterialIconView(MaterialIcon.MIC_NONE)
+                                            graphic = AppStyles.recordIcon()
                                             text = messages["record"]
                                         }
                                     }
                                     ChapterContext.VIEW_TAKES -> {
                                         chunkCard.actionButton.apply {
-                                            graphic = MaterialIconView(MaterialIcon.APPS)
+                                            graphic = AppStyles.viewTakesIcon()
                                             text = messages["viewTakes"]
                                         }
                                     }
                                     ChapterContext.EDIT_TAKES -> {
                                         chunkCard.actionButton.apply {
-                                            graphic = MaterialIconView(MaterialIcon.EDIT)
+                                            graphic = AppStyles.editIcon()
                                             text = messages["edit"]
                                         }
                                     }
