@@ -18,6 +18,9 @@ object Injector {
             .build()
 
     val directoryProvider = persistenceComponent.injectDirectoryProvider()
+
+    val preferences = persistenceComponent.injectPreferences()
+
     val languageRepo = LanguageRepository(database, LanguageMapper())
     val collectionRepo = CollectionRepository(
             database,
@@ -27,12 +30,11 @@ object Injector {
     val metadataRepo = ResourceMetadataRepository(database, ResourceMetadataMapper(), LanguageMapper())
     val chunkRepository = ChunkRepository(database)
     val takeRepository = TakeRepository(database)
-    val pluginRepository = AudioPluginRepository(database)
+    val pluginRepository = AudioPluginRepository(database, preferences)
 
     val audioPlayer
         get() = audioComponent.injectPlayer()
 
     val audioPluginRegistrar = audioPluginComponent.injectRegistrar()
 
-    val preferences = persistenceComponent.injectPreferences()
 }

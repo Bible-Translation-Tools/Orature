@@ -14,7 +14,7 @@ class AppPreferencesTest {
 
         val appPreferences = AppPreferences
         appPreferences.setCurrentUserId(input)
-        val result = appPreferences.getCurrentUserId()
+        val result = appPreferences.currentUserId()
         Assert.assertEquals(expected, result)
     }
 
@@ -23,7 +23,7 @@ class AppPreferencesTest {
         val expected = null
 
         val appPreferences = AppPreferences
-        val result = appPreferences.getCurrentUserId()
+        val result = appPreferences.currentUserId()
 
         Assert.assertEquals(expected, result)
     }
