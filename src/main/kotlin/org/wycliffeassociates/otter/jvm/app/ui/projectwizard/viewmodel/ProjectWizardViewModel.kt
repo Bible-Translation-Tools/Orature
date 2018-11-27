@@ -41,15 +41,19 @@ class ProjectWizardViewModel : ViewModel() {
                     languages.setAll(retrieved)
                 }
 
+        loadProjects()
+
+        targetLanguageProperty.toObservable().subscribe { language ->
+            existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
+        }
+    }
+
+    private fun loadProjects() {
         collectionRepo
                 .getRootProjects()
                 .subscribe { retrieved ->
                     projects.setAll(retrieved)
                 }
-
-        targetLanguageProperty.toObservable().subscribe { language ->
-            existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
-        }
     }
 
     fun getRootSources() {
@@ -121,6 +125,7 @@ class ProjectWizardViewModel : ViewModel() {
         collectionHierarchy.clear()
         existingProjects.clear()
         creationCompletedProperty.value = false
+        loadProjects()
     }
 
     fun languagesValid() = valid(sourceLanguageProperty, targetLanguageProperty)
