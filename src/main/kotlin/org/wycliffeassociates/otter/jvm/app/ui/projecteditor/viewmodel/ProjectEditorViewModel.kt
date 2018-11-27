@@ -7,22 +7,19 @@ import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.domain.collections.GetCollections
 import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.EditTake
-import org.wycliffeassociates.otter.common.domain.content.GetContent
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
@@ -69,8 +66,6 @@ class ProjectEditorViewModel: ViewModel() {
 
     // Create the use cases we need (the model layer)
     private val accessTakes = AccessTakes(chunkRepository, takeRepository)
-    private val getContent = GetContent(chunkRepository)
-    private val getCollections = GetCollections(collectionRepository)
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
             collectionRepository,
@@ -109,8 +104,8 @@ class ProjectEditorViewModel: ViewModel() {
             projectTitle = project.titleKey
             children.clear()
             chunks.clear()
-                getCollections
-                        .subcollectionsOf(project)
+                collectionRepository
+                        .getChildren(project)
                         .observeOnFx()
                         .subscribe { childCollections ->
                             // Now we have the children of the project collection
@@ -128,8 +123,8 @@ class ProjectEditorViewModel: ViewModel() {
         // Remove existing chunks so the user knows they are outdated
         chunks.clear()
         loading = true
-        getContent
-                .getChunks(child)
+        chunkRepository
+                .getByCollection(child)
                 .flatMapObservable {
                     Observable.fromIterable(it)
                 }

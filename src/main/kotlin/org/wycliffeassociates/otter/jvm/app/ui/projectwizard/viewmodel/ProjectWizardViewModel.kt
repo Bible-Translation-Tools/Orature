@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
-import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -10,8 +9,6 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
-import org.wycliffeassociates.otter.common.domain.collections.GetCollections
-import org.wycliffeassociates.otter.common.domain.languages.GetLanguages
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import tornadofx.ViewModel
@@ -35,18 +32,17 @@ class ProjectWizardViewModel : ViewModel() {
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
     private val creationUseCase = CreateProject(collectionRepo)
-    private val getCollections = GetCollections(collectionRepo)
 
     init {
-        GetLanguages(languageRepo)
-                .all()
+        languageRepo
+                .getAll()
                 .observeOnFx()
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
                 }
 
-        GetCollections(collectionRepo)
-                .rootProjects()
+        collectionRepo
+                .getRootProjects()
                 .subscribe { retrieved ->
                     projects.setAll(retrieved)
                 }
@@ -57,8 +53,8 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun getRootSources() {
-        getCollections
-                .rootSources()
+        collectionRepo
+                .getRootSources()
                 .observeOnFx()
                 .subscribe { retrieved ->
                     collectionHierarchy.add(retrieved.filter {
@@ -77,8 +73,8 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     private fun showSubcollections(collection: Collection) {
-        getCollections
-                .subcollectionsOf(collection)
+        collectionRepo
+                .getChildren(collection)
                 .observeOnFx()
                 .doOnSuccess { subcollections ->
                     collectionHierarchy.add(subcollections)

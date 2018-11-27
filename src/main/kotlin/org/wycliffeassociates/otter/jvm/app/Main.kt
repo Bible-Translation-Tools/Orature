@@ -1,12 +1,11 @@
 package org.wycliffeassociates.otter.jvm.app
 
-import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.plugins.InitializePlugins
+import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.view.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import tornadofx.*
 
 class MyApp : App(Workspace::class) {
@@ -39,7 +38,7 @@ private fun initApp() {
     // Always import new plugins
     ImportAudioPlugins(Injector.audioPluginRegistrar, Injector.directoryProvider)
             .importAll()
-            .andThen(InitializePlugins(Injector.pluginRepository).init())
+            .andThen(Injector.pluginRepository.initSelected())
             .subscribe()
 
     // Always clean up database

@@ -8,7 +8,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
-import org.wycliffeassociates.otter.common.domain.plugins.AccessPlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.ViewModel
 import java.io.File
@@ -20,8 +19,6 @@ class MainMenuViewModel : ViewModel() {
     private val chunkRepo = Injector.chunkRepo
     private val directoryProvider = Injector.directoryProvider
     private val pluginRepository = Injector.pluginRepository
-
-    private val accessPlugins = AccessPlugins(pluginRepository)
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
@@ -51,8 +48,8 @@ class MainMenuViewModel : ViewModel() {
     }
 
     fun refreshPlugins() {
-        accessPlugins
-                .getAllPluginData()
+        pluginRepository
+                .getAll()
                 .observeOnFx()
                 .doOnSuccess { pluginData ->
                     editorPlugins.setAll(pluginData.filter { it.canEdit })
@@ -60,7 +57,7 @@ class MainMenuViewModel : ViewModel() {
                 }
                 .observeOn(Schedulers.io())
                 .flatMapMaybe {
-                    accessPlugins.getRecorderData()
+                    pluginRepository.getRecorderData()
                 }
                 .observeOnFx()
                 .doOnSuccess {
@@ -68,7 +65,7 @@ class MainMenuViewModel : ViewModel() {
                 }
                 .observeOn(Schedulers.io())
                 .flatMap {
-                    accessPlugins.getEditorData()
+                    pluginRepository.getEditorData()
                 }
                 .observeOnFx()
                 .doOnSuccess {
@@ -78,12 +75,12 @@ class MainMenuViewModel : ViewModel() {
     }
 
     fun selectEditor(editorData: AudioPluginData) {
-        accessPlugins.setEditorData(editorData).subscribe()
+        pluginRepository.setEditorData(editorData).subscribe()
         selectedEditorProperty.set(editorData)
     }
 
     fun selectRecorder(recorderData: AudioPluginData) {
-        accessPlugins.setRecorderData(recorderData).subscribe()
+        pluginRepository.setRecorderData(recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
     }
 }
