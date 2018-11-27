@@ -1,10 +1,12 @@
 package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
 
 import com.jfoenix.controls.JFXButton
+import com.jfoenix.controls.JFXSnackbar
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
@@ -48,6 +50,14 @@ class ViewTakesView : View() {
 
     override val root = anchorpane {
         addClass(AppStyles.appBackground)
+        val snackBar = JFXSnackbar(this)
+        viewModel.snackBarObservable.subscribe { shouldShow ->
+            snackBar.enqueue(
+                    JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
+                        viewModel.addPlugin(true, false)
+                    })
+            )
+        }
         vbox {
             anchorpaneConstraints {
                 leftAnchor = 0.0

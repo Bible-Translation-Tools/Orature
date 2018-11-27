@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel
 
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -10,6 +12,8 @@ import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
+import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
@@ -38,6 +42,8 @@ class ViewTakesViewModel : ViewModel() {
     private var showPluginActive: Boolean by property(false)
     var showPluginActiveProperty = getProperty(ViewTakesViewModel::showPluginActive)
 
+    val snackBarObservable: PublishSubject<Boolean> = PublishSubject.create()
+
     private val recordTake = RecordTake(
             collectionRepository,
             chunkRepository,
@@ -54,6 +60,14 @@ class ViewTakesViewModel : ViewModel() {
 
     init {
         reset()
+    }
+
+    fun addPlugin(record: Boolean, edit: Boolean) {
+        find<AddPluginViewModel>().apply {
+            canRecord = record
+            canEdit = edit
+        }
+        find<AddPluginView>().openModal()
     }
 
     private fun populateTakes(chunk: Chunk) {
@@ -93,10 +107,17 @@ class ViewTakesViewModel : ViewModel() {
             recordTake
                     .record(project, chapterProperty.value, chunkProperty.value)
                     .observeOnFx()
-                    .subscribe {
+                    .doOnComplete {
                         showPluginActive = false
                         populateTakes(chunkProperty.value)
                     }
+                    .onErrorResumeNext {
+                        Completable.fromAction {
+                            showPluginActive = false
+                            snackBarObservable.onNext(true)
+                        }
+                    }
+                    .subscribe()
         }
     }
 
