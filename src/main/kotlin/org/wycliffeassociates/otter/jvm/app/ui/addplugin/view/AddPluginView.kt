@@ -54,10 +54,10 @@ class AddPluginView : View() {
             }
             field {
                 canEditBox = JFXCheckBox(messages["canRecord"])
-                        .apply { viewModel.canRecordProperty.bind(selectedProperty()) }
+                        .apply { selectedProperty().bindBidirectional(viewModel.canRecordProperty) }
                 add(canEditBox)
                 canRecordBox = JFXCheckBox(messages["canEdit"])
-                        .apply { viewModel.canEditProperty.bind(selectedProperty()) }
+                        .apply { selectedProperty().bindBidirectional(viewModel.canEditProperty) }
                 add(canRecordBox)
             }
         }
@@ -76,6 +76,11 @@ class AddPluginView : View() {
 
     override fun onDock() {
         super.onDock()
+        nameField.requestFocus()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
         canEditBox.isSelected = false
         canRecordBox.isSelected = false
         nameField.text = ""

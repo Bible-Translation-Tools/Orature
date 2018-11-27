@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view
 
 import javafx.geometry.Pos
+import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight

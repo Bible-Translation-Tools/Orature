@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.theme
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.scene.Cursor
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
@@ -11,6 +12,9 @@ import tornadofx.*
 class AppStyles : Stylesheet() {
 
     companion object {
+        val jfxSnackbarContent by cssclass()
+        val jfxSnackbarToast by cssclass()
+        val jfxSnackbarAction by cssclass()
         val backButton by cssclass()
         val appBackground by cssclass()
         val progressDialog by cssclass()
@@ -24,6 +28,19 @@ class AppStyles : Stylesheet() {
     }
 
     init {
+        jfxSnackbarContent {
+            backgroundColor += Color.BLACK
+            fontSize = 16.px
+            backgroundRadius += box(5.px)
+        }
+        jfxSnackbarToast {
+            textFill = Color.WHITE
+        }
+        jfxSnackbarAction {
+            textFill = AppTheme.colors.appRed
+            fontWeight = FontWeight.BOLD
+            cursor = Cursor.HAND
+        }
         // Material design scroll bar
         scrollBar {
             backgroundColor += Color.TRANSPARENT

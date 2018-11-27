@@ -55,6 +55,9 @@ class AudioPluginRepository(
         return Completable
                 .fromAction {
                     audioPluginDao.delete(mapper.mapToEntity(obj))
+                    // Update the preferences if necessary
+                    if (AppPreferences.getRecorderPluginId() == obj.id) AppPreferences.setRecorderPluginId(-1)
+                    if (AppPreferences.getEditorPluginId() == obj.id) AppPreferences.setEditorPluginId(-1)
                 }
                 .subscribeOn(Schedulers.io())
     }

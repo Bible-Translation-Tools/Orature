@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXButton
+import com.jfoenix.controls.JFXSnackbar
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import io.reactivex.Observable
@@ -9,6 +10,7 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
+import javafx.event.EventHandler
 import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
@@ -43,6 +45,14 @@ class ProjectEditor : View() {
     }
 
     override val root = stackpane {
+        val snackBar = JFXSnackbar(this)
+        viewModel.snackBarObservable.subscribe { message ->
+            snackBar.enqueue(
+                    JFXSnackbar.SnackbarEvent(message, messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
+                        viewModel.addPlugin(message == messages["noRecorder"], message == messages["noEditor"])
+                    })
+            )
+        }
         addClass(AppStyles.appBackground)
         hbox {
             vbox {

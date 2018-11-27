@@ -2,9 +2,12 @@ package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
@@ -15,6 +18,8 @@ import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.GetContent
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
+import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
@@ -76,6 +81,8 @@ class ProjectEditorViewModel: ViewModel() {
             launchPlugin
     )
     private val editTake = EditTake(takeRepository, launchPlugin)
+
+    val snackBarObservable = PublishSubject.create<String>()
 
     init {
         projectProperty.toObservable().subscribe { setTitleAndChapters() }
@@ -141,6 +148,14 @@ class ProjectEditorViewModel: ViewModel() {
                 }
     }
 
+    fun addPlugin(record: Boolean, edit: Boolean) {
+        find<AddPluginViewModel>().apply {
+            canRecord = record
+            canEdit = edit
+        }
+        find<AddPluginView>().openModal()
+    }
+
     fun doChunkContextualAction(chunk: Chunk) {
         activeChunk = chunk
         when (context) {
@@ -156,7 +171,7 @@ class ProjectEditorViewModel: ViewModel() {
             recordTake
                     .record(project, activeChild, activeChunk)
                     .observeOnFx()
-                    .subscribe {
+                    .doOnComplete {
                         showPluginActive = false
                         // Update the has takes boolean property
                         val item = chunks.filtered {
@@ -164,6 +179,11 @@ class ProjectEditorViewModel: ViewModel() {
                         }.first()
                         item.second.value = true
                     }
+                    .onErrorResumeNext { Completable.fromAction {
+                        showPluginActive = false
+                        snackBarObservable.onNext(messages["noRecorder"])
+                    } }
+                    .subscribe()
         }
     }
 
@@ -178,6 +198,10 @@ class ProjectEditorViewModel: ViewModel() {
             showPluginActive = true
             editTake
                     .edit(take)
+                    .doOnError {
+                        snackBarObservable.onNext(messages["noEditor"])
+                    }
+                    .onErrorComplete()
                     .observeOnFx()
                     .subscribe {
                         showPluginActive = false

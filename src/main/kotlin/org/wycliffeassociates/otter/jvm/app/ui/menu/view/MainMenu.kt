@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.toObservable
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
+import javafx.event.EventHandler
 import javafx.scene.control.MenuBar
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
@@ -41,11 +42,13 @@ class MainMenu : MenuBar() {
                 }
             }
             menu(messages["audioPlugins"]) {
+                onShowing = EventHandler {
+                    viewModel.refreshPlugins()
+                }
                 item(messages["new"]) {
                     graphic = MainMenuStyles.addPluginIcon("20px")
                     action {
                         find<AddPluginView>().apply {
-                            whenUndocked { viewModel.refreshPlugins() }
                             openModal()
                         }
                     }
@@ -54,7 +57,6 @@ class MainMenu : MenuBar() {
                     graphic = MainMenuStyles.removePluginIcon("20px")
                     action {
                         find<RemovePluginsView>().apply {
-                            whenUndocked { viewModel.refreshPlugins() }
                             openModal()
                         }
                     }

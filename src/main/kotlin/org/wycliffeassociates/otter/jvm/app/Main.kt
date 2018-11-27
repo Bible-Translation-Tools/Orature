@@ -26,7 +26,6 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    Injector.preferences.setAppInitialized(false)
     if (!Injector.preferences.getAppInitialized()) {
         // Needs initialization
         ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
