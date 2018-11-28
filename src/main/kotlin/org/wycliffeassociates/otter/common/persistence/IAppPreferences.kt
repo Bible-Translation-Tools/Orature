@@ -2,12 +2,12 @@ package org.wycliffeassociates.otter.common.persistence
 
 // interface to getting user-independent app preferences
 interface IAppPreferences {
-    fun getCurrentUserId(): Int?
+    fun currentUserId(): Int?
     fun setCurrentUserId(userId: Int)
-    fun getAppInitialized(): Boolean
+    fun appInitialized(): Boolean
     fun setAppInitialized(initialized: Boolean)
-    fun getEditorPluginId(): Int?
+    fun editorPluginId(): Int?
     fun setEditorPluginId(id: Int)
-    fun getRecorderPluginId(): Int?
+    fun recorderPluginId(): Int?
     fun setRecorderPluginId(id: Int)
 }

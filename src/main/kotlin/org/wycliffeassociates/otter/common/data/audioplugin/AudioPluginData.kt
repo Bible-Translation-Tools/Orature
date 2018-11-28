@@ -10,5 +10,5 @@ data class AudioPluginData(
         var canRecord: Boolean,
         var executable: String,
         var args: List<String>,
-        var pluginFile: File
+        var pluginFile: File?
 )

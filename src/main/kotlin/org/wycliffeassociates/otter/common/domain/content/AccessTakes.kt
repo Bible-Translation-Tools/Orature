@@ -35,4 +35,10 @@ class AccessTakes(
     fun delete(take: Take): Completable {
         return takeRepo.delete(take)
     }
+
+    fun getTakeCount(chunk: Chunk): Single<Int> {
+        return takeRepo
+                .getByChunk(chunk)
+                .map { it.size }
+    }
 }
