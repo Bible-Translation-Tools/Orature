@@ -8,14 +8,13 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ProjectCollection
-import org.wycliffeassociates.otter.jvm.app.ui.imageLoader
+import org.wycliffeassociates.otter.jvm.app.ui.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreation.viewmodel.ProjectCreationViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
 import tornadofx.*
-import java.io.File
 
 class SelectCollection : View() {
     private val viewModel: ProjectCreationViewModel by inject()
@@ -87,10 +86,22 @@ class SelectCollection : View() {
     private fun resourceGraphic(resourceSlug: String): Node {
         return when (resourceSlug) {
             SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
-            SlugsEnum.OBS.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/OBS.svg").toURI()))
-            SlugsEnum.TW.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/tW.svg").toURI()))
-            SlugsEnum.OT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Old_Testament.svg").toURI()))
-            SlugsEnum.NT.slug -> imageLoader(File(ClassLoader.getSystemResource("assets/Cross.svg").toURI()))
+            SlugsEnum.OBS.slug -> ImageLoader.load(
+                    ClassLoader.getSystemResourceAsStream("assets/OBS.svg"),
+                    ImageLoader.Format.SVG
+            )
+            SlugsEnum.TW.slug -> ImageLoader.load(
+                    ClassLoader.getSystemResourceAsStream("assets/tW.svg"),
+                    ImageLoader.Format.SVG
+            )
+            SlugsEnum.OT.slug -> ImageLoader.load(
+                    ClassLoader.getSystemResourceAsStream("assets/Old_Testament.svg"),
+                    ImageLoader.Format.SVG
+            )
+            SlugsEnum.NT.slug -> ImageLoader.load(
+                    ClassLoader.getSystemResourceAsStream("assets/Cross.svg"),
+                    ImageLoader.Format.SVG
+            )
             else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
         }
     }
