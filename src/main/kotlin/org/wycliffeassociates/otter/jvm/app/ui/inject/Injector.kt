@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.Resourc
 
 object Injector {
     private val persistenceComponent = DaggerPersistenceComponent.builder().build()
-    val database = persistenceComponent.injectDatabase()
+    private val database = persistenceComponent.injectDatabase()
     private val audioComponent = DaggerAudioComponent
             .builder()
             .build()

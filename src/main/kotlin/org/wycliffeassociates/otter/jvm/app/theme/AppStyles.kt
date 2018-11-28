@@ -25,6 +25,8 @@ class AppStyles : Stylesheet() {
         fun viewTakesIcon(size: String = "1em") = MaterialIconView(MaterialIcon.APPS, size)
         fun backIcon() = MaterialIconView(MaterialIcon.ARROW_BACK)
         fun chapterIcon(size: String = "1em") = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
+
+        const val defaultFontSize = 10.0
     }
 
     init {
@@ -94,12 +96,12 @@ class AppStyles : Stylesheet() {
 
 
         // Load the fonts
-        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Regular.ttf"), 10.0)
-        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Bold.ttf"), 10.0)
-        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-BoldItalic.ttf"), 10.0)
-        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Italic.ttf"), 10.0)
+        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Regular.ttf"), defaultFontSize)
+        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Bold.ttf"), defaultFontSize)
+        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-BoldItalic.ttf"), defaultFontSize)
+        Font.loadFont(ClassLoader.getSystemResourceAsStream("fonts/NotoSans-Italic.ttf"), defaultFontSize)
         root {
-            font = Font.font("Noto Sans", 10.0)
+            font = Font.font("Noto Sans", defaultFontSize)
             fontWeight = FontWeight.NORMAL
         }
     }
