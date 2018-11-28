@@ -63,6 +63,39 @@ class CollectionRepository(
                 .subscribeOn(Schedulers.io())
     }
 
+    override fun getRootProjects(): Single<List<Collection>> {
+        return Single
+                .fromCallable {
+                    collectionDao
+                            .fetchAll()
+                            .filter { it.parentFk == null && it.label == "project" }
+                            .map(this::buildCollection)
+                }
+                .subscribeOn(Schedulers.io())
+    }
+
+    override fun getRootSources(): Single<List<Collection>> {
+        return Single
+                .fromCallable {
+                    collectionDao
+                            .fetchAll()
+                            .filter { it.parentFk == null && it.sourceFk == null }
+                            .map(this::buildCollection)
+                }
+                .subscribeOn(Schedulers.io())
+    }
+
+    override fun getSource(project: Collection): Maybe<Collection> {
+        return Maybe
+                .fromCallable {
+                    buildCollection(
+                            collectionDao.fetchSource(collectionDao.fetchById(project.id))
+                    )
+                }
+                .onErrorComplete()
+                .subscribeOn(Schedulers.io())
+    }
+
     override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
         return Maybe
                 .fromCallable {

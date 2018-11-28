@@ -22,7 +22,8 @@ class AudioPluginDao(
                         AUDIO_PLUGIN_ENTITY.BIN,
                         AUDIO_PLUGIN_ENTITY.ARGS,
                         AUDIO_PLUGIN_ENTITY.EDIT,
-                        AUDIO_PLUGIN_ENTITY.RECORD
+                        AUDIO_PLUGIN_ENTITY.RECORD,
+                        AUDIO_PLUGIN_ENTITY.PATH
                 )
                 .values(
                         entity.name,
@@ -30,7 +31,8 @@ class AudioPluginDao(
                         entity.bin,
                         entity.args,
                         entity.edit,
-                        entity.record
+                        entity.record,
+                        entity.path
                 )
                 .execute()
 
@@ -71,6 +73,7 @@ class AudioPluginDao(
                 .set(AUDIO_PLUGIN_ENTITY.ARGS, entity.args)
                 .set(AUDIO_PLUGIN_ENTITY.EDIT, entity.edit)
                 .set(AUDIO_PLUGIN_ENTITY.RECORD, entity.record)
+                .set(AUDIO_PLUGIN_ENTITY.PATH, entity.path)
                 .where(AUDIO_PLUGIN_ENTITY.ID.eq(entity.id))
                 .execute()
     }

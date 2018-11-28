@@ -43,19 +43,19 @@ class FilterableComboBox<T> : ComboBox<T>() {
         editor.focusedProperty().onChange {
             if (it && items.isNotEmpty()) {
                 // Trigger the dropdown
-                show()
+                forceShow()
             }
         }
     }
 
     private fun refreshFilterItems() {
         filterItems.setAll(items.map { FilterableItem(it, filterConverter(it)) })
-        if (editor.isFocused && items.isNotEmpty()) show()
+        if (editor.isFocused && items.isNotEmpty()) forceShow()
     }
 
-    override fun show() {
-        super.show()
+    private fun forceShow() {
         if (editor.text.isEmpty()) {
+            valueProperty().value = null
             // Change the editor's text so the filter handler thinks it needs to display new suggestions
             editor.text = "a" 
             // Fire a fake key released event to trigger the autocomplete handler
@@ -75,11 +75,7 @@ fun <T> EventTarget.filterablecombobox(
         property: Property<T>? = null,
         values: List<T>? = null,
         init: FilterableComboBox<T>.() -> Unit = {}
-): FilterableComboBox<T> {
-    val box = FilterableComboBox<T>()
-    box.init()
-    if (values != null) box.items = (values as? ObservableList<T>) ?: values.observable()
-    if (property != null) box.bind(property)
-    add(box)
-    return box
-}
+): FilterableComboBox<T> = FilterableComboBox<T>().also {
+    if (values != null) it.items = (values as? ObservableList<T>) ?: values.observable()
+    if (property != null) it.bind(property)
+}.attachTo(this, init)

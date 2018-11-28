@@ -1,26 +1,16 @@
 package org.wycliffeassociates.otter.jvm.app
 
+import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
-import org.wycliffeassociates.otter.common.domain.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.plugins.InitializePlugins
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenu
-import org.wycliffeassociates.otter.jvm.app.ui.menu.MainMenuStylesheet
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeView
-import org.wycliffeassociates.otter.jvm.app.ui.styles.ProjectPageStylesheet
-import org.wycliffeassociates.otter.jvm.app.ui.styles.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesStylesheet
-import org.wycliffeassociates.otter.jvm.app.widgets.WidgetsStyles
+import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.view.ProjectHomeView
 import tornadofx.*
-import java.io.File
 
 class MyApp : App(Workspace::class) {
     init {
-        importStylesheet(ProjectPageStylesheet::class)
-        importStylesheet(ViewTakesStylesheet::class)
-        importStylesheet(MainMenuStylesheet::class)
-        importStylesheet(AppStyles::class)
-        importStylesheet<WidgetsStyles>()
+        importStylesheet<AppStyles>()
         workspace.header.removeFromParent()
         workspace.add(MainMenu())
     }
@@ -35,16 +25,23 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    ImportLanguages(ClassLoader.getSystemResourceAsStream("langnames.json"), Injector.languageRepo)
-            .import()
-            .onErrorComplete()
-            .subscribe()
+    if (!Injector.preferences.appInitialized()) {
+        // Needs initialization
+        ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
+                .import()
+                .onErrorComplete()
+                .subscribe()
 
+        Injector.preferences.setAppInitialized(true)
+    }
+
+    // Always import new plugins
     ImportAudioPlugins(Injector.audioPluginRegistrar, Injector.directoryProvider)
             .importAll()
-            .andThen(InitializePlugins(Injector.pluginRepository).init())
+            .andThen(Injector.pluginRepository.initSelected())
             .subscribe()
 
+    // Always clean up database
     Injector.takeRepository
             .removeNonExistentTakes()
             .subscribe()

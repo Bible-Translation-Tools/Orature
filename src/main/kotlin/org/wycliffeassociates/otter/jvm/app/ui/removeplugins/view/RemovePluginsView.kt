@@ -1,12 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.removeplugins.view
 
 import com.jfoenix.controls.JFXButton
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.RemovePluginStyles
 import org.wycliffeassociates.otter.jvm.app.ui.removeplugins.viewmodel.RemovePluginsViewModel
 import tornadofx.*
 
@@ -14,32 +9,32 @@ class RemovePluginsView : View() {
     private val viewModel: RemovePluginsViewModel by inject()
 
     init {
-        importStylesheet<RemovePluginStyles>()
+        importStylesheet<RemovePluginsStyles>()
     }
 
     override val root = stackpane {
         title = messages["remove"]
-        setPrefSize(300.0, 200.0)
+        addClass(RemovePluginsStyles.removePluginsRoot)
         label(messages["noPlugins"]) {
-            addClass(RemovePluginStyles.noPluginLabel)
+            addClass(RemovePluginsStyles.noPluginLabel)
             visibleProperty().bind(viewModel.noPluginsProperty)
             managedProperty().bind(visibleProperty())
         }
         listview(viewModel.plugins) {
-            addClass(RemovePluginStyles.pluginList)
+            addClass(RemovePluginsStyles.pluginList)
             visibleProperty().bind(viewModel.noPluginsProperty.not())
             managedProperty().bind(visibleProperty())
             cellCache {
-                hbox(10.0) {
-                    addClass(RemovePluginStyles.pluginListCell)
+                hbox {
+                    addClass(RemovePluginsStyles.pluginListCell)
                     label(it.name) {
                         hgrow = Priority.ALWAYS
                         maxWidth = Double.MAX_VALUE
                     }
                     add(JFXButton().apply {
-                        graphic = MaterialIconView(MaterialIcon.DELETE, "20px")
+                        graphic = RemovePluginsStyles.deleteIcon("20px")
                         isDisableVisualFocus = true
-                        addClass(RemovePluginStyles.deleteButton)
+                        addClass(RemovePluginsStyles.deleteButton)
                         action {
                             viewModel.remove(it)
                         }

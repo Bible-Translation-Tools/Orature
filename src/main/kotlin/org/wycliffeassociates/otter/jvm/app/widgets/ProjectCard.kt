@@ -11,10 +11,10 @@ import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.common.data.model.ProjectCollection
+import org.wycliffeassociates.otter.common.data.model.Collection
 import tornadofx.*
 
-class ProjectCard(project: ProjectCollection) : VBox() {
+class ProjectCard(project: Collection) : VBox() {
     var cardButton: Button
     var graphicContainer: Node = StackPane()
 
@@ -49,7 +49,7 @@ class ProjectCard(project: ProjectCollection) : VBox() {
     }
 }
 
-fun Pane.projectcard(project: ProjectCollection, init: ProjectCard.() -> Unit = {}): ProjectCard {
+fun Pane.projectcard(project: Collection, init: ProjectCard.() -> Unit = {}): ProjectCard {
     val projectCard = ProjectCard(project)
     projectCard.init()
     add(projectCard)

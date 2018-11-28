@@ -1,20 +1,25 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Chunk
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.EditTake
-import org.wycliffeassociates.otter.common.domain.content.GetContent
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
+import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.view.ChapterContext
+import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
+import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
@@ -30,7 +35,7 @@ class ProjectEditorViewModel: ViewModel() {
     private val projectProperty = tornadofx.find<ProjectHomeViewModel>().selectedProjectProperty
 
     // setup model with fx properties
-    var projectTitle: String by property()
+    private var projectTitle: String by property()
     val projectTitleProperty = getProperty(ProjectEditorViewModel::projectTitle)
 
     // List of collection children (i.e. the chapters) to display in the list
@@ -60,11 +65,7 @@ class ProjectEditorViewModel: ViewModel() {
     val loadingProperty = getProperty(ProjectEditorViewModel::loading)
 
     // Create the use cases we need (the model layer)
-    private val getContent = GetContent(
-            collectionRepository,
-            chunkRepository,
-            takeRepository
-    )
+    private val accessTakes = AccessTakes(chunkRepository, takeRepository)
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
             collectionRepository,
@@ -74,29 +75,43 @@ class ProjectEditorViewModel: ViewModel() {
             WaveFileCreator(),
             launchPlugin
     )
-    private val editTake = EditTake(
-            takeRepository,
-            launchPlugin
-    )
+    private val editTake = EditTake(takeRepository, launchPlugin)
+
+    val snackBarObservable = PublishSubject.create<String>()
 
     init {
-        setTitleAndChapters()
-        projectProperty.onChange { setTitleAndChapters() }
+        projectProperty.toObservable().subscribe { setTitleAndChapters() }
+    }
+
+    fun refreshActiveChunk() {
+        // See if takes still exist for this chunk
+        activeChunkProperty.value?.let {
+            accessTakes
+                    .getTakeCount(activeChunk)
+                    .observeOnFx()
+                    .subscribe { count ->
+                        if (count == 0) {
+                            // No more takes. Update hasTakes property
+                            chunks.filter { it.first.value == activeChunk }.first().second.value = false
+                        }
+                    }
+        }
     }
 
     private fun setTitleAndChapters() {
-        projectTitle = projectProperty.value.titleKey
-        children.clear()
-        chunks.clear()
-        if (projectProperty.value != null) {
-            getContent
-                    .getSubcollections(projectProperty.value)
-                    .observeOnFx()
-                    .subscribe { childCollections ->
-                        // Now we have the children of the project collection
-                        children.addAll(childCollections.sortedBy { it.sort })
-                    }
-        }
+        val project = projectProperty.value
+        if (project != null) {
+            projectTitle = project.titleKey
+            children.clear()
+            chunks.clear()
+                collectionRepository
+                        .getChildren(project)
+                        .observeOnFx()
+                        .subscribe { childCollections ->
+                            // Now we have the children of the project collection
+                            children.addAll(childCollections.sortedBy { it.sort })
+                        }
+            }
     }
 
     fun changeContext(newContext: ChapterContext) {
@@ -108,13 +123,13 @@ class ProjectEditorViewModel: ViewModel() {
         // Remove existing chunks so the user knows they are outdated
         chunks.clear()
         loading = true
-        getContent
-                .getChunks(child)
+        chunkRepository
+                .getByCollection(child)
                 .flatMapObservable {
                     Observable.fromIterable(it)
                 }
                 .flatMapSingle { chunk ->
-                    getContent
+                    accessTakes
                             .getTakeCount(chunk)
                             .map { Pair(chunk.toProperty(), SimpleBooleanProperty(it > 0)) }
                 }
@@ -126,6 +141,14 @@ class ProjectEditorViewModel: ViewModel() {
                     chunks.addAll(retrieved)
                     loading = false
                 }
+    }
+
+    fun addPlugin(record: Boolean, edit: Boolean) {
+        find<AddPluginViewModel>().apply {
+            canRecord = record
+            canEdit = edit
+        }
+        find<AddPluginView>().openModal()
     }
 
     fun doChunkContextualAction(chunk: Chunk) {
@@ -143,7 +166,7 @@ class ProjectEditorViewModel: ViewModel() {
             recordTake
                     .record(project, activeChild, activeChunk)
                     .observeOnFx()
-                    .subscribe {
+                    .doOnComplete {
                         showPluginActive = false
                         // Update the has takes boolean property
                         val item = chunks.filtered {
@@ -151,6 +174,11 @@ class ProjectEditorViewModel: ViewModel() {
                         }.first()
                         item.second.value = true
                     }
+                    .onErrorResumeNext { Completable.fromAction {
+                        showPluginActive = false
+                        snackBarObservable.onNext(messages["noRecorder"])
+                    } }
+                    .subscribe()
         }
     }
 
@@ -165,6 +193,10 @@ class ProjectEditorViewModel: ViewModel() {
             showPluginActive = true
             editTake
                     .edit(take)
+                    .doOnError {
+                        snackBarObservable.onNext(messages["noEditor"])
+                    }
+                    .onErrorComplete()
                     .observeOnFx()
                     .subscribe {
                         showPluginActive = false

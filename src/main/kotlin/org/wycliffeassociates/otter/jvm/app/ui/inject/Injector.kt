@@ -4,7 +4,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.injection.DaggerAudioCompon
 import org.wycliffeassociates.otter.jvm.device.audioplugin.injection.DaggerAudioPluginComponent
 import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.persistence.repositories.*
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
 
@@ -19,7 +18,9 @@ object Injector {
             .build()
 
     val directoryProvider = persistenceComponent.injectDirectoryProvider()
-    val resourceContainerDirectory = directoryProvider.resourceContainerDirectory
+
+    val preferences = persistenceComponent.injectPreferences()
+
     val languageRepo = LanguageRepository(database, LanguageMapper())
     val collectionRepo = CollectionRepository(
             database,
@@ -27,14 +28,13 @@ object Injector {
     )
     val chunkRepo = ChunkRepository(database)
     val metadataRepo = ResourceMetadataRepository(database, ResourceMetadataMapper(), LanguageMapper())
-    val sourceRepo = SourceRepository(database)
-    val projectRepo = ProjectRepository(database)
     val chunkRepository = ChunkRepository(database)
     val takeRepository = TakeRepository(database)
-    val pluginRepository = AudioPluginRepository(database)
+    val pluginRepository = AudioPluginRepository(database, preferences)
 
     val audioPlayer
         get() = audioComponent.injectPlayer()
 
     val audioPluginRegistrar = audioPluginComponent.injectRegistrar()
+
 }

@@ -4,7 +4,6 @@ import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXCheckBox
 import com.jfoenix.controls.JFXTextField
 import javafx.geometry.Pos
-import org.wycliffeassociates.otter.jvm.app.ui.addplugin.AddPluginStyles
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import tornadofx.*
 
@@ -18,11 +17,9 @@ class AddPluginView : View() {
         importStylesheet<AddPluginStyles>()
     }
 
-
     private val viewModel: AddPluginViewModel by inject()
 
     override val root = form {
-        prefWidth = 500.0
         fieldset {
             field {
                 nameField = JFXTextField().apply {
@@ -42,6 +39,7 @@ class AddPluginView : View() {
                 }
                 add(executableField)
                 add(JFXButton(messages["browse"].toUpperCase()).apply {
+                    addClass(AddPluginStyles.browseButton)
                     action {
                         val files = chooseFile(
                                 messages["chooseExecutable"],
@@ -56,10 +54,10 @@ class AddPluginView : View() {
             }
             field {
                 canEditBox = JFXCheckBox(messages["canRecord"])
-                        .apply { viewModel.canRecordProperty.bind(selectedProperty()) }
+                        .apply { selectedProperty().bindBidirectional(viewModel.canRecordProperty) }
                 add(canEditBox)
                 canRecordBox = JFXCheckBox(messages["canEdit"])
-                        .apply { viewModel.canEditProperty.bind(selectedProperty()) }
+                        .apply { selectedProperty().bindBidirectional(viewModel.canEditProperty) }
                 add(canRecordBox)
             }
         }
@@ -69,7 +67,6 @@ class AddPluginView : View() {
                 addClass(AddPluginStyles.saveButton)
                 action {
                     viewModel.save()
-
                     close()
                 }
                 enableWhen { viewModel.validated() }
@@ -79,6 +76,11 @@ class AddPluginView : View() {
 
     override fun onDock() {
         super.onDock()
+        nameField.requestFocus()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
         canEditBox.isSelected = false
         canRecordBox.isSelected = false
         nameField.text = ""

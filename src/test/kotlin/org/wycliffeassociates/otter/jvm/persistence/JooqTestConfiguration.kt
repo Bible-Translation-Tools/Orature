@@ -20,7 +20,7 @@ object JooqTestConfiguration {
     fun createDatabase(databasePath: String): Configuration {
         println("Creating $databasePath")
         val config = getConfig(databasePath)
-        val file = File(listOf("src", "main", "resources", "CreateAppDb.sql").joinToString(File.separator))
+        val file = File(listOf("src", "main", "resources", "sql/CreateAppDb.sql").joinToString(File.separator))
         val sql = StringBuffer()
         file.forEachLine {
             sql.append(it)

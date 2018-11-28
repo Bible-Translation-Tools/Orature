@@ -26,5 +26,6 @@ class PersistenceModule {
     fun providesDirectoryProvider() : IDirectoryProvider = DirectoryProvider("TranslationRecorder")
 
     @Provides
-    fun providesAudioPluginRepository(database: AppDatabase): IAudioPluginRepository = AudioPluginRepository(database)
+    fun providesAudioPluginRepository(database: AppDatabase, preferences: IAppPreferences): IAudioPluginRepository
+            = AudioPluginRepository(database, preferences)
 }
