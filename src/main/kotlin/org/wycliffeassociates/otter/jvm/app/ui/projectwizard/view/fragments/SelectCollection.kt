@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments
 
 import javafx.application.Platform
+import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
@@ -64,6 +65,5 @@ class SelectCollection : Fragment() {
         viewModel.showOverlayProperty.onChange { it: Boolean ->
             Platform.runLater { if (it) dialog.open() else dialog.close() }
         }
-
     }
 }

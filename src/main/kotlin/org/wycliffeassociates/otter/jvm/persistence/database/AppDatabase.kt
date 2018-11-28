@@ -29,7 +29,6 @@ class AppDatabase(
 
         // Create the jooq dsl
         dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
-
         if (dbDoesNotExist) setup()
     }
 
