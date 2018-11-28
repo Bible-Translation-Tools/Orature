@@ -68,7 +68,7 @@ class CollectionRepository(
                 .fromCallable {
                     collectionDao
                             .fetchAll()
-                            .filter { it.parentFk == null && it.label == "project" }
+                            .filter { it.sourceFk != null && it.label == "project" }
                             .map(this::buildCollection)
                 }
                 .subscribeOn(Schedulers.io())

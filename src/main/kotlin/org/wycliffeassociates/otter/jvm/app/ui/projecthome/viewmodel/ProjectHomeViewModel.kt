@@ -28,6 +28,10 @@ class ProjectHomeViewModel : ViewModel() {
                 }.subscribe()
     }
 
+    fun clearSelectedProject() {
+        selectedProjectProperty.value = null
+    }
+
     fun createProject() {
         workspace.find<ProjectWizard>().openModal()
     }
