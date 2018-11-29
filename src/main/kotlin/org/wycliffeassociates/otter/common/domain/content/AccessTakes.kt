@@ -2,29 +2,22 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
-import org.wycliffeassociates.otter.common.data.model.Chunk
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.IWaveFileCreator
-import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
-import java.io.File
-import java.time.LocalDate
 
 class AccessTakes(
-        private val chunkRepo: IChunkRepository,
+        private val contentRepo: IContentRepository,
         private val takeRepo: ITakeRepository
 ) {
-    fun getByChunk(chunk: Chunk): Single<List<Take>> {
-        return takeRepo.getByChunk(chunk)
+    fun getByContent(content: Content): Single<List<Take>> {
+        return takeRepo.getByContent(content)
     }
 
-    fun setSelectedTake(chunk: Chunk, selectedTake: Take?): Completable {
-        chunk.selectedTake = selectedTake
-        return chunkRepo.update(chunk)
+    fun setSelectedTake(content: Content, selectedTake: Take?): Completable {
+        content.selectedTake = selectedTake
+        return contentRepo.update(content)
     }
 
     fun setTakePlayed(take: Take, played: Boolean): Completable {
@@ -36,9 +29,9 @@ class AccessTakes(
         return takeRepo.delete(take)
     }
 
-    fun getTakeCount(chunk: Chunk): Single<Int> {
+    fun getTakeCount(content: Content): Single<Int> {
         return takeRepo
-                .getByChunk(chunk)
-                .map { it.size }
+                .getByContent(content)
+                    .map { it.size }
     }
 }

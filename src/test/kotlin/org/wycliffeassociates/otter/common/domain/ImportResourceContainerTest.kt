@@ -9,12 +9,12 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.collections.tree.Tree
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
@@ -63,32 +63,32 @@ class ImportResourceContainerTest {
 
 }
 
-class MockContentRepository: IChunkRepository {
-    override fun insertForCollection(chunk: Chunk, collection: Collection): Single<Int> {
+class MockContentRepository: IContentRepository {
+    override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getByCollection(collection: Collection): Single<List<Chunk>> {
+    override fun getByCollection(collection: Collection): Single<List<Content>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getSources(chunk: Chunk): Single<List<Chunk>> {
+    override fun getSources(content: Content): Single<List<Content>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun updateSources(chunk: Chunk, sourceChunks: List<Chunk>): Completable {
+    override fun updateSources(content: Content, sourceContents: List<Content>): Completable {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getAll(): Single<List<Chunk>> {
+    override fun getAll(): Single<List<Content>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun update(obj: Chunk): Completable {
+    override fun update(obj: Content): Completable {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun delete(obj: Chunk): Completable {
+    override fun delete(obj: Content): Completable {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

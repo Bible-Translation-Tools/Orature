@@ -5,11 +5,11 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.collections.tree.TreeNode
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.usfm.ParseUsfm
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
@@ -22,10 +22,7 @@ import java.io.IOException
 
 
 class ImportResourceContainer(
-        private val languageRepository: ILanguageRepository,
-        private val metadataRepository: IResourceMetadataRepository,
         private val collectionRepository: ICollectionRepository,
-        private val chunkRepository: IChunkRepository,
         directoryProvider: IDirectoryProvider
 ) {
 
@@ -105,8 +102,13 @@ class ImportResourceContainer(
                 val slug = "${project.identifier}_${chapter.key}"
                 val col = Collection(chapter.key, slug, "chapter", chapter.key.toString(), null)
                 val tree = Tree(col)
+                // create a chunk for the whole chapter
+                val chapChunk = Content(0, "chapter",
+                        chapter.value.values.first().number,
+                        chapter.value.values.last().number, null)
+                tree.addChild(TreeNode(chapChunk))
                 for (verse in chapter.value.values) {
-                    val con = Chunk(verse.number, "verse", verse.number, verse.number, null)
+                    val con = Content(verse.number, "verse", verse.number, verse.number, null)
                     tree.addChild(TreeNode(con))
                 }
                 chapters.add(tree)

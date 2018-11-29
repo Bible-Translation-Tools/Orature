@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.data.model
 
-data class Chunk(
+data class Content(
         var sort: Int,
         var labelKey: String,
         var start: Int,

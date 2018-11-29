@@ -3,13 +3,13 @@ package org.wycliffeassociates.otter.common.domain.content
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.functions.Function3
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.IWaveFileCreator
-import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import java.io.File
@@ -17,22 +17,22 @@ import java.time.LocalDate
 
 class RecordTake(
         private val collectionRepository: ICollectionRepository,
-        private val chunkRepository: IChunkRepository,
+        private val contentRepository: IContentRepository,
         private val takeRepository: ITakeRepository,
         private val directoryProvider: IDirectoryProvider,
         private val waveFileCreator: IWaveFileCreator,
         private val launchPlugin: LaunchPlugin
 ) {
-    private fun getChunkCount(collection: Collection): Single<Int> = chunkRepository
+    private fun getContentCount(collection: Collection, filter: (Content) -> Boolean): Single<Int> = contentRepository
             .getByCollection(collection)
-            .map { it.size }
+            .map { retrieved -> retrieved.filter(filter).size }
 
     private fun getNumberOfSubcollections(collection: Collection): Single<Int> = collectionRepository
             .getChildren(collection)
             .map { it.size }
 
-    private fun getMaxTakeNumber(chunk: Chunk): Single<Int> = takeRepository
-            .getByChunk(chunk)
+    private fun getMaxTakeNumber(content: Content): Single<Int> = takeRepository
+            .getByContent(content)
             .map { takes ->
                 takes.maxBy { it.number }?.number ?: 0
             }
@@ -40,7 +40,7 @@ class RecordTake(
     private fun generateFilename(
             project: Collection,
             chapter: Collection,
-            chunk: Chunk,
+            content: Content,
             number: Int,
             chapterCount: Int,
             chunkCount: Int
@@ -58,36 +58,48 @@ class RecordTake(
                         && project.sort > 39) project.sort + 1 else project.sort
         )
         val bookSlug = project.slug
-        val chapterNumber = chapterFormat.format(chapter.titleKey.toInt())
-        val verseNumber = if (chunk.start == chunk.end) {
-            verseFormat.format(chunk.start)
+        val chapterNumber = chapterFormat.format(chapter.titleKey.toIntOrNull() ?: chapter.sort)
+        val verseNumber = if (content.start == content.end) {
+            verseFormat.format(content.start)
         } else {
-            "$verseFormat-$verseFormat".format(chunk.start, chunk.end)
+            "$verseFormat-$verseFormat".format(content.start, content.end)
         }
         val takeNumber = "%02d".format(number)
 
         // Compile the complete filename
-        return listOf(
-                languageSlug,
-                rcSlug,
-                "b$bookNumber",
-                bookSlug,
-                "c$chapterNumber",
-                "v$verseNumber",
-                "t$takeNumber"
-        ).joinToString("_", postfix = ".wav")
+
+        return if (content.labelKey == "chapter") {
+            listOf(
+                    languageSlug,
+                    rcSlug,
+                    "b$bookNumber",
+                    bookSlug,
+                    "c$chapterNumber",
+                    "t$takeNumber"
+            ).joinToString("_", postfix = ".wav")
+        } else {
+            listOf(
+                    languageSlug,
+                    rcSlug,
+                    "b$bookNumber",
+                    bookSlug,
+                    "c$chapterNumber",
+                    "v$verseNumber",
+                    "t$takeNumber"
+            ).joinToString("_", postfix = ".wav")
+        }
     }
 
-    private fun create(project: Collection, chapter: Collection, chunk: Chunk): Single<Take> = Single
+    private fun create(project: Collection, chapter: Collection, content: Content): Single<Take> = Single
             .zip(
-                    getMaxTakeNumber(chunk),
+                    getMaxTakeNumber(content),
                     getNumberOfSubcollections(project),
-                    getChunkCount(chapter),
+                    getContentCount(chapter) { it.labelKey != "chapter" },
                     Function3 { highest, chapterCount, verseCount ->
                         val filename = generateFilename(
                                 project,
                                 chapter,
-                                chunk,
+                                content,
                                 highest + 1,
                                 chapterCount,
                                 verseCount
@@ -115,19 +127,19 @@ class RecordTake(
                     }
             )
 
-    private fun insert(take: Take, chunk: Chunk): Completable = takeRepository
-            .insertForChunk(take, chunk)
+    private fun insert(take: Take, content: Content): Completable = takeRepository
+            .insertForContent(take, content)
             .toCompletable()
 
-    fun record(project: Collection, chapter: Collection, chunk: Chunk): Completable {
-        return create(project, chapter, chunk)
+    fun record(project: Collection, chapter: Collection, content: Content): Completable {
+        return create(project, chapter, content)
                 .flatMap { take ->
                     launchPlugin
                             .launchRecorder(take.path)
                             .toSingle { take }
                 }
                 .flatMapCompletable { take ->
-                    insert(take, chunk)
+                    insert(take, content)
                 }
     }
 }
