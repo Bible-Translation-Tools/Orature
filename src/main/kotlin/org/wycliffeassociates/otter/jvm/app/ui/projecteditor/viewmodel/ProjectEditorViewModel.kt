@@ -10,8 +10,8 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
@@ -114,7 +114,7 @@ class ProjectEditorViewModel: ViewModel() {
 
     private fun setTitleAndChapters() {
         val project = projectProperty.value
-        activeChunkProperty.value = null
+        activeContentProperty.value = null
         activeChildProperty.value = null
         if (project != null) {
             projectTitle = project.titleKey

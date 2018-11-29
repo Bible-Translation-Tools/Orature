@@ -41,7 +41,7 @@ class ProjectEditor : View() {
             it.first.value = null
             it.first.value = tmp
         }
-        viewModel.refreshActiveChunk()
+        viewModel.refreshActiveContent()
 
         if (viewModel.activeChildProperty.value == null) {
             // No chapter has been selected
