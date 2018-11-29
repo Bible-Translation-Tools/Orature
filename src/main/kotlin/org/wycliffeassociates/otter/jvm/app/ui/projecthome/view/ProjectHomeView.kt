@@ -125,6 +125,7 @@ class ProjectHomeView : View() {
 
     override fun onDock() {
         viewModel.loadProjects()
+        viewModel.clearSelectedProject()
     }
 
 }
