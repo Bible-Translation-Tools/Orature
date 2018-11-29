@@ -4,98 +4,98 @@ import io.reactivex.Completable
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.persistence.repositories.IChunkRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
+import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
+import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.TakeMapper
 
-class ChunkRepository(
+class ContentRepository(
         database: AppDatabase,
-        private val chunkMapper: ChunkMapper = ChunkMapper(),
+        private val contentMapper: ContentMapper = ContentMapper(),
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
-) : IChunkRepository {
-    private val chunkDao = database.getChunkDao()
+) : IContentRepository {
+    private val contentDao = database.getContentDao()
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()
 
-    override fun getByCollection(collection: Collection): Single<List<Chunk>> {
+    override fun getByCollection(collection: Collection): Single<List<Content>> {
         return Single
                 .fromCallable {
-                    chunkDao
+                    contentDao
                             .fetchByCollectionId(collection.id)
-                            .map(this::buildChunk)
+                            .map(this::buildContent)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getSources(chunk: Chunk): Single<List<Chunk>> {
+    override fun getSources(content: Content): Single<List<Content>> {
         return Single
                 .fromCallable {
-                    chunkDao
-                            .fetchSources(chunkMapper.mapToEntity(chunk))
-                            .map(this::buildChunk)
+                    contentDao
+                            .fetchSources(contentMapper.mapToEntity(content))
+                            .map(this::buildContent)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun updateSources(chunk: Chunk, sourceChunks: List<Chunk>): Completable {
+    override fun updateSources(content: Content, sourceContents: List<Content>): Completable {
         return Completable
                 .fromAction {
-                    chunkDao.updateSources(
-                            chunkMapper.mapToEntity(chunk),
-                            sourceChunks.map { chunkMapper.mapToEntity(it )}
+                    contentDao.updateSources(
+                            contentMapper.mapToEntity(content),
+                            sourceContents.map { contentMapper.mapToEntity(it )}
                     )
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun delete(obj: Chunk): Completable {
+    override fun delete(obj: Content): Completable {
         return Completable
                 .fromAction {
-                    chunkDao.delete(chunkMapper.mapToEntity(obj))
+                    contentDao.delete(contentMapper.mapToEntity(obj))
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getAll(): Single<List<Chunk>> {
+    override fun getAll(): Single<List<Content>> {
         return Single
                 .fromCallable {
-                    chunkDao
+                    contentDao
                             .fetchAll()
-                            .map(this::buildChunk)
+                            .map(this::buildContent)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun insertForCollection(chunk: Chunk, collection: Collection): Single<Int> {
+    override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
         return Single
                 .fromCallable {
-                    chunkDao.insert(chunkMapper.mapToEntity(chunk).apply { collectionFk = collection.id })
+                    contentDao.insert(contentMapper.mapToEntity(content).apply { collectionFk = collection.id })
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun update(obj: Chunk): Completable {
+    override fun update(obj: Content): Completable {
         return Completable
                 .fromAction {
-                    val existing = chunkDao.fetchById(obj.id)
-                    val entity = chunkMapper.mapToEntity(obj)
+                    val existing = contentDao.fetchById(obj.id)
+                    val entity = contentMapper.mapToEntity(obj)
                     // Make sure we don't over write the collection relationship
                     entity.collectionFk = existing.collectionFk
-                    chunkDao.update(entity)
+                    contentDao.update(entity)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    private fun buildChunk(entity: ChunkEntity): Chunk {
+    private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
-        val sources = chunkDao.fetchSources(entity)
-        val chunkEnd = sources.map { it.start }.max() ?: entity.start
+        val sources = contentDao.fetchSources(entity)
+        val contentEnd = sources.map { it.start }.max() ?: entity.start
         val selectedTake = entity
                 .selectedTakeFk?.let { selectedTakeFk ->
             // Retrieve the markers
@@ -104,7 +104,7 @@ class ChunkRepository(
                     .map(markerMapper::mapFromEntity)
             takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
         }
-        return chunkMapper.mapFromEntity(entity, selectedTake, chunkEnd)
+        return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
     }
 
 }

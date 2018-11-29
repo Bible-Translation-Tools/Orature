@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.persistence.entities
 
-data class ChunkEntity(
+data class ContentEntity(
         var id: Int,
         var sort: Int,
         var labelKey: String,

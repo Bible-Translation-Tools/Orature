@@ -4,7 +4,7 @@ import io.reactivex.Completable
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
@@ -20,7 +20,7 @@ class TakeRepository(
 ) : ITakeRepository {
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()
-    private val chunkDao = database.getChunkDao()
+    private val contentDao = database.getContentDao()
     override fun delete(obj: Take): Completable {
         return Completable
                 .fromAction {
@@ -39,20 +39,20 @@ class TakeRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getByChunk(chunk: Chunk): Single<List<Take>> {
+    override fun getByContent(content: Content): Single<List<Take>> {
         return Single
                 .fromCallable {
                     takeDao
-                            .fetchByChunkId(chunk.id)
+                            .fetchByContentId(content.id)
                             .map(this::buildTake)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun insertForChunk(take: Take, chunk: Chunk): Single<Int> {
+    override fun insertForContent(take: Take, content: Content): Single<Int> {
         return Single
                 .fromCallable {
-                    val takeId = takeDao.insert(takeMapper.mapToEntity(take, chunk.id))
+                    val takeId = takeDao.insert(takeMapper.mapToEntity(take, content.id))
                     // Insert the markers
                     take.markers.forEach {
                         val entity = markerMapper.mapToEntity(it, takeId)
@@ -97,9 +97,9 @@ class TakeRepository(
                             if (!takeFile.exists()) {
                                 // Take does not exist anymore
                                 // Reset the selected take if necessary to satisfy foreign key constraints
-                                val chunk = chunkDao.fetchById(take.contentFk, dsl)
-                                if (chunk.selectedTakeFk == take.id) chunk.selectedTakeFk = null
-                                chunkDao.update(chunk, dsl)
+                                val content = contentDao.fetchById(take.contentFk, dsl)
+                                if (content.selectedTakeFk == take.id) content.selectedTakeFk = null
+                                contentDao.update(content, dsl)
                                 // Remove the take from the database
                                 takeDao.delete(take, dsl)
                             }

@@ -16,7 +16,7 @@ class MainMenuViewModel : ViewModel() {
     private val languageRepo = Injector.languageRepo
     private val metadataRepo = Injector.metadataRepo
     private val collectionRepo = Injector.collectionRepo
-    private val chunkRepo = Injector.chunkRepo
+    private val contentRepo = Injector.contentRepo
     private val directoryProvider = Injector.directoryProvider
     private val pluginRepository = Injector.pluginRepository
 
@@ -33,10 +33,7 @@ class MainMenuViewModel : ViewModel() {
 
     fun importContainerDirectory(dir: File) {
         val importer = ImportResourceContainer(
-                languageRepo,
-                metadataRepo,
                 collectionRepo,
-                chunkRepo,
                 directoryProvider
         )
         showImportDialogProperty.value = true

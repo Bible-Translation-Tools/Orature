@@ -5,22 +5,22 @@ import jooq.Tables.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
-import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
+import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
 
-class ChunkDao(
+class ContentDao(
         private val instanceDsl: DSLContext
 ) {
-    fun fetchByCollectionId(collectionId: Int, dsl: DSLContext = instanceDsl): List<ChunkEntity> {
+    fun fetchByCollectionId(collectionId: Int, dsl: DSLContext = instanceDsl): List<ContentEntity> {
         return dsl
                 .select()
                 .from(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.COLLECTION_FK.eq(collectionId))
                 .fetch {
-                    RecordMappers.mapToChunkEntity(it)
+                    RecordMappers.mapToContentEntity(it)
                 }
     }
 
-    fun fetchSources(entity: ChunkEntity, dsl: DSLContext = instanceDsl): List<ChunkEntity> {
+    fun fetchSources(entity: ContentEntity, dsl: DSLContext = instanceDsl): List<ContentEntity> {
         val sourceIds = dsl
                 .select(CONTENT_DERIVATIVE.SOURCE_FK)
                 .from(CONTENT_DERIVATIVE)
@@ -34,11 +34,11 @@ class ChunkDao(
                 .from(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.ID.`in`(sourceIds))
                 .fetch {
-                    RecordMappers.mapToChunkEntity(it)
+                    RecordMappers.mapToContentEntity(it)
                 }
     }
 
-    fun updateSources(entity: ChunkEntity, sources: List<ChunkEntity>, dsl: DSLContext = instanceDsl) {
+    fun updateSources(entity: ContentEntity, sources: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
         // Delete the existing sources
         dsl
                 .deleteFrom(CONTENT_DERIVATIVE)
@@ -57,10 +57,10 @@ class ChunkDao(
     }
 
     @Synchronized
-    fun insert(entity: ChunkEntity, dsl: DSLContext = instanceDsl): Int {
+    fun insert(entity: ContentEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID was not 0")
 
-        // Insert the new chunk entity
+        // Insert the new content entity
         dsl
                 .insertInto(
                         CONTENT_ENTITY,
@@ -88,26 +88,26 @@ class ChunkDao(
                 }
     }
 
-    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ChunkEntity {
+    fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ContentEntity {
         return dsl
                 .select()
                 .from(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.ID.eq(id))
                 .fetchOne {
-                    RecordMappers.mapToChunkEntity(it)
+                    RecordMappers.mapToContentEntity(it)
                 }
     }
 
-    fun fetchAll(dsl: DSLContext = instanceDsl): List<ChunkEntity> {
+    fun fetchAll(dsl: DSLContext = instanceDsl): List<ContentEntity> {
         return dsl
                 .select()
                 .from(CONTENT_ENTITY)
                 .fetch {
-                    RecordMappers.mapToChunkEntity(it)
+                    RecordMappers.mapToContentEntity(it)
                 }
     }
 
-    fun update(entity: ChunkEntity, dsl: DSLContext = instanceDsl) {
+    fun update(entity: ContentEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(CONTENT_ENTITY)
                 .set(CONTENT_ENTITY.SORT, entity.sort)
@@ -119,7 +119,7 @@ class ChunkDao(
                 .execute()
     }
 
-    fun delete(entity: ChunkEntity, dsl: DSLContext = instanceDsl) {
+    fun delete(entity: ContentEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .deleteFrom(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.ID.eq(entity.id))

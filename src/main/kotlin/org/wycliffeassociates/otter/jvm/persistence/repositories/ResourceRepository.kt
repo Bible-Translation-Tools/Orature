@@ -3,80 +3,80 @@ package org.wycliffeassociates.otter.jvm.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
+import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
+import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.TakeMapper
 
 class ResourceRepository(
         database: AppDatabase,
-        private val chunkMapper: ChunkMapper = ChunkMapper(),
+        private val contentMapper: ContentMapper = ContentMapper(),
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
 ) : IResourceRepository {
-    private val chunkDao = database.getChunkDao()
+    private val contentDao = database.getContentDao()
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()
     private val resourceLinkDao = database.getResourceLinkDao()
 
-    override fun delete(obj: Chunk): Completable {
+    override fun delete(obj: Content): Completable {
         return Completable
                 .fromAction {
-                    chunkDao.delete(chunkMapper.mapToEntity(obj))
+                    contentDao.delete(contentMapper.mapToEntity(obj))
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getAll(): Single<List<Chunk>> {
+    override fun getAll(): Single<List<Content>> {
         return Single
                 .fromCallable {
-                    chunkDao
+                    contentDao
                             .fetchAll()
                             .map(this::buildResource)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getByCollection(collection: Collection): Single<List<Chunk>> {
+    override fun getByCollection(collection: Collection): Single<List<Content>> {
         return Single
                 .fromCallable {
                     resourceLinkDao
                             .fetchByCollectionId(collection.id)
                             .map {
-                                chunkDao.fetchById(it.resourceChunkFk)
+                                contentDao.fetchById(it.resourceContentFk)
                             }
                             .map(this::buildResource)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getByChunk(chunk: Chunk): Single<List<Chunk>> {
+    override fun getByContent(content: Content): Single<List<Content>> {
         return Single
                 .fromCallable {
                     resourceLinkDao
-                            .fetchByChunkId(chunk.id)
+                            .fetchByContentId(content.id)
                             .map {
-                                chunkDao.fetchById(it.resourceChunkFk)
+                                contentDao.fetchById(it.resourceContentFk)
                             }
                             .map(this::buildResource)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun linkToChunk(resource: Chunk, chunk: Chunk): Completable {
+    override fun linkToContent(resource: Content, content: Content): Completable {
         return Completable
                 .fromAction {
                     // Check if already exists
                     val alreadyExists = resourceLinkDao
-                            .fetchByChunkId(chunk.id)
+                            .fetchByContentId(content.id)
                             .filter {
                                 // Check for this link
-                                it.resourceChunkFk == resource.id
+                                it.resourceContentFk == resource.id
                             }.isNotEmpty()
 
                     if (!alreadyExists) {
@@ -84,7 +84,7 @@ class ResourceRepository(
                         val entity = ResourceLinkEntity(
                                 0,
                                 resource.id,
-                                chunk.id,
+                                content.id,
                                 null
                         )
                         resourceLinkDao.insert(entity)
@@ -93,7 +93,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun linkToCollection(resource: Chunk, collection: Collection): Completable {
+    override fun linkToCollection(resource: Content, collection: Collection): Completable {
         return Completable
                 .fromAction {
                     // Check if already exists
@@ -101,7 +101,7 @@ class ResourceRepository(
                             .fetchByCollectionId(collection.id)
                             .filter {
                                 // Check for this link
-                                it.resourceChunkFk == resource.id
+                                it.resourceContentFk == resource.id
                             }.isNotEmpty()
 
                     if (!alreadyExists) {
@@ -118,15 +118,15 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun unlinkFromChunk(resource: Chunk, chunk: Chunk): Completable {
+    override fun unlinkFromContent(resource: Content, content: Content): Completable {
         return Completable
                 .fromAction {
                     // Check if exists
                     resourceLinkDao
-                            .fetchByChunkId(chunk.id)
+                            .fetchByContentId(content.id)
                             .filter {
                                 // Check for this link
-                                it.resourceChunkFk == resource.id
+                                it.resourceContentFk == resource.id
                             }
                             .forEach {
                                 // Delete the link
@@ -136,7 +136,7 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun unlinkFromCollection(resource: Chunk, collection: Collection): Completable {
+    override fun unlinkFromCollection(resource: Content, collection: Collection): Completable {
         return Completable
                 .fromAction {
                     // Check if exists
@@ -144,7 +144,7 @@ class ResourceRepository(
                             .fetchByCollectionId(collection.id)
                             .filter {
                                 // Check for this link
-                                it.resourceChunkFk == resource.id
+                                it.resourceContentFk == resource.id
                             }
                             .forEach {
                                 // Delete the link
@@ -154,22 +154,22 @@ class ResourceRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun update(obj: Chunk): Completable {
+    override fun update(obj: Content): Completable {
         return Completable
                 .fromAction {
-                    val existing = chunkDao.fetchById(obj.id)
-                    val entity = chunkMapper.mapToEntity(obj)
+                    val existing = contentDao.fetchById(obj.id)
+                    val entity = contentMapper.mapToEntity(obj)
                     // Make sure we don't over write the collection relationship
                     entity.collectionFk = existing.collectionFk
-                    chunkDao.update(entity)
+                    contentDao.update(entity)
                 }
                 .subscribeOn(Schedulers.io())
     }
 
-    private fun buildResource(entity: ChunkEntity): Chunk {
+    private fun buildResource(entity: ContentEntity): Content {
         // Check for sources
-        val sources = chunkDao.fetchSources(entity)
-        val chunkEnd = sources.map { it.start }.max() ?: entity.start
+        val sources = contentDao.fetchSources(entity)
+        val contentEnd = sources.map { it.start }.max() ?: entity.start
         val selectedTake = entity
                 .selectedTakeFk?.let { selectedTakeFk ->
             // Retrieve the markers
@@ -178,7 +178,7 @@ class ResourceRepository(
                     .map(markerMapper::mapFromEntity)
             takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
         }
-        return chunkMapper.mapFromEntity(entity, selectedTake, chunkEnd)
+        return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
     }
 
 }

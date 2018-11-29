@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
-import org.wycliffeassociates.otter.jvm.persistence.entities.ChunkEntity
+import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
 
-class ChunkMapper {
-    fun mapFromEntity(entity: ChunkEntity, selectedTake: Take?, end: Int): Chunk {
-        return Chunk(
+class ContentMapper {
+    fun mapFromEntity(entity: ContentEntity, selectedTake: Take?, end: Int): Content {
+        return Content(
                 entity.sort,
                 entity.labelKey,
                 entity.start,
@@ -16,8 +16,8 @@ class ChunkMapper {
         )
     }
 
-    fun mapToEntity(obj: Chunk, collectionFk: Int = 0): ChunkEntity {
-        return ChunkEntity(
+    fun mapToEntity(obj: Content, collectionFk: Int = 0): ContentEntity {
+        return ContentEntity(
                 obj.id,
                 obj.sort,
                 obj.labelKey,

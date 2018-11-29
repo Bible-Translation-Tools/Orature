@@ -7,7 +7,7 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
@@ -23,11 +23,11 @@ import tornadofx.*
 class ViewTakesViewModel : ViewModel() {
     private val directoryProvider = Injector.directoryProvider
     private val collectionRepository = Injector.collectionRepo
-    private val chunkRepository = Injector.chunkRepository
+    private val contentRepository = Injector.contentRepository
     private val takeRepository = Injector.takeRepository
     private val pluginRepository = Injector.pluginRepository
 
-    private val chunkProperty = find(ProjectEditorViewModel::class).activeChunkProperty
+    val contentProperty = find(ProjectEditorViewModel::class).activeContentProperty
     private val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
     private var chapterProperty = find(ProjectEditorViewModel::class).activeChildProperty
 
@@ -46,7 +46,7 @@ class ViewTakesViewModel : ViewModel() {
 
     private val recordTake = RecordTake(
             collectionRepository,
-            chunkRepository,
+            contentRepository,
             takeRepository,
             directoryProvider,
             WaveFileCreator(),
@@ -54,7 +54,7 @@ class ViewTakesViewModel : ViewModel() {
     )
 
     private val accessTakes = AccessTakes(
-            Injector.chunkRepository,
+            Injector.contentRepository,
             Injector.takeRepository
     )
 
@@ -70,24 +70,24 @@ class ViewTakesViewModel : ViewModel() {
         find<AddPluginView>().openModal()
     }
 
-    private fun populateTakes(chunk: Chunk) {
+    private fun populateTakes(content: Content) {
         accessTakes
-                .getByChunk(chunk)
+                .getByContent(content)
                 .observeOnFx()
                 .subscribe { retrievedTakes ->
                     alternateTakes.clear()
-                    alternateTakes.addAll(retrievedTakes.filter { it != chunk.selectedTake })
-                    selectedTakeProperty.value = chunk.selectedTake
+                    alternateTakes.addAll(retrievedTakes.filter { it != content.selectedTake })
+                    selectedTakeProperty.value = content.selectedTake
                 }
     }
 
     fun acceptTake(take: Take) {
-        val chunk = chunkProperty.value
+        val content = contentProperty.value
         // Move the old selected take back to the alternates (if not null)
         if (selectedTakeProperty.value != null) alternateTakes.add(selectedTakeProperty.value)
         // Do the database action
         accessTakes
-                .setSelectedTake(chunk, take)
+                .setSelectedTake(content, take)
                 .subscribe()
         // Set the new selected take value
         selectedTakeProperty.value = take
@@ -101,15 +101,15 @@ class ViewTakesViewModel : ViewModel() {
                 .subscribe()
     }
 
-    fun recordChunk() {
+    fun recordContent() {
         projectProperty.value?.let { project ->
             showPluginActive = true
             recordTake
-                    .record(project, chapterProperty.value, chunkProperty.value)
+                    .record(project, chapterProperty.value, contentProperty.value)
                     .observeOnFx()
                     .doOnComplete {
                         showPluginActive = false
-                        populateTakes(chunkProperty.value)
+                        populateTakes(contentProperty.value)
                     }
                     .onErrorResumeNext {
                         Completable.fromAction {
@@ -125,7 +125,7 @@ class ViewTakesViewModel : ViewModel() {
         if (take == selectedTakeProperty.value) {
             // Delete the selected take
             accessTakes
-                    .setSelectedTake(chunkProperty.value, null)
+                    .setSelectedTake(contentProperty.value, null)
                     .concatWith(accessTakes.delete(take))
                     .subscribe()
             selectedTakeProperty.value = null
@@ -141,7 +141,11 @@ class ViewTakesViewModel : ViewModel() {
     fun reset() {
         alternateTakes.clear()
         selectedTakeProperty.value = null
-        chunkProperty.value?.let { populateTakes(it) }
-        title = "${FX.messages[chunkProperty.value?.labelKey ?: "verse"]} ${chunkProperty.value?.start ?: ""}"
+        contentProperty.value?.let { populateTakes(it) }
+        title = if (contentProperty.value?.labelKey == "chapter") {
+            chapterProperty.value?.titleKey ?: ""
+        } else {
+            "${FX.messages[contentProperty.value?.labelKey ?: "verse"]} ${contentProperty.value?.start ?: ""}"
+        }
     }
 }

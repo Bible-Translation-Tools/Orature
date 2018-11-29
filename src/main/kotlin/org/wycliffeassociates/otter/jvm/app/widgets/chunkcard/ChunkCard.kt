@@ -1,43 +1,45 @@
-package org.wycliffeassociates.otter.jvm.app.widgets.chunkcard
+package org.wycliffeassociates.otter.jvm.app.widgets.contentcard
 
 
 import com.jfoenix.controls.JFXButton
+import javafx.scene.control.Label
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class ChunkCard(initialChunk: Chunk? = null) : VBox() {
+class ContentCard(initialContent: Content? = null) : VBox() {
     var actionButton = JFXButton()
-    var chunk: Chunk by property(initialChunk)
+    var titleLabel by singleAssign<Label>()
+    var content: Content by property(initialContent)
 
-    fun chunkProperty() = getProperty(ChunkCard::chunk)
+    fun contentProperty() = getProperty(ContentCard::content)
 
     init {
-        importStylesheet<ChunkCardStyles>()
-        addClass(ChunkCardStyles.defaultChunkCard)
-        label(chunkProperty().stringBinding {
+        importStylesheet<ContentCardStyles>()
+        addClass(ContentCardStyles.defaultContentCard)
+        titleLabel = label(contentProperty().stringBinding {
             "${messages[it?.labelKey ?: ""]} ${it?.start ?: ""}"
         }) {
             vgrow = Priority.ALWAYS
             maxHeight = Double.MAX_VALUE
-            addClass(ChunkCardStyles.titleLabel)
+            addClass(ContentCardStyles.titleLabel)
         }
-        label(chunkProperty().stringBinding {
+        label(contentProperty().stringBinding {
             if (it?.selectedTake != null) "${messages["take"]} ${it.selectedTake?.number ?: ""}" else ""
         }) {
             vgrow = Priority.ALWAYS
             maxHeight = Double.MAX_VALUE
-            addClass(ChunkCardStyles.selectedTakeLabel)
+            addClass(ContentCardStyles.selectedTakeLabel)
         }
         actionButton.isDisableVisualFocus = true
         add(actionButton)
     }
 }
 
-fun chunkcard(verse: Chunk, init: ChunkCard.() -> Unit): ChunkCard {
-    val vc = ChunkCard(verse)
+fun contentcard(verse: Content, init: ContentCard.() -> Unit): ContentCard {
+    val vc = ContentCard(verse)
     vc.init()
     return vc
 }

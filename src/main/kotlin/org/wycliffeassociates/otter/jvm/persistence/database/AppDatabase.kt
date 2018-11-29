@@ -54,7 +54,7 @@ class AppDatabase(
     private var languageDao = LanguageDao(dsl)
     private val resourceMetadataDao = ResourceMetadataDao(dsl)
     private val collectionDao = CollectionDao(dsl)
-    private val chunkDao = ChunkDao(dsl)
+    private val contentDao = ContentDao(dsl)
     private val resourceLinkDao = ResourceLinkDao(dsl)
     private val takeDao = TakeDao(dsl)
     private val markerDao = MarkerDao(dsl)
@@ -64,7 +64,7 @@ class AppDatabase(
     fun getLanguageDao() = languageDao
     fun getResourceMetadataDao() = resourceMetadataDao
     fun getCollectionDao() = collectionDao
-    fun getChunkDao() = chunkDao
+    fun getContentDao() = contentDao
     fun getResourceLinkDao() = resourceLinkDao
     fun getTakeDao() = takeDao
     fun getMarkerDao() = markerDao

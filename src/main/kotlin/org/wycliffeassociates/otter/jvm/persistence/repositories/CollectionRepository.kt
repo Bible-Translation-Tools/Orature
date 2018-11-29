@@ -12,7 +12,7 @@ import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
 import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.collections.tree.TreeNode
-import org.wycliffeassociates.otter.common.data.model.Chunk
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -21,7 +21,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ChunkMapper
+import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
@@ -36,12 +36,12 @@ class CollectionRepository(
         private val database: AppDatabase,
         private val directoryProvider: IDirectoryProvider,
         private val collectionMapper: CollectionMapper = CollectionMapper(),
-        private val chunkMapper: ChunkMapper = ChunkMapper(),
+        private val contentMapper: ContentMapper = ContentMapper(),
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
     private val collectionDao = database.getCollectionDao()
-    private val chunkDao = database.getChunkDao()
+    private val contentDao = database.getContentDao()
     private val metadataDao = database.getResourceMetadataDao()
     private val languageDao = database.getLanguageDao()
 
@@ -444,7 +444,7 @@ class CollectionRepository(
                 importCollection(parentId, metadataId, node, dsl)
             }
             is TreeNode -> {
-                importChunk(parentId, node, dsl)
+                importContent(parentId, node, dsl)
             }
         }
     }
@@ -462,12 +462,12 @@ class CollectionRepository(
         }
     }
 
-    private fun importChunk(parentId: Int, node: TreeNode, dsl: DSLContext) {
-        val chunk = node.value
-        if (chunk is Chunk) {
-            val entity = chunkMapper.mapToEntity(chunk)
+    private fun importContent(parentId: Int, node: TreeNode, dsl: DSLContext) {
+        val content = node.value
+        if (content is Content) {
+            val entity = contentMapper.mapToEntity(content)
             entity.collectionFk = parentId
-            chunkDao.insert(entity, dsl)
+            contentDao.insert(entity, dsl)
         }
     }
 }

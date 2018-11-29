@@ -26,9 +26,9 @@ object Injector {
             database,
             directoryProvider
     )
-    val chunkRepo = ChunkRepository(database)
+    val contentRepo = ContentRepository(database)
     val metadataRepo = ResourceMetadataRepository(database, ResourceMetadataMapper(), LanguageMapper())
-    val chunkRepository = ChunkRepository(database)
+    val contentRepository = ContentRepository(database)
     val takeRepository = TakeRepository(database)
     val pluginRepository = AudioPluginRepository(database, preferences)
 

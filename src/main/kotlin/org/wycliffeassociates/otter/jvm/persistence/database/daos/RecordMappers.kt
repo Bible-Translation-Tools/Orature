@@ -50,8 +50,8 @@ class RecordMappers {
             )
         }
 
-        fun mapToChunkEntity(record: Record): ChunkEntity {
-            return ChunkEntity(
+        fun mapToContentEntity(record: Record): ContentEntity {
+            return ContentEntity(
                     record.getValue(CONTENT_ENTITY.ID),
                     record.getValue(CONTENT_ENTITY.SORT),
                     record.getValue(CONTENT_ENTITY.LABEL),

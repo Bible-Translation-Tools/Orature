@@ -30,6 +30,9 @@ class ViewTakesStyles : Stylesheet() {
         viewTakesTitle {
             fontSize = 40.px
             textFill = AppTheme.colors.defaultText
+            child("*") {
+                fill = AppTheme.colors.defaultText
+            }
         }
         takeFlowPane {
             borderColor += box(Color.LIGHTGRAY)

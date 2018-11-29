@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
 class ResourceLinkDao(
         private val instanceDsl: DSLContext
 ) {
-    fun fetchByChunkId(id: Int, dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
+    fun fetchByContentId(id: Int, dsl: DSLContext = instanceDsl): List<ResourceLinkEntity> {
         return dsl
                 .select()
                 .from(RESOURCE_LINK)
@@ -42,8 +42,8 @@ class ResourceLinkDao(
                         RESOURCE_LINK.COLLECTION_FK
                 )
                 .values(
-                        entity.resourceChunkFk,
-                        entity.chunkFk,
+                        entity.resourceContentFk,
+                        entity.contentFk,
                         entity.collectionFk
                 )
                 .execute()
@@ -79,8 +79,8 @@ class ResourceLinkDao(
     fun update(entity: ResourceLinkEntity, dsl: DSLContext = instanceDsl) {
         dsl
                 .update(RESOURCE_LINK)
-                .set(RESOURCE_LINK.RESOURCE_CONTENT_FK, entity.resourceChunkFk)
-                .set(RESOURCE_LINK.CONTENT_FK, entity.chunkFk)
+                .set(RESOURCE_LINK.RESOURCE_CONTENT_FK, entity.resourceContentFk)
+                .set(RESOURCE_LINK.CONTENT_FK, entity.contentFk)
                 .set(RESOURCE_LINK.COLLECTION_FK, entity.collectionFk)
                 .where(RESOURCE_LINK.ID.eq(entity.id))
                 .execute()

@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.TakeEntity
 class TakeDao(
         private val instanceDsl: DSLContext
 ) {
-    fun fetchByChunkId(id: Int, dsl: DSLContext = instanceDsl): List<TakeEntity> {
+    fun fetchByContentId(id: Int, dsl: DSLContext = instanceDsl): List<TakeEntity> {
         return dsl
                 .select()
                 .from(TAKE_ENTITY)

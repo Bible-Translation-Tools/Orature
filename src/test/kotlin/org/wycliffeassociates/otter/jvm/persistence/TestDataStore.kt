@@ -4,9 +4,6 @@ import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import java.io.File
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
-import java.util.*
 
 object TestDataStore {
     val languages = listOf(
@@ -117,15 +114,15 @@ object TestDataStore {
             )
     )
 
-    val chunks = listOf(
-            Chunk(
+    val content = listOf(
+            Content(
                     0,
                     "verse1",
                     1,
                     1,
                     null
             ),
-            Chunk(
+            Content(
                     41,
                     "verse42",
                     42,
