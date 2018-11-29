@@ -93,8 +93,11 @@ class MockContentRepository: IChunkRepository {
     }
 }
 
-
 class MockCollectionRepository: ICollectionRepository {
+    override fun deleteProject(project: Collection, deleteAudio: Boolean): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun getRootProjects(): Single<List<Collection>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

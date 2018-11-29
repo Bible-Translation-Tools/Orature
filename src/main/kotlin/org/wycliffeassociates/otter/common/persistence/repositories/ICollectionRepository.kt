@@ -19,5 +19,6 @@ interface ICollectionRepository : IRepository<Collection> {
     fun updateSource(collection: Collection, newSource: Collection): Completable
     fun updateParent(collection: Collection, newParent: Collection): Completable
     fun deriveProject(source: Collection, language: Language): Completable
+    fun deleteProject(project: Collection, deleteAudio: Boolean): Completable
     fun importResourceContainer(rc: ResourceContainer, tree: Tree, languageSlug: String): Completable
 }
