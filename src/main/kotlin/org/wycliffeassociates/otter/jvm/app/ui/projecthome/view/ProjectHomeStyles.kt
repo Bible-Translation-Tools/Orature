@@ -4,10 +4,8 @@ import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import tornadofx.Stylesheet
-import tornadofx.box
-import tornadofx.cssclass
-import tornadofx.px
+import org.wycliffeassociates.otter.jvm.app.widgets.projectcard.ProjectCardStyles
+import tornadofx.*
 
 class ProjectHomeStyles : Stylesheet() {
     companion object {
@@ -88,7 +86,7 @@ class ProjectHomeStyles : Stylesheet() {
                 }
             }
 
-            s(".jfx-button") {
+            ProjectCardStyles.projectCardButton {
                 minHeight = 40.px
                 maxWidth = Double.MAX_VALUE.px
                 backgroundColor += AppTheme.colors.appRed
@@ -96,6 +94,15 @@ class ProjectHomeStyles : Stylesheet() {
                 cursor = Cursor.HAND
                 fontSize = 16.px
                 fontWeight = FontWeight.BOLD
+            }
+
+            ProjectCardStyles.deleteProjectButton {
+                s(".jfx-rippler") {
+                    unsafe("-jfx-rippler-fill", raw(AppTheme.colors.appRed.css))
+                }
+                child("*") {
+                    fill = AppTheme.colors.subtitle
+                }
             }
         }
     }

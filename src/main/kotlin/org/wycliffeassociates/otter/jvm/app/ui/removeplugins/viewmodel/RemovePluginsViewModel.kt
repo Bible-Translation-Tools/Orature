@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.ViewModel
@@ -11,7 +12,7 @@ import tornadofx.ViewModel
 class RemovePluginsViewModel : ViewModel() {
     val pluginRepository = Injector.pluginRepository
 
-    val plugins = FXCollections.observableArrayList<AudioPluginData>()
+    val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
     val noPluginsProperty: ReadOnlyBooleanProperty
 
     init {

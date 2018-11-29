@@ -55,6 +55,7 @@ class AudioPluginRepository(
     override fun delete(obj: AudioPluginData): Completable {
         return Completable
                 .fromAction {
+                    obj.pluginFile?.let { if (it.exists()) it.delete() }
                     audioPluginDao.delete(mapper.mapToEntity(obj))
                     // Update the preferences if necessary
                     if (preferences.recorderPluginId() == obj.id) preferences.setRecorderPluginId(-1)

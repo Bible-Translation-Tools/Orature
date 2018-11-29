@@ -53,6 +53,35 @@ class CollectionRepository(
                 .subscribeOn(Schedulers.io())
     }
 
+    override fun deleteProject(project: Collection, deleteAudio: Boolean): Completable {
+        return Completable
+                .fromAction {
+                    // 1. Delete the project collection from the database. The associated chunks, takes, and links
+                    //    should be cascade deleted
+                    collectionDao.delete(collectionMapper.mapToEntity(project))
+                    // 2. Load the resource container
+                    val metadata = project.resourceContainer
+                    if (metadata != null) {
+                        val container = ResourceContainer.load(metadata.path)
+                        // 3. Remove the project from the manifest
+                        container.manifest.projects = container.manifest.projects.filter { it.identifier != project.slug }
+                        // 4a. If the manifest has more projects, write out the new manifest
+                        if (container.manifest.projects.isNotEmpty()) {
+                            container.writeManifest()
+                        } else {
+                            // 4b. If the manifest has no projects left, delete the RC folder and the metadata from the database
+                            metadata.path.deleteRecursively()
+                            metadataDao.delete(metadataMapper.mapToEntity(metadata))
+                        }
+                    }
+                    // 5. If project audio should be deleted, get the folder for the project audio and delete it
+                    if (deleteAudio) {
+                        val audioDirectory = directoryProvider.getProjectAudioDirectory(project, ".").parentFile
+                        audioDirectory.deleteRecursively()
+                    }
+                }.subscribeOn(Schedulers.io())
+    }
+
     override fun getAll(): Single<List<Collection>> {
         return Single
                 .fromCallable {

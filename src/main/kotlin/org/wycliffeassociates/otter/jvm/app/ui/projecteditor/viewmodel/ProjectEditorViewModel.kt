@@ -77,7 +77,7 @@ class ProjectEditorViewModel: ViewModel() {
     )
     private val editTake = EditTake(takeRepository, launchPlugin)
 
-    val snackBarObservable = PublishSubject.create<String>()
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     init {
         projectProperty.toObservable().subscribe { setTitleAndChapters() }

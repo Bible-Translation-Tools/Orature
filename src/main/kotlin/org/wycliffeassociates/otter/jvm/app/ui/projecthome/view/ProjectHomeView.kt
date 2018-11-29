@@ -7,13 +7,14 @@ import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
+import javafx.scene.control.ButtonType
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.images.SVGImage
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.projectcard
+import org.wycliffeassociates.otter.jvm.app.widgets.projectcard.projectcard
 import tornadofx.*
 
 class ProjectHomeView : View() {
@@ -56,6 +57,23 @@ class ProjectHomeView : View() {
                                 text = messages["loadProject"]
                                 action {
                                     viewModel.openProject(it)
+                                }
+                            }
+                            deleteButton.apply {
+                                action {
+                                    error(
+                                            messages["deleteProjectPrompt"],
+                                            messages["deleteProjectDetails"],
+                                            ButtonType.YES,
+                                            ButtonType.NO,
+                                            title = messages["deleteProjectPrompt"]
+                                    ) { button: ButtonType ->
+                                        if (button == ButtonType.YES) {
+                                            viewModel.deleteProject(it)
+                                            cardButton.isDisable = true
+                                            isDisable = true
+                                        }
+                                    }
                                 }
                             }
                             graphicContainer.apply {

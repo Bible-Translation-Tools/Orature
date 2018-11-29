@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS rc_link_entity (
 
 CREATE TABLE IF NOT EXISTS collection_entity (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    parent_fk     INTEGER REFERENCES collection_entity(id),
+    parent_fk     INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
     source_fk     INTEGER REFERENCES collection_entity(id),
     label         TEXT NOT NULL,
     title         TEXT NOT NULL,
