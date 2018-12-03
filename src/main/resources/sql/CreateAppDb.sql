@@ -100,3 +100,8 @@ CREATE TABLE IF NOT EXISTS audio_plugin_entity (
     path                TEXT,
     UNIQUE (name, version)
 );
+
+CREATE TABLE IF NOT EXISTS preferences (
+    key                 TEXT NOT NULL UNIQUE,
+    value               TEXT
+);

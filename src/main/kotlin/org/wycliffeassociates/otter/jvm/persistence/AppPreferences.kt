@@ -1,49 +1,68 @@
 package org.wycliffeassociates.otter.jvm.persistence
 
+import io.reactivex.Completable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
-import java.util.prefs.Preferences
+import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.entities.PreferenceEntity
 
 // preferences object that stores user-independent preference data
-object AppPreferences : IAppPreferences {
+class AppPreferences(database: AppDatabase) : IAppPreferences {
+    companion object {
+        val NO_ID = -1
+    }
+    private val preferenceDao = database.getPreferenceDao()
     private val CURRENT_USER_ID_KEY = "currentUserId"
     private val APP_INIT_KEY = "appInitialized"
     private val EDITOR_PLUGIN_ID_KEY = "editorPluginId"
     private val RECORDER_PLUGIN_ID_KEY = "recorderPluginId"
-    private val preferences = Preferences.userNodeForPackage(AppPreferences::class.java)
 
-    override fun currentUserId(): Int? {
-        val userId = preferences.getInt(CURRENT_USER_ID_KEY, -1)
-        return if (userId < 0) null else userId
-    }
+    private fun putInt(key: String, value: Int): Completable =
+            Completable.fromAction {
+                preferenceDao.upsert(PreferenceEntity(key, value.toString()))
+            }.subscribeOn(Schedulers.io())
 
-    override fun setCurrentUserId(userId: Int) {
-        preferences.putInt(CURRENT_USER_ID_KEY, userId)
-    }
+    private fun putBoolean(key: String, value: Boolean): Completable =
+            Completable.fromAction {
+                preferenceDao.upsert(PreferenceEntity(key, value.toString()))
+            }.subscribeOn(Schedulers.io())
 
-    override fun appInitialized(): Boolean {
-        return preferences.getBoolean(APP_INIT_KEY, false)
-    }
+    private fun getInt(key: String, def: Int): Single<Int> =
+            Single.fromCallable {
+                var value = def
+                try {
+                    value = preferenceDao.fetchByKey(key).value.toInt()
+                } catch (e: RuntimeException) {
+                    // do nothing
+                }
+                return@fromCallable value
+            }.subscribeOn(Schedulers.io())
 
-    override fun setAppInitialized(initialized: Boolean) {
-        preferences.putBoolean(APP_INIT_KEY, initialized)
-    }
+    private fun getBoolean(key: String, def: Boolean): Single<Boolean> =
+            Single.fromCallable {
+                var value = def
+                try {
+                    value = preferenceDao.fetchByKey(key).value.toBoolean()
+                } catch (e: RuntimeException) {
+                    // do nothing
+                }
+                return@fromCallable value
+            }.subscribeOn(Schedulers.io())
 
-    override fun editorPluginId(): Int? {
-        val editorId = preferences.getInt(EDITOR_PLUGIN_ID_KEY, -1)
-        return if (editorId < 0) null else editorId
-    }
+    override fun currentUserId(): Single<Int> = getInt(CURRENT_USER_ID_KEY, -1)
 
-    override fun setEditorPluginId(id: Int) {
-        preferences.putInt(EDITOR_PLUGIN_ID_KEY, id)
-    }
+    override fun setCurrentUserId(userId: Int): Completable = putInt(CURRENT_USER_ID_KEY, userId)
 
-    override fun recorderPluginId(): Int? {
-        val recorderId = preferences.getInt(RECORDER_PLUGIN_ID_KEY, -1)
-        return if (recorderId < 0) null else recorderId
-    }
+    override fun appInitialized(): Single<Boolean> = getBoolean(APP_INIT_KEY, false)
 
-    override fun setRecorderPluginId(id: Int) {
-        preferences.putInt(RECORDER_PLUGIN_ID_KEY, id)
-    }
+    override fun setAppInitialized(initialized: Boolean): Completable = putBoolean(APP_INIT_KEY, initialized)
 
+    override fun editorPluginId(): Single<Int> = getInt(EDITOR_PLUGIN_ID_KEY, -1)
+
+    override fun setEditorPluginId(id: Int): Completable = putInt(EDITOR_PLUGIN_ID_KEY, id)
+
+    override fun recorderPluginId(): Single<Int> = getInt(RECORDER_PLUGIN_ID_KEY, -1)
+
+    override fun setRecorderPluginId(id: Int): Completable = putInt(RECORDER_PLUGIN_ID_KEY, id)
 }

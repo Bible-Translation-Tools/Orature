@@ -59,6 +59,7 @@ class AppDatabase(
     private val takeDao = TakeDao(dsl)
     private val markerDao = MarkerDao(dsl)
     private val audioPluginDao = AudioPluginDao(dsl)
+    private val preferenceDao = PreferenceDao(dsl)
 
     // the getters
     fun getLanguageDao() = languageDao
@@ -69,6 +70,7 @@ class AppDatabase(
     fun getTakeDao() = takeDao
     fun getMarkerDao() = markerDao
     fun getAudioPluginDao() = audioPluginDao
+    fun getPreferenceDao() = preferenceDao
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {

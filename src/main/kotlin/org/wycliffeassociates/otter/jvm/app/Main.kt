@@ -25,15 +25,19 @@ fun main(args: Array<String>) {
 }
 
 private fun initApp() {
-    if (!Injector.preferences.appInitialized()) {
-        // Needs initialization
-        ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
-                .import()
-                .onErrorComplete()
-                .subscribe()
+    Injector.preferences.appInitialized()
+            .subscribe { initialized ->
+                if (!initialized) {
+                    // Needs initialization
+                    ImportLanguages(ClassLoader.getSystemResourceAsStream("content/langnames.json"), Injector.languageRepo)
+                            .import()
+                            .onErrorComplete()
+                            .subscribe()
 
-        Injector.preferences.setAppInitialized(true)
-    }
+                    Injector.preferences.setAppInitialized(true).subscribe()
+                }
+            }
+
 
     // Always import new plugins
     ImportAudioPlugins(Injector.audioPluginRegistrar, Injector.directoryProvider)

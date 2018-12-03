@@ -6,6 +6,13 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.*
 
 class RecordMappers {
     companion object {
+        fun mapToPreferencesEntity(record: Record): PreferenceEntity {
+            return PreferenceEntity(
+                    record.getValue(PREFERENCES.KEY),
+                    record.getValue(PREFERENCES.VALUE)
+            )
+        }
+
         fun mapToLanguageEntity(record: Record): LanguageEntity {
             return LanguageEntity(
                     record.getValue(LANGUAGE_ENTITY.ID),

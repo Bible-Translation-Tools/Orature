@@ -20,7 +20,8 @@ class PersistenceModule {
             = AppDatabase(directoryProvider.getAppDataDirectory().resolve(File("content.sqlite")))
 
     @Provides
-    fun providesAppPreferences() : IAppPreferences = AppPreferences
+    @Singleton
+    fun providesAppPreferences(database: AppDatabase) : IAppPreferences = AppPreferences(database)
 
     @Provides
     fun providesDirectoryProvider() : IDirectoryProvider = DirectoryProvider("TranslationRecorder")
