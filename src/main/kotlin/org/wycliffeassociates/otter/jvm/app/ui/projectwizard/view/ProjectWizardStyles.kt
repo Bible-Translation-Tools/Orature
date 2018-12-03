@@ -5,10 +5,10 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Node
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.app.widgets.searchablelist.SearchableListStyles
 import tornadofx.*
 import tornadofx.WizardStyles.Companion.wizard
 
@@ -20,10 +20,11 @@ class ProjectWizardStyles : Stylesheet() {
         val wizardCardGraphicsContainer by cssclass()
         val collectionFlowPane by cssclass()
         val noResource by cssclass()
-        val filterableComboBox by cssclass()
+        val searchableList by cssclass()
         val wizardButton by cssclass()
         val languageBoxLabel by cssclass()
         val selectLanguageRoot by cssclass()
+        val languageSearchContainer by cssclass()
 
         fun sourceLanguageIcon() = MaterialIconView(MaterialIcon.HEARING, "25px")
         fun targetLanguageIcon() = MaterialIconView(MaterialIcon.RECORD_VOICE_OVER, "25px")
@@ -118,28 +119,38 @@ class ProjectWizardStyles : Stylesheet() {
             textFill = AppTheme.colors.defaultText
         }
 
-        filterableComboBox {
-            backgroundColor += Color.TRANSPARENT
-            borderColor += box(null, null, AppTheme.colors.appRed, null)
-            borderWidth += box(0.px, 0.px, 2.px, 0.px)
+        languageSearchContainer {
+            alignment = Pos.TOP_CENTER
+            spacing = 10.px
+        }
+
+        searchableList {
+            backgroundRadius += box(5.px)
+            padding = box(10.px)
             minWidth = 350.px
-            child(".text-input") {
-                backgroundColor += Color.TRANSPARENT
-                textFill = AppTheme.colors.defaultText
+            SearchableListStyles.searchFieldContainer {
+                padding = box(5.px)
+                backgroundColor += AppTheme.colors.base
             }
-            child(".arrow-button") {
-                backgroundColor += Color.TRANSPARENT
-                child(".arrow") {
-                    visibility = FXVisibility.HIDDEN
-                }
+            SearchableListStyles.searchField {
+                backgroundColor += AppTheme.colors.base
+                // gets rid of a blue focus animation
+                unsafe("-jfx-focus-color", raw(AppTheme.colors.appRed.css))
             }
-            comboBoxPopup {
-                listView {
-                    backgroundColor += AppTheme.colors.defaultBackground
-                    borderColor += box(AppTheme.colors.base)
-                    listCell {
+            SearchableListStyles.searchListView {
+                backgroundColor += AppTheme.colors.base
+                borderColor += box(AppTheme.colors.base)
+                listCell {
+                    label {
                         textFill = AppTheme.colors.defaultText
-                        backgroundColor += AppTheme.colors.defaultBackground
+                    }
+                    backgroundColor += AppTheme.colors.base
+                    backgroundRadius += box(5.px)
+                    and(selected) {
+                        backgroundColor += AppTheme.colors.appRed
+                        label {
+                            textFill = AppTheme.colors.white
+                        }
                     }
                 }
             }
@@ -153,6 +164,4 @@ class ProjectWizardStyles : Stylesheet() {
             cursor = Cursor.HAND
         }
     }
-
-
 }

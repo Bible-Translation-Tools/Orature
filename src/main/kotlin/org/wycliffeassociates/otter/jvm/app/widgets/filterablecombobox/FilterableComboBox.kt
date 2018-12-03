@@ -3,13 +3,9 @@ package org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javafx.event.EventHandler
 import javafx.event.EventTarget
 import javafx.scene.control.ComboBox
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import tornadofx.*
-
 
 /**
  * This class contains a comboBox that is searchable and filterable through a text field.
@@ -24,7 +20,7 @@ class FilterableComboBox<T> : ComboBox<T>() {
     init {
         /** Set up filterable comboBox based on the incoming data to select from */
         isEditable = true
-        makeAutocompletable(false) { input ->
+        skin = FilterableComboBoxSkin(this) { input ->
             filterItems
                     .filter { it.filterText.joinToString("&").contains(input, true) }
                     .sortedBy { it.filterText.joinToString("&").indexOf(input, ignoreCase = true) }
@@ -41,32 +37,21 @@ class FilterableComboBox<T> : ComboBox<T>() {
         }
 
         editor.focusedProperty().onChange {
-            if (it && items.isNotEmpty()) {
-                // Trigger the dropdown
-                forceShow()
-            }
+            (skin as FilterableComboBoxSkin<*>).showDropdownIfFocused()
         }
     }
 
     private fun refreshFilterItems() {
         filterItems.setAll(items.map { FilterableItem(it, filterConverter(it)) })
-        if (editor.isFocused && items.isNotEmpty()) forceShow()
     }
+}
 
-    private fun forceShow() {
-        if (editor.text.isEmpty()) {
-            valueProperty().value = null
-            // Change the editor's text so the filter handler thinks it needs to display new suggestions
-            editor.text = "a" 
-            // Fire a fake key released event to trigger the autocomplete handler
-            editor.fireEvent(KeyEvent(
-                    KeyEvent.KEY_RELEASED,
-                    "a", "a",
-                    KeyCode.A,
-                    false, false, false, false
-            ))
-            // Clear the text of the fake 'a'
-            editor.clear()
+class FilterableComboBoxSkin<T>(comboBox: ComboBox<T>, autoCompleteFilter: ((String) -> List<T>)? = null) : AutoCompleteComboBoxSkin<T>(comboBox, autoCompleteFilter, false) {
+    fun showDropdownIfFocused() {
+        if (editor?.isFocused == true && comboBox.items.isNotEmpty()) {
+            // Trigger the dropdown and make sure the items are showing
+            listView.items = comboBox.items
+            comboBox.show()
         }
     }
 }

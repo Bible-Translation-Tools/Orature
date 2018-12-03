@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -13,13 +14,15 @@ import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
 import tornadofx.ViewModel
 import tornadofx.Wizard
+import tornadofx.booleanBinding
 
 class ProjectWizardViewModel : ViewModel() {
     private val languageRepo = Injector.languageRepo
     private val collectionRepo = Injector.collectionRepo
 
-    val sourceLanguageProperty = bind { SimpleObjectProperty<Language>() }
-    val targetLanguageProperty = bind { SimpleObjectProperty<Language>() }
+    val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
+    val sourceLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
+    val targetLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
 
@@ -119,8 +122,7 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun reset() {
-        sourceLanguageProperty.value = null
-        targetLanguageProperty.value = null
+        clearLanguages.onNext(true)
         collections.setAll()
         collectionHierarchy.clear()
         existingProjects.clear()
@@ -128,5 +130,27 @@ class ProjectWizardViewModel : ViewModel() {
         loadProjects()
     }
 
-    fun languagesValid() = valid(sourceLanguageProperty, targetLanguageProperty)
+    fun filterLanguages(query: String): ObservableList<Language> =
+        languages.filtered {
+            it.name.contains(query, true)
+                    || it.anglicizedName.contains(query, true)
+                    || it.slug.contains(query, true)
+        }.sorted { lang1, lang2 ->
+            when {
+                lang1.slug.startsWith(query, true) -> -1
+                lang2.slug.startsWith(query, true) -> 1
+                lang1.name.startsWith(query, true) -> -1
+                lang2.name.startsWith(query, true) -> 1
+                lang1.anglicizedName.startsWith(query, true) -> -1
+                lang2.anglicizedName.startsWith(query, true) -> 1
+                else -> 0
+            }
+        }
+
+    fun filterTargetLanguages(query: String): ObservableList<Language> =
+            filterLanguages(query).filtered { it != sourceLanguageProperty.value }
+
+    fun languagesValid() = sourceLanguageProperty.booleanBinding(targetLanguageProperty) {
+        sourceLanguageProperty.value != null && targetLanguageProperty.value != null
+    }
 }
