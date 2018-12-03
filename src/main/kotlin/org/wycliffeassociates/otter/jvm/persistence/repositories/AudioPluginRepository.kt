@@ -82,29 +82,29 @@ class AudioPluginRepository(
                     .fromCallable {
                         audioPluginDao.fetchAll()
                     }
-                    .filter { it.isNotEmpty() }
-                    .flatMapSingle { allPlugins ->
-                        preferences.editorPluginId()
-                                .map { Pair(allPlugins, it) }
-                    }
-                    .flatMap { (allPlugins, editorId) ->
-                        val editPlugins = allPlugins.filter { it.edit == 1 }
-                        return@flatMap if (editorId == AppPreferences.NO_ID && editPlugins.isNotEmpty()) {
-                            preferences.setEditorPluginId(editPlugins.first().id)
-                        } else {
-                            Completable.complete()
-                        }.toSingle { allPlugins }
-                    }
-                    .flatMap { allPlugins ->
-                        preferences.recorderPluginId()
-                                .map { Pair(allPlugins, it) }
-                    }
-                    .flatMapCompletable { (allPlugins, recorderId) ->
-                        val recordPlugins = allPlugins.filter { it.record == 1 }
-                        if (recorderId == AppPreferences.NO_ID && recordPlugins.isNotEmpty()) {
-                            return@flatMapCompletable preferences.setRecorderPluginId(recordPlugins.first().id)
-                        } else {
+                    .flatMapCompletable { allPlugins ->
+                        if (allPlugins.isEmpty())
                             return@flatMapCompletable Completable.complete()
+                        else {
+                            return@flatMapCompletable preferences.editorPluginId()
+                                    .flatMapCompletable { editorId ->
+                                        val editPlugins = allPlugins.filter { it.edit == 1 }
+                                        return@flatMapCompletable if (editorId == AppPreferences.NO_ID
+                                                && editPlugins.isNotEmpty()) {
+                                            preferences.setEditorPluginId(editPlugins.first().id)
+                                        } else {
+                                            Completable.complete()
+                                        }
+                                    }
+                                    .andThen(preferences.recorderPluginId())
+                                    .flatMapCompletable { recorderId ->
+                                        val recordPlugins = allPlugins.filter { it.record == 1 }
+                                        if (recorderId == AppPreferences.NO_ID && recordPlugins.isNotEmpty()) {
+                                            return@flatMapCompletable preferences.setRecorderPluginId(recordPlugins.first().id)
+                                        } else {
+                                            return@flatMapCompletable Completable.complete()
+                                        }
+                                    }
                         }
                     }
                     .subscribeOn(Schedulers.io())
