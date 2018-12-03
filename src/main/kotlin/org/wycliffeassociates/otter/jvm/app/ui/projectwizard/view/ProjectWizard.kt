@@ -54,7 +54,6 @@ class ProjectWizard : Wizard() {
         wizardViewModel.creationCompletedProperty.onChange {
             if (it) {
                 runLater {
-                    wizardViewModel.reset()
                     currentPage = pages[0]
                     close()
                 }
@@ -63,8 +62,12 @@ class ProjectWizard : Wizard() {
     }
 
     override fun onCancel() {
-        wizardViewModel.reset()
         currentPage = pages[0]
         close()
+    }
+
+    override fun onDock() {
+        super.onDock()
+        wizardViewModel.reset()
     }
 }
