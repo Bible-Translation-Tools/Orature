@@ -50,11 +50,16 @@ class ParseUsfm(val file: File) {
             }
             MARKER_VERSE_NUMBER -> {
                 val sub = split[1].split("\\s+".toRegex(), 2)
-                if (sub.size >= 2) {
-                    current.v = sub[0].replace("\\s".toRegex(), "").toInt()
-                    val verse = sub[1]
-                    //list initialized on chapter tag parse
-                    chapters[current.c]!![current.v] = Verse(current.v, verse)
+                // Check for verse bridges
+                val numbers = sub[0].replace("\\s".toRegex(), "")
+                        .split("-")
+                        .map { it.toInt() }
+                // Add all the verses
+                // Verse text is ignored since
+                // 1) it is not needed, 2) the current parser cannot extract text from word tags, if present
+                for (verseNumber in numbers[0]..(numbers.getOrNull(1) ?: numbers[0])) {
+                    current.v = verseNumber
+                    chapters[current.c]!![current.v] = Verse(current.v, "")
                 }
             }
             MARKER_NEW_PARAGRAPH -> return

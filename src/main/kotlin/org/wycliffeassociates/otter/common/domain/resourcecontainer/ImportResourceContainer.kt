@@ -1,194 +1,195 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
-import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.collections.tree.TreeNode
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.domain.usfm.ParseUsfm
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
-import org.wycliffeassociates.resourcecontainer.errors.RCException
 import java.io.File
 import java.io.IOException
-
 
 class ImportResourceContainer(
         private val collectionRepository: ICollectionRepository,
         directoryProvider: IDirectoryProvider
 ) {
+    enum class Result {
+        SUCCESS,
+        INVALID_RC,
+        INVALID_CONTENT,
+        UNSUPPORTED_CONTENT,
+        IMPORT_ERROR,
+        LOAD_RC_ERROR,
+        UNKNOWN_ERROR
+    }
 
     private val rcDirectory = File(directoryProvider.getAppDataDirectory(), "rc")
 
-    fun import(file: File): Completable {
+    fun import(file: File): Single<Result> {
         return when {
-            file.isDirectory -> importDirectory(file)
-            else -> Completable.complete()
+            file.isDirectory -> importContainerDirectory(file)
+            else -> Single.just(Result.INVALID_RC)
         }
     }
 
-    private fun importDirectory(dir: File): Completable {
-        if (validateResourceContainer(dir)) {
-            if (dir.parentFile?.absolutePath != rcDirectory.absolutePath) {
-                val success = dir.copyRecursively(File(rcDirectory, dir.name), true)
-                if (!success) {
-                    throw IOException("Could not copy resource container ${dir.name} to resource container directory")
+    private fun importContainerDirectory(directory: File) =
+        Single
+                .just(directory)
+                .flatMap { containerDir ->
+                    // Is this a valid resource container
+                    if (!validateResourceContainer(containerDir)) return@flatMap Single.just(Result.INVALID_RC)
+
+                    // Copy to the internal directory
+                    val newDirectory = copyToInternalDirectory(containerDir)
+
+                    // Load
+                    val container = try {
+                         ResourceContainer.load(newDirectory, OtterResourceContainerConfig())
+                    } catch (e: Exception) {
+                        return@flatMap cleanUp(newDirectory, Result.LOAD_RC_ERROR)
+                    }
+
+                    val (constructResult, tree) = constructContainerTree(container)
+                    if (constructResult != Result.SUCCESS) return@flatMap cleanUp(newDirectory, constructResult)
+
+                    return@flatMap collectionRepository
+                            .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
+                            .toSingle { Result.SUCCESS }
+                            .onErrorResumeNext(cleanUp(newDirectory, Result.IMPORT_ERROR))
+                }
+                .onErrorReturn { Result.UNKNOWN_ERROR }
+                .subscribeOn(Schedulers.io())
+
+    private fun cleanUp(containerDir: File, result: Result): Single<Result> = Single.fromCallable {
+        containerDir.deleteRecursively()
+        return@fromCallable result
+    }
+
+    private fun validateResourceContainer(dir: File): Boolean = dir.listFiles().map { it.name }.contains("manifest.yaml")
+
+    private fun copyToInternalDirectory(dir: File): File {
+        // Copy the resource container into the correct directory
+        val destinationDirectory = rcDirectory.resolve(dir.name).absoluteFile
+        if (dir.absoluteFile != destinationDirectory) {
+            // Need to copy the resource container into the internal directory
+            val success = dir.copyRecursively(destinationDirectory, true)
+            if (!success) {
+                throw IOException("Could not copy resource container ${dir.name} to resource container directory")
+            }
+        }
+        return destinationDirectory
+    }
+
+    private fun makeExpandedContainer(container: ResourceContainer): Result {
+        val dublinCore = container.manifest.dublinCore
+        if (dublinCore.type == "bundle" && dublinCore.format.startsWith("text/usfm")) {
+            return if (container.expandUSFMBundle()) Result.SUCCESS else Result.INVALID_CONTENT
+        }
+        return Result.SUCCESS
+    }
+
+    private fun constructContainerTree(container: ResourceContainer): Pair<Result, Tree> {
+        val root = Tree(container.toCollection())
+        val categoryInfo = container.otterConfigCategories()
+        for (project in container.manifest.projects) {
+            var parent = root
+            for (categorySlug in project.categories) {
+                // use the `latest` RC spec to treat categories as hierarchical
+                // look for a matching category under the parent
+                val existingCategory = parent.children
+                        .map { it as? Tree }
+                        .filter { (it?.value as? Collection)?.slug == categorySlug }
+                        .firstOrNull()
+                parent = if (existingCategory != null) {
+                    existingCategory
+                } else {
+                    // category node does not yet exist
+                    val category = categoryInfo.filter { it.identifier == categorySlug }.firstOrNull() ?: continue
+                    val categoryNode = Tree(category.toCollection())
+                    parent.addChild(categoryNode)
+                    categoryNode
                 }
             }
-            return importResourceContainer(File(rcDirectory, dir.name))
+            val projectResult = constructProjectTree(container.dir, project)
+            if (projectResult.first == Result.SUCCESS) {
+                parent.addChild(projectResult.second)
+            } else {
+                return Pair(projectResult.first, Tree(Unit))
+            }
+        }
+        return Pair(Result.SUCCESS, root)
+    }
+
+    private fun constructProjectTree(containerDir: File, project: Project): Pair<Result, Tree> {
+        var result = Result.SUCCESS
+        val projectLocation = containerDir.resolve(project.path)
+        val projectTree = Tree(project.toCollection())
+        if (projectLocation.isDirectory) {
+            val files = projectLocation.listFiles()
+            for (file in files) {
+                result = parseFileIntoProjectTree(file, projectTree, project.identifier)
+                if (result != Result.SUCCESS) return Pair(result, Tree(Unit))
+            }
         } else {
-            return Completable.error(RCException("Missing manifest.yaml"))
+            // Single file
+            result = parseFileIntoProjectTree(projectLocation, projectTree, project.identifier)
+            if (result != Result.SUCCESS) return Pair(result, Tree(Unit))
         }
+        return Pair(result, projectTree)
     }
 
-    private fun validateResourceContainer(dir: File): Boolean {
-        val names = dir.listFiles().map { it.name }
-        return names.contains("manifest.yaml")
-    }
-
-    private fun importResourceContainer(container: File): Completable {
-        return Single.fromCallable {
-            val rc = ResourceContainer.load(container, OtterResourceContainerConfig())
-            val dc = rc.manifest.dublinCore
-            if (dc.type == "bundle" && dc.format == "text/usfm") {
-                expandResourceContainerBundle(rc)
-            }
-            return@fromCallable Triple(constructContainerTree(rc), rc, dc)
-        }.flatMapCompletable { (tree, rc, dc) ->
-            collectionRepository.importResourceContainer(rc, tree, dc.language.identifier)
-        }.subscribeOn(Schedulers.io())
-    }
-
-    private fun constructContainerTree(rc: ResourceContainer): Tree {
-        val root = constructRoot(rc)
-        val categories = getCategories(rc)
-        val nodes = categories
-                .map { category ->
-                    val categoryTree = Tree(category)
-                    categoryTree.addAll(
-                            getProjectsInCategory(rc.manifest, category.slug)
-                                    .map {
-                                        constructProjectTree(rc.dir, it, "project")
-                                    }
-                    )
-                    return@map categoryTree
-                }
-                .plus(
-                        getProjectsNotInCategories(rc.manifest, categories.map { it.slug })
-                                .map {
-                                    constructProjectTree(rc.dir, it, "project")
-                                }
-                )
-        root.addAll(nodes)
-        return root
-    }
-
-    private fun constructProjectTree(containerDir: File, project: Project, type: String): Tree {
-        val projectDir = File(containerDir, project.path)
-        val files = projectDir.listFiles()
-        val book = Tree(Collection(project.sort, project.identifier, type, project.title, null))
-        val chapters = arrayListOf<Tree>()
-        for (file in files) {
-            val doc = ParseUsfm(file).parse()
-            for (chapter in doc.chapters) {
-                val slug = "${project.identifier}_${chapter.key}"
-                val col = Collection(chapter.key, slug, "chapter", chapter.key.toString(), null)
-                val tree = Tree(col)
-                // create a chunk for the whole chapter
-                val chapChunk = Content(0, "chapter",
-                        chapter.value.values.first().number,
-                        chapter.value.values.last().number, null)
-                tree.addChild(TreeNode(chapChunk))
-                for (verse in chapter.value.values) {
-                    val con = Content(verse.number, "verse", verse.number, verse.number, null)
-                    tree.addChild(TreeNode(con))
-                }
-                chapters.add(tree)
-            }
-        }
-        book.addAll(chapters)
-        return book
-    }
-
-
-    private fun constructRoot(rc: ResourceContainer): Tree {
-        val dc = rc.manifest.dublinCore
-        val slug = dc.identifier
-        val title = dc.title
-        val label = dc.type
-        val collection = Collection(0, slug, label, title, null)
-        return Tree(collection)
-    }
-
-    private fun getCategories(rc: ResourceContainer): List<Collection> {
-        val collections = arrayListOf<Collection>()
-        val config = rc.config
-        config?.let {
-            if (it is OtterResourceContainerConfig) {
-                it.extendedDublinCore?.let {
-                    for (cat in it.categories) {
-                        collections.add(
-                                Collection(cat.sort, cat.identifier, cat.identifier, cat.title, null)
-                        )
-                    }
+    private fun parseFileIntoProjectTree(file: File, root: Tree, projectIdentifier: String): Result {
+        return when (file.extension) {
+            "usfm", "USFM" -> {
+                try {
+                    val chapters = parseUSFMToChapterTrees(file, projectIdentifier)
+                    root.addAll(chapters)
+                    Result.SUCCESS
+                } catch (e: RuntimeException) {
+                    Result.INVALID_CONTENT
                 }
             }
+            else -> { Result.UNSUPPORTED_CONTENT }
         }
-        return collections
     }
 
-    private fun getProjectsInCategory(manifest: Manifest, categorySlug: String): List<Project> {
-        val projects = manifest.projects.filter { it.categories.contains(categorySlug) }
-        return projects
-    }
-
-    private fun getProjectsNotInCategories(manifest: Manifest, categorySlugs: List<String>): List<Project> {
-        val projects = manifest.projects.filter { it.categories.intersect(categorySlugs).isEmpty() }
-        return projects
-    }
-
-    fun expandResourceContainerBundle(rc: ResourceContainer) {
-        val dc = rc.manifest.dublinCore
-        dc.type = "book"
-
-        for (project in rc.manifest.projects) {
-            expandUsfm(rc.dir, project)
+    private fun parseUSFMToChapterTrees(usfmFile: File, projectSlug: String): List<Tree> {
+        if (usfmFile.extension != "usfm") {
+            throw IOException("Not a USFM file")
         }
 
-        rc.writeManifest()
-    }
+        val doc = ParseUsfm(usfmFile).parse()
+        return doc.chapters.map { chapter ->
+            val chapterSlug = "${projectSlug}_${chapter.key}"
+            val chapterCollection = Collection(
+                    chapter.key,
+                    chapterSlug,
+                    "chapter",
+                    chapter.key.toString(),
+                    null
+            )
+            val chapterTree = Tree(chapterCollection)
+            // create a chunk for the whole chapter
+            val chapChunk = Content(
+                    0,
+                    "chapter",
+                    chapter.value.values.first().number,
+                    chapter.value.values.last().number,
+                    null
+            )
+            chapterTree.addChild(TreeNode(chapChunk))
 
-    fun expandUsfm(root: File, project: Project) {
-        val projectRoot = File(root, project.identifier)
-        projectRoot.mkdir()
-        val usfmFile = File(root, project.path)
-        if (usfmFile.exists() && usfmFile.extension == "usfm") {
-            val book = ParseUsfm(usfmFile).parse()
-            val chapterPadding = book.chapters.size.toString().length //length of the string version of the number of chapters
-            val bookDir = File(root, project.identifier)
-            bookDir.mkdir()
-            for (chapter in book.chapters.entries) {
-                val chapterFile = File(bookDir, chapter.key.toString().padStart(chapterPadding, '0') + ".usfm")
-                val verses = chapter.value.entries.map { it.value }.toTypedArray()
-                verses.sortBy { it.number }
-                chapterFile.bufferedWriter().use {
-                    it.write("\\c ${chapter.key}")
-                    it.newLine()
-                    for (verse in verses) {
-                        it.appendln("\\v ${verse.number} ${verse.text}")
-                    }
-                }
+            // Create content for each verse
+            for (verse in chapter.value.values) {
+                val content = Content(verse.number, "verse", verse.number, verse.number, null)
+                chapterTree.addChild(TreeNode(content))
             }
-            usfmFile.delete()
+            return@map chapterTree
         }
-        project.path = "./${project.identifier}"
     }
 }
