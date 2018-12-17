@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.persistence.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.IWaveFileCreator
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
@@ -23,6 +24,12 @@ class RecordTake(
         private val waveFileCreator: IWaveFileCreator,
         private val launchPlugin: LaunchPlugin
 ) {
+    enum class Result {
+        SUCCESS,
+        NO_RECORDER,
+        NO_AUDIO
+    }
+
     private fun getContentCount(collection: Collection, filter: (Content) -> Boolean): Single<Int> = contentRepository
             .getByCollection(collection)
             .map { retrieved -> retrieved.filter(filter).size }
@@ -131,15 +138,25 @@ class RecordTake(
             .insertForContent(take, content)
             .toCompletable()
 
-    fun record(project: Collection, chapter: Collection, content: Content): Completable {
+    fun record(project: Collection, chapter: Collection, content: Content): Single<Result> {
         return create(project, chapter, content)
                 .flatMap { take ->
                     launchPlugin
                             .launchRecorder(take.path)
-                            .toSingle { take }
-                }
-                .flatMapCompletable { take ->
-                    insert(take, content)
+                            .flatMap {
+                                when (it) {
+                                    LaunchPlugin.Result.SUCCESS -> {
+                                        if (take.path.length() == EMPTY_WAVE_FILE_SIZE) {
+                                            take.path.delete()
+                                            Single.just(Result.NO_AUDIO)
+                                        } else {
+                                            insert(take, content).toSingle { Result.SUCCESS }
+
+                                        }
+                                    }
+                                    LaunchPlugin.Result.NO_PLUGIN -> Single.just(Result.NO_RECORDER)
+                                }
+                            }
                 }
     }
 }
