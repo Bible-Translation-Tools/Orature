@@ -151,10 +151,12 @@ class RecordTake(
                                             Single.just(Result.NO_AUDIO)
                                         } else {
                                             insert(take, content).toSingle { Result.SUCCESS }
-
                                         }
                                     }
-                                    LaunchPlugin.Result.NO_PLUGIN -> Single.just(Result.NO_RECORDER)
+                                    LaunchPlugin.Result.NO_PLUGIN -> {
+                                        take.path.delete()
+                                        Single.just(Result.NO_RECORDER)
+                                    }
                                 }
                             }
                 }
