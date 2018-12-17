@@ -14,6 +14,7 @@ import javafx.geometry.Orientation
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.ChapterContext
 import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
@@ -116,7 +117,7 @@ class ProjectEditor : View() {
                             val contentCard = ContentCard()
                             contentCard.contentProperty().bind(item.first)
                             contentCard.bindClass(cardContextCssRuleProperty())
-                            contentCard.bindClass(disabledCssRuleProperty(item.second))
+                            contentCard.bindClass(disabledCssRuleProperty(item.first, item.second))
                             contentCard.bindClass(hasTakesCssRuleProperty(item.second))
                             if (item.first.value.labelKey == "chapter") {
                                 // Special rendering
@@ -126,7 +127,11 @@ class ProjectEditor : View() {
                             }
                             viewModel.contextProperty.toObservable().subscribe { context ->
                                 contentCard.actionButton.visibleProperty().bind(
-                                        item.second.or(viewModel.contextProperty.isEqualTo(ChapterContext.RECORD))
+                                        viewModel.contextProperty.isEqualTo(ChapterContext.RECORD)
+                                                .or(item.second
+                                                        .and(viewModel.contextProperty.isEqualTo(ChapterContext.VIEW_TAKES)))
+                                                .or(item.first.booleanBinding { it?.selectedTake != null}
+                                                        .and(viewModel.contextProperty.isEqualTo(ChapterContext.EDIT_TAKES)))
                                 )
                                 when (context ?: ChapterContext.RECORD) {
                                     ChapterContext.RECORD -> {
@@ -232,6 +237,7 @@ class ProjectEditor : View() {
     }
 
     private fun disabledCssRuleProperty(
+            contentProperty: SimpleObjectProperty<Content>,
             hasTakesProperty: SimpleBooleanProperty
     ): ObservableValue<CssRule> {
         val cssRuleProperty = SimpleObjectProperty<CssRule>()
@@ -239,8 +245,11 @@ class ProjectEditor : View() {
         Observable.merge(viewModel.contextProperty.toObservable(), hasTakesProperty.toObservable()).subscribe {
             cssRuleProperty.value = when (viewModel.contextProperty.value ?: ChapterContext.RECORD) {
                 ChapterContext.RECORD -> null
-                ChapterContext.VIEW_TAKES, ChapterContext.EDIT_TAKES -> {
+                ChapterContext.VIEW_TAKES -> {
                     if (hasTakesProperty.value) null else ProjectEditorStyles.disabledCard
+                }
+                ChapterContext.EDIT_TAKES -> {
+                    if (contentProperty.value.selectedTake != null) null else ProjectEditorStyles.disabledCard
                 }
             }
         }
