@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projecthome.view
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.text.FontWeight
+import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.widgets.projectcard.ProjectCardStyles
 import tornadofx.*
@@ -22,8 +23,8 @@ class ProjectHomeStyles : Stylesheet() {
 
     init {
         homeAnchorPane {
-            prefWidth = 1200.px
-            prefHeight = 800.px
+            prefWidth = Screen.getPrimary().visualBounds.width.px
+            prefHeight = Screen.getPrimary().visualBounds.height.px
         }
 
         projectsFlowPane {

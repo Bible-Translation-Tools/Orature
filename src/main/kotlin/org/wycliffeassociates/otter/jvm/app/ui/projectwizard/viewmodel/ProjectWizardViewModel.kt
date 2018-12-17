@@ -17,8 +17,9 @@ import tornadofx.Wizard
 import tornadofx.booleanBinding
 
 class ProjectWizardViewModel : ViewModel() {
-    private val languageRepo = Injector.languageRepo
-    private val collectionRepo = Injector.collectionRepo
+    private val injector: Injector by inject()
+    private val languageRepo = injector.languageRepo
+    private val collectionRepo = injector.collectionRepo
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val sourceLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }

@@ -9,6 +9,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.AccessTakes
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
@@ -21,11 +22,12 @@ import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
 class ViewTakesViewModel : ViewModel() {
-    private val directoryProvider = Injector.directoryProvider
-    private val collectionRepository = Injector.collectionRepo
-    private val contentRepository = Injector.contentRepository
-    private val takeRepository = Injector.takeRepository
-    private val pluginRepository = Injector.pluginRepository
+    private val injector: Injector by inject()
+    private val directoryProvider = injector.directoryProvider
+    private val collectionRepository = injector.collectionRepo
+    private val contentRepository = injector.contentRepository
+    private val takeRepository = injector.takeRepository
+    private val pluginRepository = injector.pluginRepository
 
     val contentProperty = find(ProjectEditorViewModel::class).activeContentProperty
     private val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
@@ -54,13 +56,15 @@ class ViewTakesViewModel : ViewModel() {
     )
 
     private val accessTakes = AccessTakes(
-            Injector.contentRepository,
-            Injector.takeRepository
+            contentRepository,
+            takeRepository
     )
 
     init {
         reset()
     }
+
+    fun audioPlayer(): IAudioPlayer = injector.audioPlayer
 
     fun addPlugin(record: Boolean, edit: Boolean) {
         find<AddPluginViewModel>().apply {

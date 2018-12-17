@@ -10,7 +10,8 @@ import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.ViewModel
 
 class RemovePluginsViewModel : ViewModel() {
-    val pluginRepository = Injector.pluginRepository
+    private val injector: Injector by inject()
+    val pluginRepository = injector.pluginRepository
 
     val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
     val noPluginsProperty: ReadOnlyBooleanProperty

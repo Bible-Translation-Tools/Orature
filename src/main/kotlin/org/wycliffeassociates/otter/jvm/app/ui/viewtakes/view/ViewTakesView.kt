@@ -239,7 +239,7 @@ class ViewTakesView : View() {
     }
 
     private fun createTakeCard(take: Take): TakeCard {
-        return TakeCard(take, Injector.audioPlayer).apply {
+        return TakeCard(take, viewModel.audioPlayer()).apply {
             addClass(ViewTakesStyles.takeCard)
             badge.addClass(ViewTakesStyles.badge)
             simpleAudioPlayer.playPauseButton.addClass(ViewTakesStyles.playPauseButton)

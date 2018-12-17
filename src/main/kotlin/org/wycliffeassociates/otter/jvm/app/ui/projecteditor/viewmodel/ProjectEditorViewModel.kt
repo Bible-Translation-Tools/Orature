@@ -26,11 +26,12 @@ import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
 class ProjectEditorViewModel: ViewModel() {
-    private val directoryProvider = Injector.directoryProvider
-    private val collectionRepository = Injector.collectionRepo
-    private val contentRepository = Injector.contentRepository
-    private val takeRepository = Injector.takeRepository
-    private val pluginRepository = Injector.pluginRepository
+    private val injector: Injector by inject()
+    private val directoryProvider = injector.directoryProvider
+    private val collectionRepository = injector.collectionRepo
+    private val contentRepository = injector.contentRepository
+    private val takeRepository = injector.takeRepository
+    private val pluginRepository = injector.pluginRepository
 
     // Inject the selected project from the project home view model
     private val projectProperty = tornadofx.find<ProjectHomeViewModel>().selectedProjectProperty

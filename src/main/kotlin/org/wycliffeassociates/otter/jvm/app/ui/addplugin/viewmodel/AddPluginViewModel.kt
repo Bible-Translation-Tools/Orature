@@ -11,7 +11,8 @@ import tornadofx.*
 import java.io.File
 
 class AddPluginViewModel : ViewModel() {
-    private val pluginRepository = Injector.pluginRepository
+    private val injector: Injector by inject()
+    private val pluginRepository = injector.pluginRepository
 
     var name: String by property("")
     val nameProperty = getProperty(AddPluginViewModel::name)

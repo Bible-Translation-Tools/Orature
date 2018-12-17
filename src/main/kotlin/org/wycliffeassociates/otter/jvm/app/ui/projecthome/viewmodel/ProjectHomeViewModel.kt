@@ -12,7 +12,8 @@ import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizard
 import tornadofx.ViewModel
 
 class ProjectHomeViewModel : ViewModel() {
-    private val collectionRepo = Injector.collectionRepo
+    private val injector: Injector by inject()
+    private val collectionRepo = injector.collectionRepo
 
     val projects: ObservableList<Collection> = FXCollections.observableArrayList<Collection>()
     val selectedProjectProperty = SimpleObjectProperty<Collection>()

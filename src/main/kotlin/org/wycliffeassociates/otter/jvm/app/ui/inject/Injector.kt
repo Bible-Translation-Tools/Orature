@@ -6,8 +6,10 @@ import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceC
 import org.wycliffeassociates.otter.jvm.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
+import tornadofx.Component
+import tornadofx.ScopedInstance
 
-object Injector {
+class Injector : Component(), ScopedInstance {
     private val persistenceComponent = DaggerPersistenceComponent.builder().build()
     private val database = persistenceComponent.injectDatabase()
     private val audioComponent = DaggerAudioComponent
