@@ -107,10 +107,11 @@ class ViewTakesViewModel : ViewModel() {
             recordTake
                     .record(project, chapterProperty.value, contentProperty.value)
                     .observeOnFx()
-                    .doOnComplete {
+                    .doOnSuccess {
                         showPluginActive = false
                         populateTakes(contentProperty.value)
                     }
+                    .toCompletable()
                     .onErrorResumeNext {
                         Completable.fromAction {
                             showPluginActive = false

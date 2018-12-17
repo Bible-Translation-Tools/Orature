@@ -182,18 +182,21 @@ class ProjectEditorViewModel: ViewModel() {
             recordTake
                     .record(project, activeChild, activeContent)
                     .observeOnFx()
-                    .doOnComplete {
+                    .doOnSuccess { result ->
                         showPluginActive = false
-                        // Update the has takes boolean property
-                        val item = filteredContent.filtered {
-                            it.first.value == activeContent
-                        }.first()
-                        item.second.value = true
+                        when (result) {
+                            RecordTake.Result.SUCCESS -> {
+                                // Update the has takes boolean property
+                                val item = filteredContent.filtered {
+                                    it.first.value == activeContent
+                                }.first()
+                                item.second.value = true
+                            }
+                            RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
+                            RecordTake.Result.NO_AUDIO -> {}
+                        }
+
                     }
-                    .onErrorResumeNext { Completable.fromAction {
-                        showPluginActive = false
-                        snackBarObservable.onNext(messages["noRecorder"])
-                    } }
                     .subscribe()
         }
     }
@@ -209,13 +212,13 @@ class ProjectEditorViewModel: ViewModel() {
             showPluginActive = true
             editTake
                     .edit(take)
-                    .doOnError {
-                        snackBarObservable.onNext(messages["noEditor"])
-                    }
-                    .onErrorComplete()
                     .observeOnFx()
-                    .subscribe {
+                    .subscribe { result ->
                         showPluginActive = false
+                        when (result) {
+                            EditTake.Result.SUCCESS -> {}
+                            EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                        }
                     }
         }
     }
