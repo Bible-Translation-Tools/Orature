@@ -10,13 +10,11 @@ import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.ViewModel
+import tornadofx.get
 import java.io.File
 
 class MainMenuViewModel : ViewModel() {
-    private val languageRepo = Injector.languageRepo
-    private val metadataRepo = Injector.metadataRepo
     private val collectionRepo = Injector.collectionRepo
-    private val contentRepo = Injector.contentRepo
     private val directoryProvider = Injector.directoryProvider
     private val pluginRepository = Injector.pluginRepository
 
@@ -39,8 +37,21 @@ class MainMenuViewModel : ViewModel() {
         showImportDialogProperty.value = true
         importer.import(dir)
                 .observeOnFx()
-                .subscribe {
+                .subscribe { result ->
+                    val errorMessage = when (result) {
+                        ImportResourceContainer.Result.SUCCESS -> null
+                        ImportResourceContainer.Result.INVALID_RC -> messages["importErrorInvalidRc"]
+                        ImportResourceContainer.Result.INVALID_CONTENT -> messages["importErrorInvalidContent"]
+                        ImportResourceContainer.Result.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
+                        ImportResourceContainer.Result.IMPORT_ERROR -> messages["importErrorImportError"]
+                        ImportResourceContainer.Result.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
+                        ImportResourceContainer.Result.UNKNOWN_ERROR -> messages["importErrorUnknownError"]
+                        else -> null
+                    }
                     showImportDialogProperty.value = false
+                    errorMessage?.let {
+                        tornadofx.error(messages["importError"], it)
+                    }
                 }
     }
 
