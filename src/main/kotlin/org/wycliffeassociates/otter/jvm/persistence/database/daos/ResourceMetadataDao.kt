@@ -74,7 +74,8 @@ class ResourceMetadataDao(
                         DUBLIN_CORE_ENTITY.TYPE,
                         DUBLIN_CORE_ENTITY.TITLE,
                         DUBLIN_CORE_ENTITY.VERSION,
-                        DUBLIN_CORE_ENTITY.PATH
+                        DUBLIN_CORE_ENTITY.PATH,
+                        DUBLIN_CORE_ENTITY.DERIVEDFROM_FK
                 )
                 .values(
                         entity.conformsTo,
@@ -90,7 +91,8 @@ class ResourceMetadataDao(
                         entity.type,
                         entity.title,
                         entity.version,
-                        entity.path
+                        entity.path,
+                        entity.derivedFromFk
                 )
                 .execute()
 
@@ -139,6 +141,7 @@ class ResourceMetadataDao(
                 .set(DUBLIN_CORE_ENTITY.TITLE, entity.title)
                 .set(DUBLIN_CORE_ENTITY.VERSION, entity.version)
                 .set(DUBLIN_CORE_ENTITY.PATH, entity.path)
+                .set(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK, entity.derivedFromFk)
                 .where(DUBLIN_CORE_ENTITY.ID.eq(entity.id))
                 .execute()
     }

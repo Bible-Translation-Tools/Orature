@@ -46,7 +46,7 @@ class MainMenuViewModel : ViewModel() {
                         ImportResourceContainer.Result.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
                         ImportResourceContainer.Result.IMPORT_ERROR -> messages["importErrorImportError"]
                         ImportResourceContainer.Result.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
-                        ImportResourceContainer.Result.UNKNOWN_ERROR -> messages["importErrorUnknownError"]
+                        ImportResourceContainer.Result.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
                         else -> null
                     }
                     showImportDialogProperty.value = false

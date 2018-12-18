@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS dublin_core_entity (
     type        TEXT NOT NULL,
     title       TEXT NOT NULL,
     version     TEXT NOT NULL,
-    path        TEXT NOT NULL
+    path        TEXT NOT NULL,
+    derivedFrom_fk INTEGER REFERENCES dublin_core_entity(id),
+    UNIQUE (language_fk, identifier, version, creator, derivedFrom_fk)
 );
 
 CREATE TABLE IF NOT EXISTS rc_link_entity (

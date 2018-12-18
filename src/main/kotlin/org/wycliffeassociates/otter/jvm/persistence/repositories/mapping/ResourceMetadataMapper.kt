@@ -27,7 +27,7 @@ class ResourceMetadataMapper {
         )
     }
 
-    fun mapToEntity(obj: ResourceMetadata): ResourceMetadataEntity {
+    fun mapToEntity(obj: ResourceMetadata, derivedFromFk: Int? = null): ResourceMetadataEntity {
         return ResourceMetadataEntity(
                 obj.id,
                 obj.conformsTo,
@@ -43,7 +43,8 @@ class ResourceMetadataMapper {
                 obj.type,
                 obj.title,
                 obj.version,
-                obj.path.toURI().path
+                obj.path.toURI().path,
+                derivedFromFk
         )
     }
 }

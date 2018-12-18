@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -9,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
+import java.sql.DatabaseMetaData
 
 class ResourceMetadataRepository(
         database: AppDatabase,
@@ -36,6 +38,15 @@ class ResourceMetadataRepository(
                 .subscribeOn(Schedulers.io())
     }
 
+    override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
+        return Maybe
+                .fromCallable {
+                    resourceMetadataDao.fetchById(metadata.id).derivedFromFk
+                }
+                .map { buildMetadata(resourceMetadataDao.fetchById(it)) }
+                .subscribeOn(Schedulers.io())
+    }
+
     override fun getLinked(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
         return Single
                 .fromCallable {
@@ -46,10 +57,21 @@ class ResourceMetadataRepository(
                 .subscribeOn(Schedulers.io())
     }
 
+    override fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable {
+        return Completable
+                .fromAction {
+                    val updated = metadataMapper.mapToEntity(metadata, source?.id)
+                    resourceMetadataDao.update(updated)
+                }
+                .subscribeOn(Schedulers.io())
+    }
+
     override fun update(obj: ResourceMetadata): Completable {
         return Completable
                 .fromAction {
-                    resourceMetadataDao.update(metadataMapper.mapToEntity(obj))
+                    val existing = resourceMetadataDao.fetchById(obj.id)
+                    val updated = metadataMapper.mapToEntity(obj, existing.derivedFromFk)
+                    resourceMetadataDao.update(updated)
                 }
                 .subscribeOn(Schedulers.io())
     }

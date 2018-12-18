@@ -29,6 +29,7 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
 import java.lang.NullPointerException
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 
@@ -74,12 +75,18 @@ class CollectionRepository(
                             metadataDao.delete(metadataMapper.mapToEntity(metadata))
                         }
                     }
-                    // 5. If project audio should be deleted, get the folder for the project audio and delete it
-                    if (deleteAudio) {
-                        val audioDirectory = directoryProvider.getProjectAudioDirectory(project, ".").parentFile
-                        audioDirectory.deleteRecursively()
-                    }
-                }.subscribeOn(Schedulers.io())
+                }.andThen(
+                        getSource(project).doOnSuccess {
+                            // If project audio should be deleted, get the folder for the project audio and delete it
+                            if (deleteAudio) {
+                                val audioDirectory = directoryProvider.getProjectAudioDirectory(
+                                        it.resourceContainer ?: throw RuntimeException("No source metadata found."),
+                                        project, ".").parentFile
+                                audioDirectory.deleteRecursively()
+                            }
+                        }.ignoreElement()
+                )
+                .subscribeOn(Schedulers.io())
     }
 
     override fun getAll(): Single<List<Collection>> {
@@ -186,25 +193,30 @@ class CollectionRepository(
         val metadata = source.resourceContainer
         metadata ?: throw NullPointerException("Source has no resource metadata")
 
-        val slug = "${targetLanguage.slug}_${metadata.identifier}"
-        val directory = directoryProvider.resourceContainerDirectory.resolve(slug)
+        val dublinCore = dublincore {
+            identifier = metadata.identifier
+            issued = LocalDate.now().toString()
+            modified = LocalDate.now().toString()
+            language = language {
+                identifier = targetLanguage.slug
+                direction = targetLanguage.direction
+                title = targetLanguage.name
+            }
+            creator = "otter"
+            version = metadata.version
+            format = "text/usfm"
+            subject = metadata.subject
+            type = "book"
+            title = metadata.title
+        }
+        val directory = directoryProvider.getDerivedContainerDirectory(
+                dublinCore.mapToMetadata(File("."), targetLanguage),
+                metadata
+        )
         val container = ResourceContainer.create(directory) {
             // Set up the manifest
             manifest = Manifest(
-                    dublincore {
-                        identifier = metadata.identifier
-                        issued = LocalDate.now().toString()
-                        modified = LocalDate.now().toString()
-                        language = language {
-                            identifier = targetLanguage.slug
-                            direction = targetLanguage.direction
-                            title = targetLanguage.name
-                        }
-                        format = "text/usfm"
-                        subject = metadata.subject
-                        type = "book"
-                        title = metadata.title
-                    },
+                    dublinCore,
                     listOf(),
                     Checking()
             )
@@ -222,6 +234,9 @@ class CollectionRepository(
                         val matches = existingMetadata.filter {
                             it.identifier == source.resourceContainer?.identifier
                                     && it.languageFk == language.id
+                                    && it.creator == "otter"
+                                    && it.version == source.resourceContainer?.version
+                                    && it.derivedFromFk == source.resourceContainer?.id
                         }
 
                         val metadataEntity = if (matches.isEmpty()) {
@@ -233,6 +248,7 @@ class CollectionRepository(
 
                             // Insert ResourceMetadata into database
                             val entity = metadataMapper.mapToEntity(metadata)
+                            entity.derivedFromFk = source.resourceContainer?.id
                             entity.id = metadataDao.insert(entity, dsl)
                             /* return@if */ entity
                         } else {

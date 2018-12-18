@@ -40,7 +40,8 @@ class RecordMappers {
                     record.getValue(DUBLIN_CORE_ENTITY.TYPE),
                     record.getValue(DUBLIN_CORE_ENTITY.TITLE),
                     record.getValue(DUBLIN_CORE_ENTITY.VERSION),
-                    record.getValue(DUBLIN_CORE_ENTITY.PATH)
+                    record.getValue(DUBLIN_CORE_ENTITY.PATH),
+                    record.getValue(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
             )
         }
 
