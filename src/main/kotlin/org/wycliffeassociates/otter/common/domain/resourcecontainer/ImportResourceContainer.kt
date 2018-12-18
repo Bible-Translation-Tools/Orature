@@ -16,7 +16,7 @@ import java.io.IOException
 
 class ImportResourceContainer(
         private val collectionRepository: ICollectionRepository,
-        directoryProvider: IDirectoryProvider
+        private val directoryProvider: IDirectoryProvider
 ) {
     enum class Result {
         SUCCESS,
@@ -25,10 +25,8 @@ class ImportResourceContainer(
         UNSUPPORTED_CONTENT,
         IMPORT_ERROR,
         LOAD_RC_ERROR,
-        UNKNOWN_ERROR
+        ALREADY_EXISTS
     }
-
-    private val rcDirectory = File(directoryProvider.getAppDataDirectory(), "rc")
 
     fun import(file: File): Single<Result> {
         return when {
@@ -44,10 +42,24 @@ class ImportResourceContainer(
                     // Is this a valid resource container
                     if (!validateResourceContainer(containerDir)) return@flatMap Single.just(Result.INVALID_RC)
 
-                    // Copy to the internal directory
-                    val newDirectory = copyToInternalDirectory(containerDir)
+                    // Load the external container to get the metadata we need to figure out where to copy to
+                    val extContainer = try {
+                        ResourceContainer.load(containerDir, OtterResourceContainerConfig())
+                    } catch (e: Exception) {
+                        // Could be checked or unchecked exception from RC library
+                        return@flatMap Single.just(Result.LOAD_RC_ERROR)
+                    }
+                    val internalDir = directoryProvider.getSourceContainerDirectory(extContainer)
+                    if (internalDir.exists() && internalDir.listFiles().isNotEmpty()) {
+                        // Collision on disk: Can't import the resource container
+                        // Assumes that filesystem internal app directory and database are in sync
+                        return@flatMap Single.just(Result.ALREADY_EXISTS)
+                    }
 
-                    // Load
+                    // Copy to the internal directory
+                    val newDirectory = copyToInternalDirectory(containerDir, internalDir)
+
+                    // Load the internal container
                     val container = try {
                          ResourceContainer.load(newDirectory, OtterResourceContainerConfig())
                     } catch (e: Exception) {
@@ -60,9 +72,8 @@ class ImportResourceContainer(
                     return@flatMap collectionRepository
                             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
                             .toSingle { Result.SUCCESS }
-                            .onErrorResumeNext(cleanUp(newDirectory, Result.IMPORT_ERROR))
+                            .doOnError { newDirectory.deleteRecursively() }
                 }
-                .onErrorReturn { Result.UNKNOWN_ERROR }
                 .subscribeOn(Schedulers.io())
 
     private fun cleanUp(containerDir: File, result: Result): Single<Result> = Single.fromCallable {
@@ -72,9 +83,8 @@ class ImportResourceContainer(
 
     private fun validateResourceContainer(dir: File): Boolean = dir.listFiles().map { it.name }.contains("manifest.yaml")
 
-    private fun copyToInternalDirectory(dir: File): File {
+    private fun copyToInternalDirectory(dir: File, destinationDirectory: File): File {
         // Copy the resource container into the correct directory
-        val destinationDirectory = rcDirectory.resolve(dir.name).absoluteFile
         if (dir.absoluteFile != destinationDirectory) {
             // Need to copy the resource container into the internal directory
             val success = dir.copyRecursively(destinationDirectory, true)

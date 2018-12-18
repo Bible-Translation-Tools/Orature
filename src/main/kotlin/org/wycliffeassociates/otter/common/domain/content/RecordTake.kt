@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.content
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.functions.Function3
+import io.reactivex.functions.Function4
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Take
@@ -14,6 +15,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepo
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import java.io.File
+import java.lang.RuntimeException
 import java.time.LocalDate
 
 class RecordTake(
@@ -102,7 +104,8 @@ class RecordTake(
                     getMaxTakeNumber(content),
                     getNumberOfSubcollections(project),
                     getContentCount(chapter) { it.labelKey != "chapter" },
-                    Function3 { highest, chapterCount, verseCount ->
+                    collectionRepository.getSource(project).toSingle(),
+                    Function4 { highest, chapterCount, verseCount, source ->
                         val filename = generateFilename(
                                 project,
                                 chapter,
@@ -116,7 +119,11 @@ class RecordTake(
                         val chapterFormat = if (chapterCount > 99) "%03d" else "%02d"
 
                         val takeFile = directoryProvider
-                                .getProjectAudioDirectory(project, chapterFormat.format(chapter.titleKey.toInt()))
+                                .getProjectAudioDirectory(
+                                        source.resourceContainer ?: throw RuntimeException("No source metadata found"),
+                                        project,
+                                        chapterFormat.format(chapter.titleKey.toInt())
+                                )
                                 .resolve(File(filename))
 
                         val newTake = Take(
@@ -130,7 +137,7 @@ class RecordTake(
 
                         // Create an empty WAV file
                         waveFileCreator.createEmpty(newTake.path)
-                        return@Function3 newTake
+                        return@Function4 newTake
                     }
             )
 
