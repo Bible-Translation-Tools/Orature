@@ -11,13 +11,17 @@ class AudioPlugin(val pluginData: AudioPluginData) : IAudioPlugin {
         return Completable
                 .fromCallable {
                     // Build and start the process
-                    val process = ProcessBuilder(
+                    val processBuilder = ProcessBuilder(
                             listOf(
                                     pluginData.executable,
                                     *(pluginData.args.toTypedArray()),
                                     file.toString()
                             )
-                    ).start()
+                    )
+                    processBuilder.redirectErrorStream(true)
+                    val process = processBuilder.start()
+                    process.outputStream.close()
+                    while (process.inputStream.read() >= 0) { }
                     process.waitFor()
                 }
                 .subscribeOn(Schedulers.io())

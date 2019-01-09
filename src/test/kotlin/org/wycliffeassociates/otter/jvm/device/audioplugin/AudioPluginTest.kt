@@ -12,8 +12,8 @@ class AudioPluginTest {
             "3.4.2",
             true,
             false,
-            "echo",
-            listOf("hello"),
+            "bash",
+            listOf("-c", "echo hello"),
             File("some/fake/file/path.yaml")
     )
     var missingExecutablePlugin = AudioPluginData(

@@ -11,6 +11,8 @@ buildscript {
     ext.requery_version = '1.5.1'
     ext.sqlite_jdbc = '3.25.2'
     ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
+    ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
+    ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
 
     repositories {
         mavenCentral()
@@ -43,6 +45,7 @@ group 'org.wycliffeassociates'
 apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'install4j'
+apply plugin: 'application'
 //apply plugin: 'javafx-gradle-plugin'
 
 sourceCompatibility = 1.8
@@ -166,6 +169,10 @@ task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
 //     vendor = 'org.wycliffeassociates'
 // }
 
+application {
+    mainClassName = "org.wycliffeassociates.otter.jvm.app.MainKt"
+}
+
 //////////////////////////////////// Custom Tasks ///////////////////////////////////////////
 def getVersionName = { ->
     def stdout = new ByteArrayOutputStream()
@@ -191,12 +198,9 @@ task createDb {
     configurations.sqllite.each{ File file ->
         loader.addURL(file.toURL())
     }
-   // def driverName = 'org.sqlite.JDBC'
-   // Class.forName(driverName)
-    def sql = Sql.newInstance('jdbc:sqlite:test.sqlite', "org.sqlite.JDBC")
     String[] text = new File(sqlDirPath).text.split(';')
     text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
-        sql = Sql.newInstance('jdbc:sqlite:test.sqlite', "org.sqlite.JDBC")
+        def sql = Sql.newInstance(sqliteConnect, "org.sqlite.JDBC")
         sql.execute(it)
         sql.close()
     }
@@ -208,7 +212,7 @@ jooq {
     sample(sourceSets.main) {
         jdbc {
             driver = 'org.sqlite.JDBC'
-            url = 'jdbc:sqlite:test.sqlite'
+            url = sqliteConnect
         }
         generator {
             database {
@@ -224,7 +228,7 @@ jooq {
 }
 
 clean.doLast {
-    project.file('test.sqlite').delete()
+    project.file(sqliteFile).delete()
     project.file('src/main/java/jooq').deleteDir()
 }
 /////////////////////// Define Task Orders ///////////////////////////////
