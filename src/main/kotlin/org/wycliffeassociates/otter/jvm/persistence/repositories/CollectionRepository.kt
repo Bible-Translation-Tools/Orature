@@ -210,6 +210,9 @@ class CollectionRepository(
             title = metadata.title
         }
         val directory = directoryProvider.getDerivedContainerDirectory(
+                // A placeholder file is needed here for the mapping function
+                // The file is never used, since the DP doesn't look at the directory
+                // to generate the derived directory.
                 dublinCore.mapToMetadata(File("."), targetLanguage),
                 metadata
         )
