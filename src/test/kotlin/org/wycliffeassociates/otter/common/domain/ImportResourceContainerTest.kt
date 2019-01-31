@@ -186,6 +186,15 @@ class MockLanguageRepository: ILanguageRepository {
 }
 
 class MockResourceMetadataRepository: IResourceMetadataRepository {
+
+    override fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
