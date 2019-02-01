@@ -120,6 +120,8 @@ object TestDataStore {
                     "verse1",
                     1,
                     1,
+                    null,
+                    null,
                     null
             ),
             Content(
@@ -127,7 +129,9 @@ object TestDataStore {
                     "verse42",
                     42,
                     42,
-                    takes.first()
+                    takes.first(),
+                    null,
+                    null
             )
     )
 }

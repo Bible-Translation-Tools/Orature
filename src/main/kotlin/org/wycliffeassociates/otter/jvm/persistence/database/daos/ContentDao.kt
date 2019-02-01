@@ -68,14 +68,18 @@ class ContentDao(
                         CONTENT_ENTITY.SORT,
                         CONTENT_ENTITY.START,
                         CONTENT_ENTITY.LABEL,
-                        CONTENT_ENTITY.SELECTED_TAKE_FK
+                        CONTENT_ENTITY.SELECTED_TAKE_FK,
+                        CONTENT_ENTITY.TEXT,
+                        CONTENT_ENTITY.FORMAT
                 )
                 .values(
                         entity.collectionFk,
                         entity.sort,
                         entity.start,
                         entity.labelKey,
-                        entity.selectedTakeFk
+                        entity.selectedTakeFk,
+                        entity.text,
+                        entity.format
                 )
                 .execute()
 
@@ -115,6 +119,8 @@ class ContentDao(
                 .set(CONTENT_ENTITY.START, entity.start)
                 .set(CONTENT_ENTITY.COLLECTION_FK, entity.collectionFk)
                 .set(CONTENT_ENTITY.SELECTED_TAKE_FK, entity.selectedTakeFk)
+                .set(CONTENT_ENTITY.TEXT, entity.text)
+                .set(CONTENT_ENTITY.FORMAT, entity.format)
                 .where(CONTENT_ENTITY.ID.eq(entity.id))
                 .execute()
     }

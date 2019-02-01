@@ -12,6 +12,8 @@ class ContentMapper {
                 entity.start,
                 end,
                 selectedTake,
+                entity.text,
+                entity.format,
                 entity.id
         )
     }
@@ -23,7 +25,9 @@ class ContentMapper {
                 obj.labelKey,
                 obj.start,
                 collectionFk,
-                obj.selectedTake?.id
+                obj.selectedTake?.id,
+                obj.text,
+                obj.format
         )
     }
 

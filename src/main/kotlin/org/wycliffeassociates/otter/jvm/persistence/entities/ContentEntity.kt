@@ -6,5 +6,7 @@ data class ContentEntity(
         var labelKey: String,
         var start: Int,
         var collectionFk: Int,
-        var selectedTakeFk: Int?
+        var selectedTakeFk: Int?,
+        var text: String?,
+        var format: String?
 )

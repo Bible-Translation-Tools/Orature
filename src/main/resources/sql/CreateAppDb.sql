@@ -52,7 +52,9 @@ CREATE TABLE IF NOT EXISTS content_entity (
     label            TEXT NOT NULL,
     selected_take_fk INTEGER REFERENCES take_entity(id),
     start            INTEGER NOT NULL,
-    sort             INTEGER NOT NULL
+    sort             INTEGER NOT NULL,
+    text             TEXT,
+    format           TEXT
 );
 
 CREATE TABLE IF NOT EXISTS content_derivative (
