@@ -1,5 +1,5 @@
 # otter-jvm
-JVM specific packages for the 8woc2018 project
+JVM specific packages for the otter project
 Supports Windows, MacOs, Linux, and any other operating system that supports the desktop JVM
 
 
