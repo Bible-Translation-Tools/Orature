@@ -190,13 +190,23 @@ class ImportResourceContainer(
                     "chapter",
                     chapter.value.values.first().number,
                     chapter.value.values.last().number,
+                    null,
+                    null,
                     null
             )
             chapterTree.addChild(TreeNode(chapChunk))
 
             // Create content for each verse
             for (verse in chapter.value.values) {
-                val content = Content(verse.number, "verse", verse.number, verse.number, null)
+                val content = Content(
+                        verse.number,
+                        "verse",
+                        verse.number,
+                        verse.number,
+                        null,
+                        null,
+                        null
+                )
                 chapterTree.addChild(TreeNode(content))
             }
             return@map chapterTree

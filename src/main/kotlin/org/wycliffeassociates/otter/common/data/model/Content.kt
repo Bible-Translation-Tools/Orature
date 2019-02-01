@@ -6,5 +6,7 @@ data class Content(
         var start: Int,
         var end: Int,
         var selectedTake: Take?,
+        var text: String?,
+        var format: String?,
         var id: Int = 0
 )
