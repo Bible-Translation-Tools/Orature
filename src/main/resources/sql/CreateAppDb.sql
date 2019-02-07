@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS resource_link (
     resource_content_fk INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE,
     content_fk          INTEGER REFERENCES content_entity(id) ON DELETE CASCADE,
     collection_fk       INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
+    rc_fk               INTEGER NOT NULL REFERENCES dublin_core_entity(id),
     UNIQUE (resource_content_fk, content_fk, collection_fk),
     CONSTRAINT ensure_at_least_one_not_null
         CHECK ((collection_fk is NOT NULL) or (content_fk is NOT NULL)),

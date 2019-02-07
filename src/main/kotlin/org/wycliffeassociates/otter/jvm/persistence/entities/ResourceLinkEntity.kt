@@ -4,5 +4,6 @@ data class ResourceLinkEntity(
         var id: Int,
         var resourceContentFk: Int,
         var contentFk: Int?,
-        var collectionFk: Int?
+        var collectionFk: Int?,
+        var rcFk: Int
 )

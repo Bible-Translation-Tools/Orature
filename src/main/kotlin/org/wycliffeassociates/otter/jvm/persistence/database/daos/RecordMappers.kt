@@ -76,7 +76,8 @@ class RecordMappers {
                     record.getValue(RESOURCE_LINK.ID),
                     record.getValue(RESOURCE_LINK.RESOURCE_CONTENT_FK),
                     record.getValue(RESOURCE_LINK.CONTENT_FK),
-                    record.getValue(RESOURCE_LINK.COLLECTION_FK)
+                    record.getValue(RESOURCE_LINK.COLLECTION_FK),
+                    record.getValue(RESOURCE_LINK.RC_FK)
             )
         }
 
