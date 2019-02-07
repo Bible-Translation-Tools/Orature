@@ -8,6 +8,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import tornadofx.ViewModel
 import tornadofx.get
@@ -40,13 +41,13 @@ class MainMenuViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe { result ->
                     val errorMessage = when (result) {
-                        ImportResourceContainer.Result.SUCCESS -> null
-                        ImportResourceContainer.Result.INVALID_RC -> messages["importErrorInvalidRc"]
-                        ImportResourceContainer.Result.INVALID_CONTENT -> messages["importErrorInvalidContent"]
-                        ImportResourceContainer.Result.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
-                        ImportResourceContainer.Result.IMPORT_ERROR -> messages["importErrorImportError"]
-                        ImportResourceContainer.Result.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
-                        ImportResourceContainer.Result.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
+                        ImportResult.SUCCESS -> null
+                        ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]
+                        ImportResult.INVALID_CONTENT -> messages["importErrorInvalidContent"]
+                        ImportResult.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
+                        ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
+                        ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
+                        ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
                         else -> null
                     }
                     showImportDialogProperty.value = false
