@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.usfm
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
 import java.io.File
 
@@ -22,7 +22,6 @@ data class Verse(val number: Int, var text: String)
 class UsfmDocument : HashMap<Int, HashMap<Int, Verse>>()
 
 class ParseUsfm(val file: File) {
-    val current = Current()
     val chapters: UsfmDocument = UsfmDocument()
 
     fun parse(): ParseUsfm {
@@ -40,12 +39,13 @@ class ParseUsfm(val file: File) {
         if (split.isEmpty()) {
             return
         }
+        val current = Current()
         when (split[0]) {
             MARKER_BOOK_NAME -> return
             MARKER_CHAPTER_NUMBER -> {
-                current.c = split[1]?.let {
-                    it.replace("\\s".toRegex(), "").toInt() //strip potential whitespace and convert to int
-                }
+                current.c = split[1]
+                        ?.replace("\\s".toRegex(), "")
+                        .toInt() //strip potential whitespace and convert to int
                 chapters[current.c] = hashMapOf()
             }
             MARKER_VERSE_NUMBER -> {
@@ -77,17 +77,15 @@ class ParseUsfm(val file: File) {
                     //addFormattingToNextVerse(line)
                 } else {
                     // add this to the last verse
-                    addFormattingToLastVerse(line)
+                    addFormattingToVerse(line, current)
                 }
             }
         }
-
-
     }
 
-    private fun addFormattingToLastVerse(line: String) {
-        if (chapters.containsKey(current.c) && chapters[current.c]!!.containsKey(current.v)) {
-            chapters[current.c]!![current.v]!!.text += "$sep $line"
+    private fun addFormattingToVerse(line: String, verse: Current) {
+        if (chapters.containsKey(verse.c) && chapters[verse.c]!!.containsKey(verse.v)) {
+            chapters[verse.c]!![verse.v]!!.text += "$sep $line"
         }
     }
 }

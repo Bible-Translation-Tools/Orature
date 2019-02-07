@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.md
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
