@@ -8,5 +8,5 @@ data class CollectionEntity(
         var title: String,
         var slug: String,
         var sort: Int,
-        var metadataFk: Int?
+        var dublinCoreFk: Int?
 )

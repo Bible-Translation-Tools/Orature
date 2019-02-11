@@ -35,15 +35,15 @@ CREATE TABLE IF NOT EXISTS rc_link_entity (
 );
 
 CREATE TABLE IF NOT EXISTS collection_entity (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    parent_fk     INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
-    source_fk     INTEGER REFERENCES collection_entity(id),
-    label         TEXT NOT NULL,
-    title         TEXT NOT NULL,
-    slug          TEXT NOT NULL,
-    sort          INTEGER NOT NULL,
-    rc_fk         INTEGER NOT NULL REFERENCES dublin_core_entity(id),
-    UNIQUE (slug, rc_fk)
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    parent_fk       INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
+    source_fk       INTEGER REFERENCES collection_entity(id),
+    label           TEXT NOT NULL,
+    title           TEXT NOT NULL,
+    slug            TEXT NOT NULL,
+    sort            INTEGER NOT NULL,
+    dublin_core_fk  INTEGER NOT NULL REFERENCES dublin_core_entity(id),
+    UNIQUE (slug, dublin_core_fk)
 );
 
 CREATE TABLE IF NOT EXISTS content_entity (
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS resource_link (
     resource_content_fk INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE,
     content_fk          INTEGER REFERENCES content_entity(id) ON DELETE CASCADE,
     collection_fk       INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
-    rc_fk               INTEGER NOT NULL REFERENCES dublin_core_entity(id),
+    dublin_core_fk      INTEGER NOT NULL REFERENCES dublin_core_entity(id),
     UNIQUE (resource_content_fk, content_fk, collection_fk),
     CONSTRAINT ensure_at_least_one_not_null
         CHECK ((collection_fk is NOT NULL) or (content_fk is NOT NULL)),

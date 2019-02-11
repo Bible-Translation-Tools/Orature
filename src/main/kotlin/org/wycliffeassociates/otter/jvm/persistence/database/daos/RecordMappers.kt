@@ -54,7 +54,7 @@ class RecordMappers {
                     record.getValue(COLLECTION_ENTITY.TITLE),
                     record.getValue(COLLECTION_ENTITY.SLUG),
                     record.getValue(COLLECTION_ENTITY.SORT),
-                    record.getValue(COLLECTION_ENTITY.RC_FK)
+                    record.getValue(COLLECTION_ENTITY.DUBLIN_CORE_FK)
             )
         }
 
@@ -77,7 +77,7 @@ class RecordMappers {
                     record.getValue(RESOURCE_LINK.RESOURCE_CONTENT_FK),
                     record.getValue(RESOURCE_LINK.CONTENT_FK),
                     record.getValue(RESOURCE_LINK.COLLECTION_FK),
-                    record.getValue(RESOURCE_LINK.RC_FK)
+                    record.getValue(RESOURCE_LINK.DUBLIN_CORE_FK)
             )
         }
 

@@ -5,5 +5,5 @@ data class ResourceLinkEntity(
         var resourceContentFk: Int,
         var contentFk: Int?,
         var collectionFk: Int?,
-        var rcFk: Int
+        var dublinCoreFk: Int
 )

@@ -33,7 +33,7 @@ class CollectionDao(
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
-                .where(COLLECTION_ENTITY.SLUG.eq(slug).and(COLLECTION_ENTITY.RC_FK.eq(containerId)))
+                .where(COLLECTION_ENTITY.SLUG.eq(slug).and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(containerId)))
                 .fetchOne {
                     RecordMappers.mapToCollectionEntity(it)
                 }
@@ -53,7 +53,7 @@ class CollectionDao(
                         COLLECTION_ENTITY.TITLE,
                         COLLECTION_ENTITY.LABEL,
                         COLLECTION_ENTITY.SORT,
-                        COLLECTION_ENTITY.RC_FK
+                        COLLECTION_ENTITY.DUBLIN_CORE_FK
                 )
                 .values(
                         entity.parentFk,
@@ -62,7 +62,7 @@ class CollectionDao(
                         entity.title,
                         entity.label,
                         entity.sort,
-                        entity.metadataFk
+                        entity.dublinCoreFk
                 )
                 .execute()
 
@@ -103,7 +103,7 @@ class CollectionDao(
                 .set(COLLECTION_ENTITY.TITLE, entity.title)
                 .set(COLLECTION_ENTITY.LABEL, entity.label)
                 .set(COLLECTION_ENTITY.SORT, entity.sort)
-                .set(COLLECTION_ENTITY.RC_FK, entity.metadataFk)
+                .set(COLLECTION_ENTITY.DUBLIN_CORE_FK, entity.dublinCoreFk)
                 .where(COLLECTION_ENTITY.ID.eq(entity.id))
                 .execute()
     }

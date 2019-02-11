@@ -263,7 +263,7 @@ class CollectionRepository(
                         val sourceEntity = collectionDao.fetchById(source.id, dsl)
                         val projectEntity = sourceEntity
                                 // parentFk null for now. May be non-null if derivative categories added
-                                .copy(id = 0, metadataFk = metadataEntity.id, parentFk = null, sourceFk = sourceEntity.id)
+                                .copy(id = 0, dublinCoreFk = metadataEntity.id, parentFk = null, sourceFk = sourceEntity.id)
                         projectEntity.id = collectionDao.insert(projectEntity, dsl)
 
                         // Copy the chapters
@@ -314,7 +314,7 @@ class CollectionRepository(
                 COLLECTION_ENTITY.TITLE,
                 COLLECTION_ENTITY.SLUG,
                 COLLECTION_ENTITY.SORT,
-                COLLECTION_ENTITY.RC_FK
+                COLLECTION_ENTITY.DUBLIN_CORE_FK
         ).select(
                 dsl.select(
                         value(projectId),
@@ -363,7 +363,7 @@ class CollectionRepository(
                                 )
                                 .leftJoin(COLLECTION_ENTITY)
                                 .on(COLLECTION_ENTITY.SOURCE_FK.eq(field("chapterid", Int::class.java))
-                                        .and(COLLECTION_ENTITY.RC_FK.eq(metadataId)))
+                                        .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(metadataId)))
                 ).execute()
     }
 
@@ -436,7 +436,7 @@ class CollectionRepository(
 
     private fun buildCollection(entity: CollectionEntity): Collection {
         var metadata: ResourceMetadata? = null
-        entity.metadataFk?.let {
+        entity.dublinCoreFk?.let {
             val metadataEntity = metadataDao.fetchById(it)
             val language = languageMapper.mapFromEntity(languageDao.fetchById(metadataEntity.languageFk))
             metadata = metadataMapper.mapFromEntity(metadataEntity, language)
@@ -473,7 +473,7 @@ class CollectionRepository(
         if (collection is Collection) {
             val entity = collectionMapper.mapToEntity(collection)
             entity.parentFk = parentId
-            entity.metadataFk = metadataId
+            entity.dublinCoreFk = metadataId
             val id = collectionDao.insert(entity, dsl)
             for (node in node.children) {
                 importNode(id, metadataId, node, dsl)
