@@ -25,21 +25,20 @@ class ParseUsfm(val file: File) {
     val chapters: UsfmDocument = UsfmDocument()
 
     fun parse(): ParseUsfm {
-        val reader = file.bufferedReader()
-        reader.use {
+        val fileCursor = Current()
+        file.bufferedReader().use {
             it.forEachLine {
-                parseLine(it)
+                parseLine(it, fileCursor)
             }
         }
         return this
     }
 
-    private fun parseLine(line: String) {
+    private fun parseLine(line: String, current: Current) {
         val split = line.split("\\s+".toRegex(), 2)
         if (split.isEmpty()) {
             return
         }
-        val current = Current()
         when (split[0]) {
             MARKER_BOOK_NAME -> return
             MARKER_CHAPTER_NUMBER -> {
