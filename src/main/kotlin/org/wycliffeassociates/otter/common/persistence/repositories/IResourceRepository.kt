@@ -11,8 +11,8 @@ interface IResourceRepository : IRepository<Content> {
     // Get resources for a collection
     fun getByCollection(collection: Collection): Single<List<Content>>
     // Link/Unlink
-    fun linkToContent(resource: Content, content: Content, rcFk: Int): Completable
+    fun linkToContent(resource: Content, content: Content, dublinCoreFk: Int): Completable
     fun unlinkFromContent(resource: Content, content: Content): Completable
-    fun linkToCollection(resource: Content, collection: Collection, rcFk: Int): Completable
+    fun linkToCollection(resource: Content, collection: Collection, dublinCoreFk: Int): Completable
     fun unlinkFromCollection(resource: Content, collection: Collection): Completable
 }
