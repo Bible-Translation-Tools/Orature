@@ -3,7 +3,10 @@ package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
+import javafx.scene.effect.Effect
 import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
+import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.Stylesheet
 import tornadofx.box
@@ -24,6 +27,9 @@ class ViewTakesStyles : Stylesheet() {
         val glow by cssclass()
         val recordButton by cssclass()
         val playPauseButton by cssclass()
+        val navigationButton by cssclass()
+        val newTakeCard by cssclass()
+        val scrollpane by cssclass()
     }
 
     init {
@@ -37,11 +43,16 @@ class ViewTakesStyles : Stylesheet() {
         takeFlowPane {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
-            backgroundColor += Color.TRANSPARENT
+            backgroundColor += AppTheme.colors.defaultBackground
             spacing = 10.px
-            padding = box(20.px)
+            padding = box(10.px, 150.px)
             vgap = 16.px
             hgap = 16.px
+        }
+
+        scrollpane {
+            maxHeight = Screen.getPrimary().visualBounds.height.px / 2.5
+            backgroundColor += Color.TRANSPARENT
         }
 
         glow {
@@ -52,8 +63,10 @@ class ViewTakesStyles : Stylesheet() {
             backgroundColor += AppTheme.colors.cardBackground.deriveColor(0.0, 1.0, 1.0, 0.8)
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
-            maxHeight = 100.px
-            maxWidth = 250.px
+            minHeight = 200.px
+            minWidth = 348.px
+            maxHeight = minHeight
+            maxWidth = minWidth
             label {
                 fontSize = 16.px
             }
@@ -87,12 +100,38 @@ class ViewTakesStyles : Stylesheet() {
             }
         }
 
+        newTakeCard {
+            minHeight = 200.px
+            minWidth = 348.px
+            borderRadius += box(5.0.px)
+            backgroundRadius += box(5.0.px)
+            effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
+            backgroundColor += AppTheme.colors.white
+            button {
+                minHeight = 40.px
+                minWidth = 158.px
+                backgroundColor += AppTheme.colors.appRed
+                fontSize = 16.px
+                //overwrite dropshadow on newtakecard
+                effect = DropShadow(0.0,0.0,0.0,AppTheme.colors.dropShadow)
+                child("*") {
+                    fill = AppTheme.colors.white
+                }
+            }
+
+            label {
+                fontSize = 25.px
+                fontWeight = FontWeight.BOLD
+                effect = DropShadow(0.0,0.0,0.0,AppTheme.colors.dropShadow)
+            }
+        }
+
         placeholder {
             backgroundColor += AppTheme.colors.imagePlaceholder
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
-            minHeight = 100.px
-            minWidth = 250.px
+            minHeight = 200.px
+            minWidth = 348.px
         }
 
         headerContainer {
@@ -124,6 +163,20 @@ class ViewTakesStyles : Stylesheet() {
             child("*") {
                 fill = AppTheme.colors.appRed
             }
+        }
+
+        navigationButton {
+            minHeight = 40.px
+            minWidth = 187.0.px
+            backgroundColor += AppTheme.colors.white
+            borderColor += box(AppTheme.colors.appRed)
+            borderWidth += box(0.5.px)
+            borderRadius += box(5.0.px)
+            backgroundRadius += box(5.0.px)
+            child("*") {
+                fill = AppTheme.colors.appRed
+            }
+            fontSize = 14.px
         }
     }
 }
