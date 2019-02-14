@@ -5,9 +5,8 @@ import com.jfoenix.controls.JFXProgressBar
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
-import javafx.scene.Node
-import javafx.scene.control.Button
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
@@ -20,30 +19,14 @@ import java.util.concurrent.TimeUnit
 // Named "Simple" since just displays a progress bar and play/pause button
 // No waveform view
 class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioPlayer) : HBox() {
-    val playPauseButton = Button()
     val progressBar = JFXProgressBar()
-    var playGraphic: Node? = null
-        set (value) {
-            field = value
-            if (!isPlaying) {
-                playPauseButton.graphic = field
-            }
-        }
-    var pauseGraphic: Node? = null
-        set (value) {
-            field = value
-            if (isPlaying) {
-                playPauseButton.graphic = field
-            }
-        }
 
-    @Volatile private var isPlaying = false
+    @Volatile  var isPlaying = SimpleBooleanProperty(false)
 
     init {
         style {
-            alignment = Pos.CENTER_LEFT
+            alignment = Pos.TOP_CENTER
         }
-        add(playPauseButton)
         add(progressBar)
 
         // Set up indefinite loading bar
@@ -62,31 +45,28 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
                     Platform.runLater { progressBar.progress = 0.0 }
                 }
                 AudioPlayerEvent.PLAY -> {
-                    isPlaying = true
+                    isPlaying.set(true)
                     disposable = startProgressUpdate()
-                    Platform.runLater {  playPauseButton.graphic = pauseGraphic }
                 }
                 AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> {
                     disposable?.dispose()
-                    isPlaying = false
-                    Platform.runLater { playPauseButton.graphic = playGraphic }
+                    isPlaying.set(false)
                 }
                 AudioPlayerEvent.COMPLETE -> {
                     disposable?.dispose()
-                    isPlaying = false
+                    isPlaying.set(false)
                     // Make sure we update on the main thread
                     // Only needed here since rest of events are triggered from FX thread
                     Platform.runLater {
                         progressBar.progress = 0.0
-                        playPauseButton.graphic = playGraphic
                     }
                 }
             }
         }
+    }
 
-        playPauseButton.action {
-            if (!isPlaying) player.play() else player.pause()
-        }
+    fun buttonPressed() {
+        if(!isPlaying.value) player.play() else player.pause()
     }
 
     private fun startProgressUpdate(): Disposable {

@@ -1,23 +1,18 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
+import com.github.thomasnield.rxkotlinfx.bind
 import com.jfoenix.controls.JFXButton
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.widgets.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.simpleaudioplayer
 import tornadofx.*
@@ -31,8 +26,9 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
     var playButton: Button by singleAssign()
     var editButton: Button by singleAssign()
 
-    var simpleAudioPlayer: SimpleAudioPlayer by singleAssign()
 
+    var simpleAudioPlayer: SimpleAudioPlayer by singleAssign()
+    private val isAudioPlaying: SimpleBooleanProperty = SimpleBooleanProperty()
     init {
         importStylesheet<TakeCardStyles>()
         addClass(TakeCardStyles.defaultTakeCard)
@@ -40,7 +36,9 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
             addClass(TakeCardStyles.content)
             //the top bar of the take card
             hbox(10) {
-                vgrow = Priority.ALWAYS
+                style {
+                    maxHeight = 75.0.px
+                }
                 hbox(10.0) {
                     hgrow = Priority.ALWAYS
                     alignment = Pos.TOP_LEFT
@@ -56,30 +54,42 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                 }
             }
             // waveform and audio control buttons
-            vbox(10.0) {
-                alignment = Pos.TOP_CENTER
+            vbox(15.0) {
+                vgrow = Priority.ALWAYS
+                alignment = Pos.CENTER
                 hbox {
+                    alignment = Pos.CENTER
                     simpleAudioPlayer = simpleaudioplayer(take.path, player) {
                         vgrow = Priority.ALWAYS
-                        alignment = Pos.CENTER_LEFT
-                        playGraphic = TakeCardStyles.playIcon()
-                        pauseGraphic = TakeCardStyles.pauseIcon()
-                        with(playPauseButton) {
-                            addEventHandler(ActionEvent.ACTION) {
-                                if (!take.played) {
-                                    take.played = true
-                                }
-                                playedProperty.value = take.played
-                            }
-                        }
+                        addClass(TakeCardStyles.progressBar)
+                        isAudioPlaying.bind(isPlaying)
                     }
                 }
                 hbox(15.0) {
-                    playButton = JFXButton("PLAY", MaterialIconView(MaterialIcon.PLAY_ARROW, "25px"))
+                    playButton = JFXButton("PLAY", TakeCardStyles.playIcon())
                             .addClass(TakeCardStyles.defaultButton)
-                    editButton = JFXButton("EDIT", MaterialIconView(MaterialIcon.EDIT, "25px")
-                            .apply { fill = TakeCardStyles.defaultGreen })
-                            .addClass(TakeCardStyles.defaultButton).apply { textFill = TakeCardStyles.defaultGreen }
+                            .apply {
+                                isDisableVisualFocus = true
+                                action {
+                                    simpleAudioPlayer.buttonPressed()
+                                    when(isAudioPlaying.value) {
+                                        true -> {
+                                            graphic = TakeCardStyles.pauseIcon()
+                                            text = "PLAY"
+                                        }
+                                        false -> {
+                                            graphic = TakeCardStyles.playIcon()
+                                            text = "PAUSE"
+                                        }
+                                    }
+                                }
+                            }
+                    editButton = JFXButton("EDIT", TakeCardStyles.editIcon())
+                            .addClass(TakeCardStyles.defaultButton)
+                            .apply {
+                                textFill = TakeCardStyles.defaultGreen
+                                isDisableVisualFocus = true
+                            }
 
                     add(playButton)
                     add(editButton)

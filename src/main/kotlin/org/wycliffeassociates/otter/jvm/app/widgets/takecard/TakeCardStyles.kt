@@ -20,12 +20,14 @@ class TakeCardStyles : Stylesheet() {
         val takeNumberLabel by cssclass()
         val timestampLabel by cssclass()
         val defaultButton by cssclass()
+        val progressBar by cssclass()
         val defaultGreen : Color = c("#58BD2F")
 
-        fun playIcon() = MaterialIconView(MaterialIcon.PLAY_CIRCLE_OUTLINE, "30px")
-        fun pauseIcon() = MaterialIconView(MaterialIcon.PAUSE_CIRCLE_OUTLINE, "30px")
+        fun pauseIcon() = MaterialIconView(MaterialIcon.PAUSE, "30px")
         fun deleteIcon() = MaterialIconView(MaterialIcon.DELETE, "25px")
         fun badgeIcon() = MaterialDesignIconView(MaterialDesignIcon.CREATION, "18px")
+        fun playIcon() = MaterialIconView(MaterialIcon.PLAY_ARROW, "25px")
+        fun editIcon() = MaterialIconView(MaterialIcon.EDIT, "25px").apply { fill = defaultGreen }
         fun draggingIcon() = ImageLoader.load(
                 ClassLoader.getSystemResourceAsStream("images/baseline-drag_indicator-24px.svg"),
                 ImageLoader.Format.SVG
@@ -74,6 +76,20 @@ class TakeCardStyles : Stylesheet() {
                 borderWidth += box(0.5.px)
                 effect = DropShadow(1.0,2.0,2.0,Color.LIGHTGRAY)
                 backgroundColor += Color.WHITE
+            }
+        }
+
+        progressBar {
+            track {
+                backgroundColor += Color.LIGHTGRAY
+                minHeight = 40.px
+                backgroundRadius += box(5.0.px)
+            }
+            bar {
+                backgroundColor += c("#0094F0")
+                minHeight = 40.px
+                backgroundRadius += box(5.0.px)
+
             }
         }
     }
