@@ -72,16 +72,6 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                                 isDisableVisualFocus = true
                                 action {
                                     simpleAudioPlayer.buttonPressed()
-                                    when(isAudioPlaying.value) {
-                                        true -> {
-                                            graphic = TakeCardStyles.pauseIcon()
-                                            text = "PLAY"
-                                        }
-                                        false -> {
-                                            graphic = TakeCardStyles.playIcon()
-                                            text = "PAUSE"
-                                        }
-                                    }
                                 }
                             }
                     editButton = JFXButton("EDIT", TakeCardStyles.editIcon())
@@ -100,6 +90,23 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                 bottomAnchor = 0.0
                 leftAnchor = 0.0
                 rightAnchor = 0.0
+            }
+        }
+
+        isAudioPlaying.onChange {
+            when(isAudioPlaying.value) {
+                true -> {
+                    playButton.apply {
+                        graphic = TakeCardStyles.pauseIcon()
+                        text = "PAUSE"
+                    }
+                }
+                false -> {
+                    playButton.apply {
+                        graphic = TakeCardStyles.playIcon()
+                        text = "PLAY"
+                    }
+                }
             }
         }
     }

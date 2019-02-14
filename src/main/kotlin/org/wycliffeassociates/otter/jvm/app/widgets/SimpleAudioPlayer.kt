@@ -54,11 +54,11 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
                 }
                 AudioPlayerEvent.COMPLETE -> {
                     disposable?.dispose()
-                    isPlaying.set(false)
                     // Make sure we update on the main thread
                     // Only needed here since rest of events are triggered from FX thread
                     Platform.runLater {
                         progressBar.progress = 0.0
+                        isPlaying.set(false)
                     }
                 }
             }
