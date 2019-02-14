@@ -241,7 +241,6 @@ class ViewTakesView : View() {
     private fun createTakeCard(take: Take): TakeCard {
         return TakeCard(take, viewModel.audioPlayer()).apply {
             addClass(ViewTakesStyles.takeCard)
-            simpleAudioPlayer.playPauseButton.addClass(ViewTakesStyles.playPauseButton)
             playedProperty.onChange {
                 if (it) viewModel.setTakePlayed(take)
             }
