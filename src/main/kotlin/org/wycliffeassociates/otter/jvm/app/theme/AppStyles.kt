@@ -25,6 +25,7 @@ class AppStyles : Stylesheet() {
         fun viewTakesIcon(size: String = "1em") = MaterialIconView(MaterialIcon.APPS, size)
         fun backIcon() = MaterialIconView(MaterialIcon.ARROW_BACK)
         fun chapterIcon(size: String = "1em") = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
+        fun forwardIcon(size: String ="1em") = MaterialIconView(MaterialIcon.ARROW_FORWARD)
 
         const val defaultFontSize = 10.0
     }
