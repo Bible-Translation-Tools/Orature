@@ -1,0 +1,10 @@
+.list-menu {
+    -fx-background-color: #EEEEEE;
+    -fx-border: none;
+}
+
+.list-item {
+    -fx-background-color: #EEEEEE;
+    -fx-border: none;
+    -fx-padding: 24;
+}

@@ -41,6 +41,7 @@ class CollectionRepository(
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
+
     private val collectionDao = database.getCollectionDao()
     private val contentDao = database.getContentDao()
     private val metadataDao = database.getResourceMetadataDao()
