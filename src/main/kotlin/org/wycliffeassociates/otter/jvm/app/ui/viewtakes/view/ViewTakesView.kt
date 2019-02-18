@@ -72,13 +72,16 @@ class ViewTakesView : View() {
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox(15.0) {
+                addClass(ViewTakesStyles.pageTop)
                 alignment = Pos.CENTER
                 vgrow = Priority.ALWAYS
+                //previous verse button
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(ViewTakesStyles.navigationButton)
                     //todo create verse to verse navigation
                     isDisable = true
                 }
+                //selected take and drag target
                 stackpane {
                     addClass(ViewTakesStyles.selectedTakeContainer)
                     // drag target glow
@@ -125,6 +128,7 @@ class ViewTakesView : View() {
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
                     }
                 }
+                //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
                     addClass(ViewTakesStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT

@@ -8,10 +8,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import tornadofx.Stylesheet
-import tornadofx.box
-import tornadofx.cssclass
-import tornadofx.px
+import tornadofx.*
 
 class ViewTakesStyles : Stylesheet() {
     companion object {
@@ -30,6 +27,7 @@ class ViewTakesStyles : Stylesheet() {
         val navigationButton by cssclass()
         val newTakeCard by cssclass()
         val scrollpane by cssclass()
+        val pageTop by cssclass()
     }
 
     init {
@@ -45,13 +43,16 @@ class ViewTakesStyles : Stylesheet() {
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
             backgroundColor += AppTheme.colors.defaultBackground
             spacing = 10.px
-            padding = box(10.px, 150.px)
+            alignment = Pos.CENTER
             vgap = 16.px
             hgap = 16.px
         }
 
+        pageTop {
+                minHeight = 400.px
+        }
+
         scrollpane {
-            maxHeight = Screen.getPrimary().visualBounds.height.px / 2.5
             backgroundColor += Color.TRANSPARENT
         }
 
