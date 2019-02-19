@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
-import com.github.thomasnield.rxkotlinfx.bind
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -29,6 +28,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
 
     var simpleAudioPlayer: SimpleAudioPlayer by singleAssign()
     private val isAudioPlaying: SimpleBooleanProperty = SimpleBooleanProperty()
+
     init {
         importStylesheet<TakeCardStyles>()
         addClass(TakeCardStyles.defaultTakeCard)
@@ -41,7 +41,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                 }
                 hbox(10.0) {
                     hgrow = Priority.ALWAYS
-                    alignment = Pos.TOP_LEFT
+                    alignment = Pos.CENTER_LEFT
                     takeNumberLabel = label("Take " + "%02d".format(take.number), TakeCardStyles.draggingIcon())
                     takeNumberLabel.addClass(TakeCardStyles.takeNumberLabel)
                     timestampLabel = label(take.timestamp.toString())
@@ -49,7 +49,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                 }
                 hbox {
                     alignment = Pos.TOP_RIGHT
-                    hgrow = Priority.ALWAYS
+                    hgrow = Priority.SOMETIMES
                     deleteButton = button("Delete", MaterialIconView(MaterialIcon.DELETE, "15px"))
                 }
             }
@@ -94,7 +94,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
         }
 
         isAudioPlaying.onChange {
-            when(isAudioPlaying.value) {
+            when (isAudioPlaying.value) {
                 true -> {
                     playButton.apply {
                         graphic = TakeCardStyles.pauseIcon()
