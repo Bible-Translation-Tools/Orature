@@ -6,6 +6,7 @@ import javafx.scene.Cursor
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
+import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.ProgressDialogStyles
 import tornadofx.*
 
@@ -18,14 +19,30 @@ class AppStyles : Stylesheet() {
         val backButton by cssclass()
         val appBackground by cssclass()
         val progressDialog by cssclass()
-
+        val appToggleButton by cssclass()
         // Icons
         fun recordIcon(size: String = "1em") = MaterialIconView(MaterialIcon.MIC_NONE, size)
         fun editIcon(size: String = "1em") = MaterialIconView(MaterialIcon.EDIT, size)
         fun viewTakesIcon(size: String = "1em") = MaterialIconView(MaterialIcon.APPS, size)
-        fun backIcon() = MaterialIconView(MaterialIcon.ARROW_BACK)
+        fun backIcon(size: String = "1em") = MaterialIconView(MaterialIcon.ARROW_BACK)
+        fun forwardIcon(size: String = "1em") = MaterialIconView(MaterialIcon.ARROW_FORWARD, size)
+        fun bookIcon(size: String = "1em") =  MaterialIconView(MaterialIcon.BOOK, size)
         fun chapterIcon(size: String = "1em") = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
-        fun forwardIcon(size: String ="1em") = MaterialIconView(MaterialIcon.ARROW_FORWARD)
+        fun verseIcon(size: String = "1em") =  MaterialIconView(MaterialIcon.BOOKMARK, size)
+        fun projectGraphic() = ImageLoader.load(
+                ClassLoader.getSystemResourceAsStream("images/project_image.png"),
+                ImageLoader.Format.PNG
+        )
+        fun chapterGraphic() = ImageLoader.load(
+                ClassLoader.getSystemResourceAsStream("images/chapter_image.png"),
+                ImageLoader.Format.PNG
+        )
+
+        fun chunkGraphic() = ImageLoader.load(
+                ClassLoader.getSystemResourceAsStream("images/verse_image.png"),
+                ImageLoader.Format.PNG
+        )
+
 
         const val defaultFontSize = 10.0
     }
@@ -93,6 +110,11 @@ class AppStyles : Stylesheet() {
             label {
                 textFill = AppTheme.colors.defaultText
             }
+        }
+
+        appToggleButton {
+            textFill = AppTheme.colors.defaultText
+            unsafe("-jfx-toggle-color", raw(AppTheme.colors.appRed.css))
         }
 
 

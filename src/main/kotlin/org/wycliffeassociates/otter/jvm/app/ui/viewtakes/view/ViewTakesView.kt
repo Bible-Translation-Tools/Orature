@@ -6,6 +6,7 @@ import com.jfoenix.controls.JFXSnackbar
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
+import javafx.beans.property.Property
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
@@ -18,16 +19,17 @@ import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel.ViewTakesViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import tornadofx.*
 
-class ViewTakesView : View() {
+class ViewTakesView : Fragment() {
     private val viewModel: ViewTakesViewModel by inject()
 
     // The currently selected take
@@ -44,14 +46,28 @@ class ViewTakesView : View() {
     // Record button?
     private var recordButton: Button by singleAssign()
 
+    //Edit Take Button
+    private var editTake: Button by singleAssign()
+
     // Flow pane of available takes
     private var takesFlowPane = createTakesFlowPane()
+
+    val activeCollection: Property<Collection> = viewModel.activeCollectionProperty
+    val activeProject: Property<Collection> = viewModel.activeProjectProperty
+    val activeContent: Property<Content> = viewModel.activeContentProperty
 
     init {
         importStylesheet<ViewTakesStyles>()
     }
 
     override val root = anchorpane {
+
+        anchorpaneConstraints {
+            leftAnchor = 0.0
+            rightAnchor = 0.0
+            bottomAnchor = 0.0
+            topAnchor = 0.0
+        }
         addClass(AppStyles.appBackground)
         val snackBar = JFXSnackbar(this)
         viewModel.snackBarObservable.subscribe { shouldShow ->
@@ -61,12 +77,12 @@ class ViewTakesView : View() {
                     })
             )
         }
-        vbox {
+        hbox {
             anchorpaneConstraints {
                 leftAnchor = 0.0
                 rightAnchor = 0.0
-                topAnchor = 0.0
                 bottomAnchor = 0.0
+                topAnchor = 0.0
             }
 
             // Top items above the alternate takes
@@ -91,6 +107,7 @@ class ViewTakesView : View() {
                     }
                     vbox {
                         alignment = Pos.CENTER
+
                         // Check if the selected take card has changed
                         isFillWidth = false
                         val placeholder = vbox {
@@ -110,7 +127,6 @@ class ViewTakesView : View() {
                                 add(it)
                             }
                         }
-
                         viewModel.selectedTakeProperty.onChange {
                             // The view model wants us to use this selected take
                             // This take will not appear in the flow pane items
@@ -145,6 +161,21 @@ class ViewTakesView : View() {
             }
         }
 
+        editTake = JFXButton("", MaterialIconView(MaterialIcon.EDIT, "25px")).apply {
+            addClass(ViewTakesStyles.editTakesButton)
+            anchorpaneConstraints {
+                rightAnchor = 25.0
+                bottomAnchor = 100.0
+            }
+            enableWhen(viewModel.isSelectedTake)
+            isDisableVisualFocus = true
+            action {
+                viewModel.editContent()
+            }
+        }
+        add(recordButton)
+        add(editTake)
+
         // Create drag shadow node and hide it initially
         dragShadow = vbox {
             draggingTakeProperty.onChange {
@@ -164,7 +195,12 @@ class ViewTakesView : View() {
         // Plugin active cover
         val dialog = progressdialog {
             root.addClass(AppStyles.progressDialog)
-            graphic = AppStyles.recordIcon("60px")
+            viewModel.contextProperty.toObservable().subscribe { newContext ->
+                when (newContext) {
+                    TakeContext.RECORD -> graphic = AppStyles.recordIcon("60px")
+                    TakeContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
+                }
+            }
         }
         viewModel.showPluginActiveProperty.onChange {
             Platform.runLater {

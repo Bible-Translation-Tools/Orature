@@ -2,22 +2,25 @@ package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel
 
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.Completable
 import io.reactivex.subjects.PublishSubject
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.AccessTakes
+import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projecteditor.viewmodel.ProjectEditorViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.TakeContext
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
@@ -29,23 +32,33 @@ class ViewTakesViewModel : ViewModel() {
     private val takeRepository = injector.takeRepository
     private val pluginRepository = injector.pluginRepository
 
-    val contentProperty = find(ProjectEditorViewModel::class).activeContentProperty
-    private val projectProperty = find(ProjectHomeViewModel::class).selectedProjectProperty
-    private var chapterProperty = find(ProjectEditorViewModel::class).activeChildProperty
+    var activeProperty: Collection by property()
+    val activeProjectProperty = getProperty(ViewTakesViewModel::activeProperty)
+
+    var activeCollection: Collection by property()
+    var activeCollectionProperty = getProperty(ViewTakesViewModel::activeCollection)
+
+    var activeContent: Content by property()
+    val activeContentProperty = getProperty(ViewTakesViewModel::activeContent)
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
+    var isSelectedTake = SimpleBooleanProperty(false)
+
+    private var context: TakeContext by property(TakeContext.RECORD)
+    val contextProperty = getProperty(ViewTakesViewModel::context)
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
 
-    var title: String by property("View Takes")
+    var title: String by property()
     val titleProperty = getProperty(ViewTakesViewModel::title)
 
     // Whether the UI should show the plugin as active
     private var showPluginActive: Boolean by property(false)
     var showPluginActiveProperty = getProperty(ViewTakesViewModel::showPluginActive)
 
-    val snackBarObservable: PublishSubject<Boolean> = PublishSubject.create()
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
+    private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
             collectionRepository,
             contentRepository,
@@ -60,8 +73,23 @@ class ViewTakesViewModel : ViewModel() {
             takeRepository
     )
 
+    private val editTake = EditTake(takeRepository, launchPlugin)
+
     init {
+        activeContentProperty.toObservable().subscribe{
+            title ="${FX.messages[activeContentProperty.value?.labelKey ?: "verse"]} ${activeContentProperty.value?.start ?: ""}"
+            activeContent = it
+            populateTakes(it)
+        }
         reset()
+        //listen for changes to the selected take property, if there is a change activate edit button
+        selectedTakeProperty.onChange {
+            if (it == null) {
+                isSelectedTake.set(false)
+            } else {
+                isSelectedTake.set(true)
+            }
+        }
     }
 
     fun audioPlayer(): IAudioPlayer = injector.audioPlayer
@@ -82,11 +110,15 @@ class ViewTakesViewModel : ViewModel() {
                     alternateTakes.clear()
                     alternateTakes.addAll(retrievedTakes.filter { it != content.selectedTake })
                     selectedTakeProperty.value = content.selectedTake
+                    // if we have a selected take, make the edit button active
+                    if (selectedTakeProperty.value != null) {
+                        isSelectedTake.set(true)
+                    }
                 }
     }
 
     fun acceptTake(take: Take) {
-        val content = contentProperty.value
+        val content = activeContentProperty.value
         // Move the old selected take back to the alternates (if not null)
         if (selectedTakeProperty.value != null) alternateTakes.add(selectedTakeProperty.value)
         // Do the database action
@@ -106,23 +138,50 @@ class ViewTakesViewModel : ViewModel() {
     }
 
     fun recordContent() {
-        projectProperty.value?.let { project ->
+        contextProperty.set(TakeContext.RECORD)
+        activeProjectProperty.value?.let { project ->
             showPluginActive = true
             recordTake
-                    .record(project, chapterProperty.value, contentProperty.value)
+                    .record(project, activeCollectionProperty.value, activeContentProperty.value)
                     .observeOnFx()
-                    .doOnSuccess {
+                    .doOnSuccess { result ->
                         showPluginActive = false
-                        populateTakes(contentProperty.value)
+                        when (result) {
+                            RecordTake.Result.SUCCESS -> {
+                                populateTakes(activeContentProperty.value)
+                            }
+
+                            RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
+                            RecordTake.Result.NO_AUDIO -> {
+                            }
+                        }
                     }
                     .toCompletable()
                     .onErrorResumeNext {
                         Completable.fromAction {
                             showPluginActive = false
-                            snackBarObservable.onNext(true)
+                            snackBarObservable.onNext(messages["noRecorder"])
                         }
                     }
                     .subscribe()
+        }
+    }
+
+    fun editContent() {
+        contextProperty.set(TakeContext.EDIT_TAKES)
+        selectedTakeProperty.value?.let { take ->
+            showPluginActive = true
+            editTake
+                    .edit(take)
+                    .observeOnFx()
+                    .subscribe { result ->
+                        showPluginActive = false
+                        when (result) {
+                            EditTake.Result.SUCCESS -> {
+                            }
+                            EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                        }
+                    }
         }
     }
 
@@ -130,7 +189,7 @@ class ViewTakesViewModel : ViewModel() {
         if (take == selectedTakeProperty.value) {
             // Delete the selected take
             accessTakes
-                    .setSelectedTake(contentProperty.value, null)
+                    .setSelectedTake(activeContentProperty.value, null)
                     .concatWith(accessTakes.delete(take))
                     .subscribe()
             selectedTakeProperty.value = null
@@ -146,11 +205,11 @@ class ViewTakesViewModel : ViewModel() {
     fun reset() {
         alternateTakes.clear()
         selectedTakeProperty.value = null
-        contentProperty.value?.let { populateTakes(it) }
-        title = if (contentProperty.value?.labelKey == "chapter") {
-            chapterProperty.value?.titleKey ?: ""
+        activeContentProperty.value?.let { populateTakes(it) }
+        title = if (activeContentProperty.value?.labelKey == "chapter") {
+            activeCollectionProperty.value?.titleKey ?: ""
         } else {
-            "${FX.messages[contentProperty.value?.labelKey ?: "verse"]} ${contentProperty.value?.start ?: ""}"
+            "${FX.messages[activeContentProperty.value?.labelKey ?: "verse"]} ${activeContentProperty.value?.start ?: ""}"
         }
     }
 }

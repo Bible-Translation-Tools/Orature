@@ -22,7 +22,8 @@ class ViewTakesStyles : Stylesheet() {
         val selectedTakeContainer by cssclass()
         val takeFlowPane by cssclass()
         val glow by cssclass()
-        val recordButton by cssclass()
+        val recordTakeButton by cssclass()
+        val editTakesButton by cssclass()
         val playPauseButton by cssclass()
         val navigationButton by cssclass()
         val newTakeCard by cssclass()
@@ -150,7 +151,7 @@ class ViewTakesStyles : Stylesheet() {
             }
         }
 
-        recordButton {
+        recordTakeButton {
             backgroundRadius += box(25.px)
             borderRadius += box(25.px)
             backgroundColor += AppTheme.colors.base
@@ -159,13 +160,11 @@ class ViewTakesStyles : Stylesheet() {
             maxHeight = 50.px
             maxWidth = 50.px
             cursor = Cursor.HAND
-            effect = DropShadow(10.0, AppTheme.colors.dropShadow)
             unsafe("-jfx-button-type", raw("RAISED"))
             child("*") {
                 fill = AppTheme.colors.appRed
             }
         }
-
         navigationButton {
             minHeight = 40.px
             minWidth = 187.0.px
@@ -178,6 +177,7 @@ class ViewTakesStyles : Stylesheet() {
                 fill = AppTheme.colors.appRed
             }
             fontSize = 14.px
+
         }
     }
 }
