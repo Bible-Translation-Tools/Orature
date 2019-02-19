@@ -47,6 +47,7 @@ class TakeManagementStyles : Stylesheet() {
             vgap = 16.px
             hgap = 16.px
             padding = box(5.0.px)
+            prefHeight = 300.px
         }
 
         pageTop {
@@ -185,7 +186,7 @@ class TakeManagementStyles : Stylesheet() {
 
         tpanelStyle {
             prefWidth = 1300.px
-            prefHeight = 700.px
+            prefHeight = 1000.px
             backgroundColor += AppTheme.colors.white
         }
     }

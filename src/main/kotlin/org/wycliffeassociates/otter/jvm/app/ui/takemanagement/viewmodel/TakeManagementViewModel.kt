@@ -58,6 +58,9 @@ class TakeManagementViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
+    val hasNext = SimpleBooleanProperty()
+    val hasPrevious = SimpleBooleanProperty()
+
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
             collectionRepository,
@@ -182,6 +185,32 @@ class TakeManagementViewModel : ViewModel() {
                             EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                         }
                     }
+        }
+    }
+
+    fun nextVerse() {
+        contentRepository.getByCollection(activeCollection).observeOnFx().subscribe {verses ->
+            val nextverse = verses.find { verse ->  verse.start == activeContent.start + 1 }?: activeContent
+            if(nextverse != null) {
+                activeContentProperty.set(nextverse)
+                populateTakes(nextverse)
+            }
+            else {
+
+            }
+        }
+    }
+
+    fun previousVerse() {
+        contentRepository.getByCollection(activeCollection).observeOnFx().subscribe {verses ->
+            val previousVerse = verses.find { verse ->  verse.start == activeContent.start - 1  && activeContent.start>0 }?: activeContent
+            if(previousVerse != null) {
+                activeContentProperty.set(previousVerse)
+                populateTakes(previousVerse)
+            }
+            else {
+
+            }
         }
     }
 

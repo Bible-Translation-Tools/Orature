@@ -92,6 +92,7 @@ class AppStyles : Stylesheet() {
                 backgroundColor += AppTheme.colors.appRed
                 unsafe("-jfx-button-type", raw("RAISED"))
             }
+            cursor = Cursor.HAND
         }
 
         appBackground {

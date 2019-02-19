@@ -88,8 +88,9 @@ class TakeManagementView : Fragment() {
                 //previous verse button
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(TakeManagementStyles.navigationButton)
-                    //todo create verse to verse navigation
-                    isDisable = true
+                    action {
+                        viewModel.previousVerse()
+                    }
                 }
                 //selected take and drag target
                 stackpane {
@@ -142,8 +143,9 @@ class TakeManagementView : Fragment() {
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
                     addClass(TakeManagementStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
-                    //todo create verse to verse navigation
-                    isDisable = true
+                    action {
+                        viewModel.nextVerse()
+                    }
                 }
             }
 

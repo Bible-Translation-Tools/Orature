@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.contentgrid.view.ContentGrid
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementView
 import tornadofx.*
 
-class MainViewViewModel: ViewModel() {
+class MainViewViewModel : ViewModel() {
     val selectedProjectProperty = SimpleObjectProperty<Collection>()
     val selectedProjectName = SimpleStringProperty()
     val selectedProjectLanguage = SimpleStringProperty()
@@ -25,19 +25,19 @@ class MainViewViewModel: ViewModel() {
 
     init {
         selectedProjectProperty.onChange {
-            if(it!= null) {
+            if (it != null) {
                 projectSelected(it)
             }
         }
 
         selectedCollectionProperty.onChange {
-            if(it != null) {
+            if (it != null) {
                 collectionSelected(it)
             }
         }
 
         selectedContentProperty.onChange {
-            if(it != null) {
+            if (it != null) {
                 contentSelected(it)
             }
         }
@@ -67,6 +67,7 @@ class MainViewViewModel: ViewModel() {
 
     fun contentSelected(content: Content) {
         setActiveContentText(content)
+
         find<MainScreenView>().activeFragment.dock<TakeManagementView>()
         TakeManagementView().apply {
             activeProject.bindBidirectional(selectedProjectProperty)
