@@ -23,12 +23,12 @@ class ViewTakesStyles : Stylesheet() {
         val takeFlowPane by cssclass()
         val glow by cssclass()
         val recordTakeButton by cssclass()
-        val editTakesButton by cssclass()
         val playPauseButton by cssclass()
         val navigationButton by cssclass()
         val newTakeCard by cssclass()
         val scrollpane by cssclass()
         val pageTop by cssclass()
+        val panelStyle by cssclass()
     }
 
     init {
@@ -178,6 +178,11 @@ class ViewTakesStyles : Stylesheet() {
             }
             fontSize = 14.px
 
+        }
+
+        panelStyle {
+            prefWidth = 1200.px
+            prefHeight = 700.px
         }
     }
 }

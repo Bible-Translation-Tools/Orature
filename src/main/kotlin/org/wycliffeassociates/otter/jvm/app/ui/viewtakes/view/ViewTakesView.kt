@@ -43,12 +43,6 @@ class ViewTakesView : Fragment() {
     // Drag shadow (node that actually moves with cursor)
     private var dragShadow: Node = VBox()
 
-    // Record button?
-    private var recordButton: Button by singleAssign()
-
-    //Edit Take Button
-    private var editTake: Button by singleAssign()
-
     // Flow pane of available takes
     private var takesFlowPane = createTakesFlowPane()
 
@@ -69,6 +63,7 @@ class ViewTakesView : Fragment() {
             topAnchor = 0.0
         }
         addClass(AppStyles.appBackground)
+        addClass(ViewTakesStyles.panelStyle)
         val snackBar = JFXSnackbar(this)
         viewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
@@ -77,7 +72,7 @@ class ViewTakesView : Fragment() {
                     })
             )
         }
-        hbox {
+        vbox {
             anchorpaneConstraints {
                 leftAnchor = 0.0
                 rightAnchor = 0.0
@@ -161,21 +156,6 @@ class ViewTakesView : Fragment() {
             }
         }
 
-        editTake = JFXButton("", MaterialIconView(MaterialIcon.EDIT, "25px")).apply {
-            addClass(ViewTakesStyles.editTakesButton)
-            anchorpaneConstraints {
-                rightAnchor = 25.0
-                bottomAnchor = 100.0
-            }
-            enableWhen(viewModel.isSelectedTake)
-            isDisableVisualFocus = true
-            action {
-                viewModel.editContent()
-            }
-        }
-        add(recordButton)
-        add(editTake)
-
         // Create drag shadow node and hide it initially
         dragShadow = vbox {
             draggingTakeProperty.onChange {
@@ -233,6 +213,8 @@ class ViewTakesView : Fragment() {
 
     private fun cancelDrag(evt: MouseEvent) {
         takesFlowPane.add(draggingTakeProperty.value)
+        //remove the new take card bc it isn't a take card and breaks sortTakesFlowPane
+        takesFlowPane.children.removeAt(0)
         sortTakesFlowPane(takesFlowPane)
         draggingTakeProperty.value = null
     }
@@ -275,12 +257,9 @@ class ViewTakesView : Fragment() {
     }
 
     private fun sortTakesFlowPane(flowPane: FlowPane) {
-        flowPane.children.setAll(flowPane.children.filter {
-            it is TakeCard?
+        flowPane.children.setAll(flowPane.children.sortedBy {
+            (it as TakeCard).take.number
         }
-                .sortedBy {
-                    (it as TakeCard).take.number
-                }
         )
         //add the newTakeCard here after we have sorted all other takes by take number
         flowPane.children.add(0, createRecordCard())
