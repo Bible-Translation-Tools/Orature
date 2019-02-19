@@ -1,19 +1,16 @@
 package org.wycliffeassociates.otter.jvm.app.ui.splash.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.view.ProjectHomeView
 import tornadofx.*
-import java.util.concurrent.TimeUnit
 
 class SplashScreenViewModel : ViewModel() {
     val progressProperty = SimpleDoubleProperty(0.0)
@@ -29,7 +26,7 @@ class SplashScreenViewModel : ViewModel() {
                         newWorkspace = find()
                         newWorkspace.header.removeFromParent()
                         newWorkspace.add(MainMenu())
-                        newWorkspace.dock<ProjectHomeView>()
+                        newWorkspace.dock<MainScreenView>()
                         newWorkspace.openWindow(owner = null)
                         shouldCloseProperty.value = true
                     }

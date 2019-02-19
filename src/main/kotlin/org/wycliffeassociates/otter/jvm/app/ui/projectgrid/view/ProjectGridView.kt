@@ -1,29 +1,31 @@
-package org.wycliffeassociates.otter.jvm.app.ui.projecthome.view
+package org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view
 
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.beans.property.ReadOnlyBooleanProperty
-import javafx.beans.property.SimpleListProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.*
 import javafx.geometry.Pos
-import javafx.scene.control.ButtonType
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.images.SVGImage
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.projectcard.projectcard
+import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel.ProjectGridViewModel
+import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
+import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
-class ProjectHomeView : View() {
+class ProjectGridView : Fragment() {
 
-    private val viewModel: ProjectHomeViewModel by inject()
+    private val viewModel: ProjectGridViewModel by inject()
     private val noProjectsProperty: ReadOnlyBooleanProperty
 
+    val activeProject: Property<Collection> = viewModel.selectedProjectProperty
+
     init {
-        importStylesheet<ProjectHomeStyles>()
+        importStylesheet<ProjectGridStyles>()
+        importStylesheet<DefaultStyles>()
         // Setup property bindings to bind to empty property
         // https://stackoverflow.com/questions/21612969/is-it-possible-to-bind-the-non-empty-state-of-
         // an-observablelist-inside-an-object
@@ -33,8 +35,10 @@ class ProjectHomeView : View() {
     }
 
     override val root = anchorpane {
+        hgrow = Priority.ALWAYS
+        vgrow = Priority.ALWAYS
         addClass(AppStyles.appBackground)
-        addClass(ProjectHomeStyles.homeAnchorPane)
+        addClass(ProjectGridStyles.homeAnchorPane)
         scrollpane {
             isFitToHeight = true
             isFitToWidth = true
@@ -44,46 +48,37 @@ class ProjectHomeView : View() {
                 leftAnchor = 0
                 rightAnchor = 0
             }
-            content = flowpane {
-                addClass(AppStyles.appBackground)
-                addClass(ProjectHomeStyles.projectsFlowPane)
-                bindChildren(viewModel.projects) {
+            content =
                     hbox {
-                        projectcard(it) {
-                            addClass(ProjectHomeStyles.projectCard)
-                            titleLabel.addClass(ProjectHomeStyles.projectCardTitle)
-                            languageLabel.addClass(ProjectHomeStyles.projectCardLanguage)
-                            cardButton.apply {
-                                text = messages["loadProject"]
-                                action {
-                                    viewModel.openProject(it)
-                                }
-                            }
-                            deleteButton.apply {
-                                action {
-                                    error(
-                                            messages["deleteProjectPrompt"],
-                                            messages["deleteProjectDetails"],
-                                            ButtonType.YES,
-                                            ButtonType.NO,
-                                            title = messages["deleteProjectPrompt"]
-                                    ) { button: ButtonType ->
-                                        if (button == ButtonType.YES) {
-                                            viewModel.deleteProject(it)
-                                            cardButton.isDisable = true
-                                            isDisable = true
+                        addClass(AppStyles.appBackground)
+                        flowpane {
+                            hgrow = Priority.ALWAYS
+                            addClass(AppStyles.appBackground)
+                            addClass(ProjectGridStyles.projectsFlowPane)
+                            bindChildren(viewModel.projects) {
+                                    card {
+                                        addClass(DefaultStyles.defaultCard)
+                                        cardfront {
+                                                isActive = true
+                                            innercard (AppStyles.projectGraphic()){
+                                                majorLabel = it.titleKey
+                                                minorLabel = it.resourceContainer?.language?.name
+                                            }
+                                            cardbutton {
+                                                addClass(DefaultStyles.defaultCardButton)
+                                                text = messages["openProject"]
+                                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+                                                        .apply { fill = AppTheme.colors.appRed }
+                                                action {
+                                                    viewModel.selectProject(it)
+                                                }
+                                            }
                                         }
+
                                     }
-                                }
-                            }
-                            graphicContainer.apply {
-                                addClass(ProjectHomeStyles.projectGraphicContainer)
-                                add(MaterialIconView(MaterialIcon.IMAGE, "75px"))
                             }
                         }
                     }
-                }
-            }
         }
 
         vbox {
@@ -96,10 +91,10 @@ class ProjectHomeView : View() {
             alignment = Pos.CENTER
             vgrow = Priority.ALWAYS
             label(messages["noProjects"]) {
-                addClass(ProjectHomeStyles.noProjectsLabel)
+                addClass(ProjectGridStyles.noProjectsLabel)
             }
             label(messages["noProjectsSubtitle"]) {
-                addClass(ProjectHomeStyles.tryCreatingLabel)
+                addClass(ProjectGridStyles.tryCreatingLabel)
             }
 
             visibleProperty().bind(noProjectsProperty)
@@ -107,7 +102,7 @@ class ProjectHomeView : View() {
         }
 
         add(JFXButton("", MaterialIconView(MaterialIcon.ADD, "25px")).apply {
-            addClass(ProjectHomeStyles.addProjectButton)
+            addClass(ProjectGridStyles.addProjectButton)
             isDisableVisualFocus = true
             anchorpaneConstraints {
                 bottomAnchor = 25
@@ -145,5 +140,4 @@ class ProjectHomeView : View() {
         viewModel.loadProjects()
         viewModel.clearSelectedProject()
     }
-
 }

@@ -84,6 +84,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                     add(playButton)
                     add(editButton)
                 }
+ 
             }
             anchorpaneConstraints {
                 topAnchor = 0.0
@@ -112,9 +113,8 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
     }
 }
 
-fun Pane.takecard(take: Take, player: IAudioPlayer, init: TakeCard.() -> Unit = {}): TakeCard {
+fun takecard(take: Take, player: IAudioPlayer, init: TakeCard.() -> Unit = {}): TakeCard {
     val takeCard = TakeCard(take, player)
     takeCard.init()
-    add(takeCard)
     return takeCard
 }
