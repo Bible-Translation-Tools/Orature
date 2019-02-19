@@ -19,6 +19,7 @@ class ResourceRepository(
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
 ) : IResourceRepository {
+
     private val contentDao = database.getContentDao()
     private val takeDao = database.getTakeDao()
     private val markerDao = database.getMarkerDao()

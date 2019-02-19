@@ -83,13 +83,12 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
 
 }
 
-fun Pane.simpleaudioplayer(
+fun simpleaudioplayer(
         audioFile: File,
         audioPlayer: IAudioPlayer,
         init: SimpleAudioPlayer.() -> Unit
 ): SimpleAudioPlayer {
     val audioPlayer = SimpleAudioPlayer(audioFile, audioPlayer)
     audioPlayer.init()
-    add(audioPlayer)
     return audioPlayer
 }

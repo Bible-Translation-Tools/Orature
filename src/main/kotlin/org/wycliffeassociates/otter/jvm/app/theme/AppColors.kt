@@ -18,4 +18,5 @@ abstract class AppColors {
     abstract val colorlessButton: Color
     abstract val dropShadow: Color
     abstract val imagePlaceholder: Color
+    abstract val lightBackground: Color
 }

@@ -51,7 +51,7 @@ class ProgressDialog : Fragment() {
     }
 }
 
-fun EventTarget.progressdialog(setup: ProgressDialog.() -> Unit = {}): ProgressDialog {
+fun progressdialog(setup: ProgressDialog.() -> Unit = {}): ProgressDialog {
     val progressDialog = ProgressDialog()
     progressDialog.setup()
     return progressDialog

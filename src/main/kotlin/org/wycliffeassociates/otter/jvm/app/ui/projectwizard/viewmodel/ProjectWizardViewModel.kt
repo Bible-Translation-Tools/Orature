@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.projecthome.viewmodel.ProjectHomeViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel.ProjectGridViewModel
 import tornadofx.ViewModel
 import tornadofx.Wizard
 import tornadofx.booleanBinding
@@ -97,7 +97,7 @@ class ProjectWizardViewModel : ViewModel() {
             creationUseCase
                     .create(selectedCollection, language)
                     .subscribe {
-                        tornadofx.find(ProjectHomeViewModel::class).loadProjects()
+                        tornadofx.find(ProjectGridViewModel::class).loadProjects()
                         showOverlayProperty.value = false
                         creationCompletedProperty.value = true
                     }
