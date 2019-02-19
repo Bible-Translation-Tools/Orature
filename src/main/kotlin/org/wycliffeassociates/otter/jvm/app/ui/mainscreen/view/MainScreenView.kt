@@ -70,7 +70,6 @@ class MainScreenView : View() {
                         navigateBack()
                     }
                 }
-
             })
 
             fragmentStage = anchorpane {

@@ -50,6 +50,7 @@ class TakeManagementView : Fragment() {
 
     init {
         importStylesheet<TakeManagementStyles>()
+        takesFlowPane.children.add(createRecordCard())
     }
 
     override val root = anchorpane {
@@ -61,7 +62,7 @@ class TakeManagementView : Fragment() {
             topAnchor = 0.0
         }
         addClass(AppStyles.appBackground)
-        addClass(TakeManagementStyles.panelStyle)
+        addClass(TakeManagementStyles.tpanelStyle)
         val snackBar = JFXSnackbar(this)
         viewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
@@ -228,7 +229,7 @@ class TakeManagementView : Fragment() {
     private fun createTakesFlowPane(): FlowPane {
         return FlowPane().apply {
             vgrow = Priority.ALWAYS
-            addClass(TakeManagementStyles.takeFlowPane)
+            addClass(TakeManagementStyles.takeGrid)
             // Update the takes displayed
             viewModel.alternateTakes.onChange {
                 clear()

@@ -5,6 +5,7 @@ import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
+import org.wycliffeassociates.otter.jvm.app.theme.AppColors
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
@@ -18,7 +19,7 @@ class TakeManagementStyles : Stylesheet() {
         val placeholder by cssclass()
         val headerContainer by cssclass()
         val selectedTakeContainer by cssclass()
-        val takeFlowPane by cssclass()
+        val takeGrid by cssclass()
         val glow by cssclass()
         val recordTakeButton by cssclass()
         val playPauseButton by cssclass()
@@ -26,7 +27,7 @@ class TakeManagementStyles : Stylesheet() {
         val newTakeCard by cssclass()
         val scrollpane by cssclass()
         val pageTop by cssclass()
-        val panelStyle by cssclass()
+        val tpanelStyle by cssclass()
     }
 
     init {
@@ -37,18 +38,20 @@ class TakeManagementStyles : Stylesheet() {
                 fill = AppTheme.colors.defaultText
             }
         }
-        takeFlowPane {
+        takeGrid {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
-            backgroundColor += AppTheme.colors.defaultBackground
+            backgroundColor += AppTheme.colors.white
             spacing = 10.px
-            alignment = Pos.CENTER
+            alignment = Pos.CENTER_LEFT
             vgap = 16.px
             hgap = 16.px
+            padding = box(5.0.px)
         }
 
         pageTop {
                 minHeight = 400.px
+                maxHeight = minHeight
         }
 
         scrollpane {
@@ -104,6 +107,8 @@ class TakeManagementStyles : Stylesheet() {
             minHeight = 200.px
             minWidth = 348.px
             borderRadius += box(5.0.px)
+            borderColor += box(AppTheme.colors.defaultBackground)
+            borderWidth += box(1.px)
             backgroundRadius += box(5.0.px)
             effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
             backgroundColor += AppTheme.colors.white
@@ -141,7 +146,7 @@ class TakeManagementStyles : Stylesheet() {
         }
 
         selectedTakeContainer {
-            backgroundColor += AppTheme.colors.defaultBackground
+            backgroundColor += AppTheme.colors.white
             padding = box(20.px)
             alignment = Pos.CENTER_LEFT
             label {
@@ -178,9 +183,10 @@ class TakeManagementStyles : Stylesheet() {
 
         }
 
-        panelStyle {
-            prefWidth = 1200.px
+        tpanelStyle {
+            prefWidth = 1300.px
             prefHeight = 700.px
+            backgroundColor += AppTheme.colors.white
         }
     }
 }
