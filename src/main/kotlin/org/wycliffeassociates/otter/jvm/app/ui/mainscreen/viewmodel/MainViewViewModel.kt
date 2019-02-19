@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view.CollectionsGrid
 import org.wycliffeassociates.otter.jvm.app.ui.contentgrid.view.ContentGrid
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementView
 import tornadofx.*
 
 class MainViewViewModel: ViewModel() {
@@ -67,8 +67,8 @@ class MainViewViewModel: ViewModel() {
 
     fun contentSelected(content: Content) {
         setActiveContentText(content)
-        find<MainScreenView>().activeFragment.dock<ViewTakesView>()
-        ViewTakesView().apply {
+        find<MainScreenView>().activeFragment.dock<TakeManagementView>()
+        TakeManagementView().apply {
             activeProject.bindBidirectional(selectedProjectProperty)
             activeCollection.bindBidirectional(selectedCollectionProperty)
             activeContent.bindBidirectional(selectedContentProperty)

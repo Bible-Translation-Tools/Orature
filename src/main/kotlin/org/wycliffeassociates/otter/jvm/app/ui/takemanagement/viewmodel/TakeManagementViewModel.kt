@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel
+package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -20,11 +20,11 @@ import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.TakeContext
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
-class ViewTakesViewModel : ViewModel() {
+class TakeManagementViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val directoryProvider = injector.directoryProvider
     private val collectionRepository = injector.collectionRepo
@@ -33,28 +33,28 @@ class ViewTakesViewModel : ViewModel() {
     private val pluginRepository = injector.pluginRepository
 
     var activeProperty: Collection by property()
-    val activeProjectProperty = getProperty(ViewTakesViewModel::activeProperty)
+    val activeProjectProperty = getProperty(TakeManagementViewModel::activeProperty)
 
     var activeCollection: Collection by property()
-    var activeCollectionProperty = getProperty(ViewTakesViewModel::activeCollection)
+    var activeCollectionProperty = getProperty(TakeManagementViewModel::activeCollection)
 
     var activeContent: Content by property()
-    val activeContentProperty = getProperty(ViewTakesViewModel::activeContent)
+    val activeContentProperty = getProperty(TakeManagementViewModel::activeContent)
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
     var isSelectedTake = SimpleBooleanProperty(false)
 
     private var context: TakeContext by property(TakeContext.RECORD)
-    val contextProperty = getProperty(ViewTakesViewModel::context)
+    val contextProperty = getProperty(TakeManagementViewModel::context)
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
 
     var title: String by property()
-    val titleProperty = getProperty(ViewTakesViewModel::title)
+    val titleProperty = getProperty(TakeManagementViewModel::title)
 
     // Whether the UI should show the plugin as active
     private var showPluginActive: Boolean by property(false)
-    var showPluginActiveProperty = getProperty(ViewTakesViewModel::showPluginActive)
+    var showPluginActiveProperty = getProperty(TakeManagementViewModel::showPluginActive)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 

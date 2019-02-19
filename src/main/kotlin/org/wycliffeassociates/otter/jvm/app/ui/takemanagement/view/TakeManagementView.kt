@@ -1,7 +1,6 @@
-package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
+package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
-import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXSnackbar
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -11,7 +10,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.control.Button
 import javafx.scene.control.ButtonType
 import javafx.scene.control.ContentDisplay
 import javafx.scene.input.MouseEvent
@@ -23,14 +21,14 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.TakeContext
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.viewmodel.ViewTakesViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import tornadofx.*
 
-class ViewTakesView : Fragment() {
-    private val viewModel: ViewTakesViewModel by inject()
+class TakeManagementView : Fragment() {
+    private val viewModel: TakeManagementViewModel by inject()
 
     // The currently selected take
     private var selectedTakeProperty = SimpleObjectProperty<TakeCard>()
@@ -51,7 +49,7 @@ class ViewTakesView : Fragment() {
     val activeContent: Property<Content> = viewModel.activeContentProperty
 
     init {
-        importStylesheet<ViewTakesStyles>()
+        importStylesheet<TakeManagementStyles>()
     }
 
     override val root = anchorpane {
@@ -63,7 +61,7 @@ class ViewTakesView : Fragment() {
             topAnchor = 0.0
         }
         addClass(AppStyles.appBackground)
-        addClass(ViewTakesStyles.panelStyle)
+        addClass(TakeManagementStyles.panelStyle)
         val snackBar = JFXSnackbar(this)
         viewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
@@ -83,21 +81,21 @@ class ViewTakesView : Fragment() {
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox(15.0) {
-                addClass(ViewTakesStyles.pageTop)
+                addClass(TakeManagementStyles.pageTop)
                 alignment = Pos.CENTER
                 vgrow = Priority.ALWAYS
                 //previous verse button
                 button(messages["previousVerse"], AppStyles.backIcon()) {
-                    addClass(ViewTakesStyles.navigationButton)
+                    addClass(TakeManagementStyles.navigationButton)
                     //todo create verse to verse navigation
                     isDisable = true
                 }
                 //selected take and drag target
                 stackpane {
-                    addClass(ViewTakesStyles.selectedTakeContainer)
+                    addClass(TakeManagementStyles.selectedTakeContainer)
                     // drag target glow
                     stackpane {
-                        addClass(ViewTakesStyles.dragTarget, ViewTakesStyles.glow)
+                        addClass(TakeManagementStyles.dragTarget, TakeManagementStyles.glow)
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
                     }
                     vbox {
@@ -106,7 +104,7 @@ class ViewTakesView : Fragment() {
                         // Check if the selected take card has changed
                         isFillWidth = false
                         val placeholder = vbox {
-                            addClass(ViewTakesStyles.placeholder)
+                            addClass(TakeManagementStyles.placeholder)
                             vgrow = Priority.NEVER
                         }
 
@@ -133,7 +131,7 @@ class ViewTakesView : Fragment() {
 
                     // Create the drag target
                     dragTarget = stackpane {
-                        addClass(ViewTakesStyles.dragTarget)
+                        addClass(TakeManagementStyles.dragTarget)
                         add(MaterialIconView(MaterialIcon.ADD, "30px"))
                         // Initially hide the drag target
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
@@ -141,7 +139,7 @@ class ViewTakesView : Fragment() {
                 }
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
-                    addClass(ViewTakesStyles.navigationButton)
+                    addClass(TakeManagementStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     //todo create verse to verse navigation
                     isDisable = true
@@ -151,7 +149,7 @@ class ViewTakesView : Fragment() {
             // Add the available takes flow pane
             scrollpane {
                 isFitToWidth = true
-                addClass(ViewTakesStyles.scrollpane)
+                addClass(TakeManagementStyles.scrollpane)
                 add(takesFlowPane)
             }
         }
@@ -230,7 +228,7 @@ class ViewTakesView : Fragment() {
     private fun createTakesFlowPane(): FlowPane {
         return FlowPane().apply {
             vgrow = Priority.ALWAYS
-            addClass(ViewTakesStyles.takeFlowPane)
+            addClass(TakeManagementStyles.takeFlowPane)
             // Update the takes displayed
             viewModel.alternateTakes.onChange {
                 clear()
@@ -246,7 +244,7 @@ class ViewTakesView : Fragment() {
     private fun createRecordCard(): VBox {
         return vbox(10.0) {
             alignment = Pos.CENTER
-            addClass(ViewTakesStyles.newTakeCard)
+            addClass(TakeManagementStyles.newTakeCard)
             label(messages["newTake"])
             button(messages["record"], AppStyles.recordIcon("25px")) {
                 action {
@@ -267,14 +265,14 @@ class ViewTakesView : Fragment() {
 
     private fun createTakeCard(take: Take): TakeCard {
         return TakeCard(take, viewModel.audioPlayer()).apply {
-            addClass(ViewTakesStyles.takeCard)
-            badge.addClass(ViewTakesStyles.badge)
-            simpleAudioPlayer.playPauseButton.addClass(ViewTakesStyles.playPauseButton)
+            addClass(TakeManagementStyles.takeCard)
+            badge.addClass(TakeManagementStyles.badge)
+            simpleAudioPlayer.playPauseButton.addClass(TakeManagementStyles.playPauseButton)
             playedProperty.onChange {
                 if (it) viewModel.setTakePlayed(take)
             }
             deleteButton.apply {
-                addClass(ViewTakesStyles.deleteButton)
+                addClass(TakeManagementStyles.deleteButton)
                 action {
                     error(
                             messages["deleteTakePrompt"],
