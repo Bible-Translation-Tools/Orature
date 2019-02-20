@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -23,6 +24,8 @@ class MainViewViewModel : ViewModel() {
     val selectedContentTitle = SimpleStringProperty()
     val selectedContentBody = SimpleStringProperty()
 
+    val takesPageDocked = SimpleBooleanProperty(false)
+
     init {
         selectedProjectProperty.onChange {
             if (it != null) {
@@ -39,6 +42,9 @@ class MainViewViewModel : ViewModel() {
         selectedContentProperty.onChange {
             if (it != null) {
                 contentSelected(it)
+            }
+            else { // the take manager was undocked
+                takesPageDocked.set(false)
             }
         }
     }
@@ -68,12 +74,15 @@ class MainViewViewModel : ViewModel() {
     fun contentSelected(content: Content) {
         setActiveContentText(content)
 
-        find<MainScreenView>().activeFragment.dock<TakeManagementView>()
-        TakeManagementView().apply {
-            activeProject.bindBidirectional(selectedProjectProperty)
-            activeCollection.bindBidirectional(selectedCollectionProperty)
-            activeContent.bindBidirectional(selectedContentProperty)
+        if(takesPageDocked.value == false) {
+            find<MainScreenView>().activeFragment.dock<TakeManagementView>()
+            TakeManagementView().apply {
+                activeProject.bindBidirectional(selectedProjectProperty)
+                activeCollection.bindBidirectional(selectedCollectionProperty)
+                activeContent.bindBidirectional(selectedContentProperty)
+            }
         }
+        takesPageDocked.set(true)
     }
 
     fun setActiveContentText(content: Content) {
