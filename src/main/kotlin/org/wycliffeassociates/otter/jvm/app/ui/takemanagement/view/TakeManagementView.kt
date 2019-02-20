@@ -91,6 +91,7 @@ class TakeManagementView : Fragment() {
                     action {
                         viewModel.previousVerse()
                     }
+                    enableWhen(viewModel.hasPrevious)
                 }
                 //selected take and drag target
                 stackpane {
@@ -145,6 +146,7 @@ class TakeManagementView : Fragment() {
                     contentDisplay = ContentDisplay.RIGHT
                     action {
                         viewModel.nextVerse()
+                        enableWhen(viewModel.hasNext)
                     }
                 }
             }

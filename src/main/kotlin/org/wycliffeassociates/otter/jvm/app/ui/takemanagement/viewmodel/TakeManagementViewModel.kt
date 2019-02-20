@@ -58,8 +58,9 @@ class TakeManagementViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    val hasNext = SimpleBooleanProperty()
-    val hasPrevious = SimpleBooleanProperty()
+    val contentList: ObservableList<Content> = observableList()
+    val hasNext = SimpleBooleanProperty(false)
+    val hasPrevious = SimpleBooleanProperty(false)
 
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
@@ -79,10 +80,12 @@ class TakeManagementViewModel : ViewModel() {
     private val editTake = EditTake(takeRepository, launchPlugin)
 
     init {
-        activeContentProperty.toObservable().subscribe{
-            title ="${FX.messages[activeContentProperty.value?.labelKey ?: "verse"]} ${activeContentProperty.value?.start ?: ""}"
+        activeContentProperty.toObservable().subscribe {
+            title = "${FX.messages[activeContentProperty.value?.labelKey
+                    ?: "verse"]} ${activeContentProperty.value?.start ?: ""}"
             activeContent = it
             populateTakes(it)
+            getContentList(activeCollection)
         }
         reset()
         //listen for changes to the selected take property, if there is a change activate edit button
@@ -93,6 +96,34 @@ class TakeManagementViewModel : ViewModel() {
                 isSelectedTake.set(true)
             }
         }
+
+        activeContentProperty.onChange {
+            if(contentList.size != 0) {
+                if (it != null) {
+                    when(it.start) {
+                        in (contentList.first().start+1)..(contentList.last().start-1) -> {
+                            hasNext.set(true)
+                            hasPrevious.set(true)
+                        }
+                        contentList.first().start -> {
+                            hasPrevious.set(false)
+                        }
+                        contentList.last().start -> {
+                            hasNext.set(false)
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getContentList(collection: Collection) {
+        contentRepository.getByCollection(collection)
+                .observeOnFx()
+                .subscribe { verses ->
+                    contentList.setAll(verses.sortedBy { verse -> verse.start })
+                }
     }
 
     fun audioPlayer(): IAudioPlayer = injector.audioPlayer
@@ -189,28 +220,23 @@ class TakeManagementViewModel : ViewModel() {
     }
 
     fun nextVerse() {
-        contentRepository.getByCollection(activeCollection).observeOnFx().subscribe {verses ->
-            val nextverse = verses.find { verse ->  verse.start == activeContent.start + 1 }?: activeContent
-            if(nextverse != null) {
-                activeContentProperty.set(nextverse)
-                populateTakes(nextverse)
-            }
-            else {
-
-            }
+        val nextVerse = contentList.find { verse ->
+            verse.start == activeContent.start + 1
+        } ?: activeContent
+        if (nextVerse != null) {
+            activeContentProperty.set(nextVerse)
+            populateTakes(nextVerse)
         }
     }
 
     fun previousVerse() {
-        contentRepository.getByCollection(activeCollection).observeOnFx().subscribe {verses ->
-            val previousVerse = verses.find { verse ->  verse.start == activeContent.start - 1  && activeContent.start>0 }?: activeContent
-            if(previousVerse != null) {
-                activeContentProperty.set(previousVerse)
-                populateTakes(previousVerse)
-            }
-            else {
-
-            }
+        val previousVerse = contentList.find { verse ->
+            verse.start == activeContent.start - 1 && verse.labelKey != "chapter" //don't pull chapter
+        }
+                ?: activeContent
+        if (previousVerse != null) {
+            activeContentProperty.set(previousVerse)
+            populateTakes(previousVerse)
         }
     }
 
@@ -238,7 +264,8 @@ class TakeManagementViewModel : ViewModel() {
         title = if (activeContentProperty.value?.labelKey == "chapter") {
             activeCollectionProperty.value?.titleKey ?: ""
         } else {
-            "${FX.messages[activeContentProperty.value?.labelKey ?: "verse"]} ${activeContentProperty.value?.start ?: ""}"
+            "${FX.messages[activeContentProperty.value?.labelKey ?: "verse"]} ${activeContentProperty.value?.start
+                    ?: ""}"
         }
     }
 }
