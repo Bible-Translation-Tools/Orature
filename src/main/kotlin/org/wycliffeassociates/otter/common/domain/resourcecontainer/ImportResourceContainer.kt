@@ -6,13 +6,13 @@ import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
 
 class ImportResourceContainer(
-        private val collectionRepository: ICollectionRepository,
+        private val resourceContainerRepository : IResourceContainerRepository,
         private val directoryProvider: IDirectoryProvider
 ) {
     fun import(file: File): Single<ImportResult> {
@@ -56,7 +56,7 @@ class ImportResourceContainer(
                     val (constructResult, tree) = constructContainerTree(container)
                     if (constructResult != ImportResult.SUCCESS) return@flatMap cleanUp(newDirectory, constructResult)
 
-                    return@flatMap collectionRepository
+                    return@flatMap resourceContainerRepository
                             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
                             .toSingle { ImportResult.SUCCESS }
                             .doOnError { newDirectory.deleteRecursively() }
