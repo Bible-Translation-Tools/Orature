@@ -5,7 +5,6 @@ import org.wycliffeassociates.otter.jvm.device.audioplugin.injection.DaggerAudio
 import org.wycliffeassociates.otter.jvm.persistence.injection.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
 import tornadofx.Component
 import tornadofx.ScopedInstance
 
@@ -28,9 +27,8 @@ class Injector : Component(), ScopedInstance {
             database,
             directoryProvider
     )
-    val contentRepo = ContentRepository(database)
-    val metadataRepo = ResourceMetadataRepository(database, ResourceMetadataMapper(), LanguageMapper())
     val contentRepository = ContentRepository(database)
+    val resourceContainerRepository = ResourceContainerRepository(database)
     val takeRepository = TakeRepository(database)
     val pluginRepository = AudioPluginRepository(database, preferences)
 
@@ -38,5 +36,4 @@ class Injector : Component(), ScopedInstance {
         get() = audioComponent.injectPlayer()
 
     val audioPluginRegistrar = audioPluginComponent.injectRegistrar()
-
 }

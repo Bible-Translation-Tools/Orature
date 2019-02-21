@@ -16,7 +16,7 @@ import java.io.File
 
 class MainMenuViewModel : ViewModel() {
     private val injector: Injector by inject()
-    private val collectionRepo = injector.collectionRepo
+    private val resourceContainerRepository = injector.resourceContainerRepository
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
 
@@ -33,7 +33,7 @@ class MainMenuViewModel : ViewModel() {
 
     fun importContainerDirectory(dir: File) {
         val importer = ImportResourceContainer(
-                collectionRepo,
+                resourceContainerRepository,
                 directoryProvider
         )
         showImportDialogProperty.value = true
