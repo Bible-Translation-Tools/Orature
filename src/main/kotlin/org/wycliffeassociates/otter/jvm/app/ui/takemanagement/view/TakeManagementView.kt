@@ -207,8 +207,8 @@ class TakeManagementView : Fragment() {
 
     private fun animateDrag(evt: MouseEvent) {
         if (draggingTakeProperty.value != null) {
-            val widthOffset = 116
-            val heightOffset = 120 / 2
+            val widthOffset = 348
+            val heightOffset = 200
             dragShadow.toFront()
             dragShadow.relocate(evt.sceneX - widthOffset, evt.sceneY - heightOffset)
         }
