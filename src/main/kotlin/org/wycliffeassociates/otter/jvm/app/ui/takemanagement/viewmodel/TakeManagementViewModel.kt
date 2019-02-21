@@ -58,9 +58,9 @@ class TakeManagementViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    val contentList: ObservableList<Content> = observableList()
-    val hasNext = SimpleBooleanProperty(false)
-    val hasPrevious = SimpleBooleanProperty(false)
+    private val contentList: ObservableList<Content> = observableList()
+    val hasNext = SimpleBooleanProperty(true)
+    val hasPrevious = SimpleBooleanProperty(true)
 
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(
