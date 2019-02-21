@@ -11,7 +11,7 @@ import tornadofx.*
 class ProjectGridStyles : Stylesheet() {
     companion object {
         val homeAnchorPane by cssclass()
-        val projectsFlowPane by cssclass()
+        val projectsGrid by cssclass()
         val noProjectsLabel by cssclass()
         val tryCreatingLabel by cssclass()
         val addProjectButton by cssclass()
@@ -19,13 +19,16 @@ class ProjectGridStyles : Stylesheet() {
 
     init {
         homeAnchorPane {
-            prefWidth = 1200.px
-            prefHeight = 700.px
+            prefWidth = 2400.px
+            prefHeight = 1400.px
         }
 
-        projectsFlowPane {
+        projectsGrid {
             vgap = 32.px
             hgap = 24.px
+            horizontalCellSpacing = 24.0.px
+            verticalCellSpacing = 32.0.px
+            maxCellsInRow = 5
             alignment = Pos.TOP_LEFT
             // Add larger padding on bottom to keep FAB from blocking last row cards
             padding = box(10.px, 20.px, 95.px, 20.px)

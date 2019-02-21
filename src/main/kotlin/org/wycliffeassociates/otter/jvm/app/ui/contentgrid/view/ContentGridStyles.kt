@@ -18,17 +18,19 @@ class ContentGridStyles: Stylesheet() {
         contentContainer {
             vgap = 32.px
             hgap = 24.px
-            alignment = Pos.TOP_LEFT
+            alignment = Pos.CENTER
+            horizontalCellSpacing = 24.0.px
+            verticalCellSpacing = 32.0.px
+            maxCellsInRow = 5
             // Add larger padding on bottom to keep FAB from blocking last row cards
-            padding = box(10.px, 20.px, 95.px, 20.px)
         }
 
         contentLoadingProgress {
             progressColor = AppTheme.colors.appRed
         }
         panelStyle {
-            prefWidth = 1200.px
-            prefHeight = 700.px
+            prefWidth = 3600.px
+            prefHeight = 2100.px
         }
     }
 }
