@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view
 
 import javafx.geometry.Pos
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
@@ -16,17 +17,18 @@ class CollectionGridStyles: Stylesheet() {
         collectionsContainer {
             vgap = 32.px
             hgap = 24.px
-            alignment = Pos.TOP_LEFT
-            // Add larger padding on bottom to keep FAB from blocking last row cards
-            padding = box(10.px, 20.px, 95.px, 20.px)
+            horizontalCellSpacing = 24.0.px
+            verticalCellSpacing = 32.0.px
+            alignment = Pos.CENTER
+            maxCellsInRow = 5
         }
 
         contentLoadingProgress {
             progressColor = AppTheme.colors.appRed
         }
         panelStyle {
-            prefWidth = 1200.px
-            prefHeight = 700.px
+            prefWidth = 3600.px
+            prefHeight = 1400.px
         }
     }
 }

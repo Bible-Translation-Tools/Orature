@@ -39,39 +39,34 @@ class ProjectGridView : Fragment() {
         vgrow = Priority.ALWAYS
         addClass(AppStyles.appBackground)
         addClass(ProjectGridStyles.homeAnchorPane)
-        scrollpane {
-            isFitToHeight = true
-            isFitToWidth = true
+
+        datagrid(viewModel.projects) {
             anchorpaneConstraints {
                 topAnchor = 0
+                rightAnchor = 0
                 bottomAnchor = 0
                 leftAnchor = 0
-                rightAnchor = 0
             }
-            content = flowpane {
-                hgrow = Priority.ALWAYS
-                addClass(AppStyles.appBackground)
-                addClass(ProjectGridStyles.projectsFlowPane)
-                bindChildren(viewModel.projects) {
-                    card {
-                        addClass(DefaultStyles.defaultCard)
-                        cardfront {
-                            isActive = true
-                            innercard(AppStyles.projectGraphic()) {
-                                majorLabel = it.titleKey
-                                minorLabel = it.resourceContainer?.language?.name
-                            }
-                            cardbutton {
-                                addClass(DefaultStyles.defaultCardButton)
-                                text = messages["openProject"]
-                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                        .apply { fill = AppTheme.colors.appRed }
-                                action {
-                                    viewModel.selectProject(it)
-                                }
+            addClass(AppStyles.appBackground)
+            addClass(ProjectGridStyles.projectsGrid)
+            cellCache {
+                card {
+                    addClass(DefaultStyles.defaultCard)
+                    cardfront {
+                        isActive = true
+                        innercard(AppStyles.projectGraphic()) {
+                            majorLabel = it.titleKey
+                            minorLabel = it.resourceContainer?.language?.name
+                        }
+                        cardbutton {
+                            addClass(DefaultStyles.defaultCardButton)
+                            text = messages["openProject"]
+                            graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+                                    .apply { fill = AppTheme.colors.appRed }
+                            action {
+                                viewModel.selectProject(it)
                             }
                         }
-
                     }
                 }
             }

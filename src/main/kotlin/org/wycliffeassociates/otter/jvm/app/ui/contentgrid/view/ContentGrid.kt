@@ -13,7 +13,6 @@ import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
-
 class ContentGrid : Fragment() {
     private val viewModel: ContentGridViewModel by inject()
 
@@ -31,38 +30,39 @@ class ContentGrid : Fragment() {
         vgrow = Priority.ALWAYS
         addClass(AppStyles.appBackground)
         addClass(ContentGridStyles.panelStyle)
-
         progressindicator {
             visibleProperty().bind(viewModel.loadingProperty)
             managedProperty().bind(visibleProperty())
             addClass(ContentGridStyles.contentLoadingProgress)
         }
-        scrollpane {
-            isFitToHeight = true
-            isFitToWidth = true
-            flowpane {
-                addClass(AppStyles.appBackground)
-                addClass(ContentGridStyles.contentContainer)
-                bindChildren(viewModel.filteredContent) {
-                    card {
-                        addClass(DefaultStyles.defaultCard)
-                        cardfront {
-                            innercard(AppStyles.chunkGraphic()) {
-                                title = it.first.value.labelKey.toUpperCase()
-                                bodyText = it.first.value.start.toString()
-                            }
-                            cardbutton {
-                                addClass(DefaultStyles.defaultCardButton)
-                                text = messages["openProject"]
-                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                        .apply { fill = AppTheme.colors.appRed }
-                                action {
-                                    viewModel.viewContentTakes(it.first.value)
-                                }
+
+        datagrid(viewModel.filteredContent) {
+            vgrow = Priority.ALWAYS
+            hgrow = Priority.ALWAYS
+            isFillWidth = true
+            addClass(AppStyles.appBackground)
+            addClass(ContentGridStyles.contentContainer)
+            vgrow = Priority.ALWAYS
+            cellCache {
+                card {
+                    addClass(DefaultStyles.defaultCard)
+                    cardfront {
+                        innercard(AppStyles.chunkGraphic()) {
+                            title = it.first.value.labelKey.toUpperCase()
+                            bodyText = it.first.value.start.toString()
+                        }
+                        cardbutton {
+                            addClass(DefaultStyles.defaultCardButton)
+                            text = messages["openProject"]
+                            graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+                                    .apply { fill = AppTheme.colors.appRed }
+                            action {
+                                viewModel.viewContentTakes(it.first.value)
                             }
                         }
                     }
                 }
+
             }
         }
     }
