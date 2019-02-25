@@ -48,7 +48,7 @@ class MainMenuViewModel : ViewModel() {
                         ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
                         ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
                         ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
-                        else -> null
+                        ImportResult.UNMATCHED_HELP -> messages["importErrorUnmatchedHelp"]
                     }
                     showImportDialogProperty.value = false
                     errorMessage?.let {
