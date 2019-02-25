@@ -10,9 +10,6 @@ import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
-import org.wycliffeassociates.otter.common.collections.tree.Tree
-import org.wycliffeassociates.otter.common.collections.tree.TreeNode
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -21,7 +18,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
-import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
@@ -37,13 +33,11 @@ class CollectionRepository(
         private val database: AppDatabase,
         private val directoryProvider: IDirectoryProvider,
         private val collectionMapper: CollectionMapper = CollectionMapper(),
-        private val contentMapper: ContentMapper = ContentMapper(),
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : ICollectionRepository {
 
     private val collectionDao = database.getCollectionDao()
-    private val contentDao = database.getContentDao()
     private val metadataDao = database.getResourceMetadataDao()
     private val languageDao = database.getLanguageDao()
 
@@ -136,8 +130,9 @@ class CollectionRepository(
     override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
         return Maybe
                 .fromCallable {
-                    buildCollection(collectionDao.fetchBySlugAndContainerId(slug, container.id))
+                    collectionDao.fetchBySlugAndContainerId(slug, container.id)
                 }
+                .map(this::buildCollection)
                 .onErrorComplete()
                 .subscribeOn(Schedulers.io())
     }
@@ -444,50 +439,5 @@ class CollectionRepository(
         }
 
         return collectionMapper.mapFromEntity(entity, metadata)
-    }
-  
-    override fun importResourceContainer(rc: ResourceContainer, rcTree: Tree, languageSlug: String): Completable {
-        return Completable.fromAction {
-            database.transaction { dsl ->
-                val language = languageMapper.mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
-                val metadata = rc.manifest.dublinCore.mapToMetadata(rc.dir, language)
-                val metadataId = metadataDao.insert(metadataMapper.mapToEntity(metadata), dsl)
-
-                importCollection(null, metadataId, rcTree, dsl)
-            }
-        }.subscribeOn(Schedulers.io())
-    }
-
-    private fun importNode(parentId: Int, metadataId: Int, node: TreeNode, dsl: DSLContext) {
-        when(node) {
-            is Tree -> {
-                importCollection(parentId, metadataId, node, dsl)
-            }
-            is TreeNode -> {
-                importContent(parentId, node, dsl)
-            }
-        }
-    }
-
-    private fun importCollection(parentId: Int?, metadataId: Int, node: Tree, dsl: DSLContext){
-        val collection = node.value
-        if (collection is Collection) {
-            val entity = collectionMapper.mapToEntity(collection)
-            entity.parentFk = parentId
-            entity.dublinCoreFk = metadataId
-            val id = collectionDao.insert(entity, dsl)
-            for (node in node.children) {
-                importNode(id, metadataId, node, dsl)
-            }
-        }
-    }
-
-    private fun importContent(parentId: Int, node: TreeNode, dsl: DSLContext) {
-        val content = node.value
-        if (content is Content) {
-            val entity = contentMapper.mapToEntity(content)
-            entity.collectionFk = parentId
-            contentDao.insert(entity, dsl)
-        }
     }
 }
