@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioPlayer) : HBox() {
     val progressBar = JFXProgressBar()
 
-    @Volatile  var isPlaying = SimpleBooleanProperty(false)
+    val isPlaying = SimpleBooleanProperty(false)
 
     init {
         style {
@@ -66,7 +66,7 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
     }
 
     fun buttonPressed() {
-        if(!isPlaying.value) player.play() else player.pause()
+        if (!isPlaying.value) player.play() else player.pause()
     }
 
     private fun startProgressUpdate(): Disposable {
