@@ -58,8 +58,9 @@ class ImportResourceContainer(
 
                     return@flatMap resourceContainerRepository
                             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
-                            .toSingle { ImportResult.SUCCESS }
-                            .doOnError { newDirectory.deleteRecursively() }
+                            .doOnEvent { result, err ->
+                                if (result != ImportResult.SUCCESS || err != null) newDirectory.deleteRecursively()
+                            }
                 }
                 .subscribeOn(Schedulers.io())
 

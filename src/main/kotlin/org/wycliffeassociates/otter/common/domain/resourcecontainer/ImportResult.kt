@@ -7,5 +7,6 @@ enum class ImportResult {
     UNSUPPORTED_CONTENT,
     IMPORT_ERROR,
     LOAD_RC_ERROR,
-    ALREADY_EXISTS
+    ALREADY_EXISTS,
+    UNMATCHED_HELP
 }
