@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.contentgrid.view
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.Property
+import javafx.event.EventHandler
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
@@ -44,6 +45,7 @@ class ContentGrid : Fragment() {
             addClass(ContentGridStyles.contentContainer)
             vgrow = Priority.ALWAYS
             cellCache {
+                val item = it
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
@@ -56,8 +58,8 @@ class ContentGrid : Fragment() {
                             text = messages["openProject"]
                             graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
                                     .apply { fill = AppTheme.colors.appRed }
-                            action {
-                                viewModel.viewContentTakes(it.first.value)
+                            onMousePressed = EventHandler {
+                                viewModel.viewContentTakes(item.first.value)
                             }
                         }
                     }

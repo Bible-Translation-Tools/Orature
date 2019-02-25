@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.*
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -50,6 +51,7 @@ class ProjectGridView : Fragment() {
             addClass(AppStyles.appBackground)
             addClass(ProjectGridStyles.projectsGrid)
             cellCache {
+                val item = it
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
@@ -63,8 +65,8 @@ class ProjectGridView : Fragment() {
                             text = messages["openProject"]
                             graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
                                     .apply { fill = AppTheme.colors.appRed }
-                            action {
-                                viewModel.selectProject(it)
+                            onMousePressed = EventHandler {
+                                viewModel.selectProject(item)
                             }
                         }
                     }

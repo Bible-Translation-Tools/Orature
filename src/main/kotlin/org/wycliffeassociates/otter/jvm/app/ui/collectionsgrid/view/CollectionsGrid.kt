@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.Property
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -12,6 +13,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.viewmodel.Collect
 import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
+import java.awt.event.MouseEvent
 
 class CollectionsGrid : Fragment() {
     private val viewModel: CollectionsGridViewModel by inject()
@@ -43,6 +45,7 @@ class CollectionsGrid : Fragment() {
             addClass(CollectionGridStyles.collectionsContainer)
             vgrow = Priority.ALWAYS
             cellCache {
+                var item = it
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
@@ -55,8 +58,9 @@ class CollectionsGrid : Fragment() {
                             text = messages["openProject"]
                             graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
                                     .apply { fill = AppTheme.colors.appRed }
-                            action {
-                                viewModel.selectCollection(it)
+                            isDisableVisualFocus = true
+                            onMousePressed = EventHandler {
+                                viewModel.selectCollection(item)
                             }
                         }
                     }

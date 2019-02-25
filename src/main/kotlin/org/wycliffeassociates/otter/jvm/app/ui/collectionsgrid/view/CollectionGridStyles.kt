@@ -20,7 +20,7 @@ class CollectionGridStyles: Stylesheet() {
             horizontalCellSpacing = 24.0.px
             verticalCellSpacing = 32.0.px
             alignment = Pos.CENTER
-            maxCellsInRow = 5
+
         }
 
         contentLoadingProgress {

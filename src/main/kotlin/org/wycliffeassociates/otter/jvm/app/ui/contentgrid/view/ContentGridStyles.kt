@@ -21,7 +21,6 @@ class ContentGridStyles: Stylesheet() {
             alignment = Pos.CENTER
             horizontalCellSpacing = 24.0.px
             verticalCellSpacing = 32.0.px
-            maxCellsInRow = 5
             // Add larger padding on bottom to keep FAB from blocking last row cards
         }
 
