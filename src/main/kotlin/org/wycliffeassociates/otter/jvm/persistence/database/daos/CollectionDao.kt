@@ -29,12 +29,13 @@ class CollectionDao(
                 }
     }
 
-    fun fetchBySlugAndContainerId(slug: String, containerId: Int, dsl: DSLContext = instanceDsl): CollectionEntity {
+    fun fetchBySlugAndContainerId(slug: String, containerId: Int, dsl: DSLContext = instanceDsl): CollectionEntity? {
         return dsl
                 .select()
                 .from(COLLECTION_ENTITY)
                 .where(COLLECTION_ENTITY.SLUG.eq(slug).and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(containerId)))
-                .fetchOne {
+                .fetchOne()
+                ?.let {
                     RecordMappers.mapToCollectionEntity(it)
                 }
     }

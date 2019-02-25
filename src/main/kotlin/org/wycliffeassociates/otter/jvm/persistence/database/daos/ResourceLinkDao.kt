@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.persistence.database.daos
 
 import jooq.Tables.RESOURCE_LINK
-import org.jooq.DSLContext
+import org.jooq.*
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
@@ -48,6 +48,27 @@ class ResourceLinkDao(
                         entity.collectionFk,
                         entity.dublinCoreFk
                 )
+                .execute()
+
+        // Fetch and return the resulting ID
+        return dsl
+                .select(max(RESOURCE_LINK.ID))
+                .from(RESOURCE_LINK)
+                .fetchOne {
+                    it.getValue(max(RESOURCE_LINK.ID))
+                }
+    }
+
+    @Synchronized
+    fun insertContentResource(select: Select<Record3<Int, Int, Int>>, dsl: DSLContext = instanceDsl): Int {
+        dsl
+                .insertInto(
+                        RESOURCE_LINK,
+                        RESOURCE_LINK.CONTENT_FK,
+                        RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                        RESOURCE_LINK.DUBLIN_CORE_FK
+                )
+                .select(select)
                 .execute()
 
         // Fetch and return the resulting ID

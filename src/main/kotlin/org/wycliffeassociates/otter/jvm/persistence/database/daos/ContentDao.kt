@@ -3,9 +3,14 @@ package org.wycliffeassociates.otter.jvm.persistence.database.daos
 import jooq.Tables.CONTENT_DERIVATIVE
 import jooq.Tables.CONTENT_ENTITY
 import org.jooq.DSLContext
+import org.jooq.Record
+import org.jooq.Select
+import org.jooq.SelectFieldOrAsterisk
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
+
+private const val VERSE_LABEL_VALUE = "verse"
 
 class ContentDao(
         private val instanceDsl: DSLContext
@@ -18,6 +23,33 @@ class ContentDao(
                 .fetch {
                     RecordMappers.mapToContentEntity(it)
                 }
+    }
+
+    fun fetchVerseByCollectionIdAndStart(collectionId: Int, start: Int, dsl: DSLContext = instanceDsl): ContentEntity? {
+        return dsl
+                .select()
+                .from(CONTENT_ENTITY)
+                .where(CONTENT_ENTITY.COLLECTION_FK.eq(collectionId))
+                .and(CONTENT_ENTITY.START.eq(start))
+                .and(CONTENT_ENTITY.LABEL.eq(VERSE_LABEL_VALUE))
+                .fetchOne()
+                ?.let { RecordMappers.mapToContentEntity(it) }
+    }
+
+    fun selectVerseByCollectionIdAndStart(
+            collectionId: Int,
+            start: Int,
+            extraFields: List<SelectFieldOrAsterisk>,
+            dsl: DSLContext = instanceDsl
+    ): Select<Record>
+    {
+        return dsl
+                .select(CONTENT_ENTITY.ID, *extraFields.toTypedArray())
+                .from(CONTENT_ENTITY)
+                .where(CONTENT_ENTITY.COLLECTION_FK.eq(collectionId))
+                .and(CONTENT_ENTITY.START.eq(start))
+                .and(CONTENT_ENTITY.LABEL.eq(VERSE_LABEL_VALUE))
+                .limit(1)
     }
 
     fun fetchSources(entity: ContentEntity, dsl: DSLContext = instanceDsl): List<ContentEntity> {
