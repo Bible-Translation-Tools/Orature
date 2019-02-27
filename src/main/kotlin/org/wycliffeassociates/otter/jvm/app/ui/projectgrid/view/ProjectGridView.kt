@@ -48,37 +48,33 @@ class ProjectGridView : Fragment() {
                 leftAnchor = 0
                 rightAnchor = 0
             }
-            content =
-                    hbox {
-                        addClass(AppStyles.appBackground)
-                        flowpane {
-                            hgrow = Priority.ALWAYS
-                            addClass(AppStyles.appBackground)
-                            addClass(ProjectGridStyles.projectsFlowPane)
-                            bindChildren(viewModel.projects) {
-                                    card {
-                                        addClass(DefaultStyles.defaultCard)
-                                        cardfront {
-                                                isActive = true
-                                            innercard (AppStyles.projectGraphic()){
-                                                majorLabel = it.titleKey
-                                                minorLabel = it.resourceContainer?.language?.name
-                                            }
-                                            cardbutton {
-                                                addClass(DefaultStyles.defaultCardButton)
-                                                text = messages["openProject"]
-                                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                                        .apply { fill = AppTheme.colors.appRed }
-                                                action {
-                                                    viewModel.selectProject(it)
-                                                }
-                                            }
-                                        }
-
-                                    }
+            content = flowpane {
+                hgrow = Priority.ALWAYS
+                addClass(AppStyles.appBackground)
+                addClass(ProjectGridStyles.projectsFlowPane)
+                bindChildren(viewModel.projects) {
+                    card {
+                        addClass(DefaultStyles.defaultCard)
+                        cardfront {
+                            isActive = true
+                            innercard(AppStyles.projectGraphic()) {
+                                majorLabel = it.titleKey
+                                minorLabel = it.resourceContainer?.language?.name
+                            }
+                            cardbutton {
+                                addClass(DefaultStyles.defaultCardButton)
+                                text = messages["openProject"]
+                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+                                        .apply { fill = AppTheme.colors.appRed }
+                                action {
+                                    viewModel.selectProject(it)
+                                }
                             }
                         }
+
                     }
+                }
+            }
         }
 
         vbox {

@@ -70,12 +70,12 @@ class MainScreenView : View() {
                         navigateBack()
                     }
                 }
-
             })
 
             fragmentStage = anchorpane {
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
+
                 add(listmenu {
                     orientation = Orientation.HORIZONTAL
                     item(messages["home"], MaterialIconView(MaterialIcon.HOME, "20px"))
@@ -89,11 +89,12 @@ class MainScreenView : View() {
                 })
                 hbox {
                     anchorpaneConstraints {
-                        topAnchor = 50
+                        topAnchor = 55
                         leftAnchor = 0
                         rightAnchor = 0
                         bottomAnchor = 0
                     }
+
                     activeFragment.dock<ProjectGridView>()
                     ProjectGridView().apply {
                         viewModel.selectedProjectProperty.bindBidirectional(activeProject)

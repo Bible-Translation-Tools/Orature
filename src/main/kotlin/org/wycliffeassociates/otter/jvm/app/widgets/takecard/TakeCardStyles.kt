@@ -27,9 +27,9 @@ class TakeCardStyles : Stylesheet() {
 
     init {
         defaultTakeCard {
-            minWidth = 250.px
+            minWidth = 348.px
             maxWidth = minWidth
-            minHeight = 100.px
+            minHeight = 200.px
             maxHeight = minHeight
             backgroundRadius += box(10.px)
             badge {

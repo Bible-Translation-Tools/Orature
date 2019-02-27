@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -7,10 +8,10 @@ import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view.CollectionsGrid
 import org.wycliffeassociates.otter.jvm.app.ui.contentgrid.view.ContentGrid
-import org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view.ViewTakesView
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementView
 import tornadofx.*
 
-class MainViewViewModel: ViewModel() {
+class MainViewViewModel : ViewModel() {
     val selectedProjectProperty = SimpleObjectProperty<Collection>()
     val selectedProjectName = SimpleStringProperty()
     val selectedProjectLanguage = SimpleStringProperty()
@@ -23,22 +24,27 @@ class MainViewViewModel: ViewModel() {
     val selectedContentTitle = SimpleStringProperty()
     val selectedContentBody = SimpleStringProperty()
 
+    val takesPageDocked = SimpleBooleanProperty(false)
+
     init {
         selectedProjectProperty.onChange {
-            if(it!= null) {
+            if (it != null) {
                 projectSelected(it)
             }
         }
 
         selectedCollectionProperty.onChange {
-            if(it != null) {
+            if (it != null) {
                 collectionSelected(it)
             }
         }
 
         selectedContentProperty.onChange {
-            if(it != null) {
+            if (it != null) {
                 contentSelected(it)
+            }
+            else { // the take manager was undocked
+                takesPageDocked.set(false)
             }
         }
     }
@@ -67,12 +73,16 @@ class MainViewViewModel: ViewModel() {
 
     fun contentSelected(content: Content) {
         setActiveContentText(content)
-        find<MainScreenView>().activeFragment.dock<ViewTakesView>()
-        ViewTakesView().apply {
-            activeProject.bindBidirectional(selectedProjectProperty)
-            activeCollection.bindBidirectional(selectedCollectionProperty)
-            activeContent.bindBidirectional(selectedContentProperty)
+
+        if(takesPageDocked.value == false) {
+            find<MainScreenView>().activeFragment.dock<TakeManagementView>()
+            TakeManagementView().apply {
+                activeProject.bindBidirectional(selectedProjectProperty)
+                activeCollection.bindBidirectional(selectedCollectionProperty)
+                activeContent.bindBidirectional(selectedContentProperty)
+            }
         }
+        takesPageDocked.set(true)
     }
 
     fun setActiveContentText(content: Content) {

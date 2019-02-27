@@ -1,18 +1,12 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIcon
-import de.jensd.fx.glyphs.materialdesignicons.MaterialDesignIconView
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.SimpleAudioPlayer

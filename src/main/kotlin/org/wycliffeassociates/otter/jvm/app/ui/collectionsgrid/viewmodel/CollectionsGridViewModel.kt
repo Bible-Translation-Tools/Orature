@@ -39,7 +39,7 @@ class CollectionsGridViewModel: ViewModel() {
     val filteredContent: ObservableList<Pair<SimpleObjectProperty<Content>, SimpleBooleanProperty>>
             = FXCollections.observableArrayList()
 
-    private var loading: Boolean by property(false)
+    private var loading: Boolean by property(true)
     val loadingProperty = getProperty(CollectionsGridViewModel::loading)
 
     // Create the use cases we need (the model layer)
@@ -61,6 +61,7 @@ class CollectionsGridViewModel: ViewModel() {
                     .observeOnFx()
                     .subscribe { childCollections ->
                         // Now we have the children of the project collection
+                        loading = false
                         children.addAll(childCollections.sortedBy { it.sort })
                     }
         }
