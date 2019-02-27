@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
+import com.jfoenix.controls.JFXButton
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.event.ActionEvent
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -13,55 +15,75 @@ import org.wycliffeassociates.otter.jvm.app.widgets.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.simpleaudioplayer
 import tornadofx.*
 
-class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
+class TakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) : AnchorPane() {
     val playedProperty = SimpleBooleanProperty(take.played)
-    val badge = stackpane {
-        addClass(TakeCardStyles.badge)
-        val icon = TakeCardStyles.badgeIcon()
-        icon.addClass(TakeCardStyles.iconStyle)
-        add(icon)
-        isVisible = !take.played
-    }
 
     var deleteButton: Button by singleAssign()
     var takeNumberLabel: Label by singleAssign()
     var timestampLabel: Label by singleAssign()
+    var playButton: Button by singleAssign()
+    var editButton: Button by singleAssign()
+
+
     var simpleAudioPlayer: SimpleAudioPlayer by singleAssign()
+    private val isAudioPlaying: SimpleBooleanProperty = SimpleBooleanProperty()
 
     init {
         importStylesheet<TakeCardStyles>()
-        setRightAnchor(badge, 0.0)
-        setTopAnchor(badge, 0.0)
         addClass(TakeCardStyles.defaultTakeCard)
         vbox {
             addClass(TakeCardStyles.content)
+            //the top bar of the take card
             hbox(10) {
-                vgrow = Priority.ALWAYS
-                alignment = Pos.CENTER_LEFT
-                takeNumberLabel = label("%02d".format(take.number))
-                takeNumberLabel.addClass(TakeCardStyles.takeNumberLabel)
-                timestampLabel = label(take.timestamp.toString())
-                timestampLabel.addClass(TakeCardStyles.timestampLabel)
-            }
-            hbox {
-                alignment = Pos.CENTER
-                simpleAudioPlayer = simpleaudioplayer(take.path, player) {
-                    vgrow = Priority.ALWAYS
+                style {
+                    maxHeight = 75.0.px
+                }
+                hbox(10.0) {
+                    hgrow = Priority.ALWAYS
                     alignment = Pos.CENTER_LEFT
-                    playGraphic = TakeCardStyles.playIcon()
-                    pauseGraphic = TakeCardStyles.pauseIcon()
-                    with(playPauseButton) {
-                        addEventHandler(ActionEvent.ACTION) {
-                            if (!take.played) {
-                                take.played = true
-                                badge.isVisible = false
-                            }
-                            playedProperty.value = take.played
-                        }
+                    takeNumberLabel = label("$takePrefix %02d".format(take.number), TakeCardStyles.draggingIcon())
+                    takeNumberLabel.addClass(TakeCardStyles.takeNumberLabel)
+                    timestampLabel = label(take.timestamp.toString())
+                    timestampLabel.addClass(TakeCardStyles.timestampLabel)
+                }
+                hbox {
+                    alignment = Pos.TOP_RIGHT
+                    hgrow = Priority.SOMETIMES
+                    deleteButton = button("Delete", MaterialIconView(MaterialIcon.DELETE, "15px"))
+                }
+            }
+            // waveform and audio control buttons
+            vbox(15.0) {
+                vgrow = Priority.ALWAYS
+                alignment = Pos.CENTER
+                hbox {
+                    alignment = Pos.CENTER
+                    simpleAudioPlayer = simpleaudioplayer(take.path, player) {
+                        vgrow = Priority.ALWAYS
+                        addClass(TakeCardStyles.takeprogressBar)
+                        isAudioPlaying.bind(isPlaying)
                     }
                 }
-                add(simpleAudioPlayer)
-                deleteButton = button(graphic = TakeCardStyles.deleteIcon())
+                hbox(15.0) {
+                    playButton = JFXButton("PLAY", TakeCardStyles.playIcon())
+                            .addClass(TakeCardStyles.defaultButton)
+                            .apply {
+                                isDisableVisualFocus = true
+                                action {
+                                    simpleAudioPlayer.buttonPressed()
+                                }
+                            }
+                    editButton = JFXButton("EDIT", TakeCardStyles.editIcon())
+                            .addClass(TakeCardStyles.defaultButton)
+                            .apply {
+                                textFill = TakeCardStyles.defaultGreen
+                                isDisableVisualFocus = true
+                            }
+
+                    add(playButton)
+                    add(editButton)
+                }
+ 
             }
             anchorpaneConstraints {
                 topAnchor = 0.0
@@ -71,13 +93,27 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
             }
         }
 
-        // Make sure badge appears on top
-        badge.toFront()
+        isAudioPlaying.onChange {
+            when (isAudioPlaying.value) {
+                true -> {
+                    playButton.apply {
+                        graphic = TakeCardStyles.pauseIcon()
+                        text = "PAUSE"
+                    }
+                }
+                false -> {
+                    playButton.apply {
+                        graphic = TakeCardStyles.playIcon()
+                        text = "PLAY"
+                    }
+                }
+            }
+        }
     }
 }
 
-fun takecard(take: Take, player: IAudioPlayer, init: TakeCard.() -> Unit = {}): TakeCard {
-    val takeCard = TakeCard(take, player)
+fun takecard(take: Take, player: IAudioPlayer, takePrefix: String, init: TakeCard.() -> Unit = {}): TakeCard {
+    val takeCard = TakeCard(take, player, takePrefix)
     takeCard.init()
     return takeCard
 }

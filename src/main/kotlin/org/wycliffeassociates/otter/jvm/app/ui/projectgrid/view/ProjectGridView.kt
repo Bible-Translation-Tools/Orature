@@ -69,6 +69,7 @@ class ProjectGridView : Fragment() {
                                 viewModel.selectProject(item)
                             }
                         }
+
                     }
                 }
             }

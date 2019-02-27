@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view
 
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 

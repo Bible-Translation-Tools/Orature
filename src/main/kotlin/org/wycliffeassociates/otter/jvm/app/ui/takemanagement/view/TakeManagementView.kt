@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.takecard
 import tornadofx.*
 
 class TakeManagementView : Fragment() {
@@ -262,17 +263,14 @@ class TakeManagementView : Fragment() {
     private fun sortTakesFlowPane(flowPane: FlowPane) {
         flowPane.children.setAll(flowPane.children.sortedBy {
             (it as TakeCard).take.number
-        }
-        )
+        })
         //add the newTakeCard here after we have sorted all other takes by take number
         flowPane.children.add(0, createRecordCard())
     }
 
     private fun createTakeCard(take: Take): TakeCard {
-        return TakeCard(take, viewModel.audioPlayer()).apply {
+        return takecard(take, viewModel.audioPlayer(), messages["take"]) {
             addClass(TakeManagementStyles.takeCard)
-            badge.addClass(TakeManagementStyles.badge)
-            simpleAudioPlayer.playPauseButton.addClass(TakeManagementStyles.playPauseButton)
             playedProperty.onChange {
                 if (it) viewModel.setTakePlayed(take)
             }
