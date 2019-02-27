@@ -1,16 +1,15 @@
-package org.wycliffeassociates.otter.jvm.app.ui.viewtakes.view
+package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
+import javafx.scene.text.FontWeight
+import org.wycliffeassociates.otter.jvm.app.theme.AppColors
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import tornadofx.Stylesheet
-import tornadofx.box
-import tornadofx.cssclass
-import tornadofx.px
+import tornadofx.*
 
-class ViewTakesStyles : Stylesheet() {
+class TakeManagementStyles : Stylesheet() {
     companion object {
         val viewTakesTitle by cssclass()
         val deleteButton by cssclass()
@@ -20,11 +19,15 @@ class ViewTakesStyles : Stylesheet() {
         val placeholder by cssclass()
         val headerContainer by cssclass()
         val selectedTakeContainer by cssclass()
-        val takeFlowPane by cssclass()
+        val takeGrid by cssclass()
         val glow by cssclass()
         val recordTakeButton by cssclass()
-        val editTakesButton by cssclass()
         val playPauseButton by cssclass()
+        val navigationButton by cssclass()
+        val newTakeCard by cssclass()
+        val scrollpane by cssclass()
+        val pageTop by cssclass()
+        val tpanelStyle by cssclass()
     }
 
     init {
@@ -35,14 +38,25 @@ class ViewTakesStyles : Stylesheet() {
                 fill = AppTheme.colors.defaultText
             }
         }
-        takeFlowPane {
+        takeGrid {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
-            backgroundColor += Color.TRANSPARENT
+            backgroundColor += AppTheme.colors.white
             spacing = 10.px
-            padding = box(20.px)
+            alignment = Pos.CENTER_LEFT
             vgap = 16.px
             hgap = 16.px
+            padding = box(5.0.px)
+            prefHeight = 300.px
+        }
+
+        pageTop {
+                minHeight = 400.px
+                maxHeight = minHeight
+        }
+
+        scrollpane {
+            backgroundColor += Color.TRANSPARENT
         }
 
         glow {
@@ -53,8 +67,10 @@ class ViewTakesStyles : Stylesheet() {
             backgroundColor += AppTheme.colors.cardBackground.deriveColor(0.0, 1.0, 1.0, 0.8)
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
-            maxHeight = 100.px
-            maxWidth = 250.px
+            minHeight = 200.px
+            minWidth = 348.px
+            maxHeight = minHeight
+            maxWidth = minWidth
             label {
                 fontSize = 16.px
             }
@@ -88,12 +104,40 @@ class ViewTakesStyles : Stylesheet() {
             }
         }
 
+        newTakeCard {
+            minHeight = 200.px
+            minWidth = 348.px
+            borderRadius += box(5.0.px)
+            borderColor += box(AppTheme.colors.defaultBackground)
+            borderWidth += box(1.px)
+            backgroundRadius += box(5.0.px)
+            effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
+            backgroundColor += AppTheme.colors.white
+            button {
+                minHeight = 40.px
+                minWidth = 158.px
+                backgroundColor += AppTheme.colors.appRed
+                fontSize = 16.px
+                //overwrite dropshadow on newtakecard
+                effect = DropShadow(0.0,0.0,0.0,AppTheme.colors.dropShadow)
+                child("*") {
+                    fill = AppTheme.colors.white
+                }
+            }
+
+            label {
+                fontSize = 25.px
+                fontWeight = FontWeight.BOLD
+                effect = DropShadow(0.0,0.0,0.0,AppTheme.colors.dropShadow)
+            }
+        }
+
         placeholder {
             backgroundColor += AppTheme.colors.imagePlaceholder
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
-            minHeight = 100.px
-            minWidth = 250.px
+            minHeight = 200.px
+            minWidth = 348.px
         }
 
         headerContainer {
@@ -103,7 +147,7 @@ class ViewTakesStyles : Stylesheet() {
         }
 
         selectedTakeContainer {
-            backgroundColor += AppTheme.colors.defaultBackground
+            backgroundColor += AppTheme.colors.white
             padding = box(20.px)
             alignment = Pos.CENTER_LEFT
             label {
@@ -125,20 +169,25 @@ class ViewTakesStyles : Stylesheet() {
                 fill = AppTheme.colors.appRed
             }
         }
-
-        editTakesButton {
-            unsafe("-jfx-button-type", raw("RAISED"))
-            backgroundRadius += box(25.px)
-            borderRadius += box(25.px)
-            backgroundColor += AppTheme.colors.appGreen
-            minHeight = 50.px
-            minWidth = 50.px
-            maxHeight = 50.px
-            maxWidth = 50.px
-            cursor = Cursor.HAND
+        navigationButton {
+            minHeight = 40.px
+            minWidth = 187.0.px
+            backgroundColor += AppTheme.colors.white
+            borderColor += box(AppTheme.colors.appRed)
+            borderWidth += box(0.5.px)
+            borderRadius += box(5.0.px)
+            backgroundRadius += box(5.0.px)
             child("*") {
-                fill = AppTheme.colors.white
+                fill = AppTheme.colors.appRed
             }
+            fontSize = 14.px
+
+        }
+
+        tpanelStyle {
+            prefWidth = 1300.px
+            prefHeight = 1000.px
+            backgroundColor += AppTheme.colors.white
         }
     }
 }
