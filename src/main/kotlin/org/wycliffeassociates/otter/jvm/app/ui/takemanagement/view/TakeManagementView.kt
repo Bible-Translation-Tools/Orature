@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.takecard
 import tornadofx.*
 
 class TakeManagementView : Fragment() {
@@ -268,10 +269,8 @@ class TakeManagementView : Fragment() {
     }
 
     private fun createTakeCard(take: Take): TakeCard {
-        return TakeCard(take, viewModel.audioPlayer()).apply {
+        return takecard(take, viewModel.audioPlayer(), messages["take"]) {
             addClass(TakeManagementStyles.takeCard)
-            badge.addClass(TakeManagementStyles.badge)
-            simpleAudioPlayer.playPauseButton.addClass(TakeManagementStyles.playPauseButton)
             playedProperty.onChange {
                 if (it) viewModel.setTakePlayed(take)
             }

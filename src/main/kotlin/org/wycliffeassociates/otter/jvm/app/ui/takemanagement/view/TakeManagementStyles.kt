@@ -80,7 +80,7 @@ class TakeManagementStyles : Stylesheet() {
         }
 
         takeCard {
-            borderRadius += box(10.px)
+            borderRadius += box(5.px)
             borderColor += box(AppTheme.colors.imagePlaceholder)
             borderWidth += box(1.px)
             backgroundColor += AppTheme.colors.cardBackground
