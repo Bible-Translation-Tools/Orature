@@ -8,7 +8,6 @@ import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -16,7 +15,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.simpleaudioplayer
 import tornadofx.*
 
-class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
+class TakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) : AnchorPane() {
     val playedProperty = SimpleBooleanProperty(take.played)
 
     var deleteButton: Button by singleAssign()
@@ -42,7 +41,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                 hbox(10.0) {
                     hgrow = Priority.ALWAYS
                     alignment = Pos.CENTER_LEFT
-                    takeNumberLabel = label("Take " + "%02d".format(take.number), TakeCardStyles.draggingIcon())
+                    takeNumberLabel = label("$takePrefix %02d".format(take.number), TakeCardStyles.draggingIcon())
                     takeNumberLabel.addClass(TakeCardStyles.takeNumberLabel)
                     timestampLabel = label(take.timestamp.toString())
                     timestampLabel.addClass(TakeCardStyles.timestampLabel)
@@ -61,7 +60,7 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
                     alignment = Pos.CENTER
                     simpleAudioPlayer = simpleaudioplayer(take.path, player) {
                         vgrow = Priority.ALWAYS
-                        addClass(TakeCardStyles.progressBar)
+                        addClass(TakeCardStyles.takeprogressBar)
                         isAudioPlaying.bind(isPlaying)
                     }
                 }
@@ -113,8 +112,8 @@ class TakeCard(val take: Take, player: IAudioPlayer) : AnchorPane() {
     }
 }
 
-fun takecard(take: Take, player: IAudioPlayer, init: TakeCard.() -> Unit = {}): TakeCard {
-    val takeCard = TakeCard(take, player)
+fun takecard(take: Take, player: IAudioPlayer, takePrefix: String, init: TakeCard.() -> Unit = {}): TakeCard {
+    val takeCard = TakeCard(take, player, takePrefix)
     takeCard.init()
     return takeCard
 }

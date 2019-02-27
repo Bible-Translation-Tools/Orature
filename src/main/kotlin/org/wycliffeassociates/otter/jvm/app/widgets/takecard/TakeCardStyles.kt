@@ -20,7 +20,7 @@ class TakeCardStyles : Stylesheet() {
         val takeNumberLabel by cssclass()
         val timestampLabel by cssclass()
         val defaultButton by cssclass()
-        val progressBar by cssclass()
+        val takeprogressBar by cssclass()
         val defaultGreen : Color = c("#58BD2F")
 
         fun pauseIcon() = MaterialIconView(MaterialIcon.PAUSE, "30px")
@@ -79,7 +79,7 @@ class TakeCardStyles : Stylesheet() {
             }
         }
 
-        progressBar {
+        takeprogressBar {
             track {
                 backgroundColor += Color.LIGHTGRAY
                 minHeight = 40.px
