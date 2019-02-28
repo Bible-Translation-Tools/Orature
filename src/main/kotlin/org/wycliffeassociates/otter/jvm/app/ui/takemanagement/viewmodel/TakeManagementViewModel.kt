@@ -253,19 +253,8 @@ class TakeManagementViewModel : ViewModel() {
     private fun enableButtons() {
         if(contentList.size != 0) {
             if (activeContent != null) {
-                when(activeContent.start) {
-                    in (contentList.first().start+1)..(contentList.last().start-1) -> {
-                        hasNext.set(true)
-                        hasPrevious.set(true)
-                    }
-                    contentList.first().start -> {
-                        hasPrevious.set(false)
-                    }
-                    contentList.last().start -> {
-                        hasNext.set(false)
-                    }
-
-                }
+                hasNext.set(activeContent.start < contentList.last().start)
+                hasPrevious.set(activeContent.start> contentList.first().start)
             }
         }
     }

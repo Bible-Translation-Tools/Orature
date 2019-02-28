@@ -43,14 +43,13 @@ class CollectionsGrid : Fragment() {
             addClass(AppStyles.appBackground)
             addClass(CollectionGridStyles.collectionsContainer)
             vgrow = Priority.ALWAYS
-            cellCache {
-                var item = it
+            cellCache { item ->
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
                         innercard(AppStyles.chapterGraphic()) {
-                            title = it.labelKey.toUpperCase()
-                            bodyText = it.titleKey
+                            title = item.labelKey.toUpperCase()
+                            bodyText = item.titleKey
                         }
                         cardbutton {
                             addClass(DefaultStyles.defaultCardButton)

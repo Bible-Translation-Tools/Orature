@@ -49,15 +49,14 @@ class ProjectGridView : Fragment() {
             }
             addClass(AppStyles.appBackground)
             addClass(ProjectGridStyles.projectsGrid)
-            cellCache {
-                val item = it
+            cellCache { item ->
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
                         isActive = true
                         innercard(AppStyles.projectGraphic()) {
-                            majorLabel = it.titleKey
-                            minorLabel = it.resourceContainer?.language?.name
+                            majorLabel = item.titleKey
+                            minorLabel = item.resourceContainer?.language?.name
                         }
                         cardbutton {
                             addClass(DefaultStyles.defaultCardButton)

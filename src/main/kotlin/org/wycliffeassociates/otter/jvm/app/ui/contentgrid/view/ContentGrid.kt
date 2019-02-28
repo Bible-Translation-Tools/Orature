@@ -43,14 +43,13 @@ class ContentGrid : Fragment() {
             addClass(AppStyles.appBackground)
             addClass(ContentGridStyles.contentContainer)
             vgrow = Priority.ALWAYS
-            cellCache {
-                val item = it
+            cellCache { item ->
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
                         innercard(AppStyles.chunkGraphic()) {
-                            title = it.first.value.labelKey.toUpperCase()
-                            bodyText = it.first.value.start.toString()
+                            title = item.first.value.labelKey.toUpperCase()
+                            bodyText = item.first.value.start.toString()
                         }
                         cardbutton {
                             addClass(DefaultStyles.defaultCardButton)
