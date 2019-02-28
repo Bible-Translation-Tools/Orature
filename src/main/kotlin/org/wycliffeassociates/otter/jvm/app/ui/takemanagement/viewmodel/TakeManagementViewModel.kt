@@ -98,10 +98,10 @@ class TakeManagementViewModel : ViewModel() {
         }
 
         activeContentProperty.onChange {
-            if(contentList.size != 0) {
+            if (contentList.size != 0) {
                 if (it != null) {
-                    when(it.start) {
-                        in (contentList.first().start+1)..(contentList.last().start-1) -> {
+                    when (it.start) {
+                        in (contentList.first().start + 1)..(contentList.last().start - 1) -> {
                             hasNext.set(true)
                             hasPrevious.set(true)
                         }
@@ -201,22 +201,19 @@ class TakeManagementViewModel : ViewModel() {
         }
     }
 
-    fun editContent() {
+    fun editContent(take: Take) {
         contextProperty.set(TakeContext.EDIT_TAKES)
-        selectedTakeProperty.value?.let { take ->
-            showPluginActive = true
-            editTake
-                    .edit(take)
-                    .observeOnFx()
-                    .subscribe { result ->
-                        showPluginActive = false
-                        when (result) {
-                            EditTake.Result.SUCCESS -> {
-                            }
-                            EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+        showPluginActive = true
+        editTake.edit(take)
+                .observeOnFx()
+                .subscribe { result ->
+                    showPluginActive = false
+                    when (result) {
+                        EditTake.Result.SUCCESS -> {
                         }
+                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     }
-        }
+                }
     }
 
     fun nextVerse() {

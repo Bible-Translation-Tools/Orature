@@ -288,6 +288,9 @@ class TakeManagementView : Fragment() {
                     }
                 }
             }
+            editButton.action {
+                viewModel.editContent(take)
+            }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }
     }
