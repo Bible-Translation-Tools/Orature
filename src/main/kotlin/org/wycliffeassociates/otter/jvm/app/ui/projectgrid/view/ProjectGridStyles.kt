@@ -18,7 +18,6 @@ class ProjectGridStyles : Stylesheet() {
 
     init {
 
-
         projectsGrid {
             vgap = 32.px
             hgap = 24.px

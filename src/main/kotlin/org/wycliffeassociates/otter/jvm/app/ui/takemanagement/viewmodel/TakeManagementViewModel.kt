@@ -42,7 +42,7 @@ class TakeManagementViewModel : ViewModel() {
     val activeContentProperty = getProperty(TakeManagementViewModel::activeContent)
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
-    private var isSelectedTake = SimpleBooleanProperty(false)
+    private val isSelectedTake = SimpleBooleanProperty(false)
 
     private var context: TakeContext by property(TakeContext.RECORD)
     val contextProperty = getProperty(TakeManagementViewModel::context)
@@ -254,7 +254,7 @@ class TakeManagementViewModel : ViewModel() {
         if(contentList.size != 0) {
             if (activeContent != null) {
                 hasNext.set(activeContent.start < contentList.last().start)
-                hasPrevious.set(activeContent.start> contentList.first().start)
+                hasPrevious.set(activeContent.start > contentList.first().start)
             }
         }
     }
