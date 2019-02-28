@@ -39,7 +39,6 @@ class ProjectGridView : Fragment() {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
         addClass(AppStyles.appBackground)
-        addClass(ProjectGridStyles.homeAnchorPane)
 
         datagrid(viewModel.projects) {
             anchorpaneConstraints {

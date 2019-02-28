@@ -87,7 +87,7 @@ class MainScreenView : View() {
                         rightAnchor = 0
                     }
                 })
-                hbox {
+                borderpane {
                     anchorpaneConstraints {
                         topAnchor = 55
                         leftAnchor = 0
@@ -95,11 +95,13 @@ class MainScreenView : View() {
                         bottomAnchor = 0
                     }
 
-                    activeFragment.dock<ProjectGridView>()
-                    ProjectGridView().apply {
-                        viewModel.selectedProjectProperty.bindBidirectional(activeProject)
+                    center {
+                        activeFragment.dock<ProjectGridView>()
+                        ProjectGridView().apply {
+                            viewModel.selectedProjectProperty.bindBidirectional(activeProject)
+                        }
+                        add(activeFragment)
                     }
-                    add(activeFragment)
                 }
             }
         }

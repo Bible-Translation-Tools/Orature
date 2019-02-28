@@ -9,7 +9,6 @@ class CollectionGridStyles: Stylesheet() {
     companion object {
         val collectionsContainer by cssclass()
         val contentLoadingProgress by cssclass()
-        val panelStyle by cssclass()
     }
 
     init {
@@ -24,10 +23,6 @@ class CollectionGridStyles: Stylesheet() {
 
         contentLoadingProgress {
             progressColor = AppTheme.colors.appRed
-        }
-        panelStyle {
-            prefWidth = 3600.px
-            prefHeight = 1400.px
         }
     }
 }

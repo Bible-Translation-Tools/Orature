@@ -28,7 +28,6 @@ class CollectionsGrid : Fragment() {
 
     override val root = vbox {
         addClass(AppStyles.appBackground)
-        addClass(CollectionGridStyles.panelStyle)
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
         progressindicator {

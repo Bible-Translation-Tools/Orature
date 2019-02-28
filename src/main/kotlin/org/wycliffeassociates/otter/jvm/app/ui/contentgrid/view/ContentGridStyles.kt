@@ -11,7 +11,6 @@ class ContentGridStyles: Stylesheet() {
     companion object {
         val contentContainer by cssclass()
         val contentLoadingProgress by cssclass()
-        val panelStyle by cssclass()
     }
 
     init {
@@ -26,10 +25,6 @@ class ContentGridStyles: Stylesheet() {
 
         contentLoadingProgress {
             progressColor = AppTheme.colors.appRed
-        }
-        panelStyle {
-            prefWidth = 3600.px
-            prefHeight = 2100.px
         }
     }
 }

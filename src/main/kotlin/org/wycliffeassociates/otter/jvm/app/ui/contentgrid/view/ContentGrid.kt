@@ -30,7 +30,6 @@ class ContentGrid : Fragment() {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
         addClass(AppStyles.appBackground)
-        addClass(ContentGridStyles.panelStyle)
         progressindicator {
             visibleProperty().bind(viewModel.loadingProperty)
             managedProperty().bind(visibleProperty())
@@ -64,7 +63,6 @@ class ContentGrid : Fragment() {
                         }
                     }
                 }
-
             }
         }
     }
