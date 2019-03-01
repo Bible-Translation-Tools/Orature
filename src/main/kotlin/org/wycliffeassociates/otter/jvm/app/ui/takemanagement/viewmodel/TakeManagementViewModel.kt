@@ -182,22 +182,19 @@ class TakeManagementViewModel : ViewModel() {
         }
     }
 
-    fun editContent() {
+    fun editContent(take: Take) {
         contextProperty.set(TakeContext.EDIT_TAKES)
-        selectedTakeProperty.value?.let { take ->
-            showPluginActive = true
-            editTake
-                    .edit(take)
-                    .observeOnFx()
-                    .subscribe { result ->
-                        showPluginActive = false
-                        when (result) {
-                            EditTake.Result.SUCCESS -> {
-                            }
-                            EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+        showPluginActive = true
+        editTake.edit(take)
+                .observeOnFx()
+                .subscribe { result ->
+                    showPluginActive = false
+                    when (result) {
+                        EditTake.Result.SUCCESS -> {
                         }
+                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     }
-        }
+                }
     }
 
     fun nextVerse() {
