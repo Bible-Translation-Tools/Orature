@@ -42,7 +42,7 @@ class TakeManagementViewModel : ViewModel() {
     val activeContentProperty = getProperty(TakeManagementViewModel::activeContent)
 
     val selectedTakeProperty = SimpleObjectProperty<Take>()
-    var isSelectedTake = SimpleBooleanProperty(false)
+    private val isSelectedTake = SimpleBooleanProperty(false)
 
     private var context: TakeContext by property(TakeContext.RECORD)
     val contextProperty = getProperty(TakeManagementViewModel::context)
@@ -58,7 +58,7 @@ class TakeManagementViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    val contentList: ObservableList<Content> = observableList()
+    private val contentList: ObservableList<Content> = observableList()
     val hasNext = SimpleBooleanProperty(false)
     val hasPrevious = SimpleBooleanProperty(false)
 
@@ -96,26 +96,6 @@ class TakeManagementViewModel : ViewModel() {
                 isSelectedTake.set(true)
             }
         }
-
-        activeContentProperty.onChange {
-            if (contentList.size != 0) {
-                if (it != null) {
-                    when (it.start) {
-                        in (contentList.first().start + 1)..(contentList.last().start - 1) -> {
-                            hasNext.set(true)
-                            hasPrevious.set(true)
-                        }
-                        contentList.first().start -> {
-                            hasPrevious.set(false)
-                        }
-                        contentList.last().start -> {
-                            hasNext.set(false)
-                        }
-
-                    }
-                }
-            }
-        }
     }
 
     private fun getContentList(collection: Collection) {
@@ -123,6 +103,7 @@ class TakeManagementViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe { verses ->
                     contentList.setAll(verses.sortedBy { verse -> verse.start })
+                    enableButtons()
                 }
     }
 
@@ -263,6 +244,15 @@ class TakeManagementViewModel : ViewModel() {
         } else {
             "${FX.messages[activeContentProperty.value?.labelKey ?: "verse"]} ${activeContentProperty.value?.start
                     ?: ""}"
+        }
+    }
+
+    private fun enableButtons() {
+        if(contentList.size != 0) {
+            if (activeContent != null) {
+                hasNext.set(activeContent.start < contentList.last().start)
+                hasPrevious.set(activeContent.start > contentList.first().start)
+            }
         }
     }
 }

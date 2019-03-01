@@ -63,6 +63,7 @@ class TakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) : A
                         addClass(TakeCardStyles.takeprogressBar)
                         isAudioPlaying.bind(isPlaying)
                     }
+                    add(simpleAudioPlayer)
                 }
                 hbox(15.0) {
                     playButton = JFXButton("PLAY", TakeCardStyles.playIcon())

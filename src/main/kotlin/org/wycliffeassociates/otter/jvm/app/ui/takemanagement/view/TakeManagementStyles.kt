@@ -185,8 +185,6 @@ class TakeManagementStyles : Stylesheet() {
         }
 
         tpanelStyle {
-            prefWidth = 1300.px
-            prefHeight = 1000.px
             backgroundColor += AppTheme.colors.white
         }
     }

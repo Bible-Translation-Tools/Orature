@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.*
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -38,37 +39,32 @@ class ProjectGridView : Fragment() {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
         addClass(AppStyles.appBackground)
-        addClass(ProjectGridStyles.homeAnchorPane)
-        scrollpane {
-            isFitToHeight = true
-            isFitToWidth = true
+
+        datagrid(viewModel.projects) {
             anchorpaneConstraints {
                 topAnchor = 0
+                rightAnchor = 0
                 bottomAnchor = 0
                 leftAnchor = 0
-                rightAnchor = 0
             }
-            content = flowpane {
-                hgrow = Priority.ALWAYS
-                addClass(AppStyles.appBackground)
-                addClass(ProjectGridStyles.projectsFlowPane)
-                bindChildren(viewModel.projects) {
-                    card {
-                        addClass(DefaultStyles.defaultCard)
-                        cardfront {
-                            isActive = true
-                            innercard(AppStyles.projectGraphic()) {
-                                majorLabel = it.titleKey
-                                minorLabel = it.resourceContainer?.language?.name
-                            }
-                            cardbutton {
-                                addClass(DefaultStyles.defaultCardButton)
-                                text = messages["openProject"]
-                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                        .apply { fill = AppTheme.colors.appRed }
-                                action {
-                                    viewModel.selectProject(it)
-                                }
+            addClass(AppStyles.appBackground)
+            addClass(ProjectGridStyles.projectsGrid)
+            cellCache { item ->
+                card {
+                    addClass(DefaultStyles.defaultCard)
+                    cardfront {
+                        isActive = true
+                        innercard(AppStyles.projectGraphic()) {
+                            majorLabel = item.titleKey
+                            minorLabel = item.resourceContainer?.language?.name
+                        }
+                        cardbutton {
+                            addClass(DefaultStyles.defaultCardButton)
+                            text = messages["openProject"]
+                            graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
+                                    .apply { fill = AppTheme.colors.appRed }
+                            onMousePressed = EventHandler {
+                                viewModel.selectProject(item)
                             }
                         }
 
