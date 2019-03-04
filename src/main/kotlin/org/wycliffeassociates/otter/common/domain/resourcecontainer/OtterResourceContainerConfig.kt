@@ -6,39 +6,33 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.wycliffeassociates.resourcecontainer.Config
-import java.io.File
-import java.io.IOException
+import java.io.Reader
+import java.io.Writer
 
 class OtterResourceContainerConfig : Config {
-
     var config: OtterConfig? = null
     var extendedDublinCore: ExtendedDublinCore? = null
 
-    override fun read(configFile: File): Config {
-        if (configFile.exists()) {
-            val mapper = ObjectMapper(YAMLFactory())
-            mapper.registerModule(KotlinModule())
-            config = configFile.bufferedReader().use {
-                mapper.readValue(it, OtterConfig::class.java)
-            }
-            config?.let {
-                extendedDublinCore = it.extendedDublinCore
-            }
-            return this
-        } else {
-            throw IOException("Missing config.yaml")
+    override fun read(reader: Reader): Config {
+        val mapper = ObjectMapper(YAMLFactory())
+        mapper.registerModule(KotlinModule())
+        config = reader.use {
+            mapper.readValue(it, OtterConfig::class.java)
         }
+        config?.let {
+            extendedDublinCore = it.extendedDublinCore
+        }
+        return this
     }
 
-    override fun write(configFile: File) {
+    override fun write(writer: Writer) {
         val mapper = ObjectMapper(YAMLFactory())
         mapper.registerModule(KotlinModule())
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        configFile.bufferedWriter().use {
+        writer.use {
             mapper.writeValue(it, config)
         }
     }
-
 }
 
 class OtterConfig (

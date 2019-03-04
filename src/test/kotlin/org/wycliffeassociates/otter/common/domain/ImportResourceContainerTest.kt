@@ -3,12 +3,10 @@ package org.wycliffeassociates.otter.common.domain
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
-import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
@@ -18,8 +16,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepo
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import java.io.File
 
 class ImportResourceContainerTest {
 

@@ -8,42 +8,75 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile.Companion.otterFileF
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.BufferedReader
+import java.io.Closeable
 import java.io.File
 import java.util.*
+import java.util.zip.ZipFile
 
 private const val FORMAT = "text/markdown"
 private val extensions = Regex(".+\\.(md|mkdn?|mdown|markdown)$", RegexOption.IGNORE_CASE)
 
 class MarkdownProjectReader() : IProjectReader {
-    override fun constructProjectTree(container: ResourceContainer, project: Project)
-            : Pair<ImportResult, Tree> {
-        val projectRoot = container.dir.resolve(project.path)
-        val collectionKey = container.manifest.dublinCore.identifier
-        return projectRoot
-                .buildFileTree()
-                .filterMarkdownFiles()
-                ?.map<Any> { f -> contentList(f) ?: collection(collectionKey, f, projectRoot) }
-                ?.flattenContent()
-                ?.let { Pair(ImportResult.SUCCESS, it) }
-                ?: Pair(ImportResult.LOAD_RC_ERROR, Tree(Unit))
+    override fun constructProjectTree(
+            container: ResourceContainer,
+            project: Project,
+            zipEntryTreeBuilder: IZipEntryTreeBuilder
+    ): Pair<ImportResult, Tree> {
+        val toClose = mutableListOf<Closeable>()
+        try {
+            val projectRoot: OtterFile
+            val projectTreeRoot: OtterTree<OtterFile>
+
+            when (container.file.extension) {
+                "zip" -> {
+                    projectRoot = otterFileF(container.file.toPath().resolve(project.path).toFile())
+                    val zip = ZipFile(container.file)
+                    // The ZipEntry tree needs the ZipFile to stay open until later, so remember to close it.
+                    toClose.add(zip)
+                    projectTreeRoot = zipEntryTreeBuilder.buildOtterFileTree(zip, project.path)
+                }
+                else -> {
+                    projectRoot = otterFileF(container.file.resolve(project.path))
+                    projectTreeRoot = container.file.resolve(project.path).buildFileTree()
+                }
+            }
+
+            val collectionKey = container.manifest.dublinCore.identifier
+
+            return projectTreeRoot
+                    .filterMarkdownFiles()
+                    ?.map<Any> { f -> contentList(f) ?: collection(collectionKey, f, projectRoot) }
+                    ?.flattenContent()
+                    ?.let { Pair(ImportResult.SUCCESS, it) }
+                    ?: Pair(ImportResult.LOAD_RC_ERROR, Tree(Unit))
+        } finally {
+            toClose.forEach { it.close() }
+        }
     }
 
-    private fun fileToId(f: File): Int =
-        f.nameWithoutExtension.toIntOrNull() ?: 0
+    private fun fileToId(f: OtterFile): Int =
+            f.nameWithoutExtension.toIntOrNull() ?: 0
 
-    private fun fileToSlug(f: File, root: File): String =
-        f.toRelativeString(root.parentFile)
-                .split('/', '\\')
-                .map { it.toIntOrNull()?.toString() ?: it }
-                .joinToString("_")
+    private fun fileToSlug(f: OtterFile, root: OtterFile): String =
+            root.parentFile?.let { parentFile ->
+                f.toRelativeString(parentFile)
+                        .split('/', '\\')
+                        .map { it.toIntOrNull()?.toString() ?: it }
+                        .joinToString("_")
+            } ?: throw Exception("fileToSlug() call should not be made with null parentFile") // TODO. Also we could move this exception somewhere else if we set parentFile to a val
 
-    private fun bufferedReaderProvider(f: File): (() -> BufferedReader)? =
-            if (f.isFile) { { f.bufferedReader() } } else null
+    private fun bufferedReaderProvider(f: OtterFile): (() -> BufferedReader)? =
+            if (f.isFile) {
+                { f.bufferedReader() }
+            } else null
 
-    private fun collection(key: String, f: File, projectRoot: File): Collection =
+    private fun collection(key: String, f: OtterFile, projectRoot: OtterFile): Collection =
             collection(key, fileToSlug(f, projectRoot), fileToId(f))
 
     private fun collection(key: String, slug: String, id: Int): Collection =
@@ -58,7 +91,7 @@ class MarkdownProjectReader() : IProjectReader {
             if (text.isEmpty()) null
             else Content(sort, label, id, id, null, text, FORMAT)
 
-    private fun contentList(f: File): List<Content>? =
+    private fun contentList(f: OtterFile): List<Content>? =
             bufferedReaderProvider(f)
                     ?.let { contentList(it, fileToId(f)) }
 
@@ -74,12 +107,12 @@ class MarkdownProjectReader() : IProjectReader {
     }
 }
 
-internal fun File.buildFileTree(): OtterTree<File> {
-    var treeRoot: OtterTree<File>? = null
-    val treeCursor = ArrayDeque<OtterTree<File>>()
+internal fun File.buildFileTree(): OtterTree<OtterFile> {
+    var treeRoot: OtterTree<OtterFile>? = null
+    val treeCursor = ArrayDeque<OtterTree<OtterFile>>()
     this.walkTopDown()
             .onEnter { newDir ->
-                OtterTree(newDir).let { newDirNode ->
+                OtterTree(otterFileF(newDir)).let { newDirNode ->
                     treeCursor.peek()?.addChild(newDirNode)
                     treeCursor.push(newDirNode)
                     true
@@ -87,12 +120,12 @@ internal fun File.buildFileTree(): OtterTree<File> {
             }
             .onLeave { treeRoot = treeCursor.pop() }
             .filter { it.isFile }
-            .map { OtterTreeNode(it) }
+            .map { OtterTreeNode(otterFileF(it)) }
             .forEach { treeCursor.peek()?.addChild(it) }
-    return treeRoot ?: OtterTree(this)
+    return treeRoot ?: OtterTree(otterFileF(this))
 }
 
-private fun OtterTree<File>.filterMarkdownFiles(): OtterTree<File>? =
+private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile>? =
         this.filterPreserveParents { it.isFile && extensions.matches(it.name) }
 
 private fun Tree.flattenContent(): Tree =

@@ -8,10 +8,13 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 
 interface IProjectReader {
-    fun constructProjectTree(container: ResourceContainer, project: Project): Pair<ImportResult, Tree>
+    fun constructProjectTree(container: ResourceContainer,
+                             project: Project,
+                             zipEntryTreeBuilder: IZipEntryTreeBuilder
+    ): Pair<ImportResult, Tree>
 
     companion object {
-        fun build(format: String): IProjectReader? = when(format.toLowerCase()) {
+        fun build(format: String): IProjectReader? = when (format.toLowerCase()) {
             "text/usfm" -> UsfmProjectReader()
             "text/markdown" -> MarkdownProjectReader()
             else -> null

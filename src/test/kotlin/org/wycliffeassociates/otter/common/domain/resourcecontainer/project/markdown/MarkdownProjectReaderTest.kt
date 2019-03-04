@@ -5,11 +5,12 @@ import org.junit.Test
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
 import java.io.File
 
 class MarkdownProjectReaderTest {
     private val pwd = File(System.getProperty("user.dir"))
-    private val fileTree: OtterTree<File> = pwd.buildFileTree()
+    private val fileTree: OtterTree<OtterFile> = pwd.buildFileTree()
 
     private fun <T> dfs(tree: OtterTreeNode<T>, f: (T, List<T>) -> Boolean, acc: List<T> = listOf()): T? {
         return if (f(tree.value, acc))
@@ -51,8 +52,8 @@ class MarkdownProjectReaderTest {
 
     @Test
     fun testFileTree_NoDupes() {
-        val set = hashSetOf<File>()
-        val foundADupe: (File, Any) -> Boolean = { f: File, _: Any -> !set.add(f) }
+        val set = hashSetOf<OtterFile>()
+        val foundADupe: (OtterFile, Any) -> Boolean = { f: OtterFile, _: Any -> !set.add(f) }
         TestCase.assertNull(dfs(fileTree, foundADupe))
     }
 

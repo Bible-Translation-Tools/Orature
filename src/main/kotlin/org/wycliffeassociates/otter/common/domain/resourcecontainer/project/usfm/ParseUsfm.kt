@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
-import java.io.File
+import java.io.BufferedReader
 
 private val sep = System.lineSeparator()
 
@@ -15,18 +15,17 @@ private val MARKER_SECTION_HEADING_THREE = "\\s3"
 private val MARKER_SECTION_HEADING_FOUR = "\\s4"
 private val MARKER_CHUNK = "\\s5"
 
-
 data class Current(var c: Int = 1, var v: Int = 1)
 data class Verse(val number: Int, var text: String)
 
 class UsfmDocument : HashMap<Int, HashMap<Int, Verse>>()
 
-class ParseUsfm(val file: File) {
+class ParseUsfm(val bufferedReader: BufferedReader) {
     val chapters: UsfmDocument = UsfmDocument()
 
     fun parse(): ParseUsfm {
         val fileCursor = Current()
-        file.bufferedReader().use {
+        bufferedReader.use {
             it.forEachLine {
                 parseLine(it, fileCursor)
             }
