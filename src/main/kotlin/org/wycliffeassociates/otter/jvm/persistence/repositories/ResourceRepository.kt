@@ -75,10 +75,10 @@ class ResourceRepository(
                     // Check if already exists
                     val alreadyExists = resourceLinkDao
                             .fetchByContentId(content.id)
-                            .filter {
+                            .any {
                                 // Check for this link
                                 it.resourceContentFk == resource.id
-                            }.isNotEmpty()
+                            }
 
                     if (!alreadyExists) {
                         // Add the resource link
@@ -89,7 +89,7 @@ class ResourceRepository(
                                 null,
                                 dublinCoreFk
                         )
-                        resourceLinkDao.insert(entity)
+                        resourceLinkDao.insertNoReturn(entity)
                     }
                 }
                 .subscribeOn(Schedulers.io())
@@ -115,7 +115,7 @@ class ResourceRepository(
                                 collection.id,
                                 dublinCoreFk
                         )
-                        resourceLinkDao.insert(entity)
+                        resourceLinkDao.insertNoReturn(entity)
                     }
                 }
                 .subscribeOn(Schedulers.io())

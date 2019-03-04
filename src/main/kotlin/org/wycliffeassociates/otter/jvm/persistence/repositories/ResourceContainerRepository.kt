@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.database.daos.ContentDao
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
@@ -39,8 +40,6 @@ class ResourceContainerRepository(
                 val metadata = dublinCore.mapToMetadata(rc.dir, language)
                 val dublinCoreFk = resourceMetadataDao.insert(ResourceMetadataMapper().mapToEntity(metadata), dsl)
 
-                // TODO: Should this only happen if we are importing a "help" RC? What if the help is imported first,
-                // TODO: ... then another related bundle RC is imported?
                 val relatedDublinCoreIds: List<Int> =
                         linkRelatedResourceContainers(dublinCoreFk, dublinCore.relation, dublinCore.creator, dsl)
 
@@ -85,10 +84,12 @@ class ResourceContainerRepository(
     }
 
     inner class ImportHelper(
-            val dublinCoreId: Int,
-            val relatedBundleDublinCoreId: Int?,
-            val dsl: DSLContext
+            private val dublinCoreId: Int,
+            private val relatedBundleDublinCoreId: Int?,
+            private val dsl: DSLContext
     ) {
+        private val dublinCoreIdDslVal = DSL.`val`(dublinCoreId)
+
         private fun findCollectionId(collection: Collection, containerId: Int): Int? =
                 collectionDao.fetchBySlugAndContainerId(collection.slug, containerId)?.id
 
@@ -105,75 +106,63 @@ class ResourceContainerRepository(
                 when (relatedBundleDublinCoreId) {
                     null -> addCollection(collection, parentId)
                     else -> findCollectionId(collection, relatedBundleDublinCoreId)
+                    // TODO: If we don't find a corresponding collection, we continue on, passing null to collectionId.
+                    // TODO: ... Eventually, contents will not be created if there is no parentId. This will happen for
+                    // TODO: ... front matter until we have another solution.
                 }
             }.let { collectionId ->
-                // TODO: If we don't find a corresponding collection, we continue on, passing null to collectionId.
-                // TODO ... Eventually, contents will not be created if there is no parentId. This will happen for front
-                // TODO ... matter until we have another solution.
-                (node as? Tree)?.let {
-                    for (childNode in it.children) {
-                        importNode(collectionId, childNode)
+                (node as? Tree)?.children?.let { children ->
+                    if (collectionId != null) {
+                        val contents = children.filter { it.value is Content }
+                        importContent(collectionId, contents)
                     }
-                }
-            }
-        }
-
-        private fun importNode(parentId: Int?, node: TreeNode) {
-            when (node.value) {
-                is Collection -> {
-                    importCollection(parentId, node)
-                }
-                is Content -> {
-                    if (parentId != null) {
-                        importContent(parentId, node)
+                    val collections = children.filter { it.value is Collection }
+                    for (collection in collections) {
+                        importCollection(collectionId, collection)
                     }
+                    collectionId?.let(this::linkChapterResources)
+                    collectionId?.let(this::linkVerseResources)
                 }
             }
         }
 
-        private fun importContent(parentId: Int, node: TreeNode) {
-            val content = node.value
-            if (content is Content) {
-                val entity = ContentMapper().mapToEntity(content).apply { collectionFk = parentId }
-                val contentId = contentDao.insert(entity, dsl)
-                if (relatedBundleDublinCoreId != null) {
-                    linkResource(parentId, contentId, content.start)
-                }
-            }
+        private fun importContent(parentId: Int, nodes: List<TreeNode>) {
+            val contentMapper = ContentMapper()
+            val entities = nodes
+                    .mapNotNull { (it.value as? Content) }
+                    .map { contentMapper.mapToEntity(it).apply { collectionFk = parentId } }
+            contentDao.insertNoReturn(*entities.toTypedArray())
         }
 
-        private fun linkResource(parentId: Int, helpContentId: Int, start: Int) {
-            when (start) {
-                0 -> linkChapterResource(helpContentId, parentId)
-                else -> linkVerseResource(helpContentId, parentId, start)
-            }
-        }
-
-        private fun linkVerseResource(helpContentId: Int, parentId: Int, start: Int) {
-            val extraFieldsForInsertIntoTable = listOf(
-                    helpContentId,
-                    dublinCoreId
-            ).map(DSL::`val`)
-
+        private fun linkVerseResources(parentCollectionId: Int) {
             @Suppress("UNCHECKED_CAST")
-            val select = contentDao.selectVerseByCollectionIdAndStart(
-                    collectionId = parentId,
-                    start = start,
-                    extraFields = extraFieldsForInsertIntoTable
+            val matchingVerses = contentDao.selectLinkableVerses(
+                    listOf(ContentDao.Labels.VERSE),
+                    listOf(ContentDao.Labels.HELP_TITLE, ContentDao.Labels.HELP_BODY),
+                    parentCollectionId,
+                    dublinCoreIdDslVal
             ) as Select<Record3<Int, Int, Int>>
 
-            resourceLinkDao.insertContentResource(select, dsl)
+            resourceLinkDao.insertContentResourceNoReturn(matchingVerses)
         }
 
-        private fun linkChapterResource(helpContentId: Int, collectionFk: Int) {
-            val resourceEntity = ResourceLinkEntity(
-                    id = 0,
-                    resourceContentFk = helpContentId,
-                    contentFk = null,
-                    collectionFk = collectionFk,
-                    dublinCoreFk = dublinCoreId
-            )
-            resourceLinkDao.insert(resourceEntity, dsl)
+        private fun linkChapterResources(parentCollectionId: Int) {
+            val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollectionId, 0,
+                    listOf(ContentDao.Labels.HELP_TITLE, ContentDao.Labels.HELP_BODY))
+
+            val resourceEntities = chapterHelps
+                    .map { helpContent ->
+                        ResourceLinkEntity(
+                                id = 0,
+                                resourceContentFk = helpContent.id,
+                                contentFk = null,
+                                collectionFk = parentCollectionId,
+                                dublinCoreFk = dublinCoreId
+                        )
+                    }
+                    .toTypedArray()
+
+            resourceLinkDao.insertNoReturn(*resourceEntities, dsl = dsl)
         }
     }
 

@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS content_entity (
     text             TEXT,
     format           TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start);
 
 CREATE TABLE IF NOT EXISTS content_derivative (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
