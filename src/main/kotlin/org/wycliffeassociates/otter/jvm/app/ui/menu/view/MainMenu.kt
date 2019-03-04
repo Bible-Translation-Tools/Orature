@@ -1,12 +1,13 @@
 package org.wycliffeassociates.otter.jvm.app.ui.menu.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
 import javafx.event.EventHandler
+import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
+import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
+import javafx.stage.FileChooser
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.viewmodel.MainMenuViewModel
@@ -19,27 +20,42 @@ class MainMenu : MenuBar() {
 
     private val viewModel: MainMenuViewModel = find()
 
+    private fun Menu.importMenuItem(message: String): MenuItem {
+        return item(message) {
+            graphic = MainMenuStyles.importIcon("20px")
+            val dialog = progressdialog {
+                text = message
+                graphic = MainMenuStyles.importIcon("60px")
+                root.addClass(AppStyles.progressDialog)
+            }
+            viewModel.showImportDialogProperty.onChange {
+                Platform.runLater { if (it) dialog.open() else dialog.close() }
+            }
+        }
+    }
+
     init {
         importStylesheet<MainMenuStyles>()
         with(this) {
             menu(messages["file"]) {
-                item(messages["importResource"]) {
-                    graphic = MainMenuStyles.importIcon("20px")
-                    val dialog = progressdialog {
-                        text = messages["importResource"]
-                        graphic = MainMenuStyles.importIcon( "60px")
-                        root.addClass(AppStyles.progressDialog)
-                    }
-                    viewModel.showImportDialogProperty.onChange {
-                        Platform.runLater { if (it) dialog.open() else dialog.close() }
-                    }
-                    action {
-                        val file = chooseDirectory(messages["importResourceTip"])
-                        file?.let {
-                            viewModel.importContainerDirectory(file)
+                importMenuItem(messages["importResourceFromFolder"])
+                        .setOnAction {
+                            val file = chooseDirectory(messages["importResourceFromFolder"])
+                            file?.let {
+                                viewModel.importContainerDirectory(file)
+                            }
                         }
-                    }
-                }
+                importMenuItem(messages["importResourceFromZip"])
+                        .setOnAction {
+                            val file = chooseFile(
+                                    messages["importResourceFromZip"],
+                                    arrayOf(FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip")),
+                                    FileChooserMode.Single
+                            ).firstOrNull()
+                            file?.let {
+                                viewModel.importContainerDirectory(file)
+                            }
+                        }
             }
             menu(messages["audioPlugins"]) {
                 onShowing = EventHandler {

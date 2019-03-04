@@ -37,7 +37,7 @@ class ResourceContainerRepository(
         return Completable.fromAction {
             database.transaction { dsl ->
                 val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
-                val metadata = dublinCore.mapToMetadata(rc.dir, language)
+                val metadata = dublinCore.mapToMetadata(rc.file, language)
                 val dublinCoreFk = resourceMetadataDao.insert(ResourceMetadataMapper().mapToEntity(metadata), dsl)
 
                 val relatedDublinCoreIds: List<Int> =

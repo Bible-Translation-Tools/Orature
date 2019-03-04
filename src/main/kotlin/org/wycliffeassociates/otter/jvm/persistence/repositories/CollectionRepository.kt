@@ -58,16 +58,17 @@ class CollectionRepository(
                     // 2. Load the resource container
                     val metadata = project.resourceContainer
                     if (metadata != null) {
-                        val container = ResourceContainer.load(metadata.path)
-                        // 3. Remove the project from the manifest
-                        container.manifest.projects = container.manifest.projects.filter { it.identifier != project.slug }
-                        // 4a. If the manifest has more projects, write out the new manifest
-                        if (container.manifest.projects.isNotEmpty()) {
-                            container.writeManifest()
-                        } else {
-                            // 4b. If the manifest has no projects left, delete the RC folder and the metadata from the database
-                            metadata.path.deleteRecursively()
-                            metadataDao.delete(metadataMapper.mapToEntity(metadata))
+                        ResourceContainer.load(metadata.path).use { container ->
+                            // 3. Remove the project from the manifest
+                            container.manifest.projects = container.manifest.projects.filter { it.identifier != project.slug }
+                            // 4a. If the manifest has more projects, write out the new manifest
+                            if (container.manifest.projects.isNotEmpty()) {
+                                container.writeManifest()
+                            } else {
+                                // 4b. If the manifest has no projects left, delete the RC folder and the metadata from the database
+                                metadata.path.deleteRecursively()
+                                metadataDao.delete(metadataMapper.mapToEntity(metadata))
+                            }
                         }
                     }
                 }.andThen(
@@ -212,6 +213,7 @@ class CollectionRepository(
                 dublinCore.mapToMetadata(File("."), targetLanguage),
                 metadata
         )
+        // TODO 2/14/19: Move create to ResourceContainer to be able to create a zip resource container?
         val container = ResourceContainer.create(directory) {
             // Set up the manifest
             manifest = Manifest(
@@ -240,16 +242,17 @@ class CollectionRepository(
 
                         val metadataEntity = if (matches.isEmpty()) {
                             // This combination of identifier and language does not already exist; create it
-                            val container = createResourceContainer(source, language)
-                            // Convert DublinCore to ResourceMetadata
-                            val metadata = container.manifest.dublinCore
-                                    .mapToMetadata(container.dir, language)
+                            createResourceContainer(source, language).use { container ->
+                                // Convert DublinCore to ResourceMetadata
+                                val metadata = container.manifest.dublinCore
+                                        .mapToMetadata(container.file, language)
 
-                            // Insert ResourceMetadata into database
-                            val entity = metadataMapper.mapToEntity(metadata)
-                            entity.derivedFromFk = source.resourceContainer?.id
-                            entity.id = metadataDao.insert(entity, dsl)
-                            /* return@if */ entity
+                                // Insert ResourceMetadata into database
+                                val entity = metadataMapper.mapToEntity(metadata)
+                                entity.derivedFromFk = source.resourceContainer?.id
+                                entity.id = metadataDao.insert(entity, dsl)
+                                /* return@if */ entity
+                            }
                         } else {
                             // Use the existing metadata
                             /* return@if */ matches.first()
@@ -273,27 +276,26 @@ class CollectionRepository(
 
                         // Add a project to the container if necessary
                         // Load the existing resource container and see if we need to add another project
-                        val container = ResourceContainer.load(File(metadataEntity.path))
-                        if (container.manifest.projects.none { it.identifier == source.slug }) {
-                            container.manifest.projects = container.manifest.projects.plus(
-                                    project {
-                                        sort = if (metadataEntity.subject.toLowerCase() == "bible"
-                                                && projectEntity.sort > 39) {
-                                            projectEntity.sort + 1
-                                        } else {
-                                            projectEntity.sort
+                        ResourceContainer.load(File(metadataEntity.path)).use { container ->
+                            if (container.manifest.projects.none { it.identifier == source.slug }) {
+                                container.manifest.projects = container.manifest.projects.plus(
+                                        project {
+                                            sort = if (metadataEntity.subject.toLowerCase() == "bible"
+                                                    && projectEntity.sort > 39) {
+                                                projectEntity.sort + 1
+                                            } else {
+                                                projectEntity.sort
+                                            }
+                                            identifier = projectEntity.slug
+                                            path = "./${projectEntity.slug}"
+                                            // This title will not be localized into the target language
+                                            title = projectEntity.title
+                                            // Unable to get categories and versification from the source collection
                                         }
-                                        identifier = projectEntity.slug
-                                        path = "./${projectEntity.slug}"
-                                        // This title will not be localized into the target language
-                                        title = projectEntity.title
-                                        // Unable to get these fields from the source collection
-                                        categories = listOf()
-                                        versification = ""
-                                    }
-                            )
-                            // Update the container
-                            container.write()
+                                )
+                                // Update the container
+                                container.write()
+                            }
                         }
                     }
                 }

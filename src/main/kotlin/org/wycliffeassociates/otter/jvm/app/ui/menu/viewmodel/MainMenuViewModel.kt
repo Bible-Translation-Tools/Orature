@@ -19,6 +19,7 @@ class MainMenuViewModel : ViewModel() {
     private val resourceContainerRepository = injector.resourceContainerRepository
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
+    private val zipEntryTreeBuilder = injector.zipEntryTreeBuilder
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
@@ -34,7 +35,8 @@ class MainMenuViewModel : ViewModel() {
     fun importContainerDirectory(dir: File) {
         val importer = ImportResourceContainer(
                 resourceContainerRepository,
-                directoryProvider
+                directoryProvider,
+                zipEntryTreeBuilder
         )
         showImportDialogProperty.value = true
         importer.import(dir)
