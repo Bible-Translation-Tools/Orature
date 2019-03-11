@@ -13,6 +13,8 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.database.daos.ContentDao
@@ -59,7 +61,7 @@ class ResourceContainerRepository(
             }
         }
                 .toSingleDefault(ImportResult.SUCCESS)
-                .onErrorReturn { e -> castOrFindImportException(e)?.result ?: ImportResult.LOAD_RC_ERROR }
+                .onErrorReturn { e -> e.castOrFindImportException()?.result ?: ImportResult.LOAD_RC_ERROR }
                 .subscribeOn(Schedulers.io())
     }
 
@@ -165,12 +167,4 @@ class ResourceContainerRepository(
             resourceLinkDao.insertNoReturn(*resourceEntities, dsl = dsl)
         }
     }
-
-    private inner class ImportException(val result: ImportResult): Exception()
-
-    private fun castOrFindImportException(e: Throwable): ImportException? =
-            if (e is ImportException) e
-            else listOfNotNull(e.cause, *e.suppressed)
-                    .mapNotNull(this::castOrFindImportException)
-                    .firstOrNull()
 }

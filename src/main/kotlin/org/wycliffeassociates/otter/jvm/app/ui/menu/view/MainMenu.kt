@@ -42,7 +42,7 @@ class MainMenu : MenuBar() {
                         .setOnAction {
                             val file = chooseDirectory(messages["importResourceFromFolder"])
                             file?.let {
-                                viewModel.importContainerDirectory(file)
+                                viewModel.importResourceContainer(file)
                             }
                         }
                 importMenuItem(messages["importResourceFromZip"])
@@ -53,7 +53,7 @@ class MainMenu : MenuBar() {
                                     FileChooserMode.Single
                             ).firstOrNull()
                             file?.let {
-                                viewModel.importContainerDirectory(file)
+                                viewModel.importResourceContainer(file)
                             }
                         }
             }

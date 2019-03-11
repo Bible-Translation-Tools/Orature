@@ -32,14 +32,14 @@ class MainMenuViewModel : ViewModel() {
         refreshPlugins()
     }
 
-    fun importContainerDirectory(dir: File) {
+    fun importResourceContainer(fileOrDir: File) {
         val importer = ImportResourceContainer(
                 resourceContainerRepository,
                 directoryProvider,
                 zipEntryTreeBuilder
         )
         showImportDialogProperty.value = true
-        importer.import(dir)
+        importer.import(fileOrDir)
                 .observeOnFx()
                 .subscribe { result ->
                     val errorMessage = when (result) {
