@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import io.reactivex.Single
+import io.reactivex.Single.just
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -34,20 +35,27 @@ class ImportResourceContainer(
     }
 
     private fun importContainerZipFile(file: File): Single<ImportResult> {
-        if (!ZipFile(file).use(this::validateResourceContainer)) return Single.just(ImportResult.INVALID_RC)
+        return Single.fromCallable {
+            if (!ZipFile(file).use(this::validateResourceContainer)) {
+                throw ImportException(ImportResult.INVALID_RC)
+            }
 
-        val internalDir = getInternalDirectory(file)
-                ?: return Single.just(ImportResult.LOAD_RC_ERROR)
-        if (internalDir.exists() && internalDir.contains(file.name)) {
-            // Collision on disk: Can't import the resource container
-            // Assumes that filesystem internal app directory and database are in sync
-            return Single.just(ImportResult.ALREADY_EXISTS)
-        }
+            val internalDir = getInternalDirectory(file)
+                    ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
 
-        // Copy to the internal directory
-        val newZipFile = copyFileToInternalDirectory(file, internalDir)
+            if (internalDir.exists() && internalDir.contains(file.name)) {
+                // Collision on disk: Can't import the resource container
+                // Assumes that filesystem internal app directory and database are in sync
+                throw ImportException(ImportResult.ALREADY_EXISTS)
+            }
 
-        return importFromInternalDir(newZipFile, internalDir)
+            // Copy to the internal directory
+            val newZipFile = copyFileToInternalDirectory(file, internalDir)
+
+            importFromInternalDir(newZipFile, internalDir).blockingGet()
+        }.onErrorReturn { e ->
+            e.castOrFindImportException()?.result ?: throw e
+        }.subscribeOn(Schedulers.io())
     }
 
     private fun importContainerDirectory(directory: File) =
