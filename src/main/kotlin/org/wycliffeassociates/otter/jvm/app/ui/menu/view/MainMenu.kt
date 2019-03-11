@@ -23,19 +23,23 @@ class MainMenu : MenuBar() {
     private fun Menu.importMenuItem(message: String): MenuItem {
         return item(message) {
             graphic = MainMenuStyles.importIcon("20px")
-            val dialog = progressdialog {
-                text = message
-                graphic = MainMenuStyles.importIcon("60px")
-                root.addClass(AppStyles.progressDialog)
-            }
-            viewModel.showImportDialogProperty.onChange {
-                Platform.runLater { if (it) dialog.open() else dialog.close() }
-            }
+        }
+    }
+
+    private fun initImportProgressDialog() {
+        val dialog = progressdialog {
+            text = messages["importResource"]
+            graphic = MainMenuStyles.importIcon("60px")
+            root.addClass(AppStyles.progressDialog)
+        }
+        viewModel.showImportDialogProperty.onChange {
+            Platform.runLater { if (it) dialog.open() else dialog.close() }
         }
     }
 
     init {
         importStylesheet<MainMenuStyles>()
+        initImportProgressDialog()
         with(this) {
             menu(messages["file"]) {
                 importMenuItem(messages["importResourceFromFolder"])
