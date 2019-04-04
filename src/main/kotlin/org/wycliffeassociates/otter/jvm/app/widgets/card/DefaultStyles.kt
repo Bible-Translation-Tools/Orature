@@ -1,24 +1,20 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.card
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.BackgroundPosition
-import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BackgroundSize
-import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import javafx.scene.paint.CycleMethod
-import javafx.scene.paint.RadialGradient
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
-import java.net.URI
 
 class DefaultStyles : Stylesheet() {
     private val defaultRed = c("#CC4141")
     private val defaultWhite = c("#FFFF")
     private val defaultGray = c("#E6E8E9")
+    private val defaultBlue = c("#0094F0")
     private val defaultGreen = c("#58BD2F")
     private val black = c("#000")
 
@@ -35,6 +31,10 @@ class DefaultStyles : Stylesheet() {
         val defaultBody by cssclass()
         val defaultMajorLabel by cssclass()
         val defaultMinorLabel by cssclass()
+        val completedProgress by cssclass()
+
+        fun checkCircle(size: String = "1em") = MaterialIconView(MaterialIcon.CHECK_CIRCLE)
+        fun green() = c("58bd2f")
     }
 
     init {
@@ -61,8 +61,6 @@ class DefaultStyles : Stylesheet() {
             prefWidth = 158.px
             maxHeight = 192.px
             maxWidth = 158.px
-
-
         }
 
         defaultInnerCard {
@@ -73,6 +71,8 @@ class DefaultStyles : Stylesheet() {
             borderWidth += box(3.0.px)
             borderRadius += box(5.0.px)
             borderInsets += box(1.5.px)
+            backgroundRadius += box(5.0.px)
+            padding = box(2.0.px)
         }
 
         defaultCard {
@@ -107,8 +107,14 @@ class DefaultStyles : Stylesheet() {
             bar {
                 padding = box(4.px)
                 backgroundInsets += box(0.px)
-                accentColor = AppTheme.colors.appBlue
+                accentColor = defaultBlue
                 backgroundRadius += box(0.px)
+            }
+        }
+
+        completedProgress {
+            bar {
+                accentColor = defaultGreen
             }
         }
         defaultTitle {

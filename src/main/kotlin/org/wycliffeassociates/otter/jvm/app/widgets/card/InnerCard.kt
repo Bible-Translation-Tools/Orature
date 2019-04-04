@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.card
 
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -22,17 +24,26 @@ class InnerCard(cardGraphic: Node? = null) : VBox() {
     val minorLabelProperty = SimpleStringProperty()
     var minorLabel by minorLabelProperty
 
+    val showProgressProperty = SimpleBooleanProperty(false)
+    var showProgress by showProgressProperty
+
+    val progressProperty = SimpleDoubleProperty(0.0)
+    var progress by progressProperty
+
+    val selectedExistsProperty = SimpleBooleanProperty(false)
+    var selectedExists by selectedExistsProperty
 
     init {
         importStylesheet<DefaultStyles>()
         addClass(DefaultStyles.defaultInnerCard)
         stackpane {
-            if(cardGraphic != null) {
-            add(cardGraphic).apply {
-                style{
-                    backgroundColor+= Color.LIGHTGRAY
+            if (cardGraphic != null) {
+                add(cardGraphic).apply {
+                    style {
+                        backgroundColor += Color.LIGHTGRAY
+                    }
                 }
-            }}
+            }
             vbox {
                 alignment = Pos.BOTTOM_CENTER
                 stackpane {
@@ -68,9 +79,20 @@ class InnerCard(cardGraphic: Node? = null) : VBox() {
                     addClass(DefaultStyles.defaultMajorLabel)
                 }
                 label(minorLabelProperty) {
+                    graphic = DefaultStyles.checkCircle("25px").apply {
+                        fill = DefaultStyles.green()
+                    }
+                    graphic.managedProperty().bind(selectedExistsProperty.booleanBinding { it != false })
+                    graphic.visibleProperty().bind(selectedExistsProperty.booleanBinding { it != false })
                     addClass(DefaultStyles.defaultMinorLabel)
                 }
-                progressbar(0.2) { addClass(DefaultStyles.defaultCardProgressBar) }
+                progressbar(progressProperty) {
+                    addClass(DefaultStyles.defaultCardProgressBar)
+                    managedProperty().bind(showProgressProperty.booleanBinding { it != false })
+                    visibleProperty().bind(showProgressProperty.booleanBinding { it != false })
+                    toggleClass(DefaultStyles.completedProgress, progressProperty
+                        .booleanBinding { it != null && 0.9999 <= it.toDouble() })
+                }
             }
         }
     }
