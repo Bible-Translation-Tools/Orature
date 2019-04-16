@@ -24,17 +24,17 @@ import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.takecard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.OldTakeCard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.oldtakecard
 import tornadofx.*
 
 class TakeManagementView : Fragment() {
     private val viewModel: TakeManagementViewModel by inject()
 
     // The currently selected take
-    private var selectedTakeProperty = SimpleObjectProperty<TakeCard>()
+    private var selectedTakeProperty = SimpleObjectProperty<OldTakeCard>()
     // Take at the top to compare to an existing selected take
-    private var draggingTakeProperty = SimpleObjectProperty<TakeCard>()
+    private var draggingTakeProperty = SimpleObjectProperty<OldTakeCard>()
 
     // Drag target to show when drag action in progress
     private var dragTarget: StackPane by singleAssign()
@@ -198,7 +198,7 @@ class TakeManagementView : Fragment() {
         val target = evt.target as Node
 
         // Remove from the flow pane
-        val takeCard = target.findParentOfType(TakeCard::class) as TakeCard
+        val takeCard = target.findParentOfType(OldTakeCard::class) as OldTakeCard
         if (takeCard.parent == takesFlowPane) {
             takeCard.removeFromParent()
             draggingTakeProperty.value = takeCard
@@ -262,14 +262,14 @@ class TakeManagementView : Fragment() {
 
     private fun sortTakesFlowPane(flowPane: FlowPane) {
         flowPane.children.setAll(flowPane.children.sortedBy {
-            (it as TakeCard).take.number
+            (it as OldTakeCard).take.number
         })
         //add the newTakeCard here after we have sorted all other takes by take number
         flowPane.children.add(0, createRecordCard())
     }
 
-    private fun createTakeCard(take: Take): TakeCard {
-        return takecard(take, viewModel.audioPlayer(), messages["take"]) {
+    private fun createTakeCard(take: Take): OldTakeCard {
+        return oldtakecard(take, viewModel.audioPlayer(), messages["take"]) {
             addClass(TakeManagementStyles.takeCard)
             playedProperty.onChange {
                 if (it) viewModel.setTakePlayed(take)
