@@ -51,8 +51,8 @@ class ParsedAudioPluginDataMapperTest {
 
         // Iterate over OS tests
         for (testCase in PLUGIN_PLATFORM_TABLE) {
-            // Mock the OS
-            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os.name"])
+            // Inject the OS
+            val osName = testCase["os.name"]
 
             // Build the expected result
             val expectedAudioPlugin = AudioPluginData(
@@ -67,7 +67,7 @@ class ParsedAudioPluginDataMapperTest {
             )
 
             // Run the mapper
-            val result = ParsedAudioPluginDataMapper().mapToAudioPluginData(inputParsedPlugin, inputPluginFile)
+            val result = ParsedAudioPluginDataMapper(osName).mapToAudioPluginData(inputParsedPlugin, inputPluginFile)
 
             // Assert the result
             Assert.assertEquals(expectedAudioPlugin, result)
@@ -94,12 +94,12 @@ class ParsedAudioPluginDataMapperTest {
 
         // Iterate over OS tests
         for (testCase in PLUGIN_PLATFORM_TABLE) {
-            // Mock the OS
-            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os.name"])
+            // Inject the OS
+            val osName = testCase["os.name"]
 
             // Run the mapper
             try {
-                val result = ParsedAudioPluginDataMapper().mapToAudioPluginData(inputYamlPlugin, inputPluginFile)
+                val result = ParsedAudioPluginDataMapper(osName).mapToAudioPluginData(inputYamlPlugin, inputPluginFile)
                 // Exception should be thrown before this line
                 Assert.fail("'${testCase["os.name"]}' case did not thrown unsupported platform exception")
             } catch (e: UnsupportedPlatformException) {
@@ -125,8 +125,8 @@ class ParsedAudioPluginDataMapperTest {
                 listOf("-t value")
         )
 
-        // Configure the static System mock
-        Mockito.`when`(System.getProperty("os.name")).thenReturn("HAL/S")
+        // Inject the OS name
+        val osName = "HAL/S"
 
         // Build the expected result
         val expectedAudioPlugin = AudioPluginData(
@@ -141,7 +141,7 @@ class ParsedAudioPluginDataMapperTest {
         )
 
         // Run the mapper
-        val result = ParsedAudioPluginDataMapper().mapToAudioPluginData(inputPluginData, inputPluginFile)
+        val result = ParsedAudioPluginDataMapper(osName).mapToAudioPluginData(inputPluginData, inputPluginFile)
 
         Assert.assertEquals(expectedAudioPlugin, result)
     }

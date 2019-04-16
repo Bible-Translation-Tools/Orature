@@ -7,16 +7,24 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.FileSystems
 
-class DirectoryProvider(private val appName: String) : IDirectoryProvider {
-
-    private val separator = FileSystems.getDefault().separator   //if mac '/' if windows '\\'
+class DirectoryProvider(
+    private val appName: String,
+    pathSeparator: String? = null,
+    userHome: String? = null,
+    windowsAppData: String? = null,
+    osName: String? = null
+) : IDirectoryProvider {
+    private val pathSeparator = pathSeparator ?: FileSystems.getDefault().separator
+    private val userHome = userHome ?: System.getProperty("user.home")
+    private val windowsAppData = windowsAppData ?: System.getenv("APPDATA")
+    private val osName = (osName ?: System.getProperty("os.name")).toUpperCase()
 
     // create a directory to store the user's application projects/documents
     override fun getUserDataDirectory(appendedPath: String): File {
         // create the directory if it does not exist
-        val pathComponents = mutableListOf(System.getProperty("user.home"), appName)
+        val pathComponents = mutableListOf(userHome, appName)
         if (appendedPath.isNotEmpty()) pathComponents.add(appendedPath)
-        val pathString = pathComponents.joinToString(separator)
+        val pathString = pathComponents.joinToString(pathSeparator)
         val file = File(pathString)
         file.mkdirs()
         return file
@@ -24,23 +32,18 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
 
     // create a directory to store the application's private data
     override fun getAppDataDirectory(appendedPath: String): File {
-        // convert to upper case
-        val os: String = System.getProperty("os.name")
-
-        val upperOS = os.toUpperCase()
-
         val pathComponents = mutableListOf<String>()
 
         when {
-            upperOS.contains("WIN") -> pathComponents.add(System.getenv("APPDATA"))
-            upperOS.contains("MAC") -> {
+            osName.contains("WIN") -> pathComponents.add(windowsAppData)
+            osName.contains("MAC") -> {
                 // use /Users/<user>/Library/Application Support/ for macOS
-                pathComponents.add(System.getProperty("user.home"))
+                pathComponents.add(userHome)
                 pathComponents.add("Library")
                 pathComponents.add("Application Support")
             }
-            upperOS.contains("LINUX") -> {
-                pathComponents.add(System.getProperty("user.home"))
+            osName.contains("LINUX") -> {
+                pathComponents.add(userHome)
                 pathComponents.add(".config")
             }
         }
@@ -50,26 +53,26 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
         if (appendedPath.isNotEmpty()) pathComponents.add(appendedPath)
 
         // create the directory if it does not exist
-        val pathString = pathComponents.joinToString(separator)
+        val pathString = pathComponents.joinToString(pathSeparator)
         val file = File(pathString)
         file.mkdirs()
         return file
     }
 
     override fun getProjectAudioDirectory(
-            sourceMetadata: ResourceMetadata,
-            book: Collection,
-            chapterDirName: String
+        sourceMetadata: ResourceMetadata,
+        book: Collection,
+        chapterDirName: String
     ): File {
         val appendedPath = listOf(
-                book.resourceContainer?.creator ?: ".",
-                sourceMetadata.creator,
-                "${sourceMetadata.language.slug}_${sourceMetadata.identifier}",
-                "v${book.resourceContainer?.version ?: "-none"}",
-                book.resourceContainer?.language?.slug ?: "no_language",
-                book.slug,
-                chapterDirName
-        ).joinToString(separator)
+            book.resourceContainer?.creator ?: ".",
+            sourceMetadata.creator,
+            "${sourceMetadata.language.slug}_${sourceMetadata.identifier}",
+            "v${book.resourceContainer?.version ?: "-none"}",
+            book.resourceContainer?.language?.slug ?: "no_language",
+            book.slug,
+            chapterDirName
+        ).joinToString(pathSeparator)
         val path = getUserDataDirectory(appendedPath)
         path.mkdirs()
         return path
@@ -78,11 +81,11 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
     override fun getSourceContainerDirectory(container: ResourceContainer): File {
         val dublinCore = container.manifest.dublinCore
         val appendedPath = listOf(
-                "src",
-                dublinCore.creator,
-                "${dublinCore.language.identifier}_${dublinCore.identifier}",
-                "v${dublinCore.version}"
-        ).joinToString(separator)
+            "src",
+            dublinCore.creator,
+            "${dublinCore.language.identifier}_${dublinCore.identifier}",
+            "v${dublinCore.version}"
+        ).joinToString(pathSeparator)
         val path = resourceContainerDirectory.resolve(appendedPath)
         path.mkdirs()
         return path
@@ -90,13 +93,13 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
 
     override fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File {
         val appendedPath = listOf(
-                "der",
-                metadata.creator,
-                source.creator,
-                "${source.language.slug}_${source.identifier}",
-                "v${metadata.version}",
-                metadata.language.slug
-        ).joinToString(separator)
+            "der",
+            metadata.creator,
+            source.creator,
+            "${source.language.slug}_${source.identifier}",
+            "v${metadata.version}",
+            metadata.language.slug
+        ).joinToString(pathSeparator)
         val path = resourceContainerDirectory.resolve(appendedPath)
         path.mkdirs()
         return path
@@ -106,10 +109,10 @@ class DirectoryProvider(private val appName: String) : IDirectoryProvider {
         get() = getAppDataDirectory("rc")
 
     override val userProfileAudioDirectory: File
-        get() = getAppDataDirectory("users${separator}audio")
+        get() = getAppDataDirectory("users${pathSeparator}audio")
 
     override val userProfileImageDirectory: File
-        get() = getAppDataDirectory("users${separator}images")
+        get() = getAppDataDirectory("users${pathSeparator}images")
 
     override val audioPluginDirectory: File
         get() = getAppDataDirectory("plugins")

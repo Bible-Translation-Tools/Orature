@@ -1,141 +1,97 @@
-import org.wycliffeassociates.otter.jvm.persistence.DirectoryProvider
-
+import TestCaseParam.*
 import junit.framework.TestCase.assertEquals
-import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.BDDMockito
-import org.mockito.Mockito
-import org.powermock.api.mockito.PowerMockito
-import org.powermock.core.classloader.annotations.PrepareForTest
-import org.powermock.modules.junit4.PowerMockRunner
+import org.wycliffeassociates.otter.jvm.persistence.DirectoryProvider
 import java.io.File
-import java.nio.file.FileSystem
-import java.nio.file.FileSystems
-import java.nio.file.Files
 
-@RunWith(PowerMockRunner::class)
-@PrepareForTest(DirectoryProvider::class)
+enum class TestCaseParam {
+    EXPECT,
+    OS,
+    SEPARATOR,
+    USERHOME,
+    WINAPPDATA
+}
+
+typealias TestCase = Map<TestCaseParam, String>
+
 class TestDirectoryProvider {
-    var mockFileSystem = Mockito.mock(FileSystem::class.java)
-
-    val APPDATA_TESTS_TABLE = listOf(
-            mapOf(
-                    "expected" to "/Users/edvin/Library/Application Support/translationRecorder/database",
-                    "os" to "Mac OS X",
-                    "separator" to "/",
-                    "appdata" to "/Users/edvin"
-            ),
-            mapOf(
-                    "expected" to "/home/edvin/.config/translationRecorder/database",
-                    "os" to "Linux",
-                    "separator" to "/",
-                    "appdata" to "/home/edvin"
-            ),
-            mapOf(
-                    "expected" to "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\database",
-                    "os" to "Windows 10",
-                    "separator" to "\\",
-                    "appdata" to "C:\\Users\\Edvin\\AppData\\Roaming"
-            )
+    private val macParams = mapOf(
+        OS to "Mac OS X",
+        SEPARATOR to "/",
+        USERHOME to "/Users/edvin"
     )
 
-    val USERDATA_TESTS_TABLE = listOf(
-            mapOf(
-                    "expected" to "/Users/edvin/translationRecorder/Projects",
-                    "os" to "Mac OS X",
-                    "separator" to "/",
-                    "home" to "/Users/edvin"
-            ),
-            mapOf(
-                    "expected" to "/home/edvin/translationRecorder/Projects",
-                    "os" to "Linux",
-                    "separator" to "/",
-                    "home" to "/home/edvin"
-            ),
-            mapOf(
-                    "expected" to "C:\\Users\\Edvin\\translationRecorder\\Projects",
-                    "os" to "Windows 10",
-                    "separator" to "\\",
-                    "home" to "C:\\Users\\Edvin"
-            )
+    private val linuxParams = mapOf(
+        OS to "Linux",
+        SEPARATOR to "/",
+        USERHOME to "/home/edvin"
     )
 
-    val USERIMAGE_TESTS_TABLE = listOf(
-            mapOf(
-                    "expected" to "/Users/edvin/Library/Application Support/translationRecorder/users/images",
-                    "os" to "Mac OS X",
-                    "separator" to "/",
-                    "appdata" to "/Users/edvin"
-            ),
-            mapOf(
-                    "expected" to "/home/edvin/.config/translationRecorder/users/images",
-                    "os" to "Linux",
-                    "separator" to "/",
-                    "appdata" to "/home/edvin"
-            ),
-            mapOf(
-                    "expected" to "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\users\\images",
-                    "os" to "Windows 10",
-                    "separator" to "\\",
-                    "appdata" to "C:\\Users\\Edvin\\AppData\\Roaming"
-            )
+    private val winParams = mapOf(
+        OS to "Windows 10",
+        SEPARATOR to "\\",
+        USERHOME to "C:\\Users\\Edvin",
+        WINAPPDATA to "C:\\Users\\Edvin\\AppData\\Roaming"
     )
 
-    val USERAUDIO_TESTS_TABLE = listOf(
-            mapOf(
-                    "expected" to "/Users/edvin/Library/Application Support/translationRecorder/users/audio",
-                    "os" to "Mac OS X",
-                    "separator" to "/",
-                    "appdata" to "/Users/edvin"
-            ),
-            mapOf(
-                    "expected" to "/home/edvin/.config/translationRecorder/users/audio",
-                    "os" to "Linux",
-                    "separator" to "/",
-                    "appdata" to "/home/edvin"
-            ),
-            mapOf(
-                    "expected" to "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\users\\audio",
-                    "os" to "Windows 10",
-                    "separator" to "\\",
-                    "appdata" to "C:\\Users\\Edvin\\AppData\\Roaming"
-            )
+    val APPDATA_TESTS_TABLE = listOf<TestCase>(
+        macParams + (EXPECT to
+                "/Users/edvin/Library/Application Support/translationRecorder/database"),
+        linuxParams + (EXPECT to
+                "/home/edvin/.config/translationRecorder/database"),
+        winParams + (EXPECT to
+                "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\database")
     )
 
-    @Before
-    fun setup() {
-        // setup up the mock of System
-        PowerMockito.mockStatic(System::class.java)
-        PowerMockito.mockStatic(FileSystems::class.java)
-        Mockito.`when`(FileSystems.getDefault()).thenReturn(mockFileSystem)
-        PowerMockito.mockStatic(Files::class.java)
-    }
+    val USERDATA_TESTS_TABLE = listOf<TestCase>(
+        macParams + (EXPECT to
+                "/Users/edvin/translationRecorder/Projects"),
+        linuxParams + (EXPECT to
+                "/home/edvin/translationRecorder/Projects"),
+        winParams + (EXPECT to
+                "C:\\Users\\Edvin\\translationRecorder\\Projects")
+    )
+
+    val USERIMAGE_TESTS_TABLE = listOf<TestCase>(
+        macParams + (EXPECT to
+                "/Users/edvin/Library/Application Support/translationRecorder/users/images"),
+        linuxParams + (EXPECT to
+                "/home/edvin/.config/translationRecorder/users/images"),
+        winParams + (EXPECT to
+                "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\users\\images")
+    )
+
+    val USERAUDIO_TESTS_TABLE = listOf<TestCase>(
+        macParams + (EXPECT to
+                "/Users/edvin/Library/Application Support/translationRecorder/users/audio"),
+        linuxParams + (EXPECT to
+                "/home/edvin/.config/translationRecorder/users/audio"),
+        winParams + (EXPECT to
+                "C:\\Users\\Edvin\\AppData\\Roaming\\translationRecorder\\users\\audio")
+    )
+
+    private fun buildDirectoryProvider(testCase: TestCase) = DirectoryProvider(
+        "translationRecorder",
+        pathSeparator = testCase[SEPARATOR],
+        userHome = testCase[USERHOME],
+        windowsAppData = testCase[WINAPPDATA],
+        osName = testCase[OS]
+    )
 
     @Test
     fun testIfCorrectAppDataDirectoryIsReturnedForEachPlatform() {
         for (testCase in APPDATA_TESTS_TABLE) {
-            // define the expected result
-            val expected = File(testCase["expected"])
+            val expected = File(testCase[EXPECT])
 
-            // configure for OS responses
-            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
-            BDDMockito.`when`(mockFileSystem.separator).thenReturn(testCase["separator"])
-            when (testCase["os"]) {
-                "Windows 10" -> Mockito.`when`(System.getenv("APPDATA")).thenReturn(testCase["appdata"])
-                else -> Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["appdata"])
-            }
+            val directoryProvider = buildDirectoryProvider(testCase)
 
-            // get the result
-            val fileResult = DirectoryProvider("translationRecorder")
-                    .getAppDataDirectory("database")
+            val fileResult = directoryProvider.getAppDataDirectory("database")
 
-            // assert
             try {
                 assertEquals(expected, fileResult)
             } catch (e: AssertionError) {
                 // failed the assert
-                println("Input OS: ${testCase["os"]}")
+                println("Input OS: ${testCase[OS]}")
                 println("Expected: $expected")
                 println("Result:   $fileResult")
                 throw e
@@ -147,21 +103,16 @@ class TestDirectoryProvider {
     @Test
     fun testIfCorrectUserDataDirectoryIsReturnedForEachPlatform() {
         for (testCase in USERDATA_TESTS_TABLE) {
-            // configure for OS responses
-            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
-            Mockito.`when`(mockFileSystem.separator).thenReturn(testCase["separator"])
-            Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["home"])
-
             // get the result
-            val fileResult = DirectoryProvider("translationRecorder")
-                    .getUserDataDirectory("Projects")
+            val fileResult = buildDirectoryProvider(testCase)
+                .getUserDataDirectory("Projects")
 
             // assert
             try {
-                assertEquals(File(testCase["expected"]), fileResult)
+                assertEquals(File(testCase[EXPECT]), fileResult)
             } catch (e: AssertionError) {
-                println("Input OS: ${testCase["os"]}")
-                println("Expected: ${testCase["expected"]}")
+                println("Input OS: ${testCase[OS]}")
+                println("Expected: ${testCase[EXPECT]}")
                 println("Result:   $fileResult")
                 throw e
             }
@@ -172,23 +123,16 @@ class TestDirectoryProvider {
     @Test
     fun testIfCorrectUserProfileImageDirectoryIsReturnedForEachPlatform() {
         for (testCase in USERIMAGE_TESTS_TABLE) {
-            // configure for OS responses
-            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
-            BDDMockito.`when`(mockFileSystem.separator).thenReturn(testCase["separator"])
-            when (testCase["os"]) {
-                "Windows 10" -> Mockito.`when`(System.getenv("APPDATA")).thenReturn(testCase["appdata"])
-                else -> Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["appdata"])
-            }
-
             // get the result
-            val fileResult = DirectoryProvider("translationRecorder").userProfileImageDirectory
+            val fileResult = buildDirectoryProvider(testCase)
+                .userProfileImageDirectory
 
             // assert
             try {
-                assertEquals(File(testCase["expected"]), fileResult)
+                assertEquals(File(testCase[EXPECT]), fileResult)
             } catch (e: AssertionError) {
-                println("Input OS: ${testCase["os"]}")
-                println("Expected: ${testCase["expected"]}")
+                println("Input OS: ${testCase[OS]}")
+                println("Expected: ${testCase[EXPECT]}")
                 println("Result:   $fileResult")
                 throw e
             }
@@ -199,28 +143,20 @@ class TestDirectoryProvider {
     @Test
     fun testIfCorrectUserProfileAudioDirectoryIsReturnedForEachPlatform() {
         for (testCase in USERAUDIO_TESTS_TABLE) {
-            // configure for OS responses
-            Mockito.`when`(System.getProperty("os.name")).thenReturn(testCase["os"])
-            BDDMockito.`when`(mockFileSystem.separator).thenReturn(testCase["separator"])
-            when (testCase["os"]) {
-                "Windows 10" -> Mockito.`when`(System.getenv("APPDATA")).thenReturn(testCase["appdata"])
-                else -> Mockito.`when`(System.getProperty("user.home")).thenReturn(testCase["appdata"])
-            }
-
             // get the result
-            val fileResult = DirectoryProvider("translationRecorder").userProfileAudioDirectory
+            val fileResult = buildDirectoryProvider(testCase)
+                .userProfileAudioDirectory
 
             // assert
             try {
-                assertEquals(File(testCase["expected"]), fileResult)
+                assertEquals(File(testCase[EXPECT]), fileResult)
             } catch (e: AssertionError) {
-                println("Input OS: ${testCase["os"]}")
-                println("Expected: ${testCase["expected"]}")
+                println("Input OS: ${testCase[OS]}")
+                println("Expected: ${testCase[EXPECT]}")
                 println("Result:   $fileResult")
                 throw e
             }
             if (fileResult.exists()) fileResult.delete()
         }
     }
-
 }
