@@ -112,12 +112,14 @@ class MainScreenView : View() {
         //navigate back to verse selection from viewing takes
         if (viewModel.selectedContentProperty.value != null) {
             viewModel.selectedContentProperty.value = null
+            activeFragment.navigateBack()
         }
         //from verse selection, navigate back to chapter selection
         else if (viewModel.selectedCollectionProperty.value != null) {
             viewModel.selectedCollectionProperty.value = null
         }
-        activeFragment.navigateBack()
+
+        else activeFragment.navigateBack()
 
     }
 

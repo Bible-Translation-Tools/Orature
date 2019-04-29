@@ -1,12 +1,11 @@
-package org.wycliffeassociates.otter.jvm.app.ui.contentgrid.view
+package org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view
 
 import javafx.geometry.Pos
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
 
-class ContentGridStyles: Stylesheet() {
+class CardGridStyles: Stylesheet() {
 
     companion object {
         val contentContainer by cssclass()

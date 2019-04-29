@@ -1,66 +1,78 @@
-package org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view
+package org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.Property
 import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.viewmodel.CollectionsGridViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.ContentGridViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
-class CollectionsGrid : Fragment() {
-    private val viewModel: CollectionsGridViewModel by inject()
+class CardGrid : Fragment() {
+    private val viewModel: ContentGridViewModel by inject()
 
     val activeCollection: Property<Collection> = viewModel.activeCollectionProperty
     val activeProject: Property<Collection> = viewModel.activeProjectProperty
+    val activeContent: Property<Content> = viewModel.activeContentProperty
+
 
     init {
-        importStylesheet<CollectionGridStyles>()
+        importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
+
     }
 
     override val root = vbox {
-        addClass(AppStyles.appBackground)
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
+        addClass(AppStyles.appBackground)
         progressindicator {
             visibleProperty().bind(viewModel.loadingProperty)
             managedProperty().bind(visibleProperty())
-            addClass(CollectionGridStyles.contentLoadingProgress)
+            addClass(CardGridStyles.contentLoadingProgress)
         }
 
-        datagrid(viewModel.children) {
+        datagrid(viewModel.filteredContent) {
             vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
             isFillWidth = true
             addClass(AppStyles.appBackground)
-            addClass(CollectionGridStyles.collectionsContainer)
+            addClass(CardGridStyles.contentContainer)
+            vgrow = Priority.ALWAYS
             cellCache { item ->
                 card {
                     addClass(DefaultStyles.defaultCard)
                     cardfront {
-                        innercard(AppStyles.chapterGraphic()) {
-                            title = item.labelKey.toUpperCase()
-                            bodyText = item.titleKey
+                        innercard(cardGraphic()) {
+                            title = item.item.toUpperCase()
+                            bodyText = item.bodyText
                         }
                         cardbutton {
                             addClass(DefaultStyles.defaultCardButton)
                             text = messages["openProject"]
                             graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                    .apply { fill = AppTheme.colors.appRed }
-                            isDisableVisualFocus = true
+                                .apply { fill = AppTheme.colors.appRed }
                             onMousePressed = EventHandler {
-                                viewModel.selectCollection(item)
+                                viewModel.onCardSelection(item)
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun cardGraphic() : Node {
+        if(viewModel.filteredContent.first().dataType == "content") {
+            return AppStyles.chunkGraphic()
+        }
+        return AppStyles.chapterGraphic()
     }
 }

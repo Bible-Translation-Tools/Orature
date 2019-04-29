@@ -41,7 +41,7 @@ class TakeManagementStyles : Stylesheet() {
         takeGrid {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
-            backgroundColor += AppTheme.colors.white
+            backgroundColor += AppTheme.colors.defaultBackground
             spacing = 10.px
             alignment = Pos.CENTER_LEFT
             vgap = 16.px
@@ -133,7 +133,7 @@ class TakeManagementStyles : Stylesheet() {
         }
 
         placeholder {
-            backgroundColor += AppTheme.colors.imagePlaceholder
+            backgroundColor += AppTheme.colors.white
             borderRadius += box(10.px)
             backgroundRadius += box(10.px)
             minHeight = 200.px
@@ -147,7 +147,7 @@ class TakeManagementStyles : Stylesheet() {
         }
 
         selectedTakeContainer {
-            backgroundColor += AppTheme.colors.white
+            backgroundColor += AppTheme.colors.defaultBackground
             padding = box(20.px)
             alignment = Pos.CENTER_LEFT
             label {
@@ -185,7 +185,7 @@ class TakeManagementStyles : Stylesheet() {
         }
 
         tpanelStyle {
-            backgroundColor += AppTheme.colors.white
+//            backgroundColor += AppTheme.colors.a
         }
     }
 }

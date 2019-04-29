@@ -6,8 +6,7 @@ import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
-import org.wycliffeassociates.otter.jvm.app.ui.collectionsgrid.view.CollectionsGrid
-import org.wycliffeassociates.otter.jvm.app.ui.contentgrid.view.ContentGrid
+import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view.CardGrid
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementView
 import tornadofx.*
 
@@ -49,29 +48,22 @@ class MainViewViewModel : ViewModel() {
         }
     }
 
-    fun projectSelected(selectedProject: Collection) {
+    private fun projectSelected(selectedProject: Collection) {
         setActiveProjectText(selectedProject)
 
-        find<MainScreenView>().activeFragment.dock<CollectionsGrid>()
-        CollectionsGrid().apply {
-            activeProject.bindBidirectional(selectedProjectProperty)
-            activeCollection.bindBidirectional(selectedCollectionProperty)
-        }
-    }
-
-    fun collectionSelected(collection: Collection) {
-        setActiveCollectionText(collection)
-
-        find<MainScreenView>().activeFragment.dock<ContentGrid>()
-        ContentGrid().apply {
+        find<MainScreenView>().activeFragment.dock<CardGrid>()
+        CardGrid().apply {
             activeProject.bindBidirectional(selectedProjectProperty)
             activeCollection.bindBidirectional(selectedCollectionProperty)
             activeContent.bindBidirectional(selectedContentProperty)
-
         }
     }
 
-    fun contentSelected(content: Content) {
+    private fun collectionSelected(collection: Collection) {
+        setActiveCollectionText(collection)
+    }
+
+    private fun contentSelected(content: Content) {
         setActiveContentText(content)
 
         if(takesPageDocked.value == false) {
@@ -85,17 +77,17 @@ class MainViewViewModel : ViewModel() {
         takesPageDocked.set(true)
     }
 
-    fun setActiveContentText(content: Content) {
+    private fun setActiveContentText(content: Content) {
         selectedContentTitle.set(content.labelKey.toUpperCase())
         selectedContentBody.set(content.start.toString())
     }
 
-    fun setActiveCollectionText(collection: Collection) {
+    private fun setActiveCollectionText(collection: Collection) {
         selectedCollectionTitle.set(collection.labelKey.toUpperCase())
         selectedCollectionBody.set(collection.titleKey)
     }
 
-    fun setActiveProjectText(activeProject: Collection) {
+    private fun setActiveProjectText(activeProject: Collection) {
         selectedProjectName.set(activeProject.titleKey)
         selectedProjectLanguage.set(activeProject.resourceContainer?.language?.name)
     }
