@@ -1,21 +1,13 @@
 package org.wycliffeassociates.otter.jvm.statusindicator.control
 
-import javafx.beans.property.DoubleProperty
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.*
 import javafx.geometry.HPos
 import javafx.geometry.Insets
 import javafx.geometry.VPos
+import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
-import javafx.scene.layout.StackPane
-import javafx.scene.paint.Color
-import javafx.scene.paint.CycleMethod
-import javafx.scene.paint.LinearGradient
-import javafx.scene.paint.Stop
+import javafx.scene.layout.*
+import javafx.scene.paint.*
 import tornadofx.*
 
 
@@ -32,33 +24,67 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
     private val skinAccentFill: ObjectProperty<Color> = SimpleObjectProperty<Color>(Color.RED)
     private val skinTrackColor: ObjectProperty<Color> = SimpleObjectProperty<Color>(Color.WHITE)
     private val barHeight: DoubleProperty = SimpleDoubleProperty(0.0)
+    private val trackHeight: DoubleProperty = SimpleDoubleProperty(0.0)
     private val indicatorRadius: DoubleProperty = SimpleDoubleProperty(0.0)
-
+    private val skinShowText: BooleanProperty = SimpleBooleanProperty(false)
+    private val barBorderStyle: ObjectProperty<BorderStrokeStyle> =
+        SimpleObjectProperty<BorderStrokeStyle>(BorderStrokeStyle.NONE)
+    private val barBorderRadius: DoubleProperty = SimpleDoubleProperty(0.0)
+    private val barBorderWidth: DoubleProperty = SimpleDoubleProperty(0.0)
+    private val textFill: ObjectProperty<Paint> = SimpleObjectProperty<Paint>(Color.BLACK)
+    private val barBorderColor: ObjectProperty<Paint> = SimpleObjectProperty<Paint>(Color.BLACK)
+    private val trackBorderColor: ObjectProperty<Paint> = SimpleObjectProperty<Paint>(Color.BLACK)
+    private val trackBorderStyle: ObjectProperty<BorderStrokeStyle> =
+        SimpleObjectProperty<BorderStrokeStyle>(BorderStrokeStyle.NONE)
+    private val trackBorderRadius: DoubleProperty = SimpleDoubleProperty(0.0)
+    private val trackBorderWidth: DoubleProperty = SimpleDoubleProperty(0.0)
 
     init {
         //need to define super(statusindicator)? not sure if this is required atm
         bar = StackPane()
-        bar.styleClass.setAll("bar")
+        bar.styleClass.setAll("indicator-bar")
 
         track = StackPane()
-        track.styleClass.setAll("track")
+        track.styleClass.setAll("indicator-track")
 
         children.setAll(track, bar)
 
         control.widthProperty().onChange { invalidBar = true }
-        control.heightProperty().onChange {invalidBar = true }
+        control.heightProperty().onChange { invalidBar = true }
         control.primaryFillProperty.onChange { updateBarFill(control.primaryFill, control.accentFill) }
         control.accentFillProperty.onChange { updateBarFill(control.primaryFill, control.accentFill) }
-        control.progressProperty.onChange { updateStatusIndicator(control.width, control.height)
-        }
+        control.progressProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.barBorderStyleProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.barBorderRadiusProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.barBorderWidthProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.barBorderColorProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.trackHeightProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.textFillProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.trackBorderColorProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.trackBorderStyleProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.trackBorderRadiusProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.trackBorderWidthProperty.onChange { updateStatusIndicator(control.width, control.height) }
+        control.trackHeightProperty.onChange { updateStatusIndicator(control.width, control.height) }
+
         skinnable.requestLayout()
 
         localProgressProperty.bind(control.progressProperty)
         skinPrimaryFill.bind(control.primaryFillProperty)
         skinAccentFill.bind(control.accentFillProperty)
         barHeight.bind(control.barHeightProperty)
+        trackHeight.bind(control.trackHeightProperty)
         indicatorRadius.bind(control.indicatorRadiusProperty)
         skinTrackColor.bind(control.trackFillProperty)
+        skinShowText.bind(control.showTextProperty)
+        barBorderStyle.bind(control.barBorderStyleProperty)
+        barBorderRadius.bind(control.barBorderRadiusProperty)
+        barBorderWidth.bind(control.barBorderWidthProperty)
+        textFill.bind(control.textFillProperty)
+        barBorderColor.bind(control.barBorderColorProperty)
+        trackBorderColor.bind(control.trackBorderColorProperty)
+        trackBorderStyle.bind(control.trackBorderStyleProperty)
+        trackBorderRadius.bind(control.trackBorderRadiusProperty)
+        trackBorderWidth.bind(control.trackBorderWidthProperty)
     }
 
     fun updateBarFill(primaryFill: Color, accentFill: Color) {
@@ -92,7 +118,29 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         }
 
         bar = StackPane()
+        bar.border = Border(
+            BorderStroke(
+                barBorderColor.value,
+                barBorderStyle.value,
+                CornerRadii(barBorderRadius.value),
+                BorderWidths(barBorderWidth.value)
+            )
+        )
+
+        val textLabel = Label("${((localProgressProperty.value * 100).toInt())}%")
+        textLabel.textFill = textFill.value
+        if (skinShowText.value) bar.add(textLabel)
+
         track = StackPane()
+        track.border = Border(
+            BorderStroke(
+                trackBorderColor.value,
+                trackBorderStyle.value,
+                CornerRadii(trackBorderRadius.value),
+                BorderWidths(trackBorderWidth.value)
+            )
+        )
+
         if (localProgressProperty.value <= 1.0000001) {
             barWidth =
                 ((localProgressProperty.value * width) - snappedLeftInset() - snappedRightInset()).toInt().toDouble()
@@ -121,8 +169,8 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
             )
         )
 
-        bar.styleClass.setAll("bar")
-        track.styleClass.setAll("track")
+        bar.styleClass.setAll("indicator-bar")
+        track.styleClass.setAll("indicator-track")
         children.setAll(track, bar)
 
     }
@@ -131,18 +179,51 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         if (invalidBar) {
             updateStatusIndicator(contentWidth, contentHeight)
         }
-        track.resizeRelocate(contentX, contentY, contentWidth, contentHeight)
+        if (trackHeight.value == 0.0){
+            track.resizeRelocate(contentX, contentY, contentWidth, contentHeight)
+            layoutInArea(track,
+                contentX,
+                contentY ,
+                contentWidth,
+                contentHeight,
+                -1.0,
+                HPos.CENTER,
+                VPos.CENTER
+            )
+        }
+        else {
+            track.resizeRelocate(contentX, contentY, contentWidth, trackHeight.value)
+            layoutInArea(
+                track,
+                contentX,
+                contentY -trackHeight.value/2 ,
+                contentWidth,
+                trackHeight.value,
+                -1.0,
+                HPos.CENTER,
+                VPos.CENTER
+            )
+        }
+
         if (barHeight.value == 0.0) {
             bar.resizeRelocate(contentX, contentY, barWidth, contentHeight)
-            layoutInArea(track, contentX, contentY, contentWidth, contentHeight, -1.0, HPos.CENTER, VPos.CENTER)
-            layoutInArea(bar, contentX, contentY, barWidth, contentHeight, -1.0, HPos.CENTER, VPos.CENTER)
-        } else {
-            bar.resizeRelocate(contentX, contentY, barWidth, barHeight.value)
-            layoutInArea(track, contentX, contentY, contentWidth, contentHeight, -1.0, HPos.CENTER, VPos.CENTER)
             layoutInArea(
                 bar,
                 contentX,
-                contentY - (barHeight.value / 4.0),
+                contentY ,
+                barWidth,
+                contentHeight,
+                -1.0,
+                HPos.CENTER,
+                VPos.CENTER
+            )
+        }
+        else {
+            bar.resizeRelocate(contentX, contentY, barWidth, barHeight.value)
+            layoutInArea(
+                bar,
+                contentX,
+                contentY - barHeight.value/3 ,
                 barWidth,
                 barHeight.value,
                 -1.0,
@@ -173,7 +254,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         bottomInset: Double,
         leftInset: Double
     ): Double {
-        return rightInset + leftInset + 200
+        return rightInset + leftInset + Int.MAX_VALUE
     }
 
     override fun computeMinHeight(
