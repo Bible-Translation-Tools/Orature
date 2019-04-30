@@ -179,58 +179,60 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         if (invalidBar) {
             updateStatusIndicator(contentWidth, contentHeight)
         }
-        if (trackHeight.value == 0.0){
-            track.resizeRelocate(contentX, contentY, contentWidth, contentHeight)
-            layoutInArea(track,
-                contentX,
-                contentY ,
-                contentWidth,
-                contentHeight,
-                -1.0,
-                HPos.CENTER,
-                VPos.CENTER
-            )
-        }
-        else {
-            track.resizeRelocate(contentX, contentY, contentWidth, trackHeight.value)
-            layoutInArea(
-                track,
-                contentX,
-                contentY -trackHeight.value/2 ,
-                contentWidth,
-                trackHeight.value,
-                -1.0,
-                HPos.CENTER,
-                VPos.CENTER
-            )
-        }
 
-        if (barHeight.value == 0.0) {
-            bar.resizeRelocate(contentX, contentY, barWidth, contentHeight)
+         if(trackHeight.value < barHeight.value){
+             val trackShift = (barHeight.value - trackHeight.value)/2.0
+
+            bar.resizeRelocate(contentX, contentY, contentWidth, barHeight.value)
             layoutInArea(
                 bar,
                 contentX,
-                contentY ,
-                barWidth,
-                contentHeight,
-                -1.0,
-                HPos.CENTER,
-                VPos.CENTER
-            )
-        }
-        else {
-            bar.resizeRelocate(contentX, contentY, barWidth, barHeight.value)
-            layoutInArea(
-                bar,
-                contentX,
-                contentY - barHeight.value/3 ,
+                contentY,
                 barWidth,
                 barHeight.value,
                 -1.0,
                 HPos.CENTER,
                 VPos.CENTER
             )
+
+            track.resizeRelocate(contentX, trackShift, contentWidth, trackHeight.value)
+            layoutInArea(
+                track,
+                contentX,
+                trackShift,
+                contentWidth,
+                trackHeight.value,
+                -1.0,
+                HPos.CENTER,
+                VPos.TOP
+            )
         }
+
+         else  {
+             bar.resizeRelocate(contentX, contentY, contentWidth, trackHeight.value)
+             layoutInArea(
+                 bar,
+                 contentX,
+                 contentY,
+                 barWidth,
+                 trackHeight.value,
+                 -1.0,
+                 HPos.CENTER,
+                 VPos.CENTER
+             )
+
+             track.resizeRelocate(contentX, contentY + barHeight.value/3.0, contentWidth, trackHeight.value)
+             layoutInArea(
+                 track,
+                 contentX,
+                 contentY,
+                 contentWidth,
+                 trackHeight.value,
+                 -1.0,
+                 HPos.CENTER,
+                 VPos.TOP
+             )
+         }
 
         track.isVisible = true
         bar.isVisible = true
