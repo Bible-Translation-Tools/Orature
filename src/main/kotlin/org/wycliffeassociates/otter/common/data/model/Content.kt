@@ -8,5 +8,6 @@ data class Content(
         var selectedTake: Take?,
         var text: String?,
         var format: String?,
+        var type: ContentType,
         var id: Int = 0
 )

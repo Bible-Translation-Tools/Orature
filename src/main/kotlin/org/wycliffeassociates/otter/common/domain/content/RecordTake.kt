@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.functions.Function3
 import io.reactivex.functions.Function4
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -127,12 +126,13 @@ class RecordTake(
                                 .resolve(File(filename))
 
                         val newTake = Take(
-                                takeFile.name,
-                                takeFile,
-                                highest + 1,
-                                LocalDate.now(),
-                                false,
-                                listOf() // No markers
+                                filename = takeFile.name,
+                                path = takeFile,
+                                number = highest + 1,
+                                created = LocalDate.now(),
+                                deleted = null,
+                                played = false,
+                                markers = listOf() // No markers
                         )
 
                         // Create an empty WAV file

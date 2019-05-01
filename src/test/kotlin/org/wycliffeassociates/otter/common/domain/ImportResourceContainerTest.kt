@@ -68,6 +68,10 @@ class MockContentRepository: IContentRepository {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    override fun getCollectionMetaContent(collection: Collection): Single<Content> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     override fun getSources(content: Content): Single<List<Content>> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

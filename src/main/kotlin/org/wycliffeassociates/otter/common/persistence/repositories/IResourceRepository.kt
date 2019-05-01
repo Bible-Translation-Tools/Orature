@@ -1,18 +1,20 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
-import io.reactivex.Single
+import io.reactivex.Observable
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.workbook.ResourceInfo
 
 interface IResourceRepository : IRepository<Content> {
-    // Get resources for a content
-    fun getByContent(content: Content): Single<List<Content>>
-    // Get resources for a collection
-    fun getByCollection(collection: Collection): Single<List<Content>>
-    // Link/Unlink
+    fun getResources(collection: Collection, resourceInfo: ResourceInfo): Observable<Content>
+    fun getResources(content: Content, resourceInfo: ResourceInfo): Observable<Content>
+    fun getSubtreeResourceInfo(collection: Collection): List<ResourceInfo>
+    fun getResourceInfo(content: Content): List<ResourceInfo>
+    fun getResourceInfo(collection: Collection): List<ResourceInfo>
     fun linkToContent(resource: Content, content: Content, dublinCoreFk: Int): Completable
-    fun unlinkFromContent(resource: Content, content: Content): Completable
     fun linkToCollection(resource: Content, collection: Collection, dublinCoreFk: Int): Completable
-    fun unlinkFromCollection(resource: Content, collection: Collection): Completable
+
+    // Prepare SubtreeHasResources table
+    fun calculateAndSetSubtreeHasResources(collectionId: Int)
 }

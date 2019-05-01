@@ -15,7 +15,7 @@ class EditTake(
         NO_EDITOR
     }
     fun edit(take: Take): Single<Result> {
-        take.timestamp = LocalDate.now()
+        take.created = LocalDate.now()
         return launchPlugin
                 .launchEditor(take.path)
                 .flatMap {

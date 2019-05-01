@@ -14,5 +14,7 @@ data class AssociatedAudio(
      *  This will cache and emit the latest value.
      *  The UX may push updates here for propagation, and the persistence layer should respond by storing them.
      */
-    val selected: BehaviorRelay<Int?>
+    val selected: BehaviorRelay<TakeHolder>
 )
+
+data class TakeHolder(val value: Take?)

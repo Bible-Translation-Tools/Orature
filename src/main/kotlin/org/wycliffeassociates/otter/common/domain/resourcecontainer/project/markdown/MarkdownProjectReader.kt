@@ -6,6 +6,7 @@ import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.collections.tree.TreeNode
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
@@ -87,9 +88,9 @@ class MarkdownProjectReader() : IProjectReader {
                     titleKey = "$id",
                     resourceContainer = null)
 
-    private fun content(sort: Int, label: String, id: Int, text: String): Content? =
+    private fun content(sort: Int, label: String, id: Int, text: String, type: ContentType): Content? =
             if (text.isEmpty()) null
-            else Content(sort, label, id, id, null, text, FORMAT)
+            else Content(sort, label, id, id, null, text, FORMAT, type)
 
     private fun contentList(f: OtterFile): List<Content>? =
             bufferedReaderProvider(f)
@@ -100,8 +101,8 @@ class MarkdownProjectReader() : IProjectReader {
         var sort = 1
         return helpResources.flatMap { helpResource ->
             listOfNotNull(
-                    content(sort++, "title", fileId, helpResource.title),
-                    content(sort++, "body", fileId, helpResource.body)
+                    content(sort++, "title", fileId, helpResource.title, ContentType.TITLE),
+                    content(sort++, "body", fileId, helpResource.body, ContentType.BODY)
             )
         }
     }

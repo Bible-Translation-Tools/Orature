@@ -4,9 +4,10 @@ import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.collections.tree.TreeNode
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -97,35 +98,37 @@ private fun parseUSFMToChapterTrees(bufferedReader: BufferedReader, projectSlug:
     return doc.chapters.map { chapter ->
         val chapterSlug = "${projectSlug}_${chapter.key}"
         val chapterCollection = Collection(
-                chapter.key,
-                chapterSlug,
-                "chapter",
-                chapter.key.toString(),
-                null
+            sort = chapter.key,
+            slug = chapterSlug,
+            labelKey = "chapter",
+            titleKey = chapter.key.toString(),
+            resourceContainer = null
         )
         val chapterTree = Tree(chapterCollection)
         // create a chunk for the whole chapter
         val chapChunk = Content(
-                0,
-                "chapter",
-                chapter.value.values.first().number,
-                chapter.value.values.last().number,
-                null,
-                null,
-                null
+            sort = 0,
+            labelKey = "chapter",
+            start = chapter.value.values.first().number,
+            end = chapter.value.values.last().number,
+            selectedTake = null,
+            text = null,
+            format = null,
+            type = ContentType.META
         )
         chapterTree.addChild(TreeNode(chapChunk))
 
         // Create content for each verse
         for (verse in chapter.value.values) {
             val content = Content(
-                    verse.number,
-                    "verse",
-                    verse.number,
-                    verse.number,
-                    null,
-                    null,
-                    null
+                sort = verse.number,
+                labelKey = "verse",
+                start = verse.number,
+                end = verse.number,
+                selectedTake = null,
+                text = null,
+                format = null,
+                type = ContentType.TEXT
             )
             chapterTree.addChild(TreeNode(content))
         }
