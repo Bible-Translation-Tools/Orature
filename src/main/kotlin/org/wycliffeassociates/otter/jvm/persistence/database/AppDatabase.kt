@@ -10,7 +10,7 @@ import java.io.File
 class AppDatabase(
         databaseFile: File
 ) {
-    private val dsl: DSLContext
+    val dsl: DSLContext
 
     init {
         // Load the SQLite JDBC drivers
@@ -32,7 +32,7 @@ class AppDatabase(
         if (dbDoesNotExist) setup()
     }
 
-    fun setup() {
+    private fun setup() {
         // Setup the tables
         val schemaFileStream = ClassLoader.getSystemResourceAsStream("sql/CreateAppDb.sql")
 
@@ -50,27 +50,18 @@ class AppDatabase(
         }
     }
 
-    // Create the daos
-    private var languageDao = LanguageDao(dsl)
-    private val resourceMetadataDao = ResourceMetadataDao(dsl)
-    private val collectionDao = CollectionDao(dsl)
-    private val contentDao = ContentDao(dsl)
-    private val resourceLinkDao = ResourceLinkDao(dsl)
-    private val takeDao = TakeDao(dsl)
-    private val markerDao = MarkerDao(dsl)
-    private val audioPluginDao = AudioPluginDao(dsl)
-    private val preferenceDao = PreferenceDao(dsl)
-
-    // the getters
-    fun getLanguageDao() = languageDao
-    fun getResourceMetadataDao() = resourceMetadataDao
-    fun getCollectionDao() = collectionDao
-    fun getContentDao() = contentDao
-    fun getResourceLinkDao() = resourceLinkDao
-    fun getTakeDao() = takeDao
-    fun getMarkerDao() = markerDao
-    fun getAudioPluginDao() = audioPluginDao
-    fun getPreferenceDao() = preferenceDao
+    // Create the DAOs
+    val languageDao = LanguageDao(dsl)
+    val resourceMetadataDao = ResourceMetadataDao(dsl)
+    val collectionDao = CollectionDao(dsl)
+    val contentDao = ContentDao(dsl)
+    val contentTypeDao = ContentTypeDao(dsl)
+    val resourceLinkDao = ResourceLinkDao(dsl)
+    val subtreeHasResourceDao = SubtreeHasResourceDao(dsl)
+    val takeDao = TakeDao(dsl)
+    val markerDao = MarkerDao(dsl)
+    val audioPluginDao = AudioPluginDao(dsl)
+    val preferenceDao = PreferenceDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {

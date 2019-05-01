@@ -4,6 +4,8 @@ import jooq.Tables.*
 import org.jooq.Record
 import org.wycliffeassociates.otter.jvm.persistence.entities.*
 
+typealias ContentEntityTable = jooq.tables.ContentEntity
+
 class RecordMappers {
     companion object {
         fun mapToPreferencesEntity(record: Record): PreferenceEntity {
@@ -58,16 +60,17 @@ class RecordMappers {
             )
         }
 
-        fun mapToContentEntity(record: Record): ContentEntity {
+        fun mapToContentEntity(record: Record, table: ContentEntityTable = CONTENT_ENTITY): ContentEntity {
             return ContentEntity(
-                    record.getValue(CONTENT_ENTITY.ID),
-                    record.getValue(CONTENT_ENTITY.SORT),
-                    record.getValue(CONTENT_ENTITY.LABEL),
-                    record.getValue(CONTENT_ENTITY.START),
-                    record.getValue(CONTENT_ENTITY.COLLECTION_FK),
-                    record.getValue(CONTENT_ENTITY.SELECTED_TAKE_FK),
-                    record.getValue(CONTENT_ENTITY.TEXT),
-                    record.getValue(CONTENT_ENTITY.FORMAT)
+                    record.getValue(table.ID),
+                    record.getValue(table.SORT),
+                    record.getValue(table.LABEL),
+                    record.getValue(table.START),
+                    record.getValue(table.COLLECTION_FK),
+                    record.getValue(table.SELECTED_TAKE_FK),
+                    record.getValue(table.TEXT),
+                    record.getValue(table.FORMAT),
+                    record.getValue(table.TYPE_FK)
             )
         }
 
@@ -88,7 +91,8 @@ class RecordMappers {
                     record.getValue(TAKE_ENTITY.FILENAME),
                     record.getValue(TAKE_ENTITY.PATH),
                     record.getValue(TAKE_ENTITY.NUMBER),
-                    record.getValue(TAKE_ENTITY.TIMESTAMP),
+                    record.getValue(TAKE_ENTITY.CREATED_TS),
+                    record.getValue(TAKE_ENTITY.DELETED_TS),
                     record.getValue(TAKE_ENTITY.PLAYED)
             )
         }

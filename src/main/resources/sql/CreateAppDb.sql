@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS collection_entity (
 CREATE TABLE IF NOT EXISTS content_entity (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     collection_fk    INTEGER NOT NULL REFERENCES collection_entity(id) ON DELETE CASCADE,
+    type_fk          INTEGER NOT NULL REFERENCES content_type(id) ON DELETE RESTRICT,
     label            TEXT NOT NULL,
     selected_take_fk INTEGER REFERENCES take_entity(id),
     start            INTEGER NOT NULL,
@@ -56,7 +57,13 @@ CREATE TABLE IF NOT EXISTS content_entity (
     text             TEXT,
     format           TEXT
 );
-CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start);
+CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
+
+CREATE TABLE IF NOT EXISTS content_type (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    name             TEXT NOT NULL,
+    UNIQUE (name COLLATE NOCASE) ON CONFLICT IGNORE
+);
 
 CREATE TABLE IF NOT EXISTS content_derivative (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,7 +77,8 @@ CREATE TABLE IF NOT EXISTS take_entity (
     filename         TEXT NOT NULL,
     path             TEXT NOT NULL,
     number           INTEGER NOT NULL,
-    timestamp        TEXT NOT NULL,
+    created_ts       TEXT NOT NULL,
+    deleted_ts       TEXT DEFAULT NULL,
     played           INTEGER DEFAULT 0 NOT NULL
 );
 
@@ -88,11 +96,19 @@ CREATE TABLE IF NOT EXISTS resource_link (
     content_fk          INTEGER REFERENCES content_entity(id) ON DELETE CASCADE,
     collection_fk       INTEGER REFERENCES collection_entity(id) ON DELETE CASCADE,
     dublin_core_fk      INTEGER NOT NULL REFERENCES dublin_core_entity(id),
-    UNIQUE (resource_content_fk, content_fk, collection_fk),
+    UNIQUE (resource_content_fk, content_fk, collection_fk) ON CONFLICT IGNORE,
     CONSTRAINT ensure_at_least_one_not_null
         CHECK ((collection_fk is NOT NULL) or (content_fk is NOT NULL)),
     CONSTRAINT prevent_both_not_null
         CHECK ((collection_fk is NULL) or (content_fk is NULL))
+);
+CREATE INDEX IF NOT EXISTS idx_resource_link_collection ON resource_link (collection_fk);
+CREATE INDEX IF NOT EXISTS idx_resource_link_content ON resource_link (content_fk);
+
+CREATE TABLE IF NOT EXISTS subtree_has_resource (
+  collection_fk       INTEGER NOT NULL REFERENCES collection_entity (id) ON DELETE CASCADE,
+  dublin_core_fk      INTEGER NOT NULL REFERENCES dublin_core_entity (id) ON DELETE CASCADE,
+  PRIMARY KEY (collection_fk, dublin_core_fk) ON CONFLICT IGNORE
 );
 
 CREATE TABLE IF NOT EXISTS audio_plugin_entity (

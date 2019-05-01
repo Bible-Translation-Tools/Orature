@@ -6,6 +6,7 @@ data class TakeEntity(
         var filename: String,
         var filepath: String,
         var number: Int,
-        var timestamp: String,
+        var createdTs: String,
+        var deletedTs: String?,
         var played: Int
 )
