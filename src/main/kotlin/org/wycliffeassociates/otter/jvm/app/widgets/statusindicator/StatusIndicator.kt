@@ -112,10 +112,10 @@ class StatusIndicator : Control() {
     val indicatorRadiusProperty: DoubleProperty = SimpleDoubleProperty(0.0)
     var indicatorRadius by indicatorRadiusProperty
 
-    val barHeightProperty: DoubleProperty = SimpleDoubleProperty(0.0)
+    val barHeightProperty: DoubleProperty = SimpleDoubleProperty(10.0)
     var barHeight: Double by barHeightProperty
 
-    val trackHeightProperty: DoubleProperty = SimpleDoubleProperty(0.0)
+    val trackHeightProperty: DoubleProperty = SimpleDoubleProperty(10.0)
     var trackHeight: Double by trackHeightProperty
 
     val showTextProperty = SimpleBooleanProperty(false)
