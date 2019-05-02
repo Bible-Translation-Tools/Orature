@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import io.reactivex.internal.operators.observable.ObservableError
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -26,6 +27,7 @@ class ProjectWizardViewModel : ViewModel() {
     val targetLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
     val languages: ObservableList<Language> = FXCollections.observableArrayList()
+    val filteredLanguages: ObservableList<Language> = FXCollections.observableArrayList()
 
     private val collectionHierarchy: ArrayList<List<Collection>> = ArrayList()
 
@@ -43,6 +45,7 @@ class ProjectWizardViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
+                    filterToAvailableLanguges()
                 }
 
         loadProjects()
@@ -50,6 +53,17 @@ class ProjectWizardViewModel : ViewModel() {
         targetLanguageProperty.toObservable().subscribe { language ->
             existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
         }
+    }
+
+    private fun filterToAvailableLanguges() {
+        collectionRepo
+            .getRootSources()
+            .observeOnFx()
+            .subscribe { retrieved ->
+                retrieved.forEach {collection ->
+                    filteredLanguages.addAll(languages.filter { it.id == collection.resourceContainer?.language?.id })
+                }
+            }
     }
 
     private fun loadProjects() {
@@ -132,7 +146,7 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     fun filterLanguages(query: String): ObservableList<Language> =
-        languages.filtered {
+        filteredLanguages.filtered {
             it.name.contains(query, true)
                     || it.anglicizedName.contains(query, true)
                     || it.slug.contains(query, true)

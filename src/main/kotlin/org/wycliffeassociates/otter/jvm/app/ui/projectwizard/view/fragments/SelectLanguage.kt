@@ -21,7 +21,7 @@ class SelectLanguage : Fragment() {
             label(messages["sourceLanguage"], ProjectWizardStyles.sourceLanguageIcon()) {
                 addClass(ProjectWizardStyles.languageBoxLabel)
             }
-            searchablelist(viewModel.languages, viewModel.sourceLanguageProperty) {
+            searchablelist(viewModel.filteredLanguages, viewModel.sourceLanguageProperty) {
                 addClass(ProjectWizardStyles.searchableList)
                 listView.cellCache { language ->
                     label("${language.name} (${language.slug})")
@@ -44,7 +44,7 @@ class SelectLanguage : Fragment() {
             label(messages["targetLanguage"], ProjectWizardStyles.targetLanguageIcon()) {
                 addClass(ProjectWizardStyles.languageBoxLabel)
             }
-            searchablelist(viewModel.languages, viewModel.targetLanguageProperty) {
+            searchablelist(viewModel.filteredLanguages, viewModel.targetLanguageProperty) {
                 addClass(ProjectWizardStyles.searchableList)
                 listView.cellCache { language ->
                     label("${language.name} (${language.slug})")
