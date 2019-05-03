@@ -10,15 +10,14 @@ import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
-import java.sql.DatabaseMetaData
 
 class ResourceMetadataRepository(
         database: AppDatabase,
         private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
         private val languageMapper: LanguageMapper = LanguageMapper()
 ) : IResourceMetadataRepository {
-    private val resourceMetadataDao = database.getResourceMetadataDao()
-    private val languageDao = database.getLanguageDao()
+    private val resourceMetadataDao = database.resourceMetadataDao
+    private val languageDao = database.languageDao
 
     override fun insert(obj: ResourceMetadata): Single<Int> {
         return Single

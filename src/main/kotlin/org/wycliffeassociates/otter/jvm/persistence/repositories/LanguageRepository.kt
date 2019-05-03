@@ -12,7 +12,7 @@ class LanguageRepository(
         database: AppDatabase,
         private val mapper: LanguageMapper = LanguageMapper()
 ) : ILanguageRepository {
-    private val languageDao = database.getLanguageDao()
+    private val languageDao = database.languageDao
 
     override fun insert(obj: Language): Single<Int> {
         return Single

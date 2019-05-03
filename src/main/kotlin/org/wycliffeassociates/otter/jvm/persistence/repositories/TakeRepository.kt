@@ -12,21 +12,34 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.TakeEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.TakeMapper
 import java.io.File
+import java.time.LocalDate
 
 class TakeRepository(
         private val database: AppDatabase,
         private val takeMapper: TakeMapper = TakeMapper(),
         private val markerMapper: MarkerMapper = MarkerMapper()
 ) : ITakeRepository {
-    private val takeDao = database.getTakeDao()
-    private val markerDao = database.getMarkerDao()
-    private val contentDao = database.getContentDao()
+    private val takeDao = database.takeDao
+    private val markerDao = database.markerDao
+    private val contentDao = database.contentDao
+
+    /** Delete the DB record. Instead of this, consider using {@see markDeleted} to set the deleted timestamp. */
     override fun delete(obj: Take): Completable {
         return Completable
                 .fromAction {
                     takeDao.delete(takeMapper.mapToEntity(obj))
                 }
                 .subscribeOn(Schedulers.io())
+    }
+
+    /** Set the deleted timestamp to now. */
+    override fun markDeleted(take: Take): Completable {
+        return Completable
+            .fromAction {
+                val withDeletionFlag = take.copy(deleted = LocalDate.now())
+                takeDao.update(takeMapper.mapToEntity(withDeletionFlag))
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun getAll(): Single<List<Take>> {

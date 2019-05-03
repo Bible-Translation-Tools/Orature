@@ -9,25 +9,27 @@ import java.time.LocalDate
 class TakeMapper {
     fun mapFromEntity(entity: TakeEntity, markers: List<Marker>): Take {
         return Take(
-                entity.filename,
-                File(entity.filepath),
-                entity.number,
-                LocalDate.parse(entity.timestamp),
-                entity.played == 1,
-                markers,
-                entity.id
+            filename = entity.filename,
+            path = File(entity.filepath),
+            number = entity.number,
+            created = entity.createdTs.let(LocalDate::parse),
+            deleted = entity.deletedTs?.let(LocalDate::parse),
+            played = entity.played == 1,
+            markers = markers,
+            id = entity.id
         )
     }
 
     fun mapToEntity(obj: Take, contentFk: Int = -1): TakeEntity {
         return TakeEntity(
-                obj.id,
-                contentFk,
-                obj.filename,
-                obj.path.toURI().path,
-                obj.number,
-                obj.timestamp.toString(),
-                if (obj.played) 1 else 0
+            id = obj.id,
+            contentFk = contentFk,
+            filename = obj.filename,
+            filepath = obj.path.toURI().path,
+            number = obj.number,
+            createdTs = obj.created.toString(),
+            deletedTs = obj.deleted?.toString(),
+            played = if (obj.played) 1 else 0
         )
     }
 }

@@ -12,7 +12,7 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
     companion object {
         val NO_ID = -1
     }
-    private val preferenceDao = database.getPreferenceDao()
+    private val preferenceDao = database.preferenceDao
     private val CURRENT_USER_ID_KEY = "currentUserId"
     private val APP_INIT_KEY = "appInitialized"
     private val EDITOR_PLUGIN_ID_KEY = "editorPluginId"

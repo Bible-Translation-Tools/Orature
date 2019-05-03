@@ -15,6 +15,7 @@ class ContentDao(
 ) {
     // TODO: move to common data package
     enum class Labels(val value: String) {
+        CHAPTER("chapter"),
         VERSE("verse"),
         HELP_TITLE("title"),
         HELP_BODY("body")
@@ -162,7 +163,8 @@ class ContentDao(
                         CONTENT_ENTITY.LABEL,
                         CONTENT_ENTITY.SELECTED_TAKE_FK,
                         CONTENT_ENTITY.TEXT,
-                        CONTENT_ENTITY.FORMAT
+                        CONTENT_ENTITY.FORMAT,
+                        CONTENT_ENTITY.TYPE_FK
                 )
         val insertWithValues = entities.fold(bareInsert) { q, e ->
             if (e.id != 0) throw InsertionException("Entity ID was not 0")
@@ -173,7 +175,8 @@ class ContentDao(
                     e.labelKey,
                     e.selectedTakeFk,
                     e.text,
-                    e.format
+                    e.format,
+                    e.type_fk
             )
         }
         insertWithValues.execute()

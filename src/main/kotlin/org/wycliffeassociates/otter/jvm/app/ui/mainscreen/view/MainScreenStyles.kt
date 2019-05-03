@@ -17,8 +17,8 @@ class MainScreenStyles : Stylesheet() {
     init {
 
         main {
-            prefWidth = Screen.getPrimary().visualBounds.width.px - 20.0
-            prefHeight = Screen.getPrimary().visualBounds.height.px - 20.0
+            prefWidth = Screen.getPrimary().visualBounds.width.px - 100.0
+            prefHeight = Screen.getPrimary().visualBounds.height.px - 100.0
         }
 
         // this gets compiled down to list-menu

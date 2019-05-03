@@ -18,7 +18,7 @@ class AudioPluginRepository(
         private val preferences: IAppPreferences,
         private val mapper: AudioPluginDataMapper = AudioPluginDataMapper()
 ) : IAudioPluginRepository {
-    private val audioPluginDao = database.getAudioPluginDao()
+    private val audioPluginDao = database.audioPluginDao
 
     override fun insert(data: AudioPluginData): Single<Int> {
         return Single
