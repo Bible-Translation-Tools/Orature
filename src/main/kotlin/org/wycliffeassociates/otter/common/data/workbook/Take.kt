@@ -11,7 +11,12 @@ data class Take(
     val number: Int,
     val format: MimeType,
     val createdTimestamp: LocalDate,
-    val deletedTimestamp: BehaviorRelay<DateHolder>
+    val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty)
 )
 
-data class DateHolder(val value: LocalDate?)
+data class DateHolder(val value: LocalDate?) {
+    companion object {
+        val empty = DateHolder(null)
+        fun now() = DateHolder(LocalDate.now())
+    }
+}
