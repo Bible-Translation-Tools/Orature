@@ -111,7 +111,7 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
                 .from(RESOURCE_LINK)
                 .join(main).on(main.ID.eq(RESOURCE_LINK.CONTENT_FK))
                 .join(help).on(help.ID.eq(RESOURCE_LINK.RESOURCE_CONTENT_FK))
-                .where(RESOURCE_LINK.ID.eq(metadata.id))
+                .where(RESOURCE_LINK.DUBLIN_CORE_FK.eq(metadata.id))
                 .and(condition(main))
                 .orderBy(help.START, help.SORT)
                 .fetchStream()

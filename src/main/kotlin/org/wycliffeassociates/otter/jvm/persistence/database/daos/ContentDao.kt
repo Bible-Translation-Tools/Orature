@@ -26,9 +26,8 @@ class ContentDao(
                 .select()
                 .from(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.COLLECTION_FK.eq(collectionId))
-                .fetch {
-                    RecordMappers.mapToContentEntity(it)
-                }
+                .orderBy(CONTENT_ENTITY.SORT)
+                .fetch { RecordMappers.mapToContentEntity(it) }
     }
 
     fun fetchByCollectionIdAndStart(
@@ -43,6 +42,7 @@ class ContentDao(
                 .where(CONTENT_ENTITY.COLLECTION_FK.eq(collectionId))
                 .and(CONTENT_ENTITY.START.eq(start))
                 .and(CONTENT_ENTITY.LABEL.`in`(label.map(Labels::value)))
+                .orderBy(CONTENT_ENTITY.SORT)
                 .fetch { RecordMappers.mapToContentEntity(it) }
     }
 
@@ -93,9 +93,8 @@ class ContentDao(
                 .select()
                 .from(CONTENT_ENTITY)
                 .where(CONTENT_ENTITY.ID.`in`(sourceIds))
-                .fetch {
-                    RecordMappers.mapToContentEntity(it)
-                }
+                .orderBy(CONTENT_ENTITY.SORT)
+                .fetch { RecordMappers.mapToContentEntity(it) }
     }
 
     fun updateSources(entity: ContentEntity, sources: List<ContentEntity>, dsl: DSLContext = instanceDsl) {
