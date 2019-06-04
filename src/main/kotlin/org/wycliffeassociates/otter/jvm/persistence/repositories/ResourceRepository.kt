@@ -6,7 +6,8 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import jooq.Tables.*
-import org.jooq.Condition
+import org.jooq.SelectConditionStep
+import org.jooq.Record
 import org.jooq.DSLContext
 import org.wycliffeassociates.otter.common.collections.multimap.MultiMap
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -14,6 +15,7 @@ import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.workbook.ResourceInfo
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.persistence.database.daos.ContentEntityTable
 import org.wycliffeassociates.otter.jvm.persistence.database.daos.RecordMappers
 import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
@@ -70,9 +72,8 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
         return database.dsl
             .selectDistinct(DUBLIN_CORE_ENTITY.asterisk())
             .from(RESOURCE_LINK)
-            .join(CONTENT_ENTITY).on(CONTENT_ENTITY.ID.eq(RESOURCE_LINK.CONTENT_FK))
             .join(DUBLIN_CORE_ENTITY).on(DUBLIN_CORE_ENTITY.ID.eq(RESOURCE_LINK.DUBLIN_CORE_FK))
-            .where(CONTENT_ENTITY.COLLECTION_FK.eq(collection.id))
+            .where(RESOURCE_LINK.COLLECTION_FK.eq(collection.id))
             .fetch(RecordMappers.Companion::mapToResourceMetadataEntity)
             .map(this::buildResourceInfo)
     }
@@ -87,32 +88,50 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
             .map(this::buildResourceInfo)
     }
 
-    override fun getResources(collection: Collection, resourceInfo: ResourceInfo): Observable<Content> {
-        return getResources({ table -> table.COLLECTION_FK.eq(collection.id) }, resourceInfo)
-    }
-
     override fun getResources(content: Content, resourceInfo: ResourceInfo): Observable<Content> {
-        return getResources({ table -> table.ID.eq(content.id) }, resourceInfo)
-    }
-
-    private fun getResources(
-        condition: (jooq.tables.ContentEntity) -> Condition,
-        resourceInfo: ResourceInfo
-    ): Observable<Content> {
         val metadata = mapToResourceMetadataEntity[resourceInfo]
             ?: return Observable.empty()
 
         val main = CONTENT_ENTITY.`as`("main")
         val help = CONTENT_ENTITY.`as`("help")
 
+        val selectStatement = database.dsl
+            .selectDistinct(help.asterisk())
+            .from(RESOURCE_LINK)
+            .join(main).on(main.ID.eq(RESOURCE_LINK.CONTENT_FK))
+            .join(help).on(help.ID.eq(RESOURCE_LINK.RESOURCE_CONTENT_FK))
+            .where(RESOURCE_LINK.DUBLIN_CORE_FK.eq(metadata.id))
+            .and(main.ID.eq(content.id))
+
+        return getResources(help, selectStatement)
+    }
+
+    /**
+     * Returns collection-specific resources (does not return resources about the collection's children.)
+     */
+    override fun getResources(collection: Collection, resourceInfo: ResourceInfo): Observable<Content> {
+        val metadata = mapToResourceMetadataEntity[resourceInfo]
+            ?: return Observable.empty()
+
+        val help = CONTENT_ENTITY.`as`("help")
+
+        val selectStatement = database.dsl
+            .selectDistinct(help.asterisk())
+            .from(RESOURCE_LINK)
+            .join(COLLECTION_ENTITY).on(COLLECTION_ENTITY.ID.eq(RESOURCE_LINK.COLLECTION_FK))
+            .join(help).on(RESOURCE_LINK.RESOURCE_CONTENT_FK.eq(help.ID))
+            .where(RESOURCE_LINK.DUBLIN_CORE_FK.eq(metadata.id))
+            .and(COLLECTION_ENTITY.ID.eq(collection.id))
+
+        return getResources(help, selectStatement)
+    }
+
+    private fun getResources(
+        help: ContentEntityTable,
+        selectStatement: SelectConditionStep<Record>
+    ): Observable<Content> {
         val contentStreamObservable = Observable.fromCallable {
-            database.dsl
-                .selectDistinct(help.asterisk())
-                .from(RESOURCE_LINK)
-                .join(main).on(main.ID.eq(RESOURCE_LINK.CONTENT_FK))
-                .join(help).on(help.ID.eq(RESOURCE_LINK.RESOURCE_CONTENT_FK))
-                .where(RESOURCE_LINK.DUBLIN_CORE_FK.eq(metadata.id))
-                .and(condition(main))
+            selectStatement
                 .orderBy(help.START, help.SORT)
                 .fetchStream()
                 .map { RecordMappers.mapToContentEntity(it, help) }

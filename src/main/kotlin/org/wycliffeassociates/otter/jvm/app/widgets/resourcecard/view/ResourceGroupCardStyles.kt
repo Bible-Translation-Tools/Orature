@@ -6,7 +6,6 @@ import javafx.scene.text.FontWeight
 import tornadofx.*
 
 class ResourceGroupCardStyles : Stylesheet() {
-
     companion object {
         val resourceGroupCard by cssclass()
     }
