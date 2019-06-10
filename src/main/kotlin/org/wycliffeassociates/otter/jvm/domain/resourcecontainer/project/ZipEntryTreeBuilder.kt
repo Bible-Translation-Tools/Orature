@@ -6,16 +6,10 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterZipFile.Companion.otterFileZ
 import java.io.IOException
+import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.Files
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.FileSystem
-import java.nio.file.Paths
-import java.nio.file.Path
-import java.nio.file.FileSystems
-import java.nio.file.FileVisitResult
+import java.util.*
 import java.util.zip.ZipFile
-import java.util.ArrayDeque
 
 object ZipEntryTreeBuilder : IZipEntryTreeBuilder {
 
@@ -24,21 +18,26 @@ object ZipEntryTreeBuilder : IZipEntryTreeBuilder {
         return FileSystems.newFileSystem(path, null)
     }
 
-    override fun buildOtterFileTree(zipFile: ZipFile, projectPath: String): OtterTree<OtterFile> {
+    override fun buildOtterFileTree(
+        zipFile: ZipFile,
+        projectPath: String,
+        rootPathWithinZip: String?
+    ): OtterTree<OtterFile> {
         var treeRoot: OtterTree<OtterFile>? = null
         val treeCursor = ArrayDeque<OtterTree<OtterFile>>()
         createZipFileSystem(zipFile.name).use { zipFileSystem ->
 
-            val projectRoot = zipFileSystem.getPath(projectPath)
+            val projectRoot = zipFileSystem.getPath(rootPathWithinZip ?: "", projectPath).normalize()
             val sep = zipFileSystem.separator
 
             Files.walkFileTree(projectRoot, object : SimpleFileVisitor<Path>() {
                 @Throws(IOException::class)
-                override fun visitFile(file: Path,
-                                       attrs: BasicFileAttributes): FileVisitResult {
+                override fun visitFile(
+                    file: Path,
+                    attrs: BasicFileAttributes
+                ): FileVisitResult {
                     val filepath = file.toString().substringAfter(sep)
-                    val entry = zipFile.getEntry(filepath)
-                    val otterZipFile = otterFileZ(filepath, zipFile, sep, treeCursor.peek()?.value, entry)
+                    val otterZipFile = otterFileZ(filepath, zipFile, sep, rootPathWithinZip, treeCursor.peek()?.value)
                     treeCursor.peek()?.addChild(OtterTreeNode(otterZipFile))
                     return FileVisitResult.CONTINUE
                 }
@@ -50,17 +49,28 @@ object ZipEntryTreeBuilder : IZipEntryTreeBuilder {
                 }
 
                 @Throws(IOException::class)
-                override fun preVisitDirectory(dir: Path,
-                                               attrs: BasicFileAttributes): FileVisitResult {
-                    val newDirNode = OtterTree(
-                            otterFileZ(dir.toString(), zipFile, zipFileSystem.separator, treeCursor.peek()?.value)
-                    )
+                override fun preVisitDirectory(
+                    dir: Path,
+                    attrs: BasicFileAttributes
+                ): FileVisitResult {
+                    val newDirNode = OtterTree(otterFileZ(
+                            absolutePath = dir.toString(),
+                            rootZipFile = zipFile,
+                            separator = zipFileSystem.separator,
+                            rootPathWithinZip = rootPathWithinZip,
+                            parentFile = treeCursor.peek()?.value
+                    ))
                     treeCursor.peek()?.addChild(newDirNode)
                     treeCursor.push(newDirNode)
                     return FileVisitResult.CONTINUE
                 }
             })
-            return treeRoot ?: OtterTree(otterFileZ(zipFile.name, zipFile, zipFileSystem.separator))
+            return treeRoot ?: OtterTree(otterFileZ(
+                absolutePath = zipFile.name,
+                rootZipFile = zipFile,
+                separator = zipFileSystem.separator,
+                rootPathWithinZip = rootPathWithinZip
+            ))
         }
     }
 }
