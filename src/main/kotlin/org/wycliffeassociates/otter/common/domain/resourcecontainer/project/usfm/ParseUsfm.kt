@@ -1,31 +1,31 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
-import java.io.BufferedReader
+import java.io.Reader
 
 private val sep = System.lineSeparator()
 
-private val MARKER_BOOK_NAME = "\\id"
-private val MARKER_CHAPTER_NUMBER = "\\c"
-private val MARKER_VERSE_NUMBER = "\\v"
-private val MARKER_NEW_PARAGRAPH = "\\p"
-private val MARKER_SECTION_HEADING = "\\s"
-private val MARKER_SECTION_HEADING_ONE = "\\s1"
-private val MARKER_SECTION_HEADING_TWO = "\\s2"
-private val MARKER_SECTION_HEADING_THREE = "\\s3"
-private val MARKER_SECTION_HEADING_FOUR = "\\s4"
-private val MARKER_CHUNK = "\\s5"
+private const val MARKER_BOOK_NAME = "\\id"
+private const val MARKER_CHAPTER_NUMBER = "\\c"
+private const val MARKER_VERSE_NUMBER = "\\v"
+private const val MARKER_NEW_PARAGRAPH = "\\p"
+private const val MARKER_SECTION_HEADING = "\\s"
+private const val MARKER_SECTION_HEADING_ONE = "\\s1"
+private const val MARKER_SECTION_HEADING_TWO = "\\s2"
+private const val MARKER_SECTION_HEADING_THREE = "\\s3"
+private const val MARKER_SECTION_HEADING_FOUR = "\\s4"
+private const val MARKER_CHUNK = "\\s5"
 
 data class Current(var c: Int = 1, var v: Int = 1)
 data class Verse(val number: Int, var text: String)
 
 class UsfmDocument : HashMap<Int, HashMap<Int, Verse>>()
 
-class ParseUsfm(val bufferedReader: BufferedReader) {
+class ParseUsfm(val reader: Reader) {
     val chapters: UsfmDocument = UsfmDocument()
 
     fun parse(): ParseUsfm {
         val fileCursor = Current()
-        bufferedReader.use {
+        reader.use {
             it.forEachLine {
                 parseLine(it, fileCursor)
             }
@@ -42,16 +42,16 @@ class ParseUsfm(val bufferedReader: BufferedReader) {
             MARKER_BOOK_NAME -> return
             MARKER_CHAPTER_NUMBER -> {
                 current.c = split[1]
-                        ?.replace("\\s".toRegex(), "")
-                        .toInt() //strip potential whitespace and convert to int
+                    ?.replace("\\s".toRegex(), "")
+                    .toInt() //strip potential whitespace and convert to int
                 chapters[current.c] = hashMapOf()
             }
             MARKER_VERSE_NUMBER -> {
                 val sub = split[1].split("\\s+".toRegex(), 2)
                 // Check for verse bridges
                 val numbers = sub[0].replace("\\s".toRegex(), "")
-                        .split("-")
-                        .map { it.toInt() }
+                    .split("-")
+                    .map { it.toInt() }
                 // Add all the verses
                 // Verse text is ignored since
                 // 1) it is not needed, 2) the current parser cannot extract text from word tags, if present

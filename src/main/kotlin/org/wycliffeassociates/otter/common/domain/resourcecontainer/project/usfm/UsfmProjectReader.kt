@@ -6,22 +6,22 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
-import java.io.BufferedReader
 import java.io.File
-import java.util.zip.ZipFile
+import java.io.Reader
 
 class UsfmProjectReader : IProjectReader {
     private val currentDirectoryPrefix = Regex("""^\.?[/\\]""")
 
     override fun constructProjectTree(
-            container: ResourceContainer,
-            project: Project,
-            zipEntryTreeBuilder: IZipEntryTreeBuilder
+        container: ResourceContainer,
+        project: Project,
+        zipEntryTreeBuilder: IZipEntryTreeBuilder
     ): Pair<ImportResult, Tree> {
         // TODO 2/25/19
         return when (container.file.extension) {
@@ -30,7 +30,10 @@ class UsfmProjectReader : IProjectReader {
         }
     }
 
-    private fun constructTreeFromDirOrFile(container: ResourceContainer, project: Project): Pair<ImportResult, Tree> {
+    private fun constructTreeFromDirOrFile(
+        container: ResourceContainer,
+        project: Project
+    ): Pair<ImportResult, Tree> {
         var result: ImportResult = ImportResult.SUCCESS
         val projectTree = Tree(project.toCollection())
 
@@ -49,43 +52,48 @@ class UsfmProjectReader : IProjectReader {
         return Pair(result, projectTree)
     }
 
-    private fun constructTreeFromZip(container: ResourceContainer, project: Project): Pair<ImportResult, Tree> {
-        if (!project.path.endsWith(".usfm", ignoreCase = true)) {
-            return Pair(ImportResult.UNSUPPORTED_CONTENT, Tree(Unit))
-        }
-        // Find the appropriate zip entry and use it to construct the project tree
-        ZipFile(container.file).use { zip ->
-            val projectPath = currentDirectoryPrefix.replace(project.path, "")
-            zip.getEntry(projectPath)?.let {
-                val projectTree = Tree(project.toCollection())
-                val result = parseFromBufferedReader(
-                        zip.getInputStream(it).bufferedReader(),
+    private fun constructTreeFromZip(
+        container: ResourceContainer,
+        project: Project
+    ): Pair<ImportResult, Tree> {
+        return if (!project.path.endsWith(".usfm", ignoreCase = true)) {
+            Pair(ImportResult.UNSUPPORTED_CONTENT, Tree(Unit))
+        } else try {
+            ResourceContainer.load(container.file).use { rc ->
+                val projectPath = currentDirectoryPrefix.replace(project.path, "")
+                rc.accessor.getReader(projectPath).use { reader ->
+                    val projectTree = Tree(project.toCollection())
+                    val result = parseFromReader(
+                        reader,
                         projectTree,
                         project.identifier
-                )
-                return when (result) {
-                    ImportResult.SUCCESS -> Pair(result, projectTree)
-                    else -> Pair(result, Tree(Unit))
+                    )
+                    Pair(
+                        result,
+                        if (result == ImportResult.SUCCESS) projectTree else Tree(Unit)
+                    )
                 }
             }
-        } ?: return Pair(ImportResult.LOAD_RC_ERROR, Tree(Unit))
+        } catch (e: Exception) {
+            Pair(e.castOrFindImportException()?.result ?: ImportResult.LOAD_RC_ERROR, Tree(Unit))
+        }
     }
 }
 
-private fun parseFileIntoProjectTree(file: File, root: Tree, projectIdentifier: String): ImportResult {
+private fun parseFileIntoProjectTree(
+    file: File,
+    root: Tree,
+    projectIdentifier: String
+): ImportResult {
     return when (file.extension) {
-        "usfm", "USFM" -> {
-            parseFromBufferedReader(file.bufferedReader(), root, projectIdentifier)
-        }
-        else -> {
-            ImportResult.UNSUPPORTED_CONTENT
-        }
+        "usfm", "USFM" -> parseFromReader(file.bufferedReader(), root, projectIdentifier)
+        else -> ImportResult.UNSUPPORTED_CONTENT
     }
 }
 
-private fun parseFromBufferedReader(bufferedReader: BufferedReader, root: Tree, projectIdentifier: String): ImportResult {
+private fun parseFromReader(reader: Reader, root: Tree, projectIdentifier: String): ImportResult {
     return try {
-        val chapters = parseUSFMToChapterTrees(bufferedReader, projectIdentifier)
+        val chapters = parseUSFMToChapterTrees(reader, projectIdentifier)
         root.addAll(chapters)
         ImportResult.SUCCESS
     } catch (e: RuntimeException) {
@@ -93,8 +101,8 @@ private fun parseFromBufferedReader(bufferedReader: BufferedReader, root: Tree, 
     }
 }
 
-private fun parseUSFMToChapterTrees(bufferedReader: BufferedReader, projectSlug: String): List<Tree> {
-    val doc = ParseUsfm(bufferedReader).parse()
+private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<Tree> {
+    val doc = ParseUsfm(reader).parse()
     return doc.chapters.map { chapter ->
         val chapterSlug = "${projectSlug}_${chapter.key}"
         val chapterCollection = Collection(

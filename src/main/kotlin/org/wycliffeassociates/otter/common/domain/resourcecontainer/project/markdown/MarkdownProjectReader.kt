@@ -17,6 +17,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.BufferedReader
 import java.io.Closeable
 import java.io.File
+import java.nio.file.Path
 import java.util.*
 import java.util.zip.ZipFile
 
@@ -36,11 +37,16 @@ class MarkdownProjectReader() : IProjectReader {
 
             when (container.file.extension) {
                 "zip" -> {
-                    projectRoot = otterFileF(container.file.toPath().resolve(project.path).toFile())
+                    val projectPathPrefixes = listOfNotNull(container.accessor.root, project.path)
+                    projectRoot = projectPathPrefixes
+                        .fold(container.file.toPath(), Path::resolve)
+                        .normalize()
+                        .toFile()
+                        .let(::otterFileF)
                     val zip = ZipFile(container.file)
                     // The ZipEntry tree needs the ZipFile to stay open until later, so remember to close it.
                     toClose.add(zip)
-                    projectTreeRoot = zipEntryTreeBuilder.buildOtterFileTree(zip, project.path)
+                    projectTreeRoot = zipEntryTreeBuilder.buildOtterFileTree(zip, project.path, container.accessor.root)
                 }
                 else -> {
                     projectRoot = otterFileF(container.file.resolve(project.path))

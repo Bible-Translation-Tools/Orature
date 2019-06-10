@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import io.reactivex.Single
-import io.reactivex.Single.just
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -12,12 +11,11 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceCon
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
-import java.util.zip.ZipFile
 
 class ImportResourceContainer(
-        private val resourceContainerRepository: IResourceContainerRepository,
-        private val directoryProvider: IDirectoryProvider,
-        private val zipEntryTreeBuilder: IZipEntryTreeBuilder
+    private val resourceContainerRepository: IResourceContainerRepository,
+    private val directoryProvider: IDirectoryProvider,
+    private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
     fun import(file: File): Single<ImportResult> {
         return when {
@@ -36,12 +34,10 @@ class ImportResourceContainer(
 
     private fun importContainerZipFile(file: File): Single<ImportResult> {
         return Single.fromCallable {
-            if (!ZipFile(file).use(this::validateResourceContainer)) {
-                throw ImportException(ImportResult.INVALID_RC)
-            }
+            validateRcZip(file) // throws
 
             val internalDir = getInternalDirectory(file)
-                    ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
+                ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
 
             if (internalDir.exists() && internalDir.contains(file.name)) {
                 // Collision on disk: Can't import the resource container
@@ -59,26 +55,26 @@ class ImportResourceContainer(
     }
 
     private fun importContainerDirectory(directory: File) =
-            Single
-                    .just(directory)
-                    .flatMap { containerDir ->
-                        // Is this a valid resource container
-                        if (!validateResourceContainer(containerDir)) return@flatMap Single.just(ImportResult.INVALID_RC)
+        Single
+            .just(directory)
+            .flatMap { containerDir ->
+                // Is this a valid resource container
+                if (!validateRcDir(containerDir)) return@flatMap Single.just(ImportResult.INVALID_RC)
 
-                        val internalDir = getInternalDirectory(containerDir)
-                                ?: return@flatMap Single.just(ImportResult.LOAD_RC_ERROR)
-                        if (internalDir.exists() && internalDir.listFiles().isNotEmpty()) {
-                            // Collision on disk: Can't import the resource container
-                            // Assumes that filesystem internal app directory and database are in sync
-                            return@flatMap Single.just(ImportResult.ALREADY_EXISTS)
-                        }
+                val internalDir = getInternalDirectory(containerDir)
+                    ?: return@flatMap Single.just(ImportResult.LOAD_RC_ERROR)
+                if (internalDir.exists() && internalDir.listFiles().isNotEmpty()) {
+                    // Collision on disk: Can't import the resource container
+                    // Assumes that filesystem internal app directory and database are in sync
+                    return@flatMap Single.just(ImportResult.ALREADY_EXISTS)
+                }
 
-                        // Copy to the internal directory
-                        val newDirectory = copyRecursivelyToInternalDirectory(containerDir, internalDir)
+                // Copy to the internal directory
+                val newDirectory = copyRecursivelyToInternalDirectory(containerDir, internalDir)
 
-                        return@flatMap importFromInternalDir(newDirectory, newDirectory)
-                    }
-                    .subscribeOn(Schedulers.io())
+                return@flatMap importFromInternalDir(newDirectory, newDirectory)
+            }
+            .subscribeOn(Schedulers.io())
 
     private fun getInternalDirectory(file: File): File? {
         // Load the external container to get the metadata we need to figure out where to copy to
@@ -104,11 +100,11 @@ class ImportResourceContainer(
         if (constructResult != ImportResult.SUCCESS) return cleanUp(newDir, constructResult)
 
         return resourceContainerRepository
-                .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
-                .doOnEvent { result, err ->
-                    if (result != ImportResult.SUCCESS || err != null) newDir.deleteRecursively()
-                }
-                .subscribeOn(Schedulers.io())
+            .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
+            .doOnEvent { result, err ->
+                if (result != ImportResult.SUCCESS || err != null) newDir.deleteRecursively()
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun cleanUp(containerDir: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {
@@ -116,9 +112,10 @@ class ImportResourceContainer(
         return@fromCallable result
     }
 
-    private fun validateResourceContainer(dir: File): Boolean = dir.contains("manifest.yaml")
+    private fun validateRcDir(dir: File): Boolean = dir.contains("manifest.yaml")
 
-    private fun validateResourceContainer(zip: ZipFile): Boolean = zip.getEntry("manifest.yaml") != null
+    /** Throws appropriately if RC zip is invalid, otherwise returns true. */
+    private fun validateRcZip(zip: File): Boolean = ResourceContainer.load(zip, true).use { true }
 
     private fun copyFileToInternalDirectory(filepath: File, destinationDirectory: File): File {
         // Copy the resource container zip file into the correct directory
@@ -154,7 +151,7 @@ class ImportResourceContainer(
 
     private fun constructContainerTree(container: ResourceContainer): Pair<ImportResult, Tree> {
         val projectReader = IProjectReader.build(container.manifest.dublinCore.format)
-                ?: return Pair(ImportResult.UNSUPPORTED_CONTENT, Tree(Unit))
+            ?: return Pair(ImportResult.UNSUPPORTED_CONTENT, Tree(Unit))
         val root = Tree(container.toCollection())
         val categoryInfo = container.otterConfigCategories()
         for (project in container.manifest.projects) {
@@ -163,9 +160,9 @@ class ImportResourceContainer(
                 // use the `latest` RC spec to treat categories as hierarchical
                 // look for a matching category under the parent
                 val existingCategory = parent.children
-                        .map { it as? Tree }
-                        .filter { (it?.value as? Collection)?.slug == categorySlug }
-                        .firstOrNull()
+                    .map { it as? Tree }
+                    .filter { (it?.value as? Collection)?.slug == categorySlug }
+                    .firstOrNull()
                 parent = if (existingCategory != null) {
                     existingCategory
                 } else {
