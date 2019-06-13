@@ -9,6 +9,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardDataMapper
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
@@ -53,9 +54,9 @@ class ContentGridViewModel: ViewModel() {
         Observable.merge(chapterModeEnabledProperty.toObservable(), allContent.changes()).subscribe { _ ->
             filteredContent.setAll(
                     if (chapterModeEnabledProperty.value == true) {
-                        allContent.filtered { it.item == "chapter" }
+                        allContent.filtered { it.item == ContentLabel.CHAPTER.value }
                     } else {
-//                        allContent.filtered { it.item != "chapter" }
+//                        allContent.filtered { it.item != ContentLabelEnum.CHAPTER.value }
                         allContent
                     }
             )

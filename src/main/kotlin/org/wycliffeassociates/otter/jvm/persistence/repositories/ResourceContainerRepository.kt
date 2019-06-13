@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.collections.tree.Tree
 import org.wycliffeassociates.otter.common.collections.tree.TreeNode
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -19,7 +20,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.persistence.database.daos.ContentDao
 import org.wycliffeassociates.otter.jvm.persistence.entities.ResourceLinkEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
@@ -99,8 +99,8 @@ class ResourceContainerRepository(
         private val relatedBundleDublinCoreId: Int?,
         private val dsl: DSLContext
     ) {
-        private val mainLabels = listOf(ContentDao.Labels.VERSE)
-        private val helpLabels = listOf(ContentDao.Labels.HELP_TITLE, ContentDao.Labels.HELP_BODY)
+        private val mainContentTypes = listOf(ContentType.TEXT)
+        private val helpContentTypes = listOf(ContentType.TITLE, ContentType.BODY)
         private val dublinCoreIdDslVal = DSL.`val`(dublinCoreId)
 
         fun import(node: TreeNode) {
@@ -171,8 +171,8 @@ class ResourceContainerRepository(
         private fun linkVerseResources(parentCollectionId: Int) {
             @Suppress("UNCHECKED_CAST")
             val matchingVerses = contentDao.selectLinkableVerses(
-                mainLabels,
-                helpLabels,
+                mainContentTypes,
+                helpContentTypes,
                 parentCollectionId,
                 dublinCoreIdDslVal
             ) as Select<Record3<Int, Int, Int>>
@@ -181,7 +181,7 @@ class ResourceContainerRepository(
         }
 
         private fun linkChapterResources(parentCollectionId: Int) {
-            val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollectionId, 0, helpLabels)
+            val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollectionId, 0, helpContentTypes)
 
             val resourceEntities = chapterHelps
                 .map { helpContent ->
