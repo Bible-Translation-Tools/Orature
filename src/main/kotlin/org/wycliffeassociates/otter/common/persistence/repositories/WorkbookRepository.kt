@@ -9,7 +9,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.plusAssign
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.data.workbook.*
 import java.util.*
 import java.util.Collections.synchronizedMap
@@ -77,7 +76,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         return Observable.defer {
             db.getContentByCollection(chapterCollection)
                 .flattenAsObservable { it }
-                .filter { it.labelKey == "verse" }
+                .filter { it.type == ContentType.TEXT }
                 .map(this::chunk)
         }.cache()
     }
@@ -148,10 +147,12 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                     when {
                         // If the first element isn't a title, skip this pair, because the body
                         // was already used by the previous window.
-                        a?.labelKey != "title" -> null
+                        a?.type != ContentType.TITLE -> null
+
                         // If the second element isn't a body, just use the title. (The second
                         // element will appear again in the next window.)
-                        b?.labelKey != "body" -> constructResource(a, null)
+                        b?.type != ContentType.BODY -> constructResource(a, null)
+
                         // Else, we have a title/body pair, so use it.
                         else -> constructResource(a, b)
                     }
@@ -227,7 +228,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
         /** Initial Takes read from the DB. */
         val takesFromDb = db.getTakeByContent(content)
-            .flattenAsObservable { list -> list.sortedBy { it.number } }
+            .flattenAsObservable { list: List<ModelTake> -> list.sortedBy { it.number } }
             .map { workbookTake(it) to it }
 
         /** Relay to send Takes out to consumers, but also receive new Takes from UI. */
@@ -270,7 +271,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getResourceInfo(collection: Collection): List<ResourceInfo>
         fun getSubtreeResourceInfo(collection: Collection): List<ResourceInfo>
         fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
-        fun getTakeByContent(content: Content): Single<List<Take>>
+        fun getTakeByContent(content: Content): Single<List<ModelTake>>
         fun updateTake(take: ModelTake, date: DateHolder): Completable
     }
 }

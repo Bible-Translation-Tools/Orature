@@ -93,7 +93,7 @@ class TestWorkbookRepository {
                                 id = autoincrement,
                                 resourceContainer = collection.resourceContainer,
                                 titleKey = chapter.toString(),
-                                labelKey = "chapter"
+                                labelKey = ContentLabel.CHAPTER.value
                             )
                         }
                     }
@@ -116,7 +116,7 @@ class TestWorkbookRepository {
                                 start = verse,
                                 end = verse,
                                 sort = verse,
-                                labelKey = "verse",
+                                labelKey = ContentLabel.VERSE.value,
                                 type = ContentType.TEXT,
                                 format = format,
                                 text = "/v $verse but test everything; hold fast what is good.",
@@ -135,7 +135,7 @@ class TestWorkbookRepository {
             Single.just(
                 Content(
                     sort = 0,
-                    labelKey = "chapter",
+                    labelKey = ContentLabel.CHAPTER.value,
                     start = 1,
                     end = BasicTestParams.chunksPerChapter,
                     selectedTake = null,
@@ -181,7 +181,7 @@ class TestWorkbookRepository {
                         start = content.start,
                         end = content.end,
                         sort = 1,
-                        labelKey = "title",
+                        labelKey = ContentLabel.HELP_TITLE.value,
                         type = ContentType.TITLE,
                         format = "text/markdown",
                         text = "but test everything; hold fast what is good.",
@@ -192,7 +192,7 @@ class TestWorkbookRepository {
                         start = content.start,
                         end = content.end,
                         sort = 2,
-                        labelKey = "body",
+                        labelKey = ContentLabel.HELP_BODY.value,
                         type = ContentType.BODY,
                         format = "text/markdown",
                         text = "The original author may not have had TDD in mind.",
@@ -216,7 +216,7 @@ class TestWorkbookRepository {
                         start = 1,
                         end = BasicTestParams.chunksPerChapter,
                         sort = 1,
-                        labelKey = "title",
+                        labelKey = ContentLabel.HELP_TITLE.value,
                         type = ContentType.TITLE,
                         format = "text/markdown",
                         text = "Chapter 2 notes",
@@ -227,7 +227,7 @@ class TestWorkbookRepository {
                         start = 1,
                         end = BasicTestParams.chunksPerChapter,
                         sort = 2,
-                        labelKey = "body",
+                        labelKey = ContentLabel.HELP_BODY.value,
                         type = ContentType.BODY,
                         format = "text/markdown",
                         text = "Chapter 2 is a fine chapter. Here are the notes.",
