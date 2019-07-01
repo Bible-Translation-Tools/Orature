@@ -10,7 +10,7 @@ object ParseMd {
     private val isTitleRegex = Regex("^#+\\s*[^#\\s]+")
     private val titleTextRegex = Regex("^#+\\s*")
 
-    fun parse(reader: BufferedReader): List<HelpResource> {
+    fun parseHelp(reader: BufferedReader): List<HelpResource> {
         val helpResourceList = ArrayList<HelpResource>()
 
         reader.forEachLine {
@@ -32,6 +32,9 @@ object ParseMd {
         }
         return helpResourceList
     }
+
+    fun parse(reader: BufferedReader): List<String> =
+        reader.lineSequence().filter { it.isNotBlank() }.toList()
 
     internal fun getTitleText(line: String): String? {
         titleTextRegex.find(line)?.let {

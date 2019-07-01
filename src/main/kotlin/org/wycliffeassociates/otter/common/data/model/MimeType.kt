@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.common.data.model
 
 enum class MimeType(vararg types: String) {
-    USFM("text/usfm", "text/x-usfm"),
-    MARKDOWN("text/markdown", "text/x-markdown"),
+    USFM("text/usfm", "text/x-usfm", "usfm"),
+    MARKDOWN("text/markdown", "text/x-markdown", "markdown"),
     WAV("audio/wav", "audio/wave", "audio/x-wave", "audio/vnd.wave");
 
     val accepted = types.toList()
@@ -13,6 +13,6 @@ enum class MimeType(vararg types: String) {
             .flatMap { mt -> mt.accepted.map { it to mt } }
             .associate { it }
 
-        fun of(type: String) = map[type]
+        fun of(type: String) = map[type.toLowerCase()]
     }
 }

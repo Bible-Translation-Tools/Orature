@@ -2,8 +2,10 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.collections.tree.Tree
+import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -96,8 +98,11 @@ class ImportResourceContainer(
             return cleanUp(newDir, ImportResult.LOAD_RC_ERROR)
         }
 
-        val (constructResult, tree) = constructContainerTree(container)
-        if (constructResult != ImportResult.SUCCESS) return cleanUp(newDir, constructResult)
+        val tree = try {
+            constructContainerTree(container)
+        } catch (e: ImportException) {
+            return cleanUp(newDir, e.result)
+        }
 
         return resourceContainerRepository
             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
@@ -143,16 +148,21 @@ class ImportResourceContainer(
 
     private fun makeExpandedContainer(container: ResourceContainer): ImportResult {
         val dublinCore = container.manifest.dublinCore
-        if (dublinCore.type == "bundle" && dublinCore.format.startsWith("text/usfm")) {
+        if (dublinCore.type == "bundle" && MimeType.of(dublinCore.format) == MimeType.USFM) {
             return if (container.expandUSFMBundle()) ImportResult.SUCCESS else ImportResult.INVALID_CONTENT
         }
         return ImportResult.SUCCESS
     }
 
-    private fun constructContainerTree(container: ResourceContainer): Pair<ImportResult, Tree> {
-        val projectReader = IProjectReader.build(container.manifest.dublinCore.format)
-            ?: return Pair(ImportResult.UNSUPPORTED_CONTENT, Tree(Unit))
-        val root = Tree(container.toCollection())
+    /** @throws ImportException */
+    private fun constructContainerTree(container: ResourceContainer): OtterTree<CollectionOrContent> {
+        val projectReader = IProjectReader.build(
+            format = container.manifest.dublinCore.format,
+            isHelp = container.manifest.dublinCore.type == "help"
+        )
+            ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
+
+        val root = OtterTree<CollectionOrContent>(container.toCollection())
         val categoryInfo = container.otterConfigCategories()
         for (project in container.manifest.projects) {
             var parent = root
@@ -160,7 +170,7 @@ class ImportResourceContainer(
                 // use the `latest` RC spec to treat categories as hierarchical
                 // look for a matching category under the parent
                 val existingCategory = parent.children
-                    .map { it as? Tree }
+                    .map { it as? OtterTree<CollectionOrContent> }
                     .filter { (it?.value as? Collection)?.slug == categorySlug }
                     .firstOrNull()
                 parent = if (existingCategory != null) {
@@ -168,18 +178,14 @@ class ImportResourceContainer(
                 } else {
                     // category node does not yet exist
                     val category = categoryInfo.filter { it.identifier == categorySlug }.firstOrNull() ?: continue
-                    val categoryNode = Tree(category.toCollection())
+                    val categoryNode = OtterTree<CollectionOrContent>(category.toCollection())
                     parent.addChild(categoryNode)
                     categoryNode
                 }
             }
-            val projectResult = projectReader.constructProjectTree(container, project, zipEntryTreeBuilder)
-            if (projectResult.first == ImportResult.SUCCESS) {
-                parent.addChild(projectResult.second)
-            } else {
-                return Pair(projectResult.first, Tree(Unit))
-            }
+            val projectTree = projectReader.constructProjectTree(container, project, zipEntryTreeBuilder)
+            parent.addChild(projectTree)
         }
-        return Pair(ImportResult.SUCCESS, root)
+        return root
     }
 }

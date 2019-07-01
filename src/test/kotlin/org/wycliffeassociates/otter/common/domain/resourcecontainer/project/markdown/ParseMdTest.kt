@@ -11,7 +11,7 @@ typealias TestCaseForParser = Pair<List<String>, List<HelpResource>>
 
 class ParseMdTest {
     // These test cases are designed to test the creation of the HelpResource data objects
-    // (including the branching logic of the parse() function)
+    // (including the branching logic of the parseHelp() function)
     private val testParseCases: List<TestCaseForParser> = listOf(
             listOf(
                     "# Title 1",
@@ -113,7 +113,7 @@ class ParseMdTest {
     fun testParse() {
         testParseCases.forEach {
             val bufferedReader = getBufferedReader(it.first)
-            val helpResourceList = ParseMd.parse(bufferedReader)
+            val helpResourceList = ParseMd.parseHelp(bufferedReader)
             try {
                 assertEquals(it.second, helpResourceList)
             } catch (e: AssertionError) {

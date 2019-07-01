@@ -27,13 +27,13 @@ class MarkdownProjectReaderTest {
 
     @Test
     fun testBuilderMarkdown() {
-        val reader = IProjectReader.build("text/markdown")
+        val reader = IProjectReader.build("text/markdown", false)
         TestCase.assertTrue(reader is MarkdownProjectReader)
     }
 
     @Test
     fun testBuilderUnknown() {
-        val reader = IProjectReader.build("unknown")
+        val reader = IProjectReader.build("unknown", false)
         TestCase.assertTrue(reader == null)
     }
 

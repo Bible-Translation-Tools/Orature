@@ -1,8 +1,5 @@
 package org.wycliffeassociates.otter.common.collections.tree
 
-typealias Tree = OtterTree<Any>
-typealias TreeNode = OtterTreeNode<Any>
-
 class OtterTree<T>(value: T) : OtterTreeNode<T>(value) {
 
     //private mutable list, public immutable accessor
