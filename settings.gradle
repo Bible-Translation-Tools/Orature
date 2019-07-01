@@ -1,4 +1,4 @@
-rootProject.name = '8woc2018-common'
+rootProject.name = 'otter-common'
 boolean inComposite = gradle.parent != null
 if (!inComposite) {
     includeBuild "../kotlin-resource-container"
