@@ -10,25 +10,19 @@ import tornadofx.Fragment
 import tornadofx.hbox
 import tornadofx.label
 
-class InfoFragment(
-        language: String = "",
-        book: String = "",
-        chapter: String = "",
-        chunk: String = ""
-) : Fragment() {
+class InfoFragment : Fragment() {
 
     override val root = hbox {
         minHeight = 50.0
         alignment = Pos.CENTER_LEFT
-        label(language)
-        label(book)
-        label(chapter)
-        label(chunk)
-
         background = Background(BackgroundFill(Paint.valueOf("#333333"), CornerRadii.EMPTY, Insets.EMPTY))
     }
 
     init {
+        addRecordingInfoFromParams()
+    }
+
+    private fun addRecordingInfoFromParams() {
         val language = app.parameters.named["lang"]
         val book = app.parameters.named["book"]
         val chapter = app.parameters.named["chap"]

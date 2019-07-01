@@ -67,10 +67,8 @@ class RecorderViewModel : ViewModel() {
         val waveformLayer = WaveformLayer(renderer)
         waveformView.addDrawable(waveformLayer)
 
-        println("${waveformView.width}")
-
         at.start()
-        volumeTest!!.start()
+        volumeTest?.let { it.start() }
     }
 
     @Volatile

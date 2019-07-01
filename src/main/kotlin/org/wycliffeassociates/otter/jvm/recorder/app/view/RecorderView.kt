@@ -23,8 +23,8 @@ class RecorderView : View() {
     }
 
     init {
+        //notifies viewmodel that views have been inflated and the canvas now has a width
         primaryStage.setOnShown {
-            println(it)
             recorderViewModel.onViewReady()
         }
     }

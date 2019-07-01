@@ -10,7 +10,8 @@ import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioRecorder : IAudioRecorder {
     override fun pause() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        line.stop()
+        line.close()
     }
 
     companion object {
