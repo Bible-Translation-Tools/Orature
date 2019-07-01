@@ -9,6 +9,9 @@ import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioRecorder : IAudioRecorder {
+    override fun pause() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
     companion object {
         val SAMPLE_RATE = 44100F // Hz
