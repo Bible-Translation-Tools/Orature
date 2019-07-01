@@ -7,7 +7,7 @@ import tornadofx.launch
 /**
  * @param args array of cli arguments
  * options include:
- * 
+ *
  * --wav= the filepath to write to
  * --lang= the language name to display
  * --book= the book name to display

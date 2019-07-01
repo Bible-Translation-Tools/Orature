@@ -59,7 +59,9 @@ class RecorderViewModel : ViewModel() {
     init {
         volumeBarView.addDrawable(volumeBar)
         waveformView.addDrawable(BaseWaveLine())
-        waveformView.add(fps)
+        if (app.parameters.named.containsKey("debug")) {
+            waveformView.add(fps)
+        }
     }
 
     fun onViewReady() {
