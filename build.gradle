@@ -126,7 +126,7 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
 
     //WA Libraries
-    implementation 'org.wycliffeassociates:8woc2018-common'
+    implementation 'org.wycliffeassociates:otter-common'
     implementation 'org.wycliffeassociates:kotlin-resource-container'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
 
