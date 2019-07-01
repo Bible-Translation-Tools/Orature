@@ -7,9 +7,10 @@ import org.jooq.DSLContext
 import org.jooq.Record3
 import org.jooq.Select
 import org.jooq.impl.DSL
-import org.wycliffeassociates.otter.common.collections.tree.Tree
-import org.wycliffeassociates.otter.common.collections.tree.TreeNode
+import org.wycliffeassociates.otter.common.collections.tree.OtterTree
+import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
@@ -42,7 +43,7 @@ class ResourceContainerRepository(
 
     override fun importResourceContainer(
         rc: ResourceContainer,
-        rcTree: Tree,
+        rcTree: OtterTree<CollectionOrContent>,
         languageSlug: String
     ): Single<ImportResult> {
         val dublinCore = rc.manifest.dublinCore
@@ -83,9 +84,15 @@ class ResourceContainerRepository(
     ): List<Int> {
         val relatedIds = mutableListOf<Int>()
         relations.forEach { relation ->
-            val parts = relation.split('/')
-            // NOTE: We look for derivedFromFk=null since we are looking for the original resource container
-            resourceMetadataDao.fetchLatestVersion(parts[0], parts[1], creator, null, dsl)
+            val (languageSlug, identifier) = relation.split('/')
+            resourceMetadataDao.fetchLatestVersion(
+                languageSlug = languageSlug,
+                identifier = identifier,
+                creator = creator,
+                relaxCreatorIfNoMatch = true,
+                derivedFromFk = null, // derivedFromFk=null since we are looking for the original resource container
+                dsl = dsl
+            )
                 ?.let { relatedDublinCore ->
                     resourceMetadataDao.addLink(dublinCoreFk, relatedDublinCore.id, dsl)
                     relatedIds.add(relatedDublinCore.id)
@@ -103,7 +110,7 @@ class ResourceContainerRepository(
         private val helpContentTypes = listOf(ContentType.TITLE, ContentType.BODY)
         private val dublinCoreIdDslVal = DSL.`val`(dublinCoreId)
 
-        fun import(node: TreeNode) {
+        fun import(node: OtterTreeNode<CollectionOrContent>) {
             importCollection(null, node)
 
             relatedBundleDublinCoreId
@@ -130,7 +137,7 @@ class ResourceContainerRepository(
             return collectionDao.insert(entity, dsl)
         }
 
-        private fun importCollection(parentId: Int?, node: TreeNode): Int? {
+        private fun importCollection(parentId: Int?, node: OtterTreeNode<CollectionOrContent>): Int? {
             val collectionId = (node.value as Collection).let { collection ->
                 when (relatedBundleDublinCoreId) {
                     null -> addCollection(collection, parentId)
@@ -141,7 +148,7 @@ class ResourceContainerRepository(
                 }
             }
 
-            val children = (node as? Tree)?.children
+            val children = (node as? OtterTree<CollectionOrContent>)?.children
             if (children != null) {
                 if (collectionId != null) {
                     val contents = children.filter { it.value is Content }
@@ -161,11 +168,11 @@ class ResourceContainerRepository(
             return collectionId
         }
 
-        private fun importContent(parentId: Int, nodes: List<TreeNode>) {
+        private fun importContent(parentId: Int, nodes: List<OtterTreeNode<CollectionOrContent>>) {
             val entities = nodes
-                .mapNotNull { (it.value as? Content) }
+                .mapNotNull { it.value as? Content }
                 .map { contentMapper.mapToEntity(it).apply { collectionFk = parentId } }
-            contentDao.insertNoReturn(*entities.toTypedArray())
+            if (entities.isNotEmpty()) contentDao.insertNoReturn(*entities.toTypedArray())
         }
 
         private fun linkVerseResources(parentCollectionId: Int) {

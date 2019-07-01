@@ -119,6 +119,29 @@ class ResourceMetadataDao(
                             identifier: String,
                             creator: String,
                             derivedFromFk: Int?,
+                            relaxCreatorIfNoMatch: Boolean = true,
+                            dsl: DSLContext = instanceDsl
+    ): ResourceMetadataEntity? {
+        fun flv(_creator: String?) = fetchLatestVersion(
+            creator = _creator,
+            languageSlug = languageSlug,
+            identifier = identifier,
+            derivedFromFk = derivedFromFk,
+            dsl = dsl
+        )
+
+        return flv(creator)
+            ?: if (relaxCreatorIfNoMatch) {
+                flv(null)
+            } else {
+                null
+            }
+    }
+
+    private fun fetchLatestVersion(languageSlug: String,
+                            identifier: String,
+                            creator: String?,
+                            derivedFromFk: Int?,
                             dsl: DSLContext = instanceDsl
     ) : ResourceMetadataEntity? {
         return dsl
@@ -127,7 +150,7 @@ class ResourceMetadataDao(
                         .on(DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(LANGUAGE_ENTITY.ID)))
                 .where(LANGUAGE_ENTITY.SLUG.eq(languageSlug))
                 .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
-                .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator))
+                .run { creator?.let { and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator)) } ?: this }
                 .and(derivedFromFk?.let(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK::eq)
                         ?: DUBLIN_CORE_ENTITY.DERIVEDFROM_FK.isNull)
                 .orderBy(DUBLIN_CORE_ENTITY.VERSION.desc())
