@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
 import java.io.File
+import kotlin.IllegalArgumentException
 
 class MarkdownProjectReaderTest {
     private val pwd = File(System.getProperty("user.dir"))
@@ -31,10 +32,9 @@ class MarkdownProjectReaderTest {
         TestCase.assertTrue(reader is MarkdownProjectReader)
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException::class)
     fun testBuilderUnknown() {
-        val reader = IProjectReader.build("unknown", false)
-        TestCase.assertTrue(reader == null)
+        IProjectReader.build("unknown", false)
     }
 
     @Test

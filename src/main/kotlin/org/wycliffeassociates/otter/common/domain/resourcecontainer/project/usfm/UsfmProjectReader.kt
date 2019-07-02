@@ -15,6 +15,8 @@ import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.Reader
 
+private const val FORMAT = "text/usfm"
+
 class UsfmProjectReader : IProjectReader {
     private val currentDirectoryPrefix = Regex("""^\.?[/\\]""")
 
@@ -136,8 +138,8 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
                 start = verse.number,
                 end = verse.number,
                 selectedTake = null,
-                text = null,
-                format = null,
+                text = verse.text,
+                format = FORMAT,
                 type = ContentType.TEXT
             )
             chapterTree.addChild(OtterTreeNode(content))

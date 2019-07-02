@@ -19,6 +19,7 @@ interface IProjectReader {
     ): OtterTree<CollectionOrContent>
 
     companion object {
+        /** @throws [IllegalArgumentException] if the format type is not supported **/
         fun build(format: String, isHelp: Boolean): IProjectReader? = when (MimeType.of(format)) {
             MimeType.USFM -> {
                 if (isHelp) throw ImportException(ImportResult.INVALID_RC)
@@ -27,7 +28,8 @@ interface IProjectReader {
             MimeType.MARKDOWN -> {
                 MarkdownProjectReader(isHelp)
             }
-            else -> null
+            // MimeType.of will throw an IllegalArgumentException first
+            else -> throw IllegalArgumentException("Mime type $format not supported")
         }
     }
 }

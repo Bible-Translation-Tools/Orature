@@ -38,14 +38,22 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         connections.clear()
-        return Workbook(book(source), book(target))
+        return Workbook(
+            book(source),
+            book(target)
+        )
     }
+
+    private fun Collection.getLanguageSlug() = this.resourceContainer?.language?.slug
+        ?: throw IllegalStateException("Collection with id=$id has null resource container")
 
     private fun book(bookCollection: Collection): Book {
         return Book(
             title = bookCollection.titleKey,
             sort = bookCollection.sort,
+            slug = bookCollection.slug,
             chapters = constructBookChapters(bookCollection),
+            languageSlug = bookCollection.getLanguageSlug(),
             subtreeResources = db.getSubtreeResourceInfo(bookCollection)
         )
     }
@@ -82,34 +90,46 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
     }
 
     private fun chunk(content: Content) = Chunk(
-        title = content.start.toString(),
         sort = content.sort,
         audio = constructAssociatedAudio(content),
         resources = constructResourceGroups(content),
-        text = textItem(content)
+        textItem = textItem(content),
+        start = content.start,
+        end = content.end,
+        contentType = content.type
     )
 
-    private fun textItem(content: Content?): TextItem? {
-        return content
-            ?.format
-            ?.let { MimeType.of(it) }
-            ?.let { mimeType ->
-                content.text?.let {
-                    TextItem(it, mimeType)
-                }
+    private fun textItem(content: Content): TextItem {
+        return content.format?.let { format ->
+            // TODO 6/25: Content text should never be null, but parse usfm is currently broken so
+            // TODO... only check resource contents for now
+            if (listOf(ContentType.TITLE, ContentType.BODY).contains(content.type) && content.text == null) {
+                throw IllegalStateException("Content text is null for resource")
             }
+            TextItem(content.text ?: "[empty]", MimeType.of(format))
+        } ?: throw IllegalStateException("Content format is null")
     }
 
     private fun constructResource(title: Content, body: Content?): Resource? {
-        val titleTextItem = textItem(title)
-            ?: return null
+        val bodyComponent = body?.let {
+            Resource.Component(
+                sort = it.sort,
+                textItem = textItem(it),
+                audio = constructAssociatedAudio(it),
+                contentType = ContentType.BODY
+            )
+        }
+
+        val titleComponent = Resource.Component(
+            sort = title.sort,
+            textItem = textItem(title),
+            audio = constructAssociatedAudio(title),
+            contentType = ContentType.TITLE
+        )
 
         return Resource(
-            sort = title.sort,
-            title = titleTextItem,
-            body = textItem(body),
-            titleAudio = constructAssociatedAudio(title),
-            bodyAudio = body?.let { constructAssociatedAudio(body) }
+            title = titleComponent,
+            body = bodyComponent
         )
     }
 

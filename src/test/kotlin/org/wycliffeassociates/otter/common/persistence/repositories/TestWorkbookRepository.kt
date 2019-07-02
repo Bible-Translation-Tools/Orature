@@ -271,7 +271,7 @@ class TestWorkbookRepository {
     }
 
     @Test
-    fun workbookHasBooks() {
+    fun workbookHasBooksAndLanguageSlugs() {
         val workbook = buildBasicTestWorkbook()
 
         Assert.assertEquals(1, workbook.source.sort)
@@ -280,6 +280,8 @@ class TestWorkbookRepository {
         Assert.assertEquals("Genesis", workbook.target.title)
         Assert.assertArrayEquals(arrayOf("tn"), resourceSlugArray(workbook.source.subtreeResources))
         Assert.assertArrayEquals(arrayOf(), resourceSlugArray(workbook.target.subtreeResources))
+        Assert.assertEquals("en", workbook.source.languageSlug)
+        Assert.assertEquals("la", workbook.target.languageSlug)
     }
 
     @Test
@@ -405,7 +407,7 @@ class TestWorkbookRepository {
 
         val expected = 1
         Assert.assertEquals("This chunk should have $expected Resources", expected, resources.size)
-        Assert.assertTrue("Expected resource text", resources.first().body?.text?.contains("TDD") ?: false)
+        Assert.assertTrue("Expected resource text", resources.first().body?.textItem?.text?.contains("TDD") ?: false)
     }
 
     @Test
@@ -500,7 +502,7 @@ class TestWorkbookRepository {
         chunks.forEach {
             Assert.assertTrue(
                 "Chunk text expected",
-                it.text?.text?.startsWith("/v ${it.title}")
+                it.textItem?.text?.startsWith("/v ${it.title}")
                     ?: false
             )
         }
