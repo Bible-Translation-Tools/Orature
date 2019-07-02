@@ -1,3 +1,4 @@
 rootProject.name = 'otter-jvm'
 includeBuild '../kotlin-resource-container'
+includeBuild '../chromeabletabpane'
 includeBuild '../otter-common'

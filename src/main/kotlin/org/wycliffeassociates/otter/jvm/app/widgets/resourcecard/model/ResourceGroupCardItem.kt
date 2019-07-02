@@ -17,11 +17,15 @@ data class ResourceGroupCardItem(
     }
 }
 
-fun resourceGroupCardItem(element: BookElement, slug: String, onSelect: (Resource) -> Unit): ResourceGroupCardItem? {
+fun resourceGroupCardItem(
+    element: BookElement,
+    slug: String,
+    onSelect: (BookElement, Resource) -> Unit
+): ResourceGroupCardItem? {
     return findResourceGroup(element, slug)?.let { rg ->
         ResourceGroupCardItem(
             getGroupTitle(element),
-            getResourceCardItems(rg, onSelect)
+            getResourceCardItems(rg, element, onSelect)
         )
     }
 }
@@ -40,10 +44,14 @@ private fun getGroupTitle(element: BookElement): String {
     }
 }
 
-private fun getResourceCardItems(rg: ResourceGroup, onSelect: (Resource) -> Unit): Observable<ResourceCardItem> {
+private fun getResourceCardItems(
+    rg: ResourceGroup,
+    bookElement: BookElement,
+    onSelect: (BookElement, Resource) -> Unit
+): Observable<ResourceCardItem> {
     return rg.resources.map {
         ResourceCardItem(it) {
-            onSelect(it)
+            onSelect(bookElement, it)
         }
     }
 }

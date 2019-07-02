@@ -3,9 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model
 import com.sun.javafx.collections.ObservableListWrapper
 import javafx.collections.ListChangeListener
 
-class ResourceGroupCardItemList(list: List<ResourceGroupCardItem>) :
-    ObservableListWrapper<ResourceGroupCardItem>(list) {
-
+class ResourceGroupCardItemList: ObservableListWrapper<ResourceGroupCardItem>(mutableListOf()) {
     init {
         addListener(
             ListChangeListener<ResourceGroupCardItem> {

@@ -23,13 +23,15 @@ import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.OldTakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.oldtakecard
 import tornadofx.*
 
 class TakeManagementView : Fragment() {
-    private val viewModel: TakeManagementViewModel by inject()
+    private val takeManagementViewModel: TakeManagementViewModel by inject()
+    private val workbookViewModel: WorkbookViewModel by inject()
 
     // The currently selected take
     private var selectedTakeProperty = SimpleObjectProperty<OldTakeCard>()
@@ -45,9 +47,9 @@ class TakeManagementView : Fragment() {
     // Flow pane of available takes
     private var takesFlowPane = createTakesFlowPane()
 
-    val activeCollection: Property<Collection> = viewModel.activeCollectionProperty
-    val activeProject: Property<Collection> = viewModel.activeProjectProperty
-    val activeContent: Property<Content> = viewModel.activeContentProperty
+    val activeCollection: Property<Collection> = takeManagementViewModel.activeCollectionProperty
+    val activeProject: Property<Collection> = takeManagementViewModel.activeProjectProperty
+    val activeContent: Property<Content> = takeManagementViewModel.activeContentProperty
 
     init {
         importStylesheet<TakeManagementStyles>()
@@ -65,10 +67,10 @@ class TakeManagementView : Fragment() {
         addClass(AppStyles.appBackground)
         addClass(TakeManagementStyles.tpanelStyle)
         val snackBar = JFXSnackbar(this)
-        viewModel.snackBarObservable.subscribe { shouldShow ->
+        takeManagementViewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
                     JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
-                        viewModel.addPlugin(true, false)
+                        takeManagementViewModel.addPlugin(true, false)
                     })
             )
         }
@@ -90,9 +92,9 @@ class TakeManagementView : Fragment() {
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(TakeManagementStyles.navigationButton)
                     action {
-                        viewModel.previousVerse()
+                        takeManagementViewModel.previousVerse()
                     }
-                    enableWhen(viewModel.hasPrevious)
+                    enableWhen(takeManagementViewModel.hasPrevious)
                 }
                 //selected take and drag target
                 stackpane {
@@ -120,11 +122,11 @@ class TakeManagementView : Fragment() {
                                 add(placeholder)
                             } else {
                                 // Add the selected take card
-                                viewModel.acceptTake(it.take)
+                                takeManagementViewModel.acceptTake(it.take)
                                 add(it)
                             }
                         }
-                        viewModel.selectedTakeProperty.onChange {
+                        takeManagementViewModel.selectedTakeProperty.onChange {
                             // The view model wants us to use this selected take
                             // This take will not appear in the flow pane items
                             if (it != null && selectedTakeProperty.value == null) {
@@ -146,8 +148,8 @@ class TakeManagementView : Fragment() {
                     addClass(TakeManagementStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     action {
-                        viewModel.nextVerse()
-                        enableWhen(viewModel.hasNext)
+                        takeManagementViewModel.nextVerse()
+                        enableWhen(takeManagementViewModel.hasNext)
                     }
                 }
             }
@@ -179,14 +181,14 @@ class TakeManagementView : Fragment() {
         // Plugin active cover
         val dialog = progressdialog {
             root.addClass(AppStyles.progressDialog)
-            viewModel.contextProperty.toObservable().subscribe { newContext ->
+            takeManagementViewModel.contextProperty.toObservable().subscribe { newContext ->
                 when (newContext) {
                     TakeContext.RECORD -> graphic = AppStyles.recordIcon("60px")
                     TakeContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
                 }
             }
         }
-        viewModel.showPluginActiveProperty.onChange {
+        takeManagementViewModel.showPluginActiveProperty.onChange {
             Platform.runLater {
                 if (it == true) dialog.open() else dialog.close()
             }
@@ -236,7 +238,7 @@ class TakeManagementView : Fragment() {
             vgrow = Priority.ALWAYS
             addClass(TakeManagementStyles.takeGrid)
             // Update the takes displayed
-            viewModel.alternateTakes.onChange {
+            takeManagementViewModel.alternateTakes.onChange {
                 clear()
                 it.list.forEach { take ->
                     // Add a new take card
@@ -254,7 +256,7 @@ class TakeManagementView : Fragment() {
             label(messages["newTake"])
             button(messages["record"], AppStyles.recordIcon("25px")) {
                 action {
-                    viewModel.recordContent()
+                    takeManagementViewModel.recordContent(workbookViewModel.chunk!!)
                 }
             }
         }
@@ -269,10 +271,10 @@ class TakeManagementView : Fragment() {
     }
 
     private fun createTakeCard(take: Take): OldTakeCard {
-        return oldtakecard(take, viewModel.audioPlayer(), messages["take"]) {
+        return oldtakecard(take, takeManagementViewModel.audioPlayer(), messages["take"]) {
             addClass(TakeManagementStyles.takeCard)
             playedProperty.onChange {
-                if (it) viewModel.setTakePlayed(take)
+                if (it) takeManagementViewModel.setTakePlayed(take)
             }
             deleteButton.apply {
                 addClass(TakeManagementStyles.deleteButton)
@@ -284,12 +286,12 @@ class TakeManagementView : Fragment() {
                             ButtonType.NO,
                             title = messages["deleteTakePrompt"]
                     ) { button: ButtonType ->
-                        if (button == ButtonType.YES) viewModel.delete(take)
+                        if (button == ButtonType.YES) takeManagementViewModel.delete(take)
                     }
                 }
             }
             editButton.action {
-                viewModel.editContent(take)
+                takeManagementViewModel.editContent(take)
             }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }
@@ -298,6 +300,6 @@ class TakeManagementView : Fragment() {
     override fun onDock() {
         super.onDock()
         // Reset the model
-        viewModel.reset()
+        takeManagementViewModel.reset()
     }
 }

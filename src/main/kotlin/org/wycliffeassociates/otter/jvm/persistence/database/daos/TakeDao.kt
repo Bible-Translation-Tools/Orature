@@ -20,7 +20,7 @@ class TakeDao(
             .where(TAKE_ENTITY.CONTENT_FK.eq(id))
         val query = when {
             includeDeleted -> baseQuery
-            else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNotNull)
+            else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
         }
         return query.fetch(RecordMappers.Companion::mapToTakeEntity)
     }

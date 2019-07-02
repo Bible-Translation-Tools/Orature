@@ -11,9 +11,9 @@ import org.commonmark.renderer.text.TextContentRenderer
 data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     val title: String = renderTitleAsPlainText()
     private val disposables = CompositeDisposable()
-    val titleProgressProperty: DoubleProperty = resource.titleAudio.progressProperty()
-    val bodyProgressProperty: DoubleProperty? = resource.bodyAudio?.progressProperty()
-    val hasBodyAudio: Boolean = resource.bodyAudio != null
+    val titleProgressProperty: DoubleProperty = resource.title.audio.progressProperty()
+    val bodyProgressProperty: DoubleProperty? = resource.body?.audio?.progressProperty()
+    val hasBodyAudio: Boolean = resource.body?.audio != null
 
     @Suppress("ProtectedInFinal", "Unused")
     protected fun finalize() {
@@ -39,7 +39,7 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     }
 
     private fun renderTitleAsPlainText(): String {
-        val document = parser.parse(resource.title.text)
+        val document = parser.parse(resource.title.textItem.text)
         return renderer.render(document)
     }
 }

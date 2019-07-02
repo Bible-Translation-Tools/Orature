@@ -5,7 +5,6 @@ import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.theme.AppColors
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
