@@ -8,7 +8,7 @@ import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
-class TakeManagementStyles : Stylesheet() {
+class RecordScriptureStyles : Stylesheet() {
     companion object {
         val viewTakesTitle by cssclass()
         val deleteButton by cssclass()
