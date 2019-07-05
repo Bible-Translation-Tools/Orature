@@ -5,6 +5,8 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view.CardGrid
@@ -18,9 +20,8 @@ class MainViewViewModel : ViewModel() {
     val selectedProjectName = SimpleStringProperty()
     val selectedProjectLanguage = SimpleStringProperty()
 
-    val selectedCollectionProperty = SimpleObjectProperty<Collection>()
-    val selectedCollectionTitle = SimpleStringProperty()
-    val selectedCollectionBody = SimpleStringProperty()
+    val selectedChapterTitle = SimpleStringProperty()
+    val selectedChapterBody = SimpleStringProperty()
 
     val selectedContentProperty = SimpleObjectProperty<Content>()
     val selectedContentTitle = SimpleStringProperty()
@@ -33,10 +34,8 @@ class MainViewViewModel : ViewModel() {
             it?.let { wb -> projectSelected(wb) }
         }
 
-        selectedCollectionProperty.onChange {
-            if (it != null) {
-                collectionSelected(it)
-            }
+        workbookViewModel.activeChapterProperty.onChange {
+            it?.let { ch -> chapterSelected(ch) }
         }
 
         selectedContentProperty.onChange {
@@ -54,13 +53,12 @@ class MainViewViewModel : ViewModel() {
 
         find<MainScreenView>().activeFragment.dock<CardGrid>()
         CardGrid().apply {
-            activeCollection.bindBidirectional(selectedCollectionProperty)
             activeContent.bindBidirectional(selectedContentProperty)
         }
     }
 
-    private fun collectionSelected(collection: Collection) {
-        setActiveCollectionText(collection)
+    private fun chapterSelected(chapter: Chapter) {
+        setActiveChapterText(chapter)
     }
 
     private fun contentSelected(content: Content) {
@@ -69,7 +67,6 @@ class MainViewViewModel : ViewModel() {
         if(takesPageDocked.value == false) {
             find<MainScreenView>().activeFragment.dock<TakeManagementView>()
             TakeManagementView().apply {
-                activeCollection.bindBidirectional(selectedCollectionProperty)
                 activeContent.bindBidirectional(selectedContentProperty)
             }
         }
@@ -81,9 +78,9 @@ class MainViewViewModel : ViewModel() {
         selectedContentBody.set(content.start.toString())
     }
 
-    private fun setActiveCollectionText(collection: Collection) {
-        selectedCollectionTitle.set(collection.labelKey.toUpperCase())
-        selectedCollectionBody.set(collection.titleKey)
+    private fun setActiveChapterText(chapter: Chapter) {
+        selectedChapterTitle.set(ContentLabel.CHAPTER.value.toUpperCase())
+        selectedChapterBody.set(chapter.title)
     }
 
     private fun setActiveProjectText(activeWorkbook: Workbook) {

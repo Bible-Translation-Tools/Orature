@@ -18,9 +18,7 @@ import tornadofx.*
 class CardGrid : Fragment() {
     private val viewModel: ContentGridViewModel by inject()
 
-    val activeCollection: Property<Collection> = viewModel.activeCollectionProperty
     val activeContent: Property<Content> = viewModel.activeContentProperty
-
 
     init {
         importStylesheet<CardGridStyles>()

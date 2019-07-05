@@ -7,9 +7,9 @@ import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardDataMapper
@@ -22,12 +22,7 @@ class ContentGridViewModel: ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
 
     private val injector: Injector by inject()
-    private val collectionRepository = injector.collectionRepo
     private val contentRepository = injector.contentRepository
-
-    // Selected child
-    private var activeCollection: Collection by property()
-    val activeCollectionProperty = getProperty(ContentGridViewModel::activeCollection)
 
     // Selected content (chunk or verse)
     private var activeContent: Content by property()
@@ -50,7 +45,6 @@ class ContentGridViewModel: ViewModel() {
     val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 
     init {
-        activeCollectionProperty.toObservable().subscribe { selectChildCollection(it) }
         Observable.merge(chapterModeEnabledProperty.toObservable(), allContent.changes()).subscribe { _ ->
             filteredContent.setAll(
                     if (chapterModeEnabledProperty.value == true) {
@@ -63,51 +57,42 @@ class ContentGridViewModel: ViewModel() {
         }
 
         workbookViewModel.activeWorkbookProperty.onChangeAndDoNow {
-            it?.let { wb -> bindChapters(wb) }
+            it?.let { wb -> loadChapters(wb) }
         }
-        activeCollectionProperty.onChange {
-            if(it != null) {
-                selectChildCollection(it)
-            }
-            else {
-                // TODO
-                workbookViewModel.activeWorkbookProperty.value?.let {
-                    bindChapters(it)
-                }
-            }
+
+        workbookViewModel.activeChapterProperty.onChange {
+            it?.let { ch -> loadChapterContents(ch) }
+                ?: workbookViewModel.activeWorkbookProperty.value
+                    ?.let { wb -> loadChapters(wb) }
         }
     }
 
-    private fun selectChildCollection(child: Collection) {
-        activeCollection = child
+    private fun loadChapterContents(chapter: Chapter) {
         // Remove existing content so the user knows they are outdated
         allContent.clear()
         loading = true
-        contentRepository
-                .getByCollection(child)
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    retrieved.sortedBy { it.sort }
-                    allContent.clear() // Make sure any content that might have been added are removed
-                    val cardList = CardDataMapper.mapContentListToCards(retrieved)
-                    allContent.setAll(cardList)
-                    loading = false
-                }
+        chapter.chunks
+            .map(CardDataMapper.Companion::mapChunkToCardData)
+            .doOnComplete {
+                loading = false
+            }
+            .observeOnFx()
+            .toList()
+            .doOnSuccess {
+                allContent.setAll(it)
+            }.subscribe()
     }
 
     fun onCardSelection(cardData: CardData){
-        // TODO
-//        if(cardData.collectionSource != null) {
-//            activeCollection = cardData.collectionSource
-//        }
-
-        if (cardData.contentSource != null) {
-            activeContent = cardData.contentSource
+        cardData.chapterSource?.let {
+            workbookViewModel.activeChapterProperty.set(it)
+        }
+        cardData.chunkSource?.let {
+            workbookViewModel.activeChunkProperty.set(it)
         }
     }
 
-    private fun bindChapters(workbook: Workbook) {
-        activeCollectionProperty.value = null
+    private fun loadChapters(workbook: Workbook) {
         loading = true
         allContent.clear()
         workbook.target.chapters
