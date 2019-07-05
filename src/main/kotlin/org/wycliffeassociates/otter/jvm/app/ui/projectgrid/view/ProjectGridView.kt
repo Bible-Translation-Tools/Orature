@@ -22,8 +22,6 @@ class ProjectGridView : Fragment() {
     private val viewModel: ProjectGridViewModel by inject()
     private val noProjectsProperty: ReadOnlyBooleanProperty
 
-    val activeProject: Property<Collection> = viewModel.selectedProjectProperty
-
     init {
         importStylesheet<ProjectGridStyles>()
         importStylesheet<DefaultStyles>()

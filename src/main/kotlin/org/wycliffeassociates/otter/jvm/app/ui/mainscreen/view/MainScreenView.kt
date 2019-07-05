@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.NavBoxType
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel.MainViewViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view.ProjectGridView
+import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.projectnav.projectnav
 import tornadofx.*
 
@@ -19,6 +20,7 @@ class MainScreenView : View() {
     var fragmentStage: AnchorPane by singleAssign()
 
     val viewModel: MainViewViewModel by inject()
+    val workbookViewModel: WorkbookViewModel by inject()
 
     data class NavBoxItem(val defaultText: String, val textGraphic: Node, val cardGraphic: Node, val type: NavBoxType)
 
@@ -47,17 +49,20 @@ class MainScreenView : View() {
                                 NavBoxType.PROJECT -> {
                                     majorLabelProperty.bind(viewModel.selectedProjectName)
                                     minorLabelProperty.bind(viewModel.selectedProjectLanguage)
-                                    visibleProperty().bind(viewModel.selectedProjectProperty.booleanBinding { it != null })
+                                    visibleProperty()
+                                        .bind(workbookViewModel.activeWorkbookProperty.booleanBinding { it != null })
                                 }
                                 NavBoxType.CHAPTER -> {
                                     titleProperty.bind(viewModel.selectedCollectionTitle)
                                     bodyTextProperty.bind(viewModel.selectedCollectionBody)
-                                    visibleProperty().bind(viewModel.selectedCollectionProperty.booleanBinding { it != null })
+                                    visibleProperty()
+                                        .bind(viewModel.selectedCollectionProperty.booleanBinding { it != null })
                                 }
                                 NavBoxType.CHUNK -> {
                                     titleProperty.bind(viewModel.selectedContentTitle)
                                     bodyTextProperty.bind(viewModel.selectedContentBody)
-                                    visibleProperty().bind(viewModel.selectedContentProperty.booleanBinding { it != null })
+                                    visibleProperty()
+                                        .bind(viewModel.selectedContentProperty.booleanBinding { it != null })
                                 }
                             }
                         }
@@ -97,9 +102,6 @@ class MainScreenView : View() {
 
                     center {
                         activeFragment.dock<ProjectGridView>()
-                        ProjectGridView().apply {
-                            viewModel.selectedProjectProperty.bindBidirectional(activeProject)
-                        }
                         add(activeFragment)
                     }
                 }

@@ -10,20 +10,20 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardDataMapper
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ContentGridViewModel: ViewModel() {
+    private val workbookViewModel: WorkbookViewModel by inject()
 
     private val injector: Injector by inject()
     private val collectionRepository = injector.collectionRepo
     private val contentRepository = injector.contentRepository
-
-    // The selected project
-    private var activeProject: Collection by property()
-    val activeProjectProperty = getProperty(ContentGridViewModel::activeProject)
 
     // Selected child
     private var activeCollection: Collection by property()
@@ -62,14 +62,19 @@ class ContentGridViewModel: ViewModel() {
             )
         }
 
-        activeProjectProperty.toObservable().subscribe {
-            bindChapters()
+        workbookViewModel.activeWorkbookProperty.onChangeAndDoNow {
+            it?.let { wb -> bindChapters(wb) }
         }
         activeCollectionProperty.onChange {
             if(it != null) {
                 selectChildCollection(it)
             }
-            else bindChapters()
+            else {
+                // TODO
+                workbookViewModel.activeWorkbookProperty.value?.let {
+                    bindChapters(it)
+                }
+            }
         }
     }
 
@@ -91,29 +96,32 @@ class ContentGridViewModel: ViewModel() {
     }
 
     fun onCardSelection(cardData: CardData){
-        if(cardData.collectionSource != null) {
-            activeCollection = cardData.collectionSource
-        }
+        // TODO
+//        if(cardData.collectionSource != null) {
+//            activeCollection = cardData.collectionSource
+//        }
 
-        else if (cardData.contentSource != null) {
+        if (cardData.contentSource != null) {
             activeContent = cardData.contentSource
         }
     }
 
-    private fun bindChapters() {
+    private fun bindChapters(workbook: Workbook) {
         activeCollectionProperty.value = null
         loading = true
-        if (activeProject != null) {
-            allContent.clear()
-            collectionRepository
-                .getChildren(activeProject)
-                .observeOnFx()
-                .subscribe { childCollections ->
-                    // Now we have the children of the project collection
-                    loading = false
-                    val cardList = CardDataMapper.mapCollectionListToCards(childCollections)
-                    allContent.addAll(cardList.sortedBy { it.sort })
-                }
+        allContent.clear()
+        workbook.target.chapters
+            .map(CardDataMapper.Companion::mapChapterToCardData)
+            .doOnComplete {
+                loading = false
+            }
+            .observeOnFx()
+            .toList()
+            .doOnSuccess {
+                // TODO
+                // setAll is causing the UI to hang, probably because node structure is complex. If "loading" is
+                // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
+                allContent.setAll(it)
+            }.subscribe()
         }
-    }
 }

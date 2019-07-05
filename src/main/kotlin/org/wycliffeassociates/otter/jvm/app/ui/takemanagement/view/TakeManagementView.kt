@@ -48,7 +48,6 @@ class TakeManagementView : Fragment() {
     private var takesFlowPane = createTakesFlowPane()
 
     val activeCollection: Property<Collection> = takeManagementViewModel.activeCollectionProperty
-    val activeProject: Property<Collection> = takeManagementViewModel.activeProjectProperty
     val activeContent: Property<Content> = takeManagementViewModel.activeContentProperty
 
     init {

@@ -5,13 +5,16 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view.CardGrid
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementView
+import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 class MainViewViewModel : ViewModel() {
-    val selectedProjectProperty = SimpleObjectProperty<Collection>()
+    private val workbookViewModel: WorkbookViewModel by inject()
+
     val selectedProjectName = SimpleStringProperty()
     val selectedProjectLanguage = SimpleStringProperty()
 
@@ -26,10 +29,8 @@ class MainViewViewModel : ViewModel() {
     val takesPageDocked = SimpleBooleanProperty(false)
 
     init {
-        selectedProjectProperty.onChange {
-            if (it != null) {
-                projectSelected(it)
-            }
+        workbookViewModel.activeWorkbookProperty.onChange {
+            it?.let { wb -> projectSelected(wb) }
         }
 
         selectedCollectionProperty.onChange {
@@ -48,12 +49,11 @@ class MainViewViewModel : ViewModel() {
         }
     }
 
-    private fun projectSelected(selectedProject: Collection) {
-        setActiveProjectText(selectedProject)
+    private fun projectSelected(selectedWorkbook: Workbook) {
+        setActiveProjectText(selectedWorkbook)
 
         find<MainScreenView>().activeFragment.dock<CardGrid>()
         CardGrid().apply {
-            activeProject.bindBidirectional(selectedProjectProperty)
             activeCollection.bindBidirectional(selectedCollectionProperty)
             activeContent.bindBidirectional(selectedContentProperty)
         }
@@ -69,7 +69,6 @@ class MainViewViewModel : ViewModel() {
         if(takesPageDocked.value == false) {
             find<MainScreenView>().activeFragment.dock<TakeManagementView>()
             TakeManagementView().apply {
-                activeProject.bindBidirectional(selectedProjectProperty)
                 activeCollection.bindBidirectional(selectedCollectionProperty)
                 activeContent.bindBidirectional(selectedContentProperty)
             }
@@ -87,8 +86,8 @@ class MainViewViewModel : ViewModel() {
         selectedCollectionBody.set(collection.titleKey)
     }
 
-    private fun setActiveProjectText(activeProject: Collection) {
-        selectedProjectName.set(activeProject.titleKey)
-        selectedProjectLanguage.set(activeProject.resourceContainer?.language?.name)
+    private fun setActiveProjectText(activeWorkbook: Workbook) {
+        selectedProjectName.set(activeWorkbook.target.title)
+        selectedProjectLanguage.set(activeWorkbook.target.language.name)
     }
 }

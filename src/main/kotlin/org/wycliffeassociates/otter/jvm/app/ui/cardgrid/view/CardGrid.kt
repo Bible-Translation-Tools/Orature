@@ -19,7 +19,6 @@ class CardGrid : Fragment() {
     private val viewModel: ContentGridViewModel by inject()
 
     val activeCollection: Property<Collection> = viewModel.activeCollectionProperty
-    val activeProject: Property<Collection> = viewModel.activeProjectProperty
     val activeContent: Property<Content> = viewModel.activeContentProperty
 
 
