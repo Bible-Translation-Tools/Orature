@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.ResourceG
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.resourceGroupCardItem
 import tornadofx.*
 
-class ResourcesViewModel : ViewModel() {
+class ResourceListViewModel : ViewModel() {
     internal val recordResourceViewModel: RecordResourceViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 

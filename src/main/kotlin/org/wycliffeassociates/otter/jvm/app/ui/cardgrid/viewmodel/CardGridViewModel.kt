@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewMo
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class ContentGridViewModel: ViewModel() {
+class CardGridViewModel: ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
 
     // List of content to display on the screen
@@ -28,10 +28,10 @@ class ContentGridViewModel: ViewModel() {
 
     // Whether the UI should show the plugin as active
     private var showPluginActive: Boolean by property(false)
-    val showPluginActiveProperty = getProperty(ContentGridViewModel::showPluginActive)
+    val showPluginActiveProperty = getProperty(CardGridViewModel::showPluginActive)
 
     private var loading: Boolean by property(false)
-    val loadingProperty = getProperty(ContentGridViewModel::loading)
+    val loadingProperty = getProperty(CardGridViewModel::loading)
 
     val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 

@@ -7,13 +7,13 @@ import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.ContentGridViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.CardGridViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
-class CardGrid : Fragment() {
-    private val viewModel: ContentGridViewModel by inject()
+class CardGridFragment : Fragment() {
+    private val viewModel: CardGridViewModel by inject()
 
     init {
         importStylesheet<CardGridStyles>()

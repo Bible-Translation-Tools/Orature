@@ -8,8 +8,8 @@ import javafx.scene.layout.*
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.NavBoxType
-import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel.MainViewViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view.ProjectGridView
+import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel.MainScreenViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view.ProjectGridFragment
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.projectnav.projectnav
 import tornadofx.*
@@ -19,7 +19,7 @@ class MainScreenView : View() {
     var activeFragment: Workspace = Workspace()
     var fragmentStage: AnchorPane by singleAssign()
 
-    val viewModel: MainViewViewModel by inject()
+    val viewModel: MainScreenViewModel by inject()
     val workbookViewModel: WorkbookViewModel by inject()
 
     data class NavBoxItem(val defaultText: String, val textGraphic: Node, val cardGraphic: Node, val type: NavBoxType)
@@ -101,7 +101,7 @@ class MainScreenView : View() {
                     }
 
                     center {
-                        activeFragment.dock<ProjectGridView>()
+                        activeFragment.dock<ProjectGridFragment>()
                         add(activeFragment)
                     }
                 }

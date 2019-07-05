@@ -7,12 +7,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
-import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view.CardGrid
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementView
+import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view.CardGridFragment
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.TakeManagementFragment
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
-class MainViewViewModel : ViewModel() {
+class MainScreenViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
 
     val selectedProjectName = SimpleStringProperty()
@@ -44,7 +44,7 @@ class MainViewViewModel : ViewModel() {
     private fun projectSelected(selectedWorkbook: Workbook) {
         setActiveProjectText(selectedWorkbook)
 
-        find<MainScreenView>().activeFragment.dock<CardGrid>()
+        find<MainScreenView>().activeFragment.dock<CardGridFragment>()
     }
 
     private fun chapterSelected(chapter: Chapter) {
@@ -55,7 +55,7 @@ class MainViewViewModel : ViewModel() {
         setActiveChunkText(chunk)
 
         if(takesPageDocked.value == false) {
-            find<MainScreenView>().activeFragment.dock<TakeManagementView>()
+            find<MainScreenView>().activeFragment.dock<TakeManagementFragment>()
         }
         takesPageDocked.set(true)
     }

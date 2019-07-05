@@ -26,7 +26,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.OldTakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.oldtakecard
 import tornadofx.*
 
-class TakeManagementView : Fragment() {
+class TakeManagementFragment : Fragment() {
     private val takeManagementViewModel: TakeManagementViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
