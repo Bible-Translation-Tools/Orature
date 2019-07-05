@@ -1,12 +1,10 @@
 package org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view.CardGrid
@@ -23,9 +21,8 @@ class MainViewViewModel : ViewModel() {
     val selectedChapterTitle = SimpleStringProperty()
     val selectedChapterBody = SimpleStringProperty()
 
-    val selectedContentProperty = SimpleObjectProperty<Content>()
-    val selectedContentTitle = SimpleStringProperty()
-    val selectedContentBody = SimpleStringProperty()
+    val selectedChunkTitle = SimpleStringProperty()
+    val selectedChunkBody = SimpleStringProperty()
 
     val takesPageDocked = SimpleBooleanProperty(false)
 
@@ -38,13 +35,9 @@ class MainViewViewModel : ViewModel() {
             it?.let { ch -> chapterSelected(ch) }
         }
 
-        selectedContentProperty.onChange {
-            if (it != null) {
-                contentSelected(it)
-            }
-            else { // the take manager was undocked
-                takesPageDocked.set(false)
-            }
+        workbookViewModel.activeChunkProperty.onChange {
+            it?.let { chunkSelected(it) }
+                ?: takesPageDocked.set(false)
         }
     }
 
@@ -52,30 +45,24 @@ class MainViewViewModel : ViewModel() {
         setActiveProjectText(selectedWorkbook)
 
         find<MainScreenView>().activeFragment.dock<CardGrid>()
-        CardGrid().apply {
-            activeContent.bindBidirectional(selectedContentProperty)
-        }
     }
 
     private fun chapterSelected(chapter: Chapter) {
         setActiveChapterText(chapter)
     }
 
-    private fun contentSelected(content: Content) {
-        setActiveContentText(content)
+    private fun chunkSelected(chunk: Chunk) {
+        setActiveChunkText(chunk)
 
         if(takesPageDocked.value == false) {
             find<MainScreenView>().activeFragment.dock<TakeManagementView>()
-            TakeManagementView().apply {
-                activeContent.bindBidirectional(selectedContentProperty)
-            }
         }
         takesPageDocked.set(true)
     }
 
-    private fun setActiveContentText(content: Content) {
-        selectedContentTitle.set(content.labelKey.toUpperCase())
-        selectedContentBody.set(content.start.toString())
+    private fun setActiveChunkText(chunk: Chunk) {
+        selectedChunkTitle.set(ContentLabel.of(chunk.contentType).value.toUpperCase())
+        selectedChunkBody.set(chunk.start.toString())
     }
 
     private fun setActiveChapterText(chapter: Chapter) {

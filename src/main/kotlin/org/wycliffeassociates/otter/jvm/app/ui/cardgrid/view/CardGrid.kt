@@ -2,12 +2,9 @@ package org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.beans.property.Property
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.ContentGridViewModel
@@ -17,8 +14,6 @@ import tornadofx.*
 
 class CardGrid : Fragment() {
     private val viewModel: ContentGridViewModel by inject()
-
-    val activeContent: Property<Content> = viewModel.activeContentProperty
 
     init {
         importStylesheet<CardGridStyles>()

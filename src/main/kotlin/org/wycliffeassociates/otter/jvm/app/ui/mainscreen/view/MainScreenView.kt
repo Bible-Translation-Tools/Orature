@@ -59,10 +59,10 @@ class MainScreenView : View() {
                                         .bind(workbookViewModel.activeChapterProperty.booleanBinding { it != null })
                                 }
                                 NavBoxType.CHUNK -> {
-                                    titleProperty.bind(viewModel.selectedContentTitle)
-                                    bodyTextProperty.bind(viewModel.selectedContentBody)
+                                    titleProperty.bind(viewModel.selectedChunkTitle)
+                                    bodyTextProperty.bind(viewModel.selectedChunkBody)
                                     visibleProperty()
-                                        .bind(viewModel.selectedContentProperty.booleanBinding { it != null })
+                                        .bind(workbookViewModel.activeChunkProperty.booleanBinding { it != null })
                                 }
                             }
                         }
@@ -110,10 +110,9 @@ class MainScreenView : View() {
     }
 
     private fun navigateBack() {
-
         //navigate back to verse selection from viewing takes
-        if (viewModel.selectedContentProperty.value != null) {
-            viewModel.selectedContentProperty.value = null
+        if (workbookViewModel.activeChunkProperty.value != null) {
+            workbookViewModel.activeChunkProperty.value = null
             activeFragment.navigateBack()
         }
         //from verse selection, navigate back to chapter selection
@@ -122,7 +121,5 @@ class MainScreenView : View() {
         }
 
         else activeFragment.navigateBack()
-
     }
-
 }

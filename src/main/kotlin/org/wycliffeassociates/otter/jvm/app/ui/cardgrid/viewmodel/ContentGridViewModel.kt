@@ -7,26 +7,17 @@ import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardDataMapper
-import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ContentGridViewModel: ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
-
-    private val injector: Injector by inject()
-    private val contentRepository = injector.contentRepository
-
-    // Selected content (chunk or verse)
-    private var activeContent: Content by property()
-    val activeContentProperty = getProperty(ContentGridViewModel::activeContent)
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
