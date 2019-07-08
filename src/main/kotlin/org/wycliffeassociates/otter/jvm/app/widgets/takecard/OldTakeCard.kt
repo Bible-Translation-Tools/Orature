@@ -9,15 +9,13 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.simpleaudioplayer
 import tornadofx.*
 
 class OldTakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) : AnchorPane() {
-    val playedProperty = SimpleBooleanProperty(take.played)
-
     var deleteButton: Button by singleAssign()
     var takeNumberLabel: Label by singleAssign()
     var timestampLabel: Label by singleAssign()
@@ -43,7 +41,7 @@ class OldTakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) 
                     alignment = Pos.CENTER_LEFT
                     takeNumberLabel = label("$takePrefix %02d".format(take.number), OldTakeCardStyles.draggingIcon())
                     takeNumberLabel.addClass(OldTakeCardStyles.takeNumberLabel)
-                    timestampLabel = label(take.created.toString())
+                    timestampLabel = label(take.modifiedTimestamp.value.toString())
                     timestampLabel.addClass(OldTakeCardStyles.timestampLabel)
                 }
                 hbox {
@@ -58,7 +56,7 @@ class OldTakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) 
                 alignment = Pos.CENTER
                 hbox {
                     alignment = Pos.CENTER
-                    simpleAudioPlayer = simpleaudioplayer(take.path, player) {
+                    simpleAudioPlayer = simpleaudioplayer(take.file, player) {
                         vgrow = Priority.ALWAYS
                         addClass(OldTakeCardStyles.takeProgressBar)
                         isAudioPlaying.bind(isPlaying)

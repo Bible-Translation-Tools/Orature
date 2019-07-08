@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
+import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXSnackbar
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -15,9 +16,10 @@ import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
@@ -27,6 +29,7 @@ import tornadofx.*
 
 class RecordScriptureFragment : Fragment() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    private val takeManagementViewModel: TakeManagementViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
     // The currently selected take
@@ -59,7 +62,7 @@ class RecordScriptureFragment : Fragment() {
         addClass(AppStyles.appBackground)
         addClass(RecordScriptureStyles.tpanelStyle)
         val snackBar = JFXSnackbar(this)
-        takeManagementViewModel.snackBarObservable.subscribe { shouldShow ->
+        recordScriptureViewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
                     JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
                         takeManagementViewModel.addPlugin(true, false)
@@ -84,7 +87,7 @@ class RecordScriptureFragment : Fragment() {
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
                     action {
-                        recordScriptureViewModel.previousVerse()
+                        recordScriptureViewModel.previousChunk()
                     }
                     enableWhen(recordScriptureViewModel.hasPrevious)
                 }
@@ -114,11 +117,11 @@ class RecordScriptureFragment : Fragment() {
                                 add(placeholder)
                             } else {
                                 // Add the selected take card
-                                recordScriptureViewModel.acceptTake(it.take)
+                                recordScriptureViewModel.selectTake(it.take)
                                 add(it)
                             }
                         }
-                        takeManagementViewModel.selectedTakeProperty.onChange {
+                        recordScriptureViewModel.selectedTakeProperty.onChange {
                             // The view model wants us to use this selected take
                             // This take will not appear in the flow pane items
                             if (it != null && selectedTakeProperty.value == null) {
@@ -140,8 +143,8 @@ class RecordScriptureFragment : Fragment() {
                     addClass(RecordScriptureStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     action {
-                        recordScriptureViewModel.nextVerse()
-                        enableWhen(takeManagementViewModel.hasNext)
+                        recordScriptureViewModel.nextChunk()
+                        enableWhen(recordScriptureViewModel.hasNext)
                     }
                 }
             }
@@ -265,9 +268,6 @@ class RecordScriptureFragment : Fragment() {
     private fun createTakeCard(take: Take): OldTakeCard {
         return oldtakecard(take, takeManagementViewModel.audioPlayer(), messages["take"]) {
             addClass(RecordScriptureStyles.takeCard)
-            playedProperty.onChange {
-                if (it) takeManagementViewModel.setTakePlayed(take)
-            }
             deleteButton.apply {
                 addClass(RecordScriptureStyles.deleteButton)
                 action {
@@ -278,20 +278,14 @@ class RecordScriptureFragment : Fragment() {
                             ButtonType.NO,
                             title = messages["deleteTakePrompt"]
                     ) { button: ButtonType ->
-                        if (button == ButtonType.YES) takeManagementViewModel.delete(take)
+                        if (button == ButtonType.YES) recordScriptureViewModel.delete(take)
                     }
                 }
             }
             editButton.action {
-                takeManagementViewModel.editContent(take)
+                takeManagementViewModel.edit(take)
             }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }
-    }
-
-    override fun onDock() {
-        super.onDock()
-        // Reset the model
-        recordScriptureViewModel.reset()
     }
 }

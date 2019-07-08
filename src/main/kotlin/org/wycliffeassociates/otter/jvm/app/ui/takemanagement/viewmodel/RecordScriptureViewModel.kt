@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
@@ -29,11 +30,8 @@ class RecordScriptureViewModel : ViewModel() {
     private val activeChunk: Chunk
         get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
-    private var selectedTake: Take?
-        get() = activeChunk.audio.selected.value?.value
-        set(take) {
-            activeChunk.audio.selectTake(take)
-        }
+    val selectedTakeProperty = SimpleObjectProperty<Take?>()
+    private val selectedTake by selectedTakeProperty
 
     private var context: TakeContext by property(TakeContext.RECORD)
     val contextProperty = getProperty(RecordScriptureViewModel::context)
@@ -53,6 +51,8 @@ class RecordScriptureViewModel : ViewModel() {
     val hasNext = SimpleBooleanProperty(false)
     val hasPrevious = SimpleBooleanProperty(false)
 
+    private var selectedTakeSubscription: Disposable? = null
+
     init {
         activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
 
@@ -65,7 +65,16 @@ class RecordScriptureViewModel : ViewModel() {
                 setTitle(chunk)
                 loadTakes(chunk.audio)
                 setHasNextAndPrevious()
+                subscribeToSelectedTake(chunk.audio)
             }
+        }
+    }
+
+    private fun subscribeToSelectedTake(audio: AssociatedAudio) {
+        selectedTakeSubscription?.dispose()
+
+        selectedTakeSubscription = audio.selected.subscribe {
+            selectedTakeProperty.set(it.value)
         }
     }
 
@@ -121,7 +130,7 @@ class RecordScriptureViewModel : ViewModel() {
         }
 
         // Set the new selected take value
-        selectedTake = take
+        activeChunk.audio.selectTake(take)
     }
 
     fun editContent(take: Take) {
