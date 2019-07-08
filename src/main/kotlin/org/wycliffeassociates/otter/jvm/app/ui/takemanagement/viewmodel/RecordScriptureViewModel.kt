@@ -3,16 +3,17 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
+import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
-import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
@@ -29,8 +30,11 @@ class RecordScriptureViewModel : ViewModel() {
     private val activeChunk: Chunk
         get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
-    private val selectedTakeProperty = SimpleObjectProperty<Take?>()
-    var selectedTake by selectedTakeProperty
+    private var selectedTake: Take?
+        get() = activeChunk.audio.selected.value?.value
+        set(take) {
+            activeChunk.audio.selectTake(take)
+        }
 
     private var context: TakeContext by property(TakeContext.RECORD)
     val contextProperty = getProperty(RecordScriptureViewModel::context)
@@ -57,13 +61,30 @@ class RecordScriptureViewModel : ViewModel() {
             it?.let { chapter -> getChunkList(chapter.chunks) }
         }
 
-        activeChunkProperty.onChange {
+        activeChunkProperty.onChangeAndDoNow {
             it?.let { chunk ->
                 setTitle(chunk)
                 populateTakes(chunk.audio)
+                setHasNextAndPrevious()
             }
         }
-        reset()
+    }
+
+    private fun setHasNextAndPrevious() {
+        if (chunkList.isNotEmpty()) {
+            doSetHasNextAndPrevious()
+        } else {
+            chunkList.isNotEmpty().toProperty().onChangeOnce {
+                doSetHasNextAndPrevious()
+            }
+        }
+    }
+
+    private fun doSetHasNextAndPrevious() {
+        if (chunkList.isNotEmpty()) {
+            hasNext.set(activeChunk.start < chunkList.last().start)
+            hasPrevious.set(activeChunk.start > chunkList.first().start)
+        } else throw IllegalStateException("Chunk list is empty")
     }
 
     private fun setTitle(chunk: Chunk) {
@@ -77,35 +98,32 @@ class RecordScriptureViewModel : ViewModel() {
             .observeOnFx()
             .subscribe { list ->
                 chunkList.setAll(list.sortedBy { chunk -> chunk.start })
-                enableButtons()
             }
     }
 
     private fun populateTakes(audio: AssociatedAudio) {
-        selectedTake = audio.selected.value?.value
+        val selected = selectedTake
         audio.takes
             .toList()
             .observeOnFx()
             .subscribe { retrievedTakes ->
                 retrievedTakes
-                    .filter { it != selectedTake }
+                    .filter { it != selected }
                     .let { alternateTakes.setAll(it) }
             }
     }
 
-    fun selectTake(audio: AssociatedAudio, take: Take) {
-        audio.selectTake(take)
+    fun selectTake(take: Take?) {
+        take?.let {
+            alternateTakes.remove(it)
 
-        // Move the old selected take back to the alternates (if not null)
-        selectedTake?.let {
-            alternateTakes.add(it)
+            selectedTake?.let { oldSelectedTake ->
+                alternateTakes.add(oldSelectedTake)
+            }
         }
 
         // Set the new selected take value
         selectedTake = take
-
-        // Remove the new selected take from the alternates
-        alternateTakes.remove(take)
     }
 
     fun editContent(take: Take) {
@@ -134,10 +152,7 @@ class RecordScriptureViewModel : ViewModel() {
         }
         chunkList
             .find { it.start == activeChunk.start + amount }
-            ?.let { newChunk ->
-                activeChunkProperty.set(newChunk)
-                populateTakes(newChunk.audio)
-            } // TODO: if newChunk is null, should the next button have been disabled already, or give user a message?
+            ?.let { newChunk -> activeChunkProperty.set(newChunk) }
     }
 
     fun nextChunk() {
@@ -149,43 +164,11 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun delete(take: Take) {
-        if (take == selectedTakeProperty.value) {
-            // Delete the selected take
-            accessTakes
-                    .setSelectedTake(activeContentProperty.value, null)
-                    .concatWith(accessTakes.delete(take))
-                    .subscribe()
-            selectedTakeProperty.value = null
+        take.deletedTimestamp.accept(DateHolder.now())
+        if (take == selectedTake) {
+            selectTake(null)
         } else {
             alternateTakes.remove(take)
-            accessTakes
-                    .delete(take)
-                    .subscribe()
-        }
-        if (take.path.exists()) take.path.delete()
-    }
-
-    fun reset() {
-        alternateTakes.clear()
-        selectedTakeProperty.value = null
-        activeContentProperty.value?.let { populateTakes(it) }
-        title = if (activeContentProperty.value?.type == ContentType.META) {
-            // TODO
-            "TODO"
-//            activeCollectionProperty.value?.titleKey ?: ""
-        } else {
-            val label = FX.messages[activeContentProperty.value?.labelKey ?: ContentLabel.VERSE.value]
-            val start = activeContentProperty.value?.start ?: ""
-            "$label $start"
-        }
-    }
-
-    private fun enableButtons() {
-        if(chunkList.size != 0) {
-            if (activeContent != null) {
-                hasNext.set(activeContent.start < chunkList.last().start)
-                hasPrevious.set(activeContent.start > chunkList.first().start)
-            }
         }
     }
 
