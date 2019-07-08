@@ -109,16 +109,15 @@ class RecordScriptureViewModel : ViewModel() {
     fun editContent(take: Take) {
         contextProperty.set(TakeContext.EDIT_TAKES)
         showPluginActive = true
-        editTake.edit(take)
-                .observeOnFx()
-                .subscribe { result ->
-                    showPluginActive = false
-                    when (result) {
-                        EditTake.Result.SUCCESS -> {
-                        }
-                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    }
+        takeManagementViewModel.edit(take)
+            .observeOnFx()
+            .subscribe { result ->
+                showPluginActive = false
+                when (result) {
+                    EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                    else -> {}
                 }
+            }
     }
 
     fun nextVerse() {

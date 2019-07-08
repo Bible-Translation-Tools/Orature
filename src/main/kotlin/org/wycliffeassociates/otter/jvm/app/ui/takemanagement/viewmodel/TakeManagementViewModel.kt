@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
@@ -73,6 +74,8 @@ class TakeManagementViewModel: ViewModel() {
             workbookViewModel.projectAudioDirectory,
             createFileNamer(recordable)
         )
+
+    fun edit(take: Take) = editTake.edit(take)
 
     fun recordNewTake(recordable: Recordable) {
         recordTake.record(
