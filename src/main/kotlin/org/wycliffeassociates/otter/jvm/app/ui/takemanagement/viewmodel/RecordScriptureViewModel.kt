@@ -10,6 +10,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -25,7 +26,8 @@ class RecordScriptureViewModel : ViewModel() {
 
     // This will be bidirectionally bound to workbookViewModel's activeChunkProperty
     private val activeChunkProperty = SimpleObjectProperty<Chunk?>()
-    private var activeChunk by activeChunkProperty
+    private val activeChunk: Chunk
+        get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
     private val selectedTakeProperty = SimpleObjectProperty<Take?>()
     var selectedTake by selectedTakeProperty
@@ -120,25 +122,30 @@ class RecordScriptureViewModel : ViewModel() {
             }
     }
 
-    fun nextVerse() {
-        val nextVerse = chunkList.find { verse ->
-            verse.start == activeContent.start + 1
-        } ?: activeContent
-        if (nextVerse != null) {
-            activeContentProperty.set(nextVerse)
-            populateTakes(nextVerse)
-        }
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
     }
 
-    fun previousVerse() {
-        val previousVerse = chunkList.find {
-            it.start == activeContent.start - 1 && it.type != ContentType.META //don't pull chapter/meta
+    private fun stepToChunk(direction: StepDirection) {
+        val amount = when (direction) {
+            StepDirection.FORWARD -> 1
+            StepDirection.BACKWARD -> -1
         }
-                ?: activeContent
-        if (previousVerse != null) {
-            activeContentProperty.set(previousVerse)
-            populateTakes(previousVerse)
-        }
+        chunkList
+            .find { it.start == activeChunk.start + amount }
+            ?.let { newChunk ->
+                activeChunkProperty.set(newChunk)
+                populateTakes(newChunk.audio)
+            } // TODO: if newChunk is null, should the next button have been disabled already, or give user a message?
+    }
+
+    fun nextChunk() {
+        stepToChunk(StepDirection.FORWARD)
+    }
+
+    fun previousChunk() {
+        stepToChunk(StepDirection.BACKWARD)
     }
 
     fun delete(take: Take) {
