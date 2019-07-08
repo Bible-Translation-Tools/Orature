@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
@@ -54,7 +56,7 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun newTakeAction() {
-        takeManagementViewModel.recordNewTake(activeRecordable)
+        recordNewTake(activeRecordable)
     }
 
     private fun initTabs() {
@@ -93,5 +95,14 @@ class RecordResourceViewModel : ViewModel() {
 
     private fun removeRecordableFromTabViewModel(item: Recordable) {
         contentTypeToViewModelMap.getNotNull(item.contentType).recordable = null
+    }
+
+
+    fun recordNewTake(recordable: Recordable) {
+        takeManagementViewModel.record(recordable)
+            .observeOnFx()
+            // Subscribing on an I/O thread is not completely necessary but it is is safer
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 }

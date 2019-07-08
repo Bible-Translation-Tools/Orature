@@ -3,12 +3,11 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
-import javafx.collections.ListChangeListener
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -64,7 +63,7 @@ class RecordScriptureViewModel : ViewModel() {
         activeChunkProperty.onChangeAndDoNow {
             it?.let { chunk ->
                 setTitle(chunk)
-                populateTakes(chunk.audio)
+                loadTakes(chunk.audio)
                 setHasNextAndPrevious()
             }
         }
@@ -101,15 +100,14 @@ class RecordScriptureViewModel : ViewModel() {
             }
     }
 
-    private fun populateTakes(audio: AssociatedAudio) {
-        val selected = selectedTake
+    private fun loadTakes(audio: AssociatedAudio) {
         audio.takes
-            .toList()
-            .observeOnFx()
-            .subscribe { retrievedTakes ->
-                retrievedTakes
-                    .filter { it != selected }
-                    .let { alternateTakes.setAll(it) }
+            .subscribe {
+                if ( it != selectedTake ) {
+                    Platform.runLater {
+                        alternateTakes.add(it)
+                    }
+                }
             }
     }
 
@@ -174,32 +172,18 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun recordContent(recordable: Recordable) {
         contextProperty.set(TakeContext.RECORD)
-        activeProjectProperty.value?.let { project ->
-            showPluginActive = true
-            takeManagementViewModel
-                .record(recordable)
-                .observeOnFx()
-                .doOnSuccess { result ->
-                    showPluginActive = false
-                    when (result) {
-                        RecordTake.Result.SUCCESS -> {
-                            populateTakes(activeContentProperty.value)
-                        }
+        showPluginActive = true
 
-                        RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
-                        RecordTake.Result.NO_AUDIO -> {
-                        }
-                    }
+        takeManagementViewModel
+            .record(recordable)
+            .observeOnFx()
+            .doOnSuccess { result ->
+                showPluginActive = false
+                when (result) {
+                    RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
+                    else -> {}
                 }
-                .toCompletable()
-                .onErrorResumeNext {
-                    Completable.fromAction {
-                        showPluginActive = false
-                        snackBarObservable.onNext(messages["noRecorder"])
-                    }
-                }
-                .subscribe()
-        }
+            }
+            .subscribe()
     }
-
 }
