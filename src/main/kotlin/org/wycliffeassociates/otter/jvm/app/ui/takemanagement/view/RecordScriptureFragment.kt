@@ -20,17 +20,16 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.OldTakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.oldtakecard
 import tornadofx.*
 
 class RecordScriptureFragment : Fragment() {
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
-    private val takeManagementViewModel: TakeManagementViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
     // The currently selected take
     private var selectedTakeProperty = SimpleObjectProperty<OldTakeCard>()
@@ -65,7 +64,7 @@ class RecordScriptureFragment : Fragment() {
         recordScriptureViewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
                     JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
-                        takeManagementViewModel.addPlugin(true, false)
+                        audioPluginViewModel.addPlugin(true, false)
                     })
             )
         }
@@ -117,11 +116,11 @@ class RecordScriptureFragment : Fragment() {
                                 add(placeholder)
                             } else {
                                 // Add the selected take card
-                                recordScriptureViewModel.selectTake(it.take)
+                                recordableViewModel.selectTake(it.take)
                                 add(it)
                             }
                         }
-                        recordScriptureViewModel.selectedTakeProperty.onChange {
+                        recordableViewModel.selectedTakeProperty.onChange {
                             // The view model wants us to use this selected take
                             // This take will not appear in the flow pane items
                             if (it != null && selectedTakeProperty.value == null) {
@@ -233,7 +232,7 @@ class RecordScriptureFragment : Fragment() {
             vgrow = Priority.ALWAYS
             addClass(RecordScriptureStyles.takeGrid)
             // Update the takes displayed
-            recordScriptureViewModel.alternateTakes.onChange {
+            recordableViewModel.alternateTakes.onChange {
                 clear()
                 it.list.forEach { take ->
                     // Add a new take card
@@ -251,7 +250,7 @@ class RecordScriptureFragment : Fragment() {
             label(messages["newTake"])
             button(messages["record"], AppStyles.recordIcon("25px")) {
                 action {
-                    recordScriptureViewModel.recordContent(workbookViewModel.chunk!!)
+                    recordScriptureViewModel.recordNewTake()
                 }
             }
         }
@@ -266,7 +265,7 @@ class RecordScriptureFragment : Fragment() {
     }
 
     private fun createTakeCard(take: Take): OldTakeCard {
-        return oldtakecard(take, takeManagementViewModel.audioPlayer(), messages["take"]) {
+        return oldtakecard(take, audioPluginViewModel.audioPlayer(), messages["take"]) {
             addClass(RecordScriptureStyles.takeCard)
             deleteButton.apply {
                 addClass(RecordScriptureStyles.deleteButton)
@@ -278,12 +277,12 @@ class RecordScriptureFragment : Fragment() {
                             ButtonType.NO,
                             title = messages["deleteTakePrompt"]
                     ) { button: ButtonType ->
-                        if (button == ButtonType.YES) recordScriptureViewModel.delete(take)
+                        if (button == ButtonType.YES) recordableViewModel.deleteTake(take)
                     }
                 }
             }
             editButton.action {
-                takeManagementViewModel.edit(take)
+                recordScriptureViewModel.editTake(take)
             }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }

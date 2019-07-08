@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 
+import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -11,30 +12,22 @@ import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewMo
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
-class TakeManagementViewModel: ViewModel() {
+class AudioPluginViewModel: ViewModel() {
     private val injector: Injector by inject()
     private val pluginRepository = injector.pluginRepository
 
     private val workbookViewModel: WorkbookViewModel by inject()
 
     private val launchPlugin = LaunchPlugin(pluginRepository)
-
-    private val recordTake = RecordTake(
-        WaveFileCreator(),
-        LaunchPlugin(pluginRepository)
-    )
-
+    private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    fun audioPlayer(): IAudioPlayer = injector.audioPlayer
-
-    fun addPlugin(record: Boolean, edit: Boolean) {
-        find<AddPluginViewModel>().apply {
-            canRecord = record
-            canEdit = edit
-        }
-        find<AddPluginView>().openModal()
-    }
+    fun record(recordable: Recordable): Single<RecordTake.Result> = recordTake
+        .record(
+            recordable.audio,
+            workbookViewModel.projectAudioDirectory,
+            createFileNamer(recordable)
+        )
 
     private fun createFileNamer(recordable: Recordable) = WorkbookFileNamerBuilder
         .createFileNamer(
@@ -45,12 +38,15 @@ class TakeManagementViewModel: ViewModel() {
             workbookViewModel.resourceSlug
         )
 
-    fun edit(take: Take) = editTake.edit(take)
+    fun edit(take: Take): Single<EditTake.Result> = editTake.edit(take)
 
-    fun record(recordable: Recordable) = recordTake
-        .record(
-            recordable.audio,
-            workbookViewModel.projectAudioDirectory,
-            createFileNamer(recordable)
-        )
+    fun audioPlayer(): IAudioPlayer = injector.audioPlayer
+
+    fun addPlugin(record: Boolean, edit: Boolean) {
+        find<AddPluginViewModel>().apply {
+            canRecord = record
+            canEdit = edit
+        }
+        find<AddPluginView>().openModal()
+    }
 }
