@@ -11,15 +11,17 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import tornadofx.*
 
-open class RecordableViewModel {
-
+open class RecordableViewModel(
+    val recordNewTake: () -> Unit,
+    val editTake: (Take) -> Unit
+) {
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
     private val disposables = CompositeDisposable()
 
     val selectedTakeProperty = SimpleObjectProperty<Take?>()
-    val selectedTake by selectedTakeProperty
+    private val selectedTake by selectedTakeProperty
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
 
@@ -33,6 +35,23 @@ open class RecordableViewModel {
         }
     }
 
+    fun selectTake(take: Take?) {
+        take?.let {
+            alternateTakes.remove(it)
+
+            selectedTake?.let { oldSelectedTake ->
+                alternateTakes.add(oldSelectedTake)
+            }
+        }
+
+        // Set the new selected take value
+        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+    }
+
+    fun deleteTake(take: Take) {
+        take.deletedTimestamp.accept(DateHolder.now())
+    }
+
     @Suppress("ProtectedInFinal", "Unused")
     protected fun finalize() {
         clearDisposables()
@@ -42,7 +61,7 @@ open class RecordableViewModel {
         disposables.clear()
     }
 
-    fun loadTakes(audio: AssociatedAudio) {
+    private fun loadTakes(audio: AssociatedAudio) {
         alternateTakes.clear()
         audio.takes
             .subscribe {
@@ -70,22 +89,5 @@ open class RecordableViewModel {
         audio.selected.subscribe {
             selectedTakeProperty.set(it.value)
         }.let { disposables.add(it) }
-    }
-
-    fun selectTake(take: Take?) {
-        take?.let {
-            alternateTakes.remove(it)
-
-            selectedTake?.let { oldSelectedTake ->
-                alternateTakes.add(oldSelectedTake)
-            }
-        }
-
-        // Set the new selected take value
-        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
-    }
-
-    fun deleteTake(take: Take) {
-        take.deletedTimestamp.accept(DateHolder.now())
     }
 }

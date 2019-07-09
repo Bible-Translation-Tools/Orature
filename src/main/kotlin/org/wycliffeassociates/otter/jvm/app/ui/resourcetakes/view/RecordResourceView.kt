@@ -13,6 +13,7 @@ class RecordResourceView : View() {
     override val root = tabPane
 
     // The tabs will add or remove themselves from the tabPane when their view model's 'recordable' property changes
+    @Suppress("unused")
     private val tabs: List<RecordableTab> = listOf(
         recordableTab(ContentType.TITLE, 0),
         recordableTab(ContentType.BODY, 1)

@@ -250,7 +250,7 @@ class RecordScriptureFragment : Fragment() {
             label(messages["newTake"])
             button(messages["record"], AppStyles.recordIcon("25px")) {
                 action {
-                    recordScriptureViewModel.recordNewTake()
+                    recordableViewModel.recordNewTake()
                 }
             }
         }
@@ -282,7 +282,7 @@ class RecordScriptureFragment : Fragment() {
                 }
             }
             editButton.action {
-                recordScriptureViewModel.editTake(take)
+                recordableViewModel.editTake(take)
             }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }

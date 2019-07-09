@@ -1,20 +1,17 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view
 
 import javafx.beans.property.SimpleStringProperty
-import javafx.collections.ObservableList
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.RowConstraints
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
 
 class RecordableTabContent(
-    takesList: ObservableList<Take>
+    private val recordableViewModel: RecordableViewModel
 ) : Fragment() {
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val recordResourceViewModel: RecordResourceViewModel by inject()
 
     val formattedTextProperty = SimpleStringProperty()
 
@@ -39,7 +36,7 @@ class RecordableTabContent(
                 }
                 addClass(RecordResourceStyles.leftRegionContainer)
                 add(
-                    TabContentLeftRegion(formattedTextProperty, recordResourceViewModel::recordNewTake)
+                    TabContentLeftRegion(formattedTextProperty, recordableViewModel.recordNewTake)
                 )
             }
             vbox(20.0) {
@@ -48,7 +45,7 @@ class RecordableTabContent(
                 }
                 addClass(RecordResourceStyles.rightRegion)
                 add(
-                    TakesListView(takesList, audioPluginViewModel::audioPlayer)
+                    TakesListView(recordableViewModel.alternateTakes, audioPluginViewModel::audioPlayer)
                 )
             }
         }

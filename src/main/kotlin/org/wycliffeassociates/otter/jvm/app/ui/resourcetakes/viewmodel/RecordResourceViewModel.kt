@@ -28,10 +28,13 @@ class RecordResourceViewModel : ViewModel() {
         EnumMap<ContentType, TabRecordableViewModel>(map)
     val contentTypeToViewModelMap = ContentTypeToViewModelMap(
         hashMapOf(
-            ContentType.TITLE to TabRecordableViewModel(SimpleStringProperty()),
-            ContentType.BODY to TabRecordableViewModel(SimpleStringProperty())
+            ContentType.TITLE to tabRecordableViewModel(),
+            ContentType.BODY to tabRecordableViewModel()
         )
     )
+
+    private fun tabRecordableViewModel() =
+        TabRecordableViewModel(SimpleStringProperty(), this::recordNewTake, this::editTake)
 
     init {
         initTabs()
@@ -54,7 +57,7 @@ class RecordResourceViewModel : ViewModel() {
             recordableList.setAll(items)
     }
 
-    fun recordNewTake() {
+    private fun recordNewTake() {
         activeRecordable?.let {
             audioPluginViewModel
                 .record(it)
@@ -65,7 +68,7 @@ class RecordResourceViewModel : ViewModel() {
         } ?: throw IllegalStateException("Active recordable is null")
     }
 
-    fun editTake(take: Take) {
+    private fun editTake(take: Take) {
         audioPluginViewModel
             .edit(take)
             .observeOnFx()

@@ -18,7 +18,7 @@ class RecordableTab(
     init {
         textProperty().bind(viewModel.labelProperty)
 
-        RecordableTabContent(viewModel.alternateTakes).apply {
+        RecordableTabContent(viewModel).apply {
             formattedTextProperty.bind(viewModel.getFormattedTextBinding())
             this@RecordableTab.content = this.root
         }

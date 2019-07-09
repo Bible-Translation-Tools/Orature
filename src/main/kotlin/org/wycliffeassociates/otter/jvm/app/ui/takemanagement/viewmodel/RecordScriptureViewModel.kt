@@ -19,7 +19,7 @@ class RecordScriptureViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val recordableViewModel = RecordableViewModel()
+    val recordableViewModel = RecordableViewModel(this::recordNewTake, this::editTake)
 
     // This will be bidirectionally bound to workbookViewModel's activeChunkProperty
     private val activeChunkProperty = SimpleObjectProperty<Chunk?>()
@@ -67,7 +67,7 @@ class RecordScriptureViewModel : ViewModel() {
         stepToChunk(StepDirection.BACKWARD)
     }
 
-    fun recordNewTake() {
+    private fun recordNewTake() {
         recordableViewModel.recordable?.let {
             contextProperty.set(TakeContext.RECORD)
             showPluginActive = true
@@ -86,7 +86,7 @@ class RecordScriptureViewModel : ViewModel() {
         } ?: throw IllegalStateException("Recordable is null")
     }
 
-    fun editTake(take: Take) {
+    private fun editTake(take: Take) {
         contextProperty.set(TakeContext.EDIT_TAKES)
         showPluginActive = true
         audioPluginViewModel.edit(take)
