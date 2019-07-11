@@ -55,8 +55,6 @@ class ResourceListViewModelTest : ViewModel() {
     fun testLoadResourceGroups_putsAppropriateGroupsInList() {
         workbookViewModel.activeChapterProperty.set(testChapter)
 
-        resourceListViewModel.loadResourceGroups()
-
         Assert.assertEquals(3, resourceListViewModel.resourceGroupCardItemList.size)
 
         Assert.assertEquals(3, getResourceGroupSize(0))

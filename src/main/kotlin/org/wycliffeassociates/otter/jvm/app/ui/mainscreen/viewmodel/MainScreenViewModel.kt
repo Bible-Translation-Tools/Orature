@@ -24,7 +24,7 @@ class MainScreenViewModel : ViewModel() {
     val selectedChunkTitle = SimpleStringProperty()
     val selectedChunkBody = SimpleStringProperty()
 
-    val takesPageDocked = SimpleBooleanProperty(false)
+    private val takesPageDocked = SimpleBooleanProperty(false)
 
     init {
         workbookViewModel.activeWorkbookProperty.onChange {
@@ -32,11 +32,11 @@ class MainScreenViewModel : ViewModel() {
         }
 
         workbookViewModel.activeChapterProperty.onChange {
-            it?.let { ch -> chapterSelected(ch) }
+            it?.let { chapter -> chapterSelected(chapter) }
         }
 
         workbookViewModel.activeChunkProperty.onChange {
-            it?.let { chunkSelected(it) }
+            it?.let { chunk -> chunkSelected(chunk) }
                 ?: takesPageDocked.set(false)
         }
     }

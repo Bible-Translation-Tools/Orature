@@ -6,6 +6,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordRes
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.ResourceGroupCardItemList
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.resourceGroupCardItem
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ResourceListViewModel : ViewModel() {
@@ -14,7 +15,13 @@ class ResourceListViewModel : ViewModel() {
 
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
 
-    fun loadResourceGroups() {
+    init {
+        workbookViewModel.activeChapterProperty.onChangeAndDoNow {
+            it?.let { loadResourceGroups() }
+        }
+    }
+
+    private fun loadResourceGroups() {
         val chapter = workbookViewModel.chapter
         chapter
             .children
