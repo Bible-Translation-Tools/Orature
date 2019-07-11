@@ -52,11 +52,11 @@ class TakeRepository(
                 .subscribeOn(Schedulers.io())
     }
 
-    override fun getByContent(content: Content): Single<List<Take>> {
+    override fun getByContent(content: Content, includeDeleted: Boolean): Single<List<Take>> {
         return Single
                 .fromCallable {
                     takeDao
-                            .fetchByContentId(content.id)
+                            .fetchByContentId(content.id, includeDeleted)
                             .map(this::buildTake)
                 }
                 .subscribeOn(Schedulers.io())
