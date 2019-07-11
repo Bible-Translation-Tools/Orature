@@ -3,11 +3,13 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
@@ -24,6 +26,7 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
     private val disposables = CompositeDisposable()
 
     val selectedTakeProperty = SimpleObjectProperty<Take?>()
+
     val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
     val showPluginActiveProperty = SimpleBooleanProperty(false)
     var showPluginActive by showPluginActiveProperty
@@ -32,13 +35,24 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
 
+    private var newRecordableLoaded = false
+
     init {
         recordableProperty.onChange {
-            // TODO
+            newRecordableLoaded = true
+            clearDisposables()
+            it?.audio?.let { audio ->
+                subscribeSelectedTakePropertyToRelay(audio)
+                loadTakes(audio)
+            }
         }
 
-        selectedTakeProperty.onChange {
-            // TODO
+        selectedTakeProperty.addListener { _, oldValue, newValue ->
+            // Only update alternate takes if the old and new selected takes correspond to the same recordable
+            if (!newRecordableLoaded) {
+                updateAlternateTakes(oldValue, newValue)
+            }
+            newRecordableLoaded = false
         }
     }
 
@@ -77,11 +91,12 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
     }
 
     fun selectTake(take: Take?) {
-        // TODO
+        // selectedTakeProperty will be updated when the relay emits the item that it accepts
+        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
     }
 
     fun deleteTake(take: Take) {
-        // TODO
+        take.deletedTimestamp.accept(DateHolder.now())
     }
 
     @Suppress("ProtectedInFinal", "Unused")
@@ -93,15 +108,56 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
         disposables.clear()
     }
 
+    private fun Take.isNotDeleted() = deletedTimestamp.value?.value == null
+
     private fun loadTakes(audio: AssociatedAudio) {
-        // TODO
+        alternateTakes.clear()
+        // selectedTakeProperty may not have been updated yet so ask for the current selected take
+        val selected = audio.selected.value?.value
+        audio.takes
+            .filter { it.isNotDeleted() }
+            .subscribe {
+                if ( it != selected ) {
+                    addToAlternateTakes(it)
+                }
+                removeOnDeleted(it)
+            }.let { disposables.add(it) }
     }
 
     private fun removeOnDeleted(take: Take) {
-        // TODO
+        take.deletedTimestamp
+            .filter { dateHolder -> dateHolder.value != null }
+            .subscribe {
+                removeFromAlternateTakes(take)
+            }.let { disposables.add(it) }
     }
 
-    private fun subscribeToSelectedTake(audio: AssociatedAudio) {
-        // TODO
+    private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
+        audio.selected.subscribe {
+            selectedTakeProperty.set(it.value)
+        }.let { disposables.add(it) }
+    }
+
+    private fun updateAlternateTakes(oldSelectedTake: Take?, newSelectedTake: Take?) {
+        oldSelectedTake?.let {
+            if (it.isNotDeleted()) {
+                addToAlternateTakes(it)
+            }
+        }
+        newSelectedTake?.let {
+            removeFromAlternateTakes(it)
+        }
+    }
+
+    private fun addToAlternateTakes(take: Take) {
+        Platform.runLater {
+            alternateTakes.add(take)
+        }
+    }
+
+    private fun removeFromAlternateTakes(take: Take) {
+        Platform.runLater {
+            alternateTakes.remove(take)
+        }
     }
 }

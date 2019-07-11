@@ -32,7 +32,7 @@ class RecordScriptureFragment : Fragment() {
     private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
     // The currently selected take
-    private var selectedTakeProperty = SimpleObjectProperty<OldTakeCard>()
+    private var selectedTakeCardProperty = SimpleObjectProperty<OldTakeCard>()
     // Take at the top to compare to an existing selected take
     private var draggingTakeProperty = SimpleObjectProperty<OldTakeCard>()
 
@@ -114,23 +114,22 @@ class RecordScriptureFragment : Fragment() {
                         }
 
                         // Listen for changes when the drag and drop occurs
-                        selectedTakeProperty.onChange {
+                        selectedTakeCardProperty.onChange {
                             clear()
                             if (it == null) {
                                 // No currently selected take
                                 add(placeholder)
                             } else {
-                                // Add the selected take card
-                                recordableViewModel.selectTake(it.take)
                                 add(it)
                             }
                         }
                         recordableViewModel.selectedTakeProperty.onChange {
                             // The view model wants us to use this selected take
                             // This take will not appear in the flow pane items
-                            if (it != null && selectedTakeProperty.value == null) {
-                                selectedTakeProperty.value = createTakeCard(it)
-                            } else if (it == null) selectedTakeProperty.value = null
+                            when (it) {
+                                null -> selectedTakeCardProperty.value = null
+                                else -> selectedTakeCardProperty.value = createTakeCard(it)
+                            }
                         }
                     }
 
@@ -226,7 +225,7 @@ class RecordScriptureFragment : Fragment() {
 
     private fun completeDrag(evt: MouseEvent) {
         if (dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY))) {
-            selectedTakeProperty.value = draggingTakeProperty.value
+            recordableViewModel.selectTake(draggingTakeProperty.value.take)
             draggingTakeProperty.value = null
         } else cancelDrag(evt)
     }
