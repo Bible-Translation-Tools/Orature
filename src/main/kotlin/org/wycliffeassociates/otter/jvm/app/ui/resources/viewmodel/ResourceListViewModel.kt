@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resources.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordResourceViewModel
@@ -37,6 +38,7 @@ class ResourceListViewModel : ViewModel() {
                 resourceGroupCardItem(it, workbookViewModel.resourceSlug, onSelect = this::navigateToTakesPage)
             }
             .buffer(2) // Buffering by 2 prevents the list UI from jumping while groups are loading
+            .observeOnFx()
             .subscribe {
                 resourceGroupCardItemList.addAll(it)
             }
