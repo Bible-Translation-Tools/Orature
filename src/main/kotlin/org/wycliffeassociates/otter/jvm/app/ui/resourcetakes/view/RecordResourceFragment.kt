@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordRes
 import tornadofx.*
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 
-class RecordResourceView : View() {
+class RecordResourceFragment : Fragment() {
     private val viewModel: RecordResourceViewModel by inject()
     private val tabPane = ChromeableTabPane()
 
