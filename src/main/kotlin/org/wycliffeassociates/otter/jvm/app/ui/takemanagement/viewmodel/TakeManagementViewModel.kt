@@ -70,7 +70,7 @@ class TakeManagementViewModel : ViewModel() {
             takeRepository
     )
 
-    private val editTake = EditTake(takeRepository, launchPlugin)
+    private val editTake = EditTake(launchPlugin)
 
     init {
         activeContentProperty.toObservable().subscribe {
@@ -202,18 +202,18 @@ class TakeManagementViewModel : ViewModel() {
     }
 
     fun editContent(take: Take) {
-        contextProperty.set(TakeContext.EDIT_TAKES)
-        showPluginActive = true
-        editTake.edit(take)
-                .observeOnFx()
-                .subscribe { result ->
-                    showPluginActive = false
-                    when (result) {
-                        EditTake.Result.SUCCESS -> {
-                        }
-                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    }
-                }
+//        contextProperty.set(TakeContext.EDIT_TAKES)
+//        showPluginActive = true
+//        editTake.edit(take)
+//                .observeOnFx()
+//                .subscribe { result ->
+//                    showPluginActive = false
+//                    when (result) {
+//                        EditTake.Result.SUCCESS -> {
+//                        }
+//                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+//                    }
+//                }
     }
 
     fun nextVerse() {

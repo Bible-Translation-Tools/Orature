@@ -17,12 +17,19 @@ class ResourceListViewModel : ViewModel() {
 
     init {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow {
-            it?.let { loadResourceGroups() }
+            it?.let { targetChapter ->
+                loadResourceGroups(getSourceChapter(targetChapter))
+            }
         }
     }
 
-    private fun loadResourceGroups() {
-        val chapter = workbookViewModel.chapter
+    private fun getSourceChapter(targetChapter: Chapter): Chapter {
+        return workbookViewModel.workbook.source.chapters.filter {
+            it.title == targetChapter.title
+        }.blockingFirst()
+    }
+
+    internal fun loadResourceGroups(chapter: Chapter) {
         chapter
             .children
             .startWith(chapter)
