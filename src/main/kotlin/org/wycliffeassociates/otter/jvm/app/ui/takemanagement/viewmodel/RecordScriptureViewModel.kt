@@ -2,15 +2,12 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.content.*
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -19,24 +16,15 @@ class RecordScriptureViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val recordableViewModel = RecordableViewModel(this::recordNewTake, this::editTake)
+    val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
     // This will be bidirectionally bound to workbookViewModel's activeChunkProperty
     private val activeChunkProperty = SimpleObjectProperty<Chunk?>()
     private val activeChunk: Chunk
         get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
-    private var context: TakeContext by property(TakeContext.RECORD)
-    val contextProperty = getProperty(RecordScriptureViewModel::context)
-
-    var title: String by property()
-    val titleProperty = getProperty(RecordScriptureViewModel::title)
-
-    // Whether the UI should show the plugin as active
-    private var showPluginActive: Boolean by property(false)
-    var showPluginActiveProperty = getProperty(RecordScriptureViewModel::showPluginActive)
-
-    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
+    val titleProperty = SimpleStringProperty()
+    var title by titleProperty
 
     private val chunkList: ObservableList<Chunk> = observableList()
     val hasNext = SimpleBooleanProperty(false)
@@ -65,39 +53,6 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
-    }
-
-    private fun recordNewTake() {
-        recordableViewModel.recordable?.let {
-            contextProperty.set(TakeContext.RECORD)
-            showPluginActive = true
-
-            audioPluginViewModel
-                .record(it)
-                .observeOnFx()
-                .doOnSuccess { result ->
-                    showPluginActive = false
-                    when (result) {
-                        RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
-                        else -> {}
-                    }
-                }
-                .subscribe()
-        } ?: throw IllegalStateException("Recordable is null")
-    }
-
-    private fun editTake(take: Take) {
-        contextProperty.set(TakeContext.EDIT_TAKES)
-        showPluginActive = true
-        audioPluginViewModel.edit(take)
-            .observeOnFx()
-            .subscribe { result ->
-                showPluginActive = false
-                when (result) {
-                    EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    else -> {}
-                }
-            }
     }
 
     private fun setHasNextAndPrevious() {

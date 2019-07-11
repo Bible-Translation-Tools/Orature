@@ -1,55 +1,86 @@
 package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
-import javafx.application.Platform
+import io.reactivex.subjects.PublishSubject
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.EditTake
+import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
+import tornadofx.FX.Companion.messages
 import tornadofx.*
 
-open class RecordableViewModel(
-    val recordNewTake: () -> Unit,
-    val editTake: (Take) -> Unit
-) {
+open class RecordableViewModel(private val audioPluginViewModel: AudioPluginViewModel) {
+
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
     private val disposables = CompositeDisposable()
 
     val selectedTakeProperty = SimpleObjectProperty<Take?>()
-    private val selectedTake by selectedTakeProperty
+    val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
+    val showPluginActiveProperty = SimpleBooleanProperty(false)
+    var showPluginActive by showPluginActiveProperty
+
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
 
     init {
         recordableProperty.onChange {
-            clearDisposables()
-            it?.audio?.let { audio ->
-                loadTakes(audio)
-                subscribeToSelectedTake(audio)
-            }
+            // TODO
         }
+
+        selectedTakeProperty.onChange {
+            // TODO
+        }
+    }
+
+    fun recordNewTake() {
+        recordable?.let {
+            contextProperty.set(TakeContext.RECORD)
+            showPluginActive = true
+            audioPluginViewModel
+                .record(it)
+                .observeOnFx()
+                .doOnSuccess { result ->
+                    showPluginActive = false
+                    when (result) {
+                        RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
+                        else -> {}
+                    }
+                }
+                .subscribe()
+        } ?: throw IllegalStateException("Recordable is null")
+    }
+
+    fun editTake(take: Take) {
+        contextProperty.set(TakeContext.EDIT_TAKES)
+        showPluginActive = true
+        audioPluginViewModel
+            .edit(take)
+            .observeOnFx()
+            .subscribe { result ->
+                showPluginActive = false
+                when (result) {
+                    EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                    else -> {}
+                }
+            }
     }
 
     fun selectTake(take: Take?) {
-        take?.let {
-            alternateTakes.remove(it)
-
-            selectedTake?.let { oldSelectedTake ->
-                alternateTakes.add(oldSelectedTake)
-            }
-        }
-
-        // Set the new selected take value
-        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+        // TODO
     }
 
     fun deleteTake(take: Take) {
-        take.deletedTimestamp.accept(DateHolder.now())
+        // TODO
     }
 
     @Suppress("ProtectedInFinal", "Unused")
@@ -62,32 +93,14 @@ open class RecordableViewModel(
     }
 
     private fun loadTakes(audio: AssociatedAudio) {
-        alternateTakes.clear()
-        audio.takes
-            .subscribe {
-                removeOnDeleted(it)
-                if ( it != selectedTake ) {
-                    Platform.runLater {
-                        alternateTakes.add(it)
-                    }
-                }
-            }.let { disposables.add(it) }
+        // TODO
     }
 
     private fun removeOnDeleted(take: Take) {
-        take.deletedTimestamp.subscribe { dateHolder ->
-            if (dateHolder.value != null) {
-                alternateTakes.remove(take)
-                if (take == selectedTake) {
-                    selectTake(null)
-                }
-            }
-        }.let { disposables.add(it) }
+        // TODO
     }
 
     private fun subscribeToSelectedTake(audio: AssociatedAudio) {
-        audio.selected.subscribe {
-            selectedTakeProperty.set(it.value)
-        }.let { disposables.add(it) }
+        // TODO
     }
 }

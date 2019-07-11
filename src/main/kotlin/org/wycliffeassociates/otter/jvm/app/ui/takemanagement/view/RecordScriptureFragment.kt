@@ -61,7 +61,7 @@ class RecordScriptureFragment : Fragment() {
         addClass(AppStyles.appBackground)
         addClass(RecordScriptureStyles.tpanelStyle)
         val snackBar = JFXSnackbar(this)
-        recordScriptureViewModel.snackBarObservable.subscribe { shouldShow ->
+        recordableViewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
                     JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
                         audioPluginViewModel.addPlugin(true, false)
@@ -175,14 +175,14 @@ class RecordScriptureFragment : Fragment() {
         // Plugin active cover
         val dialog = progressdialog {
             root.addClass(AppStyles.progressDialog)
-            recordScriptureViewModel.contextProperty.toObservable().subscribe { newContext ->
+            recordableViewModel.contextProperty.toObservable().subscribe { newContext ->
                 when (newContext) {
                     TakeContext.RECORD -> graphic = AppStyles.recordIcon("60px")
                     TakeContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
                 }
             }
         }
-        recordScriptureViewModel.showPluginActiveProperty.onChange {
+        recordableViewModel.showPluginActiveProperty.onChange {
             Platform.runLater {
                 if (it == true) dialog.open() else dialog.close()
             }

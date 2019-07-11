@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -12,7 +10,6 @@ import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPlu
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import java.util.EnumMap
 import javafx.collections.ListChangeListener
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -34,7 +31,7 @@ class RecordResourceViewModel : ViewModel() {
     )
 
     private fun tabRecordableViewModel() =
-        TabRecordableViewModel(SimpleStringProperty(), this::recordNewTake, this::editTake)
+        TabRecordableViewModel(SimpleStringProperty(), audioPluginViewModel)
 
     init {
         initTabs()
@@ -55,26 +52,6 @@ class RecordResourceViewModel : ViewModel() {
     fun setRecordableListItems(items: List<Recordable>) {
         if (!recordableList.containsAll(items))
             recordableList.setAll(items)
-    }
-
-    private fun recordNewTake() {
-        activeRecordable?.let {
-            audioPluginViewModel
-                .record(it)
-                .observeOnFx()
-                // Subscribing on an I/O thread is not completely necessary but it is is safer
-                .subscribeOn(Schedulers.io())
-                .subscribe()
-        } ?: throw IllegalStateException("Active recordable is null")
-    }
-
-    private fun editTake(take: Take) {
-        audioPluginViewModel
-            .edit(take)
-            .observeOnFx()
-            // Subscribing on an I/O thread is not completely necessary but it is is safer
-            .subscribeOn(Schedulers.io())
-            .subscribe()
     }
 
     private fun initTabs() {

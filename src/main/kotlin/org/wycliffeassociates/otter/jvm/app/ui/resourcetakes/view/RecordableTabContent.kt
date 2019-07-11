@@ -36,7 +36,7 @@ class RecordableTabContent(
                 }
                 addClass(RecordResourceStyles.leftRegionContainer)
                 add(
-                    TabContentLeftRegion(formattedTextProperty, recordableViewModel.recordNewTake)
+                    TabContentLeftRegion(formattedTextProperty, recordableViewModel::recordNewTake)
                 )
             }
             vbox(20.0) {
