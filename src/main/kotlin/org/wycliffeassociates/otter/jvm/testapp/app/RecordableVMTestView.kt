@@ -59,7 +59,7 @@ class RecordableVMTestView : View() {
         workbookViewModel.activeChapterProperty.set(chapter)
         workbookViewModel.activeChunkProperty.set(chunk)
 
-        resourcesViewModel.loadResourceGroups()
+        resourcesViewModel.loadResourceGroups(chapter)
     }
 
     private fun getTestProjectAudioDirectory(workbook: Workbook): File {

@@ -35,7 +35,7 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                             ) {
                                 addClass(TakeCardStyles.takeNumberLabel)
                             }
-                            label(control.take.createdTimestamp.toString()) {
+                            label(control.take.modifiedTimestamp.toString()) {
                                 addClass(TakeCardStyles.timestampLabel)
                             }
                         }

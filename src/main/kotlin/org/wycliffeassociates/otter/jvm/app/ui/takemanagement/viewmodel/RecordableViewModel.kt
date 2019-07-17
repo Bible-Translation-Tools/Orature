@@ -35,24 +35,13 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
 
-    private var newRecordableLoaded = false
-
     init {
         recordableProperty.onChange {
-            newRecordableLoaded = true
             clearDisposables()
             it?.audio?.let { audio ->
                 subscribeSelectedTakePropertyToRelay(audio)
                 loadTakes(audio)
             }
-        }
-
-        selectedTakeProperty.addListener { _, oldValue, newValue ->
-            // Only update alternate takes if the old and new selected takes correspond to the same recordable
-            if (!newRecordableLoaded) {
-                updateAlternateTakes(oldValue, newValue)
-            }
-            newRecordableLoaded = false
         }
     }
 
@@ -92,6 +81,7 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
 
     fun selectTake(take: Take?) {
         // selectedTakeProperty will be updated when the relay emits the item that it accepts
+        updateAlternateTakes(selectedTakeProperty.value, take)
         recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
     }
 
