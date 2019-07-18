@@ -6,6 +6,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordScriptureStyles
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -42,7 +43,9 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                         hbox {
                             alignment = Pos.TOP_RIGHT
                             hgrow = Priority.SOMETIMES
-                            add(JFXButton(messages["delete"], MaterialIconView(MaterialIcon.DELETE, "18px")))
+                            add(deleteButton.apply {
+                                graphic = MaterialIconView(MaterialIcon.DELETE, "18px")
+                            })
                         }
                     }
                     // waveform and audio control buttons
@@ -57,14 +60,13 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                         }
                         hbox(15.0) {
                             add(playButton.addClass(TakeCardStyles.defaultButton))
-                            add(
-                                JFXButton(messages["edit"], MaterialIconView(MaterialIcon.EDIT, "18px").apply {
+                            add(editButton.apply {
+                                graphic = MaterialIconView(MaterialIcon.EDIT, "18px").apply {
                                     fill = TakeCardStyles.defaultGreen
-                                }).apply {
-                                    addClass(TakeCardStyles.defaultButton)
-                                    addClass(TakeCardStyles.editButton)
                                 }
-                            )
+                                addClass(TakeCardStyles.defaultButton)
+                                addClass(TakeCardStyles.editButton)
+                            })
                         }
                     }
                     anchorpaneConstraints {

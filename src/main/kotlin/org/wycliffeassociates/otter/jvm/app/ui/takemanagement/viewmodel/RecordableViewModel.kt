@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.EditTakeEvent
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 
@@ -63,17 +64,17 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
         } ?: throw IllegalStateException("Recordable is null")
     }
 
-    fun editTake(take: Take) {
+    fun editTake(editTakeEvent: EditTakeEvent) {
         contextProperty.set(TakeContext.EDIT_TAKES)
         showPluginActive = true
         audioPluginViewModel
-            .edit(take)
+            .edit(editTakeEvent.take)
             .observeOnFx()
             .subscribe { result ->
                 showPluginActive = false
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    EditTake.Result.SUCCESS -> {}
+                    EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
                     null -> {} // This cannot happen but the compiler complains if null branch does not exist
                 }
             }

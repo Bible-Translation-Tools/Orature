@@ -78,31 +78,6 @@ class RecordScriptureStyles : Stylesheet() {
             }
         }
 
-        takeCard {
-            borderRadius += box(5.px)
-            borderColor += box(AppTheme.colors.imagePlaceholder)
-            borderWidth += box(1.px)
-            backgroundColor += AppTheme.colors.cardBackground
-            label {
-                textFill = AppTheme.colors.defaultText
-            }
-            badge {
-                backgroundColor += AppTheme.colors.appRed
-            }
-            button {
-                and(deleteButton) {
-                    child("*") {
-                        fill = AppTheme.colors.defaultText
-                    }
-                }
-                and(playPauseButton) {
-                    child("*") {
-                        fill = AppTheme.colors.appRed
-                    }
-                }
-            }
-        }
-
         newTakeCard {
             minHeight = 200.px
             minWidth = 348.px

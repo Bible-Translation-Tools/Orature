@@ -7,25 +7,25 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
 class TakesListView(items: ObservableList<Take>, audioPlayer: () -> IAudioPlayer) : ListView<Take>(items) {
-    private val lastTakeEvent: SimpleObjectProperty<TakeEvent?> = SimpleObjectProperty()
+    private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
 
     init {
         cellFormat {
             graphic = cache(it.number) {
-                resourcetakecard(it, audioPlayer(), lastTakeEvent.toObservable())
+                resourcetakecard(it, audioPlayer(), lastPlayOrPauseEvent.toObservable())
             }
         }
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
         addClass(RecordResourceStyles.takesList)
 
-        addEventHandler(TakeEvent.PLAY) {
-            lastTakeEvent.set(it)
+        addEventHandler(PlayOrPauseEvent.PLAY) {
+            lastPlayOrPauseEvent.set(it)
         }
     }
 }

@@ -9,7 +9,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.control.ButtonType
 import javafx.scene.control.ContentDisplay
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.FlowPane
@@ -17,13 +16,13 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.OldTakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.oldtakecard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
 import tornadofx.*
 
 class RecordScriptureFragment : Fragment() {
@@ -31,10 +30,12 @@ class RecordScriptureFragment : Fragment() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
+    private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
+
     // The currently selected take
-    private var selectedTakeCardProperty = SimpleObjectProperty<OldTakeCard>()
+    private var selectedTakeCardProperty = SimpleObjectProperty<TakeCard>()
     // Take at the top to compare to an existing selected take
-    private var draggingTakeProperty = SimpleObjectProperty<OldTakeCard>()
+    private var draggingTakeProperty = SimpleObjectProperty<TakeCard>()
 
     // Drag target to show when drag action in progress
     private var dragTarget: StackPane by singleAssign()
@@ -51,6 +52,16 @@ class RecordScriptureFragment : Fragment() {
     }
 
     override val root = anchorpane {
+
+        addEventHandler(PlayOrPauseEvent.PLAY) {
+            lastPlayOrPauseEvent.set(it)
+        }
+        addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
+            recordableViewModel.deleteTake(it.take)
+        }
+        addEventHandler(EditTakeEvent.EDIT_TAKE) {
+            recordableViewModel.editTake(it)
+        }
 
         anchorpaneConstraints {
             leftAnchor = 0.0
@@ -198,7 +209,7 @@ class RecordScriptureFragment : Fragment() {
         val target = evt.target as Node
 
         // Remove from the flow pane
-        val takeCard = target.findParentOfType(OldTakeCard::class) as OldTakeCard
+        val takeCard = target.findParentOfType(TakeCard::class) as TakeCard
         if (takeCard.parent == takesFlowPane) {
             takeCard.removeFromParent()
             draggingTakeProperty.value = takeCard
@@ -262,32 +273,14 @@ class RecordScriptureFragment : Fragment() {
 
     private fun sortTakesFlowPane(flowPane: FlowPane) {
         flowPane.children.setAll(flowPane.children.sortedBy {
-            (it as OldTakeCard).take.number
+            (it as TakeCard).take.number
         })
         //add the newTakeCard here after we have sorted all other takes by take number
         flowPane.children.add(0, createRecordCard())
     }
 
-    private fun createTakeCard(take: Take): OldTakeCard {
-        return oldtakecard(take, audioPluginViewModel.audioPlayer(), messages["take"]) {
-            addClass(RecordScriptureStyles.takeCard)
-            deleteButton.apply {
-                addClass(RecordScriptureStyles.deleteButton)
-                action {
-                    error(
-                            messages["deleteTakePrompt"],
-                            messages["cannotBeUndone"],
-                            ButtonType.YES,
-                            ButtonType.NO,
-                            title = messages["deleteTakePrompt"]
-                    ) { button: ButtonType ->
-                        if (button == ButtonType.YES) recordableViewModel.deleteTake(take)
-                    }
-                }
-            }
-            editButton.action {
-                recordableViewModel.editTake(take)
-            }
+    private fun createTakeCard(take: Take): TakeCard {
+        return scripturetakecard(take, audioPluginViewModel.audioPlayer(), lastPlayOrPauseEvent.toObservable()) {
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }
     }
