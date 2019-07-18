@@ -41,7 +41,7 @@ class OldTakeCard(val take: Take, player: IAudioPlayer, val takePrefix: String) 
                     alignment = Pos.CENTER_LEFT
                     takeNumberLabel = label("$takePrefix %02d".format(take.number), OldTakeCardStyles.draggingIcon())
                     takeNumberLabel.addClass(OldTakeCardStyles.takeNumberLabel)
-                    timestampLabel = label(take.modifiedTimestamp.value.toString())
+                    timestampLabel = label(take.createdTimestamp.toString())
                     timestampLabel.addClass(OldTakeCardStyles.timestampLabel)
                 }
                 hbox {
