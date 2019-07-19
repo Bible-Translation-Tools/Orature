@@ -65,5 +65,7 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
                 false -> playIconView
             }
         }
+
+        consumeMouseEvents(false)
     }
 }
