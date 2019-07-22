@@ -43,12 +43,8 @@ class RecordScriptureFragment : Fragment() {
     // Drag shadow (node that actually moves with cursor)
     private var dragShadow: Node = VBox()
 
-    // Flow pane of available takes
-    private var takesFlowPane = createTakesFlowPane()
-
     init {
         importStylesheet<RecordScriptureStyles>()
-        takesFlowPane.children.add(createRecordCard())
     }
 
     override val root = anchorpane {
@@ -165,9 +161,15 @@ class RecordScriptureFragment : Fragment() {
 
             // Add the available takes flow pane
             scrollpane {
+                vgrow = Priority.ALWAYS
                 isFitToWidth = true
                 addClass(RecordScriptureStyles.scrollpane)
-                add(takesFlowPane)
+                add(TakesFlowPane(
+                    recordableViewModel.alternateTakes,
+                    audioPluginViewModel::audioPlayer,
+                    recordableViewModel.lastPlayOrPauseEvent,
+                    recordableViewModel::recordNewTake
+                ))
             }
         }
 
@@ -210,10 +212,10 @@ class RecordScriptureFragment : Fragment() {
 
         // Remove from the flow pane
         val takeCard = target.findParentOfType(TakeCard::class) as TakeCard
-        if (takeCard.parent == takesFlowPane) {
-            takeCard.removeFromParent()
-            draggingTakeProperty.value = takeCard
-        }
+//        if (takeCard.parent == takesFlowPane) {
+//            takeCard.removeFromParent()
+//            draggingTakeProperty.value = takeCard
+//        }
         animateDrag(evt)
     }
 
@@ -227,10 +229,10 @@ class RecordScriptureFragment : Fragment() {
     }
 
     private fun cancelDrag(evt: MouseEvent) {
-        takesFlowPane.add(draggingTakeProperty.value)
+//        takesFlowPane.add(draggingTakeProperty.value)
         //remove the new take card bc it isn't a take card and breaks sortTakesFlowPane
-        takesFlowPane.children.removeAt(0)
-        sortTakesFlowPane(takesFlowPane)
+//        takesFlowPane.children.removeAt(0)
+//        sortTakesFlowPane(takesFlowPane)
         draggingTakeProperty.value = null
     }
 
@@ -239,44 +241,6 @@ class RecordScriptureFragment : Fragment() {
             recordableViewModel.selectTake(draggingTakeProperty.value.take)
             draggingTakeProperty.value = null
         } else cancelDrag(evt)
-    }
-
-    // Create the flow pane of alternate takes
-    private fun createTakesFlowPane(): FlowPane {
-        return FlowPane().apply {
-            vgrow = Priority.ALWAYS
-            addClass(RecordScriptureStyles.takeGrid)
-            // Update the takes displayed
-            recordableViewModel.alternateTakes.onChange {
-                clear()
-                it.list.forEach { take ->
-                    // Add a new take card
-                    add(createTakeCard(take))
-                }
-                sortTakesFlowPane(takesFlowPane)
-            }
-        }
-    }
-
-    private fun createRecordCard(): VBox {
-        return vbox(10.0) {
-            alignment = Pos.CENTER
-            addClass(RecordScriptureStyles.newTakeCard)
-            label(messages["newTake"])
-            button(messages["record"], AppStyles.recordIcon("25px")) {
-                action {
-                    recordableViewModel.recordNewTake()
-                }
-            }
-        }
-    }
-
-    private fun sortTakesFlowPane(flowPane: FlowPane) {
-        flowPane.children.setAll(flowPane.children.sortedBy {
-            (it as TakeCard).take.number
-        })
-        //add the newTakeCard here after we have sorted all other takes by take number
-        flowPane.children.add(0, createRecordCard())
     }
 
     private fun createTakeCard(take: Take): TakeCard {

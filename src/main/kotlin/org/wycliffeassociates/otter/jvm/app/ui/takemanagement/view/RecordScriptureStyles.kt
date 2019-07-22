@@ -24,6 +24,7 @@ class RecordScriptureStyles : Stylesheet() {
         val playPauseButton by cssclass()
         val navigationButton by cssclass()
         val newTakeCard by cssclass()
+        val blankTakeCard by cssclass()
         val scrollpane by cssclass()
         val pageTop by cssclass()
         val tpanelStyle by cssclass()
@@ -76,6 +77,17 @@ class RecordScriptureStyles : Stylesheet() {
             child("*") {
                 fill = AppTheme.colors.appBlue
             }
+        }
+
+        blankTakeCard {
+            minHeight = 200.px
+            minWidth = 348.px
+            backgroundColor += AppTheme.colors.appGreen
+            borderRadius += box(5.0.px)
+            borderColor += box(AppTheme.colors.defaultBackground)
+            borderWidth += box(1.px)
+            backgroundRadius += box(5.0.px)
+            effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
         }
 
         newTakeCard {
