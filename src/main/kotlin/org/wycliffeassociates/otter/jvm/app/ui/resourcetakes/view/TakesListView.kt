@@ -11,9 +11,11 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
-class TakesListView(items: ObservableList<Take>, audioPlayer: () -> IAudioPlayer) : ListView<Take>(items) {
-    private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
-
+class TakesListView(
+    items: ObservableList<Take>,
+    audioPlayer: () -> IAudioPlayer,
+    lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?>
+) : ListView<Take>(items) {
     init {
         cellFormat {
             graphic = cache(it.number) {

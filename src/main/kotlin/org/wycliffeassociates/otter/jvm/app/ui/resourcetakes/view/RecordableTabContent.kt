@@ -45,7 +45,10 @@ class RecordableTabContent(
                 }
                 addClass(RecordResourceStyles.rightRegion)
                 add(
-                    TakesListView(recordableViewModel.alternateTakes, audioPluginViewModel::audioPlayer)
+                    TakesListView(
+                        recordableViewModel.alternateTakes,
+                        audioPluginViewModel::audioPlayer,
+                        recordableViewModel.lastPlayOrPauseEvent)
                 )
             }
         }

@@ -1,12 +1,10 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
-import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordScriptureStyles
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 

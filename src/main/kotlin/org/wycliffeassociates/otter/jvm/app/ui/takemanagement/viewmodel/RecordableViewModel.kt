@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.PlayOrPauseEvent
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 
@@ -35,6 +36,8 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
+
+    val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
 
     init {
         recordableProperty.onChange {
@@ -143,6 +146,7 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
     private fun addToAlternateTakes(take: Take) {
         Platform.runLater {
             alternateTakes.add(take)
+            alternateTakes.sortBy { it.number }
         }
     }
 
