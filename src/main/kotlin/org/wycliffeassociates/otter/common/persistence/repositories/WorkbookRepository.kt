@@ -44,7 +44,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         )
     }
 
-    private fun Collection.getLanguageSlug() = this.resourceContainer?.language?.slug
+    private fun Collection.getLanguage() = this.resourceContainer?.language
         ?: throw IllegalStateException("Collection with id=$id has null resource container")
 
     private fun book(bookCollection: Collection): Book {
@@ -53,7 +53,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             sort = bookCollection.sort,
             slug = bookCollection.slug,
             chapters = constructBookChapters(bookCollection),
-            languageSlug = bookCollection.getLanguageSlug(),
+            language = bookCollection.getLanguage(),
             subtreeResources = db.getSubtreeResourceInfo(bookCollection)
         )
     }
@@ -107,7 +107,8 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                 throw IllegalStateException("Content text is null for resource")
             }
             TextItem(content.text ?: "[empty]", MimeType.of(format))
-        } ?: throw IllegalStateException("Content format is null")
+        } ?: TextItem(content.text ?: "[empty]", MimeType.of("usfm")) // TODO 7/5: temporary workaround
+//        } ?: throw IllegalStateException("Content format is null")
     }
 
     private fun constructResource(title: Content, body: Content?): Resource? {

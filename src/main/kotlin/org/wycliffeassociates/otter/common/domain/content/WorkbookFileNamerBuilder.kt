@@ -11,7 +11,7 @@ object WorkbookFileNamerBuilder {
         rcSlug: String
     ) = FileNamer(
         bookSlug = workbook.target.slug,
-        languageSlug = workbook.target.languageSlug,
+        languageSlug = workbook.target.language.slug,
         chapterCount = workbook.target.chapters.count().blockingGet(),
         chapterTitle = chapter.title,
         chapterSort = chapter.sort,
