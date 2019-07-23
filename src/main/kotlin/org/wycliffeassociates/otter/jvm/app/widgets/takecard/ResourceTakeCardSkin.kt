@@ -10,12 +10,12 @@ import tornadofx.*
 
 class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
 
-    private var container: VBox
-
     init {
         importStylesheet<TakeCardStyles>()
 
-        container = VBox().apply {
+        back.addClass(TakeCardStyles.resourceTakeCardPlaceholder)
+
+        front.apply {
             addClass(TakeCardStyles.resourceTakeCard)
 
             hbox(10.0) {
@@ -45,7 +45,5 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 add(JFXButton("", MaterialIconView(MaterialIcon.DELETE, "18px")))
             }
         }
-
-        children.setAll(container)
     }
 }

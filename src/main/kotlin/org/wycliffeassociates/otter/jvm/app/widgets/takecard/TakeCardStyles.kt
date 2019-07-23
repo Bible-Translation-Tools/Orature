@@ -12,7 +12,9 @@ class TakeCardStyles : Stylesheet() {
 
     companion object {
         val scriptureTakeCard by cssclass()
+        val scriptureTakeCardPlaceholder by cssclass()
         val resourceTakeCard by cssclass()
+        val resourceTakeCardPlaceholder by cssclass()
         val badge by cssclass()
         val iconStyle by cssclass()
         val content by cssclass()
@@ -67,6 +69,15 @@ class TakeCardStyles : Stylesheet() {
                     minHeight = 30.px
                 }
             }
+        }
+
+        resourceTakeCardPlaceholder {
+            minHeight = 80.px
+            maxWidth = 500.px
+            borderColor += box(grey)
+            borderRadius += box(5.px)
+            backgroundColor += AppTheme.colors.appGreen
+            borderWidth += box(1.px)
         }
 
         // SCRIPTURE TAKE CARD specific styles
@@ -131,6 +142,17 @@ class TakeCardStyles : Stylesheet() {
                     minHeight = 40.px
                 }
             }
+        }
+
+        scriptureTakeCardPlaceholder {
+            minHeight = 200.px
+            minWidth = 348.px
+            backgroundColor += AppTheme.colors.appGreen
+            borderRadius += box(5.0.px)
+            borderColor += box(AppTheme.colors.defaultBackground)
+            borderWidth += box(1.px)
+            backgroundRadius += box(5.0.px)
+            effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
         }
     }
 }

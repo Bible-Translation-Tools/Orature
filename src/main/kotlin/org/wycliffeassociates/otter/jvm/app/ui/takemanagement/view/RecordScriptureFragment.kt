@@ -8,46 +8,45 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.Node
+import javafx.scene.Parent
 import javafx.scene.control.ContentDisplay
-import javafx.scene.input.MouseEvent
-import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
-import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
 import tornadofx.*
 
-class RecordScriptureFragment : Fragment() {
+class RecordScriptureFragment : DragTakeFragment() {
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
-    private val recordableViewModel = recordScriptureViewModel.recordableViewModel
+    override val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
     private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
 
     // The currently selected take
     private var selectedTakeCardProperty = SimpleObjectProperty<TakeCard>()
-    // Take at the top to compare to an existing selected take
-    private var draggingTakeProperty = SimpleObjectProperty<TakeCard>()
-
-    // Drag target to show when drag action in progress
-    private var dragTarget: StackPane by singleAssign()
-
-    // Drag shadow (node that actually moves with cursor)
-    private var dragShadow: Node = VBox()
 
     init {
         importStylesheet<RecordScriptureStyles>()
     }
 
-    override val root = anchorpane {
+    override fun getDragTargetBuilder() = DragTargetBuilder(
+        stackpane {
+            addClass(RecordScriptureStyles.dragTarget)
+            add(MaterialIconView(MaterialIcon.ADD, "30px"))
+        }
+    )
+
+    override val root: Parent = anchorpane {
+
+        addDragTakeEventHandlers()
 
         addEventHandler(PlayOrPauseEvent.PLAY) {
             lastPlayOrPauseEvent.set(it)
@@ -108,7 +107,7 @@ class RecordScriptureFragment : Fragment() {
                     // drag target glow
                     stackpane {
                         addClass(RecordScriptureStyles.dragTarget, RecordScriptureStyles.glow)
-                        visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
+                        visibleProperty().bind(draggingNodeProperty.booleanBinding { it != null })
                     }
                     vbox {
                         alignment = Pos.CENTER
@@ -140,13 +139,7 @@ class RecordScriptureFragment : Fragment() {
                         }
                     }
 
-                    // Create the drag target
-                    dragTarget = stackpane {
-                        addClass(RecordScriptureStyles.dragTarget)
-                        add(MaterialIconView(MaterialIcon.ADD, "30px"))
-                        // Initially hide the drag target
-                        visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
-                    }
+                    add(dragTarget())
                 }
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
@@ -173,21 +166,7 @@ class RecordScriptureFragment : Fragment() {
             }
         }
 
-        // Create drag shadow node and hide it initially
-        dragShadow = vbox {
-            draggingTakeProperty.onChange {
-                clear()
-                if (it != null) {
-                    add(it)
-                    show()
-                } else {
-                    hide()
-                }
-            }
-            hide()
-            addEventHandler(MouseEvent.MOUSE_DRAGGED, ::animateDrag)
-            addEventHandler(MouseEvent.MOUSE_RELEASED, ::completeDrag)
-        }
+        add(dragContainer)
 
         // Plugin active cover
         val dialog = progressdialog {
@@ -206,46 +185,11 @@ class RecordScriptureFragment : Fragment() {
         }
     }
 
-    private fun startDrag(evt: MouseEvent) {
-        // Get the take being dragged
-        val target = evt.target as Node
-
-        // Remove from the flow pane
-        val takeCard = target.findParentOfType(TakeCard::class) as TakeCard
-//        if (takeCard.parent == takesFlowPane) {
-//            takeCard.removeFromParent()
-//            draggingTakeProperty.value = takeCard
-//        }
-        animateDrag(evt)
-    }
-
-    private fun animateDrag(evt: MouseEvent) {
-        if (draggingTakeProperty.value != null) {
-            val widthOffset = 348
-            val heightOffset = 200
-            dragShadow.toFront()
-            dragShadow.relocate(evt.sceneX - widthOffset, evt.sceneY - heightOffset)
-        }
-    }
-
-    private fun cancelDrag(evt: MouseEvent) {
-//        takesFlowPane.add(draggingTakeProperty.value)
-        //remove the new take card bc it isn't a take card and breaks sortTakesFlowPane
-//        takesFlowPane.children.removeAt(0)
-//        sortTakesFlowPane(takesFlowPane)
-        draggingTakeProperty.value = null
-    }
-
-    private fun completeDrag(evt: MouseEvent) {
-        if (dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY))) {
-            recordableViewModel.selectTake(draggingTakeProperty.value.take)
-            draggingTakeProperty.value = null
-        } else cancelDrag(evt)
-    }
-
     private fun createTakeCard(take: Take): TakeCard {
-        return scripturetakecard(take, audioPluginViewModel.audioPlayer(), lastPlayOrPauseEvent.toObservable()) {
-            addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
-        }
+        return scripturetakecard(
+            take,
+            audioPluginViewModel.audioPlayer(),
+            lastPlayOrPauseEvent.toObservable()
+        )
     }
 }

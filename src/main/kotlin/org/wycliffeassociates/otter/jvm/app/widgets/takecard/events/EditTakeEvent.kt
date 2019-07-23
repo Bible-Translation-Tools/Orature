@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.app.widgets.takecard
+package org.wycliffeassociates.otter.jvm.app.widgets.takecard.events
 
 import javafx.event.Event
 import javafx.event.EventType

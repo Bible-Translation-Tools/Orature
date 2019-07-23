@@ -8,6 +8,9 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.app.widgets.simpleaudioplayer
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
 
 class TakeCard(
     val take: Take,
@@ -32,13 +35,22 @@ class TakeCard(
     }
 
     fun fireEditTakeEvent() {
-        fireEvent(EditTakeEvent(EditTakeEvent.EDIT_TAKE, take) {
-            player.load(take.file)
-        })
+        fireEvent(
+            EditTakeEvent(
+                EditTakeEvent.EDIT_TAKE,
+                take
+            ) {
+                player.load(take.file)
+            })
     }
 
     fun fireDeleteTakeEvent() {
-        fireEvent(DeleteTakeEvent(DeleteTakeEvent.DELETE_TAKE, take))
+        fireEvent(
+            DeleteTakeEvent(
+                DeleteTakeEvent.DELETE_TAKE,
+                take
+            )
+        )
     }
 
     private fun clearDisposables() {

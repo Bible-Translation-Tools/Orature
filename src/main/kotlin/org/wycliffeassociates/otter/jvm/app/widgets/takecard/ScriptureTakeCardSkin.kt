@@ -4,18 +4,17 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
 
-    private var container: VBox
-
     init {
         importStylesheet<TakeCardStyles>()
 
-        container = VBox().apply {
+        back.addClass(TakeCardStyles.scriptureTakeCardPlaceholder)
+
+        front.apply {
             anchorpane {
                 addClass(TakeCardStyles.scriptureTakeCard)
                 vbox {
@@ -76,6 +75,5 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 }
             }
         }
-        children.addAll(container)
     }
 }

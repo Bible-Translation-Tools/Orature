@@ -7,7 +7,7 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.PlayOrPauseEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 

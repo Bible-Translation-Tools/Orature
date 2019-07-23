@@ -10,9 +10,8 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.PlayOrPauseEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.scripturetakecard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -24,6 +23,7 @@ class TakesFlowPane(
 ): FlowPane() {
     init {
         importStylesheet<RecordScriptureStyles>()
+        importStylesheet<TakeCardStyles>()
         importStylesheet<AppStyles>()
 
         vgrow = Priority.ALWAYS
@@ -48,9 +48,7 @@ class TakesFlowPane(
     }
 
     private fun createTakeCard(take: Take): TakeCard {
-        return scripturetakecard(take, audioPlayer(), lastPlayOrPauseEvent.toObservable()) {
-//            addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
-        }
+        return scripturetakecard(take, audioPlayer(), lastPlayOrPauseEvent.toObservable())
     }
 
     private fun createRecordCard(): VBox {
@@ -69,7 +67,7 @@ class TakesFlowPane(
     private fun createBlankCard(): VBox {
         return vbox(10.0) {
             alignment = Pos.CENTER
-            addClass(RecordScriptureStyles.blankTakeCard)
+            addClass(TakeCardStyles.scriptureTakeCardPlaceholder)
             label("blank")
         }
     }
