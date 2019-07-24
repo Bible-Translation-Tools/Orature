@@ -11,6 +11,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ContentDisplay
+import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
@@ -33,27 +34,22 @@ class RecordScriptureFragment : DragTakeFragment() {
 
     init {
         importStylesheet<RecordScriptureStyles>()
-    }
 
-    override val root: Parent = anchorpane {
+        root.apply {
+            addEventHandler(PlayOrPauseEvent.PLAY) {
+                lastPlayOrPauseEvent.set(it)
+            }
+            addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
+                recordableViewModel.deleteTake(it.take)
+            }
+            addEventHandler(EditTakeEvent.EDIT_TAKE) {
+                recordableViewModel.editTake(it)
+            }
 
-        addDragTakeEventHandlers()
-
-        addEventHandler(PlayOrPauseEvent.PLAY) {
-            lastPlayOrPauseEvent.set(it)
-        }
-        addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
-            recordableViewModel.deleteTake(it.take)
-        }
-        addEventHandler(EditTakeEvent.EDIT_TAKE) {
-            recordableViewModel.editTake(it)
-        }
-
-        addClass(AppStyles.appBackground)
-        addClass(RecordScriptureStyles.tpanelStyle)
-        val snackBar = JFXSnackbar(this)
-        recordableViewModel.snackBarObservable.subscribe { shouldShow ->
-            snackBar.enqueue(
+            addClass(AppStyles.appBackground)
+            val snackBar = JFXSnackbar(this as AnchorPane) // TODO
+            recordableViewModel.snackBarObservable.subscribe { shouldShow ->
+                snackBar.enqueue(
                     JFXSnackbar.SnackbarEvent(
                         messages["noRecorder"],
                         messages["addPlugin"].toUpperCase(),
@@ -61,17 +57,12 @@ class RecordScriptureFragment : DragTakeFragment() {
                         false,
                         EventHandler {
                             audioPluginViewModel.addPlugin(true, false)
-                    })
-            )
-        }
-        vbox {
-            anchorpaneConstraints {
-                leftAnchor = 0.0
-                rightAnchor = 0.0
-                bottomAnchor = 0.0
-                topAnchor = 0.0
+                        })
+                )
             }
+        }
 
+        mainContainer.apply {
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox(15.0) {
@@ -105,7 +96,7 @@ class RecordScriptureFragment : DragTakeFragment() {
                             addClass(RecordScriptureStyles.dragTarget)
                             alignment = Pos.CENTER
                             add(MaterialIconView(MaterialIcon.ADD, "30px"))
-                    })
+                        })
                 }
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
@@ -123,17 +114,16 @@ class RecordScriptureFragment : DragTakeFragment() {
                 vgrow = Priority.ALWAYS
                 isFitToWidth = true
                 addClass(RecordScriptureStyles.scrollpane)
-                add(TakesFlowPane(
-                    recordableViewModel.alternateTakes,
-                    audioPluginViewModel::audioPlayer,
-                    recordableViewModel.lastPlayOrPauseEvent,
-                    recordableViewModel::recordNewTake
-                ))
+                add(
+                    TakesFlowPane(
+                        recordableViewModel.alternateTakes,
+                        audioPluginViewModel::audioPlayer,
+                        recordableViewModel.lastPlayOrPauseEvent,
+                        recordableViewModel::recordNewTake
+                    )
+                )
             }
         }
-
-        add(dragComponents
-            .dragContainer())
 
         // Plugin active cover
         val dialog = progressdialog {

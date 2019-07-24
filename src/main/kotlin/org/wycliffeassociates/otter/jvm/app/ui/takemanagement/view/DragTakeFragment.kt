@@ -5,6 +5,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
@@ -21,9 +22,13 @@ abstract class DragTakeFragment : Fragment() {
 
     abstract fun createTakeCard(take: Take): TakeCard
 
+    /** Add custom components to this container, rather than root*/
+    val mainContainer = VBox()
+
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
     // This inner class better organizes the components that need to be added to the derived class
+    /** Use the provided functions to add these components to your derived class */
     inner class DragComponents {
         private val dragTargetBottom = VBox().apply {
             bindVisibleToDraggingNodeProperty()
@@ -40,15 +45,6 @@ abstract class DragTakeFragment : Fragment() {
         fun dragTargetTop(runOnNode: (VBox.() -> Unit)? = null): Node = dragTargetTop.apply {
             runOnNode?.let { it() }
         }
-
-        private val dragContainer = VBox().apply {
-            draggingNodeProperty.onChange {
-                clear()
-                it?.let { node -> add(node) }
-            }
-        }
-
-        fun dragContainer() = dragContainer
 
         fun selectedTakeContainer(runOnPlaceHolder: Node.() -> Unit) = VBox().apply {
             alignment = Pos.CENTER
@@ -69,9 +65,29 @@ abstract class DragTakeFragment : Fragment() {
 
     val dragComponents = DragComponents()
     private val dragTargetTop = dragComponents.dragTargetTop()
-    private val dragContainer = dragComponents.dragContainer()
 
-    fun Parent.addDragTakeEventHandlers() {
+    private val dragContainer = VBox().apply {
+        draggingNodeProperty.onChange {
+            clear()
+            it?.let { node -> add(node) }
+        }
+    }
+
+    final override val root: Parent = anchorpane {
+        addDragTakeEventHandlers()
+
+        add(mainContainer.apply {
+            anchorpaneConstraints {
+                leftAnchor = 0.0
+                rightAnchor = 0.0
+                bottomAnchor = 0.0
+                topAnchor = 0.0
+            }
+        })
+        add(dragContainer)
+    }
+
+    private fun Parent.addDragTakeEventHandlers() {
         addEventHandler(StartDragEvent.START_DRAG, ::startDrag)
         addEventHandler(AnimateDragEvent.ANIMATE_DRAG, ::animateDrag)
         addEventHandler(CompleteDragEvent.COMPLETE_DRAG, ::completeDrag)
