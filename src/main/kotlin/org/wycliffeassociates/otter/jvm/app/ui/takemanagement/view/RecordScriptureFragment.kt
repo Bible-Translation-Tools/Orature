@@ -8,6 +8,7 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ContentDisplay
 import javafx.scene.layout.Priority
@@ -30,19 +31,9 @@ class RecordScriptureFragment : DragTakeFragment() {
 
     private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
 
-    // The currently selected take
-    private var selectedTakeCardProperty = SimpleObjectProperty<TakeCard>()
-
     init {
         importStylesheet<RecordScriptureStyles>()
     }
-
-    override fun getDragTargetBuilder() = DragTargetBuilder(
-        stackpane {
-            addClass(RecordScriptureStyles.dragTarget)
-            add(MaterialIconView(MaterialIcon.ADD, "30px"))
-        }
-    )
 
     override val root: Parent = anchorpane {
 
@@ -103,43 +94,24 @@ class RecordScriptureFragment : DragTakeFragment() {
                 }
                 //selected take and drag target
                 stackpane {
-                    addClass(RecordScriptureStyles.selectedTakeContainer)
                     // drag target glow
-                    stackpane {
-                        addClass(RecordScriptureStyles.dragTarget, RecordScriptureStyles.glow)
-                        visibleProperty().bind(draggingNodeProperty.booleanBinding { it != null })
-                    }
-                    vbox {
-                        alignment = Pos.CENTER
+                    add(dragComponents
+                        .dragTargetBottom {
+                            addClass(RecordScriptureStyles.dragTarget, RecordScriptureStyles.glow)
+                        })
 
-                        // Check if the selected take card has changed
-                        isFillWidth = false
-                        val placeholder = vbox {
+                    add(dragComponents
+                        .selectedTakeContainer {
                             addClass(RecordScriptureStyles.placeholder)
                             vgrow = Priority.NEVER
-                        }
+                        })
 
-                        // Listen for changes when the drag and drop occurs
-                        selectedTakeCardProperty.onChange {
-                            clear()
-                            if (it == null) {
-                                // No currently selected take
-                                add(placeholder)
-                            } else {
-                                add(it)
-                            }
-                        }
-                        recordableViewModel.selectedTakeProperty.onChange {
-                            // The view model wants us to use this selected take
-                            // This take will not appear in the flow pane items
-                            when (it) {
-                                null -> selectedTakeCardProperty.value = null
-                                else -> selectedTakeCardProperty.value = createTakeCard(it)
-                            }
-                        }
-                    }
-
-                    add(dragTarget())
+                    add(dragComponents
+                        .dragTargetTop {
+                            addClass(RecordScriptureStyles.dragTarget)
+                            alignment = Pos.CENTER
+                            add(MaterialIconView(MaterialIcon.ADD, "30px"))
+                    })
                 }
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
@@ -166,7 +138,8 @@ class RecordScriptureFragment : DragTakeFragment() {
             }
         }
 
-        add(dragContainer)
+        add(dragComponents
+            .dragContainer())
 
         // Plugin active cover
         val dialog = progressdialog {
@@ -185,7 +158,7 @@ class RecordScriptureFragment : DragTakeFragment() {
         }
     }
 
-    private fun createTakeCard(take: Take): TakeCard {
+    override fun createTakeCard(take: Take): TakeCard {
         return scripturetakecard(
             take,
             audioPluginViewModel.audioPlayer(),

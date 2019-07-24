@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -29,8 +30,8 @@ class TakesFlowPane(
         vgrow = Priority.ALWAYS
         addClass(RecordScriptureStyles.takeGrid)
 
-        alternateTakes.onChange {
-            updateTakeCards(it.list)
+        alternateTakes.onChangeAndDoNow {
+            updateTakeCards(it)
         }
     }
 

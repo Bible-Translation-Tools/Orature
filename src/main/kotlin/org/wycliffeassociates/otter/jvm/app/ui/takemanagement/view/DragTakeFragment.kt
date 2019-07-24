@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.StartDragEvent
@@ -14,43 +16,69 @@ import tornadofx.*
 
 abstract class DragTakeFragment : Fragment() {
 
-    inner class DragTargetBuilder(private val node: Node) {
-        fun build() = node.apply {
-            visibleProperty().bind(draggingNodeProperty.booleanBinding { it != null })
-            dragTarget = this
-        }
-    }
-    abstract fun getDragTargetBuilder(): DragTargetBuilder
-    fun dragTarget(): Node = getDragTargetBuilder().build()
-    var dragTarget: Node by singleAssign()
-
-
+    // Can only use this in functions; otherwise, it will not be initialized yet
     abstract val recordableViewModel: RecordableViewModel
 
-    // Drag Container (node that actually moves with cursor)
-//    var dragContainer: Node by singleAssign()
+    abstract fun createTakeCard(take: Take): TakeCard
 
-    val draggingNodeProperty = SimpleObjectProperty<Node>()
+    private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
-    val dragContainer = createDragContainer()
+    // This inner class better organizes the components that need to be added to the derived class
+    inner class DragComponents {
+        private val dragTargetBottom = VBox().apply {
+            bindVisibleToDraggingNodeProperty()
+        }
 
-    private fun createDragContainer() = VBox().apply {
-        draggingNodeProperty.onChange {
-            clear()
-            if (it != null) {
-                add(it)
-                show()
-            } else {
-                hide()
+        fun dragTargetBottom(runOnNode: (VBox.() -> Unit)? = null): Node = dragTargetBottom.apply {
+            runOnNode?.let { it() }
+        }
+
+        private val dragTargetTop = VBox().apply {
+            bindVisibleToDraggingNodeProperty()
+        }
+
+        fun dragTargetTop(runOnNode: (VBox.() -> Unit)? = null): Node = dragTargetTop.apply {
+            runOnNode?.let { it() }
+        }
+
+        private val dragContainer = VBox().apply {
+            draggingNodeProperty.onChange {
+                clear()
+                it?.let { node -> add(node) }
             }
         }
-        hide()
+
+        fun dragContainer() = dragContainer
+
+        fun selectedTakeContainer(runOnPlaceHolder: Node.() -> Unit) = VBox().apply {
+            alignment = Pos.CENTER
+
+            val placeholder = vbox {
+                runOnPlaceHolder()
+            }
+
+            recordableViewModel.selectedTakeProperty.onChange {
+                clear()
+                when (it) {
+                    null -> add(placeholder)
+                    else -> add(createTakeCard(it))
+                }
+            }
+        }
     }
+
+    val dragComponents = DragComponents()
+    private val dragTargetTop = dragComponents.dragTargetTop()
+    private val dragContainer = dragComponents.dragContainer()
 
     fun Parent.addDragTakeEventHandlers() {
         addEventHandler(StartDragEvent.START_DRAG, ::startDrag)
         addEventHandler(AnimateDragEvent.ANIMATE_DRAG, ::animateDrag)
         addEventHandler(CompleteDragEvent.COMPLETE_DRAG, ::completeDrag)
+    }
+
+    private fun Node.bindVisibleToDraggingNodeProperty() {
+        visibleProperty().bind(draggingNodeProperty.booleanBinding { it != null })
     }
 
     private fun startDrag(evt: StartDragEvent) {
@@ -78,7 +106,7 @@ abstract class DragTakeFragment : Fragment() {
     }
 
     private fun completeDrag(evt: CompleteDragEvent) {
-        if (dragTarget.contains(dragTarget.sceneToLocal(evt.mouseEvent.sceneX, evt.mouseEvent.sceneY))) {
+        if (dragTargetTop.contains(dragTargetTop.sceneToLocal(evt.mouseEvent.sceneX, evt.mouseEvent.sceneY))) {
             onDraggedToTarget(evt.take)
             draggingNodeProperty.set(null)
         } else cancelDrag(evt.onCancel)

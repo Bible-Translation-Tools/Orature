@@ -4,6 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
+import javafx.collections.ObservableList
 import tornadofx.onChange
 import java.lang.IllegalStateException
 
@@ -15,6 +16,13 @@ fun <T> ObservableValue<T>.onChangeAndDoNow(op: (T?) -> Unit) {
     op(this.value)
     this.onChange {
         op(it)
+    }
+}
+
+fun <T> ObservableList<T>.onChangeAndDoNow(op: (List<T>) -> Unit) {
+    op(this)
+    this.onChange {
+        op(it.list)
     }
 }
 
