@@ -49,12 +49,6 @@ class RecordScriptureFragment : DragTakeFragment() {
             recordableViewModel.editTake(it)
         }
 
-        anchorpaneConstraints {
-            leftAnchor = 0.0
-            rightAnchor = 0.0
-            bottomAnchor = 0.0
-            topAnchor = 0.0
-        }
         addClass(AppStyles.appBackground)
         addClass(RecordScriptureStyles.tpanelStyle)
         val snackBar = JFXSnackbar(this)
