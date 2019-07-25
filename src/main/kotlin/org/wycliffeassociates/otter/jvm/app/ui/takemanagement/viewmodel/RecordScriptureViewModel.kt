@@ -24,7 +24,7 @@ class RecordScriptureViewModel : ViewModel() {
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
     // This will be bidirectionally bound to workbookViewModel's activeChunkProperty
-    private val activeChunkProperty = SimpleObjectProperty<Chunk?>()
+    private val activeChunkProperty = SimpleObjectProperty<Chunk>()
     private val activeChunk: Chunk
         get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
