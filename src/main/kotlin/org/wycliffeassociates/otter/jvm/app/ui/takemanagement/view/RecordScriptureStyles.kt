@@ -10,26 +10,38 @@ import tornadofx.*
 
 class RecordScriptureStyles : Stylesheet() {
     companion object {
+        val background by cssclass()
         val viewTakesTitle by cssclass()
-        val deleteButton by cssclass()
         val dragTarget by cssclass()
-        val takeCard by cssclass()
-        val badge by cssclass()
-        val placeholder by cssclass()
         val headerContainer by cssclass()
-        val selectedTakeContainer by cssclass()
         val takeGrid by cssclass()
         val glow by cssclass()
         val recordTakeButton by cssclass()
-        val playPauseButton by cssclass()
         val navigationButton by cssclass()
         val newTakeCard by cssclass()
         val scrollpane by cssclass()
         val pageTop by cssclass()
-        val tpanelStyle by cssclass()
+
+        val takeMaxWidth = 348.px
+        val takeMinHeight = 200.px
+
+        fun takeWidthHeight() = mixin {
+            minHeight = takeMinHeight
+            maxWidth = takeMaxWidth
+            prefWidth = maxWidth
+            maxHeight = minHeight
+        }
+
+        fun takeRadius() = mixin {
+            borderRadius += box(10.px)
+            backgroundRadius += box(10.px)
+        }
     }
 
     init {
+        background {
+            backgroundColor += AppTheme.colors.white
+        }
         viewTakesTitle {
             fontSize = 40.px
             textFill = AppTheme.colors.defaultText
@@ -40,7 +52,7 @@ class RecordScriptureStyles : Stylesheet() {
         takeGrid {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
-            backgroundColor += AppTheme.colors.defaultBackground
+            backgroundColor += AppTheme.colors.white
             spacing = 10.px
             alignment = Pos.CENTER_LEFT
             vgap = 16.px
@@ -63,13 +75,9 @@ class RecordScriptureStyles : Stylesheet() {
         }
 
         dragTarget {
+            +takeWidthHeight()
+            +takeRadius()
             backgroundColor += AppTheme.colors.cardBackground.deriveColor(0.0, 1.0, 1.0, 0.8)
-            borderRadius += box(10.px)
-            backgroundRadius += box(10.px)
-            minHeight = 200.px
-            minWidth = 348.px
-            maxHeight = minHeight
-            maxWidth = minWidth
             label {
                 fontSize = 16.px
             }
@@ -79,8 +87,7 @@ class RecordScriptureStyles : Stylesheet() {
         }
 
         newTakeCard {
-            minHeight = 200.px
-            minWidth = 348.px
+            +takeWidthHeight()
             borderRadius += box(5.0.px)
             borderColor += box(AppTheme.colors.defaultBackground)
             borderWidth += box(1.px)
@@ -92,8 +99,6 @@ class RecordScriptureStyles : Stylesheet() {
                 minWidth = 158.px
                 backgroundColor += AppTheme.colors.appRed
                 fontSize = 16.px
-                //overwrite dropshadow on newtakecard
-                effect = DropShadow(0.0,0.0,0.0,AppTheme.colors.dropShadow)
                 child("*") {
                     fill = AppTheme.colors.white
                 }
@@ -102,31 +107,13 @@ class RecordScriptureStyles : Stylesheet() {
             label {
                 fontSize = 25.px
                 fontWeight = FontWeight.BOLD
-                effect = DropShadow(0.0,0.0,0.0,AppTheme.colors.dropShadow)
             }
-        }
-
-        placeholder {
-            backgroundColor += AppTheme.colors.white
-            borderRadius += box(10.px)
-            backgroundRadius += box(10.px)
-            minHeight = 200.px
-            minWidth = 348.px
         }
 
         headerContainer {
             padding = box(20.px)
             spacing = 20.px
             alignment = Pos.CENTER_LEFT
-        }
-
-        selectedTakeContainer {
-            backgroundColor += AppTheme.colors.defaultBackground
-            padding = box(20.px)
-            alignment = Pos.CENTER_LEFT
-            label {
-                textFill = AppTheme.colors.defaultText
-            }
         }
 
         recordTakeButton {
@@ -143,6 +130,7 @@ class RecordScriptureStyles : Stylesheet() {
                 fill = AppTheme.colors.appRed
             }
         }
+
         navigationButton {
             minHeight = 40.px
             minWidth = 187.0.px
@@ -155,11 +143,6 @@ class RecordScriptureStyles : Stylesheet() {
                 fill = AppTheme.colors.appRed
             }
             fontSize = 14.px
-
-        }
-
-        tpanelStyle {
-//            backgroundColor += AppTheme.colors.a
         }
     }
 }

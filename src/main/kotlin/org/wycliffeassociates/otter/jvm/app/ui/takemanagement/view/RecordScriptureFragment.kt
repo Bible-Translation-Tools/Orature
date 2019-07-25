@@ -8,8 +8,6 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.control.ContentDisplay
 import javafx.scene.layout.AnchorPane
 import javafx.scene.layout.Priority
@@ -34,6 +32,7 @@ class RecordScriptureFragment : DragTakeFragment() {
 
     init {
         importStylesheet<RecordScriptureStyles>()
+        importStylesheet<TakeCardStyles>()
 
         root.apply {
             addEventHandler(PlayOrPauseEvent.PLAY) {
@@ -46,7 +45,7 @@ class RecordScriptureFragment : DragTakeFragment() {
                 recordableViewModel.editTake(it)
             }
 
-            addClass(AppStyles.appBackground)
+            addClass(RecordScriptureStyles.background)
             val snackBar = JFXSnackbar(this as AnchorPane) // TODO
             recordableViewModel.snackBarObservable.subscribe { shouldShow ->
                 snackBar.enqueue(
@@ -87,7 +86,7 @@ class RecordScriptureFragment : DragTakeFragment() {
 
                     add(dragComponents
                         .selectedTakeContainer {
-                            addClass(RecordScriptureStyles.placeholder)
+                            addClass(TakeCardStyles.scriptureTakeCardPlaceholder)
                             vgrow = Priority.NEVER
                         })
 

@@ -16,6 +16,7 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
         back.addClass(TakeCardStyles.resourceTakeCardPlaceholder)
 
         front.apply {
+            isFillWidth = true
             addClass(TakeCardStyles.resourceTakeCard)
 
             hbox(10.0) {

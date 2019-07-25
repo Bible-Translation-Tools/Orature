@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view
 
 import javafx.geometry.Pos
+import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.text.FontPosture
@@ -14,22 +15,31 @@ class RecordResourceStyles : Stylesheet() {
         val takesTab by cssclass()
         val leftRegionContainer by cssclass()
         val rightRegion by cssclass()
-        val dragTarget by cssclass()
+        val selectedTakePlaceholder by cssclass()
         val contentText by cssclass()
         val newTakeRegion by cssclass()
         val contentScrollPane by cssclass()
         val takesList by cssclass()
+        val glow by cssclass()
+        val dragTarget by cssclass()
 
         val takeMaxWidth = 500.px
         val takeMinHeight = 80.px
+
+        fun takeWidthHeight() = mixin {
+            minHeight = takeMinHeight
+            maxWidth = takeMaxWidth
+            minWidth = maxWidth
+            maxHeight = minHeight
+        }
+
+        fun takeRadius() = mixin {
+            borderRadius += box(5.px)
+            backgroundRadius += box(5.px)
+        }
     }
 
-    private fun margin(top: LinearU, right: LinearU, bottom: LinearU, left: LinearU) = mixin {
-        backgroundInsets += box(top, right, bottom, left)
-        borderInsets += box(top, right, bottom, left)
-    }
-
-    private val topMargin = 15.px
+    private val topMargin = 30.px
     private val bottomMargin = 15.px
     private val leftRegionLeftMargin = 80.px
     private val leftRegionRightMargin = 100.px
@@ -40,6 +50,7 @@ class RecordResourceStyles : Stylesheet() {
         }
 
         leftRegionContainer {
+            padding = box(topMargin, 0.px, 0.px, 0.px)
             borderColor += box(
                 Color.TRANSPARENT,
                 AppTheme.colors.lightBackground,
@@ -52,15 +63,32 @@ class RecordResourceStyles : Stylesheet() {
             padding = box(topMargin, 70.px, 30.px, 30.px)
         }
 
-        dragTarget {
-            +margin(topMargin, leftRegionLeftMargin, 0.px, leftRegionRightMargin)
+        selectedTakePlaceholder {
+            +takeWidthHeight()
+            +takeRadius()
             alignment = Pos.CENTER
             backgroundColor += AppTheme.colors.defaultBackground
-            maxWidth = takeMaxWidth + leftRegionLeftMargin + leftRegionRightMargin
-            minHeight = takeMinHeight + topMargin
+            borderColor += box(Color.DARKGRAY)
             borderStyle += BorderStrokeStyle.DASHED
             borderWidth += box(2.px)
             fontStyle = FontPosture.ITALIC
+        }
+
+        glow {
+            effect = DropShadow(5.0, AppTheme.colors.appBlue)
+        }
+
+        dragTarget {
+            +takeWidthHeight()
+            +takeRadius()
+            backgroundColor += AppTheme.colors.cardBackground.deriveColor(0.0, 1.0, 1.0, 0.8)
+            label {
+                fontSize = 16.px
+            }
+            child("*") {
+                // TODO: This won't always be blue
+                fill = AppTheme.colors.appBlue
+            }
         }
 
         contentText {
@@ -88,6 +116,7 @@ class RecordResourceStyles : Stylesheet() {
 
         listCell {
             backgroundColor += Color.TRANSPARENT
+            padding = box(0.px, 0.px, 15.px, 0.px)
         }
     }
 }

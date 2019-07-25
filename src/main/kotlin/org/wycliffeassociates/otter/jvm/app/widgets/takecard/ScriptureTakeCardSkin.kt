@@ -12,7 +12,7 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
     init {
         importStylesheet<TakeCardStyles>()
 
-        back.addClass(TakeCardStyles.scriptureTakeCardPlaceholder)
+        back.addClass(TakeCardStyles.scriptureTakeCardPlaceholder, TakeCardStyles.scriptureTakeCardDropShadow)
 
         front.apply {
             anchorpane {
