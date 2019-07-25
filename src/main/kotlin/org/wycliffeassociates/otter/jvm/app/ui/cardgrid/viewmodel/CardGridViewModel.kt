@@ -36,7 +36,10 @@ class CardGridViewModel: ViewModel() {
     val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 
     init {
-        Observable.merge(chapterModeEnabledProperty.toObservable(), allContent.changes()).subscribe { _ ->
+        Observable.merge(
+            chapterModeEnabledProperty.toObservable(),
+            allContent.changes()
+        ).subscribe { _ ->
             filteredContent.setAll(
                     if (chapterModeEnabledProperty.value == true) {
                         allContent.filtered { it.item == ContentLabel.CHAPTER.value }
@@ -53,8 +56,9 @@ class CardGridViewModel: ViewModel() {
 
         workbookViewModel.activeChapterProperty.onChange {
             it?.let { ch -> loadChapterContents(ch) }
-                ?: workbookViewModel.activeWorkbookProperty.value
-                    ?.let { wb -> loadChapters(wb) }
+                ?: workbookViewModel.activeWorkbookProperty.value?.let {
+                        wb -> loadChapters(wb)
+                }
         }
     }
 
