@@ -63,8 +63,13 @@ class RecordScriptureFragment : Fragment() {
         val snackBar = JFXSnackbar(this)
         recordableViewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
-                    JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
-                        audioPluginViewModel.addPlugin(true, false)
+                    JFXSnackbar.SnackbarEvent(
+                        messages["noRecorder"],
+                        messages["addPlugin"].toUpperCase(),
+                        5000,
+                        false,
+                        EventHandler {
+                            audioPluginViewModel.addPlugin(true, false)
                     })
             )
         }

@@ -13,6 +13,11 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class RecordScriptureViewModel : ViewModel() {
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
+    }
+
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -84,11 +89,6 @@ class RecordScriptureViewModel : ViewModel() {
             .subscribe { list ->
                 chunkList.setAll(list.sortedBy { chunk -> chunk.start })
             }
-    }
-
-    private enum class StepDirection {
-        FORWARD,
-        BACKWARD
     }
 
     private fun stepToChunk(direction: StepDirection) {
