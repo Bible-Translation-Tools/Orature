@@ -8,8 +8,6 @@ import javafx.scene.text.FontPosture
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
-typealias LinearU = Dimension<Dimension.LinearUnits>
-
 class RecordResourceStyles : Stylesheet() {
     companion object {
         val takesTab by cssclass()

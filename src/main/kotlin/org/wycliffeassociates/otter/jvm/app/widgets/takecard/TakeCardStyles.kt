@@ -31,11 +31,6 @@ class TakeCardStyles : Stylesheet() {
         val defaultGreen : Color = c("#58BD2F")
         val grey = c("#C9C8C8")
 
-        private val resourceTakeMaxWidth = RecordResourceStyles.takeMaxWidth
-        private val resourceTakeMinHeight = RecordResourceStyles.takeMinHeight
-        private val scriptureTakeMaxWidth = RecordScriptureStyles.takeMaxWidth
-        private val scriptureTakeMinHeight = RecordScriptureStyles.takeMinHeight
-
         private fun scriptureTakeWidthHeight() = RecordScriptureStyles.takeWidthHeight()
         private fun scriptureTakeRadius() = RecordScriptureStyles.takeRadius()
         private fun resourceTakeWidthHeight() = RecordResourceStyles.takeWidthHeight()

@@ -14,21 +14,13 @@ import javafx.scene.layout.RowConstraints
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.DragTakeFragment
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
-class RecordableTabContentFragment(
-    override val recordableViewModel: RecordableViewModel
-) : DragTakeFragment() {
-
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
-
+class RecordableTabContentFragment(recordableViewModel: RecordableViewModel)
+    : DragTakeFragment(recordableViewModel) {
     val formattedTextProperty = SimpleStringProperty()
 
     private val newTakeButton =
@@ -54,14 +46,12 @@ class RecordableTabContentFragment(
                 .dragTargetBottom {
                     addClass(RecordResourceStyles.dragTarget, RecordResourceStyles.glow)
                 })
-
             add(dragComponents
                 .selectedTakeContainer {
                     addClass(RecordResourceStyles.selectedTakePlaceholder)
                     vgrow = Priority.NEVER
                     text(messages["dragTakeHere"])
                 })
-
             add(dragComponents
                 .dragTargetTop {
                     addClass(RecordResourceStyles.dragTarget)
@@ -69,7 +59,6 @@ class RecordableTabContentFragment(
                     add(MaterialIconView(MaterialIcon.ADD, "30px"))
                 })
         }
-
         scrollpane {
             addClass(RecordResourceStyles.contentScrollPane)
             isFitToWidth = true
@@ -79,7 +68,6 @@ class RecordableTabContentFragment(
                 addClass(RecordResourceStyles.contentText)
             }
         }
-
         vbox {
             addClass(RecordResourceStyles.newTakeRegion)
             add(newTakeButton)
@@ -87,9 +75,7 @@ class RecordableTabContentFragment(
     }
 
     private val grid = gridpane {
-
         vgrow = Priority.ALWAYS
-
         addClass(RecordResourceStyles.takesTab)
         setFillHeightSingleRow()
 
@@ -110,7 +96,7 @@ class RecordableTabContentFragment(
                     TakesListView(
                         recordableViewModel.alternateTakes,
                         audioPluginViewModel::audioPlayer,
-                        recordableViewModel.lastPlayOrPauseEvent)
+                        lastPlayOrPauseEvent)
                 )
             }
         }
@@ -118,18 +104,6 @@ class RecordableTabContentFragment(
 
     init {
         importStylesheet<RecordResourceStyles>()
-
-        root.apply {
-            addEventHandler(PlayOrPauseEvent.PLAY) {
-                recordableViewModel.lastPlayOrPauseEvent.set(it)
-            }
-            addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
-                recordableViewModel.deleteTake(it.take)
-            }
-            addEventHandler(EditTakeEvent.EDIT_TAKE) {
-                recordableViewModel.editTake(it)
-            }
-        }
 
         mainContainer.apply {
             add(grid)
@@ -140,7 +114,7 @@ class RecordableTabContentFragment(
         return resourcetakecard(
             take,
             audioPluginViewModel.audioPlayer(),
-            recordableViewModel.lastPlayOrPauseEvent.toObservable()
+            lastPlayOrPauseEvent.toObservable()
         )
     }
 

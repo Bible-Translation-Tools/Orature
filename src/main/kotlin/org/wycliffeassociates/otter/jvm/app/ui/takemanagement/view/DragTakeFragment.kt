@@ -1,30 +1,37 @@
 package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
+import com.github.thomasnield.rxkotlinfx.toObservable
+import com.jfoenix.controls.JFXSnackbar
+import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.Priority
+import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
+import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.AnimateDragEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.CompleteDragEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.StartDragEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-abstract class DragTakeFragment : Fragment() {
-
-    // Can only use this in functions; otherwise, it will not be initialized yet
-    abstract val recordableViewModel: RecordableViewModel
+abstract class DragTakeFragment(protected val recordableViewModel: RecordableViewModel) : Fragment() {
 
     abstract fun createTakeCard(take: Take): TakeCard
 
+    protected val audioPluginViewModel: AudioPluginViewModel by inject()
+
     /** Add custom components to this container, rather than root*/
-    val mainContainer = VBox()
+    protected val mainContainer = VBox()
+
+    protected val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
@@ -64,7 +71,7 @@ abstract class DragTakeFragment : Fragment() {
         }
     }
 
-    val dragComponents = DragComponents()
+    protected val dragComponents = DragComponents()
     private val dragTargetTop = dragComponents.dragTargetTop()
 
     private val dragContainer = VBox().apply {
@@ -74,8 +81,16 @@ abstract class DragTakeFragment : Fragment() {
         }
     }
 
+    init {
+        importStylesheet<AppStyles>()
+        createAudioPluginProgressDialog()
+    }
+
     final override val root: Parent = anchorpane {
         addDragTakeEventHandlers()
+        addButtonEventHandlers()
+
+        createSnackBar(this)
 
         add(mainContainer.apply {
             anchorpaneConstraints {
@@ -92,6 +107,55 @@ abstract class DragTakeFragment : Fragment() {
         addEventHandler(StartDragEvent.START_DRAG, ::startDrag)
         addEventHandler(AnimateDragEvent.ANIMATE_DRAG, ::animateDrag)
         addEventHandler(CompleteDragEvent.COMPLETE_DRAG, ::completeDrag)
+    }
+
+    private fun Parent.addButtonEventHandlers() {
+        addEventHandler(PlayOrPauseEvent.PLAY) {
+            lastPlayOrPauseEvent.set(it)
+        }
+        addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
+            recordableViewModel.deleteTake(it.take)
+        }
+        addEventHandler(EditTakeEvent.EDIT_TAKE) {
+            recordableViewModel.editTake(it)
+        }
+    }
+
+    private fun createSnackBar(pane: Pane) {
+        // TODO: This doesn't actually handle anything correctly. Need to know whether the user
+        // TODO... hasn't selected an editor or recorder and respond appropriately.
+        val snackBar = JFXSnackbar(pane)
+        recordableViewModel.snackBarObservable.subscribe {
+            snackBar.enqueue(
+                JFXSnackbar.SnackbarEvent(
+                    messages["noRecorder"],
+                    messages["addPlugin"].toUpperCase(),
+                    5000,
+                    false,
+                    EventHandler {
+                        audioPluginViewModel.addPlugin(true, false)
+                    })
+            )
+        }
+    }
+
+    private fun createAudioPluginProgressDialog() {
+        // Plugin active cover
+        val dialog = progressdialog {
+            root.addClass(AppStyles.progressDialog)
+            recordableViewModel.contextProperty.toObservable().subscribe { newContext ->
+                when (newContext) {
+                    TakeContext.RECORD -> graphic = AppStyles.recordIcon("60px")
+                    TakeContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
+                    else -> {}
+                }
+            }
+        }
+        recordableViewModel.showPluginActiveProperty.onChange {
+            Platform.runLater {
+                if (it) dialog.open() else dialog.close()
+            }
+        }
     }
 
     private fun Node.bindVisibleToDraggingNodeProperty() {
