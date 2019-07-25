@@ -10,16 +10,16 @@ import java.io.File
 import java.lang.IllegalStateException
 
 class WorkbookViewModel: ViewModel() {
-    val activeWorkbookProperty = SimpleObjectProperty<Workbook?>()
+    val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
         get() = activeWorkbookProperty.value ?: throw IllegalStateException("Workbook is null")
 
-    val activeChapterProperty = SimpleObjectProperty<Chapter?>()
+    val activeChapterProperty = SimpleObjectProperty<Chapter>()
     val chapter: Chapter
         get() = activeChapterProperty.value ?: throw IllegalStateException("Chapter is null")
 
-    val activeChunkProperty = SimpleObjectProperty<Chunk?>()
-    val chunk by activeChunkProperty
+    val activeChunkProperty = SimpleObjectProperty<Chunk>()
+    val chunk: Chunk? by activeChunkProperty
 
     val activeResourceSlugProperty = SimpleStringProperty()
     val resourceSlug: String
@@ -28,7 +28,7 @@ class WorkbookViewModel: ViewModel() {
             else it
         }
 
-    val activeProjectAudioDirectoryProperty = SimpleObjectProperty<File?>()
+    val activeProjectAudioDirectoryProperty = SimpleObjectProperty<File>()
     val projectAudioDirectory: File
         get() = activeProjectAudioDirectoryProperty.value
             ?: throw IllegalStateException("Project audio directory is null")

@@ -70,7 +70,7 @@ class TakeManagementViewModel : ViewModel() {
             takeRepository
     )
 
-    private val editTake = EditTake(takeRepository, launchPlugin)
+    private val editTake = EditTake(launchPlugin)
 
     init {
         activeContentProperty.toObservable().subscribe {
