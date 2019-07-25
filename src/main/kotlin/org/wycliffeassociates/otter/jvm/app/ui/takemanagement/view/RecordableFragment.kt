@@ -65,6 +65,8 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
                 clear()
                 when (it) {
                     null -> add(placeholder)
+                    /* We can't just add the node being dragged, since the selected take might have just been
+                        loaded from the database */
                     else -> add(createTakeCard(it))
                 }
             }
