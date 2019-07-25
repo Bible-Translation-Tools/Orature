@@ -41,6 +41,7 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                             alignment = Pos.TOP_RIGHT
                             hgrow = Priority.SOMETIMES
                             add(deleteButton.apply {
+                                text = messages["delete"]
                                 graphic = MaterialIconView(MaterialIcon.DELETE, "18px")
                             })
                         }
@@ -58,6 +59,7 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                         hbox(15.0) {
                             add(playButton.addClass(TakeCardStyles.defaultButton))
                             add(editButton.apply {
+                                text = messages["edit"]
                                 graphic = MaterialIconView(MaterialIcon.EDIT, "18px").apply {
                                     fill = TakeCardStyles.defaultGreen
                                 }

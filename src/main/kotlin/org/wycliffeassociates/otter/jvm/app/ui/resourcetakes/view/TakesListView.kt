@@ -18,16 +18,15 @@ class TakesListView(
 ) : ListView<Take>(items) {
     init {
         cellFormat {
-            graphic = cache(it.number) {
-                resourcetakecard(it, audioPlayer(), lastPlayOrPauseEvent.toObservable())
-            }
+            /* Don't use cell caching, because we remove the front node of the take card when it is dragged
+                and we don't ever add it back if it was made the selected take. (This is because we create a
+                new take card if it was selected.)
+             */
+            graphic = resourcetakecard(it, audioPlayer(), lastPlayOrPauseEvent.toObservable())
+
         }
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
         addClass(RecordResourceStyles.takesList)
-
-        addEventHandler(PlayOrPauseEvent.PLAY) {
-            lastPlayOrPauseEvent.set(it)
-        }
     }
 }

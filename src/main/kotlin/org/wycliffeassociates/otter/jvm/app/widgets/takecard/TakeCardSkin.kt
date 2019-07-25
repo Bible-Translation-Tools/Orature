@@ -88,7 +88,6 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
     }
 
     private fun createDeleteButton() = JFXButton().apply {
-        text = messages["delete"]
         action {
             error(
                 messages["deleteTakePrompt"],
@@ -105,7 +104,6 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
     }
 
     private fun createEditButton() = JFXButton().apply {
-        text = messages["edit"]
         action {
             skinnable.fireEditTakeEvent()
         }

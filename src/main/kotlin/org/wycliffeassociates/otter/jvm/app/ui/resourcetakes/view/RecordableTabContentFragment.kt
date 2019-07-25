@@ -17,6 +17,9 @@ import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.DragTakeFragm
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
@@ -37,7 +40,7 @@ class RecordableTabContentFragment(
             maxWidth = 500.0
             text = messages["newTake"]
             action {
-                recordableViewModel::recordNewTake
+                recordableViewModel.recordNewTake()
             }
         }
 
@@ -115,6 +118,18 @@ class RecordableTabContentFragment(
 
     init {
         importStylesheet<RecordResourceStyles>()
+
+        root.apply {
+            addEventHandler(PlayOrPauseEvent.PLAY) {
+                recordableViewModel.lastPlayOrPauseEvent.set(it)
+            }
+            addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
+                recordableViewModel.deleteTake(it.take)
+            }
+            addEventHandler(EditTakeEvent.EDIT_TAKE) {
+                recordableViewModel.editTake(it)
+            }
+        }
 
         mainContainer.apply {
             add(grid)

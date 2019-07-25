@@ -13,6 +13,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.StartDragEvent
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 abstract class DragTakeFragment : Fragment() {
@@ -53,7 +54,7 @@ abstract class DragTakeFragment : Fragment() {
                 runOnPlaceHolder()
             }
 
-            recordableViewModel.selectedTakeProperty.onChange {
+            recordableViewModel.selectedTakeProperty.onChangeAndDoNow {
                 clear()
                 when (it) {
                     null -> add(placeholder)
