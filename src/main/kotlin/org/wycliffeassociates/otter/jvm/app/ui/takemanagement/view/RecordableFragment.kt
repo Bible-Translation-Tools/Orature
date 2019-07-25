@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-abstract class DragTakeFragment(protected val recordableViewModel: RecordableViewModel) : Fragment() {
+abstract class RecordableFragment(protected val recordableViewModel: RecordableViewModel) : Fragment() {
 
     abstract fun createTakeCard(take: Take): TakeCard
 

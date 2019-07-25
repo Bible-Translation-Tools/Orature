@@ -18,7 +18,7 @@ private class RecordableViewModelProvider: Component() {
 }
 
 class RecordScriptureFragment
-    : DragTakeFragment(RecordableViewModelProvider().get()) {
+    : RecordableFragment(RecordableViewModelProvider().get()) {
 
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
