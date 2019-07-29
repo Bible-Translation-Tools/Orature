@@ -20,32 +20,29 @@ class CardGridViewModel: ViewModel() {
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
-    val allContent: ObservableList<CardData>
+    private val allContent: ObservableList<CardData>
             = FXCollections.observableArrayList()
     val filteredContent: ObservableList<CardData>
             = FXCollections.observableArrayList()
 
-    // Whether the UI should show the plugin as active
-    private var showPluginActive: Boolean by property(false)
-    val showPluginActiveProperty = getProperty(CardGridViewModel::showPluginActive)
-
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(CardGridViewModel::loading)
 
-    val chapterModeEnabledProperty = SimpleBooleanProperty(false)
+    private val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 
     init {
         Observable.merge(
             chapterModeEnabledProperty.toObservable(),
             allContent.changes()
-        ).subscribe { _ ->
+        ).subscribe {
             filteredContent.setAll(
-                    if (chapterModeEnabledProperty.value == true) {
-                        allContent.filtered { it.item == ContentLabel.CHAPTER.value }
-                    } else {
-//                        allContent.filtered { it.item != ContentLabelEnum.CHAPTER.value }
-                        allContent
+                if (chapterModeEnabledProperty.value == true) {
+                    allContent.filtered { cardData ->
+                        cardData.item == ContentLabel.CHAPTER.value
                     }
+                } else {
+                    allContent
+                }
             )
         }
 
@@ -53,11 +50,13 @@ class CardGridViewModel: ViewModel() {
             it?.let { wb -> loadChapters(wb) }
         }
 
-        workbookViewModel.activeChapterProperty.onChange {
-            it?.let { ch -> loadChapterContents(ch) }
-                ?: workbookViewModel.activeWorkbookProperty.value?.let {
-                        wb -> loadChapters(wb)
+        workbookViewModel.activeChapterProperty.onChange { chapter ->
+            when (chapter) {
+                null -> workbookViewModel.activeWorkbookProperty.value?.let {
+                    workbook -> loadChapters(workbook)
                 }
+                else -> loadChapterContents(chapter)
+            }
         }
     }
 

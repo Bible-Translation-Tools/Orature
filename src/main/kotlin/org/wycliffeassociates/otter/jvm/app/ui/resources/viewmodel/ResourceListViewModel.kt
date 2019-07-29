@@ -16,8 +16,8 @@ class ResourceListViewModel : ViewModel() {
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
 
     init {
-        workbookViewModel.activeChapterProperty.onChangeAndDoNow {
-            it?.let { targetChapter ->
+        workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
+            targetChapter?.let {
                 loadResourceGroups(getSourceChapter(targetChapter))
             }
         }
