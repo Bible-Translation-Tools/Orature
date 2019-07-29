@@ -49,14 +49,14 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
             audioPluginViewModel
                 .record(it)
                 .observeOnFx()
-                .doOnSuccess { result ->
+                .subscribe { result ->
                     showPluginActive = false
                     when (result) {
                         RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
-                        else -> {}
+                        RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {}
+                        null -> {} // This cannot happen but the compiler complains if null branch does not exist
                     }
                 }
-                .subscribe()
         } ?: throw IllegalStateException("Recordable is null")
     }
 
@@ -70,7 +70,8 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
                 showPluginActive = false
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    else -> {}
+                    EditTake.Result.SUCCESS -> {}
+                    null -> {} // This cannot happen but the compiler complains if null branch does not exist
                 }
             }
     }

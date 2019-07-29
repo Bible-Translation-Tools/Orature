@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -79,7 +78,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setTitle(chunk: Chunk) {
-        val label = ContentLabel.VERSE.value
+        val label = messages["verse"]
         val start = chunk.start
         title = "$label $start"
     }
@@ -88,9 +87,10 @@ class RecordScriptureViewModel : ViewModel() {
         activeChunkSubscription?.dispose()
         activeChunkSubscription = chunks
             .toList()
+            .map { it.sortedBy { chunk -> chunk.start } }
             .observeOnFx()
             .subscribe { list ->
-                chunkList.setAll(list.sortedBy { chunk -> chunk.start })
+                chunkList.setAll(list)
             }
     }
 
