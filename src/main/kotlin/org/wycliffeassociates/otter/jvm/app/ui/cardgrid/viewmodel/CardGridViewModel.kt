@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
-import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardDataMapper
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -67,7 +66,7 @@ class CardGridViewModel: ViewModel() {
         allContent.clear()
         loading = true
         chapter.chunks
-            .map(CardDataMapper.Companion::mapChunkToCardData)
+            .map{CardData(it)}
             .doOnComplete {
                 loading = false
             }
@@ -91,7 +90,7 @@ class CardGridViewModel: ViewModel() {
         loading = true
         allContent.clear()
         workbook.target.chapters
-            .map(CardDataMapper.Companion::mapChapterToCardData)
+            .map{CardData(it)}
             .doOnComplete {
                 loading = false
             }
