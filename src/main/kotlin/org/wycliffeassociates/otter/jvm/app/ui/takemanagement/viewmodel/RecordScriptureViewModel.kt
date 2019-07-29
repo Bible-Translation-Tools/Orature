@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -28,22 +29,24 @@ class RecordScriptureViewModel : ViewModel() {
     private val activeChunk: Chunk
         get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
 
-    val titleProperty = SimpleStringProperty()
-    var title by titleProperty
+    private val titleProperty = SimpleStringProperty()
+    private var title by titleProperty
 
     private val chunkList: ObservableList<Chunk> = observableList()
     val hasNext = SimpleBooleanProperty(false)
     val hasPrevious = SimpleBooleanProperty(false)
 
+    private var activeChunkSubscription: Disposable? = null
+
     init {
         activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
 
-        workbookViewModel.activeChapterProperty.onChangeAndDoNow {
-            it?.let { chapter -> getChunkList(chapter.chunks) }
+        workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
+            chapter?.let { getChunkList(chapter.chunks) }
         }
 
-        activeChunkProperty.onChangeAndDoNow {
-            it?.let { chunk ->
+        activeChunkProperty.onChangeAndDoNow { chunk ->
+            chunk?.let {
                 setTitle(chunk)
                 setHasNextAndPrevious()
                 // This will trigger loading takes in the RecordableViewModel
@@ -61,20 +64,18 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setHasNextAndPrevious() {
-        if (chunkList.isNotEmpty()) {
-            doSetHasNextAndPrevious()
-        } else {
-            chunkList.isNotEmpty().toProperty().onChangeOnce {
-                doSetHasNextAndPrevious()
+        activeChunkProperty.value?.let { chunk ->
+            if (chunkList.isNotEmpty()) {
+                hasNext.set(chunk.start < chunkList.last().start)
+                hasPrevious.set(chunk.start > chunkList.first().start)
+            } else {
+                hasNext.set(false)
+                hasPrevious.set(false)
+                chunkList.sizeProperty.onChangeOnce {
+                    setHasNextAndPrevious()
+                }
             }
         }
-    }
-
-    private fun doSetHasNextAndPrevious() {
-        if (chunkList.isNotEmpty()) {
-            hasNext.set(activeChunk.start < chunkList.last().start)
-            hasPrevious.set(activeChunk.start > chunkList.first().start)
-        } else throw IllegalStateException("Chunk list is empty")
     }
 
     private fun setTitle(chunk: Chunk) {
@@ -84,7 +85,9 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {
-        chunks.toList()
+        activeChunkSubscription?.dispose()
+        activeChunkSubscription = chunks
+            .toList()
             .observeOnFx()
             .subscribe { list ->
                 chunkList.setAll(list.sortedBy { chunk -> chunk.start })
