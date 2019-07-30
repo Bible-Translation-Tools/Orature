@@ -10,7 +10,8 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.CompleteDragEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent.PauseEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent.PlayEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.StartDragEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
@@ -107,12 +108,10 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
         graphic = playIconView
         action {
             skinnable.fireEvent(
-                PlayOrPauseEvent(
-                    when (skinnable.isAudioPlayingProperty.get()) {
-                        true -> PlayOrPauseEvent.PAUSE
-                        false -> PlayOrPauseEvent.PLAY
-                    }
-                )
+                when (skinnable.isAudioPlayingProperty.get()) {
+                    true -> PauseEvent()
+                    false -> PlayEvent()
+                }
             )
         }
     }

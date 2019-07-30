@@ -11,6 +11,8 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent.PauseEvent
+import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseEvent.PlayEvent
 
 class TakeCard(
     val take: Take,
@@ -65,7 +67,7 @@ class TakeCard(
 
     private fun subscribeToOtherPlayEvents(playOrPauseEventObservable: Observable<PlayOrPauseEvent?>) {
         val sub = playOrPauseEventObservable
-            .filter { it.eventType == PlayOrPauseEvent.PLAY }
+            .filter { it is PlayEvent }
             .filter { it.target != this }
             .subscribe {
                 firePauseEvent()
@@ -74,7 +76,7 @@ class TakeCard(
     }
 
     private fun firePauseEvent() {
-        fireEvent(PlayOrPauseEvent(PlayOrPauseEvent.PAUSE))
+        fireEvent(PauseEvent())
     }
 }
 

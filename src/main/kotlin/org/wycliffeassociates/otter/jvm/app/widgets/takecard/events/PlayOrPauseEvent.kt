@@ -3,7 +3,10 @@ package org.wycliffeassociates.otter.jvm.app.widgets.takecard.events
 import javafx.event.Event
 import javafx.event.EventType
 
-class PlayOrPauseEvent(type: EventType<PlayOrPauseEvent>) : Event(type) {
+sealed class PlayOrPauseEvent(type: EventType<PlayOrPauseEvent>) : Event(type) {
+
+    class PlayEvent: PlayOrPauseEvent(PLAY)
+    class PauseEvent: PlayOrPauseEvent(PAUSE)
 
     companion object {
         val PLAY: EventType<PlayOrPauseEvent> = EventType("PLAY")
