@@ -5,10 +5,9 @@ import javafx.event.EventType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 
 class EditTakeEvent(
-    type: EventType<EditTakeEvent>,
     val take: Take,
     val onComplete: () -> Unit
-) : Event(type) {
+) : Event(EDIT_TAKE) {
 
     companion object {
         val EDIT_TAKE: EventType<EditTakeEvent> = EventType("EDIT_TAKE")

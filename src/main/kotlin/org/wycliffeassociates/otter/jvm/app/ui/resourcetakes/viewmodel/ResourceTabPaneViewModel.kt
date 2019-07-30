@@ -21,8 +21,9 @@ class ResourceTabPaneViewModel : ViewModel() {
 
     internal val recordableList: ObservableList<Recordable> = FXCollections.observableArrayList()
 
-    class ContentTypeToViewModelMap(map: Map<ContentType, RecordableTabViewModel>):
+    class ContentTypeToViewModelMap(map: Map<ContentType, RecordableTabViewModel>) :
         EnumMap<ContentType, RecordableTabViewModel>(map)
+
     val contentTypeToViewModelMap = ContentTypeToViewModelMap(
         hashMapOf(
             ContentType.TITLE to tabRecordableViewModel(),
@@ -61,7 +62,7 @@ class ResourceTabPaneViewModel : ViewModel() {
     }
 
     private fun setTabLabels(resourceSlug: String?) {
-        when(resourceSlug) {
+        when (resourceSlug) {
             "tn" -> {
                 setLabelProperty(ContentType.TITLE, messages["snippet"])
                 setLabelProperty(ContentType.BODY, messages["note"])

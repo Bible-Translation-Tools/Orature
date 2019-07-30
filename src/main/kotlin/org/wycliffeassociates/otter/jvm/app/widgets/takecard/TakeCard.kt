@@ -36,21 +36,13 @@ class TakeCard(
 
     fun fireEditTakeEvent() {
         fireEvent(
-            EditTakeEvent(
-                EditTakeEvent.EDIT_TAKE,
-                take
-            ) {
+            EditTakeEvent(take) {
                 player.load(take.file)
             })
     }
 
     fun fireDeleteTakeEvent() {
-        fireEvent(
-            DeleteTakeEvent(
-                DeleteTakeEvent.DELETE_TAKE,
-                take
-            )
-        )
+        fireEvent(DeleteTakeEvent(take))
     }
 
     private fun clearDisposables() {

@@ -19,8 +19,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
-class RecordResourceFragment(recordableViewModel: RecordableViewModel)
-    : RecordableFragment(recordableViewModel) {
+class RecordResourceFragment(recordableViewModel: RecordableViewModel) : RecordableFragment(recordableViewModel) {
     val formattedTextProperty = SimpleStringProperty()
 
     private val newTakeButton =
@@ -94,9 +93,10 @@ class RecordResourceFragment(recordableViewModel: RecordableViewModel)
                 addClass(RecordResourceStyles.rightRegion)
                 add(
                     TakesListView(
-                        recordableViewModel.alternateTakes,
-                        audioPluginViewModel::audioPlayer,
-                        lastPlayOrPauseEvent)
+                        items = recordableViewModel.alternateTakes,
+                        audioPlayer = audioPluginViewModel::audioPlayer,
+                        lastPlayOrPauseEvent = lastPlayOrPauseEvent
+                    )
                 )
             }
         }

@@ -107,7 +107,7 @@ open class RecordableViewModel(private val audioPluginViewModel: AudioPluginView
         audio.takes
             .filter { it.isNotDeleted() }
             .subscribe {
-                if ( it != selected ) {
+                if (it != selected) {
                     addToAlternateTakes(it)
                 }
                 removeOnDeleted(it)

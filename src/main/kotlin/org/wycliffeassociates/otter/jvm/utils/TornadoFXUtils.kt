@@ -19,6 +19,10 @@ fun <T> ObservableValue<T>.onChangeAndDoNow(op: (T?) -> Unit) {
     }
 }
 
+/**
+ * Runs the given operation now and also calls tornadofx's [onChange] with the given operation to set up an
+ * on change listener
+ */
 fun <T> ObservableList<T>.onChangeAndDoNow(op: (List<T>) -> Unit) {
     op(this)
     this.onChange {
