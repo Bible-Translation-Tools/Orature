@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXSnackbar
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
@@ -42,7 +43,8 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
             bindVisibleToDraggingNodeProperty()
         }
 
-        fun dragTargetBottom(runOnNode: (VBox.() -> Unit)? = null): Node = dragTargetBottom.apply {
+        fun dragTargetBottom(runOnNode: (VBox.() -> Unit)? = null): Node =
+            dragTargetBottom.apply {
             runOnNode?.let { it() }
         }
 
@@ -76,13 +78,6 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
     protected val dragComponents = DragComponents()
     private val dragTargetTop = dragComponents.dragTargetTop()
 
-    private val dragContainer = VBox().apply {
-        draggingNodeProperty.onChange {
-            clear()
-            it?.let { node -> add(node) }
-        }
-    }
-
     init {
         importStylesheet<AppStyles>()
         createAudioPluginProgressDialog()
@@ -102,7 +97,6 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
                 topAnchor = 0.0
             }
         })
-        add(dragContainer)
     }
 
     private fun Parent.addDragTakeEventHandlers() {
@@ -146,10 +140,10 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
         val dialog = progressdialog {
             root.addClass(AppStyles.progressDialog)
             recordableViewModel.contextProperty.toObservable().subscribe { newContext ->
-                when (newContext) {
-                    TakeContext.RECORD -> graphic = AppStyles.recordIcon("60px")
-                    TakeContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
-                    else -> {}
+                graphic = when (newContext) {
+                    TakeContext.RECORD -> AppStyles.recordIcon("60px")
+                    TakeContext.EDIT_TAKES -> AppStyles.editIcon("60px")
+                    null -> null
                 }
             }
         }
@@ -164,39 +158,59 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
         visibleProperty().bind(draggingNodeProperty.booleanBinding { it != null })
     }
 
+    private fun getPointInRoot(node: Node, pointInNode: Point2D): Point2D {
+        return when (node) {
+            root -> pointInNode
+            else -> getPointInRoot(node.parent, node.localToParent(pointInNode))
+        }
+    }
+
+    private var dragStartDelta = Point2D(0.0, 0.0)
+
+    private fun relocateDraggingNode(pointInRoot: Point2D) {
+        draggingNodeProperty.value?.let { draggingNode ->
+            val newX = pointInRoot.x - dragStartDelta.x
+            val newY = pointInRoot.y - dragStartDelta.y
+            draggingNode.relocate(newX, newY)
+        }
+    }
+
     private fun startDrag(evt: StartDragEvent) {
         if (evt.take != recordableViewModel.selectedTakeProperty.value) {
-            draggingNodeProperty.set(evt.draggingNode)
-            animateDrag(evt.mouseEvent)
+            val draggingNode = evt.draggingNode
+            val mouseEvent = evt.mouseEvent
+            dragStartDelta = Point2D(mouseEvent.x, mouseEvent.y)
+            val pointInRoot = getPointInRoot(draggingNode, Point2D(mouseEvent.x, mouseEvent.y))
+
+            root.add(draggingNode)
+            draggingNode.toFront()
+
+            draggingNodeProperty.set(draggingNode)
+            relocateDraggingNode(pointInRoot)
         }
     }
 
     private fun animateDrag(evt: AnimateDragEvent) {
-        animateDrag(evt.mouseEvent)
-    }
-
-    private fun animateDrag(evt: MouseEvent) {
-        if (draggingNodeProperty.value != null) {
-            val widthOffset = 348
-            val heightOffset = 200
-            dragContainer.toFront()
-            dragContainer.relocate(evt.sceneX - widthOffset, evt.sceneY - heightOffset)
+        draggingNodeProperty.value?.let { draggingNode ->
+            val pointInRoot = getPointInRoot(draggingNode, Point2D(evt.mouseEvent.x, evt.mouseEvent.y))
+            relocateDraggingNode(pointInRoot)
         }
     }
 
     private fun onDraggedToTarget(take: Take) {
         recordableViewModel.selectTake(take)
+        draggingNodeProperty.value.removeFromParent()
     }
+
+    private fun isDraggedToTarget(evt: MouseEvent): Boolean =
+        dragTargetTop.contains(dragTargetTop.sceneToLocal(evt.sceneX, evt.sceneY))
 
     private fun completeDrag(evt: CompleteDragEvent) {
-        if (dragTargetTop.contains(dragTargetTop.sceneToLocal(evt.mouseEvent.sceneX, evt.mouseEvent.sceneY))) {
+        if (isDraggedToTarget(evt.mouseEvent)) {
             onDraggedToTarget(evt.take)
-            draggingNodeProperty.set(null)
-        } else cancelDrag(evt.onCancel)
-    }
-
-    private fun cancelDrag(onCancel: () -> Unit) {
+        } else {
+            evt.onCancel()
+        }
         draggingNodeProperty.set(null)
-        onCancel()
     }
 }
