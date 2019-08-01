@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view.drawables
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.app.ActiveRecordingRenderer
+import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) :
         Drawable

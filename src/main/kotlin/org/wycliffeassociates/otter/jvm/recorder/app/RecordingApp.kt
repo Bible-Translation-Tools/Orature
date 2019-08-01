@@ -21,8 +21,8 @@ import tornadofx.launch
  *
  */
 fun main(args: Array<String>) {
-    val arguments = if(args.isNotEmpty()) args else arrayOf("--wav=recording.wav")
+    val arguments = if (args.isNotEmpty()) args else arrayOf("--wav=recording.wav")
     launch<RecordingApp>(arguments)
 }
 
-class RecordingApp: App(RecorderView::class)
+class RecordingApp : App(RecorderView::class)
