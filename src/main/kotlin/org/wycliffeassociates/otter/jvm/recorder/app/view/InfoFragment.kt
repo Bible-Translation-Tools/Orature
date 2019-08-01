@@ -8,7 +8,6 @@ import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Paint
 import tornadofx.Fragment
 import tornadofx.hbox
-import tornadofx.label
 
 class InfoFragment : Fragment() {
 
@@ -40,10 +39,10 @@ class InfoFragment : Fragment() {
             root.add(InfoItem(it, cnum, false))
         }
         unit?.let {
-            root.add(InfoItem(it,unum, false))
+            root.add(InfoItem(it, unum, false))
         }
 
-        if(arrayOf(language, book, chapter, unit).all { it == null }) {
+        if (arrayOf(language, book, chapter, unit).all { it == null }) {
             val wav = app.parameters.named["wav"]
             wav?.let {
                 root.add(InfoItem(it))

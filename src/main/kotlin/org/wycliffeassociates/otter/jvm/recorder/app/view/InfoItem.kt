@@ -18,7 +18,7 @@ class InfoItem(major: String, minor: String? = null, bold: Boolean = true) : HBo
         text(major) {
             fill = Color.WHITE
             style {
-                fontWeight = if(bold) FontWeight.BOLD else FontWeight.NORMAL
+                fontWeight = if (bold) FontWeight.BOLD else FontWeight.NORMAL
                 fontSize = 24.pt
                 fontFamily = "noto sans"
             }
@@ -36,7 +36,6 @@ class InfoItem(major: String, minor: String? = null, bold: Boolean = true) : HBo
 
                 style {
                     padding = box(2.px, 5.px, 2.px, 5.px)
-
                     fontSize = 20.pt
                     fontFamily = "noto sans"
                     alignment = Pos.CENTER

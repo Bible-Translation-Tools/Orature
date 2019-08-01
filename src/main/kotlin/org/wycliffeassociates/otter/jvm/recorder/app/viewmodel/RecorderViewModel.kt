@@ -70,7 +70,7 @@ class RecorderViewModel : ViewModel() {
         waveformView.addDrawable(waveformLayer)
 
         at.start()
-        volumeTest?.let { it.start() }
+        volumeTest?.start()
     }
 
     @Volatile

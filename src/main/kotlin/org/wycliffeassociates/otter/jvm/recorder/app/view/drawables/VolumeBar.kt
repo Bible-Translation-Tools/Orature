@@ -10,7 +10,6 @@ import java.nio.ByteOrder
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
-
 const val RANGE = 32767.0
 
 class VolumeBar(stream: Observable<ByteArray>) : Drawable {
@@ -34,7 +33,6 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
     private val maxColor: Paint = Paint.valueOf("#FFE599")
     private val defaultColor: Paint = Paint.valueOf("#CF2A27")
 
-
     init {
         val bb = ByteBuffer.allocate(20480)
         bb.order(ByteOrder.LITTLE_ENDIAN)
@@ -51,7 +49,6 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
                 bb.clear()
             }
     }
-
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
         calculateDbPixelLocations(canvas.height)
@@ -92,7 +89,7 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
     }
 
     private fun getDbLevel(db: Int, height: Double): Double {
-        return ((db / (RANGE) * (height / 2.0)) + height / 2.0)
+        return (db / (RANGE) * (height / 2.0)) + height / 2.0
     }
 
     private fun setColor(currentDb: Double, ctx: GraphicsContext) {

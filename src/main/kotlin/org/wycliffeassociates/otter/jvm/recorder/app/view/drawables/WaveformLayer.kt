@@ -5,9 +5,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
-class WaveformLayer(private val renderer: ActiveRecordingRenderer) :
-        Drawable
-{
+class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
 
     override fun draw(gc: GraphicsContext, canvas: Canvas) {
         gc.stroke = Color.GRAY
@@ -17,7 +15,7 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) :
 
         //for (i in 0 until buffer.size step 4) {
         var i = 0
-        while(i < buffer.size) {
+        while (i < buffer.size) {
             gc.strokeLine(
                 buffer[i].toDouble(),
                 scaleAmplitude(buffer[i + 1].toDouble(), canvas.height),
@@ -26,10 +24,9 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) :
             )
             i += 4
         }
-
     }
 
-    private inline fun scaleAmplitude(sample: Double, height: Double) =
-        sample * (height / 65535.0) + height / 2
-
+    private fun scaleAmplitude(sample: Double, height: Double): Double {
+        return sample * (height / 65535.0) + height / 2
+    }
 }

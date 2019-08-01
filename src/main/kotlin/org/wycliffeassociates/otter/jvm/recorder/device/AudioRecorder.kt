@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 
-class AudioRecorder : IAudioRecorder{
+class AudioRecorder : IAudioRecorder {
 
     private val monitor = Object()
 
@@ -35,22 +35,26 @@ class AudioRecorder : IAudioRecorder{
     private val recordingStream = Observable.fromCallable {
         val byteArray = ByteArray(BUFFER_SIZE)
         var totalRead = 0
-            while (true) {
-                if(line.isOpen || line.available() > 0) {
-                    totalRead += line.read(byteArray, 0, byteArray.size)
-                    audioByteObservable.onNext(byteArray)
-                } else {
+        while (true) {
+            if (line.isOpen || line.available() > 0) {
+                totalRead += line.read(byteArray, 0, byteArray.size)
+                audioByteObservable.onNext(byteArray)
+            } else {
+                try {
                     synchronized(monitor) {
                         monitor.wait()
                     }
-                }
-                if (stop) {
-                    line.close()
-                    break
+                } catch (e: InterruptedException) {
+                    stop()
                 }
             }
+            if (stop) {
+                line.close()
+                break
+            }
+        }
     }.subscribeOn(Schedulers.io())
-    .subscribe()
+        .subscribe()
 
     @Synchronized //Synchronized so as to not subscribe to multiple streams on quick multipress
     override fun start() {

@@ -2,14 +2,17 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.*
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.Priority
+import javafx.scene.layout.StackPane
+import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.Drawable
 import tornadofx.add
 import tornadofx.canvas
 import tornadofx.hgrow
 import tornadofx.vgrow
-
 
 class CanvasFragment(color: String = "#000000") : StackPane() {
 
@@ -23,7 +26,6 @@ class CanvasFragment(color: String = "#000000") : StackPane() {
 
     init {
         background = Background(BackgroundFill(Paint.valueOf(color), CornerRadii.EMPTY, Insets.EMPTY))
-
         alignment = Pos.TOP_LEFT
 
         add(cvs)
@@ -33,9 +35,7 @@ class CanvasFragment(color: String = "#000000") : StackPane() {
 
         cvs.widthProperty().addListener { _ -> draw() }
         cvs.heightProperty().addListener { _ -> draw() }
-    }
 
-    init {
         draw()
     }
 
@@ -46,7 +46,7 @@ class CanvasFragment(color: String = "#000000") : StackPane() {
     fun draw() {
         ctx.clearRect(0.0, 0.0, cvs.width, cvs.height)
         var i = 0
-        while(i < drawables.size) {
+        while (i < drawables.size) {
             drawables[i].draw(ctx, cvs)
             i++
         }

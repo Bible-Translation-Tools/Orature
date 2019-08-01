@@ -11,7 +11,6 @@ import tornadofx.gridpane
 import tornadofx.hgrow
 import tornadofx.vgrow
 
-
 class RecordingVisualizerFragment : Fragment() {
 
     private val vm: RecorderViewModel by inject()

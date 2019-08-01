@@ -16,7 +16,7 @@ import tornadofx.*
 
 class ControlFragment : Fragment() {
 
-    val vm : RecorderViewModel by inject()
+    val vm: RecorderViewModel by inject()
 
     val timer = label {
         textProperty().bind(vm.timerTextProperty)
@@ -25,14 +25,11 @@ class ControlFragment : Fragment() {
     val recordBtn = MaterialIconView(MaterialIcon.MIC, "48px")
 
     override val root = borderpane {
+        background = Background(BackgroundFill(Paint.valueOf("#C2185B"), CornerRadii.EMPTY, Insets.EMPTY))
 
         left {
             vbox {
                 add(timer)
-                timer.apply {
-                    fontProperty().set(Font.font("noto sans", 32.0))
-                    textFill = Color.WHITE
-                }
                 alignment = Pos.CENTER_LEFT
                 padding = Insets(10.0, 0.0, 10.0, 10.0)
             }
@@ -40,33 +37,44 @@ class ControlFragment : Fragment() {
         center {
             hgrow = Priority.ALWAYS
             add(recordBtn)
-            recordBtn.apply { fill = Color.WHITE }
-
-            recordBtn.size = "48px"
-
-            recordBtn.setOnMouseClicked {
-                if(!vm.isRecording) {
-                    recordBtn.setIcon(MaterialIcon.PAUSE_CIRCLE_OUTLINE)
-                } else {
-                    recordBtn.setIcon(MaterialIcon.MIC)
-                }
-                vm.toggle()
-            }
         }
         right {
             hbox {
-                add(saveBtn)
-                saveBtn.apply {
-                    fill = Color.WHITE
-                    setOnMouseClicked {
-                        vm.save()
-                    }
-                }
-                saveBtn.visibleProperty().bind(vm.canSaveProperty)
                 padding = Insets(10.0, 10.0, 10.0, 0.0)
                 alignment = Pos.CENTER_RIGHT
+                add(saveBtn)
             }
         }
-        background = Background(BackgroundFill(Paint.valueOf("#C2185B"), CornerRadii.EMPTY, Insets.EMPTY))
+    }
+
+    init {
+        timer.apply {
+            fontProperty().set(Font.font("noto sans", 32.0))
+            textFill = Color.WHITE
+        }
+
+        recordBtn.apply {
+            fill = Color.WHITE
+            setOnMouseClicked {
+                toggleRecording()
+            }
+        }
+
+        saveBtn.apply {
+            fill = Color.WHITE
+            visibleProperty().bind(vm.canSaveProperty)
+            setOnMouseClicked {
+                vm.save()
+            }
+        }
+    }
+
+    private fun toggleRecording() {
+        if (!vm.isRecording) {
+            recordBtn.setIcon(MaterialIcon.PAUSE_CIRCLE_OUTLINE)
+        } else {
+            recordBtn.setIcon(MaterialIcon.MIC)
+        }
+        vm.toggle()
     }
 }
