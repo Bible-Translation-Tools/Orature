@@ -7,7 +7,6 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.widgets.highlightablebutton.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Pos
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.RowConstraints
@@ -15,11 +14,17 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordableFragment
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
+import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTarget
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
-class RecordResourceFragment(recordableViewModel: RecordableViewModel) : RecordableFragment(recordableViewModel) {
+class RecordResourceFragment(
+    recordableViewModel: RecordableViewModel
+) : RecordableFragment(
+    recordableViewModel,
+    DragTarget.Type.RESOURCE_TAKE
+) {
     val formattedTextProperty = SimpleStringProperty()
 
     private val newTakeButton =
@@ -38,26 +43,8 @@ class RecordResourceFragment(recordableViewModel: RecordableViewModel) : Recorda
     private val leftRegion = VBox().apply {
         vgrow = Priority.ALWAYS
 
-        //selected take and drag target
-        stackpane {
-            // drag target glow
-            add(dragComponents
-                .dragTargetBottom {
-                    addClass(RecordResourceStyles.dragTarget, RecordResourceStyles.glow)
-                })
-            add(dragComponents
-                .selectedTakeContainer {
-                    addClass(RecordResourceStyles.selectedTakePlaceholder)
-                    vgrow = Priority.NEVER
-                    text(messages["dragTakeHere"])
-                })
-            add(dragComponents
-                .dragTargetTop {
-                    addClass(RecordResourceStyles.dragTarget)
-                    alignment = Pos.CENTER
-                    add(MaterialIconView(MaterialIcon.ADD, "30px"))
-                })
-        }
+        add(dragTarget)
+
         scrollpane {
             addClass(RecordResourceStyles.contentScrollPane)
             isFitToWidth = true

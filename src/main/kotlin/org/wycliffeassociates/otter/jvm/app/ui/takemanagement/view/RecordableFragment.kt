@@ -6,7 +6,6 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.Point2D
-import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.input.MouseEvent
@@ -17,13 +16,17 @@ import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
+import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTarget
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-abstract class RecordableFragment(protected val recordableViewModel: RecordableViewModel) : Fragment() {
+abstract class RecordableFragment(
+    protected val recordableViewModel: RecordableViewModel,
+    dragTargetType: DragTarget.Type
+) : Fragment() {
 
     abstract fun createTakeCard(take: Take): TakeCard
 
@@ -36,47 +39,16 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
-    // This inner class better organizes the components that need to be added to the derived class
-    /** Use the provided functions to add these components to your derived class */
-    inner class DragComponents {
-        private val dragTargetBottom = VBox().apply {
-            bindVisibleToDraggingNodeProperty()
-        }
-
-        fun dragTargetBottom(runOnNode: (VBox.() -> Unit)? = null): Node =
-            dragTargetBottom.apply {
-            runOnNode?.let { it() }
-        }
-
-        private val dragTargetTop = VBox().apply {
-            bindVisibleToDraggingNodeProperty()
-        }
-
-        fun dragTargetTop(runOnNode: (VBox.() -> Unit)? = null): Node = dragTargetTop.apply {
-            runOnNode?.let { it() }
-        }
-
-        fun selectedTakeContainer(runOnPlaceHolder: Node.() -> Unit) = VBox().apply {
-            alignment = Pos.CENTER
-
-            val placeholder = vbox {
-                runOnPlaceHolder()
-            }
-
-            recordableViewModel.selectedTakeProperty.onChangeAndDoNow {
-                clear()
-                when (it) {
-                    null -> add(placeholder)
-                    /* We can't just add the node being dragged, since the selected take might have just been
-                        loaded from the database */
-                    else -> add(createTakeCard(it))
-                }
-            }
+    val dragTarget = DragTarget(
+        type = dragTargetType,
+        dragBinding = draggingNodeProperty.booleanBinding{it != null}
+    ).apply {
+        recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
+            /* We can't just add the node being dragged, since the selected take might have just been
+                loaded from the database */
+            this.selectedNodeProperty.value = take?.let { createTakeCard(take) }
         }
     }
-
-    protected val dragComponents = DragComponents()
-    private val dragTargetTop = dragComponents.dragTargetTop()
 
     private val dragContainer = VBox().apply {
         draggingNodeProperty.onChange { draggingNode ->
@@ -162,10 +134,6 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
         }
     }
 
-    private fun Node.bindVisibleToDraggingNodeProperty() {
-        visibleProperty().bind(draggingNodeProperty.booleanBinding { it != null })
-    }
-
     private fun getPointInRoot(node: Node, pointInNode: Point2D): Point2D {
         return when (node) {
             root -> pointInNode
@@ -202,7 +170,7 @@ abstract class RecordableFragment(protected val recordableViewModel: RecordableV
     }
 
     private fun isDraggedToTarget(evt: MouseEvent): Boolean =
-        dragTargetTop.contains(dragTargetTop.sceneToLocal(evt.sceneX, evt.sceneY))
+        dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY))
 
     private fun completeDrag(evt: CompleteDragEvent) {
         if (isDraggedToTarget(evt.mouseEvent)) {

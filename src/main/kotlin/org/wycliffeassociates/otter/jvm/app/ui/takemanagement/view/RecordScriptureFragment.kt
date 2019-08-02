@@ -1,14 +1,13 @@
 package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.control.ContentDisplay
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
+import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTarget
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
 import tornadofx.*
 
@@ -18,7 +17,7 @@ private class RecordableViewModelProvider: Component() {
 }
 
 class RecordScriptureFragment
-    : RecordableFragment(RecordableViewModelProvider().get()) {
+    : RecordableFragment(RecordableViewModelProvider().get(), DragTarget.Type.SCRIPTURE_TAKE) {
 
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
@@ -42,25 +41,8 @@ class RecordScriptureFragment
                     }
                     enableWhen(recordScriptureViewModel.hasPrevious)
                 }
-                //selected take and drag target
-                stackpane {
-                    // drag target glow
-                    add(dragComponents
-                        .dragTargetBottom {
-                            addClass(RecordScriptureStyles.dragTarget, RecordScriptureStyles.glow)
-                        })
-                    add(dragComponents
-                        .selectedTakeContainer {
-                            addClass(TakeCardStyles.scriptureTakeCardPlaceholder)
-                            vgrow = Priority.NEVER
-                        })
-                    add(dragComponents
-                        .dragTargetTop {
-                            addClass(RecordScriptureStyles.dragTarget)
-                            alignment = Pos.CENTER
-                            add(MaterialIconView(MaterialIcon.ADD, "30px"))
-                        })
-                }
+                add(dragTarget)
+
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
