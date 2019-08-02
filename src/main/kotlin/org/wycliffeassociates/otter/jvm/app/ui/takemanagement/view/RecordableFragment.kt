@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTarget
+import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.*
@@ -25,7 +25,7 @@ import tornadofx.*
 
 abstract class RecordableFragment(
     protected val recordableViewModel: RecordableViewModel,
-    dragTargetType: DragTarget.Type
+    dragTargetBuilder: DragTargetBuilder
 ) : Fragment() {
 
     abstract fun createTakeCard(take: Take): TakeCard
@@ -39,16 +39,16 @@ abstract class RecordableFragment(
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
-    val dragTarget = DragTarget(
-        type = dragTargetType,
-        dragBinding = draggingNodeProperty.booleanBinding{it != null}
-    ).apply {
-        recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
-            /* We can't just add the node being dragged, since the selected take might have just been
-                loaded from the database */
-            this.selectedNodeProperty.value = take?.let { createTakeCard(take) }
-        }
-    }
+    val dragTarget =
+        dragTargetBuilder
+            .build(draggingNodeProperty.booleanBinding { it != null })
+            .apply {
+                recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
+                    /* We can't just add the node being dragged, since the selected take might have just been
+                        loaded from the database */
+                    this.selectedNodeProperty.value = take?.let { createTakeCard(take) }
+                }
+            }
 
     private val dragContainer = VBox().apply {
         draggingNodeProperty.onChange { draggingNode ->

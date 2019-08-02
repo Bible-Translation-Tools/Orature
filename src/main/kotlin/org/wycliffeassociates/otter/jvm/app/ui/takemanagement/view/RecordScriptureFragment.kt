@@ -7,7 +7,7 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTarget
+import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
 import tornadofx.*
 
@@ -16,9 +16,10 @@ private class RecordableViewModelProvider: Component() {
     fun get() = recordScriptureViewModel.recordableViewModel
 }
 
-class RecordScriptureFragment
-    : RecordableFragment(RecordableViewModelProvider().get(), DragTarget.Type.SCRIPTURE_TAKE) {
-
+class RecordScriptureFragment : RecordableFragment(
+    RecordableViewModelProvider().get(),
+    DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
+) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
     init {

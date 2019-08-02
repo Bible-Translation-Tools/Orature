@@ -14,7 +14,7 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordableFragment
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTarget
+import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
@@ -23,7 +23,7 @@ class RecordResourceFragment(
     recordableViewModel: RecordableViewModel
 ) : RecordableFragment(
     recordableViewModel,
-    DragTarget.Type.RESOURCE_TAKE
+    DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
 ) {
     val formattedTextProperty = SimpleStringProperty()
 
