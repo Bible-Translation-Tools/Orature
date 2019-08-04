@@ -149,10 +149,10 @@ abstract class RecordableFragment(
         dragContainer.relocate(newX, newY)
     }
 
-    private fun startDrag(evt: StartDragEvent) {
-        if (evt.take != recordableViewModel.selectedTakeProperty.value) {
-            val draggingNode = evt.draggingNode
-            val mouseEvent = evt.mouseEvent
+    private fun startDrag(event: StartDragEvent) {
+        if (event.take != recordableViewModel.selectedTakeProperty.value) {
+            val draggingNode = event.draggingNode
+            val mouseEvent = event.mouseEvent
             dragStartDelta = Point2D(mouseEvent.x, mouseEvent.y)
             val pointInRoot = getPointInRoot(draggingNode, Point2D(mouseEvent.x, mouseEvent.y))
 
@@ -162,21 +162,21 @@ abstract class RecordableFragment(
         }
     }
 
-    private fun animateDrag(evt: AnimateDragEvent) {
+    private fun animateDrag(event: AnimateDragEvent) {
         draggingNodeProperty.value?.let { draggingNode ->
-            val pointInRoot = getPointInRoot(draggingNode, Point2D(evt.mouseEvent.x, evt.mouseEvent.y))
+            val pointInRoot = getPointInRoot(draggingNode, Point2D(event.mouseEvent.x, event.mouseEvent.y))
             relocateDragContainer(pointInRoot)
         }
     }
 
-    private fun isDraggedToTarget(evt: MouseEvent): Boolean =
-        dragTarget.contains(dragTarget.sceneToLocal(evt.sceneX, evt.sceneY))
+    private fun isDraggedToTarget(event: MouseEvent): Boolean =
+        dragTarget.contains(dragTarget.sceneToLocal(event.sceneX, event.sceneY))
 
-    private fun completeDrag(evt: CompleteDragEvent) {
-        if (isDraggedToTarget(evt.mouseEvent)) {
-            recordableViewModel.selectTake(evt.take)
+    private fun completeDrag(event: CompleteDragEvent) {
+        if (isDraggedToTarget(event.mouseEvent)) {
+            recordableViewModel.selectTake(event.take)
         } else {
-            evt.onCancel()
+            event.onCancel()
         }
         draggingNodeProperty.set(null)
     }

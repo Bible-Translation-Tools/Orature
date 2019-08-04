@@ -19,11 +19,12 @@ class ResourceTabPaneFragment : Fragment() {
         recordableTab(ContentType.BODY, 1)
     )
 
-    private fun recordableTab(contentType: ContentType, sort: Int) =
-        RecordableTab(
+    private fun recordableTab(contentType: ContentType, sort: Int): RecordableTab {
+        return RecordableTab(
             viewModel = viewModel.contentTypeToViewModelMap.getNotNull(contentType),
             parent = tabPane,
             sort = sort,
             onTabSelect = viewModel::onTabSelect
-    )
+        )
+    }
 }

@@ -19,7 +19,9 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEven
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 
-open class RecordableViewModel(private val audioPluginViewModel: AudioPluginViewModel) {
+open class RecordableViewModel(
+    private val audioPluginViewModel: AudioPluginViewModel
+) {
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 

@@ -13,7 +13,7 @@ import tornadofx.*
 
 class TakesListView(
     items: ObservableList<Take>,
-    audioPlayer: () -> IAudioPlayer,
+    audioPlayer: IAudioPlayer,
     lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?>
 ) : ListView<Take>(items) {
     init {
@@ -22,7 +22,7 @@ class TakesListView(
                 and we don't ever add it back if it was made the selected take. (This is because we create a
                 new take card if it was selected.)
              */
-            graphic = resourcetakecard(it, audioPlayer(), lastPlayOrPauseEvent.toObservable())
+            graphic = resourcetakecard(it, audioPlayer, lastPlayOrPauseEvent.toObservable())
 
         }
         vgrow = Priority.ALWAYS
