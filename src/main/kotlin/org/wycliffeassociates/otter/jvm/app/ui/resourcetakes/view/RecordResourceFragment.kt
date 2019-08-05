@@ -81,8 +81,7 @@ class RecordResourceFragment(
                 add(
                     TakesListView(
                         items = recordableViewModel.alternateTakes,
-                        audioPlayer = audioPluginViewModel.audioPlayer(),
-                        lastPlayOrPauseEvent = lastPlayOrPauseEvent
+                        createTakeNode = ::createTakeCard
                     )
                 )
             }
