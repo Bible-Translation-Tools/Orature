@@ -40,7 +40,8 @@ class TakeCard(
         fireEvent(
             EditTakeEvent(take) {
                 player.load(take.file)
-            })
+            }
+        )
     }
 
     fun fireDeleteTakeEvent() {

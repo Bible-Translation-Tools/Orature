@@ -68,14 +68,16 @@ abstract class RecordableFragment(
 
         createSnackBar(this)
 
-        add(mainContainer.apply {
-            anchorpaneConstraints {
-                leftAnchor = 0.0
-                rightAnchor = 0.0
-                bottomAnchor = 0.0
-                topAnchor = 0.0
+        add(mainContainer
+            .apply {
+                anchorpaneConstraints {
+                    leftAnchor = 0.0
+                    rightAnchor = 0.0
+                    bottomAnchor = 0.0
+                    topAnchor = 0.0
+                }
             }
-        })
+        )
         add(dragContainer)
     }
 
@@ -110,7 +112,8 @@ abstract class RecordableFragment(
                     false,
                     EventHandler {
                         audioPluginViewModel.addPlugin(true, false)
-                    })
+                    }
+                )
             )
         }
     }

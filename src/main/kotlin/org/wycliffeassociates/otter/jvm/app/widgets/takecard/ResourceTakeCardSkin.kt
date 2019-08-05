@@ -26,17 +26,21 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 label("%02d.".format(control.take.number), TakeCardStyles.draggingIcon()) {
                     addClass(TakeCardStyles.takeNumberLabel)
                 }
-                add(control.simpleAudioPlayer.apply {
-                    addClass(TakeCardStyles.takeProgressBar)
-                    vgrow = Priority.ALWAYS
-                    hgrow = Priority.ALWAYS
-                })
+                add(control.simpleAudioPlayer
+                    .apply {
+                        addClass(TakeCardStyles.takeProgressBar)
+                        vgrow = Priority.ALWAYS
+                        hgrow = Priority.ALWAYS
+                    }
+                )
             }
 
             hbox {
-                add(editButton.apply {
-                    graphic = MaterialIconView(MaterialIcon.EDIT, "18px")
-                })
+                add(editButton
+                    .apply {
+                        graphic = MaterialIconView(MaterialIcon.EDIT, "18px")
+                    }
+                )
                 alignment = Pos.CENTER
                 hbox {
                     hgrow = Priority.ALWAYS
@@ -45,9 +49,11 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                     add(playButton)
                     add(JFXButton("", MaterialIconView(MaterialIcon.FAST_FORWARD, "18px")))
                 }
-                add(deleteButton.apply {
-                    graphic = MaterialIconView(MaterialIcon.DELETE, "18px")
-                })
+                add(deleteButton
+                    .apply {
+                        graphic = MaterialIconView(MaterialIcon.DELETE, "18px")
+                    }
+                )
             }
         }
     }
