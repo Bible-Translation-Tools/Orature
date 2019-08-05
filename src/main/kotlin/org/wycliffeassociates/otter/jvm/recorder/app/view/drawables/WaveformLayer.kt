@@ -5,6 +5,8 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
+private const val USHORT_SIZE = 65535.0
+
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
 
     override fun draw(gc: GraphicsContext, canvas: Canvas) {
@@ -12,21 +14,24 @@ class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
         gc.lineWidth = 1.0
 
         val buffer = renderer.floatBuffer.array
-
-        //for (i in 0 until buffer.size step 4) {
         var i = 0
+        var x = 0.0
         while (i < buffer.size) {
             gc.strokeLine(
-                buffer[i].toDouble(),
-                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height),
-                buffer[i + 2].toDouble(),
-                scaleAmplitude(buffer[i + 3].toDouble(), canvas.height)
+                x,
+                scaleAmplitude(buffer[i].toDouble(), canvas.height),
+                x,
+                scaleAmplitude(buffer[i + 1].toDouble(), canvas.height)
             )
-            i += 4
+            i += 2
+            x += 1
         }
     }
 
+    // 16 bit audio range is -32,768 to 32,767, or 65535 (size of unsigned short)
+    // This scales the sample to fit within the canvas height, and moves the
+    // sample down (-y translate) by half the height
     private fun scaleAmplitude(sample: Double, height: Double): Double {
-        return sample * (height / 65535.0) + height / 2
+        return height * (sample / USHORT_SIZE) + height / 2
     }
 }
