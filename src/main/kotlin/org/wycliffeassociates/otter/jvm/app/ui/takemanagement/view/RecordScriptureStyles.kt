@@ -58,12 +58,11 @@ class RecordScriptureStyles : Stylesheet() {
             vgap = 16.px
             hgap = 16.px
             padding = box(5.0.px)
-            prefHeight = 300.px
         }
 
         pageTop {
-                minHeight = 400.px
-                maxHeight = minHeight
+            minHeight = 400.px
+            maxHeight = minHeight
         }
 
         scrollpane {
