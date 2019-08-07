@@ -24,16 +24,16 @@ class MainScreenViewModel : ViewModel() {
     val selectedChunkBody = SimpleStringProperty()
 
     init {
-        workbookViewModel.activeWorkbookProperty.onChange {
-            it?.let { wb -> projectSelected(wb) }
+        workbookViewModel.activeWorkbookProperty.onChange { workbook ->
+            workbook?.let { projectSelected(workbook) }
         }
 
-        workbookViewModel.activeChapterProperty.onChange {
-            it?.let { chapter -> chapterSelected(chapter) }
+        workbookViewModel.activeChapterProperty.onChange { chapter ->
+            chapter?.let { chapterSelected(chapter) }
         }
 
-        workbookViewModel.activeChunkProperty.onChange {
-            it?.let { chunk -> chunkSelected(chunk) }
+        workbookViewModel.activeChunkProperty.onChange { chunk ->
+            chunk?.let { chunkSelected(chunk) }
         }
     }
 
@@ -59,7 +59,7 @@ class MainScreenViewModel : ViewModel() {
     }
 
     private fun setActiveChapterText(chapter: Chapter) {
-        selectedChapterTitle.set(ContentLabel.CHAPTER.value.toUpperCase())
+        selectedChapterTitle.set(messages["chapter"].toUpperCase())
         selectedChapterBody.set(chapter.title)
     }
 

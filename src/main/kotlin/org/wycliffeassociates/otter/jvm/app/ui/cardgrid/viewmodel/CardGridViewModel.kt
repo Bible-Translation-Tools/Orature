@@ -71,9 +71,9 @@ class CardGridViewModel: ViewModel() {
             }
             .observeOnFx()
             .toList()
-            .doOnSuccess {
-                allContent.setAll(it)
-            }.subscribe()
+            .subscribe { list: List<CardData> ->
+                allContent.setAll(list)
+            }
     }
 
     fun onCardSelection(cardData: CardData){
@@ -95,11 +95,11 @@ class CardGridViewModel: ViewModel() {
             }
             .observeOnFx()
             .toList()
-            .doOnSuccess {
+            .subscribe { list: List<CardData> ->
                 // TODO
                 // setAll is causing the UI to hang, probably because node structure is complex. If "loading" is
                 // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
-                allContent.setAll(it)
-            }.subscribe()
+                allContent.setAll(list)
+            }
         }
 }
