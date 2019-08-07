@@ -21,7 +21,6 @@ import tornadofx.getValue
 import tornadofx.setValue
 import java.io.File
 
-
 class RecorderViewModel : ViewModel() {
 
     val wav = WavFile(File(app.parameters.named["wav"]))
@@ -65,7 +64,11 @@ class RecorderViewModel : ViewModel() {
     }
 
     fun onViewReady() {
-        val renderer = ActiveRecordingRenderer(recorder.getAudioStream(), waveformView.width.toInt())
+        val renderer = ActiveRecordingRenderer(
+            recorder.getAudioStream(),
+            waveformView.width.toInt(),
+            secondsOnScreen = 10
+        )
         val waveformLayer = WaveformLayer(renderer)
         waveformView.addDrawable(waveformLayer)
 
