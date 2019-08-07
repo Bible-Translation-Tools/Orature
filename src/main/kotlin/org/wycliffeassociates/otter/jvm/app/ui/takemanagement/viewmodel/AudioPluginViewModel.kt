@@ -22,15 +22,15 @@ class AudioPluginViewModel: ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    fun record(recordable: Recordable): Single<RecordTake.Result> = recordTake
-        .record(
+    fun record(recordable: Recordable): Single<RecordTake.Result> =
+        recordTake.record(
             recordable.audio,
             workbookViewModel.projectAudioDirectory,
             createFileNamer(recordable)
         )
 
-    private fun createFileNamer(recordable: Recordable) = WorkbookFileNamerBuilder
-        .createFileNamer(
+    private fun createFileNamer(recordable: Recordable) =
+        WorkbookFileNamerBuilder.createFileNamer(
             workbookViewModel.workbook,
             workbookViewModel.chapter,
             workbookViewModel.chunk,
