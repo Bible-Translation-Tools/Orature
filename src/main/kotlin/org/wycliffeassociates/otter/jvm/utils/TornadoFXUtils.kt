@@ -23,27 +23,23 @@ fun <T> ObservableValue<T>.onChangeAndDoNow(op: (T?) -> Unit) {
  * makes it safe to run unit tests when the FX platform is not running.
  */
 fun <T> Observable<T>.observeOnFxSafe(): Observable<T> {
-    return when (IsFXInitialized.isInitialized()) {
+    return when (IsFXInitialized.isInitialized) {
         true -> observeOnFx()
         false -> this
     }
 }
 
 private object IsFXInitialized {
-    private var mIsInitialized: Boolean? = null
-    fun isInitialized(): Boolean {
-        mIsInitialized?.let {
-            return it
-        } ?: return testIsInitialized()
-    }
+    // Since object declarations are initialized lazily, isInitialized will be computed when
+    // IsFXInitialized is accessed for the first time
+    val isInitialized: Boolean = testIsInitialized()
+
     private fun testIsInitialized(): Boolean {
         try {
             Platform.runLater{}
         } catch (e: IllegalStateException) {
-            mIsInitialized = false
             return false
         }
-        mIsInitialized = true
         return true
     }
 }
