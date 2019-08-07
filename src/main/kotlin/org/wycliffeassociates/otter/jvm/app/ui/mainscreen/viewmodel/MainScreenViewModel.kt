@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -24,8 +23,6 @@ class MainScreenViewModel : ViewModel() {
     val selectedChunkTitle = SimpleStringProperty()
     val selectedChunkBody = SimpleStringProperty()
 
-    private val takesPageDocked = SimpleBooleanProperty(false)
-
     init {
         workbookViewModel.activeWorkbookProperty.onChange {
             it?.let { wb -> projectSelected(wb) }
@@ -37,7 +34,6 @@ class MainScreenViewModel : ViewModel() {
 
         workbookViewModel.activeChunkProperty.onChange {
             it?.let { chunk -> chunkSelected(chunk) }
-                ?: takesPageDocked.set(false)
         }
     }
 
@@ -54,10 +50,7 @@ class MainScreenViewModel : ViewModel() {
     private fun chunkSelected(chunk: Chunk) {
         setActiveChunkText(chunk)
 
-        if(takesPageDocked.value == false) {
-            find<MainScreenView>().activeFragment.dock<TakeManagementFragment>()
-        }
-        takesPageDocked.set(true)
+        find<MainScreenView>().activeFragment.dock<TakeManagementFragment>()
     }
 
     private fun setActiveChunkText(chunk: Chunk) {
