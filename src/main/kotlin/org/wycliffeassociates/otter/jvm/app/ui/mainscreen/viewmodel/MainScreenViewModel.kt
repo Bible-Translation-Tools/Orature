@@ -54,7 +54,7 @@ class MainScreenViewModel : ViewModel() {
     }
 
     private fun setActiveChunkText(chunk: Chunk) {
-        selectedChunkTitle.set(ContentLabel.of(chunk.contentType).value.toUpperCase())
+        selectedChunkTitle.set(messages["verse"].toUpperCase())
         selectedChunkBody.set(chunk.start.toString())
     }
 
