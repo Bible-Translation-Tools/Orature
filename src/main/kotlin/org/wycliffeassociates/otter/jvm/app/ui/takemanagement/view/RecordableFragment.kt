@@ -35,7 +35,7 @@ abstract class RecordableFragment(
     /** Add custom components to this container, rather than root*/
     protected val mainContainer = VBox()
 
-    protected val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?> = SimpleObjectProperty()
+    protected val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent> = SimpleObjectProperty()
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
 

@@ -17,7 +17,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.PlayOrPauseE
 class TakeCard(
     val take: Take,
     private val player: IAudioPlayer,
-    playOrPauseEventObservable: Observable<PlayOrPauseEvent?>
+    playOrPauseEventObservable: Observable<PlayOrPauseEvent>
 ) : Control() {
     val isAudioPlayingProperty = SimpleBooleanProperty()
     val simpleAudioPlayer = simpleaudioplayer(take.file, player) {
@@ -66,7 +66,7 @@ class TakeCard(
         }
     }
 
-    private fun subscribeToOtherPlayEvents(playOrPauseEventObservable: Observable<PlayOrPauseEvent?>) {
+    private fun subscribeToOtherPlayEvents(playOrPauseEventObservable: Observable<PlayOrPauseEvent>) {
         val sub = playOrPauseEventObservable
             .filter { it is PlayEvent }
             .filter { it.target != this }
@@ -84,7 +84,7 @@ class TakeCard(
 private fun createTakeCard(
     take: Take,
     player: IAudioPlayer,
-    playOrPauseEventObservable: Observable<PlayOrPauseEvent?>,
+    playOrPauseEventObservable: Observable<PlayOrPauseEvent>,
     skinFactory: (TakeCard) -> Skin<TakeCard>,
     init: TakeCard.() -> Unit = {}
 ): TakeCard {
@@ -97,7 +97,7 @@ private fun createTakeCard(
 fun scripturetakecard(
     take: Take,
     player: IAudioPlayer,
-    playOrPauseEventObservable: Observable<PlayOrPauseEvent?>,
+    playOrPauseEventObservable: Observable<PlayOrPauseEvent>,
     init: TakeCard.() -> Unit = {}
 ): TakeCard {
     return createTakeCard(take, player, playOrPauseEventObservable, { ScriptureTakeCardSkin(it) }, init)
@@ -106,7 +106,7 @@ fun scripturetakecard(
 fun resourcetakecard(
     take: Take,
     player: IAudioPlayer,
-    playOrPauseEventObservable: Observable<PlayOrPauseEvent?>,
+    playOrPauseEventObservable: Observable<PlayOrPauseEvent>,
     init: TakeCard.() -> Unit = {}
 ): TakeCard {
     return createTakeCard(take, player, playOrPauseEventObservable, { ResourceTakeCardSkin(it) }, init)

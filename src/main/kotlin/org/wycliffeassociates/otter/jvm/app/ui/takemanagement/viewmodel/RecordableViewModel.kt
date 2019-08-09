@@ -54,12 +54,11 @@ open class RecordableViewModel(
             audioPluginViewModel
                 .record(it)
                 .observeOnFx()
-                .subscribe { result ->
+                .subscribe { result: RecordTake.Result ->
                     showPluginActive = false
                     when (result) {
                         RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
                         RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {}
-                        null -> {} // This cannot happen but the compiler complains if null branch does not exist
                     }
                 }
         } ?: throw IllegalStateException("Recordable is null")
@@ -71,12 +70,11 @@ open class RecordableViewModel(
         audioPluginViewModel
             .edit(editTakeEvent.take)
             .observeOnFx()
-            .subscribe { result ->
+            .subscribe { result: EditTake.Result ->
                 showPluginActive = false
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
-                    null -> {} // This cannot happen but the compiler complains if null branch does not exist
                 }
             }
     }

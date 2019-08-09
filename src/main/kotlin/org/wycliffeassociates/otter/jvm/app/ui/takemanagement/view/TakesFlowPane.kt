@@ -19,7 +19,7 @@ import tornadofx.FX.Companion.messages
 class TakesFlowPane(
     alternateTakes: ObservableList<Take>,
     private val audioPlayer: () -> IAudioPlayer,
-    private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent?>,
+    private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent>,
     private val recordNewTake: () -> Unit
 ): FlowPane() {
     init {
