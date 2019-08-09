@@ -13,6 +13,8 @@ class AudioRecorder : IAudioRecorder {
 
     @Volatile
     private var stop = false
+    @Volatile
+    private var pause = false
 
     companion object {
         val SAMPLE_RATE = 44100F // Hz
@@ -32,32 +34,36 @@ class AudioRecorder : IAudioRecorder {
 
     private var line = AudioSystem.getTargetDataLine(FORMAT)
     private val audioByteObservable = PublishSubject.create<ByteArray>()
-    private val recordingStream = Observable.fromCallable {
-        val byteArray = ByteArray(BUFFER_SIZE)
-        var totalRead = 0
-        while (true) {
-            if (line.isOpen || line.available() > 0) {
-                totalRead += line.read(byteArray, 0, byteArray.size)
-                audioByteObservable.onNext(byteArray)
-            } else {
-                try {
-                    synchronized(monitor) {
-                        monitor.wait()
+    private val recordingStream = Observable
+        .fromCallable {
+            val byteArray = ByteArray(BUFFER_SIZE)
+            var totalRead = 0
+            while (true) {
+                if (line.isOpen || line.available() > 0) {
+                    totalRead += line.read(byteArray, 0, byteArray.size)
+                    audioByteObservable.onNext(byteArray)
+                } else {
+                    try {
+                        synchronized(monitor) {
+                            monitor.wait()
+                        }
+                    } catch (e: InterruptedException) {
+                        stop()
                     }
-                } catch (e: InterruptedException) {
-                    stop()
+                }
+                if (stop || pause) {
+                    line.close()
+                    if (stop) break
                 }
             }
-            if (stop) {
-                line.close()
-                break
-            }
+            stop = false
         }
-    }.subscribeOn(Schedulers.io())
+        .subscribeOn(Schedulers.io())
         .subscribe()
 
-    @Synchronized //Synchronized so as to not subscribe to multiple streams on quick multipress
+    @Synchronized // Synchronized so as to not subscribe to multiple streams on quick multipress
     override fun start() {
+        pause = false
         line.open(FORMAT)
         line.start()
         synchronized(monitor) {
@@ -67,12 +73,14 @@ class AudioRecorder : IAudioRecorder {
 
     override fun pause() {
         line.stop()
-        line.close()
+        pause = true
     }
 
     override fun stop() {
         line.stop()
         stop = true
+
+        // wakes up the recording thread to allow it to close
         synchronized(monitor) {
             monitor.notify()
         }
