@@ -6,13 +6,14 @@ import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordRes
 import tornadofx.*
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 
-class RecordResourceView : View() {
+class RecordResourceFragment : Fragment() {
     private val viewModel: RecordResourceViewModel by inject()
     private val tabPane = ChromeableTabPane()
 
     override val root = tabPane
 
     // The tabs will add or remove themselves from the tabPane when their view model's 'recordable' property changes
+    @Suppress("unused")
     private val tabs: List<RecordableTab> = listOf(
         recordableTab(ContentType.TITLE, 0),
         recordableTab(ContentType.BODY, 1)

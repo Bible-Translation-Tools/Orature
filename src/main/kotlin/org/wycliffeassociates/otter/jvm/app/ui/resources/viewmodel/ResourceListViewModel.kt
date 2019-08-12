@@ -6,6 +6,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordRes
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.ResourceGroupCardItemList
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.resourceGroupCardItem
+import org.wycliffeassociates.otter.jvm.utils.observeOnFxSafe
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -37,6 +38,7 @@ class ResourceListViewModel : ViewModel() {
                 resourceGroupCardItem(it, workbookViewModel.resourceSlug, onSelect = this::navigateToTakesPage)
             }
             .buffer(2) // Buffering by 2 prevents the list UI from jumping while groups are loading
+            .observeOnFxSafe()
             .subscribe {
                 resourceGroupCardItemList.addAll(it)
             }

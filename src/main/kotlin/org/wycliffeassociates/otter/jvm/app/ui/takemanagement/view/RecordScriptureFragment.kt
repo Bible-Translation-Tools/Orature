@@ -16,19 +16,20 @@ import javafx.scene.layout.FlowPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.TakeManagementViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.OldTakeCard
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.oldtakecard
 import tornadofx.*
 
-class TakeManagementFragment : Fragment() {
-    private val takeManagementViewModel: TakeManagementViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+class RecordScriptureFragment : Fragment() {
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
     // The currently selected take
     private var selectedTakeProperty = SimpleObjectProperty<OldTakeCard>()
@@ -45,7 +46,7 @@ class TakeManagementFragment : Fragment() {
     private var takesFlowPane = createTakesFlowPane()
 
     init {
-        importStylesheet<TakeManagementStyles>()
+        importStylesheet<RecordScriptureStyles>()
         takesFlowPane.children.add(createRecordCard())
     }
 
@@ -58,12 +59,17 @@ class TakeManagementFragment : Fragment() {
             topAnchor = 0.0
         }
         addClass(AppStyles.appBackground)
-        addClass(TakeManagementStyles.tpanelStyle)
+        addClass(RecordScriptureStyles.tpanelStyle)
         val snackBar = JFXSnackbar(this)
-        takeManagementViewModel.snackBarObservable.subscribe { shouldShow ->
+        recordableViewModel.snackBarObservable.subscribe { shouldShow ->
             snackBar.enqueue(
-                    JFXSnackbar.SnackbarEvent(messages["noRecorder"], messages["addPlugin"].toUpperCase(), 5000, false, EventHandler {
-                        takeManagementViewModel.addPlugin(true, false)
+                    JFXSnackbar.SnackbarEvent(
+                        messages["noRecorder"],
+                        messages["addPlugin"].toUpperCase(),
+                        5000,
+                        false,
+                        EventHandler {
+                            audioPluginViewModel.addPlugin(true, false)
                     })
             )
         }
@@ -78,23 +84,23 @@ class TakeManagementFragment : Fragment() {
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox(15.0) {
-                addClass(TakeManagementStyles.pageTop)
+                addClass(RecordScriptureStyles.pageTop)
                 alignment = Pos.CENTER
                 vgrow = Priority.ALWAYS
                 //previous verse button
                 button(messages["previousVerse"], AppStyles.backIcon()) {
-                    addClass(TakeManagementStyles.navigationButton)
+                    addClass(RecordScriptureStyles.navigationButton)
                     action {
-                        takeManagementViewModel.previousVerse()
+                        recordScriptureViewModel.previousChunk()
                     }
-                    enableWhen(takeManagementViewModel.hasPrevious)
+                    enableWhen(recordScriptureViewModel.hasPrevious)
                 }
                 //selected take and drag target
                 stackpane {
-                    addClass(TakeManagementStyles.selectedTakeContainer)
+                    addClass(RecordScriptureStyles.selectedTakeContainer)
                     // drag target glow
                     stackpane {
-                        addClass(TakeManagementStyles.dragTarget, TakeManagementStyles.glow)
+                        addClass(RecordScriptureStyles.dragTarget, RecordScriptureStyles.glow)
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
                     }
                     vbox {
@@ -103,7 +109,7 @@ class TakeManagementFragment : Fragment() {
                         // Check if the selected take card has changed
                         isFillWidth = false
                         val placeholder = vbox {
-                            addClass(TakeManagementStyles.placeholder)
+                            addClass(RecordScriptureStyles.placeholder)
                             vgrow = Priority.NEVER
                         }
 
@@ -115,11 +121,11 @@ class TakeManagementFragment : Fragment() {
                                 add(placeholder)
                             } else {
                                 // Add the selected take card
-                                takeManagementViewModel.acceptTake(it.take)
+                                recordableViewModel.selectTake(it.take)
                                 add(it)
                             }
                         }
-                        takeManagementViewModel.selectedTakeProperty.onChange {
+                        recordableViewModel.selectedTakeProperty.onChange {
                             // The view model wants us to use this selected take
                             // This take will not appear in the flow pane items
                             if (it != null && selectedTakeProperty.value == null) {
@@ -130,7 +136,7 @@ class TakeManagementFragment : Fragment() {
 
                     // Create the drag target
                     dragTarget = stackpane {
-                        addClass(TakeManagementStyles.dragTarget)
+                        addClass(RecordScriptureStyles.dragTarget)
                         add(MaterialIconView(MaterialIcon.ADD, "30px"))
                         // Initially hide the drag target
                         visibleProperty().bind(draggingTakeProperty.booleanBinding { it != null })
@@ -138,11 +144,11 @@ class TakeManagementFragment : Fragment() {
                 }
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
-                    addClass(TakeManagementStyles.navigationButton)
+                    addClass(RecordScriptureStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     action {
-                        takeManagementViewModel.nextVerse()
-                        enableWhen(takeManagementViewModel.hasNext)
+                        recordScriptureViewModel.nextChunk()
+                        enableWhen(recordScriptureViewModel.hasNext)
                     }
                 }
             }
@@ -150,7 +156,7 @@ class TakeManagementFragment : Fragment() {
             // Add the available takes flow pane
             scrollpane {
                 isFitToWidth = true
-                addClass(TakeManagementStyles.scrollpane)
+                addClass(RecordScriptureStyles.scrollpane)
                 add(takesFlowPane)
             }
         }
@@ -174,14 +180,14 @@ class TakeManagementFragment : Fragment() {
         // Plugin active cover
         val dialog = progressdialog {
             root.addClass(AppStyles.progressDialog)
-            takeManagementViewModel.contextProperty.toObservable().subscribe { newContext ->
+            recordableViewModel.contextProperty.toObservable().subscribe { newContext ->
                 when (newContext) {
                     TakeContext.RECORD -> graphic = AppStyles.recordIcon("60px")
                     TakeContext.EDIT_TAKES -> graphic = AppStyles.editIcon("60px")
                 }
             }
         }
-        takeManagementViewModel.showPluginActiveProperty.onChange {
+        recordableViewModel.showPluginActiveProperty.onChange {
             Platform.runLater {
                 if (it == true) dialog.open() else dialog.close()
             }
@@ -229,9 +235,9 @@ class TakeManagementFragment : Fragment() {
     private fun createTakesFlowPane(): FlowPane {
         return FlowPane().apply {
             vgrow = Priority.ALWAYS
-            addClass(TakeManagementStyles.takeGrid)
+            addClass(RecordScriptureStyles.takeGrid)
             // Update the takes displayed
-            takeManagementViewModel.alternateTakes.onChange {
+            recordableViewModel.alternateTakes.onChange {
                 clear()
                 it.list.forEach { take ->
                     // Add a new take card
@@ -245,11 +251,11 @@ class TakeManagementFragment : Fragment() {
     private fun createRecordCard(): VBox {
         return vbox(10.0) {
             alignment = Pos.CENTER
-            addClass(TakeManagementStyles.newTakeCard)
+            addClass(RecordScriptureStyles.newTakeCard)
             label(messages["newTake"])
             button(messages["record"], AppStyles.recordIcon("25px")) {
                 action {
-                    takeManagementViewModel.recordContent(workbookViewModel.chunk!!)
+                    recordableViewModel.recordNewTake()
                 }
             }
         }
@@ -264,13 +270,10 @@ class TakeManagementFragment : Fragment() {
     }
 
     private fun createTakeCard(take: Take): OldTakeCard {
-        return oldtakecard(take, takeManagementViewModel.audioPlayer(), messages["take"]) {
-            addClass(TakeManagementStyles.takeCard)
-            playedProperty.onChange {
-                if (it) takeManagementViewModel.setTakePlayed(take)
-            }
+        return oldtakecard(take, audioPluginViewModel.audioPlayer(), messages["take"]) {
+            addClass(RecordScriptureStyles.takeCard)
             deleteButton.apply {
-                addClass(TakeManagementStyles.deleteButton)
+                addClass(RecordScriptureStyles.deleteButton)
                 action {
                     error(
                             messages["deleteTakePrompt"],
@@ -279,20 +282,14 @@ class TakeManagementFragment : Fragment() {
                             ButtonType.NO,
                             title = messages["deleteTakePrompt"]
                     ) { button: ButtonType ->
-                        if (button == ButtonType.YES) takeManagementViewModel.delete(take)
+                        if (button == ButtonType.YES) recordableViewModel.deleteTake(take)
                     }
                 }
             }
             editButton.action {
-                takeManagementViewModel.editContent(take)
+                recordableViewModel.editTake(take)
             }
             addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
         }
-    }
-
-    override fun onDock() {
-        super.onDock()
-        // Reset the model
-        takeManagementViewModel.reset()
     }
 }

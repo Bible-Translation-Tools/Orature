@@ -15,7 +15,7 @@ class TabContentLeftRegion(
     formattedTextProperty: StringProperty,
     internal val newTakeAction: () -> Unit
 ): VBox() {
-    internal val newTakeButton =
+    private val newTakeButton =
         highlightablebutton {
             highlightColor = Color.ORANGE
             secondaryColor = AppTheme.colors.white
