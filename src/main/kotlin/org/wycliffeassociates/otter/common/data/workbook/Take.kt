@@ -4,6 +4,7 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import java.io.File
 import java.time.LocalDate
+import java.util.*
 
 data class Take(
     val name: String,
@@ -12,7 +13,15 @@ data class Take(
     val format: MimeType,
     val createdTimestamp: LocalDate,
     val deletedTimestamp: BehaviorRelay<DateHolder> = BehaviorRelay.createDefault(DateHolder.empty)
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        return (other as? Take)?.let {
+            it.file == this.file
+        } ?: false
+    }
+
+    override fun hashCode() = file.hashCode()
+}
 
 data class DateHolder(val value: LocalDate?) {
     companion object {

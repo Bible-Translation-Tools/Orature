@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import java.time.LocalDate
 
 class EditTake(
-        private val launchPlugin: LaunchPlugin
+    private val launchPlugin: LaunchPlugin
 ) {
     enum class Result {
         SUCCESS,

@@ -181,27 +181,22 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             }
     }
 
-    /** Build a relay primed with the current deletion state, that responds to updates by writing to the DB. */
-    private fun deletionRelay(modelTake: ModelTake): BehaviorRelay<DateHolder> {
-        val relay = BehaviorRelay.createDefault(DateHolder(modelTake.deleted))
-
-        val subscription = relay
-            .skip(1) // ignore the initial value
-            .subscribe {
-                db.updateTake(modelTake, it)
-            }
-
-        connections += subscription
-        return relay
-    }
-
-
     private fun deselectUponDelete(take: WorkbookTake, selectedTakeRelay: BehaviorRelay<TakeHolder>) {
         val subscription = take.deletedTimestamp
-            .filter { localDate -> localDate.value != null }
+            .filter { dateHolder -> dateHolder.value != null }
             .filter { take == selectedTakeRelay.value?.value }
             .map { TakeHolder(null) }
             .subscribe(selectedTakeRelay)
+        connections += subscription
+    }
+
+    private fun deleteFromDbUponDelete(take: WorkbookTake, modelTake: ModelTake) {
+        val subscription = take.deletedTimestamp
+            .filter { dateHolder -> dateHolder.value != null }
+            .subscribe {
+                db.deleteTake(modelTake, it)
+                    .subscribe()
+            }
         connections += subscription
     }
 
@@ -212,7 +207,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             number = modelTake.number,
             format = MimeType.WAV, // TODO
             createdTimestamp = modelTake.created,
-            deletedTimestamp = deletionRelay(modelTake)
+            deletedTimestamp = BehaviorRelay.createDefault(DateHolder(modelTake.deleted))
         )
     }
 
@@ -233,10 +228,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         val takeMap = synchronizedMap(WeakHashMap<WorkbookTake, ModelTake>())
 
         /** The initial selected take, from the DB. */
-        val initialSelectedTake = TakeHolder(content.selectedTake?.let { workbookTake(it) })
+        val initialSelectedTake = content.selectedTake?.let { workbookTake(it) }
 
         /** Relay to send selected-take updates out to consumers, but also receive updates from UI. */
-        val selectedTakeRelay = BehaviorRelay.createDefault(initialSelectedTake)
+        val selectedTakeRelay = BehaviorRelay.createDefault(TakeHolder(initialSelectedTake))
 
         // When we receive an update, write it to the DB.
         val selectedTakeRelaySubscription = selectedTakeRelay
@@ -245,12 +240,19 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .subscribe {
                 content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
                 db.updateContent(content)
+                    .subscribe()
             }
 
         /** Initial Takes read from the DB. */
         val takesFromDb = db.getTakeByContent(content)
             .flattenAsObservable { list: List<ModelTake> -> list.sortedBy { it.number } }
-            .map { workbookTake(it) to it }
+            .map { modelTake ->
+                val wbTake = when (modelTake) {
+                    content.selectedTake -> initialSelectedTake
+                    else -> workbookTake(modelTake)
+                }
+                wbTake to modelTake
+            }
 
         /** Relay to send Takes out to consumers, but also receive new Takes from UI. */
         val takesRelay = ReplayRelay.create<WorkbookTake>()
@@ -262,15 +264,24 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .subscribe(takesRelay)
 
         val takesRelaySubscription = takesRelay
-            // When the selected take becomes deleted, deselect it.
-            .doOnNext { deselectUponDelete(it, selectedTakeRelay) }
+            .filter { it.deletedTimestamp.value?.value == null }
+            .map { it to (takeMap[it] ?: modelTake(it))}
+            .doOnNext { (wbTake, modelTake) ->
+                // When the selected take becomes deleted, deselect it.
+                deselectUponDelete(wbTake, selectedTakeRelay)
+                // When a take becomes deleted, delete it from the database
+                deleteFromDbUponDelete(wbTake, modelTake)
+            }
 
-            // Keep the takeMap current.
-            .filter { !takeMap.contains(it) } // don't duplicate takes
-            .map { it to modelTake(it) }
-            .doOnNext { (wbTake, modelTake) -> takeMap[wbTake] = modelTake }
+            // These are new takes
+            .filter { (wbTake, _) -> !takeMap.contains(wbTake) }
 
-            // Insert the new take into the DB.
+            // Keep the takeMap current
+            .doOnNext { (wbTake, modelTake) ->
+                takeMap[wbTake] = modelTake
+            }
+
+            // Insert the new take into the DB. (We already filtered existing takes out.)
             .subscribe { (_, modelTake) ->
                 db.insertTakeForContent(modelTake, content)
                     .subscribe { insertionId -> modelTake.id = insertionId }
@@ -293,7 +304,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getSubtreeResourceInfo(collection: Collection): List<ResourceInfo>
         fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
-        fun updateTake(take: ModelTake, date: DateHolder): Completable
+        fun deleteTake(take: ModelTake, date: DateHolder): Completable
     }
 }
 
@@ -316,6 +327,6 @@ private class DefaultDatabaseAccessors(
     override fun getSubtreeResourceInfo(collection: Collection) = resourceRepo.getSubtreeResourceInfo(collection)
 
     override fun insertTakeForContent(take: ModelTake, content: Content) = takeRepo.insertForContent(take, content)
-    override fun getTakeByContent(content: Content) = takeRepo.getByContent(content)
-    override fun updateTake(take: ModelTake, date: DateHolder) = takeRepo.update(take.copy(deleted = date.value))
+    override fun getTakeByContent(content: Content) = takeRepo.getByContent(content, includeDeleted = true)
+    override fun deleteTake(take: ModelTake, date: DateHolder) = takeRepo.update(take.copy(deleted = date.value))
 }

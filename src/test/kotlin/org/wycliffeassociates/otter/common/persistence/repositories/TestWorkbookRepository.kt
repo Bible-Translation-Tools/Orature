@@ -443,11 +443,11 @@ class TestWorkbookRepository {
         val take = takes.blockingFirst()
 
         // Verify precondition - no DB writes yet
-        verify(mockedDb, times(0)).updateTake(any(), any())
+        verify(mockedDb, times(0)).deleteTake(any(), any())
 
         // Delete a take, and verify the DB is called
         take.deletedTimestamp.accept(DateHolder(LocalDate.now()))
-        verify(mockedDb, times(1)).updateTake(any(), any())
+        verify(mockedDb, times(1)).deleteTake(any(), any())
     }
 
     @Test
@@ -483,7 +483,8 @@ class TestWorkbookRepository {
 
         // Delete the take, and confirm the selection is cleared
         take.deletedTimestamp.accept(DateHolder.now())
-        verify(mockedDb, times(2)).updateContent(any())
+        verify(mockedDb, times(1)).updateContent(any())
+        verify(mockedDb, times(1)).deleteTake(any(), any())
         Assert.assertNull("Selection should be null", chunk.audio.selected.value?.value)
     }
 
