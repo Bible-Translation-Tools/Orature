@@ -6,13 +6,18 @@ import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view.RecordResourceStyles
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordScriptureStyles
+import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordScriptureStyles.Companion.takeWidthHeight
 import tornadofx.*
 
 class TakeCardStyles : Stylesheet() {
 
     companion object {
         val scriptureTakeCard by cssclass()
+        val scriptureTakeCardPlaceholder by cssclass()
         val resourceTakeCard by cssclass()
+        val resourceTakeCardPlaceholder by cssclass()
         val badge by cssclass()
         val iconStyle by cssclass()
         val content by cssclass()
@@ -22,8 +27,14 @@ class TakeCardStyles : Stylesheet() {
         val takeProgressBar by cssclass()
         val editButton by cssclass()
         val topHalf by cssclass()
+        val scriptureTakeCardDropShadow by cssclass()
         val defaultGreen : Color = c("#58BD2F")
         val grey = c("#C9C8C8")
+
+        private fun scriptureTakeWidthHeight() = RecordScriptureStyles.takeWidthHeight()
+        private fun scriptureTakeRadius() = RecordScriptureStyles.takeRadius()
+        private fun resourceTakeWidthHeight() = RecordResourceStyles.takeWidthHeight()
+        private fun resourceTakeRadius() = RecordResourceStyles.takeRadius()
 
         fun draggingIcon() = ImageLoader.load(
             ClassLoader.getSystemResourceAsStream("images/baseline-drag_indicator-24px.svg"),
@@ -50,10 +61,10 @@ class TakeCardStyles : Stylesheet() {
 
         // RESOURCE TAKE CARD specific styles
         resourceTakeCard {
-            minHeight = 80.px
-            maxWidth = 500.px
+            +resourceTakeWidthHeight()
+            +resourceTakeRadius()
+            backgroundColor += AppTheme.colors.cardBackground
             borderColor += box(grey)
-            borderRadius += box(5.px)
             topHalf {
                 padding = box(4.px, 5.px, 5.px, 5.px)
                 borderColor += box(Color.TRANSPARENT, Color.TRANSPARENT, c("C9C8C8"), Color.TRANSPARENT)
@@ -69,8 +80,17 @@ class TakeCardStyles : Stylesheet() {
             }
         }
 
+        resourceTakeCardPlaceholder {
+            +resourceTakeWidthHeight()
+            +resourceTakeRadius()
+            backgroundColor += AppTheme.colors.defaultBackground
+            borderColor += box(grey)
+            borderWidth += box(1.px)
+        }
+
         // SCRIPTURE TAKE CARD specific styles
         scriptureTakeCard {
+            +scriptureTakeWidthHeight()
             borderRadius += box(5.px)
             borderColor += box(AppTheme.colors.imagePlaceholder)
             borderWidth += box(1.px)
@@ -78,10 +98,6 @@ class TakeCardStyles : Stylesheet() {
             label {
                 textFill = AppTheme.colors.defaultText
             }
-            minWidth = 348.px
-            maxWidth = minWidth
-            minHeight = 200.px
-            maxHeight = minHeight
             backgroundRadius += box(5.px)
             badge {
                 backgroundColor += AppTheme.colors.appRed
@@ -131,6 +147,16 @@ class TakeCardStyles : Stylesheet() {
                     minHeight = 40.px
                 }
             }
+        }
+
+        scriptureTakeCardPlaceholder {
+            +scriptureTakeWidthHeight()
+            +scriptureTakeRadius()
+            backgroundColor += AppTheme.colors.defaultBackground
+        }
+
+        scriptureTakeCardDropShadow {
+            effect = DropShadow(2.0,2.0,2.0, AppTheme.colors.dropShadow)
         }
     }
 }

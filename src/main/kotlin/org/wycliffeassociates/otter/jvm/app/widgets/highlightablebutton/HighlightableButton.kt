@@ -10,6 +10,7 @@ import tornadofx.*
 class HighlightableButton : JFXButton() {
 
     var isHighlightedProperty: SimpleBooleanProperty = SimpleBooleanProperty(false)
+    var isHighlighted: Boolean by isHighlightedProperty
     var highlightColorProperty = SimpleObjectProperty<Color>(Color.BLACK)
     var highlightColor: Color by highlightColorProperty
     var secondaryColor: Color = Color.WHITE

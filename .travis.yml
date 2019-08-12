@@ -1,4 +1,5 @@
 language: java
+dist: trusty
 jdk:
   - oraclejdk8
 before_cache:
@@ -9,8 +10,9 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper
 install:
+  - git clone --branch=jbs-otter-css https://github.com/WycliffeAssociates/chromeabletabpane.git ../chromeabletabpane
   - git clone --branch=dev https://github.com/WycliffeAssociates/kotlin-resource-container.git ../kotlin-resource-container
-  - git clone https://github.com/WycliffeAssociates/8woc2018-common.git ../8woc2018-common
+  - git clone https://github.com/WycliffeAssociates/otter-common.git ../otter-common
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
   - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - source init_common.sh

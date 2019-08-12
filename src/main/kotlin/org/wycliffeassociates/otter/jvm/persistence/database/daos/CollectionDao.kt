@@ -14,9 +14,8 @@ class CollectionDao(
                 .select()
                 .from(COLLECTION_ENTITY)
                 .where(COLLECTION_ENTITY.PARENT_FK.eq(entity.id))
-                .fetch {
-                    RecordMappers.mapToCollectionEntity(it)
-                }
+                .orderBy(COLLECTION_ENTITY.SORT)
+                .fetch(RecordMappers.Companion::mapToCollectionEntity)
     }
 
     fun fetchSource(entity: CollectionEntity, dsl: DSLContext = instanceDsl): CollectionEntity {

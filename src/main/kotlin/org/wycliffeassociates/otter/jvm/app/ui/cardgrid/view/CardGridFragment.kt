@@ -2,26 +2,18 @@ package org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.beans.property.Property
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.ContentGridViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.CardGridViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
-class CardGrid : Fragment() {
-    private val viewModel: ContentGridViewModel by inject()
-
-    val activeCollection: Property<Collection> = viewModel.activeCollectionProperty
-    val activeProject: Property<Collection> = viewModel.activeProjectProperty
-    val activeContent: Property<Content> = viewModel.activeContentProperty
-
+class CardGridFragment : Fragment() {
+    private val viewModel: CardGridViewModel by inject()
 
     init {
         importStylesheet<CardGridStyles>()

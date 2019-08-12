@@ -12,6 +12,7 @@ import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -201,7 +202,7 @@ class CollectionRepository(
             }
             creator = "otter"
             version = metadata.version
-            format = "text/usfm"
+            format = MimeType.USFM.norm
             subject = metadata.subject
             type = "book"
             title = metadata.title

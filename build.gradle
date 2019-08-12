@@ -123,14 +123,16 @@ dependencies {
     //Testing
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile "org.mockito:mockito-core:2.+"
-    testCompile 'org.powermock:powermock-module-junit4:2.+'
-    testCompile 'org.powermock:powermock-module-junit4-rule:2.+'
-    testCompile 'org.powermock:powermock-api-mockito2:2.+'
-    
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+
     //WA Libraries
-    implementation 'org.wycliffeassociates:8woc2018-common'
+    implementation 'org.wycliffeassociates:otter-common'
     implementation 'org.wycliffeassociates:kotlin-resource-container'
+    implementation 'org.wycliffeassociates:chromeabletabpane'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+
+    //Atlassian commonmark (for rendering markdown)
+    implementation 'com.atlassian.commonmark:commonmark:0.12.1'
 }
 
 //tell gradle what to put in the jar

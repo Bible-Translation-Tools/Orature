@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view
 
-import javafx.scene.paint.Color
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*

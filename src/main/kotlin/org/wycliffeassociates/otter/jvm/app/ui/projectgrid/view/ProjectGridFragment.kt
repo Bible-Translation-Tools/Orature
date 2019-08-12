@@ -17,12 +17,10 @@ import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
-class ProjectGridView : Fragment() {
+class ProjectGridFragment : Fragment() {
 
     private val viewModel: ProjectGridViewModel by inject()
     private val noProjectsProperty: ReadOnlyBooleanProperty
-
-    val activeProject: Property<Collection> = viewModel.selectedProjectProperty
 
     init {
         importStylesheet<ProjectGridStyles>()
