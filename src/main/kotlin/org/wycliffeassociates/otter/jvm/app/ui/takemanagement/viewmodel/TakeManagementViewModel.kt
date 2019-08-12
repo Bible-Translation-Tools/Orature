@@ -35,9 +35,6 @@ class TakeManagementViewModel : ViewModel() {
     var activeProperty: Collection by property()
     val activeProjectProperty = getProperty(TakeManagementViewModel::activeProperty)
 
-    var activeCollection: Collection by property()
-    var activeCollectionProperty = getProperty(TakeManagementViewModel::activeCollection)
-
     var activeContent: Content by property()
     val activeContentProperty = getProperty(TakeManagementViewModel::activeContent)
 
@@ -73,7 +70,7 @@ class TakeManagementViewModel : ViewModel() {
             takeRepository
     )
 
-    private val editTake = EditTake(takeRepository, launchPlugin)
+    private val editTake = EditTake(launchPlugin)
 
     init {
         activeContentProperty.toObservable().subscribe {
@@ -82,7 +79,8 @@ class TakeManagementViewModel : ViewModel() {
             title = "$label $start"
             activeContent = it
             populateTakes(it)
-            getContentList(activeCollection)
+            // TODO
+//            getContentList(activeCollection)
         }
         reset()
         //listen for changes to the selected take property, if there is a change activate edit button
@@ -204,18 +202,18 @@ class TakeManagementViewModel : ViewModel() {
     }
 
     fun editContent(take: Take) {
-        contextProperty.set(TakeContext.EDIT_TAKES)
-        showPluginActive = true
-        editTake.edit(take)
-                .observeOnFx()
-                .subscribe { result ->
-                    showPluginActive = false
-                    when (result) {
-                        EditTake.Result.SUCCESS -> {
-                        }
-                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    }
-                }
+//        contextProperty.set(TakeContext.EDIT_TAKES)
+//        showPluginActive = true
+//        editTake.edit(take)
+//                .observeOnFx()
+//                .subscribe { result ->
+//                    showPluginActive = false
+//                    when (result) {
+//                        EditTake.Result.SUCCESS -> {
+//                        }
+//                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+//                    }
+//                }
     }
 
     fun nextVerse() {
@@ -261,7 +259,9 @@ class TakeManagementViewModel : ViewModel() {
         selectedTakeProperty.value = null
         activeContentProperty.value?.let { populateTakes(it) }
         title = if (activeContentProperty.value?.type == ContentType.META) {
-            activeCollectionProperty.value?.titleKey ?: ""
+            // TODO
+            "TODO"
+//            activeCollectionProperty.value?.titleKey ?: ""
         } else {
             val label = FX.messages[activeContentProperty.value?.labelKey ?: ContentLabel.VERSE.value]
             val start = activeContentProperty.value?.start ?: ""

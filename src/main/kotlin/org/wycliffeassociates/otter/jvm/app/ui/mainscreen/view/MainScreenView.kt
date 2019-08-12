@@ -8,8 +8,9 @@ import javafx.scene.layout.*
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.NavBoxType
-import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel.MainViewViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view.ProjectGridView
+import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel.MainScreenViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view.ProjectGridFragment
+import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.projectnav.projectnav
 import tornadofx.*
 
@@ -18,7 +19,8 @@ class MainScreenView : View() {
     var activeFragment: Workspace = Workspace()
     var fragmentStage: AnchorPane by singleAssign()
 
-    val viewModel: MainViewViewModel by inject()
+    val viewModel: MainScreenViewModel by inject()
+    val workbookViewModel: WorkbookViewModel by inject()
 
     data class NavBoxItem(val defaultText: String, val textGraphic: Node, val cardGraphic: Node, val type: NavBoxType)
 
@@ -47,17 +49,20 @@ class MainScreenView : View() {
                                 NavBoxType.PROJECT -> {
                                     majorLabelProperty.bind(viewModel.selectedProjectName)
                                     minorLabelProperty.bind(viewModel.selectedProjectLanguage)
-                                    visibleProperty().bind(viewModel.selectedProjectProperty.booleanBinding { it != null })
+                                    visibleProperty()
+                                        .bind(workbookViewModel.activeWorkbookProperty.booleanBinding { it != null })
                                 }
                                 NavBoxType.CHAPTER -> {
-                                    titleProperty.bind(viewModel.selectedCollectionTitle)
-                                    bodyTextProperty.bind(viewModel.selectedCollectionBody)
-                                    visibleProperty().bind(viewModel.selectedCollectionProperty.booleanBinding { it != null })
+                                    titleProperty.bind(viewModel.selectedChapterTitle)
+                                    bodyTextProperty.bind(viewModel.selectedChapterBody)
+                                    visibleProperty()
+                                        .bind(workbookViewModel.activeChapterProperty.booleanBinding { it != null })
                                 }
                                 NavBoxType.CHUNK -> {
-                                    titleProperty.bind(viewModel.selectedContentTitle)
-                                    bodyTextProperty.bind(viewModel.selectedContentBody)
-                                    visibleProperty().bind(viewModel.selectedContentProperty.booleanBinding { it != null })
+                                    titleProperty.bind(viewModel.selectedChunkTitle)
+                                    bodyTextProperty.bind(viewModel.selectedChunkBody)
+                                    visibleProperty()
+                                        .bind(workbookViewModel.activeChunkProperty.booleanBinding { it != null })
                                 }
                             }
                         }
@@ -96,10 +101,7 @@ class MainScreenView : View() {
                     }
 
                     center {
-                        activeFragment.dock<ProjectGridView>()
-                        ProjectGridView().apply {
-                            viewModel.selectedProjectProperty.bindBidirectional(activeProject)
-                        }
+                        activeFragment.dock<ProjectGridFragment>()
                         add(activeFragment)
                     }
                 }
@@ -108,19 +110,16 @@ class MainScreenView : View() {
     }
 
     private fun navigateBack() {
-
         //navigate back to verse selection from viewing takes
-        if (viewModel.selectedContentProperty.value != null) {
-            viewModel.selectedContentProperty.value = null
+        if (workbookViewModel.activeChunkProperty.value != null) {
+            workbookViewModel.activeChunkProperty.value = null
             activeFragment.navigateBack()
         }
         //from verse selection, navigate back to chapter selection
-        else if (viewModel.selectedCollectionProperty.value != null) {
-            viewModel.selectedCollectionProperty.value = null
+        else if (workbookViewModel.activeChapterProperty.value != null) {
+            workbookViewModel.activeChapterProperty.set(null)
         }
 
         else activeFragment.navigateBack()
-
     }
-
 }

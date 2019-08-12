@@ -6,16 +6,30 @@ import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordRes
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.ResourceGroupCardItemList
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.resourceGroupCardItem
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class ResourcesViewModel : ViewModel() {
+class ResourceListViewModel : ViewModel() {
     internal val recordResourceViewModel: RecordResourceViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
 
-    fun loadResourceGroups() {
-        val chapter = workbookViewModel.chapter
+    init {
+        workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
+            targetChapter?.let {
+                loadResourceGroups(getSourceChapter(targetChapter))
+            }
+        }
+    }
+
+    private fun getSourceChapter(targetChapter: Chapter): Chapter {
+        return workbookViewModel.workbook.source.chapters.filter {
+            it.title == targetChapter.title
+        }.blockingFirst()
+    }
+
+    internal fun loadResourceGroups(chapter: Chapter) {
         chapter
             .children
             .startWith(chapter)

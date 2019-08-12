@@ -12,8 +12,8 @@ import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordRes
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
-class ResourcesViewModelTest : ViewModel() {
-    private val resourcesViewModel: ResourcesViewModel by inject()
+class ResourceListViewModelTest : ViewModel() {
+    private val resourceListViewModel: ResourceListViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
     private val recordResourceViewModel: RecordResourceViewModel by inject()
 
@@ -23,7 +23,7 @@ class ResourcesViewModelTest : ViewModel() {
 
     @Test
     fun navigateToTakesPage_setsBookElement() {
-        resourcesViewModel.navigateToTakesPage(chunk1, testResourceNoBody)
+        resourceListViewModel.navigateToTakesPage(chunk1, testResourceNoBody)
 
         Assert.assertEquals(chunk1, workbookViewModel.activeChunkProperty.value)
     }
@@ -31,7 +31,7 @@ class ResourcesViewModelTest : ViewModel() {
     @Test
     fun navigateToTakesPage_callsSetRecordableListItems() {
         val spiedRecordResourceViewModel = spy(recordResourceViewModel)
-        val spiedResourcesViewModel = spy(resourcesViewModel)
+        val spiedResourcesViewModel = spy(resourceListViewModel)
         whenever(spiedResourcesViewModel.recordResourceViewModel).thenReturn(spiedRecordResourceViewModel)
 
         // Resource with just a title
@@ -53,11 +53,9 @@ class ResourcesViewModelTest : ViewModel() {
 
     @Test
     fun testLoadResourceGroups_putsAppropriateGroupsInList() {
-        workbookViewModel.activeChapterProperty.set(testChapter)
+        resourceListViewModel.loadResourceGroups(testChapter)
 
-        resourcesViewModel.loadResourceGroups()
-
-        Assert.assertEquals(3, resourcesViewModel.resourceGroupCardItemList.size)
+        Assert.assertEquals(3, resourceListViewModel.resourceGroupCardItemList.size)
 
         Assert.assertEquals(3, getResourceGroupSize(0))
         Assert.assertEquals(2, getResourceGroupSize(1))
@@ -75,7 +73,7 @@ class ResourcesViewModelTest : ViewModel() {
     )
 
     private fun getResourceGroupSize(idx: Int): Long {
-        return resourcesViewModel.resourceGroupCardItemList[idx].resources.count().blockingGet()
+        return resourceListViewModel.resourceGroupCardItemList[idx].resources.count().blockingGet()
     }
 
     private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create<Take>())
