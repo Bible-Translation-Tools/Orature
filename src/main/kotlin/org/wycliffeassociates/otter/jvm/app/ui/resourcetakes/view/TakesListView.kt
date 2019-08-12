@@ -1,31 +1,27 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view
 
-import com.github.thomasnield.rxkotlinfx.toObservable
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
+import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeEvent
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
 import tornadofx.*
 
-class TakesListView(items: ObservableList<Take>, audioPlayer: () -> IAudioPlayer) : ListView<Take>(items) {
-    private val lastTakeEvent: SimpleObjectProperty<TakeEvent?> = SimpleObjectProperty()
-
+class TakesListView(
+    items: ObservableList<Take>,
+    createTakeNode: (Take) -> Node
+) : ListView<Take>(items) {
     init {
         cellFormat {
-            graphic = cache(it.number) {
-                resourcetakecard(it, audioPlayer(), lastTakeEvent.toObservable())
-            }
+            /* Don't use cell caching, because we remove the front node of the take card when it is dragged
+                and we don't ever add it back if it was made the selected take. (This is because we create a
+                new take card if it was selected.)
+             */
+            graphic = createTakeNode(it)
+
         }
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
         addClass(RecordResourceStyles.takesList)
-
-        addEventHandler(TakeEvent.PLAY) {
-            lastTakeEvent.set(it)
-        }
     }
 }

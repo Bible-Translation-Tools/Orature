@@ -3,12 +3,13 @@ package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.TabRecordableViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordableTabViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import kotlin.math.min
 
 class RecordableTab(
-    private val viewModel: TabRecordableViewModel,
+    private val viewModel: RecordableTabViewModel,
     // tabPaneProperty gets set to null every time the tab gets removed from the tab pane so we need to cache it
     private val parent: TabPane,
     val sort: Int,
@@ -18,7 +19,7 @@ class RecordableTab(
     init {
         textProperty().bind(viewModel.labelProperty)
 
-        RecordableTabContent(viewModel).apply {
+        RecordResourceFragment(viewModel).apply {
             formattedTextProperty.bind(viewModel.getFormattedTextBinding())
             this@RecordableTab.content = this.root
         }
@@ -29,7 +30,7 @@ class RecordableTab(
             }
         }
 
-        viewModel.recordableProperty.onChange { item ->
+        viewModel.recordableProperty.onChangeAndDoNow { item ->
             item?.let {
                 checkAndAddSelf()
             } ?: removeSelf()

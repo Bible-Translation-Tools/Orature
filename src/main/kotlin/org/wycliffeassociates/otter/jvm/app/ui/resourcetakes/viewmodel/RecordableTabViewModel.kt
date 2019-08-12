@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPlu
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
 import java.util.concurrent.Callable
 
-class TabRecordableViewModel(
+class RecordableTabViewModel(
     val labelProperty: SimpleStringProperty,
     audioPluginViewModel: AudioPluginViewModel
 ): RecordableViewModel(

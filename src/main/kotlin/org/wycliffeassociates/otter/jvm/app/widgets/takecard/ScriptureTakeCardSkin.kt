@@ -1,22 +1,20 @@
 package org.wycliffeassociates.otter.jvm.app.widgets.takecard
 
-import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
 
-    private var container: VBox
-
     init {
         importStylesheet<TakeCardStyles>()
 
-        container = VBox().apply {
+        back.addClass(TakeCardStyles.scriptureTakeCardPlaceholder, TakeCardStyles.scriptureTakeCardDropShadow)
+
+        front.apply {
             anchorpane {
                 addClass(TakeCardStyles.scriptureTakeCard)
                 vbox {
@@ -42,7 +40,10 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                         hbox {
                             alignment = Pos.TOP_RIGHT
                             hgrow = Priority.SOMETIMES
-                            add(JFXButton(messages["delete"], MaterialIconView(MaterialIcon.DELETE, "18px")))
+                            add(deleteButton.apply {
+                                text = messages["delete"]
+                                graphic = MaterialIconView(MaterialIcon.DELETE, "18px")
+                            })
                         }
                     }
                     // waveform and audio control buttons
@@ -57,14 +58,14 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                         }
                         hbox(15.0) {
                             add(playButton.addClass(TakeCardStyles.defaultButton))
-                            add(
-                                JFXButton(messages["edit"], MaterialIconView(MaterialIcon.EDIT, "18px").apply {
+                            add(editButton.apply {
+                                text = messages["edit"]
+                                graphic = MaterialIconView(MaterialIcon.EDIT, "18px").apply {
                                     fill = TakeCardStyles.defaultGreen
-                                }).apply {
-                                    addClass(TakeCardStyles.defaultButton)
-                                    addClass(TakeCardStyles.editButton)
                                 }
-                            )
+                                addClass(TakeCardStyles.defaultButton)
+                                addClass(TakeCardStyles.editButton)
+                            })
                         }
                     }
                     anchorpaneConstraints {
@@ -76,6 +77,5 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 }
             }
         }
-        children.addAll(container)
     }
 }

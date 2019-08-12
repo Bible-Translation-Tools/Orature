@@ -10,12 +10,13 @@ import tornadofx.*
 
 class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
 
-    private var container: VBox
-
     init {
         importStylesheet<TakeCardStyles>()
 
-        container = VBox().apply {
+        back.addClass(TakeCardStyles.resourceTakeCardPlaceholder)
+
+        front.apply {
+            isFillWidth = true
             addClass(TakeCardStyles.resourceTakeCard)
 
             hbox(10.0) {
@@ -25,15 +26,21 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 label("%02d.".format(control.take.number), TakeCardStyles.draggingIcon()) {
                     addClass(TakeCardStyles.takeNumberLabel)
                 }
-                add(control.simpleAudioPlayer.apply {
-                    addClass(TakeCardStyles.takeProgressBar)
-                    vgrow = Priority.ALWAYS
-                    hgrow = Priority.ALWAYS
-                })
+                add(control.simpleAudioPlayer
+                    .apply {
+                        addClass(TakeCardStyles.takeProgressBar)
+                        vgrow = Priority.ALWAYS
+                        hgrow = Priority.ALWAYS
+                    }
+                )
             }
 
             hbox {
-                add(JFXButton("", MaterialIconView(MaterialIcon.EDIT, "18px")))
+                add(editButton
+                    .apply {
+                        graphic = MaterialIconView(MaterialIcon.EDIT, "18px")
+                    }
+                )
                 alignment = Pos.CENTER
                 hbox {
                     hgrow = Priority.ALWAYS
@@ -42,10 +49,12 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                     add(playButton)
                     add(JFXButton("", MaterialIconView(MaterialIcon.FAST_FORWARD, "18px")))
                 }
-                add(JFXButton("", MaterialIconView(MaterialIcon.DELETE, "18px")))
+                add(deleteButton
+                    .apply {
+                        graphic = MaterialIconView(MaterialIcon.DELETE, "18px")
+                    }
+                )
             }
         }
-
-        children.setAll(container)
     }
 }

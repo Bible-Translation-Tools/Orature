@@ -13,7 +13,7 @@ import javafx.collections.ListChangeListener
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class RecordResourceViewModel : ViewModel() {
+class ResourceTabPaneViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -21,8 +21,9 @@ class RecordResourceViewModel : ViewModel() {
 
     internal val recordableList: ObservableList<Recordable> = FXCollections.observableArrayList()
 
-    class ContentTypeToViewModelMap(map: Map<ContentType, TabRecordableViewModel>):
-        EnumMap<ContentType, TabRecordableViewModel>(map)
+    class ContentTypeToViewModelMap(map: Map<ContentType, RecordableTabViewModel>) :
+        EnumMap<ContentType, RecordableTabViewModel>(map)
+
     val contentTypeToViewModelMap = ContentTypeToViewModelMap(
         hashMapOf(
             ContentType.TITLE to tabRecordableViewModel(),
@@ -31,7 +32,7 @@ class RecordResourceViewModel : ViewModel() {
     )
 
     private fun tabRecordableViewModel() =
-        TabRecordableViewModel(SimpleStringProperty(), audioPluginViewModel)
+        RecordableTabViewModel(SimpleStringProperty(), audioPluginViewModel)
 
     init {
         initTabs()
@@ -61,7 +62,7 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     private fun setTabLabels(resourceSlug: String?) {
-        when(resourceSlug) {
+        when (resourceSlug) {
             "tn" -> {
                 setLabelProperty(ContentType.TITLE, messages["snippet"])
                 setLabelProperty(ContentType.BODY, messages["note"])
