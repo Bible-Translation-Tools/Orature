@@ -2,8 +2,6 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
-import io.reactivex.Completable
-import io.reactivex.internal.operators.observable.ObservableError
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -27,7 +25,6 @@ class ProjectWizardViewModel : ViewModel() {
     val sourceLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val targetLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
-
     val allLanguages: ObservableList<Language> = FXCollections.observableArrayList()
     val filteredLanguages: ObservableList<Language> = FXCollections.observableArrayList()
 
@@ -71,7 +68,6 @@ class ProjectWizardViewModel : ViewModel() {
             }.subscribe()
 
     }
-
 
     private fun loadProjects() {
         collectionRepo
