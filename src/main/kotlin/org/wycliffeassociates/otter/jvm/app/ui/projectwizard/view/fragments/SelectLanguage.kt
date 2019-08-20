@@ -44,7 +44,7 @@ class SelectLanguage : Fragment() {
             label(messages["targetLanguage"], ProjectWizardStyles.targetLanguageIcon()) {
                 addClass(ProjectWizardStyles.languageBoxLabel)
             }
-            searchablelist(viewModel.filteredLanguages, viewModel.targetLanguageProperty) {
+            searchablelist(viewModel.allLanguages, viewModel.targetLanguageProperty) {
                 addClass(ProjectWizardStyles.searchableList)
                 listView.cellCache { language ->
                     label("${language.name} (${language.slug})")
@@ -54,7 +54,7 @@ class SelectLanguage : Fragment() {
                 viewModel.sourceLanguageProperty.onChange {
                     refreshSearch(false)
                 }
-                filter(viewModel::filterTargetLanguages)
+                filter(viewModel::filterLanguages)
                 viewModel.clearLanguages.subscribe {
                     searchField.clear()
                     listView.selectionModel.clearSelection()

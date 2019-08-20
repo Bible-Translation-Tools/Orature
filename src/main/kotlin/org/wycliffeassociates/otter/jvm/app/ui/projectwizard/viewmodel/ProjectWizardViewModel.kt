@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
+import io.reactivex.Completable
 import io.reactivex.internal.operators.observable.ObservableError
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
@@ -26,7 +27,8 @@ class ProjectWizardViewModel : ViewModel() {
     val sourceLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val targetLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
-    val languages: ObservableList<Language> = FXCollections.observableArrayList()
+
+    val allLanguages: ObservableList<Language> = FXCollections.observableArrayList()
     val filteredLanguages: ObservableList<Language> = FXCollections.observableArrayList()
 
     private val collectionHierarchy: ArrayList<List<Collection>> = ArrayList()
@@ -37,18 +39,17 @@ class ProjectWizardViewModel : ViewModel() {
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
-    private val availableLanguageSet: MutableSet<Language> = mutableSetOf()
-
     private val creationUseCase = CreateProject(collectionRepo)
 
     init {
         languageRepo
-                .getAll()
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    languages.setAll(retrieved)
-                }
-        createLanguageSet().also { setFilteredLanguageList() }
+            .getAll()
+            .observeOnFx()
+            .subscribe { retrieved ->
+                allLanguages.setAll(retrieved)
+            }
+
+        filterSourceLanguages()
         loadProjects()
 
         targetLanguageProperty.toObservable().subscribe { language ->
@@ -57,46 +58,39 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
 
-    private fun createLanguageSet() {
+    private fun filterSourceLanguages() {
         collectionRepo
             .getRootSources()
             .observeOnFx()
-            .doAfterSuccess { setFilteredLanguageList() }
-            .subscribe { retrieved ->
-                retrieved.forEach { collection ->
-                    addToLanguageSet(collection.resourceContainer?.language)
-                }
-            }
+            .map { collections ->
+                collections.map { collection -> collection.resourceContainer?.language }
+            }.map { languages ->
+                languages.distinct()
+            }.map { uniqueLanguages ->
+                filteredLanguages.setAll(uniqueLanguages)
+            }.subscribe()
+
     }
 
-    private fun addToLanguageSet(language: Language?) {
-        if(!availableLanguageSet.contains(language) && language != null) {
-            availableLanguageSet.add(language)
-        }
-    }
-
-    private fun setFilteredLanguageList(){
-        filteredLanguages.addAll(availableLanguageSet)
-    }
 
     private fun loadProjects() {
         collectionRepo
-                .getRootProjects()
-                .subscribe { retrieved ->
-                    projects.setAll(retrieved)
-                }
+            .getRootProjects()
+            .subscribe { retrieved ->
+                projects.setAll(retrieved)
+            }
     }
 
     fun getRootSources() {
         collectionRepo
-                .getRootSources()
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    collectionHierarchy.add(retrieved.filter {
-                        it.resourceContainer?.language == sourceLanguageProperty.value
-                    })
-                    collections.setAll(collectionHierarchy.last())
-                }
+            .getRootSources()
+            .observeOnFx()
+            .subscribe { retrieved ->
+                collectionHierarchy.add(retrieved.filter {
+                    it.resourceContainer?.language == sourceLanguageProperty.value
+                })
+                collections.setAll(collectionHierarchy.last())
+            }
     }
 
     fun doOnUserSelection(selectedCollection: Collection) {
@@ -109,25 +103,25 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun showSubcollections(collection: Collection) {
         collectionRepo
-                .getChildren(collection)
-                .observeOnFx()
-                .doOnSuccess { subcollections ->
-                    collectionHierarchy.add(subcollections)
-                    collections.setAll(collectionHierarchy.last().sortedBy { it.sort })
-                }
-                .subscribe()
+            .getChildren(collection)
+            .observeOnFx()
+            .doOnSuccess { subcollections ->
+                collectionHierarchy.add(subcollections)
+                collections.setAll(collectionHierarchy.last().sortedBy { it.sort })
+            }
+            .subscribe()
     }
 
     private fun createProject(selectedCollection: Collection) {
         targetLanguageProperty.value?.let { language ->
             showOverlayProperty.value = true
             creationUseCase
-                    .create(selectedCollection, language)
-                    .subscribe {
-                        tornadofx.find(ProjectGridViewModel::class).loadProjects()
-                        showOverlayProperty.value = false
-                        creationCompletedProperty.value = true
-                    }
+                .create(selectedCollection, language)
+                .subscribe {
+                    tornadofx.find(ProjectGridViewModel::class).loadProjects()
+                    showOverlayProperty.value = false
+                    creationCompletedProperty.value = true
+                }
         }
     }
 
@@ -155,13 +149,12 @@ class ProjectWizardViewModel : ViewModel() {
         collectionHierarchy.clear()
         existingProjects.clear()
         creationCompletedProperty.value = false
-        createLanguageSet()
-        setFilteredLanguageList()
+        filterSourceLanguages()
         loadProjects()
     }
 
     fun filterLanguages(query: String): ObservableList<Language> =
-        filteredLanguages.filtered {
+        allLanguages.filtered {
             it.name.contains(query, true)
                     || it.anglicizedName.contains(query, true)
                     || it.slug.contains(query, true)
@@ -176,9 +169,6 @@ class ProjectWizardViewModel : ViewModel() {
                 else -> 0
             }
         }
-
-    fun filterTargetLanguages(query: String): ObservableList<Language> =
-            filterLanguages(query).filtered { it != sourceLanguageProperty.value }
 
     fun languagesValid() = sourceLanguageProperty.booleanBinding(targetLanguageProperty) {
         sourceLanguageProperty.value != null && targetLanguageProperty.value != null
