@@ -37,6 +37,8 @@ class ProjectWizardViewModel : ViewModel() {
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
+    private val availableLanguageSet: MutableSet<Language> = mutableSetOf()
+
     private val creationUseCase = CreateProject(collectionRepo)
 
     init {
@@ -45,9 +47,8 @@ class ProjectWizardViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe { retrieved ->
                     languages.setAll(retrieved)
-                    filterToAvailableLanguges()
                 }
-
+        createLanguageSet().also { setFilteredLanguageList() }
         loadProjects()
 
         targetLanguageProperty.toObservable().subscribe { language ->
@@ -55,15 +56,27 @@ class ProjectWizardViewModel : ViewModel() {
         }
     }
 
-    private fun filterToAvailableLanguges() {
+
+    private fun createLanguageSet() {
         collectionRepo
             .getRootSources()
             .observeOnFx()
+            .doAfterSuccess { setFilteredLanguageList() }
             .subscribe { retrieved ->
-                retrieved.forEach {collection ->
-                    filteredLanguages.addAll(languages.filter { it.id == collection.resourceContainer?.language?.id })
+                retrieved.forEach { collection ->
+                    addToLanguageSet(collection.resourceContainer?.language)
                 }
             }
+    }
+
+    private fun addToLanguageSet(language: Language?) {
+        if(!availableLanguageSet.contains(language) && language != null) {
+            availableLanguageSet.add(language)
+        }
+    }
+
+    private fun setFilteredLanguageList(){
+        filteredLanguages.addAll(availableLanguageSet)
     }
 
     private fun loadProjects() {
@@ -142,6 +155,8 @@ class ProjectWizardViewModel : ViewModel() {
         collectionHierarchy.clear()
         existingProjects.clear()
         creationCompletedProperty.value = false
+        createLanguageSet()
+        setFilteredLanguageList()
         loadProjects()
     }
 
