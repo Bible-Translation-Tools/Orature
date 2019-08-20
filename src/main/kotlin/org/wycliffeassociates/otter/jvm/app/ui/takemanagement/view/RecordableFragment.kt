@@ -5,10 +5,11 @@ import com.jfoenix.controls.JFXSnackbar
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
+import javafx.geometry.BoundingBox
+import javafx.geometry.Bounds
 import javafx.geometry.Point2D
 import javafx.scene.Node
 import javafx.scene.Parent
-import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -144,6 +145,13 @@ abstract class RecordableFragment(
         }
     }
 
+    private fun getBoundsInRoot(node: Node, bounds: Bounds): Bounds {
+        return when (node) {
+            root -> bounds
+            else -> getBoundsInRoot(node.parent, node.localToParent(bounds))
+        }
+    }
+
     private var dragStartDelta = Point2D(0.0, 0.0)
 
     private fun relocateDragContainer(pointInRoot: Point2D) {
@@ -172,11 +180,26 @@ abstract class RecordableFragment(
         }
     }
 
-    private fun isDraggedToTarget(event: MouseEvent): Boolean =
-        dragTarget.contains(dragTarget.sceneToLocal(event.sceneX, event.sceneY))
+    private fun isDraggedToTarget(): Boolean {
+        val draggingNodeBounds =
+            getBoundsInRoot(draggingNodeProperty.value.parent, draggingNodeProperty.value.boundsInParent)
+        val dragTargetBounds = getBoundsInRoot(dragTarget.parent, dragTarget.boundsInParent)
+
+        // Reduce the bounds of the drag target slightly so that we are sure there is enough overlap
+        // to trigger select take
+        val dragTargetReducedBounds = dragTargetBounds.let {
+            BoundingBox(
+                it.minX + it.width*.05,
+                it.minY + it.height*.05,
+                it.width*.9,
+                it.height*.9
+            )
+        }
+        return draggingNodeBounds.intersects(dragTargetReducedBounds)
+    }
 
     private fun completeDrag(event: CompleteDragEvent) {
-        if (isDraggedToTarget(event.mouseEvent)) {
+        if (isDraggedToTarget()) {
             recordableViewModel.selectTake(event.take)
         } else {
             event.onCancel()

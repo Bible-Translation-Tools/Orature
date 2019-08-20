@@ -101,13 +101,19 @@ open class RecordableViewModel(
     private fun Take.isNotDeleted() = deletedTimestamp.value?.value == null
 
     private fun loadTakes(audio: AssociatedAudio) {
-        alternateTakes.clear()
         // selectedTakeProperty may not have been updated yet so ask for the current selected take
         val selected = audio.selected.value?.value
+
+        val loadedAlternateTakes =
+            audio.getAllTakes()
+                .filter { it.isNotDeleted() }
+                .filter { it != selected }
+        alternateTakes.setAll(loadedAlternateTakes)
+
         audio.takes
             .filter { it.isNotDeleted() }
             .subscribe {
-                if (it != selected) {
+                if (it != selected && !alternateTakes.contains(it)) {
                     addToAlternateTakes(it)
                 }
                 removeOnDeleted(it)
