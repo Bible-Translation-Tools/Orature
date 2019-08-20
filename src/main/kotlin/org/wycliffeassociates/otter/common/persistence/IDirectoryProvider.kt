@@ -14,7 +14,7 @@ interface IDirectoryProvider {
     fun getAppDataDirectory(appendedPath: String = "") : File
 
     // Create the directory for project audio
-    fun getProjectAudioDirectory(sourceMetadata: ResourceMetadata, book: Collection, chapterDirName: String): File
+    fun getProjectAudioDirectory(sourceMetadata: ResourceMetadata, book: Collection): File
 
     fun getSourceContainerDirectory(container: ResourceContainer): File
     fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File
