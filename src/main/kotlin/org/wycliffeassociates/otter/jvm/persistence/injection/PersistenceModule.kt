@@ -16,17 +16,17 @@ import javax.inject.Singleton
 class PersistenceModule {
     @Provides
     @Singleton
-    fun providesAppDatabase(directoryProvider: IDirectoryProvider) : AppDatabase
-            = AppDatabase(directoryProvider.getAppDataDirectory().resolve(File("content.sqlite")))
+    fun providesAppDatabase(directoryProvider: IDirectoryProvider): AppDatabase =
+        AppDatabase(directoryProvider.getAppDataDirectory().resolve(File("content.sqlite")))
 
     @Provides
     @Singleton
-    fun providesAppPreferences(database: AppDatabase) : IAppPreferences = AppPreferences(database)
+    fun providesAppPreferences(database: AppDatabase): IAppPreferences = AppPreferences(database)
 
     @Provides
-    fun providesDirectoryProvider() : IDirectoryProvider = DirectoryProvider("TranslationRecorder")
+    fun providesDirectoryProvider(): IDirectoryProvider = DirectoryProvider("TranslationRecorder")
 
     @Provides
-    fun providesAudioPluginRepository(database: AppDatabase, preferences: IAppPreferences): IAudioPluginRepository
-            = AudioPluginRepository(database, preferences)
+    fun providesAudioPluginRepository(database: AppDatabase, preferences: IAppPreferences): IAudioPluginRepository =
+        AudioPluginRepository(database, preferences)
 }

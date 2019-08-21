@@ -6,21 +6,20 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.MarkerEntity
 class MarkerMapper {
     fun mapFromEntity(type: MarkerEntity): Marker {
         return Marker(
-                type.number,
-                type.position,
-                type.label,
-                type.id
+            type.number,
+            type.position,
+            type.label,
+            type.id
         )
     }
 
     fun mapToEntity(type: Marker, takeFk: Int? = null): MarkerEntity {
         return MarkerEntity(
-                type.id,
-                takeFk,
-                type.number,
-                type.position,
-                type.label
+            type.id,
+            takeFk,
+            type.number,
+            type.position,
+            type.label
         )
     }
-
 }

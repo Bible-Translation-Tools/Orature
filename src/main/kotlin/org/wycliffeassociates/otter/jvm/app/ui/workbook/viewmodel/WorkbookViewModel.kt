@@ -9,7 +9,7 @@ import tornadofx.*
 import java.io.File
 import java.lang.IllegalStateException
 
-class WorkbookViewModel: ViewModel() {
+class WorkbookViewModel : ViewModel() {
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
         get() = activeWorkbookProperty.value ?: throw IllegalStateException("Workbook is null")

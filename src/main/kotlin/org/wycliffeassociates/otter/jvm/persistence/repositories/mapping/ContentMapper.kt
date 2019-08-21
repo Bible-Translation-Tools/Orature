@@ -33,5 +33,4 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             type_fk = contentTypeDao.fetchId(obj.type)!!
         )
     }
-
 }

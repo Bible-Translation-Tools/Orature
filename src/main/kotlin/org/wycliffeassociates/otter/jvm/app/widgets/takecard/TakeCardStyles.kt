@@ -28,7 +28,7 @@ class TakeCardStyles : Stylesheet() {
         val editButton by cssclass()
         val topHalf by cssclass()
         val scriptureTakeCardDropShadow by cssclass()
-        val defaultGreen : Color = c("#58BD2F")
+        val defaultGreen: Color = c("#58BD2F")
         val grey = c("#C9C8C8")
 
         private fun scriptureTakeWidthHeight() = RecordScriptureStyles.takeWidthHeight()
@@ -131,7 +131,7 @@ class TakeCardStyles : Stylesheet() {
                 backgroundRadius += box(5.0.px)
                 borderColor += box(Color.LIGHTGRAY)
                 borderWidth += box(0.5.px)
-                effect = DropShadow(1.0,2.0,2.0,Color.LIGHTGRAY)
+                effect = DropShadow(1.0, 2.0, 2.0, Color.LIGHTGRAY)
                 backgroundColor += Color.WHITE
             }
 
@@ -156,7 +156,7 @@ class TakeCardStyles : Stylesheet() {
         }
 
         scriptureTakeCardDropShadow {
-            effect = DropShadow(2.0,2.0,2.0, AppTheme.colors.dropShadow)
+            effect = DropShadow(2.0, 2.0, 2.0, AppTheme.colors.dropShadow)
         }
     }
 }

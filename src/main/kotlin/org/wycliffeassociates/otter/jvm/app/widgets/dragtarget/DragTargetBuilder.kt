@@ -9,7 +9,7 @@ class DragTargetBuilder(private val type: Type) {
     }
 
     fun build(dragBinding: BooleanBinding): DragTarget {
-        val skinFactory = when(type) {
+        val skinFactory = when (type) {
             Type.RESOURCE_TAKE -> ::ResourceDragTargetSkin
             Type.SCRIPTURE_TAKE -> ::ScriptureDragTargetSkin
         }

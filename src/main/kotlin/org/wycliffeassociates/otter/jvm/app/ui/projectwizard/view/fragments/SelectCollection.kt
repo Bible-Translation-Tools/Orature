@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments
 
 import javafx.application.Platform
-import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
@@ -22,7 +21,7 @@ class SelectCollection : Fragment() {
                 hbox {
                     wizardcard {
                         var projectExists = false
-                        if (it.labelKey == "project") { //only check if project exists when we are at project level
+                        if (it.labelKey == "project") { // only check if project exists when we are at project level
                             projectExists = viewModel.doesProjectExist(it)
                         }
                         addClass(ProjectWizardStyles.wizardCard)
@@ -43,7 +42,7 @@ class SelectCollection : Fragment() {
                 }
             }
             hbox {
-                if (viewModel.collections.isEmpty()) { //if user selects resource with no children initially
+                if (viewModel.collections.isEmpty()) { // if user selects resource with no children initially
                     label(messages["noResources"]) {
                         addClass(ProjectWizardStyles.noResource)
                     }

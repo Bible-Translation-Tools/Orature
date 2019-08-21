@@ -17,17 +17,18 @@ class AudioRecorder : IAudioRecorder {
         val SIGNED = true
         val BIG_ENDIAN = false
         val FORMAT = AudioFormat(
-                SAMPLE_RATE,
-                SAMPLE_SIZE,
-                CHANNELS,
-                SIGNED,
-                BIG_ENDIAN
+            SAMPLE_RATE,
+            SAMPLE_SIZE,
+            CHANNELS,
+            SIGNED,
+            BIG_ENDIAN
         )
         val BUFFER_SIZE = 1024
     }
 
     private var line: TargetDataLine
     private val audioByteObservable = PublishSubject.create<ByteArray>()
+
     init {
         line = AudioSystem.getTargetDataLine(FORMAT)
     }
@@ -42,8 +43,9 @@ class AudioRecorder : IAudioRecorder {
                 totalRead += line.read(byteArray, 0, byteArray.size)
                 audioByteObservable.onNext(byteArray)
             }
-        }.subscribeOn(Schedulers.io())
-         .subscribe()
+        }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     override fun stop() {

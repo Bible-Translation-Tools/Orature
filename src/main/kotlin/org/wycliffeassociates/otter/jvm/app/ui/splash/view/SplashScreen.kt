@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.app.ui.splash.view
 
 import javafx.event.EventHandler
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.splash.viewmodel.SplashScreenViewModel
 import tornadofx.*
 

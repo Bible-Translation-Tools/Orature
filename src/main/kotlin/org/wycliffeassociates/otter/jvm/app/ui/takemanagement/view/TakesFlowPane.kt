@@ -21,7 +21,7 @@ class TakesFlowPane(
     private val audioPlayer: () -> IAudioPlayer,
     private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent>,
     private val recordNewTake: () -> Unit
-): FlowPane() {
+) : FlowPane() {
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()

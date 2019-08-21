@@ -12,96 +12,96 @@ import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.Languag
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ResourceMetadataMapper
 
 class ResourceMetadataRepository(
-        database: AppDatabase,
-        private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
-        private val languageMapper: LanguageMapper = LanguageMapper()
+    database: AppDatabase,
+    private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
+    private val languageMapper: LanguageMapper = LanguageMapper()
 ) : IResourceMetadataRepository {
     private val resourceMetadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
 
     override fun insert(obj: ResourceMetadata): Single<Int> {
         return Single
-                .fromCallable {
-                    resourceMetadataDao.insert(metadataMapper.mapToEntity(obj))
-                }
-                .subscribeOn(Schedulers.io())
+            .fromCallable {
+                resourceMetadataDao.insert(metadataMapper.mapToEntity(obj))
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun getAll(): Single<List<ResourceMetadata>> {
         return Single
-                .fromCallable {
-                    resourceMetadataDao
-                            .fetchAll()
-                            .map(this::buildMetadata)
-                }
-                .subscribeOn(Schedulers.io())
+            .fromCallable {
+                resourceMetadataDao
+                    .fetchAll()
+                    .map(this::buildMetadata)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
         return Maybe
-                .fromCallable {
-                    resourceMetadataDao.fetchById(metadata.id).derivedFromFk
-                }
-                .map { buildMetadata(resourceMetadataDao.fetchById(it)) }
-                .subscribeOn(Schedulers.io())
+            .fromCallable {
+                resourceMetadataDao.fetchById(metadata.id).derivedFromFk
+            }
+            .map { buildMetadata(resourceMetadataDao.fetchById(it)) }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun getLinked(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
         return Single
-                .fromCallable {
-                    resourceMetadataDao
-                            .fetchLinks(metadata.id)
-                            .map(this::buildMetadata)
-                }
-                .subscribeOn(Schedulers.io())
+            .fromCallable {
+                resourceMetadataDao
+                    .fetchLinks(metadata.id)
+                    .map(this::buildMetadata)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable {
         return Completable
-                .fromAction {
-                    val updated = metadataMapper.mapToEntity(metadata, source?.id)
-                    resourceMetadataDao.update(updated)
-                }
-                .subscribeOn(Schedulers.io())
+            .fromAction {
+                val updated = metadataMapper.mapToEntity(metadata, source?.id)
+                resourceMetadataDao.update(updated)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun update(obj: ResourceMetadata): Completable {
         return Completable
-                .fromAction {
-                    val existing = resourceMetadataDao.fetchById(obj.id)
-                    val updated = metadataMapper.mapToEntity(obj, existing.derivedFromFk)
-                    resourceMetadataDao.update(updated)
-                }
-                .subscribeOn(Schedulers.io())
+            .fromAction {
+                val existing = resourceMetadataDao.fetchById(obj.id)
+                val updated = metadataMapper.mapToEntity(obj, existing.derivedFromFk)
+                resourceMetadataDao.update(updated)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
         return Completable
-                .fromAction {
-                    resourceMetadataDao.addLink(firstMetadata.id, secondMetadata.id)
-                }
-                .subscribeOn(Schedulers.io())
+            .fromAction {
+                resourceMetadataDao.addLink(firstMetadata.id, secondMetadata.id)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun removeLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
         return Completable
-                .fromAction {
-                    resourceMetadataDao.removeLink(firstMetadata.id, secondMetadata.id)
-                }
-                .subscribeOn(Schedulers.io())
+            .fromAction {
+                resourceMetadataDao.removeLink(firstMetadata.id, secondMetadata.id)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun delete(obj: ResourceMetadata): Completable {
         return Completable
-                .fromAction {
-                    resourceMetadataDao.delete(metadataMapper.mapToEntity(obj))
-                }
-                .subscribeOn(Schedulers.io())
+            .fromAction {
+                resourceMetadataDao.delete(metadataMapper.mapToEntity(obj))
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun buildMetadata(entity: ResourceMetadataEntity): ResourceMetadata {
         val language = languageMapper
-                .mapFromEntity(languageDao.fetchById(entity.languageFk))
+            .mapFromEntity(languageDao.fetchById(entity.languageFk))
         return metadataMapper.mapFromEntity(entity, language)
     }
 }

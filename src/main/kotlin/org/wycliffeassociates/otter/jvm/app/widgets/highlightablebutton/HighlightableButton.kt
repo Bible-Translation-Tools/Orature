@@ -38,7 +38,7 @@ class HighlightableButton : JFXButton() {
     private fun doApplyColors(bgColor: Color, contentFillColor: Color) {
         style {
             backgroundColor += bgColor
-            if(hasBorder) {
+            if (hasBorder) {
                 borderColor += box(highlightColor)
             }
         }

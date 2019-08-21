@@ -10,13 +10,11 @@ import javafx.scene.layout.*
 import javafx.scene.paint.*
 import tornadofx.*
 
-
 class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(control) {
 
     private var bar: StackPane
     private var track: StackPane
     private var barWidth: Double = 0.0
-
 
     private var invalidBar = true
     private val localProgressProperty: DoubleProperty = SimpleDoubleProperty(0.0)
@@ -40,7 +38,7 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
     private val trackBorderWidth: DoubleProperty = SimpleDoubleProperty(0.0)
 
     init {
-        //need to define super(statusindicator)? not sure if this is required atm
+        // need to define super(statusindicator)? not sure if this is required atm
         bar = StackPane()
         bar.styleClass.setAll("indicator-bar")
 
@@ -172,7 +170,6 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
         bar.styleClass.setAll("indicator-bar")
         track.styleClass.setAll("indicator-track")
         children.setAll(track, bar)
-
     }
 
     override fun layoutChildren(contentX: Double, contentY: Double, contentWidth: Double, contentHeight: Double) {
@@ -180,9 +177,8 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
             updateStatusIndicator(contentWidth, contentHeight)
         }
 
-         if(trackHeight.value < barHeight.value){
-             val trackShift = (barHeight.value - trackHeight.value)/2.0
-
+        if (trackHeight.value < barHeight.value) {
+            val trackShift = (barHeight.value - trackHeight.value) / 2.0
             bar.resizeRelocate(contentX, contentY, contentWidth, barHeight.value)
             layoutInArea(
                 bar,
@@ -206,38 +202,35 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
                 HPos.CENTER,
                 VPos.TOP
             )
+        } else {
+            bar.resizeRelocate(contentX, contentY, contentWidth, trackHeight.value)
+            layoutInArea(
+                bar,
+                contentX,
+                contentY,
+                barWidth,
+                trackHeight.value,
+                -1.0,
+                HPos.CENTER,
+                VPos.CENTER
+            )
+
+            track.resizeRelocate(contentX, contentY + barHeight.value / 3.0, contentWidth, trackHeight.value)
+            layoutInArea(
+                track,
+                contentX,
+                contentY,
+                contentWidth,
+                trackHeight.value,
+                -1.0,
+                HPos.CENTER,
+                VPos.TOP
+            )
         }
-
-         else  {
-             bar.resizeRelocate(contentX, contentY, contentWidth, trackHeight.value)
-             layoutInArea(
-                 bar,
-                 contentX,
-                 contentY,
-                 barWidth,
-                 trackHeight.value,
-                 -1.0,
-                 HPos.CENTER,
-                 VPos.CENTER
-             )
-
-             track.resizeRelocate(contentX, contentY + barHeight.value/3.0, contentWidth, trackHeight.value)
-             layoutInArea(
-                 track,
-                 contentX,
-                 contentY,
-                 contentWidth,
-                 trackHeight.value,
-                 -1.0,
-                 HPos.CENTER,
-                 VPos.TOP
-             )
-         }
 
         track.isVisible = true
         bar.isVisible = true
     }
-
 
     override fun computePrefHeight(
         width: Double,
@@ -302,5 +295,4 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
     fun updateProgress(progress: Double) {
         barWidth = (progress - snappedLeftInset() - snappedRightInset()).toInt().toDouble()
     }
-
 }

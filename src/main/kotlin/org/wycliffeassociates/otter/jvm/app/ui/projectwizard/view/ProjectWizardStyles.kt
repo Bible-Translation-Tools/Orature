@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.app.widgets.searchablelist.SearchableLis
 import tornadofx.*
 import tornadofx.WizardStyles.Companion.wizard
 
-
 class ProjectWizardStyles : Stylesheet() {
 
     companion object {
@@ -32,20 +31,20 @@ class ProjectWizardStyles : Stylesheet() {
             return when (resourceSlug) {
                 SlugsEnum.ULB.slug -> MaterialIconView(MaterialIcon.BOOK, "50px")
                 SlugsEnum.OBS.slug -> ImageLoader.load(
-                        ClassLoader.getSystemResourceAsStream("images/obs.svg"),
-                        ImageLoader.Format.SVG
+                    ClassLoader.getSystemResourceAsStream("images/obs.svg"),
+                    ImageLoader.Format.SVG
                 )
                 SlugsEnum.TW.slug -> ImageLoader.load(
-                        ClassLoader.getSystemResourceAsStream("images/tw.svg"),
-                        ImageLoader.Format.SVG
+                    ClassLoader.getSystemResourceAsStream("images/tw.svg"),
+                    ImageLoader.Format.SVG
                 )
                 SlugsEnum.OT.slug -> ImageLoader.load(
-                        ClassLoader.getSystemResourceAsStream("images/old_testament.svg"),
-                        ImageLoader.Format.SVG
+                    ClassLoader.getSystemResourceAsStream("images/old_testament.svg"),
+                    ImageLoader.Format.SVG
                 )
                 SlugsEnum.NT.slug -> ImageLoader.load(
-                        ClassLoader.getSystemResourceAsStream("images/cross.svg"),
-                        ImageLoader.Format.SVG
+                    ClassLoader.getSystemResourceAsStream("images/cross.svg"),
+                    ImageLoader.Format.SVG
                 )
                 else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
             }

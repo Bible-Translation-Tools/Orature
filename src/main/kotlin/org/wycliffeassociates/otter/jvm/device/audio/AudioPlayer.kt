@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import javax.sound.sampled.DataLine
 import javax.sound.sampled.LineEvent
 
-class AudioPlayer: IAudioPlayer {
+class AudioPlayer : IAudioPlayer {
 
     // hold all the listeners
     private val listeners = mutableListOf<IAudioPlayerListener>()
@@ -23,11 +23,13 @@ class AudioPlayer: IAudioPlayer {
     }
 
     override fun addEventListener(onEventCallback: (event: AudioPlayerEvent) -> Unit) {
-        listeners.add(object: IAudioPlayerListener {
-            override fun onEvent(event: AudioPlayerEvent) {
-                onEventCallback(event)
+        listeners.add(
+            object : IAudioPlayerListener {
+                override fun onEvent(event: AudioPlayerEvent) {
+                    onEventCallback(event)
+                }
             }
-        })
+        )
     }
 
     override fun load(file: File): Completable {
@@ -51,7 +53,7 @@ class AudioPlayer: IAudioPlayer {
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
         }.subscribeOn(Schedulers.io())
     }
-    
+
     override fun play() {
         if (!clip.isRunning && clip.frameLength > 0) {
             clip.start()
@@ -67,7 +69,6 @@ class AudioPlayer: IAudioPlayer {
             clip.framePosition = clip.framePosition
             listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
         }
-
     }
 
     override fun stop() {

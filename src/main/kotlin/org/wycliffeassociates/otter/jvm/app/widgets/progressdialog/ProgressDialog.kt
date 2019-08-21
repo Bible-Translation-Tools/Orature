@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.event.EventTarget
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.*

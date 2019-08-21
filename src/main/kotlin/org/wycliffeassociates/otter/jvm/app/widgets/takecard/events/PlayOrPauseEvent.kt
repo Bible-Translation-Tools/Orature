@@ -5,8 +5,8 @@ import javafx.event.EventType
 
 sealed class PlayOrPauseEvent(type: EventType<PlayOrPauseEvent>) : Event(type) {
 
-    class PlayEvent: PlayOrPauseEvent(PLAY)
-    class PauseEvent: PlayOrPauseEvent(PAUSE)
+    class PlayEvent : PlayOrPauseEvent(PLAY)
+    class PauseEvent : PlayOrPauseEvent(PAUSE)
 
     companion object {
         val PLAY: EventType<PlayOrPauseEvent> = EventType("PLAY")

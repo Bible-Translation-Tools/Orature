@@ -5,7 +5,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
-class ProjectNavStyles: Stylesheet() {
+class ProjectNavStyles : Stylesheet() {
 
     companion object {
         val navbutton by cssclass()
@@ -33,10 +33,8 @@ class ProjectNavStyles: Stylesheet() {
             prefWidth = 90.px
         }
         cardLabel {
-            effect = DropShadow(25.0, 2.0,2.0, c("#FBFEFF"))
+            effect = DropShadow(25.0, 2.0, 2.0, c("#FBFEFF"))
             fontSize = 24.px
         }
-
-
     }
 }

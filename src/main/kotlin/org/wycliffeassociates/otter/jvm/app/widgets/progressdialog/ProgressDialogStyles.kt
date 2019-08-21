@@ -3,9 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.widgets.progressdialog
 import javafx.geometry.Pos
 import javafx.scene.text.FontWeight
 import javafx.scene.text.TextAlignment
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
-
 
 class ProgressDialogStyles : Stylesheet() {
     companion object {

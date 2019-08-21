@@ -43,23 +43,23 @@ class MainMenu : MenuBar() {
         with(this) {
             menu(messages["file"]) {
                 importMenuItem(messages["importResourceFromFolder"])
-                        .setOnAction {
-                            val file = chooseDirectory(messages["importResourceFromFolder"])
-                            file?.let {
-                                viewModel.importResourceContainer(file)
-                            }
+                    .setOnAction {
+                        val file = chooseDirectory(messages["importResourceFromFolder"])
+                        file?.let {
+                            viewModel.importResourceContainer(file)
                         }
+                    }
                 importMenuItem(messages["importResourceFromZip"])
-                        .setOnAction {
-                            val file = chooseFile(
-                                    messages["importResourceFromZip"],
-                                    arrayOf(FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip")),
-                                    FileChooserMode.Single
-                            ).firstOrNull()
-                            file?.let {
-                                viewModel.importResourceContainer(file)
-                            }
+                    .setOnAction {
+                        val file = chooseFile(
+                            messages["importResourceFromZip"],
+                            arrayOf(FileChooser.ExtensionFilter("Zip files (*.zip)", "*.zip")),
+                            FileChooserMode.Single
+                        ).firstOrNull()
+                        file?.let {
+                            viewModel.importResourceContainer(file)
                         }
+                    }
             }
             menu(messages["audioPlugins"]) {
                 onShowing = EventHandler {
@@ -87,36 +87,38 @@ class MainMenu : MenuBar() {
                     val pluginToggleGroup = ToggleGroup()
                     viewModel.recorderPlugins.onChange { _ ->
                         items.clear()
-                        items.setAll(viewModel.recorderPlugins.map { pluginData ->
-                            radiomenuitem(pluginData.name, pluginToggleGroup) {
-                                userData = pluginData
-                                action { if (isSelected) viewModel.selectRecorder(pluginData) }
-                                viewModel.selectedRecorderProperty.toObservable().subscribe {
-                                    isSelected = (it == pluginData)
+                        items.setAll(
+                            viewModel.recorderPlugins.map { pluginData ->
+                                radiomenuitem(pluginData.name, pluginToggleGroup) {
+                                    userData = pluginData
+                                    action { if (isSelected) viewModel.selectRecorder(pluginData) }
+                                    viewModel.selectedRecorderProperty.toObservable().subscribe {
+                                        isSelected = (it == pluginData)
+                                    }
                                 }
                             }
-                        })
+                        )
                     }
-
                 }
                 menu(messages["audioEditor"]) {
                     graphic = MainMenuStyles.editorIcon("20px")
                     val pluginToggleGroup = ToggleGroup()
                     viewModel.editorPlugins.onChange { _ ->
                         items.clear()
-                        items.setAll(viewModel.editorPlugins.map { pluginData ->
-                            radiomenuitem(pluginData.name, pluginToggleGroup) {
-                                userData = pluginData
-                                action { if (isSelected) viewModel.selectEditor(pluginData) }
-                                viewModel.selectedEditorProperty.toObservable().subscribe {
-                                    isSelected = (it == pluginData)
+                        items.setAll(
+                            viewModel.editorPlugins.map { pluginData ->
+                                radiomenuitem(pluginData.name, pluginToggleGroup) {
+                                    userData = pluginData
+                                    action { if (isSelected) viewModel.selectEditor(pluginData) }
+                                    viewModel.selectedEditorProperty.toObservable().subscribe {
+                                        isSelected = (it == pluginData)
+                                    }
                                 }
                             }
-                        })
+                        )
                     }
                 }
             }
-
         }
     }
 }

@@ -13,7 +13,6 @@ import tornadofx.*
 
 class CardFront : StackPane() {
 
-
     val childrenList = observableList<Node>()
 
     val defaultFill = c("#CC4141")
@@ -25,7 +24,7 @@ class CardFront : StackPane() {
     val isCompleteProperty = SimpleBooleanProperty(false)
     var isComplete by isCompleteProperty
 
-    fun innercard(cardGraphic: Node? = null,init: InnerCard.() -> Unit = {}): InnerCard {
+    fun innercard(cardGraphic: Node? = null, init: InnerCard.() -> Unit = {}): InnerCard {
         val ic = InnerCard(cardGraphic)
         ic.init()
         addLayer(ic)
@@ -45,11 +44,11 @@ class CardFront : StackPane() {
             style {
                 padding = box(2.0.px)
             }
-            //add all existing children into the temp Vbox
+            // add all existing children into the temp Vbox
             childrenList.forEach {
                 add(it)
             }
-            //add the new layer that will be at bottom of vbox
+            // add the new layer that will be at bottom of vbox
             add(layer)
         }
 

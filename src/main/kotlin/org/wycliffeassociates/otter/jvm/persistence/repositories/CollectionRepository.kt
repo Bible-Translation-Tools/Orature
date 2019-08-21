@@ -29,7 +29,6 @@ import java.lang.NullPointerException
 import java.lang.RuntimeException
 import java.time.LocalDate
 
-
 class CollectionRepository(
     private val database: AppDatabase,
     private val directoryProvider: IDirectoryProvider,
@@ -238,11 +237,11 @@ class CollectionRepository(
                     // Check for existing resource containers
                     val existingMetadata = metadataDao.fetchAll(dsl)
                     val matches = existingMetadata.filter {
-                        it.identifier == source.resourceContainer?.identifier
-                            && it.languageFk == language.id
-                            && it.creator == "otter"
-                            && it.version == source.resourceContainer?.version
-                            && it.derivedFromFk == source.resourceContainer?.id
+                        it.identifier == source.resourceContainer?.identifier &&
+                                it.languageFk == language.id &&
+                                it.creator == "otter" &&
+                                it.version == source.resourceContainer?.version &&
+                                it.derivedFromFk == source.resourceContainer?.id
                     }
 
                     val metadataEntity = if (matches.isEmpty()) {
@@ -285,8 +284,9 @@ class CollectionRepository(
                         if (container.manifest.projects.none { it.identifier == source.slug }) {
                             container.manifest.projects = container.manifest.projects.plus(
                                 project {
-                                    sort = if (metadataEntity.subject.toLowerCase() == "bible"
-                                        && projectEntity.sort > 39
+                                    sort = if (
+                                        metadataEntity.subject.toLowerCase() == "bible" &&
+                                        projectEntity.sort > 39
                                     ) {
                                         projectEntity.sort + 1
                                     } else {

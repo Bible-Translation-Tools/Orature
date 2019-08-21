@@ -8,15 +8,15 @@ import org.wycliffeassociates.otter.jvm.persistence.database.daos.*
 import java.io.File
 
 class AppDatabase(
-        databaseFile: File
+    databaseFile: File
 ) {
     val dsl: DSLContext
 
     init {
         // Load the SQLite JDBC drivers
         Class
-                .forName("org.sqlite.JDBC")
-                .newInstance()
+            .forName("org.sqlite.JDBC")
+            .newInstance()
 
         // Create a new sqlite data source
         val dbDoesNotExist = !databaseFile.exists()
@@ -38,11 +38,11 @@ class AppDatabase(
 
         // Make sure the database file has the tables we need
         val sqlStatements = schemaFileStream
-                .bufferedReader()
-                .readText()
-                .split(";")
-                .filter { it.isNotEmpty() }
-                .map { "$it;" }
+            .bufferedReader()
+            .readText()
+            .split(";")
+            .filter { it.isNotEmpty() }
+            .map { "$it;" }
 
         // Execute each SQL statement
         sqlStatements.forEach {

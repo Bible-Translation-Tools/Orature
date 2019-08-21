@@ -7,27 +7,25 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.CollectionEntity
 class CollectionMapper {
     fun mapFromEntity(entity: CollectionEntity, metadata: ResourceMetadata?): Collection {
         return Collection(
-                entity.sort,
-                entity.slug,
-                entity.label,
-                entity.title,
-                metadata,
-                entity.id
+            entity.sort,
+            entity.slug,
+            entity.label,
+            entity.title,
+            metadata,
+            entity.id
         )
-
     }
 
     fun mapToEntity(obj: Collection, parentFk: Int? = null, sourceFk: Int? = null): CollectionEntity {
         return CollectionEntity(
-                obj.id,
-                parentFk,
-                sourceFk,
-                obj.labelKey,
-                obj.titleKey,
-                obj.slug,
-                obj.sort,
-                dublinCoreFk = obj.resourceContainer?.id
+            obj.id,
+            parentFk,
+            sourceFk,
+            obj.labelKey,
+            obj.titleKey,
+            obj.slug,
+            obj.sort,
+            dublinCoreFk = obj.resourceContainer?.id
         )
     }
-
 }

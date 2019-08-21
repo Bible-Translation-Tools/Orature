@@ -4,8 +4,7 @@ import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
-
-class CardGridStyles: Stylesheet() {
+class CardGridStyles : Stylesheet() {
 
     companion object {
         val contentContainer by cssclass()

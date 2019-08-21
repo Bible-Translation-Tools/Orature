@@ -8,7 +8,8 @@ import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.widgets.card.InnerCard
 import tornadofx.*
-class NavBox(mainLabel: String? = null, graphic: Node? = null): StackPane() {
+
+class NavBox(mainLabel: String? = null, graphic: Node? = null) : StackPane() {
 
     val layerList = observableList<Node>()
 
@@ -21,7 +22,7 @@ class NavBox(mainLabel: String? = null, graphic: Node? = null): StackPane() {
     }
 
     fun addLayer(nextLayer: Node) {
-        //add the layer that will be added on top the empty nav box
+        // add the layer that will be added on top the empty nav box
         layerList.setAll(nextLayer)
     }
 
@@ -38,19 +39,18 @@ class NavBox(mainLabel: String? = null, graphic: Node? = null): StackPane() {
             maxWidth = 180.0.px
             cursor = Cursor.HAND
         }
-         vbox(10) {
-             vgrow = Priority.ALWAYS
-             hgrow = Priority.ALWAYS
-             alignment = Pos.CENTER
-             if(graphic != null) {
-                 add(graphic)
-             }
+        vbox(10) {
+            vgrow = Priority.ALWAYS
+            hgrow = Priority.ALWAYS
+            alignment = Pos.CENTER
+            if (graphic != null) {
+                add(graphic)
+            }
 
-             if(mainLabel != null) {
-                 label(mainLabel)
-             }
-
-         }
+            if (mainLabel != null) {
+                label(mainLabel)
+            }
+        }
 
         layerList.onChange {
             it.list.forEach {
