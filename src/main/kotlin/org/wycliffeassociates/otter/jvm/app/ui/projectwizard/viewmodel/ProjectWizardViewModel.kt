@@ -63,9 +63,9 @@ class ProjectWizardViewModel : ViewModel() {
                 collections.map { collection -> collection.resourceContainer?.language }
             }.map { languages ->
                 languages.distinct()
-            }.map { uniqueLanguages ->
+            }.subscribe { uniqueLanguages ->
                 filteredLanguages.setAll(uniqueLanguages)
-            }.subscribe()
+            }
 
     }
 
