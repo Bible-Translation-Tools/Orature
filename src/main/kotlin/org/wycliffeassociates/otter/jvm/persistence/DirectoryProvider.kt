@@ -61,8 +61,7 @@ class DirectoryProvider(
 
     override fun getProjectAudioDirectory(
         sourceMetadata: ResourceMetadata,
-        book: Collection,
-        chapterDirName: String
+        book: Collection
     ): File {
         val appendedPath = listOf(
             book.resourceContainer?.creator ?: ".",
@@ -70,8 +69,7 @@ class DirectoryProvider(
             "${sourceMetadata.language.slug}_${sourceMetadata.identifier}",
             "v${book.resourceContainer?.version ?: "-none"}",
             book.resourceContainer?.language?.slug ?: "no_language",
-            book.slug,
-            chapterDirName
+            book.slug
         ).joinToString(pathSeparator)
         val path = getUserDataDirectory(appendedPath)
         path.mkdirs()

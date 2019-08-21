@@ -16,6 +16,7 @@ class ProjectGridViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val collectionRepo = injector.collectionRepo
     private val workbookRepo = injector.workbookRepository
+    private val directoryProvider = injector.directoryProvider
 
     private val workbookViewModel: WorkbookViewModel by inject()
 
@@ -51,9 +52,20 @@ class ProjectGridViewModel : ViewModel() {
     fun selectProject(targetProject: Collection) {
         collectionRepo.getSource(targetProject)
             .observeOnFx()
-            .subscribe {
-                val workbook = workbookRepo.get(it, targetProject)
+            .subscribe { sourceProject ->
+                val workbook = workbookRepo.get(sourceProject, targetProject)
                 workbookViewModel.activeWorkbookProperty.set(workbook)
+
+                setProjectAudioDirectory(targetProject, sourceProject)
             }
+    }
+
+    private fun setProjectAudioDirectory(targetProject: Collection, sourceProject: Collection) {
+        val projectAudioDir = directoryProvider.getProjectAudioDirectory(
+            sourceMetadata = sourceProject.resourceContainer ?:
+                throw RuntimeException("No source metadata found."),
+            book = targetProject
+        )
+        workbookViewModel.activeProjectAudioDirectoryProperty.set(projectAudioDir)
     }
 }

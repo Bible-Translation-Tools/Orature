@@ -42,7 +42,15 @@ class RecordScriptureFragment : RecordableFragment(
                     }
                     enableWhen(recordScriptureViewModel.hasPrevious)
                 }
-                add(dragTarget)
+                vbox {
+                    region {
+                        vgrow = Priority.ALWAYS
+                    }
+                    add(dragTarget)
+                    region {
+                        vgrow = Priority.ALWAYS
+                    }
+                }
 
                 //next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {

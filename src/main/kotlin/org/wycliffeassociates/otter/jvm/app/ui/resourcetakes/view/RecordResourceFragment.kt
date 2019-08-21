@@ -43,7 +43,15 @@ class RecordResourceFragment(
     private val leftRegion = VBox().apply {
         vgrow = Priority.ALWAYS
 
-        add(dragTarget)
+        hbox {
+            region {
+                hgrow = Priority.ALWAYS
+            }
+            add(dragTarget)
+            region {
+                hgrow = Priority.ALWAYS
+            }
+        }
 
         scrollpane {
             addClass(RecordResourceStyles.contentScrollPane)

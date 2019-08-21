@@ -70,7 +70,6 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
     private fun completeDrag(evt: MouseEvent) {
         skinnable.fireEvent(
             CompleteDragEvent(
-                evt,
                 skinnable.take,
                 ::onCancelDrag
             )
