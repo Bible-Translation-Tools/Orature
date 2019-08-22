@@ -68,8 +68,7 @@ class TakesFlowPane(
     private fun createBlankCard(): VBox {
         return vbox(10.0) {
             alignment = Pos.CENTER
-            addClass(TakeCardStyles.scriptureTakeCardPlaceholder, TakeCardStyles.scriptureTakeCardDropShadow)
-            label("blank")
+            addClass(TakeCardStyles.scriptureTakeCardPlaceholder)
         }
     }
 }

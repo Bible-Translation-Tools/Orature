@@ -63,19 +63,20 @@ class RecordScriptureFragment : RecordableFragment(
                 }
             }
 
-            // Add the available takes flow pane
-            scrollpane {
-                vgrow = Priority.ALWAYS
-                isFitToWidth = true
-                addClass(RecordScriptureStyles.scrollpane)
-                add(
-                    TakesFlowPane(
-                        recordableViewModel.alternateTakes,
-                        audioPluginViewModel::audioPlayer,
-                        lastPlayOrPauseEvent,
-                        recordableViewModel::recordNewTake
+            vbox {
+                addClass(RecordScriptureStyles.scrollpaneContainer)
+                scrollpane {
+                    isFitToWidth = true
+                    addClass(RecordScriptureStyles.scrollpane)
+                    add(
+                        TakesFlowPane(
+                            recordableViewModel.alternateTakes,
+                            audioPluginViewModel::audioPlayer,
+                            lastPlayOrPauseEvent,
+                            recordableViewModel::recordNewTake
+                        )
                     )
-                )
+                }
             }
         }
     }
