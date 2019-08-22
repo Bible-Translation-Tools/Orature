@@ -57,9 +57,9 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
 
     private fun calculateDbPixelLocations(height: Double) {
         dbNone = getDbLevel(0, height)
-        dbLow = getDbLevel(2067, height)    // -24 decibel
-        dbGood = getDbLevel(4125, height)   // -18 decibel
-        dbHigh = getDbLevel(23197, height)  // -3 decibel
+        dbLow = getDbLevel(2067, height) // -24 decibel
+        dbGood = getDbLevel(4125, height) // -18 decibel
+        dbHigh = getDbLevel(23197, height) // -3 decibel
         dbMax = getDbLevel(32767, height)
     }
 

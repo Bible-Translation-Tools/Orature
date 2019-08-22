@@ -45,4 +45,3 @@ class InfoItem(major: String, minor: String? = null, bold: Boolean = true) : HBo
         }
     }
 }
-

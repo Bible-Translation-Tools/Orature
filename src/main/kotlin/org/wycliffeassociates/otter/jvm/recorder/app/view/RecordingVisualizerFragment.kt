@@ -17,16 +17,16 @@ class RecordingVisualizerFragment : Fragment() {
 
     override val root = gridpane {
 
-        //these are needed for the gridpane itself to fill out the entire width/height allocated to it
+        // these are needed for the gridpane itself to fill out the entire width/height allocated to it
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
-        //you seem to just add things to a column and row index without allocating the number of rows or columns first
-        //the classname fragment currently lies- you apparently can only add nodes, not uicomponents? fragment is the latter
+        // you seem to just add things to a column and row index without allocating the number of rows or columns first
+        // the classname fragment currently lies- you apparently can only add nodes, not uicomponents? fragment is the latter
         this.add(vm.waveformView, 0, 0)
         this.add(vm.volumeBarView, 1, 0)
 
-        //these constraints provide the min/pref/max width, hgrow, hpos, and fill width
+        // these constraints provide the min/pref/max width, hgrow, hpos, and fill width
         val waveformColumnConstraint = ColumnConstraints(
             0.0,
             0.0,
@@ -44,11 +44,11 @@ class RecordingVisualizerFragment : Fragment() {
             true
         )
 
-        //adding will increment an internal counter, so the first constraint is on the first column, second on second
+        // adding will increment an internal counter, so the first constraint is on the first column, second on second
         this.columnConstraints.add(waveformColumnConstraint)
         this.columnConstraints.add(volumeBarColumnConstraint)
 
-        //this constraint is necessary for the row to fill out the height of this gridpane
+        // this constraint is necessary for the row to fill out the height of this gridpane
         this.rowConstraints.addAll(
             RowConstraints(
                 0.0,
