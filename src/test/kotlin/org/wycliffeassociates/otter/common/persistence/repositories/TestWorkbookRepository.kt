@@ -15,8 +15,7 @@ import java.time.LocalDate
 
 class TestWorkbookRepository {
     /** When a unique ID is needed, just use this. */
-    @Suppress("VAL_REASSIGNMENT_VIA_BACKING_FIELD")
-    private val autoincrement: Int = 1
+    private var autoincrement: Int = 1
         get() = field++
 
     private val english = Language("en", "English", "English", "ltr", isGateway = true, id = autoincrement)
