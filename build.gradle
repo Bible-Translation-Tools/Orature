@@ -3,12 +3,13 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 buildscript {
-    ext.kotlin_version = '1.2.51'
+    ext.kotlin_version = '1.3.41'
     ext.tornado_version = '1.7.16'
     ext.rxkotlin_version = '2.2.0'
     ext.rxkotlinfx_version = '2.2.2'
     ext.jfoenix_version = '8.0.4'
     ext.requery_version = '1.5.1'
+    ext.ktlint_plugin_version = '8.2.0'
     ext.sqlite_jdbc = '3.25.2'
     ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
     ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
@@ -32,6 +33,7 @@ buildscript {
         classpath 'org.jooq:jooq-codegen:3.11.2'
         classpath 'org.xerial:sqlite-jdbc:3.25.2'
         classpath group: 'com.install4j', name: 'install4j-gradle', version: '7.0.8'
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_plugin_version"
     }
 }
 
@@ -39,6 +41,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'nu.studer.jooq' version '3.0.1'
+    id 'org.jlleitschuh.gradle.ktlint' version "$ktlint_plugin_version"
 }
 
 group 'org.wycliffeassociates'
@@ -46,6 +49,7 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'install4j'
 apply plugin: 'application'
+apply plugin: 'org.jlleitschuh.gradle.ktlint'
 //apply plugin: 'javafx-gradle-plugin'
 
 sourceCompatibility = 1.8
