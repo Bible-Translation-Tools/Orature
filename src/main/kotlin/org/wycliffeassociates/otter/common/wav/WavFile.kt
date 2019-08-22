@@ -58,7 +58,7 @@ class WavFile(internal val file: File) {
         header.order(ByteOrder.LITTLE_ENDIAN)
         header.putInt(BIT_RATE)
         header.putShort(PCM.toShort()) // format = 1 for pcm
-        header.putShort(NUM_CHANNELS.toShort()) //number of channels
+        header.putShort(NUM_CHANNELS.toShort()) // number of channels
         header.putInt(longSampleRate)
         header.putInt(byteRate)
         header.putShort(((NUM_CHANNELS * BIT_RATE) / 8).toShort()) // block align
