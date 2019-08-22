@@ -25,7 +25,8 @@ class ProjectWizardViewModel : ViewModel() {
     val sourceLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val targetLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
-    val languages: ObservableList<Language> = FXCollections.observableArrayList()
+    val allLanguages: ObservableList<Language> = FXCollections.observableArrayList()
+    val filteredLanguages: ObservableList<Language> = FXCollections.observableArrayList()
 
     private val collectionHierarchy: ArrayList<List<Collection>> = ArrayList()
 
@@ -42,14 +43,29 @@ class ProjectWizardViewModel : ViewModel() {
             .getAll()
             .observeOnFx()
             .subscribe { retrieved ->
-                languages.setAll(retrieved)
+                allLanguages.setAll(retrieved)
             }
 
+        filterSourceLanguages()
         loadProjects()
 
         targetLanguageProperty.toObservable().subscribe { language ->
             existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
         }
+    }
+
+
+    private fun filterSourceLanguages() {
+        collectionRepo
+            .getRootSources()
+            .observeOnFx()
+            .map { collections ->
+                collections.map { collection -> collection.resourceContainer?.language }
+            }.map { languages ->
+                languages.distinct()
+            }.subscribe { uniqueLanguages ->
+                filteredLanguages.setAll(uniqueLanguages)
+            }
     }
 
     private fun loadProjects() {
@@ -128,11 +144,12 @@ class ProjectWizardViewModel : ViewModel() {
         collectionHierarchy.clear()
         existingProjects.clear()
         creationCompletedProperty.value = false
+        filterSourceLanguages()
         loadProjects()
     }
 
-    fun filterLanguages(query: String): ObservableList<Language> =
-        languages.filtered {
+    fun filterLanguages(query: String): ObservableList<Language> {
+        return allLanguages.filtered {
             it.name.contains(query, true) ||
                     it.anglicizedName.contains(query, true) ||
                     it.slug.contains(query, true)
@@ -147,9 +164,7 @@ class ProjectWizardViewModel : ViewModel() {
                 else -> 0
             }
         }
-
-    fun filterTargetLanguages(query: String): ObservableList<Language> =
-        filterLanguages(query).filtered { it != sourceLanguageProperty.value }
+    }
 
     fun languagesValid() = sourceLanguageProperty.booleanBinding(targetLanguageProperty) {
         sourceLanguageProperty.value != null && targetLanguageProperty.value != null
