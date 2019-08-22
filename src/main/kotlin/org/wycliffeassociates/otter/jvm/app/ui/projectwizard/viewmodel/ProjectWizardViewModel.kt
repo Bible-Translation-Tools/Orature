@@ -54,7 +54,6 @@ class ProjectWizardViewModel : ViewModel() {
         }
     }
 
-
     private fun filterSourceLanguages() {
         collectionRepo
             .getRootSources()
