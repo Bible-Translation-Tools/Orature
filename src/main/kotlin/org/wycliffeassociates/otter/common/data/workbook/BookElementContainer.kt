@@ -5,5 +5,5 @@ import io.reactivex.Observable
 interface BookElementContainer {
     val children: Observable<BookElement>
     val subtreeResources: List<ResourceInfo>
-    //val progress: Observable<Int>
+    // val progress: Observable<Int>
 }

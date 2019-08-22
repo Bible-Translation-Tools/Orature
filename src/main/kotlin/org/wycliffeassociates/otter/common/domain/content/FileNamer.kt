@@ -54,7 +54,7 @@ class FileNamer(
 
     internal fun formatVerseNumber(): String? {
         val verseFormat = if (chunkCount > 99) "%03d" else "%02d"
-        val verseNum = when(start) {
+        val verseNum = when (start) {
             null -> null
             end -> verseFormat.format(start)
             else -> "$verseFormat-$verseFormat".format(start, end)

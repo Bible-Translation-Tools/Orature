@@ -6,12 +6,12 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 class OtterZipFile(
-        val absolutePath: String,
-        private val rootZipFile: ZipFile,
-        private val separator: String,
-        val rootPathWithinZip: String?,
-        val parentFile: OtterFile? = null,
-        private val zipEntry: ZipEntry? = null
+    val absolutePath: String,
+    private val rootZipFile: ZipFile,
+    private val separator: String,
+    val rootPathWithinZip: String?,
+    val parentFile: OtterFile? = null,
+    private val zipEntry: ZipEntry? = null
 ) {
     val isFile = !(zipEntry == null || zipEntry.isDirectory)
     val name: String = File(absolutePath).name
@@ -28,21 +28,23 @@ class OtterZipFile(
 
     companion object {
         fun otterFileZ(
-                absolutePath: String,
-                rootZipFile: ZipFile,
-                separator: String,
-                rootPathWithinZip: String?,
-                parentFile: OtterFile? = null
+            absolutePath: String,
+            rootZipFile: ZipFile,
+            separator: String,
+            rootPathWithinZip: String?,
+            parentFile: OtterFile? = null
         ): OtterFile {
             val zipEntry = rootZipFile.getEntry(absolutePath)
-            return OtterFile.Z(OtterZipFile(
-                absolutePath = absolutePath,
-                rootZipFile = rootZipFile,
-                separator = separator,
-                rootPathWithinZip = rootPathWithinZip,
-                parentFile = parentFile,
-                zipEntry = zipEntry
-            ))
+            return OtterFile.Z(
+                OtterZipFile(
+                    absolutePath = absolutePath,
+                    rootZipFile = rootZipFile,
+                    separator = separator,
+                    rootPathWithinZip = rootPathWithinZip,
+                    parentFile = parentFile,
+                    zipEntry = zipEntry
+                )
+            )
         }
     }
 }

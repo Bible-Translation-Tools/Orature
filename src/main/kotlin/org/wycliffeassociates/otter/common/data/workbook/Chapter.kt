@@ -16,5 +16,4 @@ data class Chapter(
 ) : BookElement, BookElementContainer {
 
     override val children: Observable<BookElement> = chunks.cast()
-
 }

@@ -8,7 +8,7 @@ sealed class OtterFile {
     class Z(val z: OtterZipFile) : OtterFile()
 
     companion object {
-         fun otterFileF(f: File): OtterFile {
+        fun otterFileF(f: File): OtterFile {
             return OtterFile.F(f)
         }
     }

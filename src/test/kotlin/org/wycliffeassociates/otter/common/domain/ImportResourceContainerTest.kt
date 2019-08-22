@@ -35,9 +35,9 @@ class ImportResourceContainerTest {
 
         // Configure the mock directory provider
         Mockito.`when`(mockDirectoryProvider.resourceContainerDirectory)
-                .thenReturn(
-                        createTempDir()
-                )
+            .thenReturn(
+                createTempDir()
+            )
     }
 
     @Test
@@ -55,67 +55,65 @@ class ImportResourceContainerTest {
 //
 //        rcImporter.import(resource)
     }
-
-
 }
 
-class MockContentRepository: IContentRepository {
+class MockContentRepository : IContentRepository {
     override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getByCollection(collection: Collection): Single<List<Content>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getCollectionMetaContent(collection: Collection): Single<Content> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getSources(content: Content): Single<List<Content>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun updateSources(content: Content, sourceContents: List<Content>): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getAll(): Single<List<Content>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun update(obj: Content): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun delete(obj: Content): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 }
 
-class MockCollectionRepository: ICollectionRepository {
+class MockCollectionRepository : ICollectionRepository {
     override fun deleteProject(project: Collection, deleteAudio: Boolean): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getRootProjects(): Single<List<Collection>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getRootSources(): Single<List<Collection>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getSource(project: Collection): Maybe<Collection> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun deriveProject(source: Collection, language: Language): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getBySlugAndContainer(slug: String, container: ResourceMetadata): Maybe<Collection> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getChildren(collection: Collection): Single<List<Collection>> {
@@ -123,7 +121,7 @@ class MockCollectionRepository: ICollectionRepository {
     }
 
     override fun updateSource(collection: Collection, newSource: Collection): Completable {
-       return Completable.complete()
+        return Completable.complete()
     }
 
     override fun updateParent(collection: Collection, newParent: Collection): Completable {
@@ -147,9 +145,9 @@ class MockCollectionRepository: ICollectionRepository {
     }
 }
 
-class MockLanguageRepository: ILanguageRepository {
+class MockLanguageRepository : ILanguageRepository {
     override fun insertAll(languages: List<Language>): Single<List<Int>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getGateway(): Single<List<Language>> {
@@ -181,26 +179,26 @@ class MockLanguageRepository: ILanguageRepository {
     }
 }
 
-class MockResourceMetadataRepository: IResourceMetadataRepository {
+class MockResourceMetadataRepository : IResourceMetadataRepository {
 
     override fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun removeLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getLinked(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
     override fun getAll(): Single<List<ResourceMetadata>> {

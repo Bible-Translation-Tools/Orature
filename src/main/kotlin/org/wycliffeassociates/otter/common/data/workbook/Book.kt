@@ -13,8 +13,7 @@ data class Book(
 
     override val subtreeResources: List<ResourceInfo>
 
-): BookElementContainer {
+) : BookElementContainer {
 
     override val children: Observable<BookElement> = chapters.cast()
-
 }

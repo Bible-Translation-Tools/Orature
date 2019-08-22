@@ -43,7 +43,7 @@ class ParseUsfm(val reader: Reader) {
             MARKER_CHAPTER_NUMBER -> {
                 current.c = split[1]
                     ?.replace("\\s".toRegex(), "")
-                    .toInt() //strip potential whitespace and convert to int
+                    .toInt() // strip potential whitespace and convert to int
                 chapters[current.c] = hashMapOf()
             }
             MARKER_VERSE_NUMBER -> {
@@ -72,7 +72,7 @@ class ParseUsfm(val reader: Reader) {
             else -> {
                 if (split[0].length == 1) {
                     // add this to the next coming verse
-                    //addFormattingToNextVerse(line)
+                    // addFormattingToNextVerse(line)
                 } else {
                     // add this to the last verse
                     addFormattingToVerse(line, current)

@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import java.io.InputStream
 
-//Imports from langnames.json
+// Imports from langnames.json
 class ImportLanguages(val inputStream: InputStream, val languageRepo: ILanguageRepository) {
     fun import(): Completable {
         return Completable.fromCallable {

@@ -8,8 +8,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepo
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 
 class AccessTakes(
-        private val contentRepo: IContentRepository,
-        private val takeRepo: ITakeRepository
+    private val contentRepo: IContentRepository,
+    private val takeRepo: ITakeRepository
 ) {
     fun getByContent(content: Content): Single<List<Take>> {
         return takeRepo.getByContent(content)
@@ -31,7 +31,7 @@ class AccessTakes(
 
     fun getTakeCount(content: Content): Single<Int> {
         return takeRepo
-                .getByContent(content)
-                    .map { it.size }
+            .getByContent(content)
+            .map { it.size }
     }
 }

@@ -265,7 +265,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
         val takesRelaySubscription = takesRelay
             .filter { it.deletedTimestamp.value?.value == null }
-            .map { it to (takeMap[it] ?: modelTake(it))}
+            .map { it to (takeMap[it] ?: modelTake(it)) }
             .doOnNext { (wbTake, modelTake) ->
                 // When the selected take becomes deleted, deselect it.
                 deselectUponDelete(wbTake, selectedTakeRelay)

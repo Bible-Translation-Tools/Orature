@@ -35,19 +35,18 @@ class OtterResourceContainerConfig : Config {
     }
 }
 
-class OtterConfig (
+class OtterConfig(
     @JsonProperty("extended_dublin_core")
     var extendedDublinCore: ExtendedDublinCore
 )
 
-
-class ExtendedDublinCore (
+class ExtendedDublinCore(
     var categories: List<Category>
 )
 
 data class Category(
-        val identifier: String,
-        val title: String,
-        val type: String,
-        val sort: Int
+    val identifier: String,
+    val title: String,
+    val type: String,
+    val sort: Int
 )

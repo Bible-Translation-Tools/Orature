@@ -12,5 +12,5 @@ data class Resource(
         override val textItem: TextItem,
         override val audio: AssociatedAudio,
         override val contentType: ContentType
-    ): Recordable
+    ) : Recordable
 }
