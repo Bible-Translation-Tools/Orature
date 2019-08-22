@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.persistence.entities.TakeEntity
 
 class TakeDao(
-        private val instanceDsl: DSLContext
+    private val instanceDsl: DSLContext
 ) {
     fun fetchByContentId(
         id: Int,
@@ -63,21 +63,21 @@ class TakeDao(
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TakeEntity {
         return dsl
-                .select()
-                .from(TAKE_ENTITY)
-                .where(TAKE_ENTITY.ID.eq(id))
-                .fetchOne {
-                    RecordMappers.mapToTakeEntity(it)
-                }
+            .select()
+            .from(TAKE_ENTITY)
+            .where(TAKE_ENTITY.ID.eq(id))
+            .fetchOne {
+                RecordMappers.mapToTakeEntity(it)
+            }
     }
 
     fun fetchAll(dsl: DSLContext = instanceDsl): List<TakeEntity> {
         return dsl
-                .select()
-                .from(TAKE_ENTITY)
-                .fetch {
-                    RecordMappers.mapToTakeEntity(it)
-                }
+            .select()
+            .from(TAKE_ENTITY)
+            .fetch {
+                RecordMappers.mapToTakeEntity(it)
+            }
     }
 
     fun update(entity: TakeEntity, dsl: DSLContext = instanceDsl) {
@@ -96,8 +96,8 @@ class TakeDao(
 
     fun delete(entity: TakeEntity, dsl: DSLContext = instanceDsl) {
         dsl
-                .deleteFrom(TAKE_ENTITY)
-                .where(TAKE_ENTITY.ID.eq(entity.id))
-                .execute()
+            .deleteFrom(TAKE_ENTITY)
+            .where(TAKE_ENTITY.ID.eq(entity.id))
+            .execute()
     }
 }

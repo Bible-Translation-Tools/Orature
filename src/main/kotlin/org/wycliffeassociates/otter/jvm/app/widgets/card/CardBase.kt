@@ -11,13 +11,13 @@ class CardBase : VBox() {
         vgrow = Priority.ALWAYS
         alignment = Pos.TOP_CENTER
         add(
-                vbox {
-                    vgrow = Priority.ALWAYS
-                    addClass(DefaultStyles.defaultBaseTop)
-                }
+            vbox {
+                vgrow = Priority.ALWAYS
+                addClass(DefaultStyles.defaultBaseTop)
+            }
         )
         addClass(DefaultStyles.baseBottom)
-        //card top half = vbox?
-        //card bottom half color is just the color of the card
+        // card top half = vbox?
+        // card bottom half color is just the color of the card
     }
 }

@@ -15,15 +15,13 @@ import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewMo
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class CardGridViewModel: ViewModel() {
+class CardGridViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
-    private val allContent: ObservableList<CardData>
-            = FXCollections.observableArrayList()
-    val filteredContent: ObservableList<CardData>
-            = FXCollections.observableArrayList()
+    private val allContent: ObservableList<CardData> = FXCollections.observableArrayList()
+    val filteredContent: ObservableList<CardData> = FXCollections.observableArrayList()
 
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(CardGridViewModel::loading)
@@ -52,8 +50,8 @@ class CardGridViewModel: ViewModel() {
 
         workbookViewModel.activeChapterProperty.onChange { chapter ->
             when (chapter) {
-                null -> workbookViewModel.activeWorkbookProperty.value?.let {
-                    workbook -> loadChapters(workbook)
+                null -> workbookViewModel.activeWorkbookProperty.value?.let { workbook ->
+                    loadChapters(workbook)
                 }
                 else -> loadChapterContents(chapter)
             }
@@ -65,7 +63,7 @@ class CardGridViewModel: ViewModel() {
         allContent.clear()
         loading = true
         chapter.chunks
-            .map{CardData(it)}
+            .map { CardData(it) }
             .doOnComplete {
                 loading = false
             }
@@ -76,7 +74,7 @@ class CardGridViewModel: ViewModel() {
             }
     }
 
-    fun onCardSelection(cardData: CardData){
+    fun onCardSelection(cardData: CardData) {
         cardData.chapterSource?.let {
             workbookViewModel.activeChapterProperty.set(it)
         }
@@ -89,7 +87,7 @@ class CardGridViewModel: ViewModel() {
         loading = true
         allContent.clear()
         workbook.target.chapters
-            .map{CardData(it)}
+            .map { CardData(it) }
             .doOnComplete {
                 loading = false
             }
@@ -101,5 +99,5 @@ class CardGridViewModel: ViewModel() {
                 // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
                 allContent.setAll(list)
             }
-        }
+    }
 }

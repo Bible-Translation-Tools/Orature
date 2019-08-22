@@ -91,7 +91,7 @@ class RecordScriptureStyles : Stylesheet() {
             borderColor += box(AppTheme.colors.defaultBackground)
             borderWidth += box(1.px)
             backgroundRadius += box(5.0.px)
-            effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
+            effect = DropShadow(2.0, 2.0, 2.0, AppTheme.colors.dropShadow)
             backgroundColor += AppTheme.colors.white
             button {
                 minHeight = 40.px

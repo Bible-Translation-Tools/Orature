@@ -26,5 +26,4 @@ class LanguageMapper : Mapper<LanguageEntity, Language> {
             if (type.isGateway) 1 else 0
         )
     }
-
 }

@@ -39,11 +39,11 @@ class ProjectWizardViewModel : ViewModel() {
 
     init {
         languageRepo
-                .getAll()
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    languages.setAll(retrieved)
-                }
+            .getAll()
+            .observeOnFx()
+            .subscribe { retrieved ->
+                languages.setAll(retrieved)
+            }
 
         loadProjects()
 
@@ -54,22 +54,22 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun loadProjects() {
         collectionRepo
-                .getRootProjects()
-                .subscribe { retrieved ->
-                    projects.setAll(retrieved)
-                }
+            .getRootProjects()
+            .subscribe { retrieved ->
+                projects.setAll(retrieved)
+            }
     }
 
     fun getRootSources() {
         collectionRepo
-                .getRootSources()
-                .observeOnFx()
-                .subscribe { retrieved ->
-                    collectionHierarchy.add(retrieved.filter {
-                        it.resourceContainer?.language == sourceLanguageProperty.value
-                    })
-                    collections.setAll(collectionHierarchy.last())
-                }
+            .getRootSources()
+            .observeOnFx()
+            .subscribe { retrieved ->
+                collectionHierarchy.add(retrieved.filter {
+                    it.resourceContainer?.language == sourceLanguageProperty.value
+                })
+                collections.setAll(collectionHierarchy.last())
+            }
     }
 
     fun doOnUserSelection(selectedCollection: Collection) {
@@ -82,25 +82,25 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun showSubcollections(collection: Collection) {
         collectionRepo
-                .getChildren(collection)
-                .observeOnFx()
-                .doOnSuccess { subcollections ->
-                    collectionHierarchy.add(subcollections)
-                    collections.setAll(collectionHierarchy.last().sortedBy { it.sort })
-                }
-                .subscribe()
+            .getChildren(collection)
+            .observeOnFx()
+            .doOnSuccess { subcollections ->
+                collectionHierarchy.add(subcollections)
+                collections.setAll(collectionHierarchy.last().sortedBy { it.sort })
+            }
+            .subscribe()
     }
 
     private fun createProject(selectedCollection: Collection) {
         targetLanguageProperty.value?.let { language ->
             showOverlayProperty.value = true
             creationUseCase
-                    .create(selectedCollection, language)
-                    .subscribe {
-                        tornadofx.find(ProjectGridViewModel::class).loadProjects()
-                        showOverlayProperty.value = false
-                        creationCompletedProperty.value = true
-                    }
+                .create(selectedCollection, language)
+                .subscribe {
+                    tornadofx.find(ProjectGridViewModel::class).loadProjects()
+                    showOverlayProperty.value = false
+                    creationCompletedProperty.value = true
+                }
         }
     }
 
@@ -133,9 +133,9 @@ class ProjectWizardViewModel : ViewModel() {
 
     fun filterLanguages(query: String): ObservableList<Language> =
         languages.filtered {
-            it.name.contains(query, true)
-                    || it.anglicizedName.contains(query, true)
-                    || it.slug.contains(query, true)
+            it.name.contains(query, true) ||
+                    it.anglicizedName.contains(query, true) ||
+                    it.slug.contains(query, true)
         }.sorted { lang1, lang2 ->
             when {
                 lang1.slug.startsWith(query, true) -> -1
@@ -149,7 +149,7 @@ class ProjectWizardViewModel : ViewModel() {
         }
 
     fun filterTargetLanguages(query: String): ObservableList<Language> =
-            filterLanguages(query).filtered { it != sourceLanguageProperty.value }
+        filterLanguages(query).filtered { it != sourceLanguageProperty.value }
 
     fun languagesValid() = sourceLanguageProperty.booleanBinding(targetLanguageProperty) {
         sourceLanguageProperty.value != null && targetLanguageProperty.value != null

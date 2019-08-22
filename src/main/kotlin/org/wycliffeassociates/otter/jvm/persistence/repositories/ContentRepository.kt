@@ -118,5 +118,4 @@ class ContentRepository(
         }
         return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
     }
-
 }

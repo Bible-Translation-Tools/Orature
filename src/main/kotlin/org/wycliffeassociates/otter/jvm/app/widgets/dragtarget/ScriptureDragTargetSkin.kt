@@ -4,8 +4,7 @@ import tornadofx.*
 
 typealias ScriptureStyles = DragTargetStyles.Scripture
 
-class ScriptureDragTargetSkin(control: DragTarget)
-    : DragTargetSkin(
+class ScriptureDragTargetSkin(control: DragTarget) : DragTargetSkin(
     control = control,
     dragTargetSize = ScriptureStyles.dragTargetSize,
     placeholder = ScriptureStyles.selectedTakePlaceHolder,

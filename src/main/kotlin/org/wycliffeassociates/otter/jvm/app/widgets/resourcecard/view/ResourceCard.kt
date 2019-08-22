@@ -60,7 +60,7 @@ class ResourceCard(private val item: ResourceCardItem) : HBox() {
                 maxWidth = 500.0
                 text = messages["viewRecordings"]
                 action {
-                   item.onSelect()
+                    item.onSelect()
                 }
             }
         )

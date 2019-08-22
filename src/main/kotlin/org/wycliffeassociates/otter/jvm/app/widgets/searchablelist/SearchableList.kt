@@ -55,5 +55,8 @@ class SearchableList<T>(listItems: ObservableList<T>, outputValue: Property<T>, 
     }
 }
 
-fun <T> EventTarget.searchablelist(listItems: ObservableList<T>, value: Property<T>, init: SearchableList<T>.() -> Unit)
-        = SearchableList(listItems, value).attachTo(this, init)
+fun <T> EventTarget.searchablelist(
+    listItems: ObservableList<T>,
+    value: Property<T>,
+    init: SearchableList<T>.() -> Unit
+) = SearchableList(listItems, value).attachTo(this, init)

@@ -8,7 +8,6 @@ import javafx.scene.Node
 import javafx.scene.effect.GaussianBlur
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import tornadofx.*
 
 class InnerCard(cardGraphic: Node? = null) : VBox() {
@@ -55,7 +54,6 @@ class InnerCard(cardGraphic: Node? = null) : VBox() {
                         fill = Color.WHITE
                         effect = GaussianBlur(15.0)
                         visibleProperty().bind(titleProperty.booleanBinding { it != null })
-
                     }
                     label(titleProperty) {
                         addClass(DefaultStyles.defaultTitle)
@@ -96,7 +94,6 @@ class InnerCard(cardGraphic: Node? = null) : VBox() {
             }
         }
     }
-
 }
 
 fun innercard(cardGraphic: Node? = null, init: InnerCard.() -> Unit = {}): InnerCard {

@@ -6,13 +6,14 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import java.io.InputStream
 
-//Loads an image with a given file path
+// Loads an image with a given file path
 class ImageLoader {
     enum class Format {
         SVG,
         PNG,
         JPG
     }
+
     companion object {
         fun load(imageStream: InputStream, format: Format): Node {
             return when (format) {

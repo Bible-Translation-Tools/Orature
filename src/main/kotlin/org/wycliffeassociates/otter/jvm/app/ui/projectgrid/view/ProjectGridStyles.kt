@@ -2,9 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectgrid.view
 
 import javafx.geometry.Pos
 import javafx.scene.Cursor
-import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 

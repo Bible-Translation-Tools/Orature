@@ -18,7 +18,6 @@ class TakesListView(
                 new take card if it was selected.)
              */
             graphic = createTakeNode(it)
-
         }
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
