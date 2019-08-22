@@ -66,7 +66,6 @@ class ProjectWizardViewModel : ViewModel() {
             }.subscribe { uniqueLanguages ->
                 filteredLanguages.setAll(uniqueLanguages)
             }
-
     }
 
     private fun loadProjects() {
@@ -149,11 +148,11 @@ class ProjectWizardViewModel : ViewModel() {
         loadProjects()
     }
 
-    fun filterLanguages(query: String): ObservableList<Language> =
-        allLanguages.filtered {
-            it.name.contains(query, true)
-                    || it.anglicizedName.contains(query, true)
-                    || it.slug.contains(query, true)
+    fun filterLanguages(query: String): ObservableList<Language> {
+        return allLanguages.filtered {
+            it.name.contains(query, true) ||
+                    it.anglicizedName.contains(query, true) ||
+                    it.slug.contains(query, true)
         }.sorted { lang1, lang2 ->
             when {
                 lang1.slug.startsWith(query, true) -> -1
@@ -165,6 +164,7 @@ class ProjectWizardViewModel : ViewModel() {
                 else -> 0
             }
         }
+    }
 
     fun languagesValid() = sourceLanguageProperty.booleanBinding(targetLanguageProperty) {
         sourceLanguageProperty.value != null && targetLanguageProperty.value != null
