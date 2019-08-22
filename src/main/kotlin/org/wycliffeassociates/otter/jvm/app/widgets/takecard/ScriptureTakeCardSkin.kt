@@ -19,7 +19,7 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 addClass(TakeCardStyles.scriptureTakeCard)
                 vbox {
                     addClass(TakeCardStyles.content)
-                    //the top bar of the take card
+                    // the top bar of the take card
                     hbox(10) {
                         style {
                             maxHeight = 75.0.px

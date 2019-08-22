@@ -12,7 +12,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewMo
 import org.wycliffeassociates.otter.jvm.persistence.WaveFileCreator
 import tornadofx.*
 
-class AudioPluginViewModel: ViewModel() {
+class AudioPluginViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val pluginRepository = injector.pluginRepository
 

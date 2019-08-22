@@ -60,12 +60,11 @@ class ProjectGridFragment : Fragment() {
                             addClass(DefaultStyles.defaultCardButton)
                             text = messages["openProject"]
                             graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                    .apply { fill = AppTheme.colors.appRed }
+                                .apply { fill = AppTheme.colors.appRed }
                             onMousePressed = EventHandler {
                                 viewModel.selectProject(item)
                             }
                         }
-
                     }
                 }
             }
@@ -105,8 +104,8 @@ class ProjectGridFragment : Fragment() {
     init {
         with(root) {
             add(ImageLoader.load(
-                    ClassLoader.getSystemResourceAsStream("images/project_home_arrow.svg"),
-                    ImageLoader.Format.SVG
+                ClassLoader.getSystemResourceAsStream("images/project_home_arrow.svg"),
+                ImageLoader.Format.SVG
             ).apply {
                 if (this is SVGImage) preserveAspect = false
                 root.widthProperty().onChange {

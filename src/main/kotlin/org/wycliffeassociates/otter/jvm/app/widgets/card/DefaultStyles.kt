@@ -120,7 +120,6 @@ class DefaultStyles : Stylesheet() {
         defaultTitle {
             fontSize = 16.px
             textFill = AppTheme.colors.defaultText
-
         }
         defaultBody {
             fontSize = 32.px
@@ -133,7 +132,6 @@ class DefaultStyles : Stylesheet() {
             fontWeight = FontWeight.BOLD
             textFill = AppTheme.colors.white
             backgroundColor += c("#000", 0.1)
-
         }
         defaultMinorLabel {
             fontSize = 16.px

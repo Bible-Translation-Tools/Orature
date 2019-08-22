@@ -8,5 +8,5 @@ package org.wycliffeassociates.otter.jvm.app.widgets.filterablecombobox
  */
 data class FilterableItem<T>(
     val item: T,
-    val filterText : List<String>
+    val filterText: List<String>
 )

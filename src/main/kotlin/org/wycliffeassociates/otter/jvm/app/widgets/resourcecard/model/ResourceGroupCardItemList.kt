@@ -3,11 +3,11 @@ package org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model
 import com.sun.javafx.collections.ObservableListWrapper
 import javafx.collections.ListChangeListener
 
-class ResourceGroupCardItemList: ObservableListWrapper<ResourceGroupCardItem>(mutableListOf()) {
+class ResourceGroupCardItemList : ObservableListWrapper<ResourceGroupCardItem>(mutableListOf()) {
     init {
         addListener(
             ListChangeListener<ResourceGroupCardItem> {
-                while(it.next()) {
+                while (it.next()) {
                     if (it.wasRemoved()) {
                         it.removed.forEach { item ->
                             item.onRemove()

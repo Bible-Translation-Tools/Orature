@@ -20,6 +20,7 @@ class RecordScriptureStyles : Stylesheet() {
         val navigationButton by cssclass()
         val newTakeCard by cssclass()
         val scrollpane by cssclass()
+        val scrollpaneContainer by cssclass()
         val pageTop by cssclass()
 
         val takeMaxWidth = 348.px
@@ -66,7 +67,15 @@ class RecordScriptureStyles : Stylesheet() {
         }
 
         scrollpane {
+            padding = box(0.px, 30.px, 0.px, 30.px)
+            viewport {
+                backgroundColor += Color.TRANSPARENT
+            }
             backgroundColor += Color.TRANSPARENT
+        }
+
+        scrollpaneContainer {
+            padding = box(0.px, 10.px, 0.px, 0.px)
         }
 
         glow {
@@ -91,7 +100,7 @@ class RecordScriptureStyles : Stylesheet() {
             borderColor += box(AppTheme.colors.defaultBackground)
             borderWidth += box(1.px)
             backgroundRadius += box(5.0.px)
-            effect = DropShadow(2.0,2.0,2.0,AppTheme.colors.dropShadow)
+            effect = DropShadow(2.0, 2.0, 2.0, AppTheme.colors.dropShadow)
             backgroundColor += AppTheme.colors.white
             button {
                 minHeight = 40.px

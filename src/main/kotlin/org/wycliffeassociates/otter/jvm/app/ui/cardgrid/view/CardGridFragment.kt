@@ -18,7 +18,6 @@ class CardGridFragment : Fragment() {
     init {
         importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
-
     }
 
     override val root = vbox {
@@ -61,8 +60,8 @@ class CardGridFragment : Fragment() {
         }
     }
 
-    private fun cardGraphic() : Node {
-        if(viewModel.filteredContent.first().dataType == "content") {
+    private fun cardGraphic(): Node {
+        if (viewModel.filteredContent.first().dataType == "content") {
             return AppStyles.chunkGraphic()
         }
         return AppStyles.chapterGraphic()

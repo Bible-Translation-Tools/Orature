@@ -1,14 +1,8 @@
 package org.wycliffeassociates.otter.jvm.statusindicator.control
 
 import com.sun.javafx.css.converters.ColorConverter
-import com.sun.javafx.css.converters.PaintConverter
-import com.sun.javafx.scene.layout.region.BorderStyleConverter
 import javafx.beans.property.*
 import javafx.css.*
-import javafx.geometry.Dimension2D
-import javafx.geometry.HPos
-import javafx.geometry.Insets
-import javafx.geometry.VPos
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.paint.*
@@ -26,7 +20,6 @@ class StatusIndicator : Control() {
         }
 
     var primaryFill: Color by primaryFillProperty
-
 
     val accentFillProperty: StyleableObjectProperty<Color> =
         object : SimpleStyleableObjectProperty<Color>(
@@ -49,62 +42,54 @@ class StatusIndicator : Control() {
     var trackFill: Color by trackFillProperty
 
     val barBorderStyleProperty: StyleableObjectProperty<BorderStrokeStyle> =
-            object: SimpleStyleableObjectProperty<BorderStrokeStyle>(
-                BAR_BORDER,
-                StatusIndicator,
-                "barBorderStyle",
-                BorderStrokeStyle.NONE
-            ){
-
-            }
+        object : SimpleStyleableObjectProperty<BorderStrokeStyle>(
+            BAR_BORDER,
+            StatusIndicator,
+            "barBorderStyle",
+            BorderStrokeStyle.NONE
+        ) {
+        }
     var barBorderStyle by barBorderStyleProperty
 
-
     val barBorderColorProperty: StyleableObjectProperty<Paint> =
-        object: SimpleStyleableObjectProperty<Paint>(
+        object : SimpleStyleableObjectProperty<Paint>(
             BAR_BORDER_COLOR,
             StatusIndicator,
             "barBorderColor",
             Color.BLACK
-        ){
-
+        ) {
         }
     var barBorderColor by barBorderColorProperty
 
     val textFillProperty: StyleableObjectProperty<Paint> =
-        object: SimpleStyleableObjectProperty<Paint>(
+        object : SimpleStyleableObjectProperty<Paint>(
             TEXT_FILL,
             StatusIndicator,
             "textFill",
             Color.BLACK
-        ){
-
+        ) {
         }
     var textFill by textFillProperty
 
     val trackBorderStyleProperty: StyleableObjectProperty<BorderStrokeStyle> =
-        object: SimpleStyleableObjectProperty<BorderStrokeStyle>(
+        object : SimpleStyleableObjectProperty<BorderStrokeStyle>(
             TRACK_BORDER,
             StatusIndicator,
             "trackBorder",
             BorderStrokeStyle.NONE
-        ){
-
+        ) {
         }
     var trackBorderStyle by trackBorderStyleProperty
 
-
     val trackBorderColorProperty: StyleableObjectProperty<Paint> =
-        object: SimpleStyleableObjectProperty<Paint>(
+        object : SimpleStyleableObjectProperty<Paint>(
             TRACK_BORDER_COLOR,
             StatusIndicator,
             "trackBorderColor",
             Color.BLACK
-        ){
-
+        ) {
         }
     var trackBorderColor by trackBorderColorProperty
-
 
     val progressProperty: DoubleProperty = SimpleDoubleProperty(0.0)
     var progress: Double by progressProperty
@@ -135,7 +120,6 @@ class StatusIndicator : Control() {
 
     val trackBorderWidthProperty: DoubleProperty = SimpleDoubleProperty(0.0)
     var trackBorderWidth by trackBorderWidthProperty
-
 
     init {
         isCompleteProperty.onChange {
@@ -195,11 +179,11 @@ class StatusIndicator : Control() {
             }
 
         private val BAR_BORDER: CssMetaData<StatusIndicator, BorderStrokeStyle> =
-            object: CssMetaData<StatusIndicator, BorderStrokeStyle>(
+            object : CssMetaData<StatusIndicator, BorderStrokeStyle>(
                 "-fx-bar-border",
                 StyleConverter<StatusIndicator, BorderStrokeStyle>(),
                 BorderStrokeStyle.NONE
-            ){
+            ) {
                 override fun isSettable(styleable: StatusIndicator): Boolean {
                     return styleable.barBorderStyleProperty.value == null || styleable.barBorderStyleProperty.isBound
                 }
@@ -210,11 +194,11 @@ class StatusIndicator : Control() {
             }
 
         private val TEXT_FILL: CssMetaData<StatusIndicator, Paint> =
-            object: CssMetaData<StatusIndicator, Paint>(
+            object : CssMetaData<StatusIndicator, Paint>(
                 "-fx-text-fill",
                 StyleConverter<StatusIndicator, Paint>(),
                 Color.BLACK
-            ){
+            ) {
                 override fun isSettable(styleable: StatusIndicator): Boolean {
                     return styleable.textFillProperty.value == null || styleable.textFillProperty.isBound
                 }
@@ -225,11 +209,11 @@ class StatusIndicator : Control() {
             }
 
         private val BAR_BORDER_COLOR: CssMetaData<StatusIndicator, Paint> =
-            object: CssMetaData<StatusIndicator, Paint>(
+            object : CssMetaData<StatusIndicator, Paint>(
                 "-fx-bar-border-color",
                 StyleConverter<StatusIndicator, Paint>(),
                 Color.BLACK
-            ){
+            ) {
                 override fun isSettable(styleable: StatusIndicator): Boolean {
                     return styleable.barBorderColorProperty.value == null || styleable.barBorderColorProperty.isBound
                 }
@@ -240,11 +224,11 @@ class StatusIndicator : Control() {
             }
 
         private val TRACK_BORDER_COLOR: CssMetaData<StatusIndicator, Paint> =
-            object: CssMetaData<StatusIndicator, Paint>(
+            object : CssMetaData<StatusIndicator, Paint>(
                 "-fx-track-border-color",
                 StyleConverter<StatusIndicator, Paint>(),
                 Color.BLACK
-            ){
+            ) {
                 override fun isSettable(styleable: StatusIndicator): Boolean {
                     return styleable.trackBorderColorProperty.value == null || styleable.trackBorderColorProperty.isBound
                 }
@@ -255,11 +239,11 @@ class StatusIndicator : Control() {
             }
 
         private val TRACK_BORDER: CssMetaData<StatusIndicator, BorderStrokeStyle> =
-            object: CssMetaData<StatusIndicator, BorderStrokeStyle>(
+            object : CssMetaData<StatusIndicator, BorderStrokeStyle>(
                 "-fx-track-border",
                 StyleConverter<StatusIndicator, BorderStrokeStyle>(),
                 BorderStrokeStyle.NONE
-            ){
+            ) {
                 override fun isSettable(styleable: StatusIndicator): Boolean {
                     return styleable.trackBorderStyleProperty.value == null || styleable.trackBorderStyleProperty.isBound
                 }
@@ -286,7 +270,6 @@ class StatusIndicator : Control() {
                 STYLEABLES.addAll(styleables)
             }
         }
-
     }
 
     override fun getControlCssMetaData(): MutableList<CssMetaData<out Styleable, *>> {

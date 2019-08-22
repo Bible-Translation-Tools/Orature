@@ -57,6 +57,7 @@ fabric.properties
 #Covers Gradle
 .gradle
 /build/
+local.properties
 
 # Ignore Gradle GUI config
 gradle-org.wycliffeassociates.otter.jvm.app.setting

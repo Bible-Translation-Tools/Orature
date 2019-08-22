@@ -6,7 +6,6 @@ import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
-import javax.inject.Singleton
 
 @Module
 class AudioModule {

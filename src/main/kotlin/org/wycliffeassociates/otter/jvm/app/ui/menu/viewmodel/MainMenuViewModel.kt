@@ -34,56 +34,56 @@ class MainMenuViewModel : ViewModel() {
 
     fun importResourceContainer(fileOrDir: File) {
         val importer = ImportResourceContainer(
-                resourceContainerRepository,
-                directoryProvider,
-                zipEntryTreeBuilder
+            resourceContainerRepository,
+            directoryProvider,
+            zipEntryTreeBuilder
         )
         showImportDialogProperty.value = true
         importer.import(fileOrDir)
-                .observeOnFx()
-                .subscribe { result ->
-                    val errorMessage = when (result) {
-                        ImportResult.SUCCESS -> null
-                        ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]
-                        ImportResult.INVALID_CONTENT -> messages["importErrorInvalidContent"]
-                        ImportResult.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
-                        ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
-                        ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
-                        ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
-                        ImportResult.UNMATCHED_HELP -> messages["importErrorUnmatchedHelp"]
-                    }
-                    showImportDialogProperty.value = false
-                    errorMessage?.let {
-                        tornadofx.error(messages["importError"], it)
-                    }
+            .observeOnFx()
+            .subscribe { result ->
+                val errorMessage = when (result) {
+                    ImportResult.SUCCESS -> null
+                    ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]
+                    ImportResult.INVALID_CONTENT -> messages["importErrorInvalidContent"]
+                    ImportResult.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
+                    ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
+                    ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
+                    ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
+                    ImportResult.UNMATCHED_HELP -> messages["importErrorUnmatchedHelp"]
                 }
+                showImportDialogProperty.value = false
+                errorMessage?.let {
+                    tornadofx.error(messages["importError"], it)
+                }
+            }
     }
 
     fun refreshPlugins() {
         pluginRepository
-                .getAll()
-                .observeOnFx()
-                .doOnSuccess { pluginData ->
-                    editorPlugins.setAll(pluginData.filter { it.canEdit })
-                    recorderPlugins.setAll(pluginData.filter { it.canRecord })
-                }
-                .observeOn(Schedulers.io())
-                .flatMapMaybe {
-                    pluginRepository.getRecorderData()
-                }
-                .observeOnFx()
-                .doOnSuccess {
-                    selectedRecorderProperty.set(it)
-                }
-                .observeOn(Schedulers.io())
-                .flatMap {
-                    pluginRepository.getEditorData()
-                }
-                .observeOnFx()
-                .doOnSuccess {
-                    selectedEditorProperty.set(it)
-                }
-                .subscribe()
+            .getAll()
+            .observeOnFx()
+            .doOnSuccess { pluginData ->
+                editorPlugins.setAll(pluginData.filter { it.canEdit })
+                recorderPlugins.setAll(pluginData.filter { it.canRecord })
+            }
+            .observeOn(Schedulers.io())
+            .flatMapMaybe {
+                pluginRepository.getRecorderData()
+            }
+            .observeOnFx()
+            .doOnSuccess {
+                selectedRecorderProperty.set(it)
+            }
+            .observeOn(Schedulers.io())
+            .flatMap {
+                pluginRepository.getEditorData()
+            }
+            .observeOnFx()
+            .doOnSuccess {
+                selectedEditorProperty.set(it)
+            }
+            .subscribe()
     }
 
     fun selectEditor(editorData: AudioPluginData) {

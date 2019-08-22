@@ -216,5 +216,4 @@ class ContentDao(
             .where(CONTENT_ENTITY.ID.eq(entity.id))
             .execute()
     }
-
 }

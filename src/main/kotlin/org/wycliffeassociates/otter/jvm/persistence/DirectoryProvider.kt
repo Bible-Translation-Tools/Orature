@@ -114,5 +114,4 @@ class DirectoryProvider(
 
     override val audioPluginDirectory: File
         get() = getAppDataDirectory("plugins")
-
 }

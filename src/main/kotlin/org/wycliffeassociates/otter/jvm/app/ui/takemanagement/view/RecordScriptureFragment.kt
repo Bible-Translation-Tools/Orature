@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
 import tornadofx.*
 
-private class RecordableViewModelProvider: Component() {
+private class RecordableViewModelProvider : Component() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     fun get() = recordScriptureViewModel.recordableViewModel
 }
@@ -34,7 +34,7 @@ class RecordScriptureFragment : RecordableFragment(
                 addClass(RecordScriptureStyles.pageTop)
                 alignment = Pos.CENTER
                 vgrow = Priority.ALWAYS
-                //previous verse button
+                // previous verse button
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
                     action {
@@ -52,7 +52,7 @@ class RecordScriptureFragment : RecordableFragment(
                     }
                 }
 
-                //next verse button
+                // next verse button
                 button(messages["nextVerse"], AppStyles.forwardIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
@@ -63,19 +63,20 @@ class RecordScriptureFragment : RecordableFragment(
                 }
             }
 
-            // Add the available takes flow pane
-            scrollpane {
-                vgrow = Priority.ALWAYS
-                isFitToWidth = true
-                addClass(RecordScriptureStyles.scrollpane)
-                add(
-                    TakesFlowPane(
-                        recordableViewModel.alternateTakes,
-                        audioPluginViewModel::audioPlayer,
-                        lastPlayOrPauseEvent,
-                        recordableViewModel::recordNewTake
+            vbox {
+                addClass(RecordScriptureStyles.scrollpaneContainer)
+                scrollpane {
+                    isFitToWidth = true
+                    addClass(RecordScriptureStyles.scrollpane)
+                    add(
+                        TakesFlowPane(
+                            recordableViewModel.alternateTakes,
+                            audioPluginViewModel::audioPlayer,
+                            lastPlayOrPauseEvent,
+                            recordableViewModel::recordNewTake
+                        )
                     )
-                )
+                }
             }
         }
     }

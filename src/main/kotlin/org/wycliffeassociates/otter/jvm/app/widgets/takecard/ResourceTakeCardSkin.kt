@@ -5,7 +5,6 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import tornadofx.*
 
 class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {

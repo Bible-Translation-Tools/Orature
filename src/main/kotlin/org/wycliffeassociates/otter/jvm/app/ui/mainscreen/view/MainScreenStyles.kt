@@ -25,11 +25,10 @@ class MainScreenStyles : Stylesheet() {
             backgroundColor += AppTheme.colors.defaultBackground
         }
 
-        //this gets compiled down to list-item
+        // this gets compiled down to list-item
         listItem {
             backgroundColor += AppTheme.colors.defaultBackground
             padding = box(24.px)
-
         }
     }
 }

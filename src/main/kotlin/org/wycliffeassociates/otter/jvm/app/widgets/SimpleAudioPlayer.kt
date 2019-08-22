@@ -8,7 +8,6 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -71,22 +70,21 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
 
     private fun startProgressUpdate(): Disposable {
         return Observable
-                .interval(16, TimeUnit.MILLISECONDS)
-                .observeOnFx()
-                .subscribe {
-                    val location = player
-                            .getAbsoluteLocationInFrames()
-                            .toDouble()
-                    progressBar.progress = location / player.getAbsoluteDurationInFrames()
-                }
+            .interval(16, TimeUnit.MILLISECONDS)
+            .observeOnFx()
+            .subscribe {
+                val location = player
+                    .getAbsoluteLocationInFrames()
+                    .toDouble()
+                progressBar.progress = location / player.getAbsoluteDurationInFrames()
+            }
     }
-
 }
 
 fun simpleaudioplayer(
-        audioFile: File,
-        audioPlayer: IAudioPlayer,
-        init: SimpleAudioPlayer.() -> Unit
+    audioFile: File,
+    audioPlayer: IAudioPlayer,
+    init: SimpleAudioPlayer.() -> Unit
 ): SimpleAudioPlayer {
     val audioPlayer = SimpleAudioPlayer(audioFile, audioPlayer)
     audioPlayer.init()

@@ -14,6 +14,7 @@ class MainMenuStyles : Stylesheet() {
         fun recorderIcon(size: String) = MaterialIconView(MaterialIcon.MIC, size)
         fun editorIcon(size: String) = MaterialIconView(MaterialIcon.MODE_EDIT, size)
     }
+
     init {
         menuBar {
             backgroundColor += AppTheme.colors.base
@@ -58,7 +59,6 @@ class MainMenuStyles : Stylesheet() {
             contextMenu {
                 backgroundColor += AppTheme.colors.base
             }
-
         }
     }
 }

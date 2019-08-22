@@ -2,8 +2,6 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -28,10 +26,10 @@ class ProjectGridViewModel : ViewModel() {
 
     fun loadProjects() {
         collectionRepo.getRootProjects()
-                .observeOnFx()
-                .doOnSuccess {
-                    projects.setAll(it)
-                }.subscribe()
+            .observeOnFx()
+            .doOnSuccess {
+                projects.setAll(it)
+            }.subscribe()
     }
 
     fun clearSelectedProject() {
@@ -44,9 +42,9 @@ class ProjectGridViewModel : ViewModel() {
 
     fun deleteProject(project: Collection) {
         collectionRepo.deleteProject(project, false)
-                .observeOnFx()
-                .andThen(Completable.fromAction { loadProjects() })
-                .subscribe()
+            .observeOnFx()
+            .andThen(Completable.fromAction { loadProjects() })
+            .subscribe()
     }
 
     fun selectProject(targetProject: Collection) {
@@ -62,8 +60,7 @@ class ProjectGridViewModel : ViewModel() {
 
     private fun setProjectAudioDirectory(targetProject: Collection, sourceProject: Collection) {
         val projectAudioDir = directoryProvider.getProjectAudioDirectory(
-            sourceMetadata = sourceProject.resourceContainer ?:
-                throw RuntimeException("No source metadata found."),
+            sourceMetadata = sourceProject.resourceContainer ?: throw RuntimeException("No source metadata found."),
             book = targetProject
         )
         workbookViewModel.activeProjectAudioDirectoryProperty.set(projectAudioDir)

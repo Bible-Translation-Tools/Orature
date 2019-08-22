@@ -55,7 +55,5 @@ class RemovePluginsStyles : Stylesheet() {
                 }
             }
         }
-
-
     }
 }

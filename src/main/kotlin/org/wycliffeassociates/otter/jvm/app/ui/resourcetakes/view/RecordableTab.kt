@@ -14,7 +14,7 @@ class RecordableTab(
     private val parent: TabPane,
     val sort: Int,
     private val onTabSelect: (Recordable) -> Unit
-): Tab() {
+) : Tab() {
 
     init {
         textProperty().bind(viewModel.labelProperty)

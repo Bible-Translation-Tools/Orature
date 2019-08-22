@@ -32,7 +32,6 @@ object AppTheme {
         override val imagePlaceholder: Color = c("#555")
         override val subtitle: Color = c("#AAA")
         override val lightBackground: Color = c("#E6E8E9")
-
     }
 
     fun useDarkColors() {

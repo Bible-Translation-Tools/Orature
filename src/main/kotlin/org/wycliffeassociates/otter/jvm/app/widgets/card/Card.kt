@@ -4,10 +4,9 @@ import javafx.scene.Node
 import javafx.scene.layout.VBox
 import tornadofx.*
 
-class Card: VBox() {
+class Card : VBox() {
 
     var cardChildren = observableList<Node>()
-
 
     fun cardfront(init: CardFront.() -> Unit = {}): CardFront {
         val cf = CardFront()
@@ -27,7 +26,7 @@ class Card: VBox() {
     }
 }
 
-fun card(init: Card.() -> Unit= {}): Card {
+fun card(init: Card.() -> Unit = {}): Card {
     val cd = Card()
     cd.init()
     return cd
