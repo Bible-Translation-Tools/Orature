@@ -40,7 +40,6 @@ class RecorderViewModel : ViewModel() {
     val timerTextProperty = SimpleStringProperty("00:00:00")
     var timerText by timerTextProperty
 
-
     val at = object : AnimationTimer() {
         override fun handle(now: Long) {
             waveformView.draw()
@@ -84,7 +83,6 @@ class RecorderViewModel : ViewModel() {
     var hasWritten by hasWrittenProperty
 
     var canSaveProperty: BooleanBinding = (recordingProperty.not()).and(hasWrittenProperty)
-
 
     fun toggle() {
         volumeTest?.let {

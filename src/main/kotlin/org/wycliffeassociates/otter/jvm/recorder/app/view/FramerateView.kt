@@ -13,8 +13,8 @@ class FramerateView : Label() {
 
     private val builder = StringBuilder("FPS: 000")
 
-    //code from:
-    //https://stackoverflow.com/questions/28287398/what-is-the-preferred-way-of-getting-the-frame-rate-of-a-javafx-application
+    // code from:
+    // https://stackoverflow.com/questions/28287398/what-is-the-preferred-way-of-getting-the-frame-rate-of-a-javafx-application
     val at = object : AnimationTimer() {
 
         override fun handle(currentNanoTime: Long) {
