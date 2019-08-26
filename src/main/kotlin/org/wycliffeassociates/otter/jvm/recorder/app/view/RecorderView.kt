@@ -2,10 +2,10 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
-import tornadofx.View
+import tornadofx.Fragment
 import tornadofx.vbox
 
-class RecorderView : View() {
+class RecorderView : Fragment() {
 
     val info = InfoFragment()
     val waveform = RecordingVisualizerFragment()
