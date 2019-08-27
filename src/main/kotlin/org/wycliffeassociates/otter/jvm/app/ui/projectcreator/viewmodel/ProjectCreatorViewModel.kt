@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view.ProjectCreator
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view.fragments.SelectCollection
+import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel.ProjectGridViewModel
 import tornadofx.*
 
@@ -154,6 +155,7 @@ class ProjectCreatorViewModel : ViewModel() {
     }
 
     fun closeCreator(){
+        find<ProjectCreator>().creationWorkspace.dock<SelectLanguage>()
         workspace.dock<MainScreenView>()
     }
 

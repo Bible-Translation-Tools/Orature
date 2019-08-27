@@ -66,7 +66,7 @@ class ProjectCreatorStyles : Stylesheet() {
             padding = box(50.px, 0.px, 0.px, 0.px)
         }
 
-        Stylesheet.label {
+        label {
             and(sourceLanguageBoxLabel) {
                 textFill = AppTheme.colors.appBlue
                 child("*") {
@@ -103,7 +103,7 @@ class ProjectCreatorStyles : Stylesheet() {
                     fill = AppTheme.colors.defaultText
                 }
             }
-            Stylesheet.label {
+            label {
                 textFill = AppTheme.colors.defaultText
                 fontWeight = FontWeight.BOLD
                 fontSize = 16.px

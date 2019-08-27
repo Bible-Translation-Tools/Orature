@@ -30,7 +30,6 @@ class ProjectCreator : View() {
                 padding = Insets(40.0)
                 button(messages["cancel"]) {
                     addClass(ProjectCreatorStyles.wizardButton)
-//                    enableWhen(creatorViewModel.showOverlayProperty)
                     action {
                         creatorViewModel.closeCreator()
                     }
@@ -51,14 +50,12 @@ class ProjectCreator : View() {
                         creatorViewModel.goNext()
                     }
                 }
-
-
             }
         }
         creatorViewModel.creationCompletedProperty.onChange {
             if (it) {
                 runLater {
-                   workspace.dock<MainScreenView>()
+                    creatorViewModel.closeCreator()
                 }
             }
         }

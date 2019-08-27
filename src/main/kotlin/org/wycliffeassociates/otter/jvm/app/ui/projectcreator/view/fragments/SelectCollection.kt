@@ -55,12 +55,6 @@ class SelectCollection : Fragment() {
                         }
                     }
                 }
-
-                button("refresh") {
-                    action {
-                        viewModel.getRootSources()
-                    }
-                }
             }
         }
         val dialog = progressdialog {
