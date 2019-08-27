@@ -58,7 +58,7 @@ class ProjectCreatorViewModel : ViewModel() {
 
         targetLanguageProperty.toObservable().subscribe { language ->
             existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
-            if(sourceLanguageProperty != null && targetLanguageProperty!= null) canGoNext.set(true)
+            if (sourceLanguageProperty != null && targetLanguageProperty != null) canGoNext.set(true)
         }
     }
 
@@ -154,7 +154,7 @@ class ProjectCreatorViewModel : ViewModel() {
         canGoBack.set(true)
     }
 
-    fun closeCreator(){
+    fun closeCreator() {
         find<ProjectCreator>().creationWorkspace.dock<SelectLanguage>()
         workspace.dock<MainScreenView>()
     }

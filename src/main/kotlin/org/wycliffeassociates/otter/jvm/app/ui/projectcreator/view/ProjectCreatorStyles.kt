@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.SlugsEnum
 import org.wycliffeassociates.otter.jvm.app.widgets.searchablelist.SearchableListStyles
 import tornadofx.*
 
-
 class ProjectCreatorStyles : Stylesheet() {
 
     companion object {

@@ -1,13 +1,9 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view
 
 import javafx.geometry.Insets
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view.ProjectCreatorStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.viewmodel.ProjectCreatorViewModel
-import org.wycliffeassociates.otter.jvm.app.ui.projectcreator.view.fragments.SelectCollection
 import tornadofx.*
 
 class ProjectCreator : View() {
@@ -17,8 +13,6 @@ class ProjectCreator : View() {
 
     init {
         importStylesheet<ProjectCreatorStyles>()
-
-
         root.addClass(AppStyles.appBackground)
         root.center {
             add(creationWorkspace)
@@ -38,10 +32,9 @@ class ProjectCreator : View() {
                     addClass(ProjectCreatorStyles.wizardButton)
                     enableWhen(creatorViewModel.canGoBack.and(!creatorViewModel.showOverlayProperty))
                     action {
-                       creatorViewModel.goBack()
+                        creatorViewModel.goBack()
                     }
                 }
-
                 button(messages["next"]) {
                     addClass(ProjectCreatorStyles.wizardButton)
                     enableWhen(creatorViewModel.canGoNext.and(creatorViewModel.languagesValid()))
@@ -60,7 +53,6 @@ class ProjectCreator : View() {
             }
         }
     }
-
 
     override fun onDock() {
         super.onDock()
