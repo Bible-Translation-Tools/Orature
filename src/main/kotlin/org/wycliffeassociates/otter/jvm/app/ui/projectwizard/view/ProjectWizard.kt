@@ -1,69 +1,56 @@
 package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view
 
-import javafx.geometry.Insets
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectCollection
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
 import tornadofx.*
 
-class ProjectWizard : Wizard() {
-
+class ProjectWizard : View() {
+    override val root = borderpane {}
     private val wizardViewModel: ProjectWizardViewModel by inject()
-    override val canGoNext = currentPageComplete
+    val wizardWorkspace = Workspace()
+
     init {
         importStylesheet<ProjectWizardStyles>()
-        showStepsHeader = false
-        showSteps = false
-        showHeader = true
-        enableStepLinks = true
-        showHeader = false
         root.addClass(AppStyles.appBackground)
+        root.center {
+            add(wizardWorkspace)
+            wizardWorkspace.header.removeFromParent()
+            wizardWorkspace.dock(SelectLanguage())
+        }
         root.bottom {
             buttonbar {
-                padding = Insets(10.0)
-                button(messages["back"]) {
-                    addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(canGoBack.and(!wizardViewModel.showOverlayProperty))
-                    action {
-                        wizardViewModel.goBack(this@ProjectWizard)
-                    }
-                }
-
-                button(messages["next"]) {
-                    addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(canGoNext.and(hasNext))
-                    action {
-                        next()
-                    }
-                }
-
+                paddingAll = 40.0
                 button(messages["cancel"]) {
                     addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(!wizardViewModel.showOverlayProperty)
                     action {
-                        onCancel()
+                        wizardViewModel.closeCreator()
+                    }
+                }
+                button(messages["back"]) {
+                    addClass(ProjectWizardStyles.wizardButton)
+                    enableWhen(wizardViewModel.canGoBack.and(!wizardViewModel.showOverlayProperty))
+                    action {
+                        wizardViewModel.goBack()
+                    }
+                }
+                button(messages["next"]) {
+                    addClass(ProjectWizardStyles.wizardButton)
+                    enableWhen(wizardViewModel.canGoNext.and(wizardViewModel.languagesValid()))
+                    visibleWhen(!wizardViewModel.languageConfirmed)
+                    action {
+                        wizardViewModel.goNext()
                     }
                 }
             }
         }
-
-        add(SelectLanguage::class)
-        add(SelectCollection::class)
-
         wizardViewModel.creationCompletedProperty.onChange {
             if (it) {
                 runLater {
-                    currentPage = pages[0]
-                    close()
+                    wizardViewModel.closeCreator()
                 }
             }
         }
-    }
-
-    override fun onCancel() {
-        currentPage = pages[0]
-        close()
     }
 
     override fun onDock() {

@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.subjects.PublishSubject
+import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -11,9 +12,12 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel.ProjectGridViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizard
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectCollection
+import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectLanguage
 import tornadofx.ViewModel
-import tornadofx.Wizard
 import tornadofx.booleanBinding
 
 class ProjectWizardViewModel : ViewModel() {
@@ -38,6 +42,10 @@ class ProjectWizardViewModel : ViewModel() {
 
     private val creationUseCase = CreateProject(collectionRepo)
 
+    val canGoNext: BooleanProperty = SimpleBooleanProperty(false)
+    val canGoBack: BooleanProperty = SimpleBooleanProperty(false)
+    val languageConfirmed: BooleanProperty = SimpleBooleanProperty(false)
+
     init {
         languageRepo
             .getAll()
@@ -51,6 +59,7 @@ class ProjectWizardViewModel : ViewModel() {
 
         targetLanguageProperty.toObservable().subscribe { language ->
             existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
+            if (sourceLanguageProperty != null && targetLanguageProperty != null) canGoNext.set(true)
         }
     }
 
@@ -112,14 +121,14 @@ class ProjectWizardViewModel : ViewModel() {
             creationUseCase
                 .create(selectedCollection, language)
                 .subscribe {
-                    tornadofx.find(ProjectGridViewModel::class).loadProjects()
+                    find(ProjectGridViewModel::class).loadProjects()
                     showOverlayProperty.value = false
                     creationCompletedProperty.value = true
                 }
         }
     }
 
-    fun goBack(projectWizard: Wizard) {
+    fun goBack() {
         when {
             collectionHierarchy.size > 1 -> {
                 collectionHierarchy.removeAt(collectionHierarchy.lastIndex)
@@ -127,10 +136,28 @@ class ProjectWizardViewModel : ViewModel() {
             }
             collectionHierarchy.size == 1 -> {
                 collectionHierarchy.removeAt(0)
-                projectWizard.back()
+                find<ProjectWizard>().wizardWorkspace.navigateBack()
+                canGoBack.set(false)
+                languageConfirmed.set(false)
             }
-            else -> projectWizard.back()
+            else -> {
+                find<ProjectWizard>().wizardWorkspace.navigateBack()
+                canGoBack.set(false)
+                languageConfirmed.set(false)
+            }
         }
+    }
+
+    fun goNext() {
+        getRootSources()
+        find<ProjectWizard>().wizardWorkspace.dock<SelectCollection>()
+        languageConfirmed.set(true)
+        canGoBack.set(true)
+    }
+
+    fun closeCreator() {
+        find<ProjectWizard>().wizardWorkspace.dock<SelectLanguage>()
+        workspace.dock<MainScreenView>()
     }
 
     fun doesProjectExist(project: Collection): Boolean {

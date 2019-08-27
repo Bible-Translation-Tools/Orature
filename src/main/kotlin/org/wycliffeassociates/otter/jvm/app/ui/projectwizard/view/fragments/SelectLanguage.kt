@@ -15,11 +15,13 @@ class SelectLanguage : Fragment() {
     }
 
     override val root = hbox {
+        paddingAll = 40.0
         addClass(ProjectWizardStyles.selectLanguageRoot)
         vbox {
+
             addClass(ProjectWizardStyles.languageSearchContainer)
             label(messages["sourceLanguage"], ProjectWizardStyles.sourceLanguageIcon()) {
-                addClass(ProjectWizardStyles.languageBoxLabel)
+                addClass(ProjectWizardStyles.sourceLanguageBoxLabel)
             }
             searchablelist(viewModel.filteredLanguages, viewModel.sourceLanguageProperty) {
                 addClass(ProjectWizardStyles.searchableList)
@@ -42,7 +44,7 @@ class SelectLanguage : Fragment() {
         vbox {
             addClass(ProjectWizardStyles.languageSearchContainer)
             label(messages["targetLanguage"], ProjectWizardStyles.targetLanguageIcon()) {
-                addClass(ProjectWizardStyles.languageBoxLabel)
+                addClass(ProjectWizardStyles.targetLanguageBoxLabel)
             }
             searchablelist(viewModel.allLanguages, viewModel.targetLanguageProperty) {
                 addClass(ProjectWizardStyles.searchableList)

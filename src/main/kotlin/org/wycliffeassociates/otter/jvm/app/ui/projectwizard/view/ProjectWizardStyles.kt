@@ -21,7 +21,8 @@ class ProjectWizardStyles : Stylesheet() {
         val noResource by cssclass()
         val searchableList by cssclass()
         val wizardButton by cssclass()
-        val languageBoxLabel by cssclass()
+        val sourceLanguageBoxLabel by cssclass()
+        val targetLanguageBoxLabel by cssclass()
         val selectLanguageRoot by cssclass()
         val languageSearchContainer by cssclass()
 
@@ -52,7 +53,7 @@ class ProjectWizardStyles : Stylesheet() {
     }
 
     init {
-        wizard {
+        WizardStyles.wizard {
             backgroundColor += AppTheme.colors.defaultBackground
             prefWidth = 1000.px
             prefHeight = 800.px
@@ -65,10 +66,17 @@ class ProjectWizardStyles : Stylesheet() {
         }
 
         label {
-            and(languageBoxLabel) {
-                textFill = AppTheme.colors.defaultText
+            and(sourceLanguageBoxLabel) {
+                textFill = AppTheme.colors.appBlue
                 child("*") {
-                    fill = AppTheme.colors.defaultText
+                    fill = AppTheme.colors.appBlue
+                }
+            }
+
+            and(targetLanguageBoxLabel) {
+                textFill = AppTheme.colors.appRed
+                child("*") {
+                    fill = AppTheme.colors.appRed
                 }
             }
         }
@@ -139,15 +147,15 @@ class ProjectWizardStyles : Stylesheet() {
             SearchableListStyles.searchListView {
                 backgroundColor += AppTheme.colors.base
                 borderColor += box(AppTheme.colors.base)
-                listCell {
-                    label {
+                Stylesheet.listCell {
+                    Stylesheet.label {
                         textFill = AppTheme.colors.defaultText
                     }
                     backgroundColor += AppTheme.colors.base
                     backgroundRadius += box(5.px)
                     and(selected) {
                         backgroundColor += AppTheme.colors.appRed
-                        label {
+                        Stylesheet.label {
                             textFill = AppTheme.colors.white
                         }
                     }
@@ -157,7 +165,7 @@ class ProjectWizardStyles : Stylesheet() {
 
         wizardButton {
             prefHeight = 40.0.px
-            prefWidth = 120.0.px
+            prefWidth = 150.0.px
             backgroundColor += AppTheme.colors.appRed
             textFill = AppTheme.colors.white
             cursor = Cursor.HAND
