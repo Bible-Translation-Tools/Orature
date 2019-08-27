@@ -16,7 +16,6 @@ import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizard
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectCollection
-import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments.SelectLanguage
 import tornadofx.ViewModel
 import tornadofx.booleanBinding
 
@@ -155,8 +154,9 @@ class ProjectWizardViewModel : ViewModel() {
         canGoBack.set(true)
     }
 
-    fun closeCreator() {
-        find<ProjectWizard>().wizardWorkspace.dock<SelectLanguage>()
+    fun closeWizard() {
+        canGoBack.set(false)
+        languageConfirmed.set(false)
         workspace.dock<MainScreenView>()
     }
 

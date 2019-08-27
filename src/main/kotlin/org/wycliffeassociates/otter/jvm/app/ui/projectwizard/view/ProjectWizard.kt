@@ -24,7 +24,7 @@ class ProjectWizard : View() {
                 button(messages["cancel"]) {
                     addClass(ProjectWizardStyles.wizardButton)
                     action {
-                        wizardViewModel.closeCreator()
+                        wizardViewModel.closeWizard()
                     }
                 }
                 button(messages["back"]) {
@@ -47,7 +47,7 @@ class ProjectWizard : View() {
         wizardViewModel.creationCompletedProperty.onChange {
             if (it) {
                 runLater {
-                    wizardViewModel.closeCreator()
+                    wizardViewModel.closeWizard()
                 }
             }
         }
@@ -55,6 +55,12 @@ class ProjectWizard : View() {
 
     override fun onDock() {
         super.onDock()
+        wizardViewModel.reset()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        wizardWorkspace.navigateBack()
         wizardViewModel.reset()
     }
 }
