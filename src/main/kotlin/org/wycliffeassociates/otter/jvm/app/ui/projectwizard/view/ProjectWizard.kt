@@ -29,14 +29,14 @@ class ProjectWizard : View() {
                 }
                 button(messages["back"]) {
                     addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(wizardViewModel.canGoBack.and(!wizardViewModel.showOverlayProperty))
+                    enableWhen(wizardViewModel.canGoBack and !wizardViewModel.showOverlayProperty)
                     action {
                         wizardViewModel.goBack()
                     }
                 }
                 button(messages["next"]) {
                     addClass(ProjectWizardStyles.wizardButton)
-                    enableWhen(wizardViewModel.canGoNext.and(wizardViewModel.languagesValid()))
+                    enableWhen(wizardViewModel.languagesValid())
                     visibleWhen(!wizardViewModel.languageConfirmed)
                     action {
                         wizardViewModel.goNext()

@@ -41,7 +41,6 @@ class ProjectWizardViewModel : ViewModel() {
 
     private val creationUseCase = CreateProject(collectionRepo)
 
-    val canGoNext: BooleanProperty = SimpleBooleanProperty(false)
     val canGoBack: BooleanProperty = SimpleBooleanProperty(false)
     val languageConfirmed: BooleanProperty = SimpleBooleanProperty(false)
 
@@ -58,7 +57,6 @@ class ProjectWizardViewModel : ViewModel() {
 
         targetLanguageProperty.toObservable().subscribe { language ->
             existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
-            if (sourceLanguageProperty != null && targetLanguageProperty != null) canGoNext.set(true)
         }
     }
 
