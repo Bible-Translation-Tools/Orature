@@ -10,7 +10,7 @@ buildscript {
     ext.jfoenix_version = '9.0.8'
     ext.requery_version = '1.5.1'
     ext.ktlint_plugin_version = '8.2.0'
-    ext.sqlite_jdbc = '3.25.2'
+    ext.sqlite_jdbc = '3.28.0'
     ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
     ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
     ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
@@ -27,9 +27,9 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
-        classpath 'org.jooq:jooq-codegen:3.11.2'
-        classpath 'org.xerial:sqlite-jdbc:3.25.2'
+        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
+        classpath 'org.jooq:jooq-codegen:3.12.0'
+        classpath 'org.xerial:sqlite-jdbc:3.28.0'
         classpath group: 'com.install4j', name: 'install4j-gradle', version: '7.0.8'
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_plugin_version"
         classpath 'org.openjfx:javafx-plugin:0.0.8'
@@ -52,10 +52,10 @@ apply plugin: 'application'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'org.openjfx.javafxplugin'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 11
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "11"
 }
 
 configurations.all {
@@ -112,9 +112,9 @@ dependencies {
 
     //Jooq
     implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
-    implementation 'org.jooq:jooq:3.11.2'
-    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.11.2'
-    jooqRuntime 'org.xerial:sqlite-jdbc:3.7.2'
+    implementation 'org.jooq:jooq:3.12.0'
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
+    jooqRuntime 'org.xerial:sqlite-jdbc:3.28.0'
     sqllite "org.xerial:sqlite-jdbc:$sqlite_jdbc"
 
     //Retrofit
@@ -127,8 +127,8 @@ dependencies {
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.2"
 
     //Dagger2
-    implementation 'com.google.dagger:dagger:2.16'
-    kapt 'com.google.dagger:dagger-compiler:2.16'
+    implementation 'com.google.dagger:dagger:2.24'
+    kapt 'com.google.dagger:dagger-compiler:2.24'
 
     //Testing
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -219,7 +219,7 @@ task createDb {
 }
 
 jooq {
-    version = '3.11.2'
+    version = '3.12.0'
     edition = 'OSS'
     sample(sourceSets.main) {
         jdbc {
