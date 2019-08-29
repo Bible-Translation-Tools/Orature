@@ -37,7 +37,7 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun createProject() {
-        workspace.find<ProjectWizard>().openModal()
+        workspace.dock<ProjectWizard>()
     }
 
     fun deleteProject(project: Collection) {
