@@ -42,7 +42,7 @@ class ParseUsfm(val reader: Reader) {
             MARKER_BOOK_NAME -> return
             MARKER_CHAPTER_NUMBER -> {
                 current.c = split[1]
-                    ?.replace("\\s".toRegex(), "")
+                    .replace("\\s".toRegex(), "")
                     .toInt() // strip potential whitespace and convert to int
                 chapters[current.c] = hashMapOf()
             }

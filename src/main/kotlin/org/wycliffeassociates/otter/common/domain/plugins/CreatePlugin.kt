@@ -11,6 +11,8 @@ class CreatePlugin(
         return pluginRepository
             .insert(data)
             .ignoreElement()
-            .concatWith(pluginRepository.initSelected())
+            .andThen {
+                pluginRepository.initSelected()
+            }
     }
 }

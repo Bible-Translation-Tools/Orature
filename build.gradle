@@ -3,12 +3,12 @@ buildscript {
     ext.rxkotlin_version = '2.2.0'
     ext.ktlint_plugin_version = '8.2.0'
 
-
     repositories {
         mavenCentral()
         jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
+    
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlint_plugin_version"
@@ -36,22 +36,24 @@ dependencies {
     compile "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     compile "com.jakewharton.rxrelay2:rxrelay:2.1.0"
 
-    //Testing
+    // Testing
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile "org.mockito:mockito-core:2.+"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
 
-    //resource container
+    // Resource Container
     implementation 'org.wycliffeassociates:kotlin-resource-container'
 
-    //Jackson YAML
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.2"
+    // Explicitly mention reflection lib so Gradle and kotlin-resource-container's Jackson
+    // dependencies coexist w/o warnings. This can be removed once the krc lib is updated
+    // to Jackson 2.9.8+.
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }
 
 compileKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
+
 compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
