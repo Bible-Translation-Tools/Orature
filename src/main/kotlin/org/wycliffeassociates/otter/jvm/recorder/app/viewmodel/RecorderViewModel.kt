@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
 import org.wycliffeassociates.otter.common.wav.WavFile
+import org.wycliffeassociates.otter.jvm.device.audioplugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
@@ -23,11 +24,12 @@ import java.io.File
 
 class RecorderViewModel : ViewModel() {
 
-    val wav = WavFile(File(app.parameters.named["wav"]))
+    val parameters = (scope as ParameterizedScope).parameters
+    val wav = WavFile(File(parameters["wav"]))
     val recorder = AudioRecorder()
     var volumeTest: AudioRecorder? = AudioRecorder()
 
-    val writer = WavFileWriter(wav, recorder.getAudioStream()) { Platform.exit() }
+    val writer = WavFileWriter(wav, recorder.getAudioStream()) { (scope as ParameterizedScope).navigateBack() }
 
     val waveformView = CanvasFragment("#000000")
     val volumeBarView = CanvasFragment("#000000")

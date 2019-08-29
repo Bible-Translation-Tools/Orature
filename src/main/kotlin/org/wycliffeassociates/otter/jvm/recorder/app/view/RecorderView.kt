@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
+import javafx.application.Platform
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.Fragment
@@ -24,8 +25,20 @@ class RecorderView : Fragment() {
 
     init {
         // notifies viewmodel that views have been inflated and the canvas now has a width
-        primaryStage.setOnShown {
+        if (primaryStage.isShowing) {
             recorderViewModel.onViewReady()
+        } else {
+            primaryStage.setOnShown {
+                recorderViewModel.onViewReady()
+            }
         }
+        Thread {
+            Thread.sleep(1000)
+            Platform.runLater {
+                recorderViewModel.onViewReady()
+
+            }
+        }.start()
+
     }
 }
