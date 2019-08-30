@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXSnackbar
+import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
@@ -12,6 +13,7 @@ import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
+import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
@@ -107,13 +109,15 @@ abstract class RecordableFragment(
         recordableViewModel.snackBarObservable.subscribe {
             snackBar.enqueue(
                 JFXSnackbar.SnackbarEvent(
-                    messages["noRecorder"],
-                    messages["addPlugin"].toUpperCase(),
-                    5000,
-                    false,
-                    EventHandler {
-                        audioPluginViewModel.addPlugin(true, false)
-                    }
+                    JFXSnackbarLayout(
+                        messages["noRecorder"],
+                        messages["addPlugin"].toUpperCase(),
+                        EventHandler {
+                            audioPluginViewModel.addPlugin(true, false)
+                        }
+                    ),
+                    Duration.millis(5000.0),
+                    null
                 )
             )
         }
