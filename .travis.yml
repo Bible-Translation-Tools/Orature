@@ -13,11 +13,7 @@ install:
   - git clone --branch=dev https://github.com/WycliffeAssociates/kotlin-resource-container.git ../kotlin-resource-container
 jobs:
   include:
-    - stage: test
-      script: ./gradlew test
     - stage: build
-      script: 
-        - ./gradlew build
+      script: ./gradlew build
 stages:
   - build
-  - test
