@@ -58,6 +58,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
                         value.collection.titleKey = project.title
                     }
                     .flattenContent()
+                    .apply { addMetaContents() }
             }
     }
 
@@ -81,8 +82,8 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         ProjectFileTree(file.buildFileTree(), otterFileF(file))
     }
 
-    private fun fileToId(f: OtterFile): Int =
-        f.nameWithoutExtension.toIntOrNull() ?: 0
+    private fun fileToIndex(f: OtterFile): Int =
+        f.nameWithoutExtension.toIntOrNull() ?: 1
 
     private fun fileToSlug(file: OtterFile, projectRoot: OtterFile): String =
         file.toRelativeString(projectRoot)
@@ -92,7 +93,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
 
     private fun fileToSort(file: OtterFile) = when (file.nameWithoutExtension) {
         "back" -> 9999
-        else -> fileToId(file)
+        else -> fileToIndex(file)
     }
 
     private fun simplifyTitle(s: String) = s.toIntOrNull()?.toString() ?: s
@@ -105,40 +106,49 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         resourceContainer = null
     )
 
-    private fun content(sort: Int, id: Int, text: String, type: ContentType): Content? =
-        if (text.isEmpty()) null
-        else Content(
-            sort = sort,
-            labelKey = ContentLabel.of(type).value,
-            start = id,
-            end = id,
-            selectedTake = null,
-            text = text,
-            format = MimeType.MARKDOWN.norm,
-            type = type
-        )
+    private fun content(
+        type: ContentType,
+        index: Int,
+        sort: Int? = null,
+        text: String? = null,
+        start: Int? = null,
+        end: Int? = null
+    ) = Content(
+        sort = sort ?: index,
+        labelKey = ContentLabel.of(type).value,
+        start = start ?: index,
+        end = end ?: index,
+        selectedTake = null,
+        text = text,
+        format = MimeType.MARKDOWN.norm,
+        type = type
+    )
 
     /**
      * Read an MD file and return its contents
      * @receiver must be a file, not a directory
      */
     private fun OtterFile.readContents(): List<Content> {
-        val fileId = fileToId(this)
+        val fileId = fileToIndex(this)
         var sort = 1
-        return if (isHelp) {
+        val contents = if (isHelp) {
             this.bufferedReader()
                 .use { ParseMd.parseHelp(it) }
                 .flatMap { helpResource ->
-                    listOfNotNull(
-                        content(sort++, fileId, helpResource.title, ContentType.TITLE),
-                        content(sort++, fileId, helpResource.body, ContentType.BODY)
+                    listOf(
+                        content(ContentType.TITLE, fileId, sort++, helpResource.title),
+                        content(ContentType.BODY, fileId, sort++, helpResource.body)
                     )
                 }
         } else {
             this.bufferedReader()
                 .use { ParseMd.parse(it) }
-                .mapNotNull { content(sort++, fileId, it, ContentType.TEXT) }
+                .map {
+                    val index = if (collectionForEachFile) sort else fileId
+                    content(ContentType.TEXT, index, sort++, it)
+                }
         }
+        return contents.filterNot { it.text.isNullOrEmpty() }
     }
 
     private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> =
@@ -149,20 +159,45 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     private fun OtterTree<Contents>.flattenContent(): OtterTree<CollectionOrContent> =
         OtterTree<CollectionOrContent>(this.value.collection).also { newRoot ->
             this.children.forEach { c ->
-                if (c.value.list != null) {
+                val child = c.value
+                if (child.list != null) {
                     // Add nodes from content list
                     val addTo =
                         if (collectionForEachFile)
-                            OtterTree<CollectionOrContent>(c.value.collection).also(newRoot::addChild)
+                            OtterTree<CollectionOrContent>(child.collection).also(newRoot::addChild)
                         else
                             newRoot
-                    addTo.addAll(c.value.list.map { OtterTreeNode(it) })
+                    addTo.addAll(child.list.map { OtterTreeNode(it) })
                 } else if (c is OtterTree<Contents>) {
                     // Add node from child
                     newRoot.addChild(c.flattenContent())
                 }
             }
         }
+
+    /** Modify this tree in-place to add META (chapter) contents for each chapter. */
+    private fun OtterTree<CollectionOrContent>.addMetaContents() {
+        if (isHelp) return
+        this.children.forEach { (it as? OtterTree)?.addMetaContents() }
+        val labelKey = (this.value as? Collection)?.labelKey
+        if (labelKey == SECONDARY_COLLECTION_KEY) {
+            addChild(chapterMetaNode(this))
+        }
+    }
+
+    private fun chapterMetaNode(
+        collection: OtterTree<CollectionOrContent>
+    ): OtterTree<CollectionOrContent> {
+        val contents = collection.children.mapNotNull { it.value as? Content }
+        return OtterTree(
+            content(
+                type = ContentType.META,
+                index = 0,
+                start = contents.map { it.start }.min() ?: 0,
+                end = contents.map { it.end }.max() ?: 0
+            )
+        )
+    }
 }
 
 internal fun File.buildFileTree(): OtterTree<OtterFile> {
