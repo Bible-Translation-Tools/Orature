@@ -59,3 +59,7 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
     kotlinOptions.allWarningsAsErrors = true
 }
+
+ktlint {
+    coloredOutput = false // Colors break source links in the IDEA console.
+}
