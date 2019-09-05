@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.statusindicator.control
 
-import com.sun.javafx.css.converters.ColorConverter
 import javafx.beans.property.*
 import javafx.css.*
+import javafx.css.converter.ColorConverter
 import javafx.scene.control.*
 import javafx.scene.layout.*
 import javafx.scene.paint.*
