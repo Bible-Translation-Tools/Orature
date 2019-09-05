@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.nhaarman.mockitokotlin2.*
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.junit.Assert
@@ -266,6 +267,18 @@ class TestWorkbookRepository {
             Single.just(autoincrement)
         )
 
+        whenever(
+            mockedDb.deleteTake(any(), any())
+        ).thenReturn(
+            Completable.complete()
+        )
+
+        whenever(
+            mockedDb.updateContent(any())
+        ).thenReturn(
+            Completable.complete()
+        )
+
         return buildWorkbook(mockedDb)
     }
 
@@ -478,11 +491,12 @@ class TestWorkbookRepository {
         // Select a take to set up the test, and verify the preconditions
         chunk.audio.selected.accept(TakeHolder(take))
         verify(mockedDb, times(1)).updateContent(any())
+        verify(mockedDb, times(0)).deleteTake(any(), any())
         Assert.assertNotNull("Selection should be non-null", chunk.audio.selected.value?.value)
 
         // Delete the take, and confirm the selection is cleared
         take.deletedTimestamp.accept(DateHolder.now())
-        verify(mockedDb, times(1)).updateContent(any())
+        verify(mockedDb, times(2)).updateContent(any())
         verify(mockedDb, times(1)).deleteTake(any(), any())
         Assert.assertNull("Selection should be null", chunk.audio.selected.value?.value)
     }
