@@ -283,8 +283,8 @@ tasks.withType(Test) {
             }
         }
     }
+}
 
-    ktlint {
-        coloredOutput = false // Colors break source links in the IDEA console.
-    }
+ktlint {
+    coloredOutput = false // Colors break source links in the IDEA console.
 }
