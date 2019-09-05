@@ -9,15 +9,15 @@ private const val USHORT_SIZE = 65535.0
 
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
 
-    override fun draw(gc: GraphicsContext, canvas: Canvas) {
-        gc.stroke = Color.GRAY
-        gc.lineWidth = 1.0
+    override fun draw(context: GraphicsContext, canvas: Canvas) {
+        context.stroke = Color.GRAY
+        context.lineWidth = 1.0
 
         val buffer = renderer.floatBuffer.array
         var i = 0
         var x = 0.0
         while (i < buffer.size) {
-            gc.strokeLine(
+            context.strokeLine(
                 x,
                 scaleAmplitude(buffer[i].toDouble(), canvas.height),
                 x,

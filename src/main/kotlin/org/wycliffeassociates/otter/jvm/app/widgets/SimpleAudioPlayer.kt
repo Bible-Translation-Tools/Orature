@@ -86,7 +86,8 @@ fun simpleaudioplayer(
     audioPlayer: IAudioPlayer,
     init: SimpleAudioPlayer.() -> Unit
 ): SimpleAudioPlayer {
-    val audioPlayer = SimpleAudioPlayer(audioFile, audioPlayer)
-    audioPlayer.init()
-    return audioPlayer
+    return SimpleAudioPlayer(audioFile, audioPlayer)
+        .apply {
+            init()
+        }
 }

@@ -41,7 +41,7 @@ class MainMenuViewModel : ViewModel() {
         showImportDialogProperty.value = true
         importer.import(fileOrDir)
             .observeOnFx()
-            .subscribe { result ->
+            .subscribe { result: ImportResult ->
                 val errorMessage = when (result) {
                     ImportResult.SUCCESS -> null
                     ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]

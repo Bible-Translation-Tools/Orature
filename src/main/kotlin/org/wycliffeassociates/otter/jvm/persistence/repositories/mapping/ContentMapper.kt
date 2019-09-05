@@ -30,7 +30,7 @@ class ContentMapper(private val contentTypeDao: ContentTypeDao) {
             selectedTakeFk = obj.selectedTake?.id,
             text = obj.text,
             format = obj.format,
-            type_fk = contentTypeDao.fetchId(obj.type)!!
+            type_fk = contentTypeDao.fetchId(obj.type)
         )
     }
 }

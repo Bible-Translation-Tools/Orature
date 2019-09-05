@@ -33,7 +33,7 @@ class DefaultStyles : Stylesheet() {
         val defaultMinorLabel by cssclass()
         val completedProgress by cssclass()
 
-        fun checkCircle(size: String = "1em") = MaterialIconView(MaterialIcon.CHECK_CIRCLE)
+        fun checkCircle(size: String = "1em") = MaterialIconView(MaterialIcon.CHECK_CIRCLE, size)
         fun green() = c("58bd2f")
     }
 

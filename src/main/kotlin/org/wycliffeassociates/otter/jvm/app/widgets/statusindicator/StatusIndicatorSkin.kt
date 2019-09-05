@@ -87,33 +87,30 @@ class StatusIndicatorSkin(control: StatusIndicator) : SkinBase<StatusIndicator>(
 
     fun updateBarFill(primaryFill: Color, accentFill: Color) {
         val stops = listOf(Stop(0.0, primaryFill), Stop(1.0, accentFill))
-        if (bar != null && track != null) {
-            bar.background = Background(
-                BackgroundFill(
-                    LinearGradient(
-                        0.0,
-                        0.0,
-                        0.05,
-                        0.7,
-                        true,
-                        CycleMethod.REPEAT,
-                        stops
-                    ),
-                    CornerRadii(0.0),
-                    Insets(0.0)
-                )
+        bar.background = Background(
+            BackgroundFill(
+                LinearGradient(
+                    0.0,
+                    0.0,
+                    0.05,
+                    0.7,
+                    true,
+                    CycleMethod.REPEAT,
+                    stops
+                ),
+                CornerRadii(0.0),
+                Insets(0.0)
             )
-            skinnable.requestLayout()
-        }
+        )
+        skinnable.requestLayout()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun updateStatusIndicator(width: Double, height: Double) {
         val stops = listOf(Stop(0.0, skinPrimaryFill.value), Stop(1.0, skinAccentFill.value))
 
-        if (bar != null && track != null) {
-            children.remove(bar)
-            children.remove(track)
-        }
+        children.remove(bar)
+        children.remove(track)
 
         bar = StackPane()
         bar.border = Border(
