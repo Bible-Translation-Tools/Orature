@@ -6,6 +6,7 @@ import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.Select
 import org.jooq.SelectFieldOrAsterisk
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.jvm.persistence.database.InsertionException
@@ -94,13 +95,19 @@ class ContentDao(
     }
 
     fun fetchSources(entity: ContentEntity, dsl: DSLContext = instanceDsl): List<ContentEntity> {
-        val sourceIds = dsl
-            .select(CONTENT_DERIVATIVE.SOURCE_FK)
-            .from(CONTENT_DERIVATIVE)
-            .where(CONTENT_DERIVATIVE.CONTENT_FK.eq(entity.id))
-            .fetch {
-                it.getValue(CONTENT_DERIVATIVE.SOURCE_FK)
-            }
+        val sourceIds = try {
+            dsl
+                .select(CONTENT_DERIVATIVE.SOURCE_FK)
+                .from(CONTENT_DERIVATIVE)
+                .where(CONTENT_DERIVATIVE.CONTENT_FK.eq(entity.id))
+                .fetch {
+                    it.getValue(CONTENT_DERIVATIVE.SOURCE_FK)
+                }
+        } catch (e: DataAccessException) {
+            // Contents that are not "text" contents do not have "source" contents,
+            // so fetch will fail and throw an exception
+            return listOf()
+        }
 
         return dsl
             .select()

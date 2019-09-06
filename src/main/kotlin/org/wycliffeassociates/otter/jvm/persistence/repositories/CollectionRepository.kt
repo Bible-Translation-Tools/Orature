@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -38,6 +39,7 @@ class CollectionRepository(
     private val collectionDao = database.collectionDao
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
+    private val contentTypeDao = database.contentTypeDao
 
     override fun delete(obj: Collection): Completable {
         return Completable
@@ -389,12 +391,14 @@ class CollectionRepository(
                     dsl.select(
                         field("sourceid", Int::class.java),
                         field("sourcesort", Int::class.java),
+                        field("sourcetype", Int::class.java),
                         COLLECTION_ENTITY.SLUG.`as`("sourcechapter")
                     )
                         .from(
                             dsl.select(
                                 CONTENT_ENTITY.ID.`as`("sourceid"),
                                 CONTENT_ENTITY.SORT.`as`("sourcesort"),
+                                CONTENT_ENTITY.TYPE_FK.`as`("sourcetype"),
                                 CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid")
                             ).from(CONTENT_ENTITY).where(
                                 CONTENT_ENTITY.COLLECTION_FK.`in`(
@@ -402,6 +406,11 @@ class CollectionRepository(
                                         .select(COLLECTION_ENTITY.ID)
                                         .from(COLLECTION_ENTITY)
                                         .where(COLLECTION_ENTITY.PARENT_FK.eq(sourceId))
+                                ).and(
+                                    // Only create content derivative entries for text contents
+                                    CONTENT_ENTITY.TYPE_FK.eq(
+                                        contentTypeDao.fetchId(ContentType.TEXT)
+                                    )
                                 )
                             )
                         )
@@ -413,6 +422,7 @@ class CollectionRepository(
                         .select(
                             field("derivedid", Int::class.java),
                             field("derivedsort", Int::class.java),
+                            field("derivedtype", Int::class.java),
                             COLLECTION_ENTITY.SLUG.`as`("derivedchapter")
                         )
                         .from(
@@ -420,6 +430,7 @@ class CollectionRepository(
                                 .select(
                                     CONTENT_ENTITY.ID.`as`("derivedid"),
                                     CONTENT_ENTITY.SORT.`as`("derivedsort"),
+                                    CONTENT_ENTITY.TYPE_FK.`as`("derivedtype"),
                                     CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid")
                                 )
                                 .from(CONTENT_ENTITY)
@@ -441,6 +452,10 @@ class CollectionRepository(
                         .and(
                             field("sourcechapter", Int::class.java)
                                 .eq(field("derivedchapter", Int::class.java))
+                        )
+                        .and(
+                            field("sourcetype", Int::class.java)
+                                .eq(field("derivedtype", Int::class.java))
                         )
                 )
         ).execute()
