@@ -7,7 +7,14 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import javax.inject.Singleton
 
-@Component(modules = [PersistenceModule::class])
+@Component(
+    modules = [
+        AppDatabaseModule::class,
+        AppPreferencesModule::class,
+        AudioPluginRepositoryModule::class,
+        DirectoryProviderModule::class
+    ]
+)
 @Singleton
 interface PersistenceComponent {
     fun injectDatabase(): AppDatabase

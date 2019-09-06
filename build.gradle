@@ -25,6 +25,7 @@ buildscript {
             url "https://maven.ej-technologies.com/repository"
         }
     }
+
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
@@ -49,13 +50,14 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'install4j'
 apply plugin: 'application'
+apply plugin: 'idea'
 apply plugin: 'org.jlleitschuh.gradle.ktlint'
 apply plugin: 'org.openjfx.javafxplugin'
 
 sourceCompatibility = 11
 
-compileKotlin {
-    kotlinOptions.jvmTarget = "11"
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions { jvmTarget = "11" }
 }
 
 configurations.all {
@@ -78,6 +80,17 @@ repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/kotlin')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
 allprojects {
     repositories {
         maven { url "https://jitpack.io" }
@@ -86,6 +99,11 @@ allprojects {
 
 configurations {
     sqllite
+}
+
+configurations {
+    integrationTestCompile.extendsFrom main
+    integrationTestRuntime.extendsFrom main
 }
 
 dependencies {
@@ -129,12 +147,17 @@ dependencies {
     //Dagger2
     implementation 'com.google.dagger:dagger:2.24'
     kapt 'com.google.dagger:dagger-compiler:2.24'
+    kaptIntegrationTest 'com.google.dagger:dagger-compiler:2.24'
 
     //Testing
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile "org.mockito:mockito-core:2.+"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
-
+    integrationTestCompile group: 'junit', name: 'junit', version: '4.12'
+    integrationTestCompile "org.mockito:mockito-core:2.+"
+    integrationTestImplementation sourceSets.main.compileClasspath
+    integrationTestImplementation sourceSets.main.output
+    
     //WA Libraries
     implementation 'org.wycliffeassociates:otter-common'
     implementation 'org.wycliffeassociates:kotlin-resource-container'
@@ -173,6 +196,17 @@ install4j {
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
     projectFile = 'otter.install4j'
+}
+
+task integrationTest(type: Test) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+}
+
+configure(integrationTest) {
+    group = 'verification'
+    description = 'Cross-package and e2e tests, may require DB'
 }
 
 // jfx {
@@ -247,6 +281,7 @@ clean.doLast {
 generateSampleJooqSchemaSource.dependsOn createDb
 compileKotlin.dependsOn generateSampleJooqSchemaSource
 install4jdeploy.dependsOn build
+integrationTest.mustRunAfter test
 
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
@@ -276,7 +311,10 @@ tasks.withType(Test) {
 
         afterSuite { desc, result ->
             if (!desc.parent) { // will match the outermost suite
-                def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
+                def output = "Results: ${result.resultType} (${result.testCount} tests, " +
+                        "${result.successfulTestCount} successes, " +
+                        "${result.failedTestCount} failures, " +
+                        "${result.skippedTestCount} skipped)"
                 def startItem = '|  ', endItem = '  |'
                 def repeatLength = startItem.length() + output.length() + endItem.length()
                 println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
@@ -287,4 +325,10 @@ tasks.withType(Test) {
 
 ktlint {
     coloredOutput = false // Colors break source links in the IDEA console.
+}
+
+idea {
+    module {
+        generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
+    }
 }

@@ -41,6 +41,21 @@ class ContentDao(
             .fetch { RecordMappers.mapToContentEntity(it) }
     }
 
+    fun fetchByCollectionIdAndType(
+        collectionId: Int,
+        type: ContentType,
+        dsl: DSLContext = instanceDsl
+    ): List<ContentEntity> {
+        val typeId = contentTypeDao.fetchId(type)
+        return dsl
+            .select()
+            .from(CONTENT_ENTITY)
+            .where(CONTENT_ENTITY.COLLECTION_FK.eq(collectionId))
+            .and(CONTENT_ENTITY.TYPE_FK.eq(typeId))
+            .orderBy(CONTENT_ENTITY.SORT)
+            .fetch { RecordMappers.mapToContentEntity(it) }
+    }
+
     fun selectVerseByCollectionIdAndStart(
         collectionId: Int,
         start: Int,
