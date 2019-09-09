@@ -41,9 +41,21 @@ class TestWorkbookRepository {
     private val rcSource = rcBase.copy(id = autoincrement, language = english)
     private val rcTarget = rcBase.copy(id = autoincrement, language = latin)
 
-    private val resourceInfoTn = ResourceInfo(
-        slug = "tn",
-        title = "translationNotes"
+    private val resourceMetadataTn = ResourceMetadata(
+        conformsTo = "rc0.2",
+        creator = "Door43 World Missions Community",
+        description = "Description",
+        format = "text/markdown",
+        identifier = "tn",
+        issued = LocalDate.now(),
+        language = english,
+        modified = LocalDate.now(),
+        publisher = "unfoldingWord",
+        subject = "Translator Notes",
+        type = "help",
+        title = "translationNotes",
+        version = "1",
+        path = File(".")
     )
 
     private val collectionBase = Collection(
@@ -62,14 +74,14 @@ class TestWorkbookRepository {
         target: Collection = collTarget
     ) = WorkbookRepository(db).get(source, target)
 
-    private fun resourceSlugArray(resourceInfos: List<ResourceInfo>) =
-        resourceInfos
-            .map(ResourceInfo::slug)
+    private fun resourceSlugArray(resourceMetadatas: List<ResourceMetadata>) =
+        resourceMetadatas
+            .map(ResourceMetadata::identifier)
             .sorted()
             .toTypedArray()
 
     private fun resourceSlugArray(resourceGroups: Iterable<ResourceGroup>) =
-        resourceSlugArray(resourceGroups.map { it.info })
+        resourceSlugArray(resourceGroups.map { it.metadata })
 
     private fun buildBasicTestDb(): IDatabaseAccessors = mock()
 
@@ -148,33 +160,33 @@ class TestWorkbookRepository {
         )
 
         whenever(
-            mockedDb.getSubtreeResourceInfo(any())
+            mockedDb.getSubtreeResourceMetadata(any())
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
             when (rcSource.id) {
-                collection.resourceContainer?.id -> listOf(resourceInfoTn)
+                collection.resourceContainer?.id -> listOf(resourceMetadataTn)
                 else -> emptyList()
             }
         }
 
         whenever(
-            mockedDb.getResourceInfo(any<Collection>())
+            mockedDb.getResourceMetadata(any<Collection>())
         ).thenReturn(
-            listOf(resourceInfoTn)
+            listOf(resourceMetadataTn)
         )
 
         whenever(
-            mockedDb.getResourceInfo(any<Content>())
+            mockedDb.getResourceMetadata(any<Content>())
         ).thenReturn(
-            listOf(resourceInfoTn)
+            listOf(resourceMetadataTn)
         )
 
         whenever(
             mockedDb.getResources(any<Content>(), any())
         ).thenAnswer { invocation ->
             val content = invocation.getArgument<Content>(0)!!
-            val info = invocation.getArgument<ResourceInfo>(1)!!
-            if (content.start == 2 && info == resourceInfoTn) {
+            val metadata = invocation.getArgument<ResourceMetadata>(1)!!
+            if (content.start == 2 && metadata == resourceMetadataTn) {
                 Observable.fromArray(
                     Content(
                         id = autoincrement,
@@ -208,8 +220,8 @@ class TestWorkbookRepository {
             mockedDb.getResources(any<Collection>(), any())
         ).thenAnswer { invocation ->
             val collection = invocation.getArgument<Collection>(0)!!
-            val info = invocation.getArgument<ResourceInfo>(1)!!
-            if (collection.titleKey == "2" && info == resourceInfoTn) {
+            val metadata = invocation.getArgument<ResourceMetadata>(1)!!
+            if (collection.titleKey == "2" && metadata == resourceMetadataTn) {
                 Observable.fromArray(
                     Content(
                         id = autoincrement,
@@ -376,11 +388,11 @@ class TestWorkbookRepository {
         val workbook = buildBasicTestWorkbook()
         val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
 
-        Assert.assertArrayEquals(arrayOf(resourceInfoTn), chapter.subtreeResources.toTypedArray())
+        Assert.assertArrayEquals(arrayOf(resourceMetadataTn), chapter.subtreeResources.toTypedArray())
     }
 
     @Test
-    fun resourceGroupsHaveCorrectInfo() {
+    fun resourceGroupsHaveCorrectMetadata() {
         val workbook = buildBasicTestWorkbook()
         val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
@@ -388,7 +400,7 @@ class TestWorkbookRepository {
 
         val expected = 1
         Assert.assertEquals("This chunk should have $expected ResourceGroups", expected, resourceGroups.size)
-        Assert.assertEquals("ResourceInfo", resourceInfoTn, resourceGroups.first().info)
+        Assert.assertEquals("ResourceMetadata", resourceMetadataTn, resourceGroups.first().metadata)
     }
 
     @Test
@@ -400,7 +412,7 @@ class TestWorkbookRepository {
         val resourceGroup = chunk.resources.first()
 
         // Load some things that shouldn't trigger resource fetch, and verify no DB call is made
-        Assert.assertEquals(resourceInfoTn, resourceGroup.info)
+        Assert.assertEquals(resourceMetadataTn, resourceGroup.metadata)
         verify(mockedDb, times(0)).getResources(any<Content>(), any())
 
         // Fetch chunks, and verify one DB call is made

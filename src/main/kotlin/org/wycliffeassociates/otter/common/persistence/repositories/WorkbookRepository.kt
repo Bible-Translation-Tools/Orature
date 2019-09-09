@@ -44,7 +44,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         )
     }
 
-    private fun Collection.getLanguage() = this.resourceContainer?.language
+    private fun Collection.getResourceMetaData() = this.resourceContainer
         ?: throw IllegalStateException("Collection with id=$id has null resource container")
 
     private fun book(bookCollection: Collection): Book {
@@ -53,8 +53,8 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             sort = bookCollection.sort,
             slug = bookCollection.slug,
             chapters = constructBookChapters(bookCollection),
-            language = bookCollection.getLanguage(),
-            subtreeResources = db.getSubtreeResourceInfo(bookCollection)
+            resourceMetadata = bookCollection.getResourceMetaData(),
+            subtreeResources = db.getSubtreeResourceMetadata(bookCollection)
         )
     }
 
@@ -75,7 +75,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                     resources = constructResourceGroups(chapterCollection),
                     audio = constructAssociatedAudio(metaContent),
                     chunks = constructChunks(chapterCollection),
-                    subtreeResources = db.getSubtreeResourceInfo(chapterCollection)
+                    subtreeResources = db.getSubtreeResourceMetadata(chapterCollection)
                 )
             }
     }
@@ -135,20 +135,20 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
     }
 
     private fun constructResourceGroups(content: Content) = constructResourceGroups(
-        resourceInfoList = db.getResourceInfo(content),
+        resourceMetadataList = db.getResourceMetadata(content),
         getResourceContents = { db.getResources(content, it) }
     )
 
     private fun constructResourceGroups(collection: Collection) = constructResourceGroups(
-        resourceInfoList = db.getResourceInfo(collection),
+        resourceMetadataList = db.getResourceMetadata(collection),
         getResourceContents = { db.getResources(collection, it) }
     )
 
     private fun constructResourceGroups(
-        resourceInfoList: List<ResourceInfo>,
-        getResourceContents: (ResourceInfo) -> Observable<Content>
+        resourceMetadataList: List<ResourceMetadata>,
+        getResourceContents: (ResourceMetadata) -> Observable<Content>
     ): List<ResourceGroup> {
-        return resourceInfoList.map {
+        return resourceMetadataList.map {
             val resources = Observable.defer {
                 getResourceContents(it)
                     .contentsToResources()
@@ -297,11 +297,11 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getCollectionMetaContent(collection: Collection): Single<Content>
         fun getContentByCollection(collection: Collection): Single<List<Content>>
         fun updateContent(content: Content): Completable
-        fun getResources(content: Content, info: ResourceInfo): Observable<Content>
-        fun getResources(collection: Collection, info: ResourceInfo): Observable<Content>
-        fun getResourceInfo(content: Content): List<ResourceInfo>
-        fun getResourceInfo(collection: Collection): List<ResourceInfo>
-        fun getSubtreeResourceInfo(collection: Collection): List<ResourceInfo>
+        fun getResources(content: Content, metadata: ResourceMetadata): Observable<Content>
+        fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
+        fun getResourceMetadata(content: Content): List<ResourceMetadata>
+        fun getResourceMetadata(collection: Collection): List<ResourceMetadata>
+        fun getSubtreeResourceMetadata(collection: Collection): List<ResourceMetadata>
         fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
         fun deleteTake(take: ModelTake, date: DateHolder): Completable
@@ -320,11 +320,11 @@ private class DefaultDatabaseAccessors(
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
     override fun updateContent(content: Content) = contentRepo.update(content)
 
-    override fun getResources(content: Content, info: ResourceInfo) = resourceRepo.getResources(content, info)
-    override fun getResources(collection: Collection, info: ResourceInfo) = resourceRepo.getResources(collection, info)
-    override fun getResourceInfo(content: Content) = resourceRepo.getResourceInfo(content)
-    override fun getResourceInfo(collection: Collection) = resourceRepo.getResourceInfo(collection)
-    override fun getSubtreeResourceInfo(collection: Collection) = resourceRepo.getSubtreeResourceInfo(collection)
+    override fun getResources(content: Content, metadata: ResourceMetadata) = resourceRepo.getResources(content, metadata)
+    override fun getResources(collection: Collection, metadata: ResourceMetadata) = resourceRepo.getResources(collection, metadata)
+    override fun getResourceMetadata(content: Content) = resourceRepo.getResourceMetadata(content)
+    override fun getResourceMetadata(collection: Collection) = resourceRepo.getResourceMetadata(collection)
+    override fun getSubtreeResourceMetadata(collection: Collection) = resourceRepo.getSubtreeResourceMetadata(collection)
 
     override fun insertTakeForContent(take: ModelTake, content: Content) = takeRepo.insertForContent(take, content)
     override fun getTakeByContent(content: Content) = takeRepo.getByContent(content, includeDeleted = true)
