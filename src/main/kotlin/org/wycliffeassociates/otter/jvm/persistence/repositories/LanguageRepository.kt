@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.persistence.repositories
 
-import org.wycliffeassociates.otter.common.data.model.Language
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.LanguageMapper
@@ -14,10 +14,10 @@ class LanguageRepository(
 ) : ILanguageRepository {
     private val languageDao = database.languageDao
 
-    override fun insert(obj: Language): Single<Int> {
+    override fun insert(language: Language): Single<Int> {
         return Single
             .fromCallable {
-                languageDao.insert(mapper.mapToEntity(obj))
+                languageDao.insert(mapper.mapToEntity(language))
             }
             .subscribeOn(Schedulers.io())
     }

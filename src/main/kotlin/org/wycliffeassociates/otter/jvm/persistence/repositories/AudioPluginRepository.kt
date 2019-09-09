@@ -83,15 +83,13 @@ class AudioPluginRepository(
                 audioPluginDao.fetchAll()
             }
             .flatMapCompletable { allPlugins ->
-                if (allPlugins.isEmpty())
-                    return@flatMapCompletable Completable.complete()
-                else {
-                    return@flatMapCompletable preferences.editorPluginId()
+                if (allPlugins.isEmpty()) {
+                    Completable.complete()
+                } else {
+                    preferences.editorPluginId()
                         .flatMapCompletable { editorId ->
                             val editPlugins = allPlugins.filter { it.edit == 1 }
-                            return@flatMapCompletable if (
-                                editorId == AppPreferences.NO_ID && editPlugins.isNotEmpty()
-                            ) {
+                            if (editorId == AppPreferences.NO_ID && editPlugins.isNotEmpty()) {
                                 preferences.setEditorPluginId(editPlugins.first().id)
                             } else {
                                 Completable.complete()
@@ -101,9 +99,9 @@ class AudioPluginRepository(
                         .flatMapCompletable { recorderId ->
                             val recordPlugins = allPlugins.filter { it.record == 1 }
                             if (recorderId == AppPreferences.NO_ID && recordPlugins.isNotEmpty()) {
-                                return@flatMapCompletable preferences.setRecorderPluginId(recordPlugins.first().id)
+                                preferences.setRecorderPluginId(recordPlugins.first().id)
                             } else {
-                                return@flatMapCompletable Completable.complete()
+                                Completable.complete()
                             }
                         }
                 }

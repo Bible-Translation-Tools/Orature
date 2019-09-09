@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.jvm.persistence.entities.ContentEntity
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.persistence.repositories.mapping.TakeMapper
+import java.lang.IllegalStateException
 
 class ContentRepository(
     database: AppDatabase
@@ -38,9 +39,10 @@ class ContentRepository(
         return Single
             .fromCallable {
                 contentDao
-                    .fetchByCollectionIdAndStart(collection.id, 1, listOf(ContentType.META))
+                    .fetchByCollectionIdAndType(collection.id, ContentType.META)
                     .map(this::buildContent)
-                    .single()
+                    .minBy { it.start }
+                    ?: throw IllegalStateException("Missing meta info for chapter.")
             }
             .subscribeOn(Schedulers.io())
     }

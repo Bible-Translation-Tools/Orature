@@ -19,7 +19,7 @@ install:
 jobs:
   include:
     - stage: build
-      script: 
-        - ./gradlew build
+      script:
+        - ./gradlew build integrationTest
 stages:
   - build

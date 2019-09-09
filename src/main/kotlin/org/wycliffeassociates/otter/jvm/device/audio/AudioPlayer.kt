@@ -22,11 +22,11 @@ class AudioPlayer : IAudioPlayer {
         listeners.add(listener)
     }
 
-    override fun addEventListener(onEventCallback: (event: AudioPlayerEvent) -> Unit) {
+    override fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit) {
         listeners.add(
             object : IAudioPlayerListener {
                 override fun onEvent(event: AudioPlayerEvent) {
-                    onEventCallback(event)
+                    onEvent(event)
                 }
             }
         )
