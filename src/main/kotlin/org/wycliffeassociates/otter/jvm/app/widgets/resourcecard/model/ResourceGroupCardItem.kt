@@ -32,7 +32,7 @@ fun resourceGroupCardItem(
 
 private fun findResourceGroup(element: BookElement, slug: String): ResourceGroup? {
     return element.resources.firstOrNull {
-        it.info.slug == slug
+        it.metadata.identifier == slug
     }
 }
 

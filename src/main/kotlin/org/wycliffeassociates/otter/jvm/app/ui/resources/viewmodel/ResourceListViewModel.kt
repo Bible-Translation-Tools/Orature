@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.resources.viewmodel
 
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
-import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.ResourceTabPaneViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.ResourceGroupCardItemList
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.resourceGroupCardItem
@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ResourceListViewModel : ViewModel() {
-    internal val resourceTabPaneViewModel: ResourceTabPaneViewModel by inject()
+    internal val recordResourceViewModel: RecordResourceViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
@@ -34,8 +34,12 @@ class ResourceListViewModel : ViewModel() {
         chapter
             .children
             .startWith(chapter)
-            .mapNotNull {
-                resourceGroupCardItem(it, workbookViewModel.resourceSlug, onSelect = this::navigateToTakesPage)
+            .mapNotNull { bookElement ->
+                resourceGroupCardItem(
+                    element = bookElement,
+                    slug = workbookViewModel.activeResourceMetadata.identifier,
+                    onSelect = this::setActiveChunkAndRecordables
+                )
             }
             .buffer(2) // Buffering by 2 prevents the list UI from jumping while groups are loading
             .observeOnFxSafe()
@@ -44,10 +48,9 @@ class ResourceListViewModel : ViewModel() {
             }
     }
 
-    internal fun navigateToTakesPage(bookElement: BookElement, resource: Resource) {
-        // TODO use navigator to navigate to takes page
+    internal fun setActiveChunkAndRecordables(bookElement: BookElement, resource: Resource) {
         workbookViewModel.activeChunkProperty.set(bookElement as? Chunk)
-        resourceTabPaneViewModel.setRecordableListItems(
+        recordResourceViewModel.setRecordableListItems(
             listOfNotNull(resource.title, resource.body)
         )
     }

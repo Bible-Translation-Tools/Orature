@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -21,12 +21,9 @@ class WorkbookViewModel : ViewModel() {
     val activeChunkProperty = SimpleObjectProperty<Chunk>()
     val chunk: Chunk? by activeChunkProperty
 
-    val activeResourceSlugProperty = SimpleStringProperty()
-    val resourceSlug: String
-        get() = activeResourceSlugProperty.value.let {
-            return if (it.isNullOrBlank()) throw IllegalStateException("Resource slug is blank or null")
-            else it
-        }
+    val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
+    val activeResourceMetadata
+        get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeProjectAudioDirectoryProperty = SimpleObjectProperty<File>()
     val projectAudioDirectory: File

@@ -13,7 +13,7 @@ import javafx.collections.ListChangeListener
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class ResourceTabPaneViewModel : ViewModel() {
+class RecordResourceViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -41,8 +41,8 @@ class ResourceTabPaneViewModel : ViewModel() {
             updateRecordables(it)
         }
 
-        workbookViewModel.activeResourceSlugProperty.onChangeAndDoNow {
-            setTabLabels(it)
+        workbookViewModel.activeResourceMetadataProperty.onChangeAndDoNow { metadata ->
+            metadata?.let { setTabLabels(metadata.identifier) }
         }
     }
 

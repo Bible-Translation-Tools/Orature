@@ -24,18 +24,18 @@ class AudioPluginViewModel : ViewModel() {
 
     fun record(recordable: Recordable): Single<RecordTake.Result> =
         recordTake.record(
-            recordable.audio,
-            workbookViewModel.projectAudioDirectory,
-            createFileNamer(recordable)
+            audio = recordable.audio,
+            projectAudioDir = workbookViewModel.projectAudioDirectory,
+            namer = createFileNamer(recordable)
         )
 
     private fun createFileNamer(recordable: Recordable) =
         WorkbookFileNamerBuilder.createFileNamer(
-            workbookViewModel.workbook,
-            workbookViewModel.chapter,
-            workbookViewModel.chunk,
-            recordable,
-            workbookViewModel.resourceSlug
+            workbook = workbookViewModel.workbook,
+            chapter = workbookViewModel.chapter,
+            chunk = workbookViewModel.chunk,
+            recordable = recordable,
+            rcSlug = workbookViewModel.activeResourceMetadata.identifier
         )
 
     fun edit(take: Take): Single<EditTake.Result> = editTake.edit(take)

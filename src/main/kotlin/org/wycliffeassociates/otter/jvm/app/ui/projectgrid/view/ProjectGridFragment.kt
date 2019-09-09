@@ -36,7 +36,7 @@ class ProjectGridFragment : Fragment() {
     override val root = anchorpane {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
-        addClass(AppStyles.appBackground)
+        addClass(AppStyles.whiteBackground)
 
         datagrid(viewModel.projects) {
             anchorpaneConstraints {
@@ -45,7 +45,7 @@ class ProjectGridFragment : Fragment() {
                 bottomAnchor = 0
                 leftAnchor = 0
             }
-            addClass(AppStyles.appBackground)
+            addClass(AppStyles.whiteBackground)
             addClass(ProjectGridStyles.projectsGrid)
             cellCache { item ->
                 card {
