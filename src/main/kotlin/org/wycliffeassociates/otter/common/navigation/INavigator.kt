@@ -9,10 +9,12 @@ interface INavigator {
     val tabGroupBuilder: ITabGroupBuilder
 
     fun back() {
-        currentGroup?.deactivate()
-        val previousGroup = navBackStack.pop()
-        previousGroup.activate()
-        currentGroup = previousGroup
+        if (navBackStack.isNotEmpty()) {
+            currentGroup?.deactivate()
+            val previousGroup = navBackStack.pop()
+            previousGroup.activate()
+            currentGroup = previousGroup
+        }
     }
 
     fun navigateTo(tabGroupType: TabGroupType) {
