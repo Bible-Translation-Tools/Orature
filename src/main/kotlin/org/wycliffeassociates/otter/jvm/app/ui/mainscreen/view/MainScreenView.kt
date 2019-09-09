@@ -88,6 +88,7 @@ class MainScreenView : View() {
                     navButton {
                         text = messages["back"]
                         graphic = AppStyles.backIcon()
+                        enableWhen(chromeableStage.canNavigateBackProperty)
                         action {
                             chromeableStage.back()
                         }
