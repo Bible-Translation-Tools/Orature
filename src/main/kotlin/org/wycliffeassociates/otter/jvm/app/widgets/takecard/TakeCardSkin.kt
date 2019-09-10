@@ -65,6 +65,7 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
         skinnable.fireEvent(AnimateDragEvent(evt))
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun completeDrag(evt: MouseEvent) {
         skinnable.fireEvent(
             CompleteDragEvent(

@@ -6,6 +6,9 @@ import org.jooq.impl.DSL
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.persistence.database.daos.*
 import java.io.File
+import java.io.IOException
+
+const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 
 class AppDatabase(
     databaseFile: File
@@ -16,6 +19,7 @@ class AppDatabase(
         // Load the SQLite JDBC drivers
         Class
             .forName("org.sqlite.JDBC")
+            .getDeclaredConstructor()
             .newInstance()
 
         // Create a new sqlite data source
@@ -34,7 +38,8 @@ class AppDatabase(
 
     private fun setup() {
         // Setup the tables
-        val schemaFileStream = ClassLoader.getSystemResourceAsStream("sql/CreateAppDb.sql")
+        val schemaFileStream = ClassLoader.getSystemResourceAsStream(CREATION_SCRIPT)
+            ?: throw IOException("Couldn't read database creation script $CREATION_SCRIPT")
 
         // Make sure the database file has the tables we need
         val sqlStatements = schemaFileStream
