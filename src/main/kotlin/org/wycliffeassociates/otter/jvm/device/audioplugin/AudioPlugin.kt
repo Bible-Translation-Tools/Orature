@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.device.audioplugin
 import com.sun.javafx.application.ParametersImpl
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import javafx.application.Application.Parameters
 import javafx.application.Platform
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
@@ -12,9 +13,10 @@ import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.app.ui.AppWorkspace
 import org.wycliffeassociates.otter.jvm.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.plugin.PluginEntrypoint
-import org.wycliffeassociates.otter.jvm.recorder.app.view.RecorderView
 import tornadofx.*
 import java.io.File
+import kotlin.jvm.internal.Reflection
+import kotlin.reflect.KClass
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
@@ -24,97 +26,120 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     override fun launch(audioFile: File): Completable {
         return when (File(pluginData.executable).extension) {
             "jar" -> launchJar(audioFile)
-            //else -> launchBin(audioFile)
-            else -> launchJar(audioFile)
+            else -> launchBin(audioFile)
         }
     }
 
     private fun launchJar(audioFile: File): Completable {
+        val parameters = buildJarArguments(pluginData.args, audioFile.absolutePath)
         return Completable
             .fromCallable {
-                val finder = ClassFinder()
-                finder.add(File(pluginData.executable))
-                val filter = SubclassClassFilter(PluginEntrypoint::class.java)
-                val foundClasses = mutableListOf<ClassInfo>()
-                finder.findClasses(foundClasses, filter)
-                val filtered = foundClasses.filter {
-                    it.className.contains("RecordingApp")
-                }
-                //if (filtered.isNotEmpty()) {
-                if (true) {
-                    //val app = javaClass.classLoader.loadClass(filtered.first().className)
-                    //val plugin = app.newInstance() as PluginEntrypoint
-                    val parameters = ParametersImpl(
-                        insertRequestedArguments(
-                            listOf(
-                                "\${wav}",
-                                "\${lang}",
-                                "\${book}",
-                                "\${chap}",
-                                "\${cnum}",
-                                "\${unit}",
-                                "\${unum}"
-                            ),
-                            audioFile.absolutePath
+                val pluginClass = findPlugin(File(pluginData.executable))
+                if (pluginClass != null) {
+                    runInWindow(pluginClass, parameters)
+                } else {
+                    runProcess(
+                        audioFile,
+                        processArgs = listOf(
+                            "java",
+                            "-jar",
+                            pluginData.executable,
+                            *parameters.raw.toTypedArray()
                         )
                     )
-                    val scope = ParameterizedScope(parameters)
-                    {
-                        synchronized(monitor) {
-                            monitor.notify()
-                            appWorkspace.navigateBack()
-                        }
-                    }
-
-                    val recorder = find<RecorderView>(scope)
-                    Platform.runLater {
-                        appWorkspace.dock(recorder)
-                    }
-                    synchronized(monitor) {
-                        monitor.wait()
-                    }
                 }
             }.subscribeOn(Schedulers.io())
     }
 
     private fun launchBin(audioFile: File): Completable {
-        val args = insertRequestedArguments(pluginData.args, audioFile.absolutePath)
+        val args = buildBinArguments(pluginData.args, audioFile.absolutePath)
         return Completable
             .fromCallable {
-                // Build and start the process
-                val processBuilder = ProcessBuilder(
-                    listOf(
+                runProcess(
+                    audioFile,
+                    processArgs = listOf(
                         pluginData.executable,
-                        *(pluginData.args.toTypedArray()),
-                        audioFile.toString()
+                        *args
                     )
                 )
-                processBuilder.redirectErrorStream(true)
-                val process = processBuilder.start()
-                process.outputStream.close()
-                while (process.inputStream.read() >= 0) {
-                }
-                process.waitFor()
             }
             .subscribeOn(Schedulers.io())
     }
 
-    private fun insertRequestedArguments(requestedArgs: List<String>, audioFilePath: String): List<String> {
+    private fun buildJarArguments(requestedArgs: List<String>, audioFilePath: String): Parameters {
         val insertedArgs = mutableListOf<String>()
         requestedArgs.forEach { arg ->
             insertedArgs.add(
                 when (arg) {
                     "\${wav}" -> "--wav=$audioFilePath"
-                    "\${lang}" -> "--lang=English"
-                    "\${book}" -> "--book=Matthew"
-                    "\${chap}" -> "--chap=Chapter"
-                    "\${cnum}" -> "--cnum=1"
-                    "\${unit}" -> "--unit=Verse"
-                    "\${unum}" -> "--unum=1"
                     else -> ""
                 }
             )
         }
-        return insertedArgs
+        insertedArgs.removeAll { it.isEmpty() }
+        if (insertedArgs.isEmpty()) {
+            insertedArgs.add("--wav=$audioFilePath")
+        }
+        return ParametersImpl(insertedArgs)
+    }
+
+    private fun buildBinArguments(requestedArgs: List<String>, audioFilePath: String): Array<String> {
+        val insertedArgs = mutableListOf<String>()
+        requestedArgs.forEach { arg ->
+            insertedArgs.add(
+                when (arg) {
+                    "\${wav}" -> audioFilePath
+                    else -> ""
+                }
+            )
+        }
+        insertedArgs.removeAll { it.isEmpty() }
+        if (insertedArgs.isEmpty()) {
+            insertedArgs.add(audioFilePath)
+        }
+        return insertedArgs.toTypedArray()
+    }
+
+    private fun findPlugin(jar: File): KClass<PluginEntrypoint>? {
+        val finder = ClassFinder()
+        finder.add(jar)
+        val filter = SubclassClassFilter(PluginEntrypoint::class.java)
+        val foundClasses = mutableListOf<ClassInfo>()
+        finder.findClasses(foundClasses, filter)
+        return if (foundClasses.isNotEmpty()) {
+            val pluginClass = javaClass.classLoader.loadClass(foundClasses.first().className)
+            Reflection.createKotlinClass(pluginClass) as KClass<PluginEntrypoint>
+        } else {
+            null
+        }
+    }
+
+
+    private fun runProcess(audioFile: File, processArgs: List<String>) {
+        // Build and start the process
+        val processBuilder = ProcessBuilder(processArgs)
+        processBuilder.redirectErrorStream(true)
+        val process = processBuilder.start()
+        process.outputStream.close()
+        while (process.inputStream.read() >= 0) {
+        }
+        process.waitFor()
+    }
+
+    private fun runInWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
+        val scope = ParameterizedScope(parameters)
+        {
+            synchronized(monitor) {
+                monitor.notify()
+                appWorkspace.navigateBack()
+            }
+        }
+        val plugin = find(pluginClass, scope)
+        Platform.runLater {
+            appWorkspace.dock(plugin)
+        }
+        synchronized(monitor) {
+            monitor.wait()
+        }
     }
 }

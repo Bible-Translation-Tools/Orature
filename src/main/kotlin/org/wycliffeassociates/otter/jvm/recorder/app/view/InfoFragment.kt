@@ -25,12 +25,12 @@ class InfoFragment : Fragment() {
     }
 
     private fun addRecordingInfoFromParams() {
-        val language = parameters.named["lang"]
+        val language = parameters.named["language"]
         val book = parameters.named["book"]
-        val chapter = parameters.named["chap"]
-        val cnum = parameters.named["cnum"]
+        val chapter = parameters.named["chapter"]
+        val cnum = parameters.named["chapter_number"]
         val unit = parameters.named["unit"]
-        val unum = parameters.named["unum"]
+        val unum = parameters.named["unit_number"]
 
         language?.let {
             root.add(InfoItem(it))

@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.viewmodel
 
 import javafx.animation.AnimationTimer
-import javafx.application.Platform
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty

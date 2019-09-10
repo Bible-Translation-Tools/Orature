@@ -4,7 +4,6 @@ import javafx.application.Platform
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.plugin.PluginEntrypoint
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
-import tornadofx.Fragment
 import tornadofx.vbox
 
 class RecorderView : PluginEntrypoint() {
@@ -37,9 +36,7 @@ class RecorderView : PluginEntrypoint() {
             Thread.sleep(1000)
             Platform.runLater {
                 recorderViewModel.onViewReady()
-
             }
         }.start()
-
     }
 }
