@@ -15,76 +15,72 @@ class TestRcImport {
 
     @Test
     fun ulb() {
-        val env = ImportEnvironment()
-        env.import("en_ulb.zip")
-
-        env.assertRowCounts(
-            Counts(
-                contents = mapOf(
-                    TEXT to 31103,
-                    META to 1189
-                ),
-                collections = 1256,
-                links = 0
+        ImportEnvironment()
+            .import("en_ulb.zip")
+            .assertRowCounts(
+                Counts(
+                    contents = mapOf(
+                        TEXT to 31103,
+                        META to 1189
+                    ),
+                    collections = 1256,
+                    links = 0
+                )
             )
-        )
     }
 
     @Test
     fun ulbAndTn() {
-        val env = ImportEnvironment()
-        env.import("en_ulb.zip")
-        env.import("en_tn.zip")
-
-        env.assertRowCounts(
-            Counts(
-                contents = mapOf(
-                    META to 1189,
-                    TEXT to 31103,
-                    TITLE to 80148,
-                    BODY to 77433
-                ),
-                collections = 1256,
-                links = 157573
+        ImportEnvironment()
+            .import("en_ulb.zip")
+            .import("en_tn.zip")
+            .assertRowCounts(
+                Counts(
+                    contents = mapOf(
+                        META to 1189,
+                        TEXT to 31103,
+                        TITLE to 80148,
+                        BODY to 77433
+                    ),
+                    collections = 1256,
+                    links = 157573
+                )
             )
-        )
     }
 
     @Test
     fun obsV6() {
-        val env = ImportEnvironment()
-        env.import("obs-biel-v6.zip")
-
-        env.assertRowCounts(
-            Counts(
-                collections = 57,
-                contents = mapOf(
-                    META to 55,
-                    TEXT to 1314
-                ),
-                links = 0
+        ImportEnvironment()
+            .import("obs-biel-v6.zip")
+            .assertRowCounts(
+                Counts(
+                    collections = 57,
+                    contents = mapOf(
+                        META to 55,
+                        TEXT to 1314
+                    ),
+                    links = 0
+                )
             )
-        )
     }
 
     @Test
     fun obsAndTnV6() {
-        val env = ImportEnvironment()
-        env.import("obs-biel-v6.zip")
-        env.import("obs-tn-biel-v6.zip")
-
-        env.assertRowCounts(
-            Counts(
-                contents = mapOf(
-                    META to 55,
-                    TEXT to 1314,
-                    TITLE to 2237,
-                    BODY to 2237
-                ),
-                collections = 57,
-                links = 4474
+        ImportEnvironment()
+            .import("obs-biel-v6.zip")
+            .import("obs-tn-biel-v6.zip")
+            .assertRowCounts(
+                Counts(
+                    contents = mapOf(
+                        META to 55,
+                        TEXT to 1314,
+                        TITLE to 2237,
+                        BODY to 2237
+                    ),
+                    collections = 57,
+                    links = 4474
+                )
             )
-        )
     }
 
     @Test
