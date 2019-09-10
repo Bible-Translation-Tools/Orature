@@ -86,6 +86,30 @@ class TestRcImport {
             )
         )
     }
+
+    @Test
+    fun obsSlugs() {
+        ImportEnvironment()
+            .import("obs-biel-v6.zip")
+            .assertSlugs(
+                "obs",
+                CollectionDescriptor(label = "book", slug = "obs"),
+                CollectionDescriptor(label = "project", slug = "obs"),
+                CollectionDescriptor(label = "chapter", slug = "obs_1")
+            )
+    }
+
+    @Test
+    fun ulbSlugs() {
+        ImportEnvironment()
+            .import("en_ulb.zip")
+            .assertSlugs(
+                "ulb",
+                CollectionDescriptor(label = "bundle", slug = "ulb"),
+                CollectionDescriptor(label = "project", slug = "gen"),
+                CollectionDescriptor(label = "chapter", slug = "gen_1")
+            )
+    }
 }
 
 private class ImportEnvironment {
@@ -108,12 +132,13 @@ private class ImportEnvironment {
             injector.zipEntryTreeBuilder
         )
 
-    fun import(rcFile: String) {
+    fun import(rcFile: String): ImportEnvironment {
         val result = importer.import(rcResourceFile(rcFile)).blockingGet()
         Assert.assertEquals(ImportResult.SUCCESS, result)
+        return this
     }
 
-    fun assertRowCounts(expected: Counts) {
+    fun assertRowCounts(expected: Counts): ImportEnvironment {
         val contentsByType = db.contentDao.fetchAll()
             .groupBy { it.type_fk }
             .mapValues { it.value.count() }
@@ -126,6 +151,23 @@ private class ImportEnvironment {
                 links = db.resourceLinkDao.fetchAll().count()
             )
         )
+
+        return this
+    }
+
+    fun assertSlugs(
+        rcSlug: String,
+        vararg collectionSlug: CollectionDescriptor
+    ): ImportEnvironment {
+        val rc = db.resourceMetadataDao.fetchAll().firstOrNull { it.identifier == rcSlug }
+        Assert.assertNotNull("Retrieving resource container info", rc)
+
+        collectionSlug.forEach { (label, slug) ->
+            val entity = db.collectionDao.fetch(containerId = rc!!.id, label = label, slug = slug)
+            Assert.assertNotNull("Retrieving $label $slug", entity)
+        }
+
+        return this
     }
 
     private fun setUpDatabase() {
@@ -149,4 +191,9 @@ private data class Counts(
     val collections: Int,
     val links: Int,
     val contents: Map<ContentType, Int>
+)
+
+private data class CollectionDescriptor(
+    val label: String,
+    val slug: String
 )
