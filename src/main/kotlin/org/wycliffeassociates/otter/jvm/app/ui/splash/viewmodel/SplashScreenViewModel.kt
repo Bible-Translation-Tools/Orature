@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
+import org.wycliffeassociates.otter.jvm.app.ui.AppWorkspace
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
@@ -15,7 +16,7 @@ import tornadofx.*
 class SplashScreenViewModel : ViewModel() {
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)
-    private var newWorkspace: Workspace by singleAssign()
+    private var appWorkspace: AppWorkspace by singleAssign()
 
     init {
         initApp()
@@ -23,11 +24,11 @@ class SplashScreenViewModel : ViewModel() {
                 .subscribe {
                     progressProperty.value = it
                     if (it == 1.0) {
-                        newWorkspace = find()
-                        newWorkspace.header.removeFromParent()
-                        newWorkspace.add(MainMenu())
-                        newWorkspace.dock<MainScreenView>()
-                        newWorkspace.openWindow(owner = null)
+                        appWorkspace = find()
+                        appWorkspace.header.removeFromParent()
+                        appWorkspace.add(MainMenu())
+                        appWorkspace.dock<MainScreenView>()
+                        appWorkspace.openWindow(owner = null)
                         shouldCloseProperty.value = true
                     }
                 }

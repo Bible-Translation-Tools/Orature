@@ -6,10 +6,13 @@ import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Paint
+import org.wycliffeassociates.otter.jvm.plugin.ParameterizedScope
 import tornadofx.Fragment
 import tornadofx.hbox
 
 class InfoFragment : Fragment() {
+
+    val parameters = (scope as ParameterizedScope).parameters
 
     override val root = hbox {
         minHeight = 50.0
@@ -22,12 +25,12 @@ class InfoFragment : Fragment() {
     }
 
     private fun addRecordingInfoFromParams() {
-        val language = app.parameters.named["lang"]
-        val book = app.parameters.named["book"]
-        val chapter = app.parameters.named["chap"]
-        val cnum = app.parameters.named["cnum"]
-        val unit = app.parameters.named["unit"]
-        val unum = app.parameters.named["unum"]
+        val language = parameters.named["lang"]
+        val book = parameters.named["book"]
+        val chapter = parameters.named["chap"]
+        val cnum = parameters.named["cnum"]
+        val unit = parameters.named["unit"]
+        val unum = parameters.named["unum"]
 
         language?.let {
             root.add(InfoItem(it))
