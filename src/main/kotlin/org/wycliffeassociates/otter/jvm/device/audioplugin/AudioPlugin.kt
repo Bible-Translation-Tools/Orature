@@ -10,7 +10,6 @@ import org.clapper.util.classutil.ClassInfo
 import org.clapper.util.classutil.SubclassClassFilter
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
-import org.wycliffeassociates.otter.jvm.app.ui.AppWorkspace
 import org.wycliffeassociates.otter.jvm.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.plugin.PluginEntrypoint
 import tornadofx.*
@@ -20,7 +19,7 @@ import kotlin.reflect.KClass
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
-    private val appWorkspace: AppWorkspace = find()
+    private val appWorkspace: Workspace = find()
     private val monitor = Object()
 
     override fun launch(audioFile: File): Completable {

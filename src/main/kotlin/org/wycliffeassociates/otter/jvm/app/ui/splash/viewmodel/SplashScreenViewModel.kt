@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
-import org.wycliffeassociates.otter.jvm.app.ui.AppWorkspace
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.app.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
@@ -18,7 +17,6 @@ import tornadofx.*
 class SplashScreenViewModel : ViewModel() {
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)
-    private var appWorkspace: AppWorkspace by singleAssign()
     private val chromeableStage: ChromeableStage by inject()
 
     init {
@@ -27,11 +25,10 @@ class SplashScreenViewModel : ViewModel() {
                 .subscribe {
                     progressProperty.value = it
                     if (it == 1.0) {
-                        appWorkspace = find()
-                        appWorkspace.header.removeFromParent()
-                        appWorkspace.add(MainMenu())
-                        appWorkspace.dock<MainScreenView>()
-                        appWorkspace.openWindow(owner = null)
+                        workspace.header.removeFromParent()
+                        workspace.add(MainMenu())
+                        workspace.dock<MainScreenView>()
+                        workspace.openWindow(owner = null)
                         chromeableStage.navigateTo(TabGroupType.PROJECT)
                         shouldCloseProperty.value = true
                     }
