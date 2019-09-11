@@ -65,10 +65,10 @@ class RecorderViewModel : ViewModel() {
         }
     }
 
-    fun onViewReady() {
+    fun onViewReady(width: Int) {
         val renderer = ActiveRecordingRenderer(
             recorder.getAudioStream(),
-            waveformView.width.toInt(),
+            width,
             secondsOnScreen = 10
         )
         val waveformLayer = WaveformLayer(renderer)
