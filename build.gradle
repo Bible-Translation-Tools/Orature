@@ -176,7 +176,6 @@ jar {
     manifest {
         attributes(
         'Main-Class': "org.wycliffeassociates.otter.jvm.app.MainKt"
-        //'Main-Class': "org.wycliffeassociates.otter.jvm.recorder.app.RecordingAppKt"
         )
     }
     from (configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
