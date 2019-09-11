@@ -48,7 +48,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
                     .filterMarkdownFiles()
                     .map { f ->
                         Contents(
-                            collection(file = f, projectRoot = projectRoot),
+                            collection(file = f, projectRoot = projectRoot, project = project),
                             if (f.isFile) f.readContents() else null
                         )
                     }
@@ -85,11 +85,19 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     private fun fileToIndex(f: OtterFile): Int =
         f.nameWithoutExtension.toIntOrNull() ?: 1
 
-    private fun fileToSlug(file: OtterFile, projectRoot: OtterFile): String =
-        file.toRelativeString(projectRoot)
+    private fun fileToSlug(
+        file: OtterFile,
+        projectRoot: OtterFile,
+        project: Project
+    ): String {
+        val fileParts = file
+            .toRelativeString(projectRoot)
             .substringBeforeLast('.')
             .split('/', '\\')
-            .joinToString("_", transform = this::simplifyTitle)
+            .asSequence()
+        val withSlug = sequenceOf(project.identifier) + fileParts.drop(1)
+        return withSlug.joinToString("_", transform = this::simplifyTitle)
+    }
 
     private fun fileToSort(file: OtterFile) = when (file.nameWithoutExtension) {
         "back" -> 9999
@@ -98,9 +106,13 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
 
     private fun simplifyTitle(s: String) = s.toIntOrNull()?.toString() ?: s
 
-    private fun collection(file: OtterFile, projectRoot: OtterFile) = Collection(
+    private fun collection(
+        file: OtterFile,
+        projectRoot: OtterFile,
+        project: Project
+    ) = Collection(
         sort = fileToSort(file),
-        slug = fileToSlug(file = file, projectRoot = projectRoot),
+        slug = fileToSlug(file = file, projectRoot = projectRoot, project = project),
         labelKey = SECONDARY_COLLECTION_KEY,
         titleKey = simplifyTitle(file.nameWithoutExtension),
         resourceContainer = null
