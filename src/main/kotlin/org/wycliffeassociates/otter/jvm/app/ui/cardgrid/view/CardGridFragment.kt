@@ -5,14 +5,18 @@ import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.CardGridViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.card.card
 import tornadofx.*
 
 class CardGridFragment : Fragment() {
+    private val navigator: ChromeableStage by inject()
     private val viewModel: CardGridViewModel by inject()
 
     init {
@@ -23,7 +27,7 @@ class CardGridFragment : Fragment() {
     override val root = vbox {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
-        addClass(AppStyles.appBackground)
+        addClass(AppStyles.whiteBackground)
         progressindicator {
             visibleProperty().bind(viewModel.loadingProperty)
             managedProperty().bind(visibleProperty())
@@ -34,9 +38,8 @@ class CardGridFragment : Fragment() {
             vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
             isFillWidth = true
-            addClass(AppStyles.appBackground)
+            addClass(AppStyles.whiteBackground)
             addClass(CardGridStyles.contentContainer)
-            vgrow = Priority.ALWAYS
             cellCache { item ->
                 card {
                     addClass(DefaultStyles.defaultCard)
@@ -52,11 +55,20 @@ class CardGridFragment : Fragment() {
                                 .apply { fill = AppTheme.colors.appRed }
                             onMousePressed = EventHandler {
                                 viewModel.onCardSelection(item)
+                                navigate(item)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun navigate(item: CardData) {
+        if (item.chapterSource != null) {
+            navigator.navigateTo(TabGroupType.RECORDABLE)
+        } else if (item.chunkSource != null) {
+            navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
         }
     }
 

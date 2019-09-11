@@ -8,6 +8,8 @@ import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.jvm.app.ui.AppWorkspace
+import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.app.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.app.ui.menu.view.MainMenu
@@ -17,6 +19,7 @@ class SplashScreenViewModel : ViewModel() {
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)
     private var appWorkspace: AppWorkspace by singleAssign()
+    private val chromeableStage: ChromeableStage by inject()
 
     init {
         initApp()
@@ -29,6 +32,7 @@ class SplashScreenViewModel : ViewModel() {
                         appWorkspace.add(MainMenu())
                         appWorkspace.dock<MainScreenView>()
                         appWorkspace.openWindow(owner = null)
+                        chromeableStage.navigateTo(TabGroupType.PROJECT)
                         shouldCloseProperty.value = true
                     }
                 }

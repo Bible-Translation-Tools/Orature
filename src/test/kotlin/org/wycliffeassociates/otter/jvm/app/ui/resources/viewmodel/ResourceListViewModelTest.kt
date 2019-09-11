@@ -6,36 +6,58 @@ import io.reactivex.Observable
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.ResourceTabPaneViewModel
+import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
+import java.io.File
+import java.time.LocalDate
 
 class ResourceListViewModelTest : ViewModel() {
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
-    private val resourceTabPaneViewModel: ResourceTabPaneViewModel by inject()
+    private val recordResourceViewModel: RecordResourceViewModel by inject()
+
+    private val english = Language("en", "English", "English", "ltr", isGateway = true)
+    private val resourceMetadataTn = ResourceMetadata(
+        conformsTo = "rc0.2",
+        creator = "Door43 World Missions Community",
+        description = "Description",
+        format = "text/markdown",
+        identifier = "tn",
+        issued = LocalDate.now(),
+        language = english,
+        modified = LocalDate.now(),
+        publisher = "unfoldingWord",
+        subject = "Translator Notes",
+        type = "help",
+        title = "translationNotes",
+        version = "1",
+        path = File(".")
+    )
 
     init {
-        workbookViewModel.activeResourceSlugProperty.set("tn")
+        workbookViewModel.activeResourceMetadataProperty.set(resourceMetadataTn)
     }
 
     @Test
-    fun navigateToTakesPage_setsBookElement() {
-        resourceListViewModel.navigateToTakesPage(chunk1, testResourceNoBody)
+    fun setActiveChunkAndRecordable_setsBookElement() {
+        resourceListViewModel.setActiveChunkAndRecordables(chunk1, testResourceNoBody)
 
         Assert.assertEquals(chunk1, workbookViewModel.activeChunkProperty.value)
     }
 
     @Test
-    fun navigateToTakesPage_callsSetRecordableListItems() {
-        val spiedRecordResourceViewModel = spy(resourceTabPaneViewModel)
+    fun setActiveChunkAndRecordable_callsSetRecordableListItems() {
+        val spiedRecordResourceViewModel = spy(recordResourceViewModel)
         val spiedResourcesViewModel = spy(resourceListViewModel)
-        whenever(spiedResourcesViewModel.resourceTabPaneViewModel).thenReturn(spiedRecordResourceViewModel)
+        whenever(spiedResourcesViewModel.recordResourceViewModel).thenReturn(spiedRecordResourceViewModel)
 
         // Resource with just a title
-        spiedResourcesViewModel.navigateToTakesPage(chunk1, testResourceNoBody)
+        spiedResourcesViewModel.setActiveChunkAndRecordables(chunk1, testResourceNoBody)
 
         verify(spiedRecordResourceViewModel, times(1))
             .setRecordableListItems(listOf(testResourceNoBody.title))
@@ -43,7 +65,7 @@ class ResourceListViewModelTest : ViewModel() {
         Assert.assertEquals(1, spiedRecordResourceViewModel.recordableList.size)
 
         // Resource with title and body
-        spiedResourcesViewModel.navigateToTakesPage(chunk1, testResourceWithBody)
+        spiedResourcesViewModel.setActiveChunkAndRecordables(chunk1, testResourceWithBody)
 
         verify(spiedRecordResourceViewModel, times(1))
             .setRecordableListItems(listOf(testResourceWithBody.title, testResourceWithBody.body!!))
@@ -91,7 +113,7 @@ class ResourceListViewModelTest : ViewModel() {
     )
 
     private val chapterResourceGroup = ResourceGroup(
-        ResourceInfo("tn", "translationNotes"),
+        resourceMetadataTn,
         Observable.fromIterable(
             listOf(
                 Resource(
@@ -111,7 +133,7 @@ class ResourceListViewModelTest : ViewModel() {
     )
 
     private val chunk1ResourceGroup = ResourceGroup(
-        ResourceInfo("tn", "translationNotes"),
+        resourceMetadataTn,
         Observable.fromIterable(
             listOf(
                 Resource(
@@ -127,7 +149,7 @@ class ResourceListViewModelTest : ViewModel() {
     )
 
     private val chunk2ResourceGroup = ResourceGroup(
-        ResourceInfo("tn", "translationNotes"),
+        resourceMetadataTn,
         Observable.fromIterable(
             listOf(
                 Resource(
@@ -170,7 +192,7 @@ class ResourceListViewModelTest : ViewModel() {
         sort = 1,
         title = "gen_1",
         audio = createAssociatedAudio(),
-        subtreeResources = listOf(ResourceInfo("tn", "translationNotes")),
+        subtreeResources = listOf(resourceMetadataTn),
         resources = listOf(chapterResourceGroup),
         chunks = Observable.fromIterable(
             listOf(

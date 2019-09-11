@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resources.view
 
-import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.view.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.styles.ResourceListStyles
 import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.view.ResourceListView
@@ -13,13 +12,9 @@ class ResourceListFragment : Fragment() {
     private val resourceListViewModel: ResourceListViewModel by inject()
 
     init {
-        importStylesheet<MainScreenStyles>()
         importStylesheet<ResourceListStyles>()
     }
     override val root = vbox {
-
-        addClass(MainScreenStyles.main)
-
         add(
             workbookheader {
                 labelText = "${workbookViewModel.chapter.title} ${messages["resources"]}"

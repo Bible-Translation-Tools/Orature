@@ -49,8 +49,6 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
             addEventHandler(MouseEvent.MOUSE_DRAGGED, ::animateDrag)
             addEventHandler(MouseEvent.MOUSE_RELEASED, ::completeDrag)
         }
-
-        consumeMouseEvents(false)
     }
 
     private fun startDrag(evt: MouseEvent) {

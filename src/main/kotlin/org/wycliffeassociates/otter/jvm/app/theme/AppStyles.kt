@@ -18,6 +18,7 @@ class AppStyles : Stylesheet() {
         val jfxSnackbarAction by cssclass()
         val backButton by cssclass()
         val appBackground by cssclass()
+        val whiteBackground by cssclass()
         val progressDialog by cssclass()
         val appToggleButton by cssclass()
 
@@ -97,6 +98,10 @@ class AppStyles : Stylesheet() {
 
         appBackground {
             backgroundColor += AppTheme.colors.defaultBackground
+        }
+
+        whiteBackground {
+            backgroundColor += AppTheme.colors.white
         }
 
         progressDialog {

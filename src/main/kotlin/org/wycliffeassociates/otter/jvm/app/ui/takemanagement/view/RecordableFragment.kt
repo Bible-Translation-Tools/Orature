@@ -203,11 +203,13 @@ abstract class RecordableFragment(
     }
 
     private fun completeDrag(event: CompleteDragEvent) {
-        if (isDraggedToTarget()) {
-            recordableViewModel.selectTake(event.take)
-        } else {
-            event.onCancel()
+        if (draggingNodeProperty.value != null) {
+            if (isDraggedToTarget()) {
+                recordableViewModel.selectTake(event.take)
+            } else {
+                event.onCancel()
+            }
+            draggingNodeProperty.set(null)
         }
-        draggingNodeProperty.set(null)
     }
 }

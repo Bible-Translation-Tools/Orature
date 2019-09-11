@@ -5,6 +5,8 @@ import io.reactivex.Completable
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.app.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.app.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizard
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
@@ -16,6 +18,7 @@ class ProjectGridViewModel : ViewModel() {
     private val workbookRepo = injector.workbookRepository
     private val directoryProvider = injector.directoryProvider
 
+    private val navigator: ChromeableStage by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
     val projects: ObservableList<Collection> = FXCollections.observableArrayList<Collection>()
@@ -55,6 +58,7 @@ class ProjectGridViewModel : ViewModel() {
                 workbookViewModel.activeWorkbookProperty.set(workbook)
 
                 setProjectAudioDirectory(targetProject, sourceProject)
+                navigator.navigateTo(TabGroupType.CHAPTER)
             }
     }
 
