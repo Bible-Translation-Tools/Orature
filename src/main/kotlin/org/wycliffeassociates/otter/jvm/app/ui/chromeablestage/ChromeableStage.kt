@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.app.ui.chromeablestage
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
 import org.wycliffeassociates.controls.ChromeableTabPane
 import org.wycliffeassociates.otter.common.navigation.INavigator
@@ -13,6 +14,7 @@ import java.util.*
 class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     val chrome: Node by param()
     val headerScalingFactor: Double by param()
+    val canNavigateBackProperty = SimpleBooleanProperty(false)
 
     override val tabGroupMap: MutableMap<TabGroupType, ITabGroup> = mutableMapOf()
     override val navBackStack = Stack<ITabGroup>()
@@ -35,5 +37,19 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
                 }
             }
         }
+    }
+
+    override fun back() {
+        super.back()
+        setCanNavigateBack()
+    }
+
+    override fun navigateTo(tabGroupType: TabGroupType) {
+        super.navigateTo(tabGroupType)
+        setCanNavigateBack()
+    }
+
+    private fun setCanNavigateBack() {
+        canNavigateBackProperty.set(navBackStack.isNotEmpty())
     }
 }
