@@ -50,6 +50,10 @@ class ProjectWizardStyles : Stylesheet() {
                 else -> MaterialIconView(MaterialIcon.COLLECTIONS_BOOKMARK, "50px")
             }
         }
+
+        fun translateIcon() = MaterialIconView(MaterialIcon.TRANSLATE, "16px")
+        fun resourceIcon() = MaterialIconView(MaterialIcon.CONTENT_COPY, "16px")
+        fun bookIcon() = MaterialIconView(MaterialIcon.BOOK, "16px")
     }
 
     init {
@@ -139,11 +143,6 @@ class ProjectWizardStyles : Stylesheet() {
                 padding = box(5.px)
                 backgroundColor += AppTheme.colors.base
             }
-            SearchableListStyles.searchField {
-                backgroundColor += AppTheme.colors.base
-                // gets rid of a blue focus animation
-                unsafe("-jfx-focus-color", raw(AppTheme.colors.appRed.css))
-            }
             SearchableListStyles.searchListView {
                 backgroundColor += AppTheme.colors.base
                 borderColor += box(AppTheme.colors.base)
@@ -160,6 +159,11 @@ class ProjectWizardStyles : Stylesheet() {
                         }
                     }
                 }
+            }
+            SearchableListStyles.searchField {
+                backgroundColor += AppTheme.colors.base
+                // gets rid of a blue focus animation
+                unsafe("-jfx-focus-color", raw(AppTheme.colors.appRed.css))
             }
         }
 
