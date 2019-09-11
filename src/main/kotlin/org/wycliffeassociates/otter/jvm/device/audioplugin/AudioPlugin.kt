@@ -36,7 +36,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
             .fromCallable {
                 val pluginClass = findPlugin(File(pluginData.executable))
                 if (pluginClass != null) {
-                    runInWindow(pluginClass, parameters)
+                    runInOtterMainWindow(pluginClass, parameters)
                 } else {
                     runProcess(
                         audioFile,
@@ -67,37 +67,31 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     }
 
     private fun buildJarArguments(requestedArgs: List<String>, audioFilePath: String): Parameters {
-        val insertedArgs = mutableListOf<String>()
-        requestedArgs.forEach { arg ->
-            insertedArgs.add(
+        val insertedArgs =
+            requestedArgs.map { arg ->
                 when (arg) {
                     "\${wav}" -> "--wav=$audioFilePath"
                     else -> ""
                 }
-            )
-        }
-        insertedArgs.removeAll { it.isEmpty() }
-        if (insertedArgs.isEmpty()) {
-            insertedArgs.add("--wav=$audioFilePath")
-        }
+            }.filterNot {
+                it.isEmpty()
+            }.ifEmpty {
+                listOf("--wav=$audioFilePath")
+            }
         return ParametersImpl(insertedArgs)
     }
 
     private fun buildBinArguments(requestedArgs: List<String>, audioFilePath: String): Array<String> {
-        val insertedArgs = mutableListOf<String>()
-        requestedArgs.forEach { arg ->
-            insertedArgs.add(
-                when (arg) {
-                    "\${wav}" -> audioFilePath
-                    else -> ""
-                }
-            )
-        }
-        insertedArgs.removeAll { it.isEmpty() }
-        if (insertedArgs.isEmpty()) {
-            insertedArgs.add(audioFilePath)
-        }
-        return insertedArgs.toTypedArray()
+        return requestedArgs.map { arg ->
+            when (arg) {
+                "\${wav}" -> "$audioFilePath"
+                else -> ""
+            }
+        }.filterNot {
+            it.isEmpty()
+        }.ifEmpty {
+            listOf("$audioFilePath")
+        }.toTypedArray()
     }
 
     private fun findPlugin(jar: File): KClass<PluginEntrypoint>? {
@@ -106,17 +100,15 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         val filter = SubclassClassFilter(PluginEntrypoint::class.java)
         val foundClasses = mutableListOf<ClassInfo>()
         finder.findClasses(foundClasses, filter)
-        return if (foundClasses.isNotEmpty()) {
-            val pluginClass = javaClass.classLoader.loadClass(foundClasses.first().className)
-            Reflection.createKotlinClass(pluginClass) as KClass<PluginEntrypoint>
-        } else {
-            null
-        }
+        return foundClasses
+            .firstOrNull()
+            ?.let { foundClass ->
+                val pluginClass = javaClass.classLoader.loadClass(foundClass.className)
+                Reflection.createKotlinClass(pluginClass) as KClass<PluginEntrypoint>
+            }
     }
 
-
     private fun runProcess(audioFile: File, processArgs: List<String>) {
-        // Build and start the process
         val processBuilder = ProcessBuilder(processArgs)
         processBuilder.redirectErrorStream(true)
         val process = processBuilder.start()
@@ -126,7 +118,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         process.waitFor()
     }
 
-    private fun runInWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
+    private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
         val scope = ParameterizedScope(parameters)
         {
             synchronized(monitor) {
