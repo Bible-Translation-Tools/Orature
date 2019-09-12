@@ -38,7 +38,7 @@ class Step(separator: Boolean) : HBox() {
                 visibleWhen { completedTextProperty.isNotNull }
                 addClass(ProgressStepperStyles.graphicLabel)
             }
-            addClass(ProgressStepperStyles.graphicContainer)
+            addClass(ProgressStepperStyles.stepGraphicContainer)
         }
 
         stackpane {
