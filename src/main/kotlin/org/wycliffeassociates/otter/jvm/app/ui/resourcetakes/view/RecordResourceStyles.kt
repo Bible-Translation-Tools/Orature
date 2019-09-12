@@ -1,10 +1,7 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view
 
 import javafx.geometry.Pos
-import javafx.scene.effect.DropShadow
-import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
-import javafx.scene.text.FontPosture
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import tornadofx.*
 
@@ -13,16 +10,13 @@ class RecordResourceStyles : Stylesheet() {
         val takesTab by cssclass()
         val leftRegionContainer by cssclass()
         val rightRegion by cssclass()
-        val selectedTakePlaceholder by cssclass()
         val contentText by cssclass()
         val newTakeRegion by cssclass()
         val contentScrollPane by cssclass()
         val takesList by cssclass()
-        val glow by cssclass()
-        val dragTarget by cssclass()
 
-        val takeMaxWidth = 500.px
-        val takeMinHeight = 80.px
+        private val takeMaxWidth = 500.px
+        private val takeMinHeight = 80.px
 
         fun takeWidthHeight() = mixin {
             minHeight = takeMinHeight
@@ -59,34 +53,6 @@ class RecordResourceStyles : Stylesheet() {
 
         rightRegion {
             padding = box(topMargin, 70.px, 30.px, 30.px)
-        }
-
-        selectedTakePlaceholder {
-            +takeWidthHeight()
-            +takeRadius()
-            alignment = Pos.CENTER
-            backgroundColor += AppTheme.colors.defaultBackground
-            borderColor += box(Color.DARKGRAY)
-            borderStyle += BorderStrokeStyle.DASHED
-            borderWidth += box(2.px)
-            fontStyle = FontPosture.ITALIC
-        }
-
-        glow {
-            effect = DropShadow(5.0, AppTheme.colors.appBlue)
-        }
-
-        dragTarget {
-            +takeWidthHeight()
-            +takeRadius()
-            backgroundColor += AppTheme.colors.cardBackground.deriveColor(0.0, 1.0, 1.0, 0.8)
-            label {
-                fontSize = 16.px
-            }
-            child("*") {
-                // TODO: This won't always be blue
-                fill = AppTheme.colors.appBlue
-            }
         }
 
         contentText {
