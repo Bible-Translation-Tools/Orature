@@ -100,6 +100,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
             .firstOrNull()
             ?.let { foundClass ->
                 val pluginClass = javaClass.classLoader.loadClass(foundClass.className)
+                @Suppress("UNCHECKED_CAST")
                 Reflection.createKotlinClass(pluginClass) as KClass<PluginEntrypoint>
             }
     }
