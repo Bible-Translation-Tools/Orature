@@ -12,7 +12,7 @@ class ProgressStepperStyles : Stylesheet() {
         fun checkIcon() = MaterialIconView(MaterialIcon.CHECK, "16px")
 
         val graphicLabel by cssclass()
-        val graphicContainer by cssclass()
+        val stepGraphicContainer by cssclass()
         val completedBar by cssclass()
         val incompleteBar by cssclass()
         val completedTextLabel by cssclass()
@@ -27,7 +27,7 @@ class ProgressStepperStyles : Stylesheet() {
             }
         }
 
-        graphicContainer {
+        stepGraphicContainer {
             backgroundColor += c("#CC4141")
             backgroundRadius += box(100.percent)
             alignment = Pos.CENTER
