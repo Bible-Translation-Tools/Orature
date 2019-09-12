@@ -5,5 +5,5 @@ import java.io.File
 
 interface IAudioPlugin {
     // Launch the plugin
-    fun launch(file: File): Completable
+    fun launch(audioFile: File): Completable
 }
