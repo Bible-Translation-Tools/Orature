@@ -83,7 +83,7 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
     }
 
     private fun fileToIndex(f: OtterFile): Int =
-        f.nameWithoutExtension.toIntOrNull() ?: 1
+        f.nameWithoutExtension.toIntOrNull() ?: 0
 
     private fun fileToSlug(
         file: OtterFile,
