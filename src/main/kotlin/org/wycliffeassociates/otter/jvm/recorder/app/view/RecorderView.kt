@@ -1,11 +1,14 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.stage.Screen
+import org.wycliffeassociates.otter.jvm.plugin.PluginEntrypoint
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
-import tornadofx.View
+import tornadofx.onChange
 import tornadofx.vbox
 
-class RecorderView : View() {
+class RecorderView : PluginEntrypoint() {
+
+    private var viewInflated = false
 
     val info = InfoFragment()
     val waveform = RecordingVisualizerFragment()
@@ -24,8 +27,11 @@ class RecorderView : View() {
 
     init {
         // notifies viewmodel that views have been inflated and the canvas now has a width
-        primaryStage.setOnShown {
-            recorderViewModel.onViewReady()
+        waveform.root.widthProperty().onChange { width ->
+            if (!viewInflated && width.toInt() > 0) {
+                recorderViewModel.onViewReady(width.toInt())
+                viewInflated = true
+            }
         }
     }
 }

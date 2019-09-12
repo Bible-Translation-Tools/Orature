@@ -50,7 +50,7 @@ open class RecordableViewModel(
     fun recordNewTake() {
         recordable?.let {
             contextProperty.set(TakeContext.RECORD)
-            showPluginActive = true
+            // showPluginActive = true
             audioPluginViewModel
                 .record(it)
                 .observeOnFx()
