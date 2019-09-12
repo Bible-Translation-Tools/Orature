@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.cardgrid.view
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.event.EventHandler
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
@@ -27,6 +28,7 @@ class CardGridFragment : Fragment() {
     override val root = vbox {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
+        alignment = Pos.CENTER
         addClass(AppStyles.whiteBackground)
         progressindicator {
             visibleProperty().bind(viewModel.loadingProperty)

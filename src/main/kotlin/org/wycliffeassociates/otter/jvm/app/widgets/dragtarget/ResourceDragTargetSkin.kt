@@ -7,10 +7,10 @@ typealias ResourceStyles = DragTargetStyles.Resource
 
 class ResourceDragTargetSkin(control: DragTarget) : DragTargetSkin(
     control = control,
-    dragTargetSize = ResourceStyles.dragTargetSize,
-    placeholder = ResourceStyles.selectedTakePlaceHolder,
+    dragTargetSize = ResourceStyles.resourceDragTargetSize,
+    placeholder = ResourceStyles.selectedResourceTakePlaceHolder,
     borderGlow = ResourceStyles.borderGlow,
-    dragTargetOverlay = ResourceStyles.dragTargetOverlay
+    dragTargetOverlay = ResourceStyles.resourceDragTargetOverlay
 ) {
     init {
         importStylesheet<ResourceStyles>()
