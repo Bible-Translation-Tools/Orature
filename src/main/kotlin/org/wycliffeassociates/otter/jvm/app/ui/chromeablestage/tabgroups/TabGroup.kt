@@ -8,4 +8,8 @@ import tornadofx.Component
 abstract class TabGroup : Component(), ITabGroup {
     private val chromeableStage: ChromeableStage by inject()
     protected val tabPane: TabPane = chromeableStage.root
+
+    override fun deactivate() {
+        // Default is no-op
+    }
 }
