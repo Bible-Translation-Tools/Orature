@@ -31,6 +31,7 @@ class ResourceListViewModel : ViewModel() {
     }
 
     internal fun loadResourceGroups(chapter: Chapter) {
+        resourceGroupCardItemList.clear()
         chapter
             .children
             .startWith(chapter)

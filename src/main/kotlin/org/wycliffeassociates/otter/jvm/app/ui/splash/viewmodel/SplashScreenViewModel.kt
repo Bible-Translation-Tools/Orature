@@ -17,7 +17,6 @@ import tornadofx.*
 class SplashScreenViewModel : ViewModel() {
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)
-    private var newWorkspace: Workspace by singleAssign()
     private val chromeableStage: ChromeableStage by inject()
 
     init {
@@ -26,12 +25,11 @@ class SplashScreenViewModel : ViewModel() {
                 .subscribe {
                     progressProperty.value = it
                     if (it == 1.0) {
-                        newWorkspace = find()
-                        newWorkspace.header.removeFromParent()
-                        newWorkspace.add(MainMenu())
-                        newWorkspace.dock<MainScreenView>()
+                        workspace.header.removeFromParent()
+                        workspace.add(MainMenu())
+                        workspace.dock<MainScreenView>()
+                        workspace.openWindow(owner = null)
                         chromeableStage.navigateTo(TabGroupType.PROJECT)
-                        newWorkspace.openWindow(owner = null)
                         shouldCloseProperty.value = true
                     }
                 }

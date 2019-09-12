@@ -81,11 +81,7 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
     }
 }
 
-fun resourcecardfragment(
+fun resourceCardFragment(
     resource: ResourceCardItem,
     init: ResourceCardFragment.() -> Unit = {}
-): ResourceCardFragment {
-    val rc = ResourceCardFragment(resource)
-    rc.init()
-    return rc
-}
+) = ResourceCardFragment(resource).apply { init.invoke(this) }
