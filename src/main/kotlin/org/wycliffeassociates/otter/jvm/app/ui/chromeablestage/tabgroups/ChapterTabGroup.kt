@@ -10,6 +10,12 @@ class ChapterTabGroup : TabGroup() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
+    init {
+        workbookViewModel.activeWorkbookProperty.onChange {
+            tabMap.clear()
+        }
+    }
+
     override fun activate() {
         workbookViewModel.activeChapterProperty.set(null)
         val activeResourceMetadata = workbookViewModel.activeResourceMetadataProperty.value
