@@ -10,6 +10,6 @@ abstract class TabGroup : Component(), ITabGroup {
     protected val tabPane: TabPane = chromeableStage.root
 
     override fun deactivate() {
-        tabPane.tabs.clear()
+        // Default is no-op
     }
 }

@@ -24,6 +24,10 @@ class ChapterTabGroup : TabGroup() {
         }
     }
 
+    override fun deactivate() {
+        tabMap.clear()
+    }
+
     private fun getTargetBookResourceMetadata(): ResourceMetadata {
         return workbookViewModel.workbook.target.resourceMetadata
     }

@@ -40,16 +40,22 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     }
 
     override fun back() {
+        clearTabs()
         super.back()
         setCanNavigateBack()
     }
 
     override fun navigateTo(tabGroupType: TabGroupType) {
+        clearTabs()
         super.navigateTo(tabGroupType)
         setCanNavigateBack()
     }
 
     private fun setCanNavigateBack() {
         canNavigateBackProperty.set(navBackStack.isNotEmpty())
+    }
+
+    private fun clearTabs() {
+        root.tabs.clear()
     }
 }
