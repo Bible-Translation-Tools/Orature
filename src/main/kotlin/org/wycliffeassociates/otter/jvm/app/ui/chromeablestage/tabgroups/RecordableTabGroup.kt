@@ -17,6 +17,8 @@ class RecordableTabGroup : TabGroup() {
         }
     }
 
+    override fun deactivate() { }
+
     private fun createChunkTab() {
         tabPane.apply {
             tab<CardGridFragment>()

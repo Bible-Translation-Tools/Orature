@@ -27,4 +27,6 @@ class RecordResourceTabGroup : TabGroup() {
             }
         }
     }
+
+    override fun deactivate() { }
 }

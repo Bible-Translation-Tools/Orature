@@ -14,4 +14,6 @@ class ProjectTabGroup : TabGroup() {
             tab<ProjectGridFragment> {}
         }
     }
+
+    override fun deactivate() { }
 }

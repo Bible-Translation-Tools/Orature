@@ -12,4 +12,6 @@ class RecordScriptureTabGroup : TabGroup() {
             }
         )
     }
+
+    override fun deactivate() { }
 }
