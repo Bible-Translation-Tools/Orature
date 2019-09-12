@@ -19,7 +19,6 @@ import kotlin.reflect.KClass
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
-    private val appWorkspace: Workspace = find()
     private val monitor = Object()
 
     override fun launch(audioFile: File): Completable {
@@ -38,7 +37,6 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     runInOtterMainWindow(pluginClass, parameters)
                 } else {
                     runProcess(
-                        audioFile,
                         processArgs = listOf(
                             "java",
                             "-jar",
@@ -55,7 +53,6 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         return Completable
             .fromCallable {
                 runProcess(
-                    audioFile,
                     processArgs = listOf(
                         pluginData.executable,
                         *args
@@ -107,7 +104,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
             }
     }
 
-    private fun runProcess(audioFile: File, processArgs: List<String>) {
+    private fun runProcess(processArgs: List<String>) {
         val processBuilder = ProcessBuilder(processArgs)
         processBuilder.redirectErrorStream(true)
         val process = processBuilder.start()
@@ -118,6 +115,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     }
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
+        val appWorkspace: Workspace = find()
         val scope = ParameterizedScope(parameters)
         {
             synchronized(monitor) {

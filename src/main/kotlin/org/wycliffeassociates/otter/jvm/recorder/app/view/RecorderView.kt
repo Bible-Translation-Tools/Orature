@@ -1,13 +1,9 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import javafx.application.Platform
 import javafx.stage.Screen
-import javafx.stage.Window
 import org.wycliffeassociates.otter.jvm.plugin.PluginEntrypoint
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.onChange
-import tornadofx.onChangeOnce
-import tornadofx.onChangeTimes
 import tornadofx.vbox
 
 class RecorderView : PluginEntrypoint() {
