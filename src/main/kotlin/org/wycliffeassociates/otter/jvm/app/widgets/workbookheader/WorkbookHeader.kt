@@ -30,7 +30,6 @@ class WorkbookHeader : VBox() {
 
     init {
         importStylesheet<WorkbookHeaderStyles>()
-
         addClass(WorkbookHeaderStyles.workbookHeader)
         spacing = 10.0
         hbox {

@@ -126,8 +126,14 @@ class ResourceContainerRepository(
                 .map { it.id }
         }
 
-        private fun findCollectionId(collection: Collection, containerId: Int): Int? =
-            collectionDao.fetchBySlugAndContainerId(collection.slug, containerId)?.id
+        private fun findCollectionId(collection: Collection, containerId: Int): Int? {
+            val entity = collectionDao.fetch(
+                slug = collection.slug,
+                label = collection.labelKey,
+                containerId = containerId
+            )
+            return entity?.id
+        }
 
         private fun addCollection(collection: Collection, parentId: Int?): Int {
             val entity = CollectionMapper().mapToEntity(collection).apply {

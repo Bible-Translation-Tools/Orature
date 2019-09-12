@@ -33,19 +33,19 @@ object DragTargetStyles {
 
     class Resource : Stylesheet() {
         companion object {
-            val dragTargetSize by cssclass()
-            val selectedTakePlaceHolder by cssclass()
-            val dragTargetOverlay by cssclass()
+            val resourceDragTargetSize by cssclass()
+            val selectedResourceTakePlaceHolder by cssclass()
+            val resourceDragTargetOverlay by cssclass()
             val borderGlow by cssclass()
         }
 
         private val glowColor = AppTheme.colors.appBlue
 
         init {
-            dragTargetSize {
+            resourceDragTargetSize {
                 +RecordResourceStyles.takeWidthHeight()
             }
-            selectedTakePlaceHolder {
+            selectedResourceTakePlaceHolder {
                 +RecordResourceStyles.takeRadius()
                 alignment = Pos.CENTER
                 backgroundColor += AppTheme.colors.defaultBackground
@@ -57,7 +57,7 @@ object DragTargetStyles {
             borderGlow {
                 +borderGlowMixin(glowColor)
             }
-            dragTargetOverlay {
+            resourceDragTargetOverlay {
                 +dragTargetOverlayMixin(glowColor)
                 +RecordResourceStyles.takeRadius()
             }

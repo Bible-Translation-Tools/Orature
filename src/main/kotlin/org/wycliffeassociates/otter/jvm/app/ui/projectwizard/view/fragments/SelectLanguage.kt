@@ -20,7 +20,7 @@ class SelectLanguage : Fragment() {
             listView.selectionModel.clearSelection()
         }
         viewModel.sourceLanguageProperty.addValidator(searchField) {
-            if (it == null) error("Source language is required") else null
+            if (it == null) error(messages["sourceLanguageRequired"]) else null
         }
     }
     private val targetList = searchablelist(viewModel.allLanguages, viewModel.targetLanguageProperty) {
