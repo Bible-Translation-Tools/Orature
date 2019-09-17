@@ -1,0 +1,140 @@
+content:
+  '01':
+    '10':
+      words:
+        - //bible/tw/circumcise
+    '12':
+      words:
+        - //bible/tw/crete
+        - //bible/tw/faith
+        - //bible/tw/true
+    '14':
+      words:
+        - //bible/tw/command
+        - //bible/tw/jew
+        - //bible/tw/true
+    '15':
+      words:
+        - //bible/tw/confess
+        - //bible/tw/conscience
+        - //bible/tw/disobey
+    '01':
+      words:
+        - //bible/tw/apostle
+        - //bible/tw/elect
+        - //bible/tw/eternity
+        - //bible/tw/faith
+        - //bible/tw/godly
+        - //bible/tw/jesus
+        - //bible/tw/paul
+        - //bible/tw/savior
+        - //bible/tw/servant
+        - //bible/tw/true
+        - //bible/tw/word
+    '04':
+      words:
+        - //bible/tw/christ
+        - //bible/tw/crete
+        - //bible/tw/elder
+        - //bible/tw/godthefather
+        - //bible/tw/grace
+        - //bible/tw/peace
+        - //bible/tw/savior
+        - //bible/tw/titus
+    '06':
+      words:
+        - //bible/tw/elder
+        - //bible/tw/evil
+        - //bible/tw/faithful
+        - //bible/tw/houseofgod
+        - //bible/tw/manager
+    '08':
+      words:
+        - //bible/tw/godly
+        - //bible/tw/good
+        - //bible/tw/righteous
+  '02':
+    '11':
+      words:
+        - //bible/tw/glory
+        - //bible/tw/godly
+        - //bible/tw/grace
+        - //bible/tw/jesus
+        - //bible/tw/righteous
+        - //bible/tw/savior
+        - //bible/tw/ungodly
+    '14':
+      words:
+        - //bible/tw/jesus
+        - //bible/tw/lawless
+        - //bible/tw/peoplegroup
+        - //bible/tw/purify
+    '15':
+      words:
+        - //bible/tw/authority
+    '01':
+      words:
+        - //bible/tw/faith
+        - //bible/tw/love
+        - //bible/tw/perseverance
+    '03':
+      words:
+        - //bible/tw/purify
+    '09':
+      words:
+        - //bible/tw/faith
+        - //bible/tw/lord
+        - //bible/tw/savior
+        - //bible/tw/servant
+  '03':
+    '12':
+      words:
+        - //bible/tw/apollos
+        - //bible/tw/tychicus
+    '14':
+      words:
+        - //bible/tw/fruit
+        - //bible/tw/peoplegroup
+        - //bible/tw/works
+    '15':
+      words:
+        - //bible/tw/faith
+        - //bible/tw/grace
+    '01':
+      words:
+        - //bible/tw/authority
+        - //bible/tw/humble
+        - //bible/tw/obey
+        - //bible/tw/ruler
+    '03':
+      words:
+        - //bible/tw/disobey
+        - //bible/tw/evil
+    '04':
+      words:
+        - //bible/tw/bornagain
+        - //bible/tw/holyspirit
+        - //bible/tw/love
+        - //bible/tw/mercy
+        - //bible/tw/righteous
+        - //bible/tw/save
+        - //bible/tw/savior
+        - //bible/tw/works
+    '06':
+      words:
+        - //bible/tw/eternity
+        - //bible/tw/god
+        - //bible/tw/grace
+        - //bible/tw/holyspirit
+        - //bible/tw/jesus
+        - //bible/tw/justify
+        - //bible/tw/savior
+    '08':
+      words:
+        - //bible/tw/trust
+        - //bible/tw/works
+    '09':
+      words:
+        - //bible/tw/condemn
+        - //bible/tw/lawofmoses
+        - //bible/tw/sin

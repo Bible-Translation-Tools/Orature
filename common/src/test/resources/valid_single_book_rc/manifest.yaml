@@ -1,0 +1,47 @@
+---
+
+dublin_core:
+    type: 'book'
+    conformsto: 'rc0.2'
+    format: 'text/usfm'
+    identifier: 'en-ulb'
+    title: 'Unlocked Literal Bible'
+    subject: 'Bible translation'
+    description: 'The Unlocked Literal Bible is an open-licensed version of the Bible that is intended to provide a form-centric translation of the Bible.'
+    language:
+        identifier: 'en'
+        title: 'English'
+        direction: 'ltr'
+    source:
+    -
+        language: 'en'
+        identifier: 'en-asv'
+        version: '1901'
+    rights: 'CC BY-SA 4.0'
+    creator: 'Wycliffe Associates'
+    contributor:
+        - 'A Contributor'
+        - 'Another Contributor'
+    relation:
+        - 'en-udb'
+        - 'en-tn'
+    publisher: 'Door43'
+    issued: '2015-12-17'
+    modified: '2015-12-22T12:01:30-05:00'
+    version: '6'
+
+checking:
+    checking_entity:
+    - 'Wycliffe Associates'
+    checking_level: '3'
+
+projects:
+    -
+        identifier: 'tit'
+        title: 'Titus'
+        versification: 'kjv'
+        sort: 57
+        path: './content'
+        categories:
+        - 'bible-nt'
+

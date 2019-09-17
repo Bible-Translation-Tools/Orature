@@ -61,6 +61,7 @@ local.properties
 
 # Ignore Gradle GUI config
 gradle-org.wycliffeassociates.otter.jvm.app.setting
+gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
@@ -96,7 +97,6 @@ gradle-org.wycliffeassociates.otter.jvm.app.setting
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-
 # DS_Store for mac users
 *.DS_Store
 .dsp_cache
@@ -115,6 +115,11 @@ hs_err_pid*
 
 
 # ignores jooq generated files
-/src/main/java/jooq/
+/jvm/src/main/java/jooq/
+
+# DS_Store files for mac users
+*.DS_Store
 
 *.iml
+
+*.sqlite

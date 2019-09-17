@@ -1,0 +1,8 @@
+---
+  name: Audacity
+  version: 0.0.1
+  canEdit: true
+  canRecord: true
+  executable:
+    macos: /Applications/Audacity.app/Contents/MacOS/Audacity
+  args: []
