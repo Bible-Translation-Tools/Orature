@@ -1,0 +1,19 @@
+language: java
+dist: trusty
+jdk:
+  - oraclejdk8
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -f $HOME/.gradle/caches/*/plugin-resoloution/
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper
+install:
+  - git clone --branch=dev https://github.com/WycliffeAssociates/kotlin-resource-container.git ../kotlin-resource-container
+jobs:
+  include:
+    - stage: build
+      script: ./gradlew build
+stages:
+  - build
