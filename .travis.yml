@@ -1,7 +1,8 @@
 language: java
 dist: trusty
 jdk:
-  - oraclejdk8
+  - openjdk11
+
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -f $HOME/.gradle/caches/*/plugin-resoloution/
@@ -10,10 +11,16 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper
 install:
+  - git clone https://github.com/WycliffeAssociates/chromeabletabpane.git ../chromeabletabpane
   - git clone --branch=dev https://github.com/WycliffeAssociates/kotlin-resource-container.git ../kotlin-resource-container
+  - git clone https://github.com/WycliffeAssociates/otter-common.git ../otter-common
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+  - source init_common.sh
 jobs:
   include:
     - stage: build
-      script: ./gradlew build
+      script:
+        - ./gradlew build integrationTest
 stages:
   - build

@@ -1,0 +1,12 @@
+---
+    name: Audacity
+    version: 1.0.3
+    canEdit: true
+    canRecord: true
+    executable:
+        macos: /Applications/Audacity.app/Contents/MacOS/Audacity
+        windows: C:\Program Files (x86)\Audacity\audacity.exe
+        linux: audacity
+    args:
+      - arg1
+      - "-t arg3"
