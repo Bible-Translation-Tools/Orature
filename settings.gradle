@@ -8,3 +8,5 @@
  */
 
 rootProject.name = 'otter'
+
+include ':common', ':jvm'

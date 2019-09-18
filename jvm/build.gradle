@@ -160,9 +160,9 @@ dependencies {
     integrationTestImplementation sourceSets.main.output
     
     //WA Libraries
-    implementation 'org.wycliffeassociates:otter-common'
-    implementation 'org.wycliffeassociates:kotlin-resource-container'
-    implementation 'org.wycliffeassociates:chromeabletabpane'
+    implementation project(':common')
+    implementation 'com.github.WycliffeAssociates:kotlin-resource-container:rc0.2'
+    implementation 'com.github.WycliffeAssociates:chromeabletabpane:jbs-bintray'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
 
     // Atlassian commonmark (for rendering markdown)
