@@ -1,6 +1,6 @@
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version'
-    implementation 'io.reactivex.rxjava2:rxkotlin:$rxkotlin_version'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
     implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
 
     // Testing
@@ -14,5 +14,5 @@ dependencies {
     // Explicitly mention reflection lib so Gradle and kotlin-resource-container's Jackson
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated
     // to Jackson 2.9.8+.
-    implementation 'org.jetbrains.kotlin:kotlin-reflect:$kotlin_version'
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }
