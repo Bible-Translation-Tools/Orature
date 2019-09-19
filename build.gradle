@@ -60,5 +60,5 @@ subprojects {
         kotlinOptions.allWarningsAsErrors = true
     }
 
-    gradleLint.rules = ['all-dependency'] // add as many rules here as you'd like
+    gradleLint.rules = ['deprecated-dependency-configuration']
 }

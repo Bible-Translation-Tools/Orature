@@ -116,8 +116,8 @@ dependencies {
     kaptIntegrationTest 'com.google.dagger:dagger-compiler:2.24'
 
     // Testing
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile "org.mockito:mockito-core:2.+"
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.+'
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
     integrationTestCompile group: 'junit', name: 'junit', version: '4.12'
     integrationTestCompile "org.mockito:mockito-core:2.+"
@@ -134,7 +134,7 @@ dependencies {
     implementation 'com.atlassian.commonmark:commonmark:0.12.1'
 
     // jar loader
-    compile group: 'org.clapper', name: 'javautil', version: '3.2.0'
+    implementation 'org.clapper:javautil:3.2.0'
 }
 
 // tell gradle what to put in the jar
