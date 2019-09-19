@@ -73,12 +73,8 @@ javafx {
 repositories {
     mavenCentral()
     jcenter()
-    maven { url 'https://jitpack.io' }
-    maven { url "https://plugins.gradle.org/m2/" }
-    maven { url 'https://mvnrepository.com/artifac/' }
-    maven { url "https://dl.bintray.com/kotlin/exposed" }
-    maven { url "https://dl.bintray.com/dua3/public" }
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    maven { url "https://dl.bintray.com/dua3/public" } // FontawesomeFX
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
 }
 
 sourceSets {
@@ -163,7 +159,7 @@ dependencies {
     implementation project(':common')
     implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
     implementation 'org.wycliffeassociates:chromeabletabpane:0.1.0'
-    implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
+    implementation 'org.wycliffeassociates:jdenticon-kotlin:1.0'
 
     // Atlassian commonmark (for rendering markdown)
     implementation 'com.atlassian.commonmark:commonmark:0.12.1'
