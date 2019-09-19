@@ -7,8 +7,8 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.*
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.takecard.*
 import tornadofx.*
 
 private class RecordableViewModelProvider : Component() {

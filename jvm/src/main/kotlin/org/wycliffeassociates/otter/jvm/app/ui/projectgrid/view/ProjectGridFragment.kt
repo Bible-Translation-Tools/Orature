@@ -13,8 +13,8 @@ import org.wycliffeassociates.otter.jvm.app.images.SVGImage
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.projectgrid.viewmodel.ProjectGridViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.app.widgets.card.card
+import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
+import org.wycliffeassociates.otter.jvm.controls.card.card
 import tornadofx.*
 
 class ProjectGridFragment : Fragment() {

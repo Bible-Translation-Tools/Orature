@@ -12,8 +12,8 @@ import org.wycliffeassociates.otter.jvm.app.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.NavBoxType
 import org.wycliffeassociates.otter.jvm.app.ui.mainscreen.viewmodel.MainScreenViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.card.InnerCard
-import org.wycliffeassociates.otter.jvm.app.widgets.projectnav.projectnav
+import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
+import org.wycliffeassociates.otter.jvm.controls.projectnav.projectnav
 import tornadofx.*
 
 class MainScreenView : View() {

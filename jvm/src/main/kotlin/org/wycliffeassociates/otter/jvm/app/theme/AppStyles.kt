@@ -7,7 +7,7 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
-import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.ProgressDialogStyles
+import org.wycliffeassociates.otter.jvm.controls.progressdialog.ProgressDialogStyles
 import tornadofx.*
 
 class AppStyles : Stylesheet() {

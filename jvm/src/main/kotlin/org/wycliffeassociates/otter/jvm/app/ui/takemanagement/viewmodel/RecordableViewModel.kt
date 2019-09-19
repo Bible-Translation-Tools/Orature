@@ -15,7 +15,7 @@ import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.takecard.events.EditTakeEvent
 import tornadofx.FX.Companion.messages
 import tornadofx.*
 

@@ -4,8 +4,8 @@ import javafx.application.Platform
 import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
-import org.wycliffeassociates.otter.jvm.app.widgets.wizardcard
+import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.wizardcard
 import tornadofx.*
 
 class SelectCollection : Fragment() {

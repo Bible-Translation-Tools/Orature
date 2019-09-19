@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.fragments
 
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.app.ui.projectwizard.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.searchablelist.searchablelist
+import org.wycliffeassociates.otter.jvm.controls.searchablelist.searchablelist
 import tornadofx.*
 
 class SelectLanguage : Fragment() {

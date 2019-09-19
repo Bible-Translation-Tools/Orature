@@ -19,10 +19,10 @@ import org.wycliffeassociates.otter.jvm.app.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.app.widgets.progressdialog.progressdialog
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.events.*
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.controls.takecard.events.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 

@@ -12,8 +12,8 @@ import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.app.ui.cardgrid.viewmodel.CardGridViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.chromeablestage.ChromeableStage
-import org.wycliffeassociates.otter.jvm.app.widgets.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.app.widgets.card.card
+import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
+import org.wycliffeassociates.otter.jvm.controls.card.card
 import tornadofx.*
 
 class CardGridFragment : Fragment() {

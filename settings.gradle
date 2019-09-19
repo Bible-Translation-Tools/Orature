@@ -9,4 +9,4 @@
 
 rootProject.name = 'otter'
 
-include ':common', ':jvm'
+include ':common', ':jvm:controls', ':jvm'

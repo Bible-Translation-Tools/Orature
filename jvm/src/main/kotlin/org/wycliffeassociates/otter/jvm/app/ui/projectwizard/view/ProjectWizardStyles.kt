@@ -8,9 +8,8 @@ import javafx.scene.Node
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.widgets.searchablelist.SearchableListStyles
+import org.wycliffeassociates.otter.jvm.controls.searchablelist.SearchableListStyles
 import tornadofx.*
-import tornadofx.WizardStyles.Companion.wizard
 
 class ProjectWizardStyles : Stylesheet() {
 

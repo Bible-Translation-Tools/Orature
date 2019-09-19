@@ -5,7 +5,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.widgets.highlightablebutton.highlightablebutton
+import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
@@ -14,9 +14,9 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordableFragment
 import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.app.widgets.takecard.resourcetakecard
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.controls.takecard.resourcetakecard
 import tornadofx.*
 
 class RecordResourceFragment(

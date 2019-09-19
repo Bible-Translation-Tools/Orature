@@ -4,8 +4,8 @@ import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
-import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.ResourceGroupCardItemList
-import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.model.resourceGroupCardItem
+import org.wycliffeassociates.otter.jvm.controls.resourcecard.model.ResourceGroupCardItemList
+import org.wycliffeassociates.otter.jvm.controls.resourcecard.model.resourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.utils.observeOnFxSafe
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*

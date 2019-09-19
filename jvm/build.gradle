@@ -127,6 +127,7 @@ dependencies {
 
     //WA Libraries
     implementation project(':common')
+    implementation project(':jvm:controls')
     implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
     implementation 'org.wycliffeassociates:chromeabletabpane:0.1.0'
     implementation 'org.wycliffeassociates:jdenticon-kotlin:1.0'

@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.app.ui.resources.view
 
-import org.wycliffeassociates.otter.jvm.app.widgets.workbookheader.workbookheader
-import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.styles.ResourceListStyles
-import org.wycliffeassociates.otter.jvm.app.widgets.resourcecard.view.ResourceListView
+import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
+import org.wycliffeassociates.otter.jvm.controls.resourcecard.styles.ResourceListStyles
+import org.wycliffeassociates.otter.jvm.controls.resourcecard.view.ResourceListView
 import org.wycliffeassociates.otter.jvm.app.ui.resources.viewmodel.ResourceListViewModel
 import org.wycliffeassociates.otter.jvm.app.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
