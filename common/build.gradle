@@ -43,7 +43,7 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
 
     // Resource Container
-    implementation 'com.github.WycliffeAssociates:kotlin-resource-container:rc0.2'
+    implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
 
     // Explicitly mention reflection lib so Gradle and kotlin-resource-container's Jackson
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated

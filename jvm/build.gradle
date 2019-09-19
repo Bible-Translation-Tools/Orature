@@ -161,8 +161,8 @@ dependencies {
     
     //WA Libraries
     implementation project(':common')
-    implementation 'com.github.WycliffeAssociates:kotlin-resource-container:rc0.2'
-    implementation 'com.github.WycliffeAssociates:chromeabletabpane:jbs-bintray'
+    implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
+    implementation 'org.wycliffeassociates:chromeabletabpane:0.1.0'
     implementation 'com.github.WycliffeAssociates:jdenticon-kotlin:-SNAPSHOT'
 
     // Atlassian commonmark (for rendering markdown)
