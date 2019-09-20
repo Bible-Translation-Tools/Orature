@@ -26,6 +26,7 @@ plugins {
     id 'java'
     id 'java-library'
     id 'nebula.lint' version '14.2.1'
+    id 'com.gradle.build-scan' version '2.4.2'
 }
 
 subprojects {
@@ -61,4 +62,9 @@ subprojects {
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
+    
+    buildScan {
+        termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+        termsOfServiceAgree = 'yes'
+    }
 }
