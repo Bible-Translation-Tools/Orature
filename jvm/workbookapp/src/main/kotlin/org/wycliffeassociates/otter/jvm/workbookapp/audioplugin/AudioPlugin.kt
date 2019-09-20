@@ -10,8 +10,8 @@ import org.clapper.util.classutil.ClassInfo
 import org.clapper.util.classutil.SubclassClassFilter
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.ParameterizedScope
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginEntrypoint
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 import java.io.File
 import kotlin.jvm.internal.Reflection

@@ -1,9 +1,0 @@
-dependencies {
-    // ReactiveX
-    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
-    implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
-
-    implementation project(':common')
-}
-
-apply plugin: 'kotlin'

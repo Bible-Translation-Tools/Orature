@@ -6,7 +6,7 @@ import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.CornerRadii
 import javafx.scene.paint.Paint
-import org.wycliffeassociates.otter.jvm.plugin.ParameterizedScope
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.Fragment
 import tornadofx.hbox
 

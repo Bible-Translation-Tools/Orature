@@ -8,8 +8,8 @@ import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.jvm.workbookapp.images.ImageLoader
-import org.wycliffeassociates.otter.jvm.workbookapp.images.SVGImage
+import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
+import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel

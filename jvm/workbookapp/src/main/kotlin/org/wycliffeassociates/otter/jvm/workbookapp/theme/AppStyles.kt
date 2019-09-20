@@ -6,7 +6,7 @@ import javafx.scene.Cursor
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.workbookapp.images.ImageLoader
+import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.controls.progressdialog.ProgressDialogStyles
 import tornadofx.*
 

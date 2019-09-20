@@ -130,6 +130,7 @@ dependencies {
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
     implementation project(':jvm:utils')
+    implementation project(':jvm:workbookplugin')
     implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
     implementation 'org.wycliffeassociates:chromeabletabpane:0.1.0'
     implementation 'org.wycliffeassociates:jdenticon-kotlin:1.0'

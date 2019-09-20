@@ -14,9 +14,9 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.controls.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.controls.takecard.resourcetakecard
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourcetakecard
 import tornadofx.*
 
 class RecordResourceFragment(

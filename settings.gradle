@@ -9,4 +9,4 @@
 
 rootProject.name = 'otter'
 
-include ':common', ':jvm:utils', ':jvm:device', ':jvm:controls', ':jvm:workbookapp', ':jvm:recorderapp', ':jvm'
+include ':common', ':jvm:utils', ':jvm:device', ':jvm:controls', ':jvm:workbookplugin', ':jvm:workbookapp', ':jvm:recorderapp', ':jvm'
