@@ -117,8 +117,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
         val appWorkspace: Workspace = find()
-        val scope = ParameterizedScope(parameters)
-        {
+        val scope = ParameterizedScope(parameters) {
             synchronized(monitor) {
                 monitor.notify()
                 appWorkspace.navigateBack()
