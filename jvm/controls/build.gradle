@@ -57,5 +57,8 @@ dependencies {
     implementation "de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms"
     implementation "de.jensd:fontawesomefx-materialdesignfont:1.7.22-4"
 
+    // Atlassian commonmark (for rendering markdown)
+    implementation 'com.atlassian.commonmark:commonmark:0.12.1'
+
     implementation project(':common')
 }
