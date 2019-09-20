@@ -1,0 +1,55 @@
+buildscript {
+    ext.tornado_version = '2.0.0-SNAPSHOT'
+    ext.rxkotlinfx_version = '2.2.2'
+    ext.jfoenix_version = '9.0.8'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://maven.ej-technologies.com/repository" }
+    }
+
+    dependencies {
+        classpath 'org.openjfx:javafx-plugin:0.0.8'
+    }
+}
+
+plugins {
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+apply plugin: 'application'
+apply plugin: 'org.openjfx.javafxplugin'
+
+javafx {
+    version = '11'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    // ReactiveX
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfx_version"
+    implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
+
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornado_version"
+
+    // JFoenix
+    implementation "com.jfoenix:jfoenix:$jfoenix_version"
+
+    // Testing
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.+'
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+
+    //WA Libraries
+    implementation project(':common')
+}

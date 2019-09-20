@@ -1,0 +1,296 @@
+import groovy.sql.Sql
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
+buildscript {
+    ext.tornado_version = '2.0.0-SNAPSHOT'
+    ext.rxkotlinfx_version = '2.2.2'
+    ext.jfoenix_version = '9.0.8'
+    ext.sqlite_jdbc = '3.28.0'
+    ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
+    ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
+    ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://maven.ej-technologies.com/repository" }
+    }
+
+    dependencies {
+        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
+        classpath 'org.jooq:jooq-codegen:3.12.0'
+        classpath 'org.xerial:sqlite-jdbc:3.28.0'
+        classpath group: 'com.install4j', name: 'install4j-gradle', version: '7.0.8'
+        classpath 'org.openjfx:javafx-plugin:0.0.8'
+    }
+}
+
+plugins {
+    id 'nu.studer.jooq' version '3.0.3'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+apply plugin: 'install4j'
+apply plugin: 'application'
+apply plugin: 'idea'
+apply plugin: 'org.openjfx.javafxplugin'
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+javafx {
+    version = '11'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://mvnrepository.com/artifac/' } // FranzXaver
+    maven { url "https://dl.bintray.com/dua3/public" } // FontawesomeFX
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+}
+
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/integration-test/kotlin')
+        }
+        resources.srcDir file('src/integration-test/resources')
+    }
+}
+
+configurations {
+    sqllite
+}
+
+configurations {
+    integrationTestCompile.extendsFrom main
+    integrationTestRuntime.extendsFrom main
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    // ReactiveX
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfx_version"
+    implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
+
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornado_version"
+
+    // SVG Loader
+    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: '0.1'
+
+    // JFoenix
+    implementation "com.jfoenix:jfoenix:$jfoenix_version"
+
+    // FontAwesomeFX
+    implementation "de.jensd:fontawesomefx-commons:9.1.2-jpms"
+    implementation "de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2-jpms"
+    implementation "de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms"
+    implementation "de.jensd:fontawesomefx-materialdesignfont:1.7.22-4"
+
+    // Jooq
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
+    implementation 'org.jooq:jooq:3.12.0'
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
+    jooqRuntime 'org.xerial:sqlite-jdbc:3.28.0'
+    sqllite "org.xerial:sqlite-jdbc:$sqlite_jdbc"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:2.0.0"
+    implementation "com.squareup.retrofit2:converter-moshi:2.0.0"
+    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+
+    // Jackson YAML
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.2"
+
+    //Dagger2
+    implementation 'com.google.dagger:dagger:2.24'
+    kapt 'com.google.dagger:dagger-compiler:2.24'
+    kaptIntegrationTest 'com.google.dagger:dagger-compiler:2.24'
+
+    // Testing
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.+'
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
+    integrationTestCompile group: 'junit', name: 'junit', version: '4.12'
+    integrationTestCompile "org.mockito:mockito-core:2.+"
+    integrationTestImplementation sourceSets.main.compileClasspath
+    integrationTestImplementation sourceSets.main.output
+
+    //WA Libraries
+    implementation project(':common')
+    implementation project(':jvm:controls')
+    implementation project(':jvm:device')
+    implementation project(':jvm:utils')
+    implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
+    implementation 'org.wycliffeassociates:chromeabletabpane:0.1.0'
+    implementation 'org.wycliffeassociates:jdenticon-kotlin:1.0'
+
+    // Atlassian commonmark (for rendering markdown)
+    implementation 'com.atlassian.commonmark:commonmark:0.12.1'
+
+    // jar loader
+    implementation 'org.clapper:javautil:3.2.0'
+}
+
+// tell gradle what to put in the jar
+jar {
+    manifest {
+        attributes(
+                'Main-Class': "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+        )
+    }
+    from(configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "META-INF/MANIFEST.MF"
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+}
+
+//install4j tasks for building win/nix/mac installers. Executable jar can be built without it
+install4j {
+    installDir = file('/opt/install4j7')
+    //license must be passed via gradlew commandline -P as it can't be commit to public source control
+    if (project.hasProperty('gradlewCommandLicenseProp')) {
+        license = gradlewCommandLicenseProp
+    }
+}
+
+
+task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
+    projectFile = 'otter.install4j'
+}
+
+task integrationTest(type: Test) {
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+}
+
+configure(integrationTest) {
+    group = 'verification'
+    description = 'Cross-package and e2e tests, may require DB'
+}
+
+application {
+    mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+}
+
+//////////////////////////////////// Custom Tasks ///////////////////////////////////////////
+def getVersionName = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+
+task printVersionName {
+    doLast {
+        println getVersionName()
+    }
+}
+
+task createDb {
+    //Add the full path to the sqlite-jdbc jar to the list of URLs
+    //that Gradle will search for classes and resources
+    //The code block below allows Gradle to find and use the executable jar for sqlite-jdbc
+    //using its full path on the local machine
+    URLClassLoader loader = GroovyObject.class.classLoader
+    configurations.sqllite.each { File file ->
+        loader.addURL(file.toURL())
+    }
+    String[] text = new File(sqlDirPath).text.split(';')
+    text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
+        def sql = Sql.newInstance(sqliteConnect, "org.sqlite.JDBC")
+        sql.execute(it)
+        sql.close()
+    }
+}
+
+jooq {
+    version = '3.12.0'
+    edition = 'OSS'
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.sqlite.JDBC'
+            url = sqliteConnect
+        }
+        generator {
+            database {
+                name = 'org.jooq.meta.sqlite.SQLiteDatabase'
+            }
+
+            target {
+                packageName = 'jooq'
+                directory = 'src/main/java'
+            }
+        }
+    }
+}
+
+clean.doLast {
+    project.file(sqliteFile).delete()
+    project.file('src/main/java/jooq').deleteDir()
+}
+/////////////////////// Define Task Orders ///////////////////////////////
+generateSampleJooqSchemaSource.dependsOn createDb
+compileKotlin.dependsOn generateSampleJooqSchemaSource
+install4jdeploy.dependsOn build
+integrationTest.mustRunAfter test
+
+///////////Customize Gradle Test Output ////////////////////////////////
+tasks.withType(Test) {
+    testLogging {
+        // set options for log level LIFECYCLE
+        events TestLogEvent.FAILED,
+                TestLogEvent.PASSED,
+                TestLogEvent.SKIPPED,
+                TestLogEvent.STANDARD_OUT
+        exceptionFormat TestExceptionFormat.FULL
+        showExceptions true
+        showCauses true
+        showStackTraces true
+
+        // set options for log level DEBUG and INFO
+        debug {
+            events TestLogEvent.STARTED,
+                    TestLogEvent.FAILED,
+                    TestLogEvent.PASSED,
+                    TestLogEvent.SKIPPED,
+                    TestLogEvent.STANDARD_ERROR,
+                    TestLogEvent.STANDARD_OUT
+            exceptionFormat TestExceptionFormat.FULL
+        }
+        info.events = debug.events
+        info.exceptionFormat = debug.exceptionFormat
+
+        afterSuite { desc, result ->
+            if (!desc.parent) { // will match the outermost suite
+                def output = "Results: ${result.resultType} (${result.testCount} tests, " +
+                        "${result.successfulTestCount} successes, " +
+                        "${result.failedTestCount} failures, " +
+                        "${result.skippedTestCount} skipped)"
+                def startItem = '|  ', endItem = '  |'
+                def repeatLength = startItem.length() + output.length() + endItem.length()
+                println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
+            }
+        }
+    }
+}
+
+idea {
+    module {
+        generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
+    }
+}

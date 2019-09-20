@@ -1,0 +1,46 @@
+buildscript {
+    ext.tornado_version = '2.0.0-SNAPSHOT'
+    ext.rxkotlinfx_version = '2.2.2'
+
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://maven.ej-technologies.com/repository" }
+    }
+
+    dependencies {
+        classpath 'org.openjfx:javafx-plugin:0.0.8'
+    }
+}
+
+plugins {
+    id 'org.openjfx.javafxplugin' version '0.0.8'
+}
+
+apply plugin: 'org.openjfx.javafxplugin'
+
+javafx {
+    version = '11'
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://mvnrepository.com/artifac/' } // FranzXaver
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    // ReactiveX
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfx_version"
+    implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
+
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornado_version"
+
+    // SVG Loader
+    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: '0.1'
+}

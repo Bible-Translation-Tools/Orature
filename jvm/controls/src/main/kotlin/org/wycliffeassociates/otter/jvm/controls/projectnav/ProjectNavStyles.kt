@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.controls.projectnav
 
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import tornadofx.*
 
 class ProjectNavStyles : Stylesheet() {

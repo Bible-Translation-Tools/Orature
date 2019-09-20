@@ -5,9 +5,9 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.text.FontPosture
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view.RecordResourceStyles
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordScriptureStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordResourceStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordScriptureStyles
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.label
 

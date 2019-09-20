@@ -4,10 +4,10 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.app.images.ImageLoader
-import org.wycliffeassociates.otter.jvm.app.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.app.ui.resourcetakes.view.RecordResourceStyles
-import org.wycliffeassociates.otter.jvm.app.ui.takemanagement.view.RecordScriptureStyles
+import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordResourceStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordScriptureStyles
 import tornadofx.*
 
 class TakeCardStyles : Stylesheet() {

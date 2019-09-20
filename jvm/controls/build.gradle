@@ -16,10 +16,9 @@ buildscript {
 }
 
 plugins {
-    id 'org.openjfx.javafxplugin'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
-apply plugin: 'install4j'
 apply plugin: 'application'
 apply plugin: 'org.openjfx.javafxplugin'
 
@@ -61,4 +60,5 @@ dependencies {
     implementation 'com.atlassian.commonmark:commonmark:0.12.1'
 
     implementation project(':common')
+    implementation project(':jvm:utils')
 }
