@@ -3,10 +3,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 buildscript {
-    ext.tornado_version = '2.0.0-SNAPSHOT'
-    ext.rxkotlinfx_version = '2.2.2'
-    ext.jfoenix_version = '9.0.8'
-    ext.sqlite_jdbc = '3.28.0'
     ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
     ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
     ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
@@ -19,27 +15,22 @@ buildscript {
     }
 
     dependencies {
-        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
-        classpath 'org.jooq:jooq-codegen:3.12.0'
-        classpath 'org.xerial:sqlite-jdbc:3.28.0'
-        classpath group: 'com.install4j', name: 'install4j-gradle', version: '7.0.8'
-        classpath 'org.openjfx:javafx-plugin:0.0.8'
+        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
+        classpath "org.jooq:jooq-codegen:$jooqVer"
+        classpath "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
+        classpath group: 'com.install4j', name: 'install4j-gradle', version: "$install4jPluginVer"
+        classpath "org.openjfx:javafx-plugin:$javafxPluginVer"
     }
 }
 
 plugins {
-    id 'nu.studer.jooq' version '3.0.3'
-    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'nu.studer.jooq' version "$jooqPluginVer"
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
 
 apply plugin: 'install4j'
 apply plugin: 'application'
-apply plugin: 'idea'
 apply plugin: 'org.openjfx.javafxplugin'
-
-configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
 
 javafx {
     version = '11'
@@ -73,55 +64,54 @@ configurations {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     // ReactiveX
-    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
-    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfx_version"
-    implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
+    implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
 
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornado_version"
+    implementation "no.tornado:tornadofx:$tornadofxVer"
 
     // SVG Loader
-    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: '0.1'
+    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: "$franzXaverVer"
 
     // JFoenix
-    implementation "com.jfoenix:jfoenix:$jfoenix_version"
+    implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
     // FontAwesomeFX
-    implementation "de.jensd:fontawesomefx-commons:9.1.2-jpms"
-    implementation "de.jensd:fontawesomefx-materialicons:2.2.0-9.1.2-jpms"
-    implementation "de.jensd:fontawesomefx-icons525:4.2.0-9.1.2-jpms"
-    implementation "de.jensd:fontawesomefx-materialdesignfont:1.7.22-4"
+    implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"
+    implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"
+    implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
+    implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
 
     // Jooq
-    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqlite_jdbc"
-    implementation 'org.jooq:jooq:3.12.0'
-    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: '3.12.0'
-    jooqRuntime 'org.xerial:sqlite-jdbc:3.28.0'
-    sqllite "org.xerial:sqlite-jdbc:$sqlite_jdbc"
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqliteJdbcVer"
+    implementation "org.jooq:jooq:$jooqVer"
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
+    jooqRuntime "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
+    sqllite "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
 
     // Retrofit
-    implementation "com.squareup.retrofit2:retrofit:2.0.0"
-    implementation "com.squareup.retrofit2:converter-moshi:2.0.0"
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.3.0'
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
+    implementation "com.squareup.retrofit2:converter-moshi:$retrofitMoshiVer"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofitRxJava2Ver"
 
     // Jackson YAML
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.2"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
 
     //Dagger2
-    implementation 'com.google.dagger:dagger:2.24'
-    kapt 'com.google.dagger:dagger-compiler:2.24'
-    kaptIntegrationTest 'com.google.dagger:dagger-compiler:2.24'
+    implementation "com.google.dagger:dagger:$daggerVer"
+    kapt "com.google.dagger:dagger-compiler:$daggerVer"
+    kaptIntegrationTest "com.google.dagger:dagger-compiler:$daggerVer"
 
     // Testing
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.mockito:mockito-core:2.+'
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0"
-    integrationTestCompile group: 'junit', name: 'junit', version: '4.12'
-    integrationTestCompile "org.mockito:mockito-core:2.+"
+    testImplementation "junit:junit:$junitVer"
+    testImplementation "org.mockito:mockito-core:$mockitoVer"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
+    integrationTestCompile group: 'junit', name: 'junit', version: "$junitVer"
+    integrationTestCompile "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation sourceSets.main.compileClasspath
     integrationTestImplementation sourceSets.main.output
 
@@ -131,15 +121,15 @@ dependencies {
     implementation project(':jvm:device')
     implementation project(':jvm:utils')
     implementation project(':jvm:workbookplugin')
-    implementation 'org.wycliffeassociates:kotlin-resource-container:0.1.0'
-    implementation 'org.wycliffeassociates:chromeabletabpane:0.1.0'
-    implementation 'org.wycliffeassociates:jdenticon-kotlin:1.0'
+    implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
+    implementation "org.wycliffeassociates:chromeabletabpane:$chromeabletabpaneVer"
+    implementation "org.wycliffeassociates:jdenticon-kotlin:$jdenticonKoltinVer"
 
     // Atlassian commonmark (for rendering markdown)
-    implementation 'com.atlassian.commonmark:commonmark:0.12.1'
+    implementation "com.atlassian.commonmark:commonmark:$commonmarkVer"
 
     // jar loader
-    implementation 'org.clapper:javautil:3.2.0'
+    implementation "org.clapper:javautil:$clapperJavaUtilVer"
 }
 
 // tell gradle what to put in the jar
@@ -220,7 +210,7 @@ task createDb {
 }
 
 jooq {
-    version = '3.12.0'
+    version = "$jooqVer"
     edition = 'OSS'
     sample(sourceSets.main) {
         jdbc {
@@ -287,11 +277,5 @@ tasks.withType(Test) {
                 println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
             }
         }
-    }
-}
-
-idea {
-    module {
-        generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
     }
 }

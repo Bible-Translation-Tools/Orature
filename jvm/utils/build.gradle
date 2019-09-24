@@ -1,7 +1,4 @@
 buildscript {
-    ext.tornado_version = '2.0.0-SNAPSHOT'
-    ext.rxkotlinfx_version = '2.2.2'
-
     repositories {
         mavenCentral()
         jcenter()
@@ -10,18 +7,18 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.openjfx:javafx-plugin:0.0.8'
+        classpath "org.openjfx:javafx-plugin:$javafxPluginVer"
     }
 }
 
 plugins {
-    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
 
 apply plugin: 'org.openjfx.javafxplugin'
 
 javafx {
-    version = '11'
+    version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
@@ -31,16 +28,14 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-
     // ReactiveX
-    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlin_version"
-    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfx_version"
-    implementation 'com.jakewharton.rxrelay2:rxrelay:2.1.0'
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
+    implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
 
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornado_version"
+    implementation "no.tornado:tornadofx:$tornadofxVer"
 
     // SVG Loader
-    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: '0.1'
+    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: "$franzXaverVer"
 }

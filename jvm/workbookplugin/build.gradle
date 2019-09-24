@@ -1,6 +1,4 @@
 buildscript {
-    ext.tornado_version = '2.0.0-SNAPSHOT'
-
     repositories {
         mavenCentral()
         jcenter()
@@ -9,18 +7,18 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.openjfx:javafx-plugin:0.0.8'
+        classpath "org.openjfx:javafx-plugin:$javafxPluginVer"
     }
 }
 
 plugins {
-    id 'org.openjfx.javafxplugin' version '0.0.8'
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
 
 apply plugin: 'org.openjfx.javafxplugin'
 
 javafx {
-    version = '11'
+    version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
@@ -29,8 +27,7 @@ repositories {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 
     // TornadoFX
-    implementation "no.tornado:tornadofx:$tornado_version"
+    implementation "no.tornado:tornadofx:$tornadofxVer"
 }
