@@ -2,44 +2,27 @@ import groovy.sql.Sql
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-buildscript {
-    ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
-    ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
-    ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
-
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://maven.ej-technologies.com/repository" }
-    }
-
-    dependencies {
-        classpath group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
-        classpath "org.jooq:jooq-codegen:$jooqVer"
-        classpath "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
-        classpath group: 'com.install4j', name: 'install4j-gradle', version: "$install4jPluginVer"
-        classpath "org.openjfx:javafx-plugin:$javafxPluginVer"
-    }
-}
-
 plugins {
     id 'nu.studer.jooq' version "$jooqPluginVer"
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
+    id "com.install4j.gradle" version "$install4jPluginVer"
 }
 
-apply plugin: 'install4j'
 apply plugin: 'application'
-apply plugin: 'org.openjfx.javafxplugin'
+apply plugin: 'idea'
+
+ext {
+    sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
+    sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
+    sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
+}
 
 javafx {
-    version = '11'
+    version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
 repositories {
-    maven { url 'https://mvnrepository.com/artifac/' } // FranzXaver
-    maven { url "https://dl.bintray.com/dua3/public" } // FontawesomeFX
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
 }
 
@@ -74,7 +57,7 @@ dependencies {
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
     // SVG Loader
-    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: "$franzXaverVer"
+    implementation "com.github.afester.javafx:FranzXaver:$franzXaverVer"
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
@@ -277,5 +260,11 @@ tasks.withType(Test) {
                 println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
             }
         }
+    }
+}
+
+idea {
+    module {
+        generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
     }
 }

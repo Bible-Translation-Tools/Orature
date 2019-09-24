@@ -1,21 +1,6 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://maven.ej-technologies.com/repository" }
-    }
-
-    dependencies {
-        classpath "org.openjfx:javafx-plugin:$javafxPluginVer"
-    }
-}
-
 plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
-
-apply plugin: 'org.openjfx.javafxplugin'
 
 javafx {
     version = "$javafxVer"
@@ -23,7 +8,6 @@ javafx {
 }
 
 repositories {
-    maven { url 'https://mvnrepository.com/artifac/' } // FranzXaver
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
 }
 
@@ -37,5 +21,5 @@ dependencies {
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
     // SVG Loader
-    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: "$franzXaverVer"
+    implementation "com.github.afester.javafx:FranzXaver:$franzXaverVer"
 }

@@ -1,21 +1,6 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url "https://maven.ej-technologies.com/repository" }
-    }
-
-    dependencies {
-        classpath "org.openjfx:javafx-plugin:$javafxPluginVer"
-    }
-}
-
 plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
 }
-
-apply plugin: 'org.openjfx.javafxplugin'
 
 javafx {
     version = "$javafxVer"
@@ -27,7 +12,6 @@ repositories {
 }
 
 dependencies {
-
     // TornadoFX
     implementation "no.tornado:tornadofx:$tornadofxVer"
 }

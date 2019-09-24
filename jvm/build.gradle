@@ -1,14 +1,14 @@
-subprojects {
-    buildscript {
-        ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
-        ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
-        ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
-
-        repositories {
-            mavenCentral()
-            jcenter()
-            maven { url "https://plugins.gradle.org/m2/" }
-            maven { url "https://maven.ej-technologies.com/repository" }
-        }
-    }
-}
+//subprojects {
+//    buildscript {
+//        ext.sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
+//        ext.sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
+//        ext.sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
+//
+//        repositories {
+//            mavenCentral()
+//            jcenter()
+//            maven { url "https://plugins.gradle.org/m2/" }
+//            maven { url "https://maven.ej-technologies.com/repository" }
+//        }
+//    }
+//}
