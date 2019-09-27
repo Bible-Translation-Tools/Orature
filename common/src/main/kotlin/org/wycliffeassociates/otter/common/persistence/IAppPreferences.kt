@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.persistence
 import io.reactivex.Completable
 import io.reactivex.Single
 
-// interface to getting user-independent app preferences
+// interface to getting user-independent workbookapp preferences
 interface IAppPreferences {
     fun currentUserId(): Single<Int>
     fun setCurrentUserId(userId: Int): Completable

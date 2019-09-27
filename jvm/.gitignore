@@ -60,7 +60,7 @@ fabric.properties
 local.properties
 
 # Ignore Gradle GUI config
-gradle-org.wycliffeassociates.otter.jvm.app.setting
+gradle-org.wycliffeassociates.otter.jvm.workbookapp.setting
 gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
