@@ -4,5 +4,5 @@
   canEdit: true
   canRecord: true
   executable:
-    macos: /Applications/Audacity.app/Contents/MacOS/Audacity
+    macos: /Applications/Audacity.workbookapp/Contents/MacOS/Audacity
   args: []

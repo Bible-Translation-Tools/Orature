@@ -43,7 +43,7 @@ class ImportResourceContainer(
 
             if (internalDir.exists() && internalDir.contains(file.name)) {
                 // Collision on disk: Can't import the resource container
-                // Assumes that filesystem internal app directory and database are in sync
+                // Assumes that filesystem internal workbookapp directory and database are in sync
                 throw ImportException(ImportResult.ALREADY_EXISTS)
             }
 
@@ -67,7 +67,7 @@ class ImportResourceContainer(
                     ?: return@flatMap Single.just(ImportResult.LOAD_RC_ERROR)
                 if (internalDir.exists() && internalDir.listFiles().isNotEmpty()) {
                     // Collision on disk: Can't import the resource container
-                    // Assumes that filesystem internal app directory and database are in sync
+                    // Assumes that filesystem internal workbookapp directory and database are in sync
                     return@flatMap Single.just(ImportResult.ALREADY_EXISTS)
                 }
 
