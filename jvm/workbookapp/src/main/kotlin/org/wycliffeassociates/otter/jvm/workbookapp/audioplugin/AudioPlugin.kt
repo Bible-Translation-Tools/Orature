@@ -7,15 +7,17 @@ import javafx.application.Application.Parameters
 import javafx.application.Platform
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
-import org.clapper.util.classutil.SubclassClassFilter
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 import java.io.File
+import java.net.URLClassLoader
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
+import java.net.URL
+
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
@@ -93,13 +95,19 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     private fun findPlugin(jar: File): KClass<PluginEntrypoint>? {
         val finder = ClassFinder()
         finder.add(jar)
-        val filter = SubclassClassFilter(PluginEntrypoint::class.java)
         val foundClasses = mutableListOf<ClassInfo>()
-        finder.findClasses(foundClasses, filter)
+        finder.findClasses(foundClasses, null)
+        foundClasses.removeAll {
+            it.superClassName?.let {superClassName ->
+                !superClassName.contains(PluginEntrypoint::class.java.name)
+            } ?: true
+        }
         return foundClasses
             .firstOrNull()
             ?.let { foundClass ->
-                val pluginClass = javaClass.classLoader.loadClass(foundClass.className)
+                val urls = arrayOf(URL("jar:file:${jar.absolutePath}!/"))
+                val jarClassLoader = URLClassLoader.newInstance(urls)
+                val pluginClass = jarClassLoader.loadClass(foundClass.className)
                 @Suppress("UNCHECKED_CAST")
                 Reflection.createKotlinClass(pluginClass) as KClass<PluginEntrypoint>
             }
