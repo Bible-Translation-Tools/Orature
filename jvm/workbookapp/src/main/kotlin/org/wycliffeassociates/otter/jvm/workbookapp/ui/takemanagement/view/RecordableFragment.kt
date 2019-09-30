@@ -54,6 +54,7 @@ abstract class RecordableFragment(
             }
 
     private val dragContainer = VBox().apply {
+        this.prefWidthProperty().bind(dragTarget.widthProperty())
         draggingNodeProperty.onChange { draggingNode ->
             clear()
             draggingNode?.let { add(draggingNode) }
