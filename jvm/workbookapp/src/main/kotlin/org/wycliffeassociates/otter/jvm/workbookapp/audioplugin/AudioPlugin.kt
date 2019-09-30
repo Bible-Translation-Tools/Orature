@@ -18,7 +18,6 @@ import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
 import java.net.URL
 
-
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
     private val monitor = Object()
@@ -98,7 +97,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         val foundClasses = mutableListOf<ClassInfo>()
         finder.findClasses(foundClasses, null)
         foundClasses.removeAll {
-            it.superClassName?.let {superClassName ->
+            it.superClassName?.let { superClassName ->
                 !superClassName.contains(PluginEntrypoint::class.java.name)
             } ?: true
         }
