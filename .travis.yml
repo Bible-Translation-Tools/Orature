@@ -1,19 +1,55 @@
 language: java
 dist: trusty
 jdk:
-  - openjdk11
-
+- openjdk11
+env:
+- secure: GTjJ9fdRylI/1al+92ruelOpJ3NtqwQ+WK3Vappw/dSS1mjRwgaTs1yO5ed9WDUtg5UbNA+X2ZyY2k+uizAOB7af6Vbj33+hmVQG2jMtrhV/It8PJKfd+fvk54kVqIoqlQ2iVcFfmUMXViNOv1QcaDufEV5utRPjaGtgMKJvnMoFIPfqtQuz9Rz+OQz4viHoGyFsLsIKOuE/6j6qGZJQYTAlf8VmyYjvUKG9otALUx2Nv6xhOn6+cneuLJ9CU+/W1rlQaGBuf9w30sUP6h4clDGYljYRR7Hi9L0LDW0dZfJGE9rE1LUOamfS2tV0mLJWAcTNlsShSgP53wnKQoSK9A6krlqfeguvpAA6P/7XUBY0607PHwcfvo3rg5+wdvdyK4v5SOPJjQUqG3TSmAKMzbtzpa1YBkywXcIOEGkxp2eFUp/aO1JnEpI0USCBDkg7wp9izER7kyYBuvL2Y51MEVh4g7I60dnEeMi0D/GY2mRyPz/lToHubut0kX1NlwinnWrOGCnSbfcRE/zs4/xnKgPFJ+mP5/aotdKiibpxau7jy/EHaECVVlCBbkxFyySL43rPR5QXl9xZnwcc5ABvw5++Q0qny4Q1q7BEgKujA1MNu2hOXlP71qDOkeUYaJOVaBDo0AGVnVs1jV3WcgcdKVHFPcQNMyjd8tVfxLcghCI=
 before_cache:
-  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -f $HOME/.gradle/caches/*/plugin-resoloution/
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -f $HOME/.gradle/caches/*/plugin-resoloution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper"
+before_install:
+- wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_7_0_12.tar.gz
+- tar -zxf install4j_unix_7_0_12.tar.gz
+- export INSTALL4JDIR="$(pwd)/install4j7.0.12"
+- wget --no-verbose "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz"
+- wget --no-verbose "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz"
+- wget --no-verbose "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz"
+install:
+- if [ -f VERSION ]; then export VERSIONVAR="$(cat VERSION).$TRAVIS_BUILD_NUMBER";
+  fi
 jobs:
   include:
-    - stage: build
-      script:
-        - ./gradlew build integrationTest
+  - stage: build
+    script:
+    - "./gradlew build integrationTest"
+    - ./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR
+      -PgradlewCommandVersionProp=$VERSIONVAR :jvm:workbookapp:install4jdeploy"
 stages:
-  - build
+- build
+addons:
+  artifacts:
+    s3_region: us-east-1
+    target_paths:
+    - "/otter/${TRAVIS_BUILD_NUMBER}/${TRAVIS_BRANCH}"
+    working_dir: ".exec"
+    paths:
+    - $(cd .exec && ls *.exe | tr "\n" ":")
+    - $(cd .exec && ls *.dmg | tr "\n" ":")
+    - $(cd .exec && ls *.deb | tr "\n" ":")
+deploy:
+  provider: releases
+  api_key:
+    secure: LRAYPt/rUQGYht5N392POYbbx6miXQ3uf1WMg81gPAFo9VmUtAjns4fsdq39/6sU3bYsXElbSihNOAUXgMSXTpP9GoBiFJVpkpchMsrxuPs5gl1HDTUKvJPDlEH6EC+j+dPWeWBOe/m1yHIjLyc1JfyDtWOvoHSoNI7or7JXpGv5wAyMjHfgrwkuFc7cfK/WrKFBL0JJQW3YHs379IVLJ9+mAQCnj0RVg7YWvvz8Le0EeFJwXUKhYL9dWqYxqKmhKCiXEG4MlVhnozUjBbqvsph8gLPLwZQFbTwBlQikz+UnrQFC2IccwlTzQRk3dE9U33worQjO9VeEiYXtvq0vYuX8+X85b7biQAE2Kan4RFR3IlU75lcQ8BSIzZnwr0ry6nUSwdqO8cxRqq6P2KS2B//d+y7u4jlKi43LGVklOQyRTmNbl4/gx6U+CWQzOpytbH5b3izZFqQbpYBPcgxDtcl/DVD+W0As3PbjvDXDZBBkhcuilDzsvBxG1TX3pMeuwSu2EOVUtoUOeoBRT12JjE4y4LluVsABkVQEZFRPfNZsukhaEqRkfcKlUpcpnLBA16S30vjUtVwfiwIognJEDkHxyFFRKA7aFWRVLb1uoV7Z96TzQeNLRyS49n4JF+kdJn95eNsiNfuktYY45+Z7UDZB5bvHy82tPBQcCxd69no=
+  file:
+    - "./.exec/*.exe"
+    - "./.exec/*.dmg"
+    - "./.exec/*.deb"
+    skip_cleanup: true
+    file_glob: true
+    on:
+      tags: true
+      repo: Bible-Translation-Tools/otter
