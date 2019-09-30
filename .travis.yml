@@ -47,8 +47,8 @@ deploy:
     - "./.exec/*.exe"
     - "./.exec/*.dmg"
     - "./.exec/*.deb"
-    skip_cleanup: true
-    file_glob: true
-    on:
-      tags: true
-      repo: Bible-Translation-Tools/otter
+  skip_cleanup: true
+  file_glob: true
+  on:
+    tags: true
+    repo: Bible-Translation-Tools/otter
