@@ -7,41 +7,50 @@ import tornadofx.*
 
 class SelectLanguage : Fragment() {
     private val viewModel: ProjectWizardViewModel by inject()
-    private val sourceList = searchablelist(viewModel.filteredLanguages, viewModel.sourceLanguageProperty) {
-        addClass(ProjectWizardStyles.searchableList)
-        listView.cellCache { language ->
-            label("${language.name} (${language.slug})")
+    private val sourceList =
+        searchablelist(
+            viewModel.filteredLanguages,
+            viewModel.sourceLanguageProperty
+        ) {
+            addClass(ProjectWizardStyles.searchableList)
+            listView.cellCache { language ->
+                label("${language.name} (${language.slug})")
+            }
+            searchField.promptText = messages["languageSearchPrompt"]
+            autoSelect = true
+            filter(viewModel::filterSourceLanguages)
+            viewModel.clearLanguages.subscribe {
+                searchField.clear()
+                listView.selectionModel.clearSelection()
+            }
+            viewModel.sourceLanguageProperty.addValidator(searchField) {
+                if (it == null) error(messages["sourceLanguageRequired"]) else null
+            }
         }
-        searchField.promptText = messages["languageSearchPrompt"]
-        autoSelect = true
-        filter(viewModel::filterLanguages)
-        viewModel.clearLanguages.subscribe {
-            searchField.clear()
-            listView.selectionModel.clearSelection()
+    private val targetList =
+        searchablelist(
+            viewModel.allLanguages,
+            viewModel.targetLanguageProperty
+        ) {
+            addClass(ProjectWizardStyles.searchableList)
+            listView.cellCache { language ->
+                label("${language.name} (${language.slug})")
+            }
+            searchField.promptText = messages["languageSearchPrompt"]
+            autoSelect = true
+            viewModel.sourceLanguageProperty.onChange {
+                refreshSearch(false)
+            }
+            filter(viewModel::filterLanguages)
+            viewModel.clearLanguages.subscribe {
+                searchField.clear()
+                listView.selectionModel.clearSelection()
+            }
+            viewModel.targetLanguageProperty.addValidator(searchField) {
+                if (it == null) error("Target language is required") else null
+            }
         }
-        viewModel.sourceLanguageProperty.addValidator(searchField) {
-            if (it == null) error(messages["sourceLanguageRequired"]) else null
-        }
-    }
-    private val targetList = searchablelist(viewModel.allLanguages, viewModel.targetLanguageProperty) {
-        addClass(ProjectWizardStyles.searchableList)
-        listView.cellCache { language ->
-            label("${language.name} (${language.slug})")
-        }
-        searchField.promptText = messages["languageSearchPrompt"]
-        autoSelect = true
-        viewModel.sourceLanguageProperty.onChange {
-            refreshSearch(false)
-        }
-        filter(viewModel::filterLanguages)
-        viewModel.clearLanguages.subscribe {
-            searchField.clear()
-            listView.selectionModel.clearSelection()
-        }
-        viewModel.targetLanguageProperty.addValidator(searchField) {
-            if (it == null) error("Target language is required") else null
-        }
-    }
+
     override val complete = viewModel.languagesValid()
 
     init {

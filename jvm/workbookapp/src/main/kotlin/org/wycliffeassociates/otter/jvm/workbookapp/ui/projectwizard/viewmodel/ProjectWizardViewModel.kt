@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.subjects.PublishSubject
+import javafx.beans.binding.BooleanExpression
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -178,6 +179,7 @@ class ProjectWizardViewModel : ViewModel() {
         creationCompletedProperty.value = false
         filterSourceLanguages()
         loadProjects()
+        languageCompletedText.set(null)
         resourceCompletedText.set(null)
     }
 
@@ -199,7 +201,17 @@ class ProjectWizardViewModel : ViewModel() {
         }
     }
 
-    fun languagesValid() = sourceLanguageProperty.booleanBinding(targetLanguageProperty) {
-        sourceLanguageProperty.value != null && targetLanguageProperty.value != null
+    fun filterSourceLanguages(query: String): ObservableList<Language> {
+        return filterLanguages(query)
+            .filtered {
+                filteredLanguages.contains(it)
+            }
+    }
+
+    fun languagesValid(): BooleanExpression {
+        return sourceLanguageProperty
+            .booleanBinding(targetLanguageProperty) {
+                sourceLanguageProperty.value != null && targetLanguageProperty.value != null
+            }
     }
 }
