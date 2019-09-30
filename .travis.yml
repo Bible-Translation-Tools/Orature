@@ -26,8 +26,7 @@ jobs:
   - stage: build
     script:
     - "./gradlew build integrationTest"
-    - ./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR
-      -PgradlewCommandVersionProp=$VERSIONVAR :jvm:workbookapp:install4jdeploy"
+    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR :jvm:workbookapp:install4jdeploy"
 stages:
 - build
 addons:
