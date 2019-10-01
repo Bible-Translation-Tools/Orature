@@ -19,13 +19,18 @@ class ChapterTabGroup : TabGroup() {
 
         // Adding these tabs can change the active resource property so we need to
         // change it back to what it was originally
-        if (activeResourceMetadata != null) {
+        if (shouldRestoreActiveResourceMetadata(activeResourceMetadata)) {
             restoreActiveResourceMetadata(activeResourceMetadata)
         }
     }
 
     override fun deactivate() {
         tabMap.clear()
+    }
+
+    private fun shouldRestoreActiveResourceMetadata(metadataToRestore: ResourceMetadata?): Boolean {
+        return metadataToRestore != null &&
+                getAssociatedMetadatas().contains(metadataToRestore)
     }
 
     private fun getTargetBookResourceMetadata(): ResourceMetadata {
@@ -36,9 +41,12 @@ class ChapterTabGroup : TabGroup() {
         return workbookViewModel.workbook.source.subtreeResources
     }
 
+    private fun getAssociatedMetadatas(): Sequence<ResourceMetadata> {
+        return sequenceOf(getTargetBookResourceMetadata()) + getSourceBookSubtreeResources()
+    }
+
     private fun createTabs() {
-        val metadataList = sequenceOf(getTargetBookResourceMetadata()) + getSourceBookSubtreeResources()
-        metadataList.forEach { metadata ->
+        getAssociatedMetadatas().forEach { metadata ->
             tabMap.putIfAbsent(metadata.identifier, ChapterSelectTab(metadata))
         }
     }

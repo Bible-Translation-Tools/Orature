@@ -21,7 +21,6 @@ class RecordResourceStyles : Stylesheet() {
         fun takeWidthHeight() = mixin {
             minHeight = takeMinHeight
             maxWidth = takeMaxWidth
-            minWidth = maxWidth
             maxHeight = minHeight
         }
 

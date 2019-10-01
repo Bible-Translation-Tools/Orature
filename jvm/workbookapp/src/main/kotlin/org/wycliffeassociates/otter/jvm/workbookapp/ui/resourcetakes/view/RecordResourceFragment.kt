@@ -47,7 +47,11 @@ class RecordResourceFragment(
             region {
                 hgrow = Priority.ALWAYS
             }
-            add(dragTarget)
+            add(
+                dragTarget.apply {
+                    hgrow = Priority.ALWAYS
+                }
+            )
             region {
                 hgrow = Priority.ALWAYS
             }
