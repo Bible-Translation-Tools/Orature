@@ -12,7 +12,7 @@ class TestDirectoryProviderModule {
 
     @Provides
     fun providesDirectoryProvider(): IDirectoryProvider = DirectoryProvider(
-        appName = "TranslationRecorder",
+        appName = "ProjectOtter",
         userHome = root.resolve("user").apply { mkdirs() }.path,
         windowsAppData = root.resolve("workbookapp").apply { mkdirs() }.path
     )
