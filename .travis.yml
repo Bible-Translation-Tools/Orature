@@ -15,9 +15,10 @@ before_install:
 - wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_7_0_12.tar.gz
 - tar -zxf install4j_unix_7_0_12.tar.gz
 - export INSTALL4JDIR="$(pwd)/install4j7.0.12"
-- wget --no-verbose -P $INSTALL4JDIR "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz"
-- wget --no-verbose -P $INSTALL4JDIR "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz"
-- wget --no-verbose -P $INSTALL4JDIR "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz"
+- mkdir $INSTALL4JDIR/jres
+- wget --no-verbose -P $INSTALL4JDIR/jres "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz"
+- wget --no-verbose -P $INSTALL4JDIR/jres "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz"
+- wget --no-verbose -P $INSTALL4JDIR/jres "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz"
 install:
 - if [ -f VERSION ]; then export VERSIONVAR="$(cat VERSION).$TRAVIS_BUILD_NUMBER";
   fi
