@@ -34,7 +34,7 @@ addons:
     paths:
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-windows-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
 deploy:
   provider: releases
   api_key:
@@ -42,7 +42,7 @@ deploy:
   file:
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-windows-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
   skip_cleanup: true
   file_glob: true
   on:
