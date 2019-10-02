@@ -171,6 +171,7 @@ task printVersionName {
 
 integrationTest.mustRunAfter test
 install4jdeploy.dependsOn build
+install4jdeploy.dependsOn integrationTest
 
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
