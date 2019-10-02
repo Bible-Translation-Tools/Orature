@@ -1,0 +1,66 @@
+import groovy.sql.Sql
+
+ext {
+    sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
+    sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
+    sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
+}
+
+configurations {
+    sqllite
+}
+
+dependencies {
+    // Jooq
+    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqliteJdbcVer"
+    implementation "org.jooq:jooq:$jooqVer"
+    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
+    jooqRuntime "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
+    sqllite "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
+}
+
+task createDb {
+    //Add the full path to the sqlite-jdbc jar to the list of URLs
+    //that Gradle will search for classes and resources
+    //The code block below allows Gradle to find and use the executable jar for sqlite-jdbc
+    //using its full path on the local machine
+    URLClassLoader loader = GroovyObject.class.classLoader
+    configurations.sqllite.each { File file ->
+        loader.addURL(file.toURL())
+    }
+    String[] text = new File(sqlDirPath).text.split(';')
+    text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
+        def sql = Sql.newInstance(sqliteConnect, "org.sqlite.JDBC")
+        sql.execute(it)
+        sql.close()
+    }
+}
+
+jooq {
+    version = "$jooqVer"
+    edition = 'OSS'
+    sample(sourceSets.main) {
+        jdbc {
+            driver = 'org.sqlite.JDBC'
+            url = sqliteConnect
+        }
+        generator {
+            database {
+                name = 'org.jooq.meta.sqlite.SQLiteDatabase'
+            }
+
+            target {
+                packageName = 'jooq'
+                directory = 'src/main/java'
+            }
+        }
+    }
+}
+
+clean.doLast {
+    project.file(sqliteFile).delete()
+    project.file('src/main/java/jooq').deleteDir()
+}
+
+generateSampleJooqSchemaSource.dependsOn createDb
+compileKotlin.dependsOn generateSampleJooqSchemaSource
