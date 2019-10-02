@@ -98,7 +98,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         finder.findClasses(foundClasses, null)
         return foundClasses
             .firstOrNull {
-                it.superClassName?.equals(PluginEntrypoint::class.java.name) ?: false
+                PluginEntrypoint::class.java.name == it.superClassName
             }
             ?.let { foundClass ->
                 val urls = arrayOf(URL("jar:file:${jar.absolutePath}!/"))
