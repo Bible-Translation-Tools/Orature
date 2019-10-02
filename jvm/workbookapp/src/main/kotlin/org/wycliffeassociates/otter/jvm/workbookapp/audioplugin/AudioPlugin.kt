@@ -96,13 +96,10 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         finder.add(jar)
         val foundClasses = mutableListOf<ClassInfo>()
         finder.findClasses(foundClasses, null)
-        foundClasses.removeAll {
-            it.superClassName?.let { superClassName ->
-                !superClassName.contains(PluginEntrypoint::class.java.name)
-            } ?: true
-        }
         return foundClasses
-            .firstOrNull()
+            .firstOrNull {
+                it.superClassName?.equals(PluginEntrypoint::class.java.name) ?: false
+            }
             ?.let { foundClass ->
                 val urls = arrayOf(URL("jar:file:${jar.absolutePath}!/"))
                 val jarClassLoader = URLClassLoader.newInstance(urls)
