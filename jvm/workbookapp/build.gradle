@@ -5,6 +5,7 @@ plugins {
     id 'nu.studer.jooq' version "$jooqPluginVer"
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
     id "com.install4j.gradle" version "$install4jPluginVer"
+    id "de.undercouch.download"
 }
 
 apply plugin: 'application'
@@ -218,3 +219,10 @@ idea {
         generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
     }
 }
+
+task downloadUlb(type: Download) {
+    src 'https://git.door43.org/WycliffeAssociates/en_ulb/archive/master.zip'
+    dest 'src/resources/content/en_ulb.zip'
+}
+
+build.dependsOn downloadUlb
