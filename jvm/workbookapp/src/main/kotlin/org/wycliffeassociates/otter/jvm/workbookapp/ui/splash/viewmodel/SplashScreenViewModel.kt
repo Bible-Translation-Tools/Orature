@@ -23,7 +23,9 @@ class SplashScreenViewModel : ViewModel() {
         injector.audioPluginRegistrar,
         injector.pluginRepository,
         injector.languageRepo,
-        injector.takeRepository
+        injector.takeRepository,
+        injector.resourceContainerRepository,
+        injector.zipEntryTreeBuilder
     )
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)

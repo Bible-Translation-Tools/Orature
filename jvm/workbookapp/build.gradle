@@ -222,7 +222,7 @@ idea {
 
 task downloadUlb(type: Download) {
     src 'https://git.door43.org/WycliffeAssociates/en_ulb/archive/master.zip'
-    dest 'src/resources/content/en_ulb.zip'
+    dest 'src/main/resources/content/en_ulb.zip'
 }
 
 build.dependsOn downloadUlb

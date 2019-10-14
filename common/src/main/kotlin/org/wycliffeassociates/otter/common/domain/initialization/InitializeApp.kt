@@ -6,10 +6,13 @@ import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import java.io.File
 import java.io.FileOutputStream
@@ -20,7 +23,14 @@ class InitializeApp(
     val audioPluginRegistrar: IAudioPluginRegistrar,
     val pluginRepository: IAudioPluginRepository,
     val languageRepo: ILanguageRepository,
-    val takeRepository: ITakeRepository
+    val takeRepository: ITakeRepository,
+    val resourceContainerRepo: IResourceContainerRepository,
+    val zipEntryTreeBuilder: IZipEntryTreeBuilder,
+    val rcImporter: ImportResourceContainer = ImportResourceContainer(
+        resourceContainerRepo,
+        directoryProvider,
+        zipEntryTreeBuilder
+    )
 ) {
     fun initApp(): Observable<Double> {
         return Observable
@@ -42,6 +52,10 @@ class InitializeApp(
                     .andThen(pluginRepository.initSelected())
                     .blockingAwait()
                 it.onNext(0.75)
+
+                if (!initialized) {
+                    rcImporter.import(ClassLoader.getSystemResourceAsStream("content/en_ulb.zip")).blockingGet()
+                }
 
                 // Always clean up database
                 takeRepository

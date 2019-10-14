@@ -12,7 +12,9 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 
 class ImportResourceContainer(
     private val resourceContainerRepository: IResourceContainerRepository,
@@ -24,6 +26,14 @@ class ImportResourceContainer(
             file.isDirectory -> importContainerDirectory(file)
             file.extension == "zip" -> importContainerZipFile(file)
             else -> Single.just(ImportResult.INVALID_RC)
+        }
+    }
+
+    fun import(stream: InputStream): Single<ImportResult> {
+        val tempFile = File.createTempFile("importRC", ".zip")
+        stream.transferTo(FileOutputStream(tempFile))
+        return import(tempFile).doFinally {
+            tempFile.delete()
         }
     }
 
