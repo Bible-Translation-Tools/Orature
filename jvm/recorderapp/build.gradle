@@ -44,5 +44,3 @@ task copyJarToWorkbookAppResources(type: Copy) {
     from jar
     into '../workbookapp/src/main/resources/plugins/jars'
 }
-
-build.dependsOn copyJarToWorkbookAppResources

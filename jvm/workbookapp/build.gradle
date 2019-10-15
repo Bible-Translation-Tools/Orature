@@ -170,10 +170,6 @@ task printVersionName {
     }
 }
 
-integrationTest.mustRunAfter test
-install4jdeploy.dependsOn build
-install4jdeploy.dependsOn integrationTest
-
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
     testLogging {
@@ -221,8 +217,12 @@ idea {
 }
 
 task downloadUlb(type: Download) {
-    src 'https://git.door43.org/WycliffeAssociates/en_ulb/archive/master.zip'
+    src 'https://content.bibletranslationtools.org/WycliffeAssociates/en_ulb/archive/master.zip'
     dest 'src/main/resources/content/en_ulb.zip'
 }
 
+build.dependsOn project(':jvm:recorderapp').tasks.copyJarToWorkbookAppResources
 build.dependsOn downloadUlb
+integrationTest.mustRunAfter test
+install4jdeploy.dependsOn build
+install4jdeploy.dependsOn integrationTest
