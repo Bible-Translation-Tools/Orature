@@ -217,7 +217,7 @@ idea {
 }
 
 task downloadUlb(type: Download) {
-    src 'https://content.bibletranslationtools.org/WycliffeAssociates/en_ulb/archive/master.zip'
+    src 'https://content.bibletranslationtools.org/WA-Catalog/en_ulb/archive/master.zip'
     dest 'src/main/resources/content/en_ulb.zip'
 }
 
