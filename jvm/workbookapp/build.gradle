@@ -221,8 +221,14 @@ task downloadUlb(type: Download) {
     dest 'src/main/resources/content/en_ulb.zip'
 }
 
+task copyUlbToIntegrationTest(type: Copy, dependsOn: 'downloadUlb') {
+    from 'src/main/resources/content/en_ulb.zip'
+    into 'src/integration-test/resources/content'
+}
+
 build.dependsOn project(':jvm:recorderapp').tasks.copyJarToWorkbookAppResources
 build.dependsOn downloadUlb
 integrationTest.mustRunAfter test
+integrationTest.dependsOn copyUlbToIntegrationTest
 install4jdeploy.dependsOn build
 install4jdeploy.dependsOn integrationTest

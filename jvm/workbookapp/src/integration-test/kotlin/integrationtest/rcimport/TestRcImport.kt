@@ -29,6 +29,28 @@ class TestRcImport {
             )
     }
 
+    /**
+     * Runs the same test as ulb(), but rather than test the provided and tested ulb resource container,
+     * we instead test the version downloaded from WACS through the downloadUlb gradle task. Failure of this
+     * test while succeeding the ulb() test therefore implies either potential issues in the WACS repository
+     * or a failure to download the content.
+     */
+    @Test
+    fun ulbFromWacs() {
+        ImportEnvironment()
+            .import("en_ulb.zip", true)
+            .assertRowCounts(
+                Counts(
+                    contents = mapOf(
+                        TEXT to 31103,
+                        META to 1189
+                    ),
+                    collections = 1256,
+                    links = 0
+                )
+            )
+    }
+
     @Test
     fun ulbAndTn() {
         ImportEnvironment()
@@ -128,8 +150,12 @@ private class ImportEnvironment {
             injector.zipEntryTreeBuilder
         )
 
-    fun import(rcFile: String): ImportEnvironment {
-        val result = importer.import(rcResourceFile(rcFile)).blockingGet()
+    fun import(rcFile: String, importAsStream: Boolean = false): ImportEnvironment {
+        val result = if (importAsStream) {
+            importer.import(rcResourceStream(rcFile)).blockingGet()
+        } else {
+            importer.import(rcResourceFile(rcFile)).blockingGet()
+        }
         Assert.assertEquals(ImportResult.SUCCESS, result)
         return this
     }
@@ -181,6 +207,13 @@ private class ImportEnvironment {
                 .toURI()
                 .path
         )
+
+    /**
+     * The path here should match that of the resource structure of main
+     */
+    private fun rcResourceStream(rcFile: String) =
+        TestRcImport::class.java.classLoader
+            .getResourceAsStream("content/$rcFile")!!
 }
 
 private data class Counts(
