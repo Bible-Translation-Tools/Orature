@@ -7,11 +7,12 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ProjectExporter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
-import tornadofx.ViewModel
-import tornadofx.get
+import tornadofx.*
 import java.io.File
 
 class MainMenuViewModel : ViewModel() {
@@ -26,10 +27,31 @@ class MainMenuViewModel : ViewModel() {
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val showExportDialogProperty = SimpleBooleanProperty(false)
     val showImportDialogProperty = SimpleBooleanProperty(false)
 
     init {
         refreshPlugins()
+    }
+
+    fun exportProject(directory: File) {
+        showExportDialogProperty.value = true
+        val exporter = ProjectExporter(
+            resourceContainerRepository,
+            directoryProvider
+        )
+        exporter.export(directory)
+            .observeOnFx()
+            .subscribe { result: ExportResult ->
+                val errorMessage = when (result) {
+                    ExportResult.SUCCESS -> null
+                    ExportResult.FAILURE -> messages["exportError"]
+                }
+                showExportDialogProperty.value = false
+                errorMessage?.let {
+                    tornadofx.error(messages["importError"], it)
+                }
+            }
     }
 
     fun importResourceContainer(fileOrDir: File) {
