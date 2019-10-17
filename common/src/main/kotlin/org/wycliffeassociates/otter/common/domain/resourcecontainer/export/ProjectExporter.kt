@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.resourcecontainer
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
