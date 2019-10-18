@@ -7,11 +7,12 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.ProjectExporter
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.ProjectExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 import java.io.File
 
@@ -21,6 +22,9 @@ class MainMenuViewModel : ViewModel() {
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
     private val zipEntryTreeBuilder = injector.zipEntryTreeBuilder
+
+    private val workbookVM = find<WorkbookViewModel>()
+    val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()

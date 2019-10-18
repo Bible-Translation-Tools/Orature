@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
+import java.io.BufferedWriter
 import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
@@ -14,13 +15,13 @@ class ProjectExporter(
     fun export(directory: File): Single<ExportResult> {
         val zipFileName = "in-progress-" + LocalDate.now().format(ISO_LOCAL_DATE) + ".zip"
         val zipFile = directory.resolve(zipFileName)
-
         directoryProvider.newZipFileWriter(zipFile).use { zipWriter ->
-            zipWriter.bufferedWriter("manifest.yaml").use {
-                it.write("hello world")
-            }
+            zipWriter.bufferedWriter("manifest.yaml").use(::writeManifest)
         }
+        return Single.just(ExportResult.SUCCESS)
+    }
 
-        return Single.just(ExportResult.FAILURE)
+    private fun writeManifest(writer: BufferedWriter) {
+        writer.write("TO DO")
     }
 }

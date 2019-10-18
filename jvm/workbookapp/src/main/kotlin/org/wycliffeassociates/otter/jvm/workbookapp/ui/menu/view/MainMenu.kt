@@ -23,6 +23,7 @@ class MainMenu : MenuBar() {
     private fun Menu.exportMenuItem(message: String): MenuItem {
         return item(message) {
             graphic = MainMenuStyles.exportIcon("20px")
+            disableProperty().bind(viewModel.disableExportProjectProperty)
         }
     }
 
