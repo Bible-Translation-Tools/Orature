@@ -1,0 +1,38 @@
+repositories {
+    ivy {
+        url 'https://git.door43.org'
+        patternLayout {
+            artifact '[organisation]/[module]/archive/[revision].[ext]'
+        }
+    }
+    ivy {
+        url 'http://td.unfoldingword.org/exports/'
+        patternLayout {
+            artifact '[artifact].[ext]'
+        }
+    }
+}
+
+configurations {
+    content
+}
+
+dependencies {
+    content 'wycliffeassociates:en_ulb:v19-10@zip'
+    content 'unfoldingword:langnames@json'
+}
+
+task copyToResources(type: Copy) {
+    from configurations.content
+    into 'src/main/resources/content'
+    rename {
+        String filename ->
+            if (filename.contains('.json')) {
+                filename.replaceAll('-.*\\.json', '.json')
+            } else {
+                filename.replaceAll('-.*\\.zip', '.zip')
+            }
+    }
+}
+
+build.dependsOn copyToResources

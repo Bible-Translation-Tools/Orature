@@ -5,7 +5,6 @@ plugins {
     id 'nu.studer.jooq' version "$jooqPluginVer"
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
     id "com.install4j.gradle" version "$install4jPluginVer"
-    id "de.undercouch.download"
 }
 
 apply plugin: 'application'
@@ -21,13 +20,30 @@ repositories {
 }
 
 sourceSets {
+    assets {
+        resources {
+            srcDir "${project(':assets').projectDir}/src/main/resource"
+        }
+    }
     integrationTest {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
             srcDir file('src/integration-test/kotlin')
         }
-        resources.srcDir file('src/integration-test/resources')
+        resources{
+            srcDirs += [ file('src/integration-test/resources'), assets.resources ]
+        }
+    }
+    main {
+        resources {
+            srcDirs += [ assets.resources ]
+        }
+    }
+    test {
+        resources {
+            srcDirs += [ assets.resources ]
+        }
     }
 }
 
@@ -112,6 +128,7 @@ dependencies {
     integrationTestImplementation sourceSets.main.output
 
     //WA Libraries
+    implementation project(':assets')
     implementation project(':common')
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
@@ -216,19 +233,6 @@ idea {
     }
 }
 
-task downloadUlb(type: Download) {
-    src 'https://content.bibletranslationtools.org/WA-Catalog/en_ulb/archive/master.zip'
-    dest 'src/main/resources/content/en_ulb.zip'
-}
-
-task copyUlbToIntegrationTest(type: Copy, dependsOn: 'downloadUlb') {
-    from 'src/main/resources/content/en_ulb.zip'
-    into 'src/integration-test/resources/content'
-}
-
-build.dependsOn project(':jvm:recorderapp').tasks.copyJarToWorkbookAppResources
-build.dependsOn downloadUlb
 integrationTest.mustRunAfter test
-integrationTest.dependsOn copyUlbToIntegrationTest
 install4jdeploy.dependsOn build
 install4jdeploy.dependsOn integrationTest
