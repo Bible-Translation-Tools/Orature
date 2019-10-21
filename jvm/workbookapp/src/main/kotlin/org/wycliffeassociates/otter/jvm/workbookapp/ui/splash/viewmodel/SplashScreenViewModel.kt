@@ -1,13 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.domain.initialization.InitializeApp
-import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector

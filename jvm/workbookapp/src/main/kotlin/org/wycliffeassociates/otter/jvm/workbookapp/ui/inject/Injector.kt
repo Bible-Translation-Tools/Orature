@@ -31,6 +31,7 @@ class Injector(
     val takeRepository = TakeRepository(database)
     val pluginRepository = AudioPluginRepository(database, preferences)
     val workbookRepository = WorkbookRepository(collectionRepo, contentRepository, resourceRepository, takeRepository)
+    val initializationRepository = InitializationRepository(database)
 
     val audioPlayer
         get() = audioComponent.injectPlayer()

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.audioplugin
+package org.wycliffeassociates.otter.common.data.config
 
 import io.reactivex.Completable
 import java.io.File

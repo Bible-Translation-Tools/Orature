@@ -4,7 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.binding.BooleanBinding
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*

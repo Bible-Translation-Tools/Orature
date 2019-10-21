@@ -4,8 +4,8 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
-import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.AudioPlugin

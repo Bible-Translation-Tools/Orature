@@ -7,8 +7,8 @@ import javafx.application.Application.Parameters
 import javafx.application.Platform
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
-import org.wycliffeassociates.otter.common.data.audioplugin.IAudioPlugin
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*

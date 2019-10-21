@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.common.domain.initialization
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins

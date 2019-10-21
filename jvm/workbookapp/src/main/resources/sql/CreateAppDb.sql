@@ -127,3 +127,11 @@ CREATE TABLE IF NOT EXISTS preferences (
     key                 TEXT NOT NULL UNIQUE,
     value               TEXT
 );
+
+CREATE TABLE IF NOT EXISTS initialization (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    name                TEXT NOT NULL,
+    version             TEXT NOT NULL,
+    initialized         INTEGER DEFAULT 0 NOT NULL,
+    UNIQUE (name)
+);

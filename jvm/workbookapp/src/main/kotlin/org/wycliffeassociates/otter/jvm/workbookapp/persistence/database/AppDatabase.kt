@@ -67,6 +67,7 @@ class AppDatabase(
     val markerDao = MarkerDao(dsl)
     val audioPluginDao = AudioPluginDao(dsl)
     val preferenceDao = PreferenceDao(dsl)
+    val initializationDao = InitializationDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {
