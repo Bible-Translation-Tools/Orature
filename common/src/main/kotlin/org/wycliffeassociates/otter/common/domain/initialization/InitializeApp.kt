@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.initialization
 
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.Initialization
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
@@ -10,12 +12,10 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 import java.io.File
 import java.io.FileOutputStream
+import java.lang.Exception
 
 class InitializeApp(
     val preferences: IAppPreferences,
@@ -25,6 +25,7 @@ class InitializeApp(
     val languageRepo: ILanguageRepository,
     val takeRepository: ITakeRepository,
     val resourceContainerRepo: IResourceContainerRepository,
+    val initializationRepo: IInitializationRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder,
     val rcImporter: ImportResourceContainer = ImportResourceContainer(
         resourceContainerRepo,
@@ -35,14 +36,57 @@ class InitializeApp(
     fun initApp(): Observable<Double> {
         return Observable
             .fromPublisher<Double> {
+                val initMap = initializationRepo.getAll().blockingGet().associateBy { it.name }
+
                 it.onNext(0.0)
+
+                var languagesInitialized = false
+                initMap["langnames"]?.let {
+                    languagesInitialized = it.initialized
+                }
+                if (!languagesInitialized) {
+                    importLanguages().subscribe(
+                        {
+                            initMap["langnames"]?.let {
+                                it.initialized = true
+                                initializationRepo.update(it).blockingAwait()
+                            } ?: initializationRepo.insert(
+                                Initialization(
+                                    "langnames",
+                                    "0.0.1",
+                                    true
+                                )
+                            ).ignoreElement().blockingAwait()
+                        },
+                        {
+                            it.printStackTrace()
+                        }
+                    )
+                }
                 it.onNext(0.25)
 
-                val initialized = preferences.appInitialized().blockingGet()
-                if (!initialized) {
-                    importLanguages()
-                    importOtterRecorder()
-                    preferences.setAppInitialized(true).blockingAwait()
+                var recorderInitialized = false
+                initMap["recorder"]?.let {
+                    recorderInitialized = it.initialized
+                }
+                if (!recorderInitialized) {
+                    importOtterRecorder().subscribe(
+                        {
+                            initMap["recorder"]?.let {
+                                it.initialized = true
+                                initializationRepo.update(it).blockingAwait()
+                            } ?: initializationRepo.insert(
+                                Initialization(
+                                    "recorder",
+                                    "0.0.1",
+                                    true
+                                )
+                            ).ignoreElement().blockingAwait()
+                        },
+                        {
+                            it.printStackTrace()
+                        }
+                    )
                 }
                 it.onNext(0.5)
 
@@ -53,8 +97,30 @@ class InitializeApp(
                     .blockingAwait()
                 it.onNext(0.75)
 
-                if (!initialized) {
-                    rcImporter.import(ClassLoader.getSystemResourceAsStream("content/en_ulb.zip")).blockingGet()
+                var ulbInitialized = false
+                initMap["en_ulb"]?.let {
+                    recorderInitialized = it.initialized
+                }
+                if (!recorderInitialized) {
+                    rcImporter.import(
+                        ClassLoader.getSystemResourceAsStream("content/en_ulb.zip")
+                    ).subscribe(
+                        {
+                            initMap["en_ulb"]?.let {
+                                it.initialized = true
+                                initializationRepo.update(it).blockingAwait()
+                            } ?: initializationRepo.insert(
+                                Initialization(
+                                    "en_ulb",
+                                    "0.0.1",
+                                    true
+                                )
+                            ).ignoreElement().blockingAwait()
+                        },
+                        {
+                            it.printStackTrace()
+                        }
+                    )
                 }
 
                 // Always clean up database
@@ -65,22 +131,19 @@ class InitializeApp(
             }.subscribeOn(Schedulers.io())
     }
 
-    private fun importLanguages() {
-        ImportLanguages(
+    private fun importLanguages(): Completable {
+        return ImportLanguages(
             ClassLoader.getSystemResourceAsStream("content/langnames.json"),
             languageRepo
-        )
-            .import()
-            .onErrorComplete()
-            .blockingAwait()
+        ).import()
     }
 
-    private fun importOtterRecorder() {
+    private fun importOtterRecorder(): Completable {
         val pluginsDir = directoryProvider.audioPluginDirectory
         val jar = File(pluginsDir, "OtterRecorder.jar")
         ClassLoader.getSystemResourceAsStream("plugins/jars/recorderapp.jar")
             ?.transferTo(FileOutputStream(jar))
-        pluginRepository.insert(
+        return pluginRepository.insert(
             AudioPluginData(
                 0,
                 "OtterRecorder",
@@ -91,8 +154,8 @@ class InitializeApp(
                 listOf(),
                 null
             )
-        ).subscribe { id: Int ->
-            preferences.setRecorderPluginId(id).blockingAwait()
-        }
+        ).doAfterSuccess { id: Int ->
+            preferences.setRecorderPluginId(id)
+        }.ignoreElement()
     }
 }

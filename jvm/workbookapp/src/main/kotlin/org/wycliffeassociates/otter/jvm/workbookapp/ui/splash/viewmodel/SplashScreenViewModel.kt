@@ -21,6 +21,7 @@ class SplashScreenViewModel : ViewModel() {
         injector.languageRepo,
         injector.takeRepository,
         injector.resourceContainerRepository,
+        injector.initializationRepository,
         injector.zipEntryTreeBuilder
     )
     val progressProperty = SimpleDoubleProperty(0.0)
