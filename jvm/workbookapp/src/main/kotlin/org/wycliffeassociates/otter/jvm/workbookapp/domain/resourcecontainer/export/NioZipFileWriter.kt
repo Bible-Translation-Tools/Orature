@@ -18,7 +18,7 @@ class NioZipFileWriter(
 
     override fun bufferedWriter(filepath: String): BufferedWriter {
         val path = fileSystem.getPath(filepath)
-        path.parent?.let { Files.createDirectories(it) }
+        path.createParentDirectories()
         return Files.newBufferedWriter(path)
     }
 
@@ -26,8 +26,10 @@ class NioZipFileWriter(
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         Files.walk(sourcePath)
-            .forEach {
-                Files.copy(it, correspondingPath(it, sourcePath, destPath))
+            .forEach { fromFile ->
+                val toFile = correspondingPath(fromFile, sourcePath, destPath)
+                toFile.createParentDirectories()
+                Files.copy(fromFile, toFile)
             }
     }
 
@@ -35,11 +37,14 @@ class NioZipFileWriter(
         path: Path,
         oldRoot: Path,
         newRoot: Path
-    ) = newRoot.resolve(oldRoot.relativize(path))
+    ) = newRoot.resolve(oldRoot.relativize(path).toString())
 
-    private fun File.jarUri(): URI {
-        // https://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html
-        val fileUri = toURI()
-        return URI("jar:" + fileUri.scheme, fileUri.path, null)
-    }
+    /**
+     *  Create a Jar:File: URI.
+     *  See https://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/zipfilesystemprovider.html
+     */
+    private fun File.jarUri() = toURI().run { URI("jar:" + scheme, path, null) }
+
+    /** If this file's parent directories don't exist, create them. */
+    private fun Path.createParentDirectories() = parent?.let { Files.createDirectories(it) }
 }

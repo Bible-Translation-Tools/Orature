@@ -19,6 +19,7 @@ import java.io.File
 class MainMenuViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val resourceContainerRepository = injector.resourceContainerRepository
+    private val resourceRepository = injector.resourceRepository
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
     private val zipEntryTreeBuilder = injector.zipEntryTreeBuilder
@@ -40,8 +41,11 @@ class MainMenuViewModel : ViewModel() {
 
     fun exportProject(directory: File) {
         showExportDialogProperty.value = true
+
         val exporter = ProjectExporter(
-            resourceContainerRepository,
+            workbookVM.activeResourceMetadata,
+            workbookVM.projectAudioDirectory,
+            resourceRepository,
             directoryProvider
         )
         exporter.export(directory)
