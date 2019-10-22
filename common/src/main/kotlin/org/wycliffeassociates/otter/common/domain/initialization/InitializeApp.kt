@@ -15,7 +15,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Exception
 
 class InitializeApp(
     val preferences: IAppPreferences,

@@ -1,3 +1,17 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.novoda:bintray-release:0.9.1'
+    }
+}
+
+apply plugin: 'com.novoda.bintray-release'
+
+group 'org.wycliffeassociates.otter'
+version '0.0.1'
+
 repositories {
     ivy {
         url 'https://git.door43.org'
@@ -35,4 +49,18 @@ task copyToResources(type: Copy) {
     }
 }
 
-build.dependsOn copyToResources
+build.finalizedBy(copyToResources)
+
+publish {
+    def groupProjectID = 'org.wycliffeassociates.otter'
+    def artifactProjectID = 'assets'
+    def publishVersionID = "0.0.1"
+
+    userOrg = 'bible-translation-tools'
+    repoName = 'otter'
+    groupId = groupProjectID
+    artifactId = artifactProjectID
+    publishVersion = publishVersionID
+    desc = ''
+    website = 'https"//github.com/Bible-Translation-Tooks/otter'
+}
