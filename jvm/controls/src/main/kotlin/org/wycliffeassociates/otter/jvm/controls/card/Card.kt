@@ -6,7 +6,7 @@ import tornadofx.*
 
 class Card : VBox() {
 
-    var cardChildren = observableList<Node>()
+    var cardChildren = observableListOf<Node>()
 
     fun cardfront(init: CardFront.() -> Unit = {}): CardFront {
         val cf = CardFront()

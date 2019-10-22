@@ -21,7 +21,7 @@ class ProjectNav : VBox() {
     val selectChunkTextProperty = SimpleStringProperty()
     var selectChunkText by selectChunkTextProperty
 
-    val nodeList = observableList<Node>()
+    val nodeList = observableListOf<Node>()
 
     fun ProjectNav.navbox(mainLabel: String? = null, graphic: Node? = null, init: NavBox.() -> Unit = {}): NavBox {
         val nb = NavBox(mainLabel, graphic)

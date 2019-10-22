@@ -31,7 +31,7 @@ class RecordScriptureViewModel : ViewModel() {
     private val titleProperty = SimpleStringProperty()
     private var title by titleProperty
 
-    private val chunkList: ObservableList<Chunk> = observableList()
+    private val chunkList: ObservableList<Chunk> = observableListOf()
     val hasNext = SimpleBooleanProperty(false)
     val hasPrevious = SimpleBooleanProperty(false)
 
