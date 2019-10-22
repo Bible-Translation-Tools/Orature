@@ -63,6 +63,6 @@ fun <T> EventTarget.filterablecombobox(
     values: List<T>? = null,
     init: FilterableComboBox<T>.() -> Unit = {}
 ): FilterableComboBox<T> = FilterableComboBox<T>().also {
-    if (values != null) it.items = (values as? ObservableList<T>) ?: values.observable()
+    if (values != null) it.items = (values as? ObservableList<T>) ?: values.asObservable()
     if (property != null) it.bind(property)
 }.attachTo(this, init)
