@@ -25,17 +25,17 @@ class InitializationRepository(
         }.subscribeOn(Schedulers.io())
     }
 
-    override fun update(initialization: Initialization): Completable {
+    override fun update(obj: Initialization): Completable {
         return Single.fromCallable {
-            initializationDao.insert(initialization)
+            initializationDao.insert(obj)
         }
             .ignoreElement()
             .subscribeOn(Schedulers.io())
     }
 
-    override fun delete(initialization: Initialization): Completable {
+    override fun delete(obj: Initialization): Completable {
         return Single.fromCallable {
-            initializationDao.delete(initialization)
+            initializationDao.delete(obj)
         }
             .ignoreElement()
             .subscribeOn(Schedulers.io())
