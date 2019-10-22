@@ -99,9 +99,9 @@ class InitializeApp(
 
                 var ulbInitialized = false
                 initMap["en_ulb"]?.let {
-                    recorderInitialized = it.initialized
+                    ulbInitialized = it.initialized
                 }
-                if (!recorderInitialized) {
+                if (!ulbInitialized) {
                     rcImporter.import(
                         ClassLoader.getSystemResourceAsStream("content/en_ulb.zip")
                     ).subscribe(

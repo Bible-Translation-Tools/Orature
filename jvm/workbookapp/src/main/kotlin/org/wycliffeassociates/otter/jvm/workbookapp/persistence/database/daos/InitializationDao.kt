@@ -39,7 +39,7 @@ class InitializationDao(
 
         return dsl
             .select(DSL.max(INITIALIZATION.ID))
-            .from(Tables.CONTENT_ENTITY)
+            .from(INITIALIZATION)
             .fetchOne {
                 it.getValue(DSL.max(INITIALIZATION.ID))
             }
