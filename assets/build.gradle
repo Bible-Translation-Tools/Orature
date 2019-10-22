@@ -62,5 +62,5 @@ publish {
     artifactId = artifactProjectID
     publishVersion = publishVersionID
     desc = ''
-    website = 'https"//github.com/Bible-Translation-Tooks/otter'
+    website = 'https://github.com/Bible-Translation-Tools/otter'
 }

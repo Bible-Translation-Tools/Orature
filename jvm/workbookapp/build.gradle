@@ -234,5 +234,6 @@ idea {
 }
 
 integrationTest.mustRunAfter test
+integrationTest.dependsOn ':assets:copyToResources'
 install4jdeploy.dependsOn build
 install4jdeploy.dependsOn integrationTest
