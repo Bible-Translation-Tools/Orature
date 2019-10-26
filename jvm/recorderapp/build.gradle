@@ -41,6 +41,9 @@ dependencies {
 }
 
 task copyJarToWorkbookAppResources(type: Copy) {
+    dependsOn 'jar'
     from jar
     into '../workbookapp/src/main/resources/plugins/jars'
 }
+
+test.dependsOn 'copyJarToWorkbookAppResources'

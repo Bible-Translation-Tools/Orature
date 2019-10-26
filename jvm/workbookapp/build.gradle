@@ -143,6 +143,8 @@ dependencies {
 
     // jar loader
     implementation "org.clapper:javautil:$clapperJavaUtilVer"
+
+    implementation "org.slf4j:slf4j-simple:$slf4jApiVer"
 }
 
 // tell gradle what to put in the jar
@@ -233,6 +235,7 @@ idea {
     }
 }
 
+compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

@@ -28,15 +28,20 @@ repositories {
 }
 
 configurations {
-    content
+    content.extendsFrom runtime
 }
 
 dependencies {
     content 'wycliffeassociates:en_ulb:v19-10@zip'
     content 'unfoldingword:langnames@json'
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
+    implementation project(":common")
+
+    implementation "org.slf4j:slf4j-api:$slf4jApiVer"
 }
 
 task copyToResources(type: Copy) {
+    dependsOn configurations.content
     from configurations.content
     into 'src/main/resources/content'
     rename {
@@ -49,7 +54,7 @@ task copyToResources(type: Copy) {
     }
 }
 
-build.finalizedBy(copyToResources)
+compileJava.dependsOn copyToResources
 
 publish {
     def groupProjectID = 'org.wycliffeassociates.otter'
