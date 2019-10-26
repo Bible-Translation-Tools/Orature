@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.Initialization
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
