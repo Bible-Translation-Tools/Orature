@@ -47,9 +47,9 @@ task copyToResources(type: Copy) {
     rename {
         String filename ->
             if (filename.contains('.json')) {
-                filename.replaceAll('-.*\\.json', '.json')
+                filename.replaceAll('-.*\\.json$', '.json')
             } else {
-                filename.replaceAll('-.*\\.zip', '.zip')
+                filename.replaceAll('-.*\\.zip$', '.zip')
             }
     }
 }
