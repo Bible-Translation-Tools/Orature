@@ -90,6 +90,17 @@ class DirectoryProvider(
         return path
     }
 
+    override fun getSourceContainerDirectory(metadata: ResourceMetadata): File {
+        return listOf(
+            "src",
+            metadata.creator,
+            "${metadata.language.slug}_${metadata.identifier}",
+            "v${metadata.version}"
+        )
+            .fold(resourceContainerDirectory, File::resolve)
+            .apply { mkdirs() }
+    }
+
     override fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File {
         val appendedPath = listOf(
             "der",

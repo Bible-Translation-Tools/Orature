@@ -43,7 +43,7 @@ class MainMenuViewModel : ViewModel() {
         showExportDialogProperty.value = true
 
         val exporter = ProjectExporter(
-            workbookVM.activeResourceMetadata,
+            workbookVM.workbook,
             workbookVM.projectAudioDirectory,
             resourceRepository,
             directoryProvider

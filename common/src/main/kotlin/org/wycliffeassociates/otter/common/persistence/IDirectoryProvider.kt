@@ -19,6 +19,10 @@ interface IDirectoryProvider {
 
     /** Internal-use directory of the given source RC */
     fun getSourceContainerDirectory(container: ResourceContainer): File
+
+    /** Internal-use directory of the given source RC */
+    fun getSourceContainerDirectory(metadata: ResourceMetadata): File
+
     /** Internal-use directory of the given derived RC */
     fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File
 
