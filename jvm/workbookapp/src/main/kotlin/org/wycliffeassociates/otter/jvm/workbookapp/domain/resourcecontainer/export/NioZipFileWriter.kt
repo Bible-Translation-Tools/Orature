@@ -22,22 +22,19 @@ class NioZipFileWriter(
         return Files.newBufferedWriter(path)
     }
 
-    override fun copyDirectory(source: File, destination: String) {
+    override fun copyDirectory(source: File, destination: String, filter: (String) -> Boolean) {
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         Files.walk(sourcePath)
             .forEach { fromFile ->
-                val toFile = correspondingPath(fromFile, sourcePath, destPath)
-                toFile.createParentDirectories()
-                Files.copy(fromFile, toFile)
+                val relativePath = sourcePath.relativize(fromFile).toString()
+                if (filter(relativePath)) {
+                    val toFile = destPath.resolve(relativePath)
+                    toFile.createParentDirectories()
+                    Files.copy(fromFile, toFile)
+                }
             }
     }
-
-    private fun correspondingPath(
-        path: Path,
-        oldRoot: Path,
-        newRoot: Path
-    ) = newRoot.resolve(oldRoot.relativize(path).toString())
 
     /**
      *  Create a Jar:File: URI.

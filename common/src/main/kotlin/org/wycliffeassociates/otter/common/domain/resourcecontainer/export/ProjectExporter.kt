@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
 
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -13,6 +14,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+const val MEDIA_DIR = "content"
 const val APP_SPECIFIC_DIR = ".apps/otter"
 const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
 const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
@@ -54,7 +56,9 @@ class ProjectExporter(
     }
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {
-        zipWriter.copyDirectory(projectAudioDirectory, TAKE_DIR)
+        val selectedChapters = selectedChapterFilePaths()
+        zipWriter.copyDirectory(projectAudioDirectory, TAKE_DIR) { !selectedChapters.contains(it) }
+        zipWriter.copyDirectory(projectAudioDirectory, MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
     private fun writeManifest(zipWriter: IZipFileWriter) {
@@ -84,10 +88,20 @@ class ProjectExporter(
         return "$lang-$project-$timestamp.zip"
     }
 
-    private fun fetchSelectedTakes(): Observable<Take> {
-        return workbook.target.chapters
-            .concatMap { chapter -> chapter.children.startWith(chapter) }
-            .mapNotNull { chapterOrChunk -> chapterOrChunk.audio.selected.value?.value }
+    private fun fetchSelectedTakes(chaptersOnly: Boolean = false): Observable<Take> {
+        val chapters = workbook.target.chapters
+        val bookElements = when {
+            chaptersOnly -> chapters.cast()
+            else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
+        }
+        return bookElements.mapNotNull { chapterOrChunk -> chapterOrChunk.audio.selected.value?.value }
+    }
+
+    private fun selectedChapterFilePaths(): Set<String> {
+        return fetchSelectedTakes(chaptersOnly = true)
+            .map(this::relativeTakePath)
+            .collectInto(hashSetOf<String>(), { set, path -> set.add(path) })
+            .blockingGet()
     }
 
     private fun relativeTakePath(take: Take): String {
