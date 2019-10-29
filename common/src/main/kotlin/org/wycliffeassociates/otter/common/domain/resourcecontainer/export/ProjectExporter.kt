@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
 
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -43,6 +44,7 @@ class ProjectExporter(
                 // TODO: log
             }
             .onErrorReturnItem(ExportResult.FAILURE)
+            .subscribeOn(Schedulers.io())
     }
 
     private fun copySourceResources(zipWriter: IZipFileWriter) {

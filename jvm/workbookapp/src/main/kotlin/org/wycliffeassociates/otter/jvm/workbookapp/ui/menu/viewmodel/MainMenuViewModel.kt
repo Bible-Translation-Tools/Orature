@@ -57,7 +57,7 @@ class MainMenuViewModel : ViewModel() {
                 }
                 showExportDialogProperty.value = false
                 errorMessage?.let {
-                    tornadofx.error(messages["importError"], it)
+                    tornadofx.error(messages["exportError"], it)
                 }
             }
     }
