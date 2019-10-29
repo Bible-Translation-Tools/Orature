@@ -20,26 +20,41 @@ class MainMenu : MenuBar() {
 
     private val viewModel: MainMenuViewModel = find()
 
+    private fun Menu.exportMenuItem(message: String): MenuItem {
+        return item(message) {
+            graphic = MainMenuStyles.exportIcon("20px")
+            disableProperty().bind(viewModel.disableExportProjectProperty)
+        }
+    }
+
     private fun Menu.importMenuItem(message: String): MenuItem {
         return item(message) {
             graphic = MainMenuStyles.importIcon("20px")
         }
     }
 
-    private fun initImportProgressDialog() {
-        val dialog = progressdialog {
+    private fun initImportExportProgressDialog() {
+        val importDialog = progressdialog {
             text = messages["importResource"]
             graphic = MainMenuStyles.importIcon("60px")
             root.addClass(AppStyles.progressDialog)
         }
+        val exportDialog = progressdialog {
+            text = messages["exportProject"]
+            graphic = MainMenuStyles.exportIcon("60px")
+            root.addClass(AppStyles.progressDialog)
+        }
         viewModel.showImportDialogProperty.onChange {
-            Platform.runLater { if (it) dialog.open() else dialog.close() }
+            Platform.runLater { if (it) importDialog.open() else importDialog.close() }
+        }
+        viewModel.showExportDialogProperty.onChange {
+            Platform.runLater { if (it) exportDialog.open() else exportDialog.close() }
         }
     }
 
     init {
         importStylesheet<MainMenuStyles>()
-        initImportProgressDialog()
+        initImportExportProgressDialog()
         with(this) {
             menu(messages["file"]) {
                 importMenuItem(messages["importResourceFromFolder"])
@@ -58,6 +73,13 @@ class MainMenu : MenuBar() {
                         ).firstOrNull()
                         file?.let {
                             viewModel.importResourceContainer(file)
+                        }
+                    }
+                exportMenuItem(messages["exportProject"])
+                    .setOnAction {
+                        val directory = chooseDirectory(messages["exportProject"])
+                        directory?.let {
+                            viewModel.exportProject(it)
                         }
                     }
             }

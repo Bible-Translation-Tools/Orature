@@ -11,7 +11,7 @@ import tornadofx.*
 
 class NavBox(mainLabel: String? = null, graphic: Node? = null) : StackPane() {
 
-    val layerList = observableList<Node>()
+    val layerList = observableListOf<Node>()
 
     fun innercard(cardGraphic: Node? = null, init: InnerCard.() -> Unit = {}): InnerCard {
         val ic = InnerCard(cardGraphic)

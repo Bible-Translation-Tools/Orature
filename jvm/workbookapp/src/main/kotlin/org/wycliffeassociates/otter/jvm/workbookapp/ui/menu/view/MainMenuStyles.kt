@@ -9,6 +9,7 @@ import tornadofx.px
 class MainMenuStyles : Stylesheet() {
     companion object {
         fun importIcon(size: String) = MaterialIconView(MaterialIcon.INPUT, size)
+        fun exportIcon(size: String) = MaterialIconView(MaterialIcon.SHARE, size)
         fun addPluginIcon(size: String) = MaterialIconView(MaterialIcon.ADD, size)
         fun removePluginIcon(size: String) = MaterialIconView(MaterialIcon.DELETE, size)
         fun recorderIcon(size: String) = MaterialIconView(MaterialIcon.MIC, size)
