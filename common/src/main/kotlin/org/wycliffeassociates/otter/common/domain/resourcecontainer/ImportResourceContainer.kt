@@ -21,6 +21,7 @@ class ImportResourceContainer(
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
+
     fun import(file: File): Single<ImportResult> {
         return when {
             file.isDirectory -> importContainerDirectory(file)
@@ -29,12 +30,17 @@ class ImportResourceContainer(
         }
     }
 
-    fun import(stream: InputStream): Single<ImportResult> {
-        val tempFile = File.createTempFile("importRC", ".zip")
-        stream.transferTo(FileOutputStream(tempFile))
-        return import(tempFile).doFinally {
+    fun import(filename: String, stream: InputStream): Single<ImportResult> {
+        val tempFile = File.createTempFile(filename, ".zip")
+        return Single.fromCallable {
+            stream.transferTo(FileOutputStream(tempFile))
+        }.flatMap {
+            import(tempFile)
+        }.doOnError {
+            ImportResult.IMPORT_ERROR
+        }.doFinally {
             tempFile.delete()
-        }
+        }.subscribeOn(Schedulers.io())
     }
 
     private fun File.contains(name: String): Boolean {

@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 
 class InitializeTakeRepository(

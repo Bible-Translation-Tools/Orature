@@ -120,14 +120,5 @@ class RecordMappers {
                 record.getValue(AUDIO_PLUGIN_ENTITY.PATH)
             )
         }
-
-        fun mapToInitialization(record: Record): Initialization {
-            return Initialization(
-                record.getValue(INITIALIZATION.NAME),
-                record.getValue(INITIALIZATION.VERSION),
-                record.getValue(INITIALIZATION.INITIALIZED) == 1,
-                record.getValue(INITIALIZATION.ID)
-            )
-        }
     }
 }

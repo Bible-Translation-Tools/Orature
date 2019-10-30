@@ -1,64 +1,49 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
-import jooq.Tables
 import jooq.Tables.INITIALIZATION
 import org.jooq.DSLContext
-import org.jooq.impl.DSL
-import org.wycliffeassociates.otter.common.data.config.Initialization
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
+import org.jooq.exception.DataAccessException
+import org.wycliffeassociates.otter.common.persistence.config.Installable
 
 class InitializationDao(
     private val instanceDsl: DSLContext
 ) {
-    fun fetchAll(dsl: DSLContext = instanceDsl): List<Initialization> {
-        return dsl
-            .select()
-            .from(Tables.INITIALIZATION)
-            .fetch {
-                RecordMappers.mapToInitialization(it)
-            }
+    private fun update(entity: Installable, dsl: DSLContext = instanceDsl) {
+        dsl
+            .update(INITIALIZATION)
+            .set(INITIALIZATION.VERSION, entity.version)
+            .where(INITIALIZATION.NAME.eq(entity.name))
+            .execute()
     }
 
-    @Synchronized
-    fun insert(entity: Initialization, dsl: DSLContext = instanceDsl): Int {
-        if (entity.id != 0) throw InsertionException("Entity ID was not 0")
-
+    private fun insert(entity: Installable, dsl: DSLContext = instanceDsl) {
         dsl
             .insertInto(
                 INITIALIZATION,
                 INITIALIZATION.NAME,
-                INITIALIZATION.VERSION,
-                INITIALIZATION.INITIALIZED
+                INITIALIZATION.VERSION
             )
             .values(
                 entity.name,
-                entity.version,
-                if (entity.initialized) 1 else 0
+                entity.version
             )
             .execute()
+    }
 
-        return dsl
-            .select(DSL.max(INITIALIZATION.ID))
+    fun upsert(entity: Installable, dsl: DSLContext = instanceDsl) {
+        try {
+            insert(entity, dsl)
+        } catch (e: DataAccessException) {
+            update(entity, dsl)
+        }
+    }
+
+    fun fetchVersion(name: String, dsl: DSLContext = instanceDsl): Int? {
+        val set = dsl
+            .select(INITIALIZATION.VERSION)
             .from(INITIALIZATION)
-            .fetchOne {
-                it.getValue(DSL.max(INITIALIZATION.ID))
-            }
-    }
-
-    fun update(entity: Initialization, dsl: DSLContext = instanceDsl) {
-        dsl
-            .update(INITIALIZATION)
-            .set(INITIALIZATION.NAME, entity.name)
-            .set(INITIALIZATION.VERSION, entity.version)
-            .set(INITIALIZATION.INITIALIZED, if (entity.initialized) 1 else 0)
-            .where(INITIALIZATION.ID.eq(entity.id))
-            .execute()
-    }
-
-    fun delete(entity: Initialization, dsl: DSLContext = instanceDsl) {
-        dsl
-            .deleteFrom(INITIALIZATION)
-            .where(INITIALIZATION.ID.eq(entity.id))
-            .execute()
+            .where(INITIALIZATION.NAME.eq(name))
+            .fetchResultSet()
+        
     }
 }

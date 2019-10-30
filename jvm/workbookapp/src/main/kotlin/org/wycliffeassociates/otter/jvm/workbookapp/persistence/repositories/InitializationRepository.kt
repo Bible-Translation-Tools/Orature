@@ -14,29 +14,35 @@ class InitializationRepository(
     private val initializationDao = database.initializationDao
 
     override fun getAll(): Single<List<Initialization>> {
-        return Single.fromCallable {
-            initializationDao.fetchAll()
-        }.subscribeOn(Schedulers.io())
+        return Single
+            .fromCallable {
+                initializationDao.fetchAll()
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun insert(initialization: Initialization): Single<Int> {
-        return Single.fromCallable {
-            initializationDao.insert(initialization)
-        }.subscribeOn(Schedulers.io())
+        return Single
+            .fromCallable {
+                initializationDao.insert(initialization)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun update(obj: Initialization): Completable {
-        return Single.fromCallable {
-            initializationDao.insert(obj)
-        }
+        return Single
+            .fromCallable {
+                initializationDao.insert(obj)
+            }
             .ignoreElement()
             .subscribeOn(Schedulers.io())
     }
 
     override fun delete(obj: Initialization): Completable {
-        return Single.fromCallable {
-            initializationDao.delete(obj)
-        }
+        return Single
+            .fromCallable {
+                initializationDao.delete(obj)
+            }
             .ignoreElement()
             .subscribeOn(Schedulers.io())
     }
