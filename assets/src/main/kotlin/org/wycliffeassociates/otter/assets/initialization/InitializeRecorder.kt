@@ -7,14 +7,14 @@ import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IInitializationRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import java.io.File
 import java.io.FileOutputStream
 
 class InitializeRecorder(
     val directoryProvider: IDirectoryProvider,
     val pluginRepository: IAudioPluginRepository,
-    val initializationRepo: IInitializationRepository,
+    val installedEntityRepo: IInstalledEntityRepository,
     val preferences: IAppPreferences
 ) : Installable {
 
@@ -26,12 +26,12 @@ class InitializeRecorder(
     override fun exec(): Completable {
         return Completable
             .fromCallable {
-                var installedVersion = initializationRepo.getInstalledVersion(this)
+                var installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     log.info("Initializing recorder...")
                     importOtterRecorder()
                         .doOnComplete {
-                            initializationRepo.install(this)
+                            installedEntityRepo.install(this)
                         }
                         .doOnError { e ->
                             log.error("Error importing recorder.", e)

@@ -16,7 +16,7 @@ class InitializeApp(
     val languageRepo: ILanguageRepository,
     val takeRepository: ITakeRepository,
     val resourceContainerRepo: IResourceContainerRepository,
-    val initializationRepo: IInitializationRepository,
+    val installedEntityRepo: IInstalledEntityRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
 
@@ -25,11 +25,11 @@ class InitializeApp(
             .fromPublisher<Double> { progress ->
                 val initializers = listOf(
                     InitializeLanguages(
-                        initializationRepo,
+                        installedEntityRepo,
                         languageRepo
                     ),
                     InitializeUlb(
-                        initializationRepo,
+                        installedEntityRepo,
                         resourceContainerRepo,
                         directoryProvider,
                         zipEntryTreeBuilder
@@ -37,7 +37,7 @@ class InitializeApp(
                     InitializeRecorder(
                         directoryProvider,
                         pluginRepository,
-                        initializationRepo,
+                        installedEntityRepo,
                         preferences
                     ),
                     InitializePlugins(

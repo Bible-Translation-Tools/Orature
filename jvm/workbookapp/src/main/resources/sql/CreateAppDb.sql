@@ -128,10 +128,7 @@ CREATE TABLE IF NOT EXISTS preferences (
     value               TEXT
 );
 
-CREATE TABLE IF NOT EXISTS initialization (
-    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-    name                TEXT NOT NULL,
-    version             INTEGER NOT NULL,
-    initialized         INTEGER DEFAULT 0 NOT NULL,
-    UNIQUE (name)
+CREATE TABLE IF NOT EXISTS installed_entity (
+    name                TEXT PRIMARY KEY NOT NULL,
+    version             INTEGER NOT NULL
 );

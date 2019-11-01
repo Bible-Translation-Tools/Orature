@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
 import org.jooq.Record
-import org.wycliffeassociates.otter.common.data.config.Initialization
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.*
 
 typealias ContentEntityTable = jooq.tables.ContentEntity

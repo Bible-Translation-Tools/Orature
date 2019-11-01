@@ -4,11 +4,11 @@ import io.reactivex.Completable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.persistence.config.Installable
-import org.wycliffeassociates.otter.common.persistence.repositories.IInitializationRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 
 class InitializeLanguages(
-    val initializationRepo: IInitializationRepository,
+    val installedEntityRepo: IInstalledEntityRepository,
     val languageRepo: ILanguageRepository
 ) : Installable {
 
@@ -20,12 +20,12 @@ class InitializeLanguages(
     override fun exec(): Completable {
         return Completable
             .fromCallable {
-                val installedVersion = initializationRepo.getInstalledVersion(this)
+                val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     log.info("Initializing languages...")
                     importLanguages()
                         .doOnComplete {
-                            initializationRepo.install(this)
+                            installedEntityRepo.install(this)
                         }
                         .doOnError { e ->
                             log.error("Error importing languages.", e)
