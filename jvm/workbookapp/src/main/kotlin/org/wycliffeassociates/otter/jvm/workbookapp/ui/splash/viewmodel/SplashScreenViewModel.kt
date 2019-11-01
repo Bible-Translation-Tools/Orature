@@ -31,16 +31,20 @@ class SplashScreenViewModel : ViewModel() {
     init {
         initApp.initApp()
             .observeOnFx()
+            .doOnComplete {
+                openApplicationWindow()
+            }
             .subscribe {
                 progressProperty.value = it
-                if (it == 1.0) {
-                    workspace.header.removeFromParent()
-                    workspace.add(MainMenu())
-                    workspace.dock<MainScreenView>()
-                    workspace.openWindow(owner = null)
-                    chromeableStage.navigateTo(TabGroupType.PROJECT)
-                    shouldCloseProperty.value = true
-                }
             }
+    }
+
+    private fun openApplicationWindow() {
+        workspace.header.removeFromParent()
+        workspace.add(MainMenu())
+        workspace.dock<MainScreenView>()
+        workspace.openWindow(owner = null)
+        chromeableStage.navigateTo(TabGroupType.PROJECT)
+        shouldCloseProperty.value = true
     }
 }

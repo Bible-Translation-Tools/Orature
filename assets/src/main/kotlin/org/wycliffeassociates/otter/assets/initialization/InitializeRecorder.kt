@@ -28,20 +28,19 @@ class InitializeRecorder(
             .fromCallable {
                 var installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
-                    log.info("Initializing recorder...")
+                    log.info("Initializing $name version: $version...")
                     importOtterRecorder()
                         .doOnComplete {
                             installedEntityRepo.install(this)
+                            log.info("Recorder imported!")
+                            log.info("$name version: $version installed!")
                         }
                         .doOnError { e ->
                             log.error("Error importing recorder.", e)
                         }
-                        .doOnComplete {
-                            log.info("Recorder imported!")
-                        }
                         .blockingAwait()
                 } else {
-                    log.info("Recorder up to date with version: $version")
+                    log.info("$name up to date with version: $version")
                 }
             }
     }

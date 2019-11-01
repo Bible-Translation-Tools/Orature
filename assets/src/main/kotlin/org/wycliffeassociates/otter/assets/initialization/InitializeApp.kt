@@ -48,19 +48,16 @@ class InitializeApp(
                     InitializeTakeRepository(
                         takeRepository
                     )
-                ).map {
-                    it.exec()
-                }
+                )
 
                 var total = 0.0
                 val increment = (1.0).div(initializers.size)
-                initializers.reduceRight { init, next ->
+                initializers.forEach {
                     total += increment
                     progress.onNext(total)
-                    init.andThen(next)
-                }.doFinally {
-                    progress.onComplete()
-                }.subscribe()
+                    it.exec().blockingAwait()
+                }
+                progress.onComplete()
             }.subscribeOn(Schedulers.io())
     }
 }

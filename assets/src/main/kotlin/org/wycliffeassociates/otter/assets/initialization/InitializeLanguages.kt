@@ -22,19 +22,19 @@ class InitializeLanguages(
             .fromCallable {
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
-                    log.info("Initializing languages...")
+                    log.info("Initializing $name version: $version...")
                     importLanguages()
                         .doOnComplete {
                             installedEntityRepo.install(this)
+                            log.info("Languages imported!")
+                            log.info("$name version: $version installed!")
                         }
                         .doOnError { e ->
                             log.error("Error importing languages.", e)
                         }
-                        .doOnComplete {
-                            log.info("Languages imported!")
-                        }
+                        .blockingAwait()
                 } else {
-                    log.info("Languages up to date with version: $version")
+                    log.info("$name up to date with version: $version")
                 }
             }
     }

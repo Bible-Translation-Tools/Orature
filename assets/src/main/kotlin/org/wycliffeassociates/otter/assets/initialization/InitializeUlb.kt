@@ -32,10 +32,11 @@ class InitializeUlb(
         return Completable.fromCallable {
             val installedVersion = installedEntityRepo.getInstalledVersion(this)
             if (installedVersion != version) {
-                log.info("Initializing $EN_ULB_FILENAME...")
+                log.info("Initializing $name version: $version...")
                 rcImporter.import(EN_ULB_FILENAME, ClassLoader.getSystemResourceAsStream("content/$EN_ULB_FILENAME.zip"))
                     .doAfterSuccess {
                         installedEntityRepo.install(this)
+                        log.info("$name version: $version installed!")
                     }
                     .ignoreElement()
                     .doOnComplete {
@@ -44,8 +45,9 @@ class InitializeUlb(
                     .doOnError { e ->
                         log.error("Error importing $EN_ULB_FILENAME.", e)
                     }
+                    .blockingAwait()
             } else {
-                log.info("en_ulb up to date with version: $version")
+                log.info("$name up to date with version: $version")
                 Completable.complete()
             }
         }
