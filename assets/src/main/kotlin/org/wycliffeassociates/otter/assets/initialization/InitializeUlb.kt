@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 
-const val EN_ULB = "en_ulb"
+private const val EN_ULB_FILENAME = "en_ulb"
 
 class InitializeUlb(
     val installedEntityRepo: IInstalledEntityRepository,
@@ -32,17 +32,17 @@ class InitializeUlb(
         return Completable.fromCallable {
             val installedVersion = installedEntityRepo.getInstalledVersion(this)
             if (installedVersion != version) {
-                log.info("Initializing $EN_ULB...")
-                rcImporter.import(EN_ULB, ClassLoader.getSystemResourceAsStream("content/$EN_ULB.zip"))
+                log.info("Initializing $EN_ULB_FILENAME...")
+                rcImporter.import(EN_ULB_FILENAME, ClassLoader.getSystemResourceAsStream("content/$EN_ULB_FILENAME.zip"))
                     .doAfterSuccess {
                         installedEntityRepo.install(this)
                     }
                     .ignoreElement()
                     .doOnComplete {
-                        log.info("$EN_ULB imported!")
+                        log.info("$EN_ULB_FILENAME imported!")
                     }
                     .doOnError { e ->
-                        log.error("Error importing $EN_ULB.", e)
+                        log.error("Error importing $EN_ULB_FILENAME.", e)
                     }
             } else {
                 log.info("en_ulb up to date with version: $version")
