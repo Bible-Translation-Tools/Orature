@@ -16,54 +16,51 @@ class InitializeApp(
     val languageRepo: ILanguageRepository,
     val takeRepository: ITakeRepository,
     val resourceContainerRepo: IResourceContainerRepository,
-    val initializationRepo: IInitializationRepository,
+    val installedEntityRepo: IInstalledEntityRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
 
     fun initApp(): Observable<Double> {
         return Observable
             .fromPublisher<Double> { progress ->
-                val initMap = initializationRepo.getAll().blockingGet().associateBy { it.name }
                 val initializers = listOf(
                     InitializeLanguages(
-                        initMap["langnames"],
-                        initializationRepo,
+                        installedEntityRepo,
                         languageRepo
                     ),
                     InitializeUlb(
-                        initMap["en_ulb"],
-                        initializationRepo,
+                        installedEntityRepo,
                         resourceContainerRepo,
                         directoryProvider,
                         zipEntryTreeBuilder
                     ),
                     InitializeRecorder(
-                        initMap["recorder"],
                         directoryProvider,
                         pluginRepository,
-                        initializationRepo,
+                        installedEntityRepo,
                         preferences
                     ),
                     InitializePlugins(
-                        initMap["ocenaudio"],
                         directoryProvider,
                         audioPluginRegistrar,
-                        pluginRepository,
-                        initializationRepo
+                        pluginRepository
                     ),
                     InitializeTakeRepository(
                         takeRepository
                     )
-                )
+                ).map {
+                    it.exec()
+                }
 
                 var total = 0.0
                 val increment = (1.0).div(initializers.size)
-                initializers.forEach { init ->
-                    init.exec().blockingAwait()
+                initializers.reduceRight { init, next ->
                     total += increment
                     progress.onNext(total)
-                }
-                progress.onComplete()
+                    init.andThen(next)
+                }.doFinally {
+                    progress.onComplete()
+                }.subscribe()
             }.subscribeOn(Schedulers.io())
     }
 }

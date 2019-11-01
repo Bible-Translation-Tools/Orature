@@ -152,7 +152,7 @@ private class ImportEnvironment {
 
     fun import(rcFile: String, importAsStream: Boolean = false): ImportEnvironment {
         val result = if (importAsStream) {
-            importer.import(rcResourceStream(rcFile)).blockingGet()
+            importer.import(rcFile, rcResourceStream(rcFile)).blockingGet()
         } else {
             importer.import(rcResourceFile(rcFile)).blockingGet()
         }

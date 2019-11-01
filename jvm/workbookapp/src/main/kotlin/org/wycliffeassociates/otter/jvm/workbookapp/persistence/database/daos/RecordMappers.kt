@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
 import org.jooq.Record
-import org.wycliffeassociates.otter.common.data.config.Initialization
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.*
 
 typealias ContentEntityTable = jooq.tables.ContentEntity
@@ -118,15 +117,6 @@ class RecordMappers {
                 record.getValue(AUDIO_PLUGIN_ENTITY.EDIT),
                 record.getValue(AUDIO_PLUGIN_ENTITY.RECORD),
                 record.getValue(AUDIO_PLUGIN_ENTITY.PATH)
-            )
-        }
-
-        fun mapToInitialization(record: Record): Initialization {
-            return Initialization(
-                record.getValue(INITIALIZATION.NAME),
-                record.getValue(INITIALIZATION.VERSION),
-                record.getValue(INITIALIZATION.INITIALIZED) == 1,
-                record.getValue(INITIALIZATION.ID)
             )
         }
     }

@@ -23,7 +23,7 @@ class AppDatabase(
             .newInstance()
 
         // Create a new sqlite data source
-        val dbDoesNotExist = !databaseFile.exists()
+        val dbDoesNotExist = !databaseFile.exists() || databaseFile.length() == 0L
 
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:${databaseFile.toURI().path}"
@@ -67,7 +67,7 @@ class AppDatabase(
     val markerDao = MarkerDao(dsl)
     val audioPluginDao = AudioPluginDao(dsl)
     val preferenceDao = PreferenceDao(dsl)
-    val initializationDao = InitializationDao(dsl)
+    val installedEntityDao = InstalledEntityDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {
