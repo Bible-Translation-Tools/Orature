@@ -9,11 +9,15 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
-import java.io.BufferedWriter
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+const val CREATOR = "otter"
+const val BOOK_TYPE = "book"
 const val MEDIA_DIR = "content"
 const val APP_SPECIFIC_DIR = ".apps/otter"
 const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
@@ -33,8 +37,17 @@ class ProjectExporter(
                 val zipFilename = makeExportFilename()
                 val zipFile = directory.resolve(zipFilename)
 
+                ResourceContainer
+                    .create(zipFile) {
+                        manifest = buildManifest()
+                    }
+                    .use {
+                        // Someday we may move the IZipFileWriter functionality into the RC library,
+                        // but for now, we're only using it to produce the manifest.
+                        it.write()
+                    }
+
                 directoryProvider.newZipFileWriter(zipFile).use { zipWriter ->
-                    writeManifest(zipWriter)
                     copyTakeFiles(zipWriter)
                     copySourceResources(zipWriter)
                     writeSelectedTakes(zipWriter)
@@ -61,14 +74,40 @@ class ProjectExporter(
         zipWriter.copyDirectory(projectAudioDirectory, MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
-    private fun writeManifest(zipWriter: IZipFileWriter) {
-        zipWriter.bufferedWriter("manifest.yaml").use {
-            writeManifest(it)
-        }
-    }
+    private fun buildManifest(): Manifest {
+        val book = workbook.target
+        val metadata = book.resourceMetadata
 
-    private fun writeManifest(writer: BufferedWriter) {
-        writer.write("TODO")
+        val project = Project(
+            title = book.title,
+            identifier = book.slug,
+            sort = 1,
+            path = "./$MEDIA_DIR"
+        )
+
+        val dublinCore = dublincore {
+            title = metadata.title
+            identifier = metadata.identifier
+            version = metadata.version
+            subject = metadata.subject
+
+            creator = CREATOR
+            type = BOOK_TYPE
+            format = metadata.format
+
+            language = language {
+                val bookLanguage = metadata.language
+                identifier = bookLanguage.slug
+                direction = bookLanguage.direction
+                title = bookLanguage.name
+            }
+
+            val today = LocalDate.now().toString()
+            issued = today
+            modified = today
+        }
+
+        return Manifest(dublinCore, listOf(project), Checking())
     }
 
     private fun writeSelectedTakes(zipWriter: IZipFileWriter) {
