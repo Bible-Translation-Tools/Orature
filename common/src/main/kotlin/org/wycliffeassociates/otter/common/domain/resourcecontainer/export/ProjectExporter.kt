@@ -10,14 +10,10 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val CREATOR = "otter"
-const val BOOK_TYPE = "book"
 const val MEDIA_DIR = "content"
 const val APP_SPECIFIC_DIR = ".apps/otter"
 const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
@@ -37,20 +33,12 @@ class ProjectExporter(
                 val zipFilename = makeExportFilename()
                 val zipFile = directory.resolve(zipFilename)
 
-                ResourceContainer
-                    .create(zipFile) {
-                        manifest = buildManifest()
-                    }
-                    .use {
-                        // Someday we may move the IZipFileWriter functionality into the RC library,
-                        // but for now, we're only using it to produce the manifest.
-                        it.write()
-                    }
+                initializeResourceContainer(zipFile)
 
                 directoryProvider.newZipFileWriter(zipFile).use { zipWriter ->
                     copyTakeFiles(zipWriter)
                     copySourceResources(zipWriter)
-                    writeSelectedTakes(zipWriter)
+                    writeSelectedTakesFile(zipWriter)
                 }
 
                 return@fromCallable ExportResult.SUCCESS
@@ -60,6 +48,16 @@ class ProjectExporter(
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun initializeResourceContainer(zipFile: File) {
+        ResourceContainer
+            .create(zipFile) {
+                manifest = workbook.target.buildManifest(projectPath = "./$MEDIA_DIR")
+            }
+            .use {
+                it.write()
+            }
     }
 
     private fun copySourceResources(zipWriter: IZipFileWriter) {
@@ -74,43 +72,7 @@ class ProjectExporter(
         zipWriter.copyDirectory(projectAudioDirectory, MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
-    private fun buildManifest(): Manifest {
-        val book = workbook.target
-        val metadata = book.resourceMetadata
-
-        val project = Project(
-            title = book.title,
-            identifier = book.slug,
-            sort = 1,
-            path = "./$MEDIA_DIR"
-        )
-
-        val dublinCore = dublincore {
-            title = metadata.title
-            identifier = metadata.identifier
-            version = metadata.version
-            subject = metadata.subject
-
-            creator = CREATOR
-            type = BOOK_TYPE
-            format = metadata.format
-
-            language = language {
-                val bookLanguage = metadata.language
-                identifier = bookLanguage.slug
-                direction = bookLanguage.direction
-                title = bookLanguage.name
-            }
-
-            val today = LocalDate.now().toString()
-            issued = today
-            modified = today
-        }
-
-        return Manifest(dublinCore, listOf(project), Checking())
-    }
-
-    private fun writeSelectedTakes(zipWriter: IZipFileWriter) {
+    private fun writeSelectedTakesFile(zipWriter: IZipFileWriter) {
         zipWriter.bufferedWriter(SELECTED_TAKES_FILE).use { fileWriter ->
             fetchSelectedTakes()
                 .map(::relativeTakePath)
