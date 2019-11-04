@@ -2,11 +2,9 @@ package integrationtest.initialization
 
 import io.reactivex.Completable
 import io.reactivex.observers.TestObserver
-import io.reactivex.subscribers.TestSubscriber
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
-
 
 class TestInitializeUlb {
 
