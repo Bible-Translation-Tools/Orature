@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
 
 import java.io.File
 import java.net.URI
@@ -14,7 +14,8 @@ internal fun File.jarUri() = toURI().run { URI("jar:" + scheme, path, null) }
 /** If this file's parent directories don't exist, create them. */
 internal fun Path.createParentDirectories() = parent?.let { Files.createDirectories(it) }
 
-internal fun Path.copyDirectoryToOtherFilesystem(dest: Path, filter: (String) -> Boolean) {
+/** Recursively copy a directory, possibly to another [java.nio.file.FileSystem], with per-file filter predicate. */
+internal fun Path.copyDirectoryTo(dest: Path, filter: (String) -> Boolean) {
     Files.walk(this)
         .filter { Files.isRegularFile(it) }
         .forEach { fromFile ->
@@ -26,6 +27,3 @@ internal fun Path.copyDirectoryToOtherFilesystem(dest: Path, filter: (String) ->
             }
         }
 }
-
-/** True iff isFile && exists && extension is "zip" */
-internal fun File.zipFileExists() = isFile && exists() && extension == "zip"

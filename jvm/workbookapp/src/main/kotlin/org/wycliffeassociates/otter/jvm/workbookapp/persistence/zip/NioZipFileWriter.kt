@@ -1,6 +1,6 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.projectimportexport
+package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
 
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.IZipFileWriter
+import org.wycliffeassociates.otter.common.persistence.zip.IZipFileWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.nio.file.FileSystem
@@ -23,6 +23,6 @@ class NioZipFileWriter(
     override fun copyDirectory(source: File, destination: String, filter: (String) -> Boolean) {
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
-        sourcePath.copyDirectoryToOtherFilesystem(destPath, filter)
+        sourcePath.copyDirectoryTo(destPath, filter)
     }
 }
