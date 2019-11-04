@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata

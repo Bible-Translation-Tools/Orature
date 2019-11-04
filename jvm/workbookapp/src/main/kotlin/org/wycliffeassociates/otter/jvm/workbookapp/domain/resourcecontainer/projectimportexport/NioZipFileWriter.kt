@@ -1,6 +1,6 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.export
+package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.projectimportexport
 
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.IZipFileWriter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.IZipFileWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.net.URI

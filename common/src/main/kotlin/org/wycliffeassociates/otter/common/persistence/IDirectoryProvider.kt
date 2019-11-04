@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.common.persistence
 
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.IZipFileWriter
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.IZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import java.io.BufferedWriter
 import java.io.File

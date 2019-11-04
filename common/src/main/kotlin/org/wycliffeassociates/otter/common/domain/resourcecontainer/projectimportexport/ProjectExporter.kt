@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import io.reactivex.Observable
 import io.reactivex.Single
