@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.persistence
 
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.IZipFileReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.IZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -25,6 +26,9 @@ interface IDirectoryProvider {
 
     /** Internal-use directory of the given derived RC */
     fun getDerivedContainerDirectory(metadata: ResourceMetadata, source: ResourceMetadata): File
+
+    /** Create a new IZipFileReader */
+    fun newZipFileReader(zip: File): IZipFileReader
 
     /** Create a new IZipFileWriter */
     fun newZipFileWriter(zip: File): IZipFileWriter

@@ -14,12 +14,6 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-const val MEDIA_DIR = "content"
-const val APP_SPECIFIC_DIR = ".apps/otter"
-const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
-const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
-const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
-
 class ProjectExporter(
     private val resourceMetadata: ResourceMetadata,
     private val workbook: Workbook,
@@ -53,7 +47,7 @@ class ProjectExporter(
     private fun initializeResourceContainer(zipFile: File) {
         ResourceContainer
             .create(zipFile) {
-                val projectPath = "./$MEDIA_DIR"
+                val projectPath = "./$RcConstants.MEDIA_DIR"
                 manifest = buildManifest(resourceMetadata, workbook.target, projectPath)
             }
             .use {
@@ -66,17 +60,17 @@ class ProjectExporter(
         sequenceOf(resourceMetadata, workbook.source.resourceMetadata)
             .map(directoryProvider::getSourceContainerDirectory)
             .toSet()
-            .forEach { zipWriter.copyDirectory(it, SOURCE_DIR) }
+            .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
     }
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {
         val selectedChapters = selectedChapterFilePaths()
-        zipWriter.copyDirectory(projectAudioDirectory, TAKE_DIR) { !selectedChapters.contains(it) }
-        zipWriter.copyDirectory(projectAudioDirectory, MEDIA_DIR) { selectedChapters.contains(it) }
+        zipWriter.copyDirectory(projectAudioDirectory, RcConstants.TAKE_DIR) { !selectedChapters.contains(it) }
+        zipWriter.copyDirectory(projectAudioDirectory, RcConstants.MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
     private fun writeSelectedTakesFile(zipWriter: IZipFileWriter) {
-        zipWriter.bufferedWriter(SELECTED_TAKES_FILE).use { fileWriter ->
+        zipWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { fileWriter ->
             fetchSelectedTakes()
                 .map(::relativeTakePath)
                 .blockingSubscribe {
