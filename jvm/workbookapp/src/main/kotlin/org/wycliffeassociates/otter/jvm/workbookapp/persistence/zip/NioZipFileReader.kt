@@ -2,9 +2,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
 
 import org.wycliffeassociates.otter.common.persistence.zip.IZipFileReader
 import java.io.File
+import java.io.InputStream
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import kotlin.streams.asSequence
 
 class NioZipFileReader(
     zipFile: File
@@ -15,7 +17,16 @@ class NioZipFileReader(
 
     override fun exists(filepath: String) = Files.exists(fileSystem.getPath(filepath))
 
+    override fun list(directory: String): Sequence<File> {
+        return Files
+            .list(fileSystem.getPath(directory))
+            .map { it.toFile() }
+            .asSequence()
+    }
+
     override fun bufferedReader(filepath: String) = Files.newBufferedReader(fileSystem.getPath(filepath))!!
+
+    override fun stream(filepath: String): InputStream = Files.newInputStream(fileSystem.getPath(filepath))
 
     override fun copyDirectory(source: String, destinationDirectory: File, filter: (String) -> Boolean) {
         val sourcePath = fileSystem.getPath(source)

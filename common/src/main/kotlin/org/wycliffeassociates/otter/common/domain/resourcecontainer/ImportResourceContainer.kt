@@ -8,6 +8,7 @@ import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -23,7 +24,9 @@ class ImportResourceContainer(
 ) {
 
     fun import(file: File): Single<ImportResult> {
+        val projectImporter = ProjectImporter(this, directoryProvider)
         return when {
+            projectImporter.isInProgress(file) -> projectImporter.importInProgress(file)
             file.isDirectory -> importContainerDirectory(file)
             file.extension == "zip" -> importContainerZipFile(file)
             else -> Single.just(ImportResult.INVALID_RC)
