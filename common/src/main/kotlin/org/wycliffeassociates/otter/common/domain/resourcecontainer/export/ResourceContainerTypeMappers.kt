@@ -6,9 +6,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.time.LocalDate
 
-const val CREATOR = "Otter"
-const val BOOK_TYPE = "book"
-
 fun Book.buildManifest(projectPath: String): Manifest {
     val dublinCore = resourceMetadata.toEntity()
     val project = toEntity(projectPath)
@@ -27,13 +24,10 @@ private fun ResourceMetadata.toEntity() = DublinCore(
     identifier = identifier,
     version = version,
     subject = subject,
-
-    creator = CREATOR,
-    type = BOOK_TYPE,
+    creator = creator,
+    type = type,
     format = format,
-
     language = language.toEntity(),
-
     issued = LocalDate.now().toString(),
     modified = LocalDate.now().toString()
 )
