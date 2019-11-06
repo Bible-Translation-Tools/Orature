@@ -6,9 +6,13 @@ import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.time.LocalDate
 
-fun Book.buildManifest(projectPath: String): Manifest {
-    val dublinCore = resourceMetadata.toEntity()
-    val project = toEntity(projectPath)
+fun buildManifest(
+    metadata: ResourceMetadata,
+    book: Book,
+    projectPath: String
+): Manifest {
+    val dublinCore = metadata.toEntity()
+    val project = book.toEntity(projectPath)
     return Manifest(dublinCore, listOf(project), Checking())
 }
 

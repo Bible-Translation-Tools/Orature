@@ -4,10 +4,10 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -21,9 +21,9 @@ const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
 const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
 
 class ProjectExporter(
+    private val resourceMetadata: ResourceMetadata,
     private val workbook: Workbook,
     private val projectAudioDirectory: File,
-    private val resourceRepository: IResourceRepository,
     private val directoryProvider: IDirectoryProvider
 ) {
 
@@ -53,7 +53,8 @@ class ProjectExporter(
     private fun initializeResourceContainer(zipFile: File) {
         ResourceContainer
             .create(zipFile) {
-                manifest = workbook.target.buildManifest(projectPath = "./$MEDIA_DIR")
+                val projectPath = "./$MEDIA_DIR"
+                manifest = buildManifest(resourceMetadata, workbook.target, projectPath)
             }
             .use {
                 it.write()
