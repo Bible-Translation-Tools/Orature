@@ -15,9 +15,7 @@ class ProjectImporter(
 ) {
     fun isInProgress(resourceContainer: File): Boolean {
         return try {
-            resourceContainer.isFile &&
-                    resourceContainer.extension == "zip" &&
-                    directoryProvider.newZipFileReader(resourceContainer).exists(RcConstants.SELECTED_TAKES_FILE)
+            resourceContainer.isFile && resourceContainer.extension == "zip" && hasInProgressMarker(resourceContainer)
         } catch (e: IOException) {
             false
         }
@@ -31,6 +29,12 @@ class ProjectImporter(
             }
         } catch (e: Exception) {
             Single.just(ImportResult.IMPORT_ERROR)
+        }
+    }
+
+    private fun hasInProgressMarker(resourceContainer: File): Boolean {
+        return directoryProvider.newZipFileReader(resourceContainer).use {
+            it.exists(RcConstants.SELECTED_TAKES_FILE)
         }
     }
 
