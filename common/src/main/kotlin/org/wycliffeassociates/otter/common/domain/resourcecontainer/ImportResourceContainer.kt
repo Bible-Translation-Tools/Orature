@@ -10,6 +10,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IPro
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -19,12 +21,20 @@ import java.io.InputStream
 
 class ImportResourceContainer(
     private val resourceContainerRepository: IResourceContainerRepository,
+    private val collectionRepository: ICollectionRepository,
+    private val languageRepository: ILanguageRepository,
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
 
     fun import(file: File): Single<ImportResult> {
-        val projectImporter = ProjectImporter(this, directoryProvider)
+        val projectImporter = ProjectImporter(
+            this,
+            directoryProvider,
+            collectionRepository,
+            languageRepository
+        )
+
         return when {
             projectImporter.isInProgress(file) -> projectImporter.importInProgress(file)
             file.isDirectory -> importContainerDirectory(file)

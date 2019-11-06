@@ -18,11 +18,9 @@ import java.io.File
 
 class MainMenuViewModel : ViewModel() {
     private val injector: Injector by inject()
-    private val resourceContainerRepository = injector.resourceContainerRepository
     private val resourceRepository = injector.resourceRepository
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
-    private val zipEntryTreeBuilder = injector.zipEntryTreeBuilder
 
     private val workbookVM = find<WorkbookViewModel>()
     val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
@@ -64,9 +62,11 @@ class MainMenuViewModel : ViewModel() {
 
     fun importResourceContainer(fileOrDir: File) {
         val importer = ImportResourceContainer(
-            resourceContainerRepository,
+            injector.resourceContainerRepository,
+            injector.collectionRepo,
+            injector.languageRepo,
             directoryProvider,
-            zipEntryTreeBuilder
+            injector.zipEntryTreeBuilder
         )
         showImportDialogProperty.value = true
         importer.import(fileOrDir)

@@ -2,16 +2,25 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.zip.IZipFileReader
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import java.io.File
 import java.io.IOException
 
 class ProjectImporter(
     private val resourceContainerImporter: ImportResourceContainer,
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
+    private val collectionRepository: ICollectionRepository,
+    private val languageRepository: ILanguageRepository
 ) {
     fun isInProgress(resourceContainer: File): Boolean {
         return try {
@@ -22,13 +31,38 @@ class ProjectImporter(
     }
 
     fun importInProgress(resourceContainer: File): Single<ImportResult> {
+        val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
+        val metadata = languageRepository
+            .getBySlug(manifest.dublinCore.language.identifier)
+            .map { language ->
+                manifest.dublinCore.mapToMetadata(resourceContainer, language)
+            }
+
         return try {
             directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
                 importSources(zipFileReader)
+                    .andThen { createDerivedProject(metadata) }
                     .toSingleDefault(ImportResult.SUCCESS)
             }
         } catch (e: Exception) {
             Single.just(ImportResult.IMPORT_ERROR)
+        }
+    }
+
+    private fun createDerivedProject(metadata: Single<ResourceMetadata>): Completable {
+        val sourceLookup = collectionRepository
+            .getRootSources()
+            .flattenAsObservable { it }
+            .filter {
+                it.resourceContainer?.run {
+                    val meta = metadata.blockingGet()
+                    language.slug == meta.language.slug && identifier == meta.identifier
+                } ?: false
+            }
+            .firstOrError()
+
+        return sourceLookup.flatMapCompletable { sourceCollection ->
+            CreateProject(collectionRepository).create(sourceCollection, metadata.blockingGet().language)
         }
     }
 
