@@ -44,7 +44,7 @@ class ProjectExporter(
                 return@fromCallable ExportResult.SUCCESS
             }
             .doOnError {
-                // TODO: log
+                it.printStackTrace() // TODO: log
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
@@ -61,10 +61,12 @@ class ProjectExporter(
             }
     }
 
+    /** Export a copy of the source RCs for the current book and the current project. */
     private fun copySourceResources(zipWriter: IZipFileWriter) {
-        val sourceMetadata = workbook.source.resourceMetadata
-        val sourceDirectory = directoryProvider.getSourceContainerDirectory(sourceMetadata)
-        zipWriter.copyDirectory(sourceDirectory, SOURCE_DIR)
+        sequenceOf(resourceMetadata, workbook.source.resourceMetadata)
+            .map(directoryProvider::getSourceContainerDirectory)
+            .toSet()
+            .forEach { zipWriter.copyDirectory(it, SOURCE_DIR) }
     }
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {

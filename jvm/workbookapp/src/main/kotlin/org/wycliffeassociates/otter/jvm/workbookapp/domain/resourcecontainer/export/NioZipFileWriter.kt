@@ -26,6 +26,7 @@ class NioZipFileWriter(
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         Files.walk(sourcePath)
+            .filter { Files.isRegularFile(it) }
             .forEach { fromFile ->
                 val relativePath = sourcePath.relativize(fromFile).toString()
                 if (filter(relativePath)) {
