@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
@@ -49,20 +50,21 @@ class ProjectImporter(
         }
     }
 
-    private fun createDerivedProject(metadata: Single<ResourceMetadata>): Completable {
+    private fun createDerivedProject(metadataSingle: Single<ResourceMetadata>): Single<Collection> {
+        val metadata: ResourceMetadata by lazy { metadataSingle.blockingGet() }
+
         val sourceLookup = collectionRepository
             .getRootSources()
             .flattenAsObservable { it }
             .filter {
                 it.resourceContainer?.run {
-                    val meta = metadata.blockingGet()
-                    language.slug == meta.language.slug && identifier == meta.identifier
+                    language.slug == metadata.language.slug && identifier == metadata.identifier
                 } ?: false
             }
             .firstOrError()
 
-        return sourceLookup.flatMapCompletable { sourceCollection ->
-            CreateProject(collectionRepository).create(sourceCollection, metadata.blockingGet().language)
+        return sourceLookup.flatMap { sourceCollection ->
+            CreateProject(collectionRepository).create(sourceCollection, metadata.language)
         }
     }
 

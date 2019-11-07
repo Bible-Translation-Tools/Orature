@@ -219,10 +219,10 @@ class CollectionRepository(
         return container
     }
 
-    override fun deriveProject(source: Collection, language: Language): Completable {
-        return Completable
-            .fromAction {
-                database.transaction { dsl ->
+    override fun deriveProject(source: Collection, language: Language): Single<Collection> {
+        return Single
+            .fromCallable {
+                database.transactionResult { dsl ->
                     // Check for existing resource containers
                     val existingMetadata = metadataDao.fetchAll(dsl)
                     val matches = existingMetadata.filter {
@@ -292,6 +292,10 @@ class CollectionRepository(
                             container.write()
                         }
                     }
+                    return@transactionResult collectionMapper.mapFromEntity(
+                        projectEntity,
+                        metadataMapper.mapFromEntity(metadataEntity, language)
+                    )
                 }
             }
             .subscribeOn(Schedulers.io())
