@@ -1,6 +1,7 @@
 package integrationtest.initialization
 
 import integrationtest.rcimport.*
+import org.wycliffeassociates.otter.assets.initialization.LANGNAMES_PATH
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -21,7 +22,7 @@ abstract class PersistenceEnvironment {
     protected abstract fun setUpDatabase()
 
     protected fun initLanguages() {
-        val langNames = ClassLoader.getSystemResourceAsStream("content/langnames.json")!!
+        val langNames = ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH)!!
         ImportLanguages(langNames, injector.languageRepo)
             .import()
             .onErrorComplete()

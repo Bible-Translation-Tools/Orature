@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 
 private const val EN_ULB_FILENAME = "en_ulb"
+private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
 class InitializeUlb(
     val installedEntityRepo: IInstalledEntityRepository,
@@ -37,7 +38,7 @@ class InitializeUlb(
                 log.info("Initializing $name version: $version...")
                 rcImporter.import(
                     EN_ULB_FILENAME,
-                    ClassLoader.getSystemResourceAsStream("content/$EN_ULB_FILENAME.zip")
+                    ClassLoader.getSystemResourceAsStream(EN_ULB_PATH)
                 )
                     .map { result ->
                         if (result == ImportResult.SUCCESS) {

@@ -7,6 +7,8 @@ import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 
+const val LANGNAMES_PATH = "content/langnames.json"
+
 class InitializeLanguages(
     val installedEntityRepo: IInstalledEntityRepository,
     val languageRepo: ILanguageRepository
@@ -41,7 +43,7 @@ class InitializeLanguages(
 
     private fun importLanguages(): Completable {
         return ImportLanguages(
-            ClassLoader.getSystemResourceAsStream("content/langnames.json"),
+            ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH),
             languageRepo
         ).import()
     }

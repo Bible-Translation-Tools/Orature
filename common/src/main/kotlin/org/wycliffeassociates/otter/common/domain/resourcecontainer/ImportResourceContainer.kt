@@ -39,9 +39,6 @@ class ImportResourceContainer(
             .flatMap {
                 import(tempFile)
             }
-            .doOnError {
-                ImportResult.IMPORT_ERROR
-            }
             .doFinally {
                 tempFile.delete()
             }
