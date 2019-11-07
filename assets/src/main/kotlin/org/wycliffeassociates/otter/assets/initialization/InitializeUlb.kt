@@ -40,23 +40,20 @@ class InitializeUlb(
                     EN_ULB_FILENAME,
                     ClassLoader.getSystemResourceAsStream(EN_ULB_PATH)
                 )
-                    .map { result ->
-                        if (result == ImportResult.SUCCESS) {
-                            installedEntityRepo.install(this)
-                            log.info("$name version: $version installed!")
-                        } else {
-                            throw ImportException(result)
+                    .toObservable()
+                    .blockingSubscribe(
+                        { result ->
+                            if (result == ImportResult.SUCCESS) {
+                                installedEntityRepo.install(this)
+                                log.info("$name version: $version installed!")
+                            } else {
+                                throw ImportException(result)
+                            }
+                        },
+                        { e ->
+                            log.error("Error importing $EN_ULB_FILENAME.", e)
                         }
-                    }
-                    .ignoreElement()
-                    .doOnComplete {
-                        log.info("$EN_ULB_FILENAME imported!")
-                    }
-                    .onErrorComplete { e ->
-                        log.error("Error importing $EN_ULB_FILENAME.", e)
-                        return@onErrorComplete true
-                    }
-                    .blockingAwait()
+                    )
             } else {
                 log.info("$name up to date with version: $version")
             }
