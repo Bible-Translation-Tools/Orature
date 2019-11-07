@@ -2,7 +2,9 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
@@ -33,17 +35,25 @@ class InitializeUlb(
             val installedVersion = installedEntityRepo.getInstalledVersion(this)
             if (installedVersion != version) {
                 log.info("Initializing $name version: $version...")
-                rcImporter.import(EN_ULB_FILENAME, ClassLoader.getSystemResourceAsStream("content/$EN_ULB_FILENAME.zip"))
-                    .doAfterSuccess {
-                        installedEntityRepo.install(this)
-                        log.info("$name version: $version installed!")
+                rcImporter.import(
+                    EN_ULB_FILENAME,
+                    ClassLoader.getSystemResourceAsStream("content/$EN_ULB_FILENAME.zip")
+                )
+                    .map { result ->
+                        if (result == ImportResult.SUCCESS) {
+                            installedEntityRepo.install(this)
+                            log.info("$name version: $version installed!")
+                        } else {
+                            throw ImportException(result)
+                        }
                     }
                     .ignoreElement()
                     .doOnComplete {
                         log.info("$EN_ULB_FILENAME imported!")
                     }
-                    .doOnError { e ->
+                    .onErrorComplete { e ->
                         log.error("Error importing $EN_ULB_FILENAME.", e)
+                        return@onErrorComplete true
                     }
                     .blockingAwait()
             } else {
