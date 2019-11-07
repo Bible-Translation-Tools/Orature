@@ -59,7 +59,6 @@ class InitializeUlb(
                     .blockingAwait()
             } else {
                 log.info("$name up to date with version: $version")
-                Completable.complete()
             }
         }
     }
