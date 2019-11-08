@@ -4,12 +4,12 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
-import java.io.BufferedWriter
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -21,9 +21,9 @@ const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
 const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
 
 class ProjectExporter(
+    private val resourceMetadata: ResourceMetadata,
     private val workbook: Workbook,
     private val projectAudioDirectory: File,
-    private val resourceRepository: IResourceRepository,
     private val directoryProvider: IDirectoryProvider
 ) {
 
@@ -33,26 +33,40 @@ class ProjectExporter(
                 val zipFilename = makeExportFilename()
                 val zipFile = directory.resolve(zipFilename)
 
+                initializeResourceContainer(zipFile)
+
                 directoryProvider.newZipFileWriter(zipFile).use { zipWriter ->
-                    writeManifest(zipWriter)
                     copyTakeFiles(zipWriter)
                     copySourceResources(zipWriter)
-                    writeSelectedTakes(zipWriter)
+                    writeSelectedTakesFile(zipWriter)
                 }
 
                 return@fromCallable ExportResult.SUCCESS
             }
             .doOnError {
-                // TODO: log
+                it.printStackTrace() // TODO: log
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
     }
 
+    private fun initializeResourceContainer(zipFile: File) {
+        ResourceContainer
+            .create(zipFile) {
+                val projectPath = "./$MEDIA_DIR"
+                manifest = buildManifest(resourceMetadata, workbook.target, projectPath)
+            }
+            .use {
+                it.write()
+            }
+    }
+
+    /** Export a copy of the source RCs for the current book and the current project. */
     private fun copySourceResources(zipWriter: IZipFileWriter) {
-        val sourceMetadata = workbook.source.resourceMetadata
-        val sourceDirectory = directoryProvider.getSourceContainerDirectory(sourceMetadata)
-        zipWriter.copyDirectory(sourceDirectory, SOURCE_DIR)
+        sequenceOf(resourceMetadata, workbook.source.resourceMetadata)
+            .map(directoryProvider::getSourceContainerDirectory)
+            .toSet()
+            .forEach { zipWriter.copyDirectory(it, SOURCE_DIR) }
     }
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {
@@ -61,17 +75,7 @@ class ProjectExporter(
         zipWriter.copyDirectory(projectAudioDirectory, MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
-    private fun writeManifest(zipWriter: IZipFileWriter) {
-        zipWriter.bufferedWriter("manifest.yaml").use {
-            writeManifest(it)
-        }
-    }
-
-    private fun writeManifest(writer: BufferedWriter) {
-        writer.write("TODO")
-    }
-
-    private fun writeSelectedTakes(zipWriter: IZipFileWriter) {
+    private fun writeSelectedTakesFile(zipWriter: IZipFileWriter) {
         zipWriter.bufferedWriter(SELECTED_TAKES_FILE).use { fileWriter ->
             fetchSelectedTakes()
                 .map(::relativeTakePath)
