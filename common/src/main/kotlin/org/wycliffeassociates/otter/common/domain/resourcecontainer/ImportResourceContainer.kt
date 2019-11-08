@@ -12,19 +12,37 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
 
 class ImportResourceContainer(
     private val resourceContainerRepository: IResourceContainerRepository,
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
+
     fun import(file: File): Single<ImportResult> {
         return when {
             file.isDirectory -> importContainerDirectory(file)
             file.extension == "zip" -> importContainerZipFile(file)
             else -> Single.just(ImportResult.INVALID_RC)
         }
+    }
+
+    fun import(filename: String, stream: InputStream): Single<ImportResult> {
+        val tempFile = File.createTempFile(filename, ".zip")
+        return Single
+            .fromCallable {
+                stream.transferTo(FileOutputStream(tempFile))
+            }
+            .flatMap {
+                import(tempFile)
+            }
+            .doFinally {
+                tempFile.delete()
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun File.contains(name: String): Boolean {

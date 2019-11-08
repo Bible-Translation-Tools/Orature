@@ -39,3 +39,11 @@ dependencies {
     implementation project(':common')
     implementation project(':jvm:workbookplugin')
 }
+
+task copyJarToWorkbookAppResources(type: Copy) {
+    dependsOn 'jar'
+    from jar
+    into '../workbookapp/src/main/resources/plugins/jars'
+}
+
+test.dependsOn 'copyJarToWorkbookAppResources'

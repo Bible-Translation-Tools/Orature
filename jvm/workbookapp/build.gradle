@@ -20,13 +20,30 @@ repositories {
 }
 
 sourceSets {
+    assets {
+        resources {
+            srcDir "${project(':assets').projectDir}/src/main/resource"
+        }
+    }
     integrationTest {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
             srcDir file('src/integration-test/kotlin')
         }
-        resources.srcDir file('src/integration-test/resources')
+        resources{
+            srcDirs += [ file('src/integration-test/resources'), assets.resources ]
+        }
+    }
+    main {
+        resources {
+            srcDirs += [ assets.resources ]
+        }
+    }
+    test {
+        resources {
+            srcDirs += [ assets.resources ]
+        }
     }
 }
 
@@ -111,6 +128,7 @@ dependencies {
     integrationTestImplementation sourceSets.main.output
 
     //WA Libraries
+    implementation project(':assets')
     implementation project(':common')
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
@@ -125,6 +143,8 @@ dependencies {
 
     // jar loader
     implementation "org.clapper:javautil:$clapperJavaUtilVer"
+
+    implementation "org.slf4j:slf4j-simple:$slf4jApiVer"
 }
 
 // tell gradle what to put in the jar
@@ -168,10 +188,6 @@ task printVersionName {
         println getVersionName()
     }
 }
-
-integrationTest.mustRunAfter test
-install4jdeploy.dependsOn build
-install4jdeploy.dependsOn integrationTest
 
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
@@ -218,3 +234,10 @@ idea {
         generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
     }
 }
+
+compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+integrationTest.mustRunAfter test
+integrationTest.dependsOn ':assets:build'
+integrationTest.dependsOn ':assets:copyToResources'
+install4jdeploy.dependsOn build
+install4jdeploy.dependsOn integrationTest

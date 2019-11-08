@@ -16,4 +16,5 @@ include ':common',
         ':jvm:workbookplugin', 
         ':jvm:workbookapp', 
         ':jvm:recorderapp', 
-        ':jvm'
+        ':jvm',
+        ':assets'

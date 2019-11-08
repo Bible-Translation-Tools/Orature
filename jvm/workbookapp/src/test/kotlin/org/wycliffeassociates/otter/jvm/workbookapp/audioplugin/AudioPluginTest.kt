@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin
 
 import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import java.io.File
 
 class AudioPluginTest {
