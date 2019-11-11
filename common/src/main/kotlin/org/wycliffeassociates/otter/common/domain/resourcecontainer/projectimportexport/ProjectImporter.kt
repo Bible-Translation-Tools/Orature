@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
-import io.reactivex.Completable
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -39,18 +38,24 @@ class ProjectImporter(
                 manifest.dublinCore.mapToMetadata(resourceContainer, language)
             }
 
-        return try {
-            directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
-                importSources(zipFileReader)
-                    .andThen { createDerivedProject(metadata) }
-                    .toSingleDefault(ImportResult.SUCCESS)
+        return Single.fromCallable {
+            try {
+                directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
+
+                    importSources(zipFileReader)
+
+                    @Suppress("UNUSED_VARIABLE")
+                    val createdDerivedProject: Collection = createDerivedProject(metadata)
+                    
+                    ImportResult.SUCCESS
+                }
+            } catch (e: Exception) {
+                ImportResult.IMPORT_ERROR
             }
-        } catch (e: Exception) {
-            Single.just(ImportResult.IMPORT_ERROR)
         }
     }
 
-    private fun createDerivedProject(metadataSingle: Single<ResourceMetadata>): Single<Collection> {
+    private fun createDerivedProject(metadataSingle: Single<ResourceMetadata>): Collection {
         val metadata: ResourceMetadata by lazy { metadataSingle.blockingGet() }
 
         val sourceLookup = collectionRepository
@@ -63,9 +68,11 @@ class ProjectImporter(
             }
             .firstOrError()
 
-        return sourceLookup.flatMap { sourceCollection ->
-            CreateProject(collectionRepository).create(sourceCollection, metadata.language)
-        }
+        return sourceLookup
+            .flatMap { sourceCollection ->
+                CreateProject(collectionRepository).create(sourceCollection, metadata.language)
+            }
+            .blockingGet()
     }
 
     private fun hasInProgressMarker(resourceContainer: File): Boolean {
@@ -74,22 +81,20 @@ class ProjectImporter(
         }
     }
 
-    private fun importSources(zipFileReader: IZipFileReader): Completable {
-        return Completable.fromAction {
-            val sourceFiles = zipFileReader
-                .list(RcConstants.SOURCE_DIR)
-                .filter { it.extension.toLowerCase() == "zip" }
+    private fun importSources(zipFileReader: IZipFileReader) {
+        val sourceFiles = zipFileReader
+            .list(RcConstants.SOURCE_DIR)
+            .filter { it.extension.toLowerCase() == "zip" }
 
-            val firstTry = sourceFiles
-                .map { importSource(it, zipFileReader) }
-                .toMap()
+        val firstTry = sourceFiles
+            .map { importSource(it, zipFileReader) }
+            .toMap()
 
-            // If our first try results contain both an UNMATCHED_HELP and a SUCCESS, then a retry might help.
-            if (firstTry.containsValue(ImportResult.SUCCESS)) {
-                firstTry
-                    .filter { (_, result) -> result == ImportResult.UNMATCHED_HELP }
-                    .forEach { (file, _) -> importSource(file, zipFileReader) }
-            }
+        // If our first try results contain both an UNMATCHED_HELP and a SUCCESS, then a retry might help.
+        if (firstTry.containsValue(ImportResult.SUCCESS)) {
+            firstTry
+                .filter { (_, result) -> result == ImportResult.UNMATCHED_HELP }
+                .forEach { (file, _) -> importSource(file, zipFileReader) }
         }
     }
 
