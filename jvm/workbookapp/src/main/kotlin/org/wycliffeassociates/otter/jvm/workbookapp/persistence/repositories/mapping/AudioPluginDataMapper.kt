@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.mapping.Mapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.AudioPluginEntity
 import java.io.File

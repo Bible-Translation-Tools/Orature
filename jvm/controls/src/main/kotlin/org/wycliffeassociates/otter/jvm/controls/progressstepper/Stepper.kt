@@ -7,7 +7,7 @@ import javafx.scene.paint.Color
 import tornadofx.*
 
 class Stepper() : HBox() {
-    var steps = observableList<Step>()
+    var steps = observableListOf<Step>()
 
     val fillColorProperty = SimpleObjectProperty<Color>()
     var fillColor by fillColorProperty

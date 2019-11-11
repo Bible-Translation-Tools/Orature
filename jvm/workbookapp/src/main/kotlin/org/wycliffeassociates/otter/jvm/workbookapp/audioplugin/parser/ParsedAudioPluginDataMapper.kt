@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.parser
 
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import java.io.File
 
 /** @param osName optionally overrides the value from System.getProperty("os.name") */

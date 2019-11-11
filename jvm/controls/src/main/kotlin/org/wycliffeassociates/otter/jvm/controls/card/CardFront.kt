@@ -13,7 +13,7 @@ import tornadofx.*
 
 class CardFront : StackPane() {
 
-    val childrenList = observableList<Node>()
+    val childrenList = observableListOf<Node>()
 
     val defaultFill = c("#CC4141")
     val forwardArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "20px")

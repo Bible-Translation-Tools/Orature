@@ -5,7 +5,7 @@ import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.ViewModel
 

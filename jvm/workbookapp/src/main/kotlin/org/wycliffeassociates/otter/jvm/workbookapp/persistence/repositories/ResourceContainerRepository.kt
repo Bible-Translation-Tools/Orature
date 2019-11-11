@@ -9,10 +9,8 @@ import org.jooq.Select
 import org.jooq.impl.DSL
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
-import org.wycliffeassociates.otter.common.data.model.Content
-import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -51,7 +49,7 @@ class ResourceContainerRepository(
             database.transaction { dsl ->
                 val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
                 val metadata = dublinCore.mapToMetadata(rc.file, language)
-                val dublinCoreFk = resourceMetadataDao.insert(ResourceMetadataMapper().mapToEntity(metadata), dsl)
+                val dublinCoreFk = insertMetadataOrThrow(dsl, metadata)
 
                 val relatedDublinCoreIds: List<Int> =
                     linkRelatedResourceContainers(dublinCoreFk, dublinCore.relation, dublinCore.creator, dsl)
@@ -74,6 +72,19 @@ class ResourceContainerRepository(
             .toSingleDefault(ImportResult.SUCCESS)
             .onErrorReturn { e -> e.castOrFindImportException()?.result ?: ImportResult.LOAD_RC_ERROR }
             .subscribeOn(Schedulers.io())
+    }
+
+    /** Insert ResourceMetadata, returning row ID, or throw [ImportException] if a matching row already exists. */
+    private fun insertMetadataOrThrow(
+        dsl: DSLContext,
+        metadata: ResourceMetadata
+    ): Int {
+        val existingRow = resourceMetadataDao.fetchLatestVersion(metadata.language.slug, metadata.identifier)
+        if (existingRow != null) {
+            throw ImportException(ImportResult.ALREADY_EXISTS)
+        }
+        val entity = ResourceMetadataMapper().mapToEntity(metadata)
+        return resourceMetadataDao.insert(entity, dsl)
     }
 
     private fun linkRelatedResourceContainers(

@@ -6,30 +6,60 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.audioplugin.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.export.ProjectExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
-import tornadofx.ViewModel
-import tornadofx.get
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
+import tornadofx.*
 import java.io.File
 
 class MainMenuViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val resourceContainerRepository = injector.resourceContainerRepository
+    private val resourceRepository = injector.resourceRepository
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
     private val zipEntryTreeBuilder = injector.zipEntryTreeBuilder
+
+    private val workbookVM = find<WorkbookViewModel>()
+    val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val showExportDialogProperty = SimpleBooleanProperty(false)
     val showImportDialogProperty = SimpleBooleanProperty(false)
 
     init {
         refreshPlugins()
+    }
+
+    fun exportProject(directory: File) {
+        showExportDialogProperty.value = true
+
+        val exporter = ProjectExporter(
+            workbookVM.activeResourceMetadata,
+            workbookVM.workbook,
+            workbookVM.projectAudioDirectory,
+            directoryProvider
+        )
+        exporter.export(directory)
+            .observeOnFx()
+            .subscribe { result: ExportResult ->
+                val errorMessage = when (result) {
+                    ExportResult.SUCCESS -> null
+                    ExportResult.FAILURE -> messages["exportError"]
+                }
+                showExportDialogProperty.value = false
+                errorMessage?.let {
+                    tornadofx.error(messages["exportError"], it)
+                }
+            }
     }
 
     fun importResourceContainer(fileOrDir: File) {

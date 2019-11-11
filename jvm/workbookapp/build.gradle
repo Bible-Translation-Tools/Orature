@@ -1,4 +1,3 @@
-import groovy.sql.Sql
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
@@ -11,12 +10,6 @@ plugins {
 apply plugin: 'application'
 apply plugin: 'idea'
 
-ext {
-    sqlDirPath = [projectDir.path, "src", "main", "resources", "sql", "CreateAppDb.sql"].join(File.separator)
-    sqliteFile = [projectDir.path, "test.sqlite"].join(File.separator)
-    sqliteConnect = "jdbc:sqlite:${ext.sqliteFile}"
-}
-
 javafx {
     version = "$javafxVer"
     modules = ['javafx.controls', 'javafx.fxml']
@@ -27,18 +20,31 @@ repositories {
 }
 
 sourceSets {
+    assets {
+        resources {
+            srcDir "${project(':assets').projectDir}/src/main/resource"
+        }
+    }
     integrationTest {
         java {
             compileClasspath += main.output + test.output
             runtimeClasspath += main.output + test.output
             srcDir file('src/integration-test/kotlin')
         }
-        resources.srcDir file('src/integration-test/resources')
+        resources{
+            srcDirs += [ file('src/integration-test/resources'), assets.resources ]
+        }
     }
-}
-
-configurations {
-    sqllite
+    main {
+        resources {
+            srcDirs += [ assets.resources ]
+        }
+    }
+    test {
+        resources {
+            srcDirs += [ assets.resources ]
+        }
+    }
 }
 
 configurations {
@@ -46,8 +52,33 @@ configurations {
     integrationTestRuntime.extendsFrom main
 }
 
-dependencies {
+application {
+    mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
+}
 
+apply from: './jooq.gradle'
+
+//install4j tasks for building win/nix/mac installers. Executable jar can be built without it
+install4j {
+    //pass in the install4j directory via -P if it's not in the default install location, e.q. for use with travis or arbitrary paths
+    if (project.hasProperty('gradlewInstall4jDirectory')) {
+        installDir = file(gradlewInstall4jDirectory)
+    }
+    //license must be passed via gradlew commandline -P as it can't be commit to public source control
+    if (project.hasProperty('gradlewCommandLicenseProp')) {
+        license = gradlewCommandLicenseProp
+    }
+}
+
+task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
+    projectFile = 'otter.install4j'
+    //Pass Travis Build ID to install4j for versioning
+    if (project.hasProperty('gradlewCommandVersionProp')) {
+        release = gradlewCommandVersionProp
+    }
+}
+
+dependencies {
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
@@ -55,6 +86,11 @@ dependencies {
 
     // TornadoFX
     implementation "no.tornado:tornadofx:$tornadofxVer"
+
+    //OpenJFX cross-platform fat jar dependencies
+    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:win"
+    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:linux"
+    runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
 
     // SVG Loader
     implementation "com.github.afester.javafx:FranzXaver:$franzXaverVer"
@@ -67,13 +103,6 @@ dependencies {
     implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"
     implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
     implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
-
-    // Jooq
-    implementation group: 'org.xerial', name: 'sqlite-jdbc', version: "$sqliteJdbcVer"
-    implementation "org.jooq:jooq:$jooqVer"
-    jooqRuntime group: 'org.jooq', name: 'jooq-meta-extensions', version: "$jooqVer"
-    jooqRuntime "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
-    sqllite "org.xerial:sqlite-jdbc:$sqliteJdbcVer"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
@@ -99,6 +128,7 @@ dependencies {
     integrationTestImplementation sourceSets.main.output
 
     //WA Libraries
+    implementation project(':assets')
     implementation project(':common')
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
@@ -113,6 +143,8 @@ dependencies {
 
     // jar loader
     implementation "org.clapper:javautil:$clapperJavaUtilVer"
+
+    implementation "org.slf4j:slf4j-simple:$slf4jApiVer"
 }
 
 // tell gradle what to put in the jar
@@ -130,20 +162,6 @@ jar {
     }
 }
 
-//install4j tasks for building win/nix/mac installers. Executable jar can be built without it
-install4j {
-    installDir = file('/opt/install4j7')
-    //license must be passed via gradlew commandline -P as it can't be commit to public source control
-    if (project.hasProperty('gradlewCommandLicenseProp')) {
-        license = gradlewCommandLicenseProp
-    }
-}
-
-
-task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
-    projectFile = 'otter.install4j'
-}
-
 task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integrationTest.output.classesDirs
     classpath = sourceSets.integrationTest.runtimeClasspath
@@ -153,10 +171,6 @@ task integrationTest(type: Test) {
 configure(integrationTest) {
     group = 'verification'
     description = 'Cross-package and e2e tests, may require DB'
-}
-
-application {
-    mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
 }
 
 //////////////////////////////////// Custom Tasks ///////////////////////////////////////////
@@ -174,54 +188,6 @@ task printVersionName {
         println getVersionName()
     }
 }
-
-task createDb {
-    //Add the full path to the sqlite-jdbc jar to the list of URLs
-    //that Gradle will search for classes and resources
-    //The code block below allows Gradle to find and use the executable jar for sqlite-jdbc
-    //using its full path on the local machine
-    URLClassLoader loader = GroovyObject.class.classLoader
-    configurations.sqllite.each { File file ->
-        loader.addURL(file.toURL())
-    }
-    String[] text = new File(sqlDirPath).text.split(';')
-    text.collect { it.trim() }.findAll { !it.isEmpty() && !it.startsWith("--") }.each {
-        def sql = Sql.newInstance(sqliteConnect, "org.sqlite.JDBC")
-        sql.execute(it)
-        sql.close()
-    }
-}
-
-jooq {
-    version = "$jooqVer"
-    edition = 'OSS'
-    sample(sourceSets.main) {
-        jdbc {
-            driver = 'org.sqlite.JDBC'
-            url = sqliteConnect
-        }
-        generator {
-            database {
-                name = 'org.jooq.meta.sqlite.SQLiteDatabase'
-            }
-
-            target {
-                packageName = 'jooq'
-                directory = 'src/main/java'
-            }
-        }
-    }
-}
-
-clean.doLast {
-    project.file(sqliteFile).delete()
-    project.file('src/main/java/jooq').deleteDir()
-}
-/////////////////////// Define Task Orders ///////////////////////////////
-generateSampleJooqSchemaSource.dependsOn createDb
-compileKotlin.dependsOn generateSampleJooqSchemaSource
-install4jdeploy.dependsOn build
-integrationTest.mustRunAfter test
 
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
@@ -268,3 +234,10 @@ idea {
         generatedSourceDirs += file('build/generated/source/kapt/integrationTest')
     }
 }
+
+compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+integrationTest.mustRunAfter test
+integrationTest.dependsOn ':assets:build'
+integrationTest.dependsOn ':assets:copyToResources'
+install4jdeploy.dependsOn build
+install4jdeploy.dependsOn integrationTest

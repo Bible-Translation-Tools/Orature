@@ -127,3 +127,8 @@ CREATE TABLE IF NOT EXISTS preferences (
     key                 TEXT NOT NULL UNIQUE,
     value               TEXT
 );
+
+CREATE TABLE IF NOT EXISTS installed_entity (
+    name                TEXT PRIMARY KEY NOT NULL,
+    version             INTEGER NOT NULL
+);
