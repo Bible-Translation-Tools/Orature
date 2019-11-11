@@ -4,10 +4,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.BooleanExpression
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -26,11 +23,11 @@ class ProjectWizardViewModel : ViewModel() {
     private val collectionRepo = injector.collectionRepo
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
-    val sourceLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
-    val targetLanguageProperty = bind(true) { SimpleObjectProperty<Language>() }
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
-    val allLanguages: ObservableList<Language> = FXCollections.observableArrayList()
-    val filteredLanguages: ObservableList<Language> = FXCollections.observableArrayList()
+    val targetLanguages = SortedFilteredList<Language>()
+    val sourceLanguages = SortedFilteredList<Language>()
+    val selectedSourceLanguage = bind(true) { SimpleObjectProperty<Language>() }
+    val selectedTargetLanguage = bind(true) { SimpleObjectProperty<Language>() }
 
     private val collectionHierarchy: ArrayList<List<Collection>> = ArrayList()
 
@@ -50,31 +47,34 @@ class ProjectWizardViewModel : ViewModel() {
     val bookCompletedText = SimpleStringProperty()
 
     init {
-        languageRepo
-            .getAll()
-            .observeOnFx()
-            .subscribe { retrieved ->
-                allLanguages.setAll(retrieved)
-            }
-
-        filterSourceLanguages()
+        initializeTargetLanguages()
+        initializeSourceLanguages()
         loadProjects()
-        targetLanguageProperty.toObservable().subscribe { language ->
+        selectedTargetLanguage.toObservable().subscribe { language ->
             existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
             languageCompletedText.set(language?.anglicizedName)
         }
     }
 
-    private fun filterSourceLanguages() {
+    private fun initializeTargetLanguages() {
+        languageRepo
+            .getAll()
+            .observeOnFx()
+            .subscribe { retrieved ->
+                targetLanguages.addAll(retrieved)
+            }
+    }
+
+    private fun initializeSourceLanguages() {
         collectionRepo
             .getRootSources()
             .observeOnFx()
             .map { collections ->
-                collections.map { collection -> collection.resourceContainer?.language }
+                collections.mapNotNull { collection -> collection.resourceContainer?.language }
             }.map { languages ->
                 languages.distinct()
             }.subscribe { uniqueLanguages ->
-                filteredLanguages.setAll(uniqueLanguages)
+                sourceLanguages.addAll(uniqueLanguages)
             }
     }
 
@@ -82,7 +82,7 @@ class ProjectWizardViewModel : ViewModel() {
         collectionRepo
             .getRootProjects()
             .subscribe { retrieved ->
-                projects.setAll(retrieved)
+                projects.addAll(retrieved)
             }
     }
 
@@ -92,7 +92,7 @@ class ProjectWizardViewModel : ViewModel() {
             .observeOnFx()
             .subscribe { retrieved ->
                 collectionHierarchy.add(retrieved.filter {
-                    it.resourceContainer?.language == sourceLanguageProperty.value
+                    it.resourceContainer?.language == selectedSourceLanguage.value
                 })
                 collections.setAll(collectionHierarchy.last())
             }
@@ -121,7 +121,7 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     private fun createProject(selectedCollection: Collection) {
-        targetLanguageProperty.value?.let { language ->
+        selectedTargetLanguage.value?.let { language ->
             showOverlayProperty.value = true
             creationUseCase
                 .create(selectedCollection, language)
@@ -177,41 +177,22 @@ class ProjectWizardViewModel : ViewModel() {
         collectionHierarchy.clear()
         existingProjects.clear()
         creationCompletedProperty.value = false
-        filterSourceLanguages()
         loadProjects()
         languageCompletedText.set(null)
         resourceCompletedText.set(null)
     }
 
-    fun filterLanguages(query: String): ObservableList<Language> {
-        return allLanguages.filtered {
-            it.name.contains(query, true) ||
-                    it.anglicizedName.contains(query, true) ||
-                    it.slug.contains(query, true)
-        }.sorted { lang1, lang2 ->
-            when {
-                lang1.slug.startsWith(query, true) -> -1
-                lang2.slug.startsWith(query, true) -> 1
-                lang1.name.startsWith(query, true) -> -1
-                lang2.name.startsWith(query, true) -> 1
-                lang1.anglicizedName.startsWith(query, true) -> -1
-                lang2.anglicizedName.startsWith(query, true) -> 1
-                else -> 0
-            }
-        }
-    }
-
-    fun filterSourceLanguages(query: String): ObservableList<Language> {
-        return filterLanguages(query)
-            .filtered {
-                filteredLanguages.contains(it)
-            }
+    fun filterLanguages(query: String?, language: Language): Boolean {
+        if (query == null) return false
+        return language.name.contains(query, true) ||
+                language.anglicizedName.contains(query, true) ||
+                language.slug.contains(query, true)
     }
 
     fun languagesValid(): BooleanExpression {
-        return sourceLanguageProperty
-            .booleanBinding(targetLanguageProperty) {
-                sourceLanguageProperty.value != null && targetLanguageProperty.value != null
+        return selectedSourceLanguage
+            .booleanBinding(selectedTargetLanguage) {
+                selectedSourceLanguage.value != null && selectedTargetLanguage.value != null
             }
     }
 }
