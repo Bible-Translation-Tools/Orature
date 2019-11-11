@@ -17,6 +17,8 @@ class TestInitializeUlb {
         val init = InitializeUlb(
             inj.installedEntityRepository,
             inj.resourceContainerRepository,
+            inj.collectionRepo,
+            inj.languageRepo,
             inj.directoryProvider,
             inj.zipEntryTreeBuilder
         )

@@ -14,8 +14,9 @@ class InitializeApp(
     val audioPluginRegistrar: IAudioPluginRegistrar,
     val pluginRepository: IAudioPluginRepository,
     val languageRepo: ILanguageRepository,
-    val takeRepository: ITakeRepository,
+    val takeRepo: ITakeRepository,
     val resourceContainerRepo: IResourceContainerRepository,
+    val collectionRepo: ICollectionRepository,
     val installedEntityRepo: IInstalledEntityRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
@@ -31,6 +32,8 @@ class InitializeApp(
                     InitializeUlb(
                         installedEntityRepo,
                         resourceContainerRepo,
+                        collectionRepo,
+                        languageRepo,
                         directoryProvider,
                         zipEntryTreeBuilder
                     ),
@@ -46,7 +49,7 @@ class InitializeApp(
                         pluginRepository
                     ),
                     InitializeTakeRepository(
-                        takeRepository
+                        takeRepo
                     )
                 )
 

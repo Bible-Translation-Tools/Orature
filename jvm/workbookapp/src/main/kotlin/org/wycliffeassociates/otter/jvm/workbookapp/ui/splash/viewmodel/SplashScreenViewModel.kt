@@ -24,6 +24,7 @@ class SplashScreenViewModel : ViewModel() {
         injector.languageRepo,
         injector.takeRepository,
         injector.resourceContainerRepository,
+        injector.collectionRepo,
         injector.installedEntityRepository,
         injector.zipEntryTreeBuilder
     )
