@@ -4,10 +4,8 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Content
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -216,6 +214,7 @@ class ProjectImporter(
                 .flatMap {
                     contentRepository.getByCollection(it).flattenAsObservable { it }
                 }
+                .filter { content -> content.type == ContentType.TEXT }
                 .filter { content -> content.start == v }
                 .firstElement()
 
