@@ -17,10 +17,10 @@ class NioZipFileReader(
 
     override fun exists(filepath: String) = Files.exists(fileSystem.getPath(filepath))
 
-    override fun list(directory: String): Sequence<File> {
+    override fun list(directory: String): Sequence<String> {
         return Files
             .list(fileSystem.getPath(directory))
-            .map { it.toFile() }
+            .map { it.toString() }
             .asSequence()
     }
 

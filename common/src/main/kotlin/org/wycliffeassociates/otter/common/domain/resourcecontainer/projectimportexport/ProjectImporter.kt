@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -20,6 +21,8 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ITakeReposit
 import org.wycliffeassociates.otter.common.persistence.zip.IZipFileReader
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
+import org.wycliffeassociates.resourcecontainer.entity.Project
+import org.wycliffeassociates.resourcecontainer.entity.Source
 import java.io.File
 import java.io.IOException
 import java.time.LocalDate
@@ -56,14 +59,21 @@ class ProjectImporter(
                         manifest.dublinCore.mapToMetadata(resourceContainer, language)
                     }
                     .blockingGet()
+                val manifestSources = manifest.dublinCore.source.toSet()
+                val manifestProject = try {
+                    manifest.projects.single()
+                } catch (t: Throwable) {
+                    log.error("In-progress import must have 1 project, but this has {}", manifest.projects.count())
+                    throw ImportException(ImportResult.INVALID_RC)
+                }
 
                 directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
 
                     importSources(zipFileReader)
 
-                    val createdDerivedProject: Collection = createDerivedProject(metadata)
+                    val createdDerivedProject: Collection = createDerivedProject(metadata, manifestSources)
 
-                    importTakes(zipFileReader, metadata, createdDerivedProject)
+                    importTakes(zipFileReader, metadata, createdDerivedProject, manifestProject)
 
                     ImportResult.SUCCESS
                 }
@@ -77,7 +87,8 @@ class ProjectImporter(
     private fun importTakes(
         zipFileReader: IZipFileReader,
         metadata: ResourceMetadata,
-        project: Collection
+        project: Collection,
+        manifestProject: Project
     ) {
         val audioDir = directoryProvider.getProjectAudioDirectory(metadata, project)
 
@@ -105,25 +116,30 @@ class ProjectImporter(
             }
         }
 
-        zipFileReader.copyDirectory(RcConstants.TAKE_DIR, audioDir, tryInsertTake)
-        zipFileReader.copyDirectory(RcConstants.MEDIA_DIR, audioDir, tryInsertTake)
+        sequenceOf(RcConstants.TAKE_DIR, manifestProject.path)
+            .filter { zipFileReader.exists(it) }
+            .forEach { zipFileReader.copyDirectory(it, audioDir, tryInsertTake) }
     }
 
-    private fun createDerivedProject(metadata: ResourceMetadata): Collection {
-        val sourceLookup = collectionRepository
+    private fun createDerivedProject(metadata: ResourceMetadata, manifestSources: Set<Source>): Collection {
+        val sourceCollection: Collection? = collectionRepository
             .getRootSources()
             .flattenAsObservable { it }
-            .filter {
-                it.resourceContainer?.run {
-                    language.slug == metadata.language.slug && identifier == metadata.identifier
-                } ?: false
+            .filter { rootSource ->
+                rootSource.resourceContainer
+                    ?.run { Source(identifier, language.slug, version) }
+                    ?.let { it in manifestSources }
+                    ?: false
             }
-            .firstOrError()
+            .blockingFirst(null)
 
-        return sourceLookup
-            .flatMap { sourceCollection ->
-                CreateProject(collectionRepository).create(sourceCollection, metadata.language)
-            }
+        if (sourceCollection == null) {
+            log.error("Failed to find source that matches requested import.")
+            throw ImportException(ImportResult.IMPORT_ERROR)
+        }
+
+        return CreateProject(collectionRepository)
+            .create(sourceCollection, metadata.language)
             .blockingGet()
     }
 
@@ -136,7 +152,7 @@ class ProjectImporter(
     private fun importSources(zipFileReader: IZipFileReader) {
         val sourceFiles = zipFileReader
             .list(RcConstants.SOURCE_DIR)
-            .filter { it.extension.toLowerCase() == "zip" }
+            .filter { it.endsWith(".zip", ignoreCase = true) }
 
         val firstTry = sourceFiles
             .map { importSource(it, zipFileReader) }
@@ -150,10 +166,10 @@ class ProjectImporter(
         }
     }
 
-    private fun importSource(fileInZip: File, zipFileReader: IZipFileReader): Pair<File, ImportResult> {
-        val name = fileInZip.nameWithoutExtension
+    private fun importSource(fileInZip: String, zipFileReader: IZipFileReader): Pair<String, ImportResult> {
+        val name = File(fileInZip).nameWithoutExtension
         val result = resourceContainerImporter
-            .import(name, zipFileReader.stream(fileInZip.path))
+            .import(name, zipFileReader.stream(fileInZip))
             .blockingGet()
         log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
@@ -175,7 +191,7 @@ class ProjectImporter(
                 .filter { content -> content.start == v }
                 .firstElement()
 
-            content.blockingGet(null)
+            content.blockingGet()
         }
     }
 

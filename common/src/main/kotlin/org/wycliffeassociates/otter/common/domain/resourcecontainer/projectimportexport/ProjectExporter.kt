@@ -50,8 +50,8 @@ class ProjectExporter(
     private fun initializeResourceContainer(zipFile: File) {
         ResourceContainer
             .create(zipFile) {
-                val projectPath = "./$RcConstants.MEDIA_DIR"
-                manifest = buildManifest(resourceMetadata, workbook.target, projectPath)
+                val projectPath = "./" + RcConstants.MEDIA_DIR
+                manifest = buildManifest(resourceMetadata, workbook, projectPath)
             }
             .use {
                 it.write()

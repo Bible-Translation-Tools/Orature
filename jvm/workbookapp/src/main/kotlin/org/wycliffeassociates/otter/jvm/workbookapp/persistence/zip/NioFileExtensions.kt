@@ -16,10 +16,11 @@ internal fun Path.createParentDirectories() = parent?.let { Files.createDirector
 
 /** Recursively copy a directory, possibly to another [java.nio.file.FileSystem], with per-file filter predicate. */
 internal fun Path.copyDirectoryTo(dest: Path, filter: (String) -> Boolean) {
-    Files.walk(this)
+    val sourceRoot = toAbsolutePath()
+    Files.walk(sourceRoot)
         .filter { Files.isRegularFile(it) }
         .forEach { fromFile ->
-            val relativePath = relativize(fromFile).toString()
+            val relativePath = sourceRoot.relativize(fromFile).toString()
             if (filter(relativePath)) {
                 val toFile = dest.resolve(relativePath)
                 toFile.createParentDirectories()

@@ -9,5 +9,5 @@ interface IZipFileReader : AutoCloseable {
     fun stream(filepath: String): InputStream
     fun exists(filepath: String): Boolean
     fun copyDirectory(source: String, destinationDirectory: File, filter: (String) -> Boolean = { _ -> true })
-    fun list(directory: String): Sequence<File>
+    fun list(directory: String): Sequence<String>
 }
