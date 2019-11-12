@@ -79,7 +79,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun loadProjects() {
         collectionRepo
-            .getRootProjects()
+            .getDerivedProjects()
             .subscribe { retrieved ->
                 projects.setAll(retrieved)
             }

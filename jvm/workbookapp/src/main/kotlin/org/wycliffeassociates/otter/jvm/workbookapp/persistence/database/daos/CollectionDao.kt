@@ -97,6 +97,16 @@ class CollectionDao(
             }
     }
 
+    fun fetchByLabel(label: String, dsl: DSLContext = instanceDsl): List<CollectionEntity> {
+        return dsl
+            .select()
+            .from(COLLECTION_ENTITY)
+            .where(COLLECTION_ENTITY.LABEL.eq(label))
+            .fetch {
+                RecordMappers.mapToCollectionEntity(it)
+            }
+    }
+
     fun update(entity: CollectionEntity, dsl: DSLContext = instanceDsl) {
         dsl
             .update(COLLECTION_ENTITY)

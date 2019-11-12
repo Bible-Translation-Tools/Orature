@@ -96,42 +96,50 @@ class ProjectImporter(
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
             .useLines { it.toSet() }
 
-        val tryInsertTake: (String) -> Boolean = { filepath ->
-            val file = File(filepath)
-            if (isAudioFile(file)) {
-                parseNumbers(filepath)?.let { (chapterVerse, takeNumber) ->
-                    getContent(chapterVerse, project)?.let { chunk ->
-                        val now = LocalDate.now()
-                        val take = Take(file.name, file, takeNumber, now, null, false, listOf())
-                        take.id = takeRepository.insertForContent(take, chunk).blockingGet()
-                        if (filepath in selectedTakes) {
-                            chunk.selectedTake = take
-                            contentRepository.update(chunk).blockingAwait()
-                        }
-                    }
+        Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
+            .filter(zipFileReader::exists)
+            .flatMap { audioDirInRc ->
+                zipFileReader.copyDirectory(audioDirInRc, audioDir, this::isAudioFile)
+            }
+            .subscribe { newTakeFile ->
+                insertTake(newTakeFile, audioDir, project, selectedTakes)
+            }
+    }
+
+    private fun insertTake(
+        filepath: String,
+        projectAudioDir: File,
+        project: Collection,
+        selectedTakes: Set<String>
+    ) {
+        parseNumbers(filepath)?.let { (chapterVerse, takeNumber) ->
+            getContent(chapterVerse, project)?.let { chunk ->
+                val now = LocalDate.now()
+                val file = File(filepath).canonicalFile
+                val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
+
+                val take = Take(file.name, file, takeNumber, now, null, false, listOf())
+                take.id = takeRepository.insertForContent(take, chunk).blockingGet()
+
+                if (relativeFile.invariantSeparatorsPath in selectedTakes) {
+                    chunk.selectedTake = take
+                    contentRepository.update(chunk).blockingAwait()
                 }
-                true
-            } else {
-                false
             }
         }
-
-        sequenceOf(RcConstants.TAKE_DIR, manifestProject.path)
-            .filter { zipFileReader.exists(it) }
-            .forEach { zipFileReader.copyDirectory(it, audioDir, tryInsertTake) }
     }
 
     private fun createDerivedProject(metadata: ResourceMetadata, manifestSources: Set<Source>): Collection {
-        val sourceCollection: Collection? = collectionRepository
-            .getRootSources()
-            .flattenAsObservable { it }
-            .filter { rootSource ->
-                rootSource.resourceContainer
+        val sourceProjects = collectionRepository.getSourceProjects().blockingGet()
+        val sourceCollection: Collection? = sourceProjects
+            .asSequence()
+            .filter { sourceProject ->
+                sourceProject.resourceContainer
                     ?.run { Source(identifier, language.slug, version) }
                     ?.let { it in manifestSources }
                     ?: false
             }
-            .blockingFirst(null)
+            .firstOrNull()
 
         if (sourceCollection == null) {
             log.error("Failed to find source that matches requested import.")
@@ -175,6 +183,8 @@ class ProjectImporter(
         return fileInZip to result
     }
 
+    private fun isAudioFile(file: String) = isAudioFile(File(file))
+
     private fun isAudioFile(file: File) = file.extension.let { it == "wav" || it == "mp3" }
 
     private fun getContent(cv: ChapterVerse, project: Collection): Content? {
@@ -195,7 +205,7 @@ class ProjectImporter(
         }
     }
 
-    fun parseNumbers(filename: String): ChapterVerseTake? {
+    private fun parseNumbers(filename: String): ChapterVerseTake? {
         val matcher = takeFilenamePattern.matcher(filename)
         return if (matcher.find()) {
             val chapter = matcher.group(1).toInt()

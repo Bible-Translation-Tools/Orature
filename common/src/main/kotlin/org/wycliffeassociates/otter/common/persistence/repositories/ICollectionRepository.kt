@@ -8,7 +8,8 @@ import org.wycliffeassociates.otter.common.data.model.Language
 
 interface ICollectionRepository : IRepository<Collection> {
     fun insert(collection: Collection): Single<Int>
-    fun getRootProjects(): Single<List<Collection>>
+    fun getDerivedProjects(): Single<List<Collection>>
+    fun getSourceProjects(): Single<List<Collection>>
     fun getRootSources(): Single<List<Collection>>
     fun getSource(project: Collection): Maybe<Collection>
     fun getChildren(collection: Collection): Single<List<Collection>>

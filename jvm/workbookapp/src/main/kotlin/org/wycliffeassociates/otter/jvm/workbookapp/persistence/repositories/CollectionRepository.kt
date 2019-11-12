@@ -99,12 +99,23 @@ class CollectionRepository(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun getRootProjects(): Single<List<Collection>> {
+    override fun getDerivedProjects(): Single<List<Collection>> {
         return Single
             .fromCallable {
                 collectionDao
-                    .fetchAll()
-                    .filter { it.sourceFk != null && it.label == "project" }
+                    .fetchByLabel("project")
+                    .filter { it.sourceFk != null }
+                    .map(this::buildCollection)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getSourceProjects(): Single<List<Collection>> {
+        return Single
+            .fromCallable {
+                collectionDao
+                    .fetchByLabel("project")
+                    .filter { it.sourceFk == null }
                     .map(this::buildCollection)
             }
             .subscribeOn(Schedulers.io())

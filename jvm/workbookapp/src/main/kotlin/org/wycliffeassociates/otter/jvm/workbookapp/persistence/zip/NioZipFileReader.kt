@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
 
+import io.reactivex.Observable
 import org.wycliffeassociates.otter.common.persistence.zip.IZipFileReader
 import java.io.File
 import java.io.InputStream
@@ -28,9 +29,13 @@ class NioZipFileReader(
 
     override fun stream(filepath: String): InputStream = Files.newInputStream(fileSystem.getPath(filepath))
 
-    override fun copyDirectory(source: String, destinationDirectory: File, filter: (String) -> Boolean) {
+    override fun copyDirectory(
+        source: String,
+        destinationDirectory: File,
+        filter: (String) -> Boolean
+    ): Observable<String> {
         val sourcePath = fileSystem.getPath(source)
         val destPath = destinationDirectory.toPath()
-        sourcePath.copyDirectoryTo(destPath, filter)
+        return sourcePath.copyDirectoryTo(destPath, filter)
     }
 }
