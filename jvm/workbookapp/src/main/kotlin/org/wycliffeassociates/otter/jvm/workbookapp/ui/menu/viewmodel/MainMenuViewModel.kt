@@ -12,13 +12,13 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 import java.io.File
 
 class MainMenuViewModel : ViewModel() {
     private val injector: Injector by inject()
-    private val resourceRepository = injector.resourceRepository
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
 
@@ -40,28 +40,26 @@ class MainMenuViewModel : ViewModel() {
     fun exportProject(directory: File) {
         showExportDialogProperty.value = true
 
-        val exporter = ProjectExporter(
+        ProjectExporter(
             workbookVM.activeResourceMetadata,
             workbookVM.workbook,
             workbookVM.projectAudioDirectory,
             directoryProvider
-        )
-        exporter.export(directory)
+        ).export(directory)
             .observeOnFx()
             .subscribe { result: ExportResult ->
-                val errorMessage = when (result) {
-                    ExportResult.SUCCESS -> null
-                    ExportResult.FAILURE -> messages["exportError"]
-                }
                 showExportDialogProperty.value = false
-                errorMessage?.let {
-                    tornadofx.error(messages["exportError"], it)
+
+                result.errorMessage?.let {
+                    error(messages["exportError"], it)
                 }
             }
     }
 
     fun importResourceContainer(fileOrDir: File) {
-        val importer = ImportResourceContainer(
+        showImportDialogProperty.value = true
+
+        ImportResourceContainer(
             injector.resourceContainerRepository,
             injector.collectionRepo,
             injector.contentRepository,
@@ -69,24 +67,17 @@ class MainMenuViewModel : ViewModel() {
             injector.languageRepo,
             directoryProvider,
             injector.zipEntryTreeBuilder
-        )
-        showImportDialogProperty.value = true
-        importer.import(fileOrDir)
+        ).import(fileOrDir)
             .observeOnFx()
             .subscribe { result: ImportResult ->
-                val errorMessage = when (result) {
-                    ImportResult.SUCCESS -> null
-                    ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]
-                    ImportResult.INVALID_CONTENT -> messages["importErrorInvalidContent"]
-                    ImportResult.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
-                    ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
-                    ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
-                    ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
-                    ImportResult.UNMATCHED_HELP -> messages["importErrorUnmatchedHelp"]
+                if (result == ImportResult.SUCCESS) {
+                    find<ProjectGridViewModel>().loadProjects()
                 }
+
                 showImportDialogProperty.value = false
-                errorMessage?.let {
-                    tornadofx.error(messages["importError"], it)
+
+                result.errorMessage?.let {
+                    error(messages["importError"], it)
                 }
             }
     }
@@ -127,4 +118,28 @@ class MainMenuViewModel : ViewModel() {
         pluginRepository.setRecorderData(recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
     }
+
+    /** Null on success, otherwise localized error text. */
+    private val ImportResult.errorMessage: String?
+        get() {
+            return when (this) {
+                ImportResult.SUCCESS -> null
+                ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]
+                ImportResult.INVALID_CONTENT -> messages["importErrorInvalidContent"]
+                ImportResult.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
+                ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
+                ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
+                ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
+                ImportResult.UNMATCHED_HELP -> messages["importErrorUnmatchedHelp"]
+            }
+        }
+
+    /** Null on success, otherwise localized error text. */
+    private val ExportResult.errorMessage: String?
+        get() {
+            return when (this) {
+                ExportResult.SUCCESS -> null
+                ExportResult.FAILURE -> messages["exportError"]
+            }
+        }
 }
