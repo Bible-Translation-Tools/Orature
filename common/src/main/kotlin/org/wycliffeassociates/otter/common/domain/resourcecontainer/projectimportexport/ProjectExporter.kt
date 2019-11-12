@@ -4,6 +4,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -21,6 +22,7 @@ class ProjectExporter(
     private val projectAudioDirectory: File,
     private val directoryProvider: IDirectoryProvider
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun export(directory: File): Single<ExportResult> {
         return Single
@@ -39,7 +41,7 @@ class ProjectExporter(
                 return@fromCallable ExportResult.SUCCESS
             }
             .doOnError {
-                it.printStackTrace() // TODO: log
+                log.error("Failed to export in-progress project", it)
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())

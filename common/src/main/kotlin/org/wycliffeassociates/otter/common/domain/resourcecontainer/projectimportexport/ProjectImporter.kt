@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -32,6 +33,8 @@ class ProjectImporter(
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+
     private val contentCache = mutableMapOf<ChapterVerse, Content>()
     private val takeFilenamePattern = Pattern.compile("""_c(\d+)_v(\d+)_t(\d+)\.""")
 
@@ -65,6 +68,7 @@ class ProjectImporter(
                     ImportResult.SUCCESS
                 }
             } catch (e: Exception) {
+                log.error("Failed to import in-progress project", e)
                 ImportResult.IMPORT_ERROR
             }
         }
@@ -151,7 +155,7 @@ class ProjectImporter(
         val result = resourceContainerImporter
             .import(name, zipFileReader.stream(fileInZip.path))
             .blockingGet()
-        // TODO: Log.info("Import source resource container $name result $result")
+        log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
     }
 
