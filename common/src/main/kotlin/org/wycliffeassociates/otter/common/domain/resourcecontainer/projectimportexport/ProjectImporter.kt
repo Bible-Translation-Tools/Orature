@@ -53,13 +53,16 @@ class ProjectImporter(
         return Single.fromCallable {
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
+
                 val metadata = languageRepository
                     .getBySlug(manifest.dublinCore.language.identifier)
                     .map { language ->
                         manifest.dublinCore.mapToMetadata(resourceContainer, language)
                     }
                     .blockingGet()
+
                 val manifestSources = manifest.dublinCore.source.toSet()
+
                 val manifestProject = try {
                     manifest.projects.single()
                 } catch (t: Throwable) {
@@ -68,15 +71,12 @@ class ProjectImporter(
                 }
 
                 directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
-
-                    importSources(zipFileReader)
-
-                    val createdDerivedProject: Collection = createDerivedProject(metadata, manifestSources)
-
-                    importTakes(zipFileReader, metadata, createdDerivedProject, manifestProject)
-
-                    ImportResult.SUCCESS
+                    importInProgress(zipFileReader, metadata, manifestProject, manifestSources)
                 }
+
+                ImportResult.SUCCESS
+            } catch (e: ImportException) {
+                e.result
             } catch (e: Exception) {
                 log.error("Failed to import in-progress project", e)
                 ImportResult.IMPORT_ERROR
@@ -84,13 +84,28 @@ class ProjectImporter(
         }
     }
 
-    private fun importTakes(
+    private fun importInProgress(
         zipFileReader: IZipFileReader,
         metadata: ResourceMetadata,
-        project: Collection,
-        manifestProject: Project
+        manifestProject: Project,
+        manifestSources: Set<Source>
     ) {
-        val audioDir = directoryProvider.getProjectAudioDirectory(metadata, project)
+        importSources(zipFileReader)
+
+        val sourceCollection = findSourceCollection(manifestSources)
+
+        val derivedProject = createDerivedProject(metadata, sourceCollection)
+
+        importTakes(zipFileReader, derivedProject, manifestProject, sourceCollection.resourceContainer!!)
+    }
+
+    private fun importTakes(
+        zipFileReader: IZipFileReader,
+        project: Collection,
+        manifestProject: Project,
+        sourceMetadata: ResourceMetadata
+    ) {
+        val audioDir = directoryProvider.getProjectAudioDirectory(sourceMetadata, project)
 
         val selectedTakes = zipFileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
@@ -129,9 +144,15 @@ class ProjectImporter(
         }
     }
 
-    private fun createDerivedProject(metadata: ResourceMetadata, manifestSources: Set<Source>): Collection {
-        val sourceProjects = collectionRepository.getSourceProjects().blockingGet()
-        val sourceCollection: Collection? = sourceProjects
+    private fun createDerivedProject(metadata: ResourceMetadata, sourceCollection: Collection): Collection {
+        return CreateProject(collectionRepository)
+            .create(sourceCollection, metadata.language)
+            .blockingGet()
+    }
+
+    private fun findSourceCollection(manifestSources: Set<Source>): Collection {
+        val allSourceProjects = collectionRepository.getSourceProjects().blockingGet()
+        val sourceCollection: Collection? = allSourceProjects
             .asSequence()
             .filter { sourceProject ->
                 sourceProject.resourceContainer
@@ -145,10 +166,7 @@ class ProjectImporter(
             log.error("Failed to find source that matches requested import.")
             throw ImportException(ImportResult.IMPORT_ERROR)
         }
-
-        return CreateProject(collectionRepository)
-            .create(sourceCollection, metadata.language)
-            .blockingGet()
+        return sourceCollection
     }
 
     private fun hasInProgressMarker(resourceContainer: File): Boolean {
