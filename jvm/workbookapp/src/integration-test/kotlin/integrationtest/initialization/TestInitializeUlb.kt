@@ -18,6 +18,8 @@ class TestInitializeUlb {
             inj.installedEntityRepository,
             inj.resourceContainerRepository,
             inj.collectionRepo,
+            inj.contentRepository,
+            inj.takeRepository,
             inj.languageRepo,
             inj.directoryProvider,
             inj.zipEntryTreeBuilder

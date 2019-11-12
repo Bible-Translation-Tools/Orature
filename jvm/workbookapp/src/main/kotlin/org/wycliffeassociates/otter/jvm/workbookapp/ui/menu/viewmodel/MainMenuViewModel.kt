@@ -64,6 +64,8 @@ class MainMenuViewModel : ViewModel() {
         val importer = ImportResourceContainer(
             injector.resourceContainerRepository,
             injector.collectionRepo,
+            injector.contentRepository,
+            injector.takeRepository,
             injector.languageRepo,
             directoryProvider,
             injector.zipEntryTreeBuilder

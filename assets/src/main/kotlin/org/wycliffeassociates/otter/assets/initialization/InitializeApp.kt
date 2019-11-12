@@ -17,6 +17,7 @@ class InitializeApp(
     val takeRepo: ITakeRepository,
     val resourceContainerRepo: IResourceContainerRepository,
     val collectionRepo: ICollectionRepository,
+    val contentRepo: IContentRepository,
     val installedEntityRepo: IInstalledEntityRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
@@ -33,6 +34,8 @@ class InitializeApp(
                         installedEntityRepo,
                         resourceContainerRepo,
                         collectionRepo,
+                        contentRepo,
+                        takeRepo,
                         languageRepo,
                         directoryProvider,
                         zipEntryTreeBuilder

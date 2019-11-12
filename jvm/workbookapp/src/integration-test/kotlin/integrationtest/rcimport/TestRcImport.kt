@@ -147,6 +147,8 @@ private class ImportEnvironment {
         get() = ImportResourceContainer(
             injector.resourceContainerRepository,
             injector.collectionRepo,
+            injector.contentRepository,
+            injector.takeRepository,
             injector.languageRepo,
             injector.directoryProvider,
             injector.zipEntryTreeBuilder
