@@ -10,10 +10,9 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
 
-class SearchableList<T>(listItems: ObservableList<T>, outputValue: Property<T>, auto: Boolean = false) : VBox() {
+class SearchableList<T>(listItems: SortedFilteredList<T>, outputValue: Property<T>, auto: Boolean = false) : VBox() {
     var autoSelect: Boolean by property(auto)
     fun autoSelectProperty() = getProperty(SearchableList<T>::autoSelect)
-    private var itemFilter: (String) -> ObservableList<T> = { listItems }
 
     var value: T by property()
     fun valueProperty() = getProperty(SearchableList<T>::value)
@@ -42,21 +41,16 @@ class SearchableList<T>(listItems: ObservableList<T>, outputValue: Property<T>, 
                 refreshSearch(autoSelectProperty().value)
             }
         }
+        listItems.bindTo(listView)
     }
 
     fun refreshSearch(autoselect: Boolean) {
-        val query = searchField.text
-        listView.items = itemFilter(query)
         if (autoselect && listView.items.isNotEmpty()) listView.selectionModel.selectFirst()
-    }
-
-    fun filter(newFilter: (String) -> ObservableList<T>) {
-        itemFilter = newFilter
     }
 }
 
 fun <T> EventTarget.searchablelist(
-    listItems: ObservableList<T>,
+    listItems: SortedFilteredList<T>,
     value: Property<T>,
     init: SearchableList<T>.() -> Unit
 ) = SearchableList(listItems, value).attachTo(this, init)

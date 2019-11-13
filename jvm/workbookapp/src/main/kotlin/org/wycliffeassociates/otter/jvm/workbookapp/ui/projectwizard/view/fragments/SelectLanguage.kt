@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.fragments
 
+import javafx.beans.property.Property
+import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.jvm.controls.searchablelist.SearchableList
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.controls.searchablelist.searchablelist
@@ -7,41 +10,61 @@ import tornadofx.*
 
 class SelectLanguage : Fragment() {
     private val viewModel: ProjectWizardViewModel by inject()
-    private val sourceList = searchablelist(viewModel.filteredLanguages, viewModel.sourceLanguageProperty) {
-        addClass(ProjectWizardStyles.searchableList)
-        listView.cellCache { language ->
-            label("${language.name} (${language.slug})")
-        }
-        searchField.promptText = messages["languageSearchPrompt"]
-        autoSelect = true
-        filter(viewModel::filterLanguages)
-        viewModel.clearLanguages.subscribe {
-            searchField.clear()
-            listView.selectionModel.clearSelection()
-        }
-        viewModel.sourceLanguageProperty.addValidator(searchField) {
-            if (it == null) error(messages["sourceLanguageRequired"]) else null
-        }
-    }
-    private val targetList = searchablelist(viewModel.allLanguages, viewModel.targetLanguageProperty) {
-        addClass(ProjectWizardStyles.searchableList)
-        listView.cellCache { language ->
-            label("${language.name} (${language.slug})")
-        }
-        searchField.promptText = messages["languageSearchPrompt"]
-        autoSelect = true
-        viewModel.sourceLanguageProperty.onChange {
+
+    private val sourceList = buildSearchableLanguageList(
+        viewModel.sourceLanguages,
+        viewModel.selectedSourceLanguage,
+        messages["sourceLanguageRequired"]
+    )
+
+    private val targetList = buildSearchableLanguageList(
+        viewModel.targetLanguages,
+        viewModel.selectedTargetLanguage,
+        messages["targetLanguageRequired"]
+    ).apply {
+        viewModel.selectedSourceLanguage.onChange {
             refreshSearch(false)
         }
-        filter(viewModel::filterLanguages)
-        viewModel.clearLanguages.subscribe {
-            searchField.clear()
-            listView.selectionModel.clearSelection()
-        }
-        viewModel.targetLanguageProperty.addValidator(searchField) {
-            if (it == null) error("Target language is required") else null
+    }
+
+    private fun buildSearchableLanguageList(
+        languages: SortedFilteredList<Language>,
+        selectedLanguage: Property<Language>,
+        errorMessage: String
+    ): SearchableList<Language> {
+        return searchablelist(
+            languages,
+            selectedLanguage
+        ) {
+            addClass(ProjectWizardStyles.searchableList)
+            languages.sortedItems.setComparator { lang1, lang2 ->
+                var query = searchField.textProperty().value
+                when {
+                    lang1.slug.startsWith(query, true) -> -1
+                    lang2.slug.startsWith(query, true) -> 1
+                    lang1.name.startsWith(query, true) -> -1
+                    lang2.name.startsWith(query, true) -> 1
+                    lang1.anglicizedName.startsWith(query, true) -> -1
+                    lang2.anglicizedName.startsWith(query, true) -> 1
+                    else -> 0
+                }
+            }
+            listView.cellCache { language ->
+                label("${language.name} (${language.slug})")
+            }
+            searchField.promptText = messages["languageSearchPrompt"]
+            autoSelect = true
+            viewModel.clearLanguages.subscribe {
+                searchField.clear()
+                listView.selectionModel.clearSelection()
+            }
+            selectedLanguage.addValidator(searchField) {
+                if (it == null) error(errorMessage) else null
+            }
+            languages.filterWhen(searchField.textProperty(), viewModel::filterLanguages)
         }
     }
+
     override val complete = viewModel.languagesValid()
 
     init {
