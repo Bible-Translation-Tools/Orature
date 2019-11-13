@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.controls.searchablelist
 
 import com.jfoenix.controls.JFXTextField
 import javafx.beans.property.Property
-import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
