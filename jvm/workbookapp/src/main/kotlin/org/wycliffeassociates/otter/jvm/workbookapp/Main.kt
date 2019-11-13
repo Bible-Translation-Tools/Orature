@@ -2,15 +2,22 @@ package org.wycliffeassociates.otter.jvm.workbookapp
 
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.view.SplashScreen
 import tornadofx.*
+import kotlin.system.exitProcess
 
 class MyApp : App(SplashScreen::class) {
     init {
         importStylesheet<AppStyles>()
+
+        Thread.setDefaultUncaughtExceptionHandler { thread, e ->
+            LoggerFactory.getLogger(thread.javaClass).error("Uncaught Exception in thread '${thread.name}'", e)
+            exitProcess(1)
+        }
     }
 
     override fun start(stage: Stage) {
