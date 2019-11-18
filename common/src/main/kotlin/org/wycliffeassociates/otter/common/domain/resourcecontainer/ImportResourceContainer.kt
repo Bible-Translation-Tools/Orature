@@ -38,7 +38,7 @@ class ImportResourceContainer(
         )
 
         return when {
-            projectImporter.isInProgress(file) -> projectImporter.importInProgress(file)
+            projectImporter.isResumableProject(file) -> projectImporter.importResumableProject(file)
             file.isDirectory -> importContainerDirectory(file)
             file.extension == "zip" -> importContainerZipFile(file)
             else -> Single.just(ImportResult.INVALID_RC)

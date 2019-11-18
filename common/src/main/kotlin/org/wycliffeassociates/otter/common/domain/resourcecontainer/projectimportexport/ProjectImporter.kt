@@ -39,7 +39,7 @@ class ProjectImporter(
     private val contentCache = mutableMapOf<ChapterVerse, Content>()
     private val takeFilenamePattern = Pattern.compile("""_c(\d+)_v(\d+)_t(\d+)\.""")
 
-    fun isInProgress(resourceContainer: File): Boolean {
+    fun isResumableProject(resourceContainer: File): Boolean {
         return try {
             resourceContainer.isFile && resourceContainer.extension == "zip" && hasInProgressMarker(resourceContainer)
         } catch (e: IOException) {
@@ -47,7 +47,7 @@ class ProjectImporter(
         }
     }
 
-    fun importInProgress(resourceContainer: File): Single<ImportResult> {
+    fun importResumableProject(resourceContainer: File): Single<ImportResult> {
         return Single.fromCallable {
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
@@ -69,7 +69,7 @@ class ProjectImporter(
                 }
 
                 directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
-                    importInProgress(zipFileReader, metadata, manifestProject, manifestSources)
+                    importResumableProject(zipFileReader, metadata, manifestProject, manifestSources)
                 }
 
                 ImportResult.SUCCESS
@@ -82,7 +82,7 @@ class ProjectImporter(
         }
     }
 
-    private fun importInProgress(
+    private fun importResumableProject(
         zipFileReader: IZipFileReader,
         metadata: ResourceMetadata,
         manifestProject: Project,
@@ -174,11 +174,11 @@ class ProjectImporter(
     }
 
     private fun importSources(zipFileReader: IZipFileReader) {
-        val sourceFiles = zipFileReader
+        val sourceFiles: Sequence<String> = zipFileReader
             .list(RcConstants.SOURCE_DIR)
             .filter { it.endsWith(".zip", ignoreCase = true) }
 
-        val firstTry = sourceFiles
+        val firstTry: Map<String, ImportResult> = sourceFiles
             .map { importSource(it, zipFileReader) }
             .toMap()
 
@@ -201,7 +201,7 @@ class ProjectImporter(
 
     private fun isAudioFile(file: String) = isAudioFile(File(file))
 
-    private fun isAudioFile(file: File) = file.extension.let { it == "wav" || it == "mp3" }
+    private fun isAudioFile(file: File) = file.extension.toLowerCase().let { it == "wav" || it == "mp3" }
 
     private fun getContent(cv: ChapterVerse, project: Collection): Content? {
         return contentCache.computeIfAbsent(cv) { (c, v) ->
@@ -214,8 +214,8 @@ class ProjectImporter(
                 .flatMap {
                     contentRepository.getByCollection(it).flattenAsObservable { it }
                 }
-                .filter { content -> content.type == ContentType.TEXT }
                 .filter { content -> content.start == v }
+                .filter { content -> content.type == ContentType.TEXT }
                 .firstElement()
 
             content.blockingGet()
