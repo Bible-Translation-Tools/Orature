@@ -1,7 +1,7 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
+package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
 import io.reactivex.Observable
-import org.wycliffeassociates.otter.common.persistence.zip.IZipFileReader
+import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
 import java.io.File
 import java.io.InputStream
 import java.nio.file.FileSystem

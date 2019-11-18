@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.persistence.zip
+package org.wycliffeassociates.otter.common.io.zip
 
 import io.reactivex.Observable
 import java.io.BufferedReader

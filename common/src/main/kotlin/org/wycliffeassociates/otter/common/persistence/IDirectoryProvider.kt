@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.common.persistence
 
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.persistence.zip.IZipFileReader
-import org.wycliffeassociates.otter.common.persistence.zip.IZipFileWriter
+import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
+import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 

@@ -1,6 +1,6 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
+package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
-import org.wycliffeassociates.otter.common.persistence.zip.IZipFileWriter
+import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.nio.file.FileSystem

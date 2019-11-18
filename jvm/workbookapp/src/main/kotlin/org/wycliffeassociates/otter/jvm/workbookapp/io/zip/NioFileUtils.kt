@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.persistence.zip
+package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.toObservable

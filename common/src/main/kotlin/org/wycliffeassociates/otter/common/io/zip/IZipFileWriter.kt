@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.persistence.zip
+package org.wycliffeassociates.otter.common.io.zip
 
 import java.io.BufferedWriter
 import java.io.File
