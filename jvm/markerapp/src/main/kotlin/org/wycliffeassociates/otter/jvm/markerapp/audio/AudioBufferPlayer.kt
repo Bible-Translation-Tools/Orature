@@ -7,20 +7,24 @@ import javax.sound.sampled.SourceDataLine
 
 class AudioBufferPlayer(val reader: AudioFileReader) {
 
+    private val bytes = ByteArray(reader.sampleRate * reader.channels)
+    private var startPosition: Int = 0
+
     lateinit var player: SourceDataLine
+    lateinit var playbackThread: Thread
 
     init {
-        AudioSystem.getMixerInfo().forEach { println(it) }
         try {
             player = AudioSystem.getSourceDataLine(
-                AudioFormat(
-                    reader.sampleRate.toFloat(),
-                    reader.sampleSize,
-                    reader.channels,
-                    true,
-                    false
-                )
+                    AudioFormat(
+                            reader.sampleRate.toFloat(),
+                            reader.sampleSize,
+                            reader.channels,
+                            true,
+                            false
+                    )
             )
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -28,21 +32,21 @@ class AudioBufferPlayer(val reader: AudioFileReader) {
 
     fun play() {
         if (!player.isActive && !player.isOpen) {
-            Thread {
-                try {
-                    player.open()
-                    val bytes = ByteArray(reader.sampleRate * reader.channels)
-                    println(player.format)
-                    player.start()
-                    while (reader.hasRemaining()) {
-                        val written = reader.getPcmBuffer(bytes)
-                        player.write(bytes, 0, written)
-                    }
-                    player.close()
-                } catch (e: Exception) {
-                    e.printStackTrace()
+            startPosition = reader.framePosition
+            playbackThread = Thread {
+                player.open()
+                player.start()
+                while (reader.hasRemaining()) {
+                    val written = reader.getPcmBuffer(bytes)
+                    player.write(bytes, 0, written)
                 }
-            }.start()
+                player.close()
+            }
+            playbackThread.start()
         }
+    }
+
+    fun framePosition() {
+        startPosition + player.framePosition
     }
 }

@@ -9,6 +9,8 @@ class WavFileReader(val wav: WavFile): AudioFileReader {
     override val sampleRate: Int = wav.sampleRate
     override val channels: Int = wav.channels
     override val sampleSize: Int = wav.bitsPerSample
+    override val framePosition: Int
+        get() = mappedFile.position() / wav.frameSizeInBytes
 
     private lateinit var mappedFile: MappedByteBuffer
 

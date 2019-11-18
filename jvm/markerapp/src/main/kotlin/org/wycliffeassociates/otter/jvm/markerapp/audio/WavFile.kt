@@ -41,6 +41,7 @@ class WavFile private constructor() {
         private set
     var bitsPerSample: Int = 16
         private set
+    val frameSizeInBytes = channels * (bitsPerSample / 8)
 
     internal var totalAudioLength = 0
     internal var totalDataLength = 0
@@ -70,10 +71,10 @@ class WavFile private constructor() {
      * @param bitsPerSample the number of bits per sample, default is 16
      */
     constructor(
-        file: File,
-        channels: Int = DEFAULT_CHANNELS,
-        sampleRate: Int = DEFAULT_SAMPLE_RATE,
-        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+            file: File,
+            channels: Int = DEFAULT_CHANNELS,
+            sampleRate: Int = DEFAULT_SAMPLE_RATE,
+            bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
     ) : this() {
         this.file = file
         this.channels = channels
@@ -171,21 +172,20 @@ class WavFile private constructor() {
     }
 
     private fun validate(
-        riff: String,
-        wave: String,
-        fmt: String,
-        pcm: Short
+            riff: String,
+            wave: String,
+            fmt: String,
+            pcm: Short
     ): Boolean {
         return booleanArrayOf(
-            riff == RIFF,
-            wave == WAVE,
-            fmt == FMT,
-            pcm == PCM
+                riff == RIFF,
+                wave == WAVE,
+                fmt == FMT,
+                pcm == PCM
         ).all { true }
     }
 
-    fun blockSize() = channels * (bitsPerSample / 8)
-    fun sampleIndex(sample: Int) = sample * blockSize()
+    fun sampleIndex(sample: Int) = sample * frameSizeInBytes
 
     @Throws(BufferUnderflowException::class)
     private fun ByteBuffer.getText(bytesToRead: Int, charset: Charset = Charsets.US_ASCII): String {
