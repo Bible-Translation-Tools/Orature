@@ -93,7 +93,9 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
 
     // SVG Loader
-    implementation "com.github.afester.javafx:FranzXaver:$franzXaverVer"
+    implementation("com.github.afester.javafx:FranzXaver:$franzXaverVer") {
+        exclude group: 'log4j', module: 'log4j'
+    }
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
