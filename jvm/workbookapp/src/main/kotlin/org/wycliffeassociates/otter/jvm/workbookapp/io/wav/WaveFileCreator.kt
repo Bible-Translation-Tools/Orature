@@ -1,6 +1,6 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.persistence
+package org.wycliffeassociates.otter.jvm.workbookapp.io.wav
 
-import org.wycliffeassociates.otter.common.persistence.IWaveFileCreator
+import org.wycliffeassociates.otter.common.io.wav.IWaveFileCreator
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.AudioFileFormat

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.wav
+package org.wycliffeassociates.otter.common.io.wav
 
 import java.io.*
 import java.nio.ByteBuffer

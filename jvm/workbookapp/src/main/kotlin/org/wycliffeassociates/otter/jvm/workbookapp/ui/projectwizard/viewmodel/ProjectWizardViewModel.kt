@@ -80,7 +80,7 @@ class ProjectWizardViewModel : ViewModel() {
 
     private fun loadProjects() {
         collectionRepo
-            .getRootProjects()
+            .getDerivedProjects()
             .subscribe { retrieved ->
                 projects.addAll(retrieved)
             }
@@ -125,7 +125,7 @@ class ProjectWizardViewModel : ViewModel() {
             showOverlayProperty.value = true
             creationUseCase
                 .create(selectedCollection, language)
-                .subscribe {
+                .subscribe { _ ->
                     find(ProjectGridViewModel::class).loadProjects()
                     showOverlayProperty.value = false
                     creationCompletedProperty.value = true
