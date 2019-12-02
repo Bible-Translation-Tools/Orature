@@ -37,4 +37,6 @@ class WavFileReader(val wav: WavFile): AudioFileReader {
     }
 
     override fun hasRemaining() = mappedFile.hasRemaining()
+
+    override val totalFrames = wav.totalAudioLength / wav.frameSizeInBytes
 }

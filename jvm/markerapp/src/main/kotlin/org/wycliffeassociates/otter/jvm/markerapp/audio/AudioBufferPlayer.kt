@@ -24,17 +24,16 @@ class AudioBufferPlayer(val reader: AudioFileReader) {
                             false
                     )
             )
-
+            player.open()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
     fun play() {
-        if (!player.isActive && !player.isOpen) {
+        if (!player.isActive) {
             startPosition = reader.framePosition
             playbackThread = Thread {
-                player.open()
                 player.start()
                 while (reader.hasRemaining()) {
                     val written = reader.getPcmBuffer(bytes)
@@ -43,6 +42,24 @@ class AudioBufferPlayer(val reader: AudioFileReader) {
                 player.close()
             }
             playbackThread.start()
+        }
+    }
+
+    fun close() {
+        player.close()
+    }
+
+    fun seek(frame: Int) {
+        val resume = player.isActive
+        player.stop()
+        if (::playbackThread.isInitialized) {
+            playbackThread.interrupt()
+        }
+        player.flush()
+        startPosition = frame
+        reader.seek(frame)
+        if (resume) {
+            play()
         }
     }
 
