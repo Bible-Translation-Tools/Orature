@@ -94,7 +94,7 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
 
     // SVG Loader
-    implementation 'com.github.jsarabia:FranzXaver:develop-SNAPSHOT'
+    implementation 'com.github.jsarabia:FranzXaverSVG:develop-SNAPSHOT'
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
