@@ -9,6 +9,7 @@ javafx {
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -21,7 +22,7 @@ dependencies {
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
     // SVG Loader
-    implementation group: 'com.github.afester.javafx', name: 'FranzXaver', version: "$franzXaverVer"
+    implementation 'com.github.jsarabia:FranzXaverSVG:develop-SNAPSHOT'
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
