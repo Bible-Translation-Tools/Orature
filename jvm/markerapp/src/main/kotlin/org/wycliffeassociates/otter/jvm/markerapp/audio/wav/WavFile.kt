@@ -1,11 +1,9 @@
-package org.wycliffeassociates.otter.jvm.markerapp.audio
+package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
 
 import java.io.*
 import java.lang.Exception
-import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.charset.Charset
 
 
 private const val RIFF = "RIFF"
@@ -71,10 +69,10 @@ class WavFile private constructor() {
      * @param bitsPerSample the number of bits per sample, default is 16
      */
     constructor(
-            file: File,
-            channels: Int = DEFAULT_CHANNELS,
-            sampleRate: Int = DEFAULT_SAMPLE_RATE,
-            bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+        file: File,
+        channels: Int = DEFAULT_CHANNELS,
+        sampleRate: Int = DEFAULT_SAMPLE_RATE,
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
     ) : this() {
         this.file = file
         this.channels = channels
@@ -186,11 +184,4 @@ class WavFile private constructor() {
     }
 
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
-
-    @Throws(BufferUnderflowException::class)
-    private fun ByteBuffer.getText(bytesToRead: Int, charset: Charset = Charsets.US_ASCII): String {
-        val bytes = ByteArray(bytesToRead)
-        this.get(bytes)
-        return bytes.toString(charset)
-    }
 }
