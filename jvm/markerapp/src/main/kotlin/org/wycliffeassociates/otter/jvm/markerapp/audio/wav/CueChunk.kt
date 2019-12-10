@@ -14,7 +14,7 @@ private const val CUE_DATA_SIZE = 24
 
 class CueChunk(val wavFile: WavFile) {
 
-    private val cues = mutableListOf<WavCue>()
+    private var cues = mutableListOf<WavCue>()
     private val cueListBuilder = CueListBuilder()
 
     val cueChunkSize: Int
@@ -24,15 +24,15 @@ class CueChunk(val wavFile: WavFile) {
         cues.add(cue)
     }
 
-    internal fun writeChunk(output: OutputStream): Int {
+    fun writeChunk(output: OutputStream): ByteBuffer {
         cues.sortBy { it.location }
-        val bytes = ByteArray(8 + cueChunkSize)
-        val buffer = ByteBuffer.wrap(bytes)
+        val buffer = ByteBuffer.allocate(8 + cueChunkSize)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
-        for(i in cues.indices){
+        for (i in cues.indices) {
             buffer.put(createCueChunk(i, cues[i]))
         }
         buffer.put(createLabelChunk(cues))
+        return buffer
     }
 
     fun createCueChunk(cueNumber: Int, cue: WavCue): ByteArray {
@@ -48,23 +48,16 @@ class CueChunk(val wavFile: WavFile) {
     }
 
     fun createLabelChunk(cues: List<WavCue>): ByteArray {
-        val size = cues.size * 40 + 4 + computeTextSize()
-        val buffer = ByteBuffer.allocate(size + 8)
+        val size = 12 * cues.size + computeTextSize(cues) // all strings + (8 for labl header, 4 for cue id) * num cues
+        val buffer = ByteBuffer.allocate(size + 8) // adds LIST header
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.put("LIST".toByteArray(Charsets.US_ASCII))
         buffer.putInt(size)
         buffer.put("adtl".toByteArray(Charsets.US_ASCII))
         for (i in cues.indices) {
-            buffer.put("ltxt".toByteArray(Charsets.US_ASCII))
-            buffer.putInt(20)
-            buffer.putInt(i)
-            buffer.putInt(0)
-            buffer.put("rvn ".toByteArray(Charsets.US_ASCII))
-            buffer.putInt(0)
-            buffer.putInt(0)
             buffer.put("labl".toByteArray(Charsets.US_ASCII))
             val label = wordAlignedLabel(cues[i])
-            buffer.putInt(4 + label.size)
+            buffer.putInt(4 + label.size) // subchunk size here is label size plus id
             buffer.putInt(i)
             buffer.put(label)
         }
@@ -95,6 +88,36 @@ class CueChunk(val wavFile: WavFile) {
             alignedLength += 4 - alignedLength % 4
         }
         return label.toByteArray().copyOf(alignedLength)
+    }
+
+
+    fun parseMetadata(chunk: ByteBuffer) {
+        cueListBuilder.clear()
+        while (chunk.remaining() > 8) {
+            val subchunkLabel = chunk.getText(LABEL_SIZE)
+            val subchunkSize = chunk.int
+
+            if (chunk.remaining() < subchunkSize) {
+                throw InvalidWavFileException(
+                    "Chunk $subchunkLabel is of size: $subchunkSize but remaining chunk size is ${chunk.remaining()}"
+                )
+            }
+
+            // section off a buffer from this one that can be used for parsing the nested chunk
+            val buffer = chunk.slice()
+            buffer.limit(buffer.position() + subchunkSize)
+
+            when (subchunkLabel) {
+                "LIST" -> parseLabels(buffer)
+                "cue " -> parseCue(buffer)
+                else -> {
+                }
+            }
+
+            // move on to the next chunk
+            chunk.seek(subchunkSize)
+        }
+        cues = cueListBuilder.build()
     }
 
     /**
@@ -141,25 +164,20 @@ class CueChunk(val wavFile: WavFile) {
 
 
     private fun parseLabels(chunk: ByteBuffer) {
-        while (chunk.hasRemaining()) {
-            if ("ltxt" == chunk.getText(LABEL_SIZE)) {
-                var size = chunk.int
-                //move to skip ltxt subchunk
-                chunk.seek(size)
-                if ("labl" == chunk.getText(LABEL_SIZE)) {
-                    size = chunk.int
+        while (chunk.remaining() > 8) {
+            val subchunk = chunk.getText(LABEL_SIZE)
+            val subchunkSize = chunk.int
+            when (subchunk) {
+                "labl" -> {
                     val id = chunk.int
-                    val labelBytes = ByteArray(size - 4)
+                    val labelBytes = ByteArray(subchunkSize - 4)
                     chunk.get(labelBytes)
                     //trim necessary to strip trailing 0's used to pad to word align
-                    val label = String(labelBytes, Charsets.US_ASCII).trim { it <= ' ' }
-                    cueMap[id]?.let {
-                        it.label = label
-                    } ?: cueMap.put(id, CueBuilder(-1, label))
-                } else {
-                    //else skip over this subchunk
-                    size = chunk.int
-                    chunk.seek(size)
+                    val label = String(labelBytes, Charsets.US_ASCII).trim()
+                    cueListBuilder.addLabel(id, label)
+                }
+                else -> {
+                    chunk.seek(subchunkSize)
                 }
             }
         }
@@ -169,6 +187,7 @@ class CueChunk(val wavFile: WavFile) {
 private class CueListBuilder() {
 
     private data class TempCue(var location: Int?, var label: String?)
+
     val map = mutableMapOf<Int, TempCue>()
 
     fun addLocation(id: Int, location: Int?) {
@@ -187,15 +206,19 @@ private class CueListBuilder() {
         }
     }
 
-    fun build(): List<WavCue> {
+    fun build(): MutableList<WavCue> {
         val cues = mutableListOf<WavCue>()
-        for(cue in map.values) {
+        for (cue in map.values) {
             cue.location?.let { loc ->
-                cue.label?.let {label ->
+                cue.label?.let { label ->
                     cues.add(WavCue(loc, label))
                 }
             }
         }
         return cues
+    }
+
+    fun clear() {
+        map.clear()
     }
 }

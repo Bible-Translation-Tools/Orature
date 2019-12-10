@@ -23,7 +23,7 @@ private const val CHANNEL_POSITION = 22
 private const val SAMPLE_RATE_POSITION = 24
 private const val BITS_PER_SAMPLE_POSITION = 34
 
-class InvalidWavFileException : Exception()
+class InvalidWavFileException(message: String? = null) : Exception(message)
 
 /**
  * Wraps a file for the purposes of reading wav header metadata
