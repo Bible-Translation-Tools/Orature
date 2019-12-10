@@ -15,7 +15,7 @@ private const val CUE_DATA_SIZE = 24
 class CueChunk(val wavFile: WavFile) {
 
     private val cues = mutableListOf<WavCue>()
-    private val cueMap = mutableMapOf<Int, CueBuilder>()
+    private val cueListBuilder = CueListBuilder()
 
     val cueChunkSize: Int
         get() = CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
@@ -119,25 +119,23 @@ class CueChunk(val wavFile: WavFile) {
         if (!chunk.hasRemaining()) {
             return
         }
-        //get number of cues
+        // read number of cues
         val numCues = chunk.int
 
-        //each cue subchunk should be 24 bytes, plus 4 for the number of cues field
-        if (chunk.remaining() != 24 * numCues) {
+        // each cue subchunk should be 24 bytes, plus 4 for the number of cues field
+        if (chunk.remaining() != CUE_DATA_SIZE * numCues) {
             throw InvalidWavFileException()
         }
 
-        //For each cue, extract the cue Id and the cue location
+        // For each cue, read the cue Id and the cue location
         for (i in 0 until numCues) {
             val cueId = chunk.int
             val cueLoc = chunk.int
 
-            //If the label has already been parsed, append this data to the existing object
-            cueMap[cueId]?.let {
-                it.location = cueLoc
-            } ?: cueMap.put(cueId, CueBuilder(cueLoc, ""))
+            cueListBuilder.addLocation(cueId, cueLoc)
 
-            chunk.get(ByteArray(16))
+            // Skip the next 16 bytes to the next cue point
+            chunk.seek(16)
         }
     }
 
@@ -168,7 +166,36 @@ class CueChunk(val wavFile: WavFile) {
     }
 }
 
-private data class CueBuilder(
-    var location: Int = 0,
-    var label: String = ""
-)
+private class CueListBuilder() {
+
+    private data class TempCue(var location: Int?, var label: String?)
+    val map = mutableMapOf<Int, TempCue>()
+
+    fun addLocation(id: Int, location: Int?) {
+        map[id]?.let {
+            it.location = location
+        } ?: run {
+            map.put(id, TempCue(location, null))
+        }
+    }
+
+    fun addLabel(id: Int, label: String) {
+        map[id]?.let {
+            it.label = label
+        } ?: run {
+            map.put(id, TempCue(null, label))
+        }
+    }
+
+    fun build(): List<WavCue> {
+        val cues = mutableListOf<WavCue>()
+        for(cue in map.values) {
+            cue.location?.let { loc ->
+                cue.label?.let {label ->
+                    cues.add(WavCue(loc, label))
+                }
+            }
+        }
+        return cues
+    }
+}
