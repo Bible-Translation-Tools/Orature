@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
+package org.wycliffeassociates.otter.common.wav
 
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer

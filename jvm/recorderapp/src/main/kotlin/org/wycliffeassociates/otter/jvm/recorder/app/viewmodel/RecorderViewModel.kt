@@ -24,7 +24,7 @@ import java.io.File
 class RecorderViewModel : ViewModel() {
 
     val parameters = (scope as ParameterizedScope).parameters
-    val wav = WavFile(File(parameters.named["wav"]))
+    val wav = WavFile(File(parameters.named["wav"]), 1, 44100, 16)
     val recorder = AudioRecorder()
     var volumeTest: AudioRecorder? = AudioRecorder()
 

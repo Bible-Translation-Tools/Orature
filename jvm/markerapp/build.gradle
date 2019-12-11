@@ -21,4 +21,6 @@ dependencies {
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
     testImplementation "junit:junit:$junitVer"
+
+    implementation project(":common")
 }

@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.recorder
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
+import org.wycliffeassociates.otter.common.wav.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.wav.WavFile
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -37,6 +38,7 @@ class ActiveRecordingRenderer(
         }
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
-        return (WavFile.SAMPLE_RATE * secondsOnScreen) / width
+        // TODO: get samplerate from wav file, don't assume 44.1khz
+        return (DEFAULT_SAMPLE_RATE * secondsOnScreen) / width
     }
 }
