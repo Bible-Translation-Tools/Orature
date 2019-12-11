@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
 
-import java.io.OutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -30,7 +29,7 @@ class CueChunk {
         cues.add(cue)
     }
 
-    fun createChunk(): ByteArray {
+    fun create(): ByteArray {
         cues as MutableList
         cues.sortBy { it.location }
         val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + cueChunkSize)
@@ -39,7 +38,7 @@ class CueChunk {
         cueChunkBuffer.putInt(CUE_DATA_SIZE * cues.size + 4)
         cueChunkBuffer.putInt(cues.size)
         for (i in cues.indices) {
-            cueChunkBuffer.put(createCueChunk(i, cues[i]))
+            cueChunkBuffer.put(createCueData(i, cues[i]))
         }
         val labelChunkArray = createLabelChunk(cues)
         val combinedBuffer = ByteBuffer.allocate(cueChunkBuffer.capacity() + labelChunkArray.size)
@@ -48,7 +47,7 @@ class CueChunk {
         return combinedBuffer.array()
     }
 
-    private fun createCueChunk(cueNumber: Int, cue: WavCue): ByteArray {
+    private fun createCueData(cueNumber: Int, cue: WavCue): ByteArray {
         val buffer = ByteBuffer.allocate(CUE_DATA_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putInt(cueNumber)
@@ -191,7 +190,7 @@ class CueChunk {
                     val labelBytes = ByteArray(subchunkSize - 4)
                     chunk.get(labelBytes)
                     //trim necessary to strip trailing 0's used to pad to word align
-                    val label = String(labelBytes, Charsets.US_ASCII).trim { it <= ' ' }
+                    val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
                     cueListBuilder.addLabel(id, label)
                 }
                 else -> {
