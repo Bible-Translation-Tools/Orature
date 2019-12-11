@@ -101,29 +101,19 @@ class WavFile private constructor() {
         val longSampleRate = sampleRate
         val byteRate = (bitsPerSample * sampleRate * channels) / 8
 
-        header.order(ByteOrder.BIG_ENDIAN)
-        header.put(RIFF.toByteArray(Charsets.US_ASCII))
-
         header.order(ByteOrder.LITTLE_ENDIAN)
+        header.put(RIFF.toByteArray(Charsets.US_ASCII))
         header.putInt(totalDataLength)
-
-        header.order(ByteOrder.BIG_ENDIAN)
         header.put(WAVE.toByteArray(Charsets.US_ASCII))
         header.put(FMT.toByteArray(Charsets.US_ASCII))
-
-        header.order(ByteOrder.LITTLE_ENDIAN)
         header.putInt(bitsPerSample)
-        header.putShort(PCM.toShort()) // format = 1 for pcm
+        header.putShort(PCM) // format = 1 for pcm
         header.putShort(channels.toShort()) // number of channels
         header.putInt(longSampleRate)
         header.putInt(byteRate)
         header.putShort(((channels * bitsPerSample) / 8).toShort()) // block align
         header.putShort(bitsPerSample.toShort()) // bits per sample
-
-        header.order(ByteOrder.BIG_ENDIAN)
         header.put(DATA.toByteArray(Charsets.US_ASCII))
-
-        header.order(ByteOrder.LITTLE_ENDIAN)
         header.putInt(totalAudioLength) // initial size
 
         header.flip()
@@ -154,14 +144,6 @@ class WavFile private constructor() {
                 totalAudioLength = bb.int
                 if (!validate(riff, wave, fmt, pcm)) {
                     throw InvalidWavFileException()
-                } else {
-                    println(riff)
-                    println(wave)
-                    println(fmt)
-                    println(pcm)
-                    println(sampleRate)
-                    println(bitsPerSample)
-                    println(channels)
                 }
             }
         } else {
@@ -170,16 +152,16 @@ class WavFile private constructor() {
     }
 
     private fun validate(
-            riff: String,
-            wave: String,
-            fmt: String,
-            pcm: Short
+        riff: String,
+        wave: String,
+        fmt: String,
+        pcm: Short
     ): Boolean {
         return booleanArrayOf(
-                riff == RIFF,
-                wave == WAVE,
-                fmt == FMT,
-                pcm == PCM
+            riff == RIFF,
+            wave == WAVE,
+            fmt == FMT,
+            pcm == PCM
         ).all { true }
     }
 
