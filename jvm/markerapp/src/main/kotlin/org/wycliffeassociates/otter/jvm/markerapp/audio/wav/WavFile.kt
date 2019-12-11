@@ -16,7 +16,7 @@ private const val DEFAULT_SAMPLE_RATE = 44100
 private const val DEFAULT_CHANNELS = 1
 private const val DEFAULT_BITS_PER_SAMPLE = 16
 
-private const val HEADER_SIZE = 44
+internal const val HEADER_SIZE = 44
 private const val AUDIO_LENGTH_LOCATION = 40
 private const val PCM_POSITION = 20
 private const val CHANNEL_POSITION = 22
@@ -44,6 +44,11 @@ class WavFile private constructor() {
     internal var totalAudioLength = 0
     internal var totalDataLength = 0
 
+    val metadata = WavMetadata()
+
+    val hasMetadata
+        get() = metadata.totalSize > 0
+
     /**
      * Reads the file header of the provided wav file.
      *
@@ -57,6 +62,7 @@ class WavFile private constructor() {
     constructor(file: File) : this() {
         this.file = file
         parseHeader()
+        parseMetadata()
     }
 
     /**
@@ -81,9 +87,14 @@ class WavFile private constructor() {
         initializeWavFile()
     }
 
+    fun writeMetadata(outputStream: OutputStream) {
+        metadata.writeMetadata(outputStream)
+    }
+
     @Throws(IOException::class)
     fun finishWrite(totalAudioLength: Int) {
         this.totalAudioLength = totalAudioLength
+        this.totalDataLength = HEADER_SIZE - 8 + totalAudioLength + metadata.totalSize
     }
 
     fun initializeWavFile() {
@@ -148,6 +159,19 @@ class WavFile private constructor() {
             }
         } else {
             throw InvalidWavFileException()
+        }
+    }
+
+    private fun parseMetadata() {
+        if (totalDataLength > totalAudioLength + 36) {
+            val metadataSize = totalDataLength - totalAudioLength - 36
+            val bytes = ByteArray(metadataSize)
+            file.inputStream().use {
+                val metadataStart = HEADER_SIZE + totalAudioLength
+                it.skip(metadataStart.toLong())
+                it.read(bytes)
+            }
+            metadata.parseMetadata(ByteBuffer.wrap(bytes))
         }
     }
 

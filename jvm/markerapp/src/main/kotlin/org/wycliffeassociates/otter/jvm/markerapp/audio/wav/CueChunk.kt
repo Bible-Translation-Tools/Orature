@@ -15,7 +15,7 @@ private const val CHUNK_HEADER_SIZE = 8
 private const val CUE_HEADER_SIZE = 4
 private const val CUE_DATA_SIZE = 24
 
-class CueChunk {
+class CueChunk : RiffChunk {
 
     val cues: List<WavCue> = mutableListOf()
 
@@ -24,12 +24,21 @@ class CueChunk {
     val cueChunkSize: Int
         get() = CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
 
+    override val totalSize: Int
+        get() = run {
+            return if (cues.isNotEmpty()) 4 + cueChunkSize + 12 + (12 * cues.size) + computeTextSize(cues) else 0
+        }
+
     fun addCue(cue: WavCue) {
         cues as MutableList
         cues.add(cue)
     }
 
-    fun create(): ByteArray {
+    override fun create(): ByteArray {
+        if (cues.isEmpty()) {
+            return ByteArray(0)
+        }
+
         cues as MutableList
         cues.sortBy { it.location }
         val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + cueChunkSize)
@@ -97,7 +106,7 @@ class CueChunk {
     }
 
 
-    fun parseMetadata(chunk: ByteBuffer) {
+    override fun parse(chunk: ByteBuffer) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         cueListBuilder.clear()
         while (chunk.remaining() > 8) {

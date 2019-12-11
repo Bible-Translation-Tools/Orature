@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.io.File
 import java.nio.ByteBuffer
 
 class CueChunkTest {
@@ -40,7 +41,7 @@ class CueChunkTest {
                 cues.addCue(cue)
             }
             val outArray = cues.create()
-            cues.parseMetadata(ByteBuffer.wrap(outArray))
+            cues.parse(ByteBuffer.wrap(outArray))
 
             val outCues = cues.cues
 
@@ -48,6 +49,24 @@ class CueChunkTest {
             for (cue in testCues) {
                 assertEquals(true, outCues.contains(cue))
             }
+        }
+    }
+
+    @Test
+    fun writeCues() {
+        for (cues in testEnv) {
+            val file = File.createTempFile("test", "wav")
+            val wav = WavFile(file, 1, 44100, 16)
+            for (cue in cues) {
+                wav.metadata.addCue(cue.location, cue.label)
+            }
+            val os = WavOutputStream(wav)
+            os.use {
+                os.write(ByteArray(200))
+            }
+            val validator = WavFile(file)
+            val resultMetadata = validator.metadata
+            assertEquals(cues.size, resultMetadata.getCues().size)
         }
     }
 }
