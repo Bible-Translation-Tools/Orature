@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.ByteBuffer
@@ -54,19 +55,26 @@ class CueChunkTest {
 
     @Test
     fun writeCues() {
-        for (cues in testEnv) {
-            val file = File.createTempFile("test", "wav")
-            val wav = WavFile(file, 1, 44100, 16)
-            for (cue in cues) {
-                wav.metadata.addCue(cue.location, cue.label)
+        val wavLengths = listOf(0, 3, 100, 400000)
+        for (writeSize in wavLengths) {
+            for (cues in testEnv) {
+                val file = File.createTempFile("test", "wav")
+                file.deleteOnExit()
+                val wav = WavFile(file, 1, 44100, 16)
+                for (cue in cues) {
+                    wav.metadata.addCue(cue.location, cue.label)
+                }
+                val os = WavOutputStream(wav)
+                os.use {
+                    os.write(ByteArray(writeSize))
+                }
+                val validator = WavFile(file)
+                val resultMetadata = validator.metadata
+                assertEquals(cues.size, resultMetadata.getCues().size)
+                for (cue in cues) {
+                    assertTrue(resultMetadata.getCues().contains(cue))
+                }
             }
-            val os = WavOutputStream(wav)
-            os.use {
-                os.write(ByteArray(200))
-            }
-            val validator = WavFile(file)
-            val resultMetadata = validator.metadata
-            assertEquals(cues.size, resultMetadata.getCues().size)
         }
     }
 }
