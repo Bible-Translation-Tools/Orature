@@ -1,5 +1,6 @@
-package org.wycliffeassociates.otter.jvm.markerapp.audio
+package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
 
+import org.wycliffeassociates.otter.jvm.markerapp.audio.AudioFileReader
 import java.io.RandomAccessFile
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel

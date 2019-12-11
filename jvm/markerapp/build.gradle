@@ -19,4 +19,6 @@ dependencies {
 
     // TornadoFX
     implementation "no.tornado:tornadofx:$tornadofxVer"
+
+    testImplementation "junit:junit:$junitVer"
 }
