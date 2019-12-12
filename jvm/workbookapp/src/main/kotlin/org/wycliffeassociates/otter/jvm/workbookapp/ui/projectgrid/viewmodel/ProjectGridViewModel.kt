@@ -28,7 +28,7 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun loadProjects() {
-        collectionRepo.getRootProjects()
+        collectionRepo.getDerivedProjects()
             .observeOnFx()
             .doOnSuccess {
                 projects.setAll(it)

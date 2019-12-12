@@ -8,19 +8,26 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
-import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 
 private const val EN_ULB_FILENAME = "en_ulb"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
 class InitializeUlb(
-    val installedEntityRepo: IInstalledEntityRepository,
-    val resourceContainerRepo: IResourceContainerRepository,
-    val directoryProvider: IDirectoryProvider,
-    val zipEntryTreeBuilder: IZipEntryTreeBuilder,
-    val rcImporter: ImportResourceContainer = ImportResourceContainer(
+    private val installedEntityRepo: IInstalledEntityRepository,
+    private val resourceContainerRepo: IResourceContainerRepository,
+    private val collectionRepo: ICollectionRepository,
+    private val contentRepo: IContentRepository,
+    private val takeRepo: ITakeRepository,
+    private val languageRepo: ILanguageRepository,
+    private val directoryProvider: IDirectoryProvider,
+    private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
+    private val rcImporter: ImportResourceContainer = ImportResourceContainer(
         resourceContainerRepo,
+        collectionRepo,
+        contentRepo,
+        takeRepo,
+        languageRepo,
         directoryProvider,
         zipEntryTreeBuilder
     )

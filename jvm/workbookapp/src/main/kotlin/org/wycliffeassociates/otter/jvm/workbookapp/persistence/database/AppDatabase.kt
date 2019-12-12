@@ -76,4 +76,11 @@ class AppDatabase(
             block(DSL.using(config))
         }
     }
+
+    fun <T> transactionResult(block: (DSLContext) -> T): T {
+        return dsl.transactionResult { config ->
+            // Create local transaction DSL and pass to block
+            block(DSL.using(config))
+        }
+    }
 }

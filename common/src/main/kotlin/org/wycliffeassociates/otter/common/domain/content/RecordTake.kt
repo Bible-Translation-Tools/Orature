@@ -4,8 +4,8 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
-import org.wycliffeassociates.otter.common.persistence.EMPTY_WAVE_FILE_SIZE
-import org.wycliffeassociates.otter.common.persistence.IWaveFileCreator
+import org.wycliffeassociates.otter.common.io.wav.EMPTY_WAVE_FILE_SIZE
+import org.wycliffeassociates.otter.common.io.wav.IWaveFileCreator
 import java.io.File
 import java.time.LocalDate
 

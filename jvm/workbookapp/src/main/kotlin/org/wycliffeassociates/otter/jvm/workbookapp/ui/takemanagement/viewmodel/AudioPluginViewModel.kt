@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginV
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.WaveFileCreator
+import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {

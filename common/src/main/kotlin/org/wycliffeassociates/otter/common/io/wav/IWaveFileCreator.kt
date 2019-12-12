@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.persistence
+package org.wycliffeassociates.otter.common.io.wav
 
 import java.io.File
 

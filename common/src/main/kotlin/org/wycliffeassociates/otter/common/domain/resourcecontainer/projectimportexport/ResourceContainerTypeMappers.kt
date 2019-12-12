@@ -1,18 +1,20 @@
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.time.LocalDate
 
 fun buildManifest(
     metadata: ResourceMetadata,
-    book: Book,
+    workbook: Workbook,
     projectPath: String
 ): Manifest {
-    val dublinCore = metadata.toEntity()
-    val project = book.toEntity(projectPath)
+    val dublinCoreSource = with(workbook.source.resourceMetadata) { Source(identifier, language.slug, version) }
+    val dublinCore = metadata.toEntity().apply { source.add(dublinCoreSource) }
+    val project = workbook.target.toEntity(projectPath)
     return Manifest(dublinCore, listOf(project), Checking())
 }
 

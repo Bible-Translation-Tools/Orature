@@ -1,24 +1,20 @@
-package org.wycliffeassociates.otter.common.domain.resourcecontainer.export
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-const val MEDIA_DIR = "content"
-const val APP_SPECIFIC_DIR = ".apps/otter"
-const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
-const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
-const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
 
 class ProjectExporter(
     private val resourceMetadata: ResourceMetadata,
@@ -26,6 +22,7 @@ class ProjectExporter(
     private val projectAudioDirectory: File,
     private val directoryProvider: IDirectoryProvider
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun export(directory: File): Single<ExportResult> {
         return Single
@@ -44,7 +41,7 @@ class ProjectExporter(
                 return@fromCallable ExportResult.SUCCESS
             }
             .doOnError {
-                it.printStackTrace() // TODO: log
+                log.error("Failed to export in-progress project", it)
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
@@ -53,8 +50,8 @@ class ProjectExporter(
     private fun initializeResourceContainer(zipFile: File) {
         ResourceContainer
             .create(zipFile) {
-                val projectPath = "./$MEDIA_DIR"
-                manifest = buildManifest(resourceMetadata, workbook.target, projectPath)
+                val projectPath = "./${RcConstants.MEDIA_DIR}"
+                manifest = buildManifest(resourceMetadata, workbook, projectPath)
             }
             .use {
                 it.write()
@@ -66,17 +63,17 @@ class ProjectExporter(
         sequenceOf(resourceMetadata, workbook.source.resourceMetadata)
             .map(directoryProvider::getSourceContainerDirectory)
             .toSet()
-            .forEach { zipWriter.copyDirectory(it, SOURCE_DIR) }
+            .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
     }
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {
         val selectedChapters = selectedChapterFilePaths()
-        zipWriter.copyDirectory(projectAudioDirectory, TAKE_DIR) { !selectedChapters.contains(it) }
-        zipWriter.copyDirectory(projectAudioDirectory, MEDIA_DIR) { selectedChapters.contains(it) }
+        zipWriter.copyDirectory(projectAudioDirectory, RcConstants.TAKE_DIR) { !selectedChapters.contains(it) }
+        zipWriter.copyDirectory(projectAudioDirectory, RcConstants.MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
     private fun writeSelectedTakesFile(zipWriter: IZipFileWriter) {
-        zipWriter.bufferedWriter(SELECTED_TAKES_FILE).use { fileWriter ->
+        zipWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { fileWriter ->
             fetchSelectedTakes()
                 .map(::relativeTakePath)
                 .blockingSubscribe {

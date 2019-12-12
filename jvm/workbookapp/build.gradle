@@ -17,6 +17,7 @@ javafx {
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+    maven { url 'https://jitpack.io' }
 }
 
 sourceSets {
@@ -93,7 +94,7 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-graphics:$javafxVer:mac"
 
     // SVG Loader
-    implementation "com.github.afester.javafx:FranzXaver:$franzXaverVer"
+    implementation 'com.github.jsarabia:FranzXaverSVG:develop-SNAPSHOT'
 
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"

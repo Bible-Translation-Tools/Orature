@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.doAssertEquals
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
-import org.wycliffeassociates.otter.common.persistence.EMPTY_WAVE_FILE_SIZE
+import org.wycliffeassociates.otter.common.io.wav.EMPTY_WAVE_FILE_SIZE
 import java.io.File
 import java.time.LocalDate
 
