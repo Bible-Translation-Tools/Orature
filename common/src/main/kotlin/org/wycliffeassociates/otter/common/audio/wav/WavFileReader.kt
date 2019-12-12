@@ -1,11 +1,11 @@
-package org.wycliffeassociates.otter.jvm.markerapp.audio.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
-import org.wycliffeassociates.otter.jvm.markerapp.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.RandomAccessFile
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-class WavFileReader(val wav: WavFile): AudioFileReader {
+class WavFileReader(val wav: WavFile) : AudioFileReader {
 
     override val sampleRate: Int = wav.sampleRate
     override val channels: Int = wav.channels

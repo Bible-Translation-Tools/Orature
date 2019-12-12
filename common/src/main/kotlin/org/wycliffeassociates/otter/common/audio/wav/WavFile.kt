@@ -1,10 +1,9 @@
-package org.wycliffeassociates.otter.common.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.*
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"

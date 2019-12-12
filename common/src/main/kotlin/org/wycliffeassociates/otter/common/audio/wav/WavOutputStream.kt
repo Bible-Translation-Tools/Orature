@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.BufferedOutputStream
 import java.io.Closeable
@@ -80,7 +80,7 @@ class WavOutputStream @Throws(FileNotFoundException::class)
     @Throws(IOException::class)
     override fun close() {
         if (wav.hasMetadata) {
-            val os = if(buffered) bos else outputStream
+            val os = if (buffered) bos else outputStream
             wav.writeMetadata(os)
         }
         if (buffered) {

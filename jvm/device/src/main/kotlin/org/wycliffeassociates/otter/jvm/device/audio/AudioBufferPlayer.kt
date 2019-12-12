@@ -1,17 +1,18 @@
-package org.wycliffeassociates.otter.jvm.markerapp.audio
+package org.wycliffeassociates.otter.jvm.device.audio
 
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.lang.Exception
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 
-class AudioBufferPlayer(val reader: AudioFileReader) {
+class AudioBufferPlayer(private val reader: AudioFileReader) {
 
     private val bytes = ByteArray(reader.sampleRate * reader.channels)
     private var startPosition: Int = 0
 
-    lateinit var player: SourceDataLine
-    lateinit var playbackThread: Thread
+    private lateinit var player: SourceDataLine
+    private lateinit var playbackThread: Thread
 
     init {
         try {

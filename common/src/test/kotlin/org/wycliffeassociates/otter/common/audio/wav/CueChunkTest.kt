@@ -1,8 +1,12 @@
-package org.wycliffeassociates.otter.common.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.wycliffeassociates.otter.common.audio.wav.CueChunk
+import org.wycliffeassociates.otter.common.audio.wav.WavCue
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import java.io.File
 import java.nio.ByteBuffer
 
@@ -14,18 +18,21 @@ class CueChunkTest {
             WavCue(2, "2"),
             WavCue(3, "3")
         ),
-        listOf( // locations out of order
+        // locations out of order
+        listOf(
             WavCue(2, "2"),
             WavCue(1, "1"),
             WavCue(3, "3")
         ),
-        listOf( // requiring padding to get to double word aligned
+        // requiring padding to get to double word aligned
+        listOf(
             WavCue(2, "1"),
             WavCue(1, "12"),
             WavCue(3, "123"),
             WavCue(4, "1234")
         ),
-        listOf( // labels have various whitespace, location range from 0 to max
+        // labels have various whitespace, location range from 0 to max
+        listOf(
             WavCue(0, "    "),
             WavCue(2, "Verse 1"),
             WavCue(3, "Verse 1   "),

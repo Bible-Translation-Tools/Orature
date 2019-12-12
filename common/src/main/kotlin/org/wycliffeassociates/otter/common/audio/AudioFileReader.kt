@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.markerapp.audio
+package org.wycliffeassociates.otter.common.audio
 
 interface AudioFileReader {
     val sampleRate: Int

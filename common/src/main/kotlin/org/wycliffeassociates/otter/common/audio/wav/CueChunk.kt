@@ -1,8 +1,7 @@
-package org.wycliffeassociates.otter.common.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-
 
 private const val CUE_LABEL = "cue "
 private const val DATA_LABEL = "data"
@@ -105,7 +104,6 @@ class CueChunk : RiffChunk {
         return label.toByteArray().copyOf(alignedLength)
     }
 
-
     override fun parse(chunk: ByteBuffer) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         cueListBuilder.clear()
@@ -165,7 +163,7 @@ class CueChunk : RiffChunk {
         val numCues = chunk.int
 
         // each cue subchunk should be 24 bytes, plus 4 for the number of cues field
-            if (chunk.remaining() != CUE_DATA_SIZE * numCues) {
+        if (chunk.remaining() != CUE_DATA_SIZE * numCues) {
             throw InvalidWavFileException()
         }
 
@@ -180,7 +178,6 @@ class CueChunk : RiffChunk {
             chunk.seek(16)
         }
     }
-
 
     private fun parseLabels(chunk: ByteBuffer) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
@@ -198,7 +195,7 @@ class CueChunk : RiffChunk {
                     val id = chunk.int
                     val labelBytes = ByteArray(subchunkSize - 4)
                     chunk.get(labelBytes)
-                    //trim necessary to strip trailing 0's used to pad to word align
+                    // trim necessary to strip trailing 0's used to pad to double word align
                     val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
                     cueListBuilder.addLabel(id, label)
                 }

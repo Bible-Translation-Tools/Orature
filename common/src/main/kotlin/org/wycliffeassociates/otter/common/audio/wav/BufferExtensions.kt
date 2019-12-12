@@ -1,9 +1,8 @@
-package org.wycliffeassociates.otter.common.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
-
 
 @Throws(BufferUnderflowException::class)
 internal fun ByteBuffer.getText(bytesToRead: Int, charset: Charset = Charsets.US_ASCII): String {
