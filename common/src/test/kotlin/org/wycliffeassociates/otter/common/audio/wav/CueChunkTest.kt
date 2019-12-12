@@ -3,10 +3,6 @@ package org.wycliffeassociates.otter.common.audio.wav
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.wycliffeassociates.otter.common.audio.wav.CueChunk
-import org.wycliffeassociates.otter.common.audio.wav.WavCue
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import java.io.File
 import java.nio.ByteBuffer
 
