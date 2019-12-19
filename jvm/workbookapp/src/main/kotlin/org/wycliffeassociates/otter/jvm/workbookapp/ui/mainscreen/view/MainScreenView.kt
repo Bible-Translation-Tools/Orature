@@ -107,9 +107,6 @@ class MainScreenView : View() {
     private fun listMenu(): Node {
         return ListMenu().apply {
             orientation = Orientation.HORIZONTAL
-            item(messages["home"], MaterialIconView(MaterialIcon.HOME, "20px"))
-            item(messages["profile"], MaterialIconView(MaterialIcon.PERSON, "20px"))
-            item(messages["settings"], MaterialIconView(MaterialIcon.SETTINGS, "20px"))
         }
     }
 
