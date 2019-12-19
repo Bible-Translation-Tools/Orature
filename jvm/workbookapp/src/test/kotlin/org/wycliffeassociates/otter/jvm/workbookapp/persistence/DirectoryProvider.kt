@@ -36,42 +36,42 @@ class TestDirectoryProvider {
 
     val APPDATA_TESTS_TABLE = listOf<TestCase>(
         macParams + (EXPECT to
-                "/Users/edvin/Library/Application Support/ProjectOtter/database"),
+                "/Users/edvin/Library/Application Support/Orature/database"),
         linuxParams + (EXPECT to
-                "/home/edvin/.config/ProjectOtter/database"),
+                "/home/edvin/.config/Orature/database"),
         winParams + (EXPECT to
-                "C:\\Users\\Edvin\\AppData\\Roaming\\ProjectOtter\\database")
+                "C:\\Users\\Edvin\\AppData\\Roaming\\Orature\\database")
     )
 
     val USERDATA_TESTS_TABLE = listOf<TestCase>(
         macParams + (EXPECT to
-                "/Users/edvin/ProjectOtter/Projects"),
+                "/Users/edvin/Orature/Projects"),
         linuxParams + (EXPECT to
-                "/home/edvin/ProjectOtter/Projects"),
+                "/home/edvin/Orature/Projects"),
         winParams + (EXPECT to
-                "C:\\Users\\Edvin\\ProjectOtter\\Projects")
+                "C:\\Users\\Edvin\\Orature\\Projects")
     )
 
     val USERIMAGE_TESTS_TABLE = listOf<TestCase>(
         macParams + (EXPECT to
-                "/Users/edvin/Library/Application Support/ProjectOtter/users/images"),
+                "/Users/edvin/Library/Application Support/Orature/users/images"),
         linuxParams + (EXPECT to
-                "/home/edvin/.config/ProjectOtter/users/images"),
+                "/home/edvin/.config/Orature/users/images"),
         winParams + (EXPECT to
-                "C:\\Users\\Edvin\\AppData\\Roaming\\ProjectOtter\\users\\images")
+                "C:\\Users\\Edvin\\AppData\\Roaming\\Orature\\users\\images")
     )
 
     val USERAUDIO_TESTS_TABLE = listOf<TestCase>(
         macParams + (EXPECT to
-                "/Users/edvin/Library/Application Support/ProjectOtter/users/audio"),
+                "/Users/edvin/Library/Application Support/Orature/users/audio"),
         linuxParams + (EXPECT to
-                "/home/edvin/.config/ProjectOtter/users/audio"),
+                "/home/edvin/.config/Orature/users/audio"),
         winParams + (EXPECT to
-                "C:\\Users\\Edvin\\AppData\\Roaming\\ProjectOtter\\users\\audio")
+                "C:\\Users\\Edvin\\AppData\\Roaming\\Orature\\users\\audio")
     )
 
     private fun buildDirectoryProvider(testCase: TestCase) = DirectoryProvider(
-        "ProjectOtter",
+        "Orature",
         pathSeparator = testCase[SEPARATOR],
         userHome = testCase[USERHOME],
         windowsAppData = testCase[WINAPPDATA],
