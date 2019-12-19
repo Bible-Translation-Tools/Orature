@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.Property
 import javafx.geometry.Orientation
 import javafx.scene.Node
