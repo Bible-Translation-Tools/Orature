@@ -1,29 +1,26 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.view
 
-import javafx.event.EventHandler
+import javafx.geometry.Pos
+import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.viewmodel.SplashScreenViewModel
 import tornadofx.*
 
 class SplashScreen : View() {
     private val viewModel: SplashScreenViewModel by inject()
-    private var offset = Pair(0.0, 0.0)
-    override val root = vbox {
+    override val root = stackpane {
+        addStylesheet(SplashScreenStyles::class)
         addClass(SplashScreenStyles.splashRoot)
+        alignment = Pos.TOP_CENTER
+        imageview(Image(SplashScreen::class.java.getResourceAsStream("/orature_splash.png")))
         progressbar(viewModel.progressProperty) {
             addClass(SplashScreenStyles.splashProgress)
-        }
-        onMousePressed = EventHandler {
-            offset = Pair(it.sceneX, it.sceneY)
-        }
-        onMouseDragged = EventHandler {
-            primaryStage.x = it.screenX - offset.first
-            primaryStage.y = it.screenY - offset.second
+            prefWidth = 376.0
+            translateY = 360.0
         }
     }
 
     init {
-        importStylesheet<SplashScreenStyles>()
         viewModel.shouldCloseProperty.onChange {
             if (it) close()
         }

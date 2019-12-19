@@ -32,17 +32,17 @@ addons:
     target_paths:
     - "/otter/${TRAVIS_BUILD_NUMBER}/${TRAVIS_BRANCH}"
     paths:
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
 deploy:
   provider: releases
   api_key:
     secure: LRAYPt/rUQGYht5N392POYbbx6miXQ3uf1WMg81gPAFo9VmUtAjns4fsdq39/6sU3bYsXElbSihNOAUXgMSXTpP9GoBiFJVpkpchMsrxuPs5gl1HDTUKvJPDlEH6EC+j+dPWeWBOe/m1yHIjLyc1JfyDtWOvoHSoNI7or7JXpGv5wAyMjHfgrwkuFc7cfK/WrKFBL0JJQW3YHs379IVLJ9+mAQCnj0RVg7YWvvz8Le0EeFJwXUKhYL9dWqYxqKmhKCiXEG4MlVhnozUjBbqvsph8gLPLwZQFbTwBlQikz+UnrQFC2IccwlTzQRk3dE9U33worQjO9VeEiYXtvq0vYuX8+X85b7biQAE2Kan4RFR3IlU75lcQ8BSIzZnwr0ry6nUSwdqO8cxRqq6P2KS2B//d+y7u4jlKi43LGVklOQyRTmNbl4/gx6U+CWQzOpytbH5b3izZFqQbpYBPcgxDtcl/DVD+W0As3PbjvDXDZBBkhcuilDzsvBxG1TX3pMeuwSu2EOVUtoUOeoBRT12JjE4y4LluVsABkVQEZFRPfNZsukhaEqRkfcKlUpcpnLBA16S30vjUtVwfiwIognJEDkHxyFFRKA7aFWRVLb1uoV7Z96TzQeNLRyS49n4JF+kdJn95eNsiNfuktYY45+Z7UDZB5bvHy82tPBQcCxd69no=
   file:
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/OTTER-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
+    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
   skip_cleanup: true
   file_glob: true
   on:
