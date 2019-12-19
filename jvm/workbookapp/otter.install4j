@@ -62,7 +62,7 @@
         <content />
       </infoPlist>
       <iconImageFiles>
-        <file path="./otter.png" />
+        <file path="./orature_icon_128x128.png" />
       </iconImageFiles>
     </launcher>
   </launchers>
