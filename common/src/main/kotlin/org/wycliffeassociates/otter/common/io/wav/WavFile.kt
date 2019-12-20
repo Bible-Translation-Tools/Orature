@@ -54,7 +54,7 @@ class WavFile private constructor() {
      * @param file the file to read
      *
      * @throws InvalidWavFileException Throws an exception if the file length
-     * is less than 44 bytes or if the header provides invalid
+     * is less than HEADER_SIZE bytes or if the header provides invalid
      * information suggesting the file is not a wav file.
      */
     @Throws(InvalidWavFileException::class)
