@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.audio.wav
+package org.wycliffeassociates.otter.common.io.wav
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

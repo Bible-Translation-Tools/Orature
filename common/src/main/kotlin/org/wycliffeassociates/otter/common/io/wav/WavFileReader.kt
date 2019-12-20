@@ -1,6 +1,6 @@
-package org.wycliffeassociates.otter.common.audio.wav
+package org.wycliffeassociates.otter.common.io.wav
 
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.io.AudioFileReader
 import java.io.RandomAccessFile
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel

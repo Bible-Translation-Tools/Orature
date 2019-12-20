@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.io.AudioFileReader
 import java.lang.Exception
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem

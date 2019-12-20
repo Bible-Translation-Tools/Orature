@@ -15,7 +15,7 @@ import java.nio.ByteOrder
  */
 class WavOutputStream @Throws(FileNotFoundException::class)
 @JvmOverloads constructor(
-    internal val wav: WavFile,
+    private val wav: WavFile,
     append: Boolean = false,
     private val buffered: Boolean = false
 ) : OutputStream(), Closeable, AutoCloseable {
@@ -36,7 +36,7 @@ class WavOutputStream @Throws(FileNotFoundException::class)
             FileOutputStream(wav.file, true)
                 .channel
                 .truncate(
-                    (whereToTruncate + WavFile.HEADER_SIZE).toLong()
+                    (whereToTruncate + HEADER_SIZE).toLong()
                 )
         } catch (e: IOException) {
             e.printStackTrace()
@@ -79,6 +79,10 @@ class WavOutputStream @Throws(FileNotFoundException::class)
 
     @Throws(IOException::class)
     override fun close() {
+        if (wav.hasMetadata) {
+            val os = if (buffered) bos else outputStream
+            wav.writeMetadata(os)
+        }
         if (buffered) {
             bos.flush()
         }
