@@ -59,6 +59,9 @@ class TakesFlowPane(
             label(messages["newTake"])
             button(messages["record"], AppStyles.recordIcon("25px")) {
                 action {
+                    this@TakesFlowPane.children?.forEach {
+                        (it as? TakeCard)?.simpleAudioPlayer?.close()
+                    }
                     recordNewTake()
                 }
             }

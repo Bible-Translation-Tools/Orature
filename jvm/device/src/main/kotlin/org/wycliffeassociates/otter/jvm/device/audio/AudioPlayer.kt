@@ -79,6 +79,11 @@ class AudioPlayer : IAudioPlayer {
         clip.framePosition = 0
     }
 
+    override fun close() {
+        stop()
+        clip.close()
+    }
+
     override fun getAbsoluteDurationInFrames(): Int {
         return clip.frameLength
     }
