@@ -81,6 +81,7 @@ class AudioPlayer : IAudioPlayer {
         stop()
         clip.close()
         audioInputStream?.close()
+        System.gc()
     }
 
     override fun getAbsoluteDurationInFrames(): Int {

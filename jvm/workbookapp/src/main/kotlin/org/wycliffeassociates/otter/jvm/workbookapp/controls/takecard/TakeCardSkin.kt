@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.Sta
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
+abstract class TakeCardSkin(val control: TakeCard) : SkinBase<TakeCard>(control) {
 
     private val defaultPlayPauseIconSize = 30
     // These can be overridden
@@ -97,6 +97,7 @@ abstract class TakeCardSkin(control: TakeCard) : SkinBase<TakeCard>(control) {
 
     private fun createEditButton() = JFXButton().apply {
         action {
+            control.simpleAudioPlayer.close()
             skinnable.fireEditTakeEvent()
         }
     }
