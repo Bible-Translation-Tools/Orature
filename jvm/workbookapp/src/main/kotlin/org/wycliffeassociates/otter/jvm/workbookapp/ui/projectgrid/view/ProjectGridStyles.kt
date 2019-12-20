@@ -41,14 +41,14 @@ class ProjectGridStyles : Stylesheet() {
             unsafe("-jfx-button-type", raw("RAISED"))
             backgroundRadius += box(25.px)
             borderRadius += box(25.px)
-            backgroundColor += AppTheme.colors.white
+            backgroundColor += AppTheme.colors.appRed
             minHeight = 50.px
             minWidth = 50.px
             maxHeight = 50.px
             maxWidth = 50.px
             cursor = Cursor.HAND
             child("*") {
-                fill = AppTheme.colors.appRed
+                fill = AppTheme.colors.white
             }
         }
     }
