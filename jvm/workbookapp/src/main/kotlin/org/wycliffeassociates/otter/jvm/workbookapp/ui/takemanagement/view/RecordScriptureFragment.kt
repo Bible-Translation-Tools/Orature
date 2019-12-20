@@ -83,6 +83,10 @@ class RecordScriptureFragment : RecordableFragment(
         }
     }
 
+    override fun closePlayers() {
+        takesList.closePlayers()
+    }
+
     override fun createTakeCard(take: Take): TakeCard {
         return scripturetakecard(
             take,

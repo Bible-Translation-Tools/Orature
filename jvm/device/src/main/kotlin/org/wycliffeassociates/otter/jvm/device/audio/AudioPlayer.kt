@@ -4,12 +4,9 @@ import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import java.io.File
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Clip
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import javax.sound.sampled.DataLine
-import javax.sound.sampled.LineEvent
+import javax.sound.sampled.*
 
 class AudioPlayer : IAudioPlayer {
 
@@ -17,6 +14,8 @@ class AudioPlayer : IAudioPlayer {
     private val listeners = mutableListOf<IAudioPlayerListener>()
 
     private var clip: Clip = AudioSystem.getClip()
+
+    private var audioInputStream: AudioInputStream? = null
 
     override fun addEventListener(listener: IAudioPlayerListener) {
         listeners.add(listener)
@@ -38,8 +37,8 @@ class AudioPlayer : IAudioPlayer {
             clip.flush()
             clip.close()
         }
-        val audioInputStream = AudioSystem.getAudioInputStream(file)
-        val info = DataLine.Info(Clip::class.java, audioInputStream.format)
+        audioInputStream = AudioSystem.getAudioInputStream(file)
+        val info = DataLine.Info(Clip::class.java, audioInputStream!!.format)
         clip = AudioSystem.getLine(info) as Clip
         clip.addLineListener { lineEvent ->
             if (lineEvent.type == LineEvent.Type.STOP && clip.framePosition == clip.frameLength) {
@@ -74,7 +73,6 @@ class AudioPlayer : IAudioPlayer {
     override fun stop() {
         if (clip.isRunning) {
             clip.stop()
-            listeners.forEach { it.onEvent(AudioPlayerEvent.STOP) }
         }
         clip.framePosition = 0
     }
@@ -82,6 +80,7 @@ class AudioPlayer : IAudioPlayer {
     override fun close() {
         stop()
         clip.close()
+        audioInputStream?.close()
     }
 
     override fun getAbsoluteDurationInFrames(): Int {

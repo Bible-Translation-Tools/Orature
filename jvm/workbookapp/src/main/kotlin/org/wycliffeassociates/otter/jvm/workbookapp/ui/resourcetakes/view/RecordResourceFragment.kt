@@ -41,9 +41,7 @@ class RecordResourceFragment(
             maxWidth = 500.0
             text = messages["newTake"]
             action {
-                alternateTakesList.getChildList()?.forEach {
-                    (it as? TakeCard)?.simpleAudioPlayer?.close()
-                }
+                closePlayers()
                 recordableViewModel.recordNewTake()
             }
         }
@@ -123,5 +121,11 @@ class RecordResourceFragment(
         val rc = RowConstraints()
         rc.percentHeight = 100.0
         rowConstraints.addAll(rc)
+    }
+
+    override fun closePlayers() {
+        alternateTakesList.getChildList()?.forEach {
+            (it as? TakeCard)?.simpleAudioPlayer?.close()
+        }
     }
 }
