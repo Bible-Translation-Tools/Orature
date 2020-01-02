@@ -18,9 +18,10 @@ import java.util.concurrent.TimeUnit
 // Named "Simple" since just displays a progress bar and play/pause button
 // No waveform view
 class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioPlayer) : HBox() {
-    val progressBar = JFXProgressBar()
 
+    val progressBar = JFXProgressBar()
     val isPlaying = SimpleBooleanProperty(false)
+    var loaded = false
 
     init {
         style {
@@ -28,12 +29,9 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
         }
         add(progressBar)
 
-        // Set up indefinite loading bar
-        progressBar.progress = -1.0
+        progressBar.progress = 0.0
         progressBar.hgrow = Priority.ALWAYS
         progressBar.maxWidth = Double.MAX_VALUE
-
-        player.load(audioFile).subscribe()
 
         // progress update observable
         var disposable: Disposable? = null
@@ -65,7 +63,22 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
     }
 
     fun buttonPressed() {
-        if (!isPlaying.value) player.play() else player.pause()
+        if (!isPlaying.value) {
+            if (!loaded) {
+                player.load(audioFile).andThen {
+                    Platform.runLater {
+                        player.play()
+                        loaded = true
+                    }
+                }.subscribe()
+            }
+            player.play()
+        } else player.pause()
+    }
+
+    fun close() {
+        player.close()
+        loaded = false
     }
 
     private fun startProgressUpdate(): Disposable {

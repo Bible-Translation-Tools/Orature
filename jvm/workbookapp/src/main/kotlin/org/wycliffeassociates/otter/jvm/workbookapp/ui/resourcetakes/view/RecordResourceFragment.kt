@@ -27,6 +27,11 @@ class RecordResourceFragment(
 ) {
     val formattedTextProperty = SimpleStringProperty()
 
+    val alternateTakesList = TakesListView(
+        items = recordableViewModel.alternateTakes,
+        createTakeNode = ::createTakeCard
+    )
+
     private val newTakeButton =
         highlightablebutton {
             highlightColor = Color.ORANGE
@@ -36,6 +41,7 @@ class RecordResourceFragment(
             maxWidth = 500.0
             text = messages["newTake"]
             action {
+                closePlayers()
                 recordableViewModel.recordNewTake()
             }
         }
@@ -90,12 +96,7 @@ class RecordResourceFragment(
                     percentWidth = 50.0
                 }
                 addClass(RecordResourceStyles.rightRegion)
-                add(
-                    TakesListView(
-                        items = recordableViewModel.alternateTakes,
-                        createTakeNode = ::createTakeCard
-                    )
-                )
+                add(alternateTakesList)
             }
         }
     }
@@ -120,5 +121,11 @@ class RecordResourceFragment(
         val rc = RowConstraints()
         rc.percentHeight = 100.0
         rowConstraints.addAll(rc)
+    }
+
+    override fun closePlayers() {
+        alternateTakesList.getChildList()?.forEach {
+            (it as? TakeCard)?.simpleAudioPlayer?.close()
+        }
     }
 }
