@@ -28,15 +28,15 @@ class AudioPluginTest {
     )
     val inputFile = File("somefile.wav")
 
-    @Test
-    fun testCompletableFinishesForValidCommand() {
-        // Create the plugin
-        val audioPlugin = AudioPlugin(inputAudioPluginData)
-        audioPlugin
-                .launch(inputFile)
-                .blockingAwait()
-        // Test only finishes if completable finishes
-    }
+//    @Test
+//    fun testCompletableFinishesForValidCommand() {
+//        // Create the plugin
+//        val audioPlugin = AudioPlugin(inputAudioPluginData)
+//        audioPlugin
+//                .launch(inputFile)
+//                .blockingAwait()
+//        // Test only finishes if completable finishes
+//    }
 
     @Test
     fun testExceptionThrownWhenExecutableNotFound() {
