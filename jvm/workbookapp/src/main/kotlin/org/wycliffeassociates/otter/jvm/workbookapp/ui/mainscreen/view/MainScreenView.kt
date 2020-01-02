@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.Property
 import javafx.geometry.Orientation
 import javafx.scene.Node
@@ -107,9 +105,6 @@ class MainScreenView : View() {
     private fun listMenu(): Node {
         return ListMenu().apply {
             orientation = Orientation.HORIZONTAL
-            item(messages["home"], MaterialIconView(MaterialIcon.HOME, "20px"))
-            item(messages["profile"], MaterialIconView(MaterialIcon.PERSON, "20px"))
-            item(messages["settings"], MaterialIconView(MaterialIcon.SETTINGS, "20px"))
         }
     }
 
