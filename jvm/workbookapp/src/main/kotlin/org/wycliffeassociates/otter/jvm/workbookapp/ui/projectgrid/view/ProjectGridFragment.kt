@@ -115,8 +115,8 @@ class ProjectGridFragment : Fragment() {
                     anchorpaneConstraints { topAnchor = it / 2.0 + 75.0 }
                 }
                 anchorpaneConstraints {
-                    rightAnchor = 125
-                    bottomAnchor = 60
+                    rightAnchor = 110
+                    bottomAnchor = 10
                 }
 
                 visibleProperty().bind(noProjectsProperty)
