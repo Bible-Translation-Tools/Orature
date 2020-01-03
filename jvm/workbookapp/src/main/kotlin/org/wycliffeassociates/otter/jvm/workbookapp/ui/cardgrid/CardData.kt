@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid
 
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 
@@ -13,7 +14,7 @@ data class CardData(
     val chapterSource: Chapter? = null
 ) {
     constructor(chunk: Chunk) : this(
-        item = ContentLabel.VERSE.value,
+        item = if (chunk.contentType == ContentType.META) ContentLabel.CHAPTER.value else ContentLabel.VERSE.value,
         dataType = CardDataType.CONTENT.value,
         bodyText = chunk.start.toString(),
         sort = chunk.sort,

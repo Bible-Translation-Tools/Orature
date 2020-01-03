@@ -50,6 +50,10 @@ class RecordScriptureViewModel : ViewModel() {
                 setHasNextAndPrevious()
                 // This will trigger loading takes in the RecordableViewModel
                 recordableViewModel.recordable = chunk
+            } ?: {
+                workbookViewModel.activeChapterProperty.value?.let {
+                    recordableViewModel.recordable = it
+                }
             }
         }
     }

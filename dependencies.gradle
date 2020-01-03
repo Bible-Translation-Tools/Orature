@@ -37,4 +37,5 @@ ext {
     fontawesomeMaterialIconsVer = "2.2.0-11"
     fontawesomeIcons525Ver = '3.0.0-11'
     fontawesomeMaterialFontVer = '1.7.22-11'
+    ikonliVer = '11.3.4'
 }

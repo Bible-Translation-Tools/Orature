@@ -2,11 +2,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.controls.card.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.CardData
@@ -19,6 +21,8 @@ import tornadofx.*
 class CardGridFragment : Fragment() {
     private val navigator: ChromeableStage by inject()
     private val viewModel: CardGridViewModel by inject()
+
+    private val chapterBanner = ChapterBanner()
 
     init {
         importStylesheet<CardGridStyles>()
@@ -34,6 +38,24 @@ class CardGridFragment : Fragment() {
             visibleProperty().bind(viewModel.loadingProperty)
             managedProperty().bind(visibleProperty())
             addClass(CardGridStyles.contentLoadingProgress)
+        }
+
+        chapterBanner.apply {
+            viewModel.chapterCard.value?.let { chapter ->
+                chapterBanner.bookTitle.text = (viewModel.workbookViewModel.workbook.target.title)
+                chapterBanner.chapterCount.text = (chapter.bodyText)
+                viewModel.workbookViewModel.activeChapterProperty?.value?.chunks?.count()?.subscribe { count ->
+                    Platform.runLater {
+                        chapterBanner.chunkCount.text = (count.toString())
+                    }
+                }
+                openButton.setOnMouseClicked {
+                    viewModel.chapterCard.value?.let {
+                        navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
+                    }
+                }
+                this@vbox.add(chapterBanner)
+            }
         }
 
         datagrid(viewModel.filteredContent) {
