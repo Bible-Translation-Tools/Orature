@@ -20,7 +20,6 @@ class ParsedAudioPluginDataMapperTest {
         deleteOnExit()
     }
 
-
     val PLUGIN_PLATFORM_TABLE = listOf(
         mapOf(
             "os.name" to "Mac OS X",
