@@ -37,12 +37,12 @@ class ChapterTabGroup : TabGroup() {
         return workbookViewModel.workbook.target.resourceMetadata
     }
 
-    private fun getSourceBookSubtreeResources(): List<ResourceMetadata> {
-        return workbookViewModel.workbook.source.subtreeResources
+    private fun getTargetBookSubtreeResources(): List<ResourceMetadata> {
+        return workbookViewModel.workbook.target.subtreeResources
     }
 
     private fun getAssociatedMetadatas(): Sequence<ResourceMetadata> {
-        return sequenceOf(getTargetBookResourceMetadata()) + getSourceBookSubtreeResources()
+        return sequenceOf(getTargetBookResourceMetadata()) + getTargetBookSubtreeResources()
     }
 
     private fun createTabs() {
