@@ -6,6 +6,12 @@ import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import java.io.File
 
 class AudioPluginTest {
+
+    var exe = File.createTempFile("test", ".exe").apply {
+        setExecutable(true)
+        deleteOnExit()
+    }
+
     var inputAudioPluginData = AudioPluginData(
             0,
             "Beethoven",
@@ -14,7 +20,7 @@ class AudioPluginTest {
             false,
             "bash",
             listOf("-c", "echo hello"),
-            File("some/fake/file/path.yaml")
+            exe
     )
     var missingExecutablePlugin = AudioPluginData(
             0,
@@ -28,15 +34,15 @@ class AudioPluginTest {
     )
     val inputFile = File("somefile.wav")
 
-//    @Test
-//    fun testCompletableFinishesForValidCommand() {
-//        // Create the plugin
-//        val audioPlugin = AudioPlugin(inputAudioPluginData)
-//        audioPlugin
-//                .launch(inputFile)
-//                .blockingAwait()
-//        // Test only finishes if completable finishes
-//    }
+    @Test
+    fun testCompletableFinishesForValidCommand() {
+        // Create the plugin
+        val audioPlugin = AudioPlugin(inputAudioPluginData)
+        audioPlugin
+                .launch(inputFile)
+                .blockingAwait()
+        // Test only finishes if completable finishes
+    }
 
     @Test
     fun testExceptionThrownWhenExecutableNotFound() {
