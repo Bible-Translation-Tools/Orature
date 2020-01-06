@@ -44,7 +44,7 @@ class CardGridFragment : Fragment() {
             viewModel.chapterCard.value?.let { chapter ->
                 chapterBanner.bookTitle.text = (viewModel.workbookViewModel.workbook.target.title)
                 chapterBanner.chapterCount.text = (chapter.bodyText)
-                viewModel.workbookViewModel.activeChapterProperty?.value?.chunks?.count()?.subscribe { count ->
+                viewModel.workbookViewModel.activeChapterProperty.value?.chunks?.count()?.subscribe { count ->
                     Platform.runLater {
                         chapterBanner.chunkCount.text = (count.toString())
                     }
