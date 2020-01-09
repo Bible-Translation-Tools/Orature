@@ -7,6 +7,7 @@ import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.controls.card.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
@@ -41,14 +42,21 @@ class CardGridFragment : Fragment() {
         }
 
         chapterBanner.apply {
-            viewModel.chapterCard.value?.let { chapter ->
+            visibleWhen(viewModel.chapterOpen)
+            managedProperty().bind(viewModel.chapterOpen)
+            viewModel.chapterCard.value?.let { _ ->
                 chapterBanner.bookTitle.text = (viewModel.workbookViewModel.workbook.target.title)
-                chapterBanner.chapterCount.text = (chapter.bodyText)
-                viewModel.workbookViewModel.activeChapterProperty.value?.chunks?.count()?.subscribe { count ->
-                    Platform.runLater {
-                        chapterBanner.chunkCount.text = (count.toString())
+                chapterBanner.chapterCount.text = viewModel.workbookViewModel.activeChapterProperty.value?.title
+                viewModel
+                    .workbookViewModel
+                    .activeChapterProperty
+                    .value
+                    ?.chunks
+                    ?.filter { it.contentType == ContentType.TEXT }?.count()?.subscribe { count ->
+                        Platform.runLater {
+                            chapterBanner.chunkCount.text = (count.toString())
+                        }
                     }
-                }
                 openButton.setOnMouseClicked {
                     viewModel.chapterCard.value?.let {
                         navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
