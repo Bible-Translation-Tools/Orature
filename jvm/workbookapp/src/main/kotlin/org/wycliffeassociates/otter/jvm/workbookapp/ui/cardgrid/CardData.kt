@@ -14,7 +14,7 @@ data class CardData(
     val chapterSource: Chapter? = null
 ) {
     constructor(chunk: Chunk) : this(
-        item = if (chunk.contentType == ContentType.META) ContentLabel.CHAPTER.value else ContentLabel.VERSE.value,
+        item = ContentLabel.of(chunk.contentType).value,
         dataType = CardDataType.CONTENT.value,
         bodyText = chunk.start.toString(),
         sort = chunk.sort,
