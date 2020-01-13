@@ -27,7 +27,7 @@
    <children>
       <VBox prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
          <children>
-            <Label fx:id="bookTitle" text="1 Thessalonians" textFill="WHITE">
+            <Label fx:id="bookTitle" text="Book Title" textFill="WHITE">
                <font>
                   <Font size="28.0" />
                </font>
@@ -38,7 +38,7 @@
             <HBox alignment="CENTER_LEFT" spacing="2.0" VBox.vgrow="ALWAYS">
                <children>
                   <FontIcon fill="WHITE" iconLiteral="mdi-file" iconSize="20" selectionFill="BLACK" stroke="TRANSPARENT" />
-                  <Label fx:id="chapterCount" text="4" textFill="WHITE">
+                  <Label fx:id="chapterCount" text="0" textFill="WHITE">
                      <font>
                         <Font size="16.0" />
                      </font>
@@ -48,7 +48,7 @@
                         <Insets left="16.0" />
                      </HBox.margin>
                   </FontIcon>
-                  <Label fx:id="chunkCount" text="12" textFill="WHITE">
+                  <Label fx:id="chunkCount" text="0" textFill="WHITE">
                      <font>
                         <Font size="16.0" />
                      </font>

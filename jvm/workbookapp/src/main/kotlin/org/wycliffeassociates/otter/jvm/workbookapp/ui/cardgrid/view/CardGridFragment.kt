@@ -44,25 +44,30 @@ class CardGridFragment : Fragment() {
         chapterBanner.apply {
             visibleWhen(viewModel.chapterOpen)
             managedProperty().bind(viewModel.chapterOpen)
-            viewModel.chapterCard.value?.let { _ ->
-                chapterBanner.bookTitle.text = (viewModel.workbookViewModel.workbook.target.title)
+            if (viewModel.chapterCard.value != null) {
+                chapterBanner.bookTitle.text = viewModel.workbookViewModel.workbook.target.title
                 chapterBanner.chapterCount.text = viewModel.workbookViewModel.activeChapterProperty.value?.title
+                chapterBanner.openButton.text = messages["open"]
                 viewModel
                     .workbookViewModel
                     .activeChapterProperty
                     .value
-                    ?.chunks
-                    ?.filter { it.contentType == ContentType.TEXT }?.count()?.subscribe { count ->
-                        Platform.runLater {
-                            chapterBanner.chunkCount.text = (count.toString())
+                    ?.let { chapter ->
+                        chapter.chunks
+                            .filter {
+                                it.contentType == ContentType.TEXT
+                            }
+                            .count()
+                            .subscribe { count ->
+                                Platform.runLater {
+                                    chapterBanner.chunkCount.text = count.toString()
+                                }
+                            }
+                        openButton.setOnMouseClicked {
+                            navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
                         }
+                        this@vbox.add(chapterBanner)
                     }
-                openButton.setOnMouseClicked {
-                    viewModel.chapterCard.value?.let {
-                        navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
-                    }
-                }
-                this@vbox.add(chapterBanner)
             }
         }
 
