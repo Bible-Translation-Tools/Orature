@@ -5,7 +5,7 @@ plugins {
     id 'nu.studer.jooq' version "$jooqPluginVer"
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
     id "com.install4j.gradle" version "$install4jPluginVer"
-    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'com.github.johnrengelman.shadow' version "$shadowPluginVer"
 }
 
 apply plugin: 'application'
