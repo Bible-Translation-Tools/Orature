@@ -85,6 +85,9 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             db.getContentByCollection(chapterCollection)
                 .flattenAsObservable { it }
                 .map(this::chunk)
+                .filter {
+                    it.contentType == ContentType.TEXT
+                }
         }.cache()
     }
 
@@ -319,11 +322,16 @@ private class DefaultDatabaseAccessors(
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
     override fun updateContent(content: Content) = contentRepo.update(content)
 
-    override fun getResources(content: Content, metadata: ResourceMetadata) = resourceRepo.getResources(content, metadata)
-    override fun getResources(collection: Collection, metadata: ResourceMetadata) = resourceRepo.getResources(collection, metadata)
+    override fun getResources(content: Content, metadata: ResourceMetadata) =
+        resourceRepo.getResources(content, metadata)
+
+    override fun getResources(collection: Collection, metadata: ResourceMetadata) =
+        resourceRepo.getResources(collection, metadata)
+
     override fun getResourceMetadata(content: Content) = resourceRepo.getResourceMetadata(content)
     override fun getResourceMetadata(collection: Collection) = resourceRepo.getResourceMetadata(collection)
-    override fun getSubtreeResourceMetadata(collection: Collection) = resourceRepo.getSubtreeResourceMetadata(collection)
+    override fun getSubtreeResourceMetadata(collection: Collection) =
+        resourceRepo.getSubtreeResourceMetadata(collection)
 
     override fun insertTakeForContent(take: ModelTake, content: Content) = takeRepo.insertForContent(take, content)
     override fun getTakeByContent(content: Content) = takeRepo.getByContent(content, includeDeleted = true)
