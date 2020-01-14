@@ -5,6 +5,7 @@ plugins {
     id 'nu.studer.jooq' version "$jooqPluginVer"
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
     id "com.install4j.gradle" version "$install4jPluginVer"
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
 apply plugin: 'application'
@@ -105,10 +106,6 @@ dependencies {
     implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
     implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
 
-    // Ikonli
-    implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
-    implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
-
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
     implementation "com.squareup.retrofit2:converter-moshi:$retrofitMoshiVer"
@@ -156,17 +153,12 @@ dependencies {
 }
 
 // tell gradle what to put in the jar
-jar {
+shadowJar {
+    archiveFileName = 'workbookapp.jar'
     manifest {
         attributes(
                 'Main-Class': "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
         )
-    }
-    from(configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }) {
-        exclude "META-INF/MANIFEST.MF"
-        exclude "META-INF/*.SF"
-        exclude "META-INF/*.DSA"
-        exclude "META-INF/*.RSA"
     }
 }
 
