@@ -8,7 +8,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.view.SplashScreen
 import tornadofx.*
-import java.lang.RuntimeException
 
 class MyApp : App(SplashScreen::class) {
     init {

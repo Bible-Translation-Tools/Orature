@@ -44,7 +44,6 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
                 }
             }
         }
-
     }
 
     private fun isCycle(error: Throwable) = error.stackTrace.any {
@@ -102,7 +101,6 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
                                 }
                             }
                         }
-
                     } catch (e: Exception) {
                         add(textarea)
                     }
@@ -113,7 +111,6 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
             showAndWait()
         }
     }
-
 }
 
 private fun stringFromError(e: Throwable): String {
