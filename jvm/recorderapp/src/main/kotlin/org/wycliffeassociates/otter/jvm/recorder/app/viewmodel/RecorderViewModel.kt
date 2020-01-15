@@ -26,7 +26,7 @@ class RecorderViewModel : ViewModel() {
     val parameters = (scope as ParameterizedScope).parameters
     val wav = WavFile(File(parameters.named["wav"]))
     val recorder = AudioRecorder()
-    var volumeTest: AudioRecorder? = AudioRecorder()
+    var volumeTest: AudioRecorder? = null //AudioRecorder()
 
     val writer = WavFileWriter(wav, recorder.getAudioStream()) {
         (scope as ParameterizedScope).navigateBack()
@@ -37,7 +37,7 @@ class RecorderViewModel : ViewModel() {
 
     val fps = FramerateView()
 
-    val volumeBar = VolumeBar(recorder.getAudioStream().mergeWith(volumeTest!!.getAudioStream()))
+    //val volumeBar = VolumeBar(recorder.getAudioStream().mergeWith(volumeTest!!.getAudioStream()))
 
     val timer = RecordingTimer()
     val timerTextProperty = SimpleStringProperty("00:00:00")
@@ -58,7 +58,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     init {
-        volumeBarView.addDrawable(volumeBar)
+        //volumeBarView.addDrawable(volumeBar)
         waveformView.addDrawable(BaseWaveLine())
         if (app.parameters.named.containsKey("debug")) {
             waveformView.add(fps)
