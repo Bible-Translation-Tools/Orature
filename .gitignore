@@ -89,3 +89,6 @@ hs_err_pid*
 
 # Ignores generated resources from the assets project
 /assets/src/main/resources/content/
+
+# Ignores artifacts included as jar plugins
+/jvm/workbookapp/src/main/resources/plugins/jars/
