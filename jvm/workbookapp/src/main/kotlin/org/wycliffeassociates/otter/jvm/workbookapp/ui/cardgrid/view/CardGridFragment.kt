@@ -2,11 +2,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.controls.card.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.CardData
@@ -19,6 +22,8 @@ import tornadofx.*
 class CardGridFragment : Fragment() {
     private val navigator: ChromeableStage by inject()
     private val viewModel: CardGridViewModel by inject()
+
+    private val chapterBanner = ChapterBanner()
 
     init {
         importStylesheet<CardGridStyles>()
@@ -34,6 +39,36 @@ class CardGridFragment : Fragment() {
             visibleProperty().bind(viewModel.loadingProperty)
             managedProperty().bind(visibleProperty())
             addClass(CardGridStyles.contentLoadingProgress)
+        }
+
+        chapterBanner.apply {
+            visibleWhen(viewModel.chapterOpen)
+            managedProperty().bind(viewModel.chapterOpen)
+            if (viewModel.chapterCard.value != null) {
+                chapterBanner.bookTitle.text = viewModel.workbookViewModel.workbook.target.title
+                chapterBanner.chapterCount.text = viewModel.workbookViewModel.activeChapterProperty.value?.title
+                chapterBanner.openButton.text = messages["open"]
+                viewModel
+                    .workbookViewModel
+                    .activeChapterProperty
+                    .value
+                    ?.let { chapter ->
+                        chapter.chunks
+                            .filter {
+                                it.contentType == ContentType.TEXT
+                            }
+                            .count()
+                            .subscribe { count ->
+                                Platform.runLater {
+                                    chapterBanner.chunkCount.text = count.toString()
+                                }
+                            }
+                        openButton.setOnMouseClicked {
+                            navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
+                        }
+                        this@vbox.add(chapterBanner)
+                    }
+            }
         }
 
         datagrid(viewModel.filteredContent) {
