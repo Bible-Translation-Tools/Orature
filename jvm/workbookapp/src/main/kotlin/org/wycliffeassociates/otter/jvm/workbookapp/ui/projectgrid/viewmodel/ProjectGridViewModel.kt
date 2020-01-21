@@ -5,6 +5,7 @@ import io.reactivex.Completable
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -30,9 +31,10 @@ class ProjectGridViewModel : ViewModel() {
     fun loadProjects() {
         collectionRepo.getDerivedProjects()
             .observeOnFx()
-            .doOnSuccess {
-                projects.setAll(it)
-            }.subscribe()
+            .subscribe { derivedProjects ->
+                val bookProjects = derivedProjects.filter { it.resourceContainer?.type == ContainerType.Book }
+                projects.setAll(bookProjects)
+            }
     }
 
     fun clearSelectedProject() {
