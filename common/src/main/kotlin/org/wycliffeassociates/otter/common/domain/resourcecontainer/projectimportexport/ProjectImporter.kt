@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 class ProjectImporter(
     private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
-    private val resourceRepository: IResourceRepository,
+    private val resourceMetadataRepository: IResourceMetadataRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
@@ -142,7 +142,7 @@ class ProjectImporter(
     }
 
     private fun createDerivedProject(language: Language, sourceCollection: Collection, resourceId: String): Collection {
-        return CreateProject(collectionRepository, resourceRepository)
+        return CreateProject(collectionRepository, resourceMetadataRepository)
             .create(sourceCollection, language, resourceId)
             .blockingSingle()
     }

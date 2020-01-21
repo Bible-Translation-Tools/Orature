@@ -19,7 +19,7 @@ import java.io.IOException
 import java.io.InputStream
 
 class ImportResourceContainer(
-    private val resourceRepository: IResourceRepository,
+    private val resourceMetadataRepository: IResourceMetadataRepository,
     private val resourceContainerRepository: IResourceContainerRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
@@ -33,7 +33,7 @@ class ImportResourceContainer(
         val projectImporter = ProjectImporter(
             this,
             directoryProvider,
-            resourceRepository,
+            resourceMetadataRepository,
             collectionRepository,
             contentRepository,
             takeRepository,
