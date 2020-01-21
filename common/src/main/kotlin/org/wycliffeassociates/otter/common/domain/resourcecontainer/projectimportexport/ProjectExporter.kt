@@ -60,9 +60,13 @@ class ProjectExporter(
 
     /** Export a copy of the source RCs for the current book and the current project. */
     private fun copySourceResources(zipWriter: IZipFileWriter) {
-        sequenceOf(resourceMetadata, workbook.source.resourceMetadata)
+        val bookSource = workbook.source.resourceMetadata
+        val resourceSource = workbook.source.linkedResources
+            .filter { it.identifier == resourceMetadata.identifier }
+
+        (resourceSource + bookSource)
             .map(directoryProvider::getSourceContainerDirectory)
-            .toSet()
+            .distinct()
             .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
     }
 
