@@ -42,6 +42,7 @@ class ChapterTabGroup : TabGroup() {
     }
 
     private fun getAssociatedMetadatas(): Sequence<ResourceMetadata> {
+
         return sequenceOf(getTargetBookResourceMetadata()) + getTargetBookSubtreeResources()
     }
 

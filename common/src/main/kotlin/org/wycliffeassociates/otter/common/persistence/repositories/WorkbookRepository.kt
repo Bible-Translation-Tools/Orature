@@ -21,12 +21,14 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         collectionRepository: ICollectionRepository,
         contentRepository: IContentRepository,
         resourceRepository: IResourceRepository,
+        resourceMetadataRepo: IResourceMetadataRepository,
         takeRepository: ITakeRepository
     ) : this(
         DefaultDatabaseAccessors(
             collectionRepository,
             contentRepository,
             resourceRepository,
+            resourceMetadataRepo,
             takeRepository
         )
     )
@@ -44,16 +46,16 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         )
     }
 
-    private fun Collection.getResourceMetaData() = this.resourceContainer
-        ?: throw IllegalStateException("Collection with id=$id has null resource container")
-
     private fun book(bookCollection: Collection): Book {
+        val resourceMetadata = bookCollection.resourceContainer
+            ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
         return Book(
             title = bookCollection.titleKey,
             sort = bookCollection.sort,
             slug = bookCollection.slug,
             chapters = constructBookChapters(bookCollection),
-            resourceMetadata = bookCollection.getResourceMetaData(),
+            resourceMetadata = resourceMetadata,
+            linkedResources = db.getLinkedResourceMetadata(resourceMetadata),
             subtreeResources = db.getSubtreeResourceMetadata(bookCollection)
         )
     }
@@ -301,6 +303,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
         fun getResourceMetadata(content: Content): List<ResourceMetadata>
         fun getResourceMetadata(collection: Collection): List<ResourceMetadata>
+        fun getLinkedResourceMetadata(metadata: ResourceMetadata): List<ResourceMetadata>
         fun getSubtreeResourceMetadata(collection: Collection): List<ResourceMetadata>
         fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
@@ -312,6 +315,7 @@ private class DefaultDatabaseAccessors(
     private val collectionRepo: ICollectionRepository,
     private val contentRepo: IContentRepository,
     private val resourceRepo: IResourceRepository,
+    private val resourceMetadataRepo: IResourceMetadataRepository,
     private val takeRepo: ITakeRepository
 ) : WorkbookRepository.IDatabaseAccessors {
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
@@ -322,12 +326,15 @@ private class DefaultDatabaseAccessors(
 
     override fun getResources(content: Content, metadata: ResourceMetadata) =
         resourceRepo.getResources(content, metadata)
-
     override fun getResources(collection: Collection, metadata: ResourceMetadata) =
         resourceRepo.getResources(collection, metadata)
 
     override fun getResourceMetadata(content: Content) = resourceRepo.getResourceMetadata(content)
     override fun getResourceMetadata(collection: Collection) = resourceRepo.getResourceMetadata(collection)
+
+    override fun getLinkedResourceMetadata(metadata: ResourceMetadata) =
+        resourceMetadataRepo.getLinked(metadata).blockingGet()
+
     override fun getSubtreeResourceMetadata(collection: Collection) =
         resourceRepo.getSubtreeResourceMetadata(collection)
 
