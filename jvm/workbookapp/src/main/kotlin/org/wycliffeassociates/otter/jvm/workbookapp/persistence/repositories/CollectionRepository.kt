@@ -288,6 +288,10 @@ class CollectionRepository(
     }
 
     private fun createResourceContainer(source: ResourceMetadata, targetLanguage: Language): ResourceContainer {
+        val derivedContainerType = when (source.type) {
+            ContainerType.Bundle -> ContainerType.Book // Sources can be bundles, but not our derived containers.
+            else -> source.type
+        }
         val dublinCore = dublincore {
             identifier = source.identifier
             issued = LocalDate.now().toString()
@@ -301,7 +305,7 @@ class CollectionRepository(
             version = source.version
             format = MimeType.USFM.norm
             subject = source.subject
-            type = ContainerType.Book.slug
+            type = derivedContainerType.slug
             title = source.title
         }
         val directory = directoryProvider.getDerivedContainerDirectory(
