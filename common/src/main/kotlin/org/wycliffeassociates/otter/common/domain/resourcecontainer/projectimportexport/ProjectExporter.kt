@@ -24,6 +24,10 @@ class ProjectExporter(
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
+    private val projectSourceMetadata = workbook.source.linkedResources
+        .firstOrNull { it.identifier == resourceMetadata.identifier }
+        ?: workbook.source.resourceMetadata
+
     fun export(directory: File): Single<ExportResult> {
         return Single
             .fromCallable {
@@ -61,10 +65,8 @@ class ProjectExporter(
     /** Export a copy of the source RCs for the current book and the current project. */
     private fun copySourceResources(zipWriter: IZipFileWriter) {
         val bookSource = workbook.source.resourceMetadata
-        val resourceSource = workbook.source.linkedResources
-            .filter { it.identifier == resourceMetadata.identifier }
 
-        (resourceSource + bookSource)
+        sequenceOf(bookSource, projectSourceMetadata)
             .map(directoryProvider::getSourceContainerDirectory)
             .distinct()
             .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
@@ -88,9 +90,10 @@ class ProjectExporter(
 
     private fun makeExportFilename(): String {
         val lang = workbook.target.language.slug
+        val resource = projectSourceMetadata.identifier
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
-        return "$lang-$project-$timestamp.zip"
+        return "$lang-$resource-$project-$timestamp.zip"
     }
 
     private fun fetchSelectedTakes(chaptersOnly: Boolean = false): Observable<Take> {
