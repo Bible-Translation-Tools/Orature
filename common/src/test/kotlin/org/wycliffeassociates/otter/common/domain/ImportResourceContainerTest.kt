@@ -112,8 +112,12 @@ class MockCollectionRepository : ICollectionRepository {
         TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun deriveProject(source: Collection, language: Language): Single<Collection> {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+    override fun deriveProject(
+        sourceMetadata: ResourceMetadata,
+        sourceCollection: Collection,
+        language: Language
+    ): Single<Collection> {
+        TODO("not implemented")
     }
 
     override fun getChildren(collection: Collection): Single<List<Collection>> {

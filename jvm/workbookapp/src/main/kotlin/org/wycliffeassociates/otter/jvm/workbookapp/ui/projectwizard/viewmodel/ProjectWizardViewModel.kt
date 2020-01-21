@@ -21,6 +21,7 @@ class ProjectWizardViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val languageRepo = injector.languageRepo
     private val collectionRepo = injector.collectionRepo
+    private val resourceRepo = injector.resourceRepository
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
@@ -37,7 +38,7 @@ class ProjectWizardViewModel : ViewModel() {
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
-    private val creationUseCase = CreateProject(collectionRepo)
+    private val creationUseCase = CreateProject(collectionRepo, resourceRepo)
 
     val canGoBack: BooleanProperty = SimpleBooleanProperty(false)
     val languageConfirmed: BooleanProperty = SimpleBooleanProperty(false)
@@ -125,11 +126,12 @@ class ProjectWizardViewModel : ViewModel() {
             showOverlayProperty.value = true
             creationUseCase
                 .create(selectedCollection, language)
-                .subscribe { _ ->
+                .doOnComplete {
                     find(ProjectGridViewModel::class).loadProjects()
                     showOverlayProperty.value = false
                     creationCompletedProperty.value = true
                 }
+                .subscribe()
         }
     }
 

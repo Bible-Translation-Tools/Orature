@@ -192,14 +192,18 @@ class CollectionRepository(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun deriveProject(source: Collection, language: Language): Single<Collection> {
+    override fun deriveProject(
+        sourceMetadata: ResourceMetadata,
+        sourceCollection: Collection,
+        language: Language
+    ): Single<Collection> {
         return Single
             .fromCallable {
                 database.transactionResult { dsl ->
-                    val metadataEntity = findOrInsertMetadataEntity(dsl, source, language)
+                    val metadataEntity = findOrInsertMetadataEntity(dsl, sourceMetadata, language)
 
                     // Insert the derived project
-                    val sourceEntity = collectionDao.fetchById(source.id, dsl)
+                    val sourceEntity = collectionDao.fetchById(sourceCollection.id, dsl)
                     val projectEntity = sourceEntity
                         // parentFk null for now. May be non-null if derivative categories added
                         .copy(id = 0, dublinCoreFk = metadataEntity.id, parentFk = null, sourceFk = sourceEntity.id)
@@ -217,7 +221,7 @@ class CollectionRepository(
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
                     ResourceContainer.load(File(metadataEntity.path)).use { container ->
-                        if (container.manifest.projects.none { it.identifier == source.slug }) {
+                        if (container.manifest.projects.none { it.identifier == sourceCollection.slug }) {
                             container.manifest.projects = container.manifest.projects.plus(
                                 project {
                                     sort = if (
@@ -250,17 +254,17 @@ class CollectionRepository(
 
     private fun findOrInsertMetadataEntity(
         dsl: DSLContext,
-        source: Collection,
+        source: ResourceMetadata,
         language: Language
     ): ResourceMetadataEntity {
         // Check for existing resource containers
         val existingMetadata = metadataDao.fetchAll(dsl)
         val matches = existingMetadata.filter {
-            it.identifier == source.resourceContainer?.identifier &&
+            it.identifier == source.identifier &&
                     it.languageFk == language.id &&
                     it.creator == dublinCoreCreator &&
-                    it.version == source.resourceContainer?.version &&
-                    it.derivedFromFk == source.resourceContainer?.id
+                    it.version == source.version &&
+                    it.derivedFromFk == source.id
         }
 
         val metadataEntity = if (matches.isEmpty()) {
@@ -272,7 +276,7 @@ class CollectionRepository(
 
                 // Insert ResourceMetadata into database
                 val entity = metadataMapper.mapToEntity(metadata)
-                entity.derivedFromFk = source.resourceContainer?.id
+                entity.derivedFromFk = source.id
                 entity.id = metadataDao.insert(entity, dsl)
                 entity
             }
@@ -283,12 +287,9 @@ class CollectionRepository(
         return metadataEntity
     }
 
-    private fun createResourceContainer(source: Collection, targetLanguage: Language): ResourceContainer {
-        val metadata = source.resourceContainer
-        metadata ?: throw NullPointerException("Source has no resource metadata")
-
+    private fun createResourceContainer(source: ResourceMetadata, targetLanguage: Language): ResourceContainer {
         val dublinCore = dublincore {
-            identifier = metadata.identifier
+            identifier = source.identifier
             issued = LocalDate.now().toString()
             modified = LocalDate.now().toString()
             language = language {
@@ -297,18 +298,18 @@ class CollectionRepository(
                 title = targetLanguage.name
             }
             creator = dublinCoreCreator
-            version = metadata.version
+            version = source.version
             format = MimeType.USFM.norm
-            subject = metadata.subject
+            subject = source.subject
             type = ContainerType.Book.slug
-            title = metadata.title
+            title = source.title
         }
         val directory = directoryProvider.getDerivedContainerDirectory(
             // A placeholder file is needed here for the mapping function
             // The file is never used, since the DP doesn't look at the directory
             // to generate the derived directory.
             dublinCore.mapToMetadata(File("."), targetLanguage),
-            metadata
+            source
         )
         val container = ResourceContainer.create(directory) {
             // Set up the manifest

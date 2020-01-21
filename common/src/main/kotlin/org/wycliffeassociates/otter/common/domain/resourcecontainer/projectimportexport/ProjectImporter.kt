@@ -11,12 +11,9 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -29,6 +26,7 @@ import java.util.regex.Pattern
 class ProjectImporter(
     private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
+    private val resourceRepository: IResourceRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
@@ -91,10 +89,11 @@ class ProjectImporter(
         importSources(zipFileReader)
 
         val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+        val sourceMetadata = sourceCollection.resourceContainer!!
 
-        val derivedProject = createDerivedProject(metadata, sourceCollection)
+        val derivedProject = createDerivedProject(metadata.language, sourceCollection, metadata.identifier)
 
-        importTakes(zipFileReader, derivedProject, manifestProject, sourceCollection.resourceContainer!!)
+        importTakes(zipFileReader, derivedProject, manifestProject, sourceMetadata)
     }
 
     private fun importTakes(
@@ -142,10 +141,10 @@ class ProjectImporter(
         }
     }
 
-    private fun createDerivedProject(metadata: ResourceMetadata, sourceCollection: Collection): Collection {
-        return CreateProject(collectionRepository)
-            .create(sourceCollection, metadata.language)
-            .blockingGet()
+    private fun createDerivedProject(language: Language, sourceCollection: Collection, resourceId: String): Collection {
+        return CreateProject(collectionRepository, resourceRepository)
+            .create(sourceCollection, language, resourceId)
+            .blockingSingle()
     }
 
     private fun findSourceCollection(manifestSources: Set<Source>, manifestProject: Project): Collection {

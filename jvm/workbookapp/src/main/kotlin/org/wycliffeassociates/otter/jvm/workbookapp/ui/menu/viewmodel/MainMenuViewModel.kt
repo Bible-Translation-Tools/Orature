@@ -60,6 +60,7 @@ class MainMenuViewModel : ViewModel() {
         showImportDialogProperty.value = true
 
         ImportResourceContainer(
+            injector.resourceRepository,
             injector.resourceContainerRepository,
             injector.collectionRepo,
             injector.contentRepository,

@@ -145,6 +145,7 @@ private class ImportEnvironment {
 
     val importer
         get() = ImportResourceContainer(
+            injector.resourceRepository,
             injector.resourceContainerRepository,
             injector.collectionRepo,
             injector.contentRepository,

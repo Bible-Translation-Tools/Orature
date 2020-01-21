@@ -1,16 +1,34 @@
 package org.wycliffeassociates.otter.common.domain.collections
 
-import io.reactivex.Single
+import io.reactivex.Observable
+import io.reactivex.rxkotlin.concatMapIterable
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 
 class CreateProject(
-    private val collectionRepo: ICollectionRepository
+    private val collectionRepo: ICollectionRepository,
+    private val resourceRepo: IResourceRepository
 ) {
-    fun create(sourceProject: Collection, targetLanguage: Language): Single<Collection> {
-        // Some concat maps can be removed when dao synchronization is added
-        if (sourceProject.resourceContainer == null) throw NullPointerException("Source project has no metadata")
-        return collectionRepo.deriveProject(sourceProject, targetLanguage)
+    /**
+     * Create derived collections for each source RC that has content in sourceProject's subtree, optionally
+     * limited to resourceId (if not null).
+     */
+    fun create(sourceProject: Collection, targetLanguage: Language, resourceId: String? = null): Observable<Collection> {
+        val sourceRc = sourceProject.resourceContainer
+            ?: throw NullPointerException("Source project has no metadata")
+
+        val helpRcs = Observable.fromCallable {
+            resourceRepo.getSubtreeResourceMetadata(sourceProject)
+        }.concatMapIterable()
+
+        val rcs = helpRcs
+            .startWith(sourceRc)
+            .filter { resourceId == null || resourceId == it.identifier }
+
+        return rcs.concatMapSingle {
+            collectionRepo.deriveProject(it, sourceProject, targetLanguage)
+        }
     }
 }
