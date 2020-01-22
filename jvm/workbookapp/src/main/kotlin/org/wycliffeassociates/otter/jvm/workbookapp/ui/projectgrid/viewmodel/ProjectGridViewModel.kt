@@ -17,7 +17,6 @@ class ProjectGridViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val collectionRepo = injector.collectionRepo
     private val workbookRepo = injector.workbookRepository
-    private val directoryProvider = injector.directoryProvider
 
     private val navigator: ChromeableStage by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
@@ -59,17 +58,9 @@ class ProjectGridViewModel : ViewModel() {
                 val workbook = workbookRepo.get(sourceProject, targetProject)
                 workbookViewModel.activeWorkbookProperty.set(workbook)
 
-                setProjectAudioDirectory(targetProject, sourceProject)
+                targetProject.resourceContainer?.let(workbookViewModel::setProjectAudioDirectory)
+
                 navigator.navigateTo(TabGroupType.CHAPTER)
             }
-    }
-
-    private fun setProjectAudioDirectory(targetProject: Collection, sourceProject: Collection) {
-        val projectAudioDir = directoryProvider.getProjectAudioDirectory(
-            source = sourceProject.resourceContainer ?: throw RuntimeException("No source metadata found."),
-            target = targetProject.resourceContainer,
-            book = targetProject
-        )
-        workbookViewModel.activeProjectAudioDirectoryProperty.set(projectAudioDir)
     }
 }

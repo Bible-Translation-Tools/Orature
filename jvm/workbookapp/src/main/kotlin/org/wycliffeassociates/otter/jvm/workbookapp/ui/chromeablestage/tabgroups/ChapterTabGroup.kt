@@ -29,8 +29,7 @@ class ChapterTabGroup : TabGroup() {
     }
 
     private fun shouldRestoreActiveResourceMetadata(metadataToRestore: ResourceMetadata?): Boolean {
-        return metadataToRestore != null &&
-                getAssociatedMetadatas().contains(metadataToRestore)
+        return metadataToRestore != null && getAssociatedMetadatas().contains(metadataToRestore)
     }
 
     private fun getTargetBookResourceMetadata(): ResourceMetadata {
@@ -58,6 +57,7 @@ class ChapterTabGroup : TabGroup() {
             add(CardGridFragment().root)
             onSelected {
                 workbookViewModel.activeResourceMetadataProperty.set(resourceMetadata)
+                workbookViewModel.setProjectAudioDirectory(resourceMetadata)
             }
         }
 
