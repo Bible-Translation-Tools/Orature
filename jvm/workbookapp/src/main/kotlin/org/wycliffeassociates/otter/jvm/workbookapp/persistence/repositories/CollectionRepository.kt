@@ -82,7 +82,11 @@ class CollectionRepository(
                     if (deleteAudio) {
                         val sourceMetadata = it.resourceContainer
                             ?: throw RuntimeException("No source metadata found.")
-                        val audioDirectory = directoryProvider.getProjectAudioDirectory(sourceMetadata, project)
+                        val audioDirectory = directoryProvider.getProjectAudioDirectory(
+                            source = sourceMetadata,
+                            target = project.resourceContainer,
+                            book = project
+                        )
                         audioDirectory.deleteRecursively()
                     }
                 }.ignoreElement()

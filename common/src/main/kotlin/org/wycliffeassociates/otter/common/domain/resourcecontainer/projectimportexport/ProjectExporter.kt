@@ -6,10 +6,9 @@ import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -102,7 +101,21 @@ class ProjectExporter(
             chaptersOnly -> chapters.cast()
             else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
         }
-        return bookElements.mapNotNull { chapterOrChunk -> chapterOrChunk.audio.selected.value?.value }
+        return bookElements
+            .flatMap { getAudioForCurrentResource(it) }
+            .mapNotNull { audio -> audio.selected.value?.value }
+    }
+
+    private fun getAudioForCurrentResource(bookElement: BookElement): Observable<AssociatedAudio> {
+        val matchingResourceGroup: ResourceGroup? =
+            bookElement.resources.firstOrNull { it.metadata.identifier == resourceMetadata.identifier }
+
+        return if (matchingResourceGroup != null) {
+            matchingResourceGroup.resources
+                .flatMapIterable { r -> listOfNotNull(r.title.audio, r.body?.audio) }
+        } else {
+            Observable.just(bookElement.audio)
+        }
     }
 
     private fun selectedChapterFilePaths(): Set<String> {

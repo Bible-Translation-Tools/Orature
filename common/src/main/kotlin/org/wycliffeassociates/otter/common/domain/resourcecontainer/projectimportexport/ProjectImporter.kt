@@ -93,16 +93,21 @@ class ProjectImporter(
 
         val derivedProject = createDerivedProject(metadata.language, sourceCollection, metadata.identifier)
 
-        importTakes(zipFileReader, derivedProject, manifestProject, metadata)
+        importTakes(zipFileReader, derivedProject, manifestProject, metadata, sourceMetadata)
     }
 
     private fun importTakes(
         zipFileReader: IZipFileReader,
         project: Collection,
         manifestProject: Project,
-        metadata: ResourceMetadata
+        metadata: ResourceMetadata,
+        sourceMetadata: ResourceMetadata
     ) {
-        val audioDir = directoryProvider.getProjectAudioDirectory(metadata, project)
+        val audioDir = directoryProvider.getProjectAudioDirectory(
+            source = sourceMetadata,
+            target = metadata,
+            book = project
+        )
 
         val selectedTakes = zipFileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
