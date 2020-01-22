@@ -511,13 +511,13 @@ return console.askYesNo(message, true);
   </installerGui>
   <mediaSets>
     <windows name="Windows" id="60">
-      <jreBundle jreBundleSource="preCreated" includedJre="windows-amd64-11.0.3" />
+      <jreBundle jreBundleSource="preCreated" includedJre="./windows-amd64-11.0.3.tar.gz" manualJreEntry="true" />
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158">
       <jreBundle jreBundleSource="preCreated" includedJre="./linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
     </linuxDeb>
     <macosFolder name="macOS Folder" id="166">
-      <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3" />
+      <jreBundle jreBundleSource="preCreated" includedJre="./macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
     </macosFolder>
     <unixInstaller name="Unix Installer" id="325">
       <jreBundle jreBundleSource="preCreated" includedJre="./linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
