@@ -3,7 +3,7 @@ dist: trusty
 jdk:
 - openjdk11
 env:
-- secure: GTjJ9fdRylI/1al+92ruelOpJ3NtqwQ+WK3Vappw/dSS1mjRwgaTs1yO5ed9WDUtg5UbNA+X2ZyY2k+uizAOB7af6Vbj33+hmVQG2jMtrhV/It8PJKfd+fvk54kVqIoqlQ2iVcFfmUMXViNOv1QcaDufEV5utRPjaGtgMKJvnMoFIPfqtQuz9Rz+OQz4viHoGyFsLsIKOuE/6j6qGZJQYTAlf8VmyYjvUKG9otALUx2Nv6xhOn6+cneuLJ9CU+/W1rlQaGBuf9w30sUP6h4clDGYljYRR7Hi9L0LDW0dZfJGE9rE1LUOamfS2tV0mLJWAcTNlsShSgP53wnKQoSK9A6krlqfeguvpAA6P/7XUBY0607PHwcfvo3rg5+wdvdyK4v5SOPJjQUqG3TSmAKMzbtzpa1YBkywXcIOEGkxp2eFUp/aO1JnEpI0USCBDkg7wp9izER7kyYBuvL2Y51MEVh4g7I60dnEeMi0D/GY2mRyPz/lToHubut0kX1NlwinnWrOGCnSbfcRE/zs4/xnKgPFJ+mP5/aotdKiibpxau7jy/EHaECVVlCBbkxFyySL43rPR5QXl9xZnwcc5ABvw5++Q0qny4Q1q7BEgKujA1MNu2hOXlP71qDOkeUYaJOVaBDo0AGVnVs1jV3WcgcdKVHFPcQNMyjd8tVfxLcghCI=
+- secure: "Nlu+D15N4JVUb1pv6Db+ZrRrHHDVyFO/BkIUYFu+8hyMsp8l+VlyaIBbzsgePPecNMkcJKN8y+sgrjEjSSgEXLyoSPJYMxv7ZFp4EaWhhGAU9KIJVw/o6RCHhjtcYo82kdrcwKPUXL86C4BmoNCqfMa1VJqVzyVgxX5iVIdBQESDo2m6/fposnA6B4Sxk1YsTiQ07scee5PX+pdjGdgfY9SRGEwOL8LuBLFOKoQCwvUjw0d/vGNCjSitqHotiMnkOrAZSafs17xAhG7lrNah/eRWdoAI7CBGQpxvhDY+d1/1vNd08jL0lTeLKKJ4oqYnrLzXYnYymyxKVEzOOnJbZS29CBNTDgLF/OrFjvqNP1OU9v8yudcA93zgMUl6OKxm7KIWGe15Xa74LvjJxRPtKkeUdt7E2uLQv1KM3IspYKbO/yieMJ+xB6KJSsxNdGtCmGJd09qNMm2Gu8HutAk5UokcEzpvCF6RTKilqs8FpVEVehjgF9djXtVtsZogzSIFu20S9SKDMc9mWOtI9Yy3gX3wBbJCq2PDDklaBQWpKV2E0es3fyvFaW/8MycIrKFmA4odKJ2JTsSvkrBUIz8FPqJ6MBiZ4wqBWaL5tn18pwIGpQh9/82UMtT88VQCDVUbctGlTsDH5S/UNi4P4tpHdTs4bU2/z3lMgxJbVgWVr3U="
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -f $HOME/.gradle/caches/*/plugin-resoloution/
@@ -12,9 +12,9 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper"
 before_install:
-- wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_7_0_12.tar.gz
-- tar -zxf install4j_unix_7_0_12.tar.gz
-- export INSTALL4JDIR="$(pwd)/install4j7.0.12"
+- wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_8_0_4.tar.gz
+- tar -zxf install4j_unix_8_0_4.tar.gz
+- export INSTALL4JDIR="$(pwd)/install4j8.0.4"
 - wget --no-verbose -P $INSTALL4JDIR/jres "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz"
 - wget --no-verbose -P $INSTALL4JDIR/jres "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz"
 - wget --no-verbose -P $INSTALL4JDIR/jres "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz"
