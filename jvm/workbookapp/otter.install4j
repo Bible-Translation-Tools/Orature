@@ -520,6 +520,8 @@ return console.askYesNo(message, true);
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158">
       <jreBundle jreBundleSource="preCreated" includedJre="linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
+      <postInstallScript>cp /opt/${compiler:sys.shortName}/${compiler:sys.shortName}.desktop ~/Desktop/
+gio set ~/Desktop/${compiler:sys.shortName}.desktop "metadata::trusted" yes</postInstallScript>
     </linuxDeb>
     <macosFolder name="macOS Folder" id="166">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3" manualJreEntry="true" />
