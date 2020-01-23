@@ -90,7 +90,7 @@ class ProjectImporter(
     ) {
         importSources(zipFileReader)
 
-        val sourceCollection = findSourceCollection(manifestSources)
+        val sourceCollection = findSourceCollection(manifestSources, manifestProject)
 
         val derivedProject = createDerivedProject(metadata, sourceCollection)
 
@@ -148,7 +148,7 @@ class ProjectImporter(
             .blockingGet()
     }
 
-    private fun findSourceCollection(manifestSources: Set<Source>): Collection {
+    private fun findSourceCollection(manifestSources: Set<Source>, manifestProject: Project): Collection {
         val allSourceProjects = collectionRepository.getSourceProjects().blockingGet()
         val sourceCollection: Collection? = allSourceProjects
             .asSequence()
@@ -157,6 +157,9 @@ class ProjectImporter(
                     ?.run { Source(identifier, language.slug, version) }
                     ?.let { it in manifestSources }
                     ?: false
+            }
+            .filter {
+                it.slug == manifestProject.identifier
             }
             .firstOrNull()
 
