@@ -524,8 +524,5 @@ return console.askYesNo(message, true);
     <macosFolder name="macOS Folder" id="166">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3" manualJreEntry="true" />
     </macosFolder>
-    <unixInstaller name="Unix Installer" id="325">
-      <jreBundle jreBundleSource="preCreated" includedJre="linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
-    </unixInstaller>
   </mediaSets>
 </install4j>

@@ -35,7 +35,6 @@ addons:
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
     - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-unix-0.1.0.${TRAVIS_BUILD_NUMBER}.sh"
 deploy:
   provider: releases
   api_key:
