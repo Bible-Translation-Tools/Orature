@@ -10,11 +10,9 @@ import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
+import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
-import org.wycliffeassociates.otter.common.data.model.MimeType
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -212,7 +210,7 @@ class CollectionRepository(
                     copyContent(dsl, sourceEntity.id, metadataEntity.id)
 
                     // Link the derivative content
-                    linkContent(dsl, sourceEntity.id, projectEntity.id)
+                    linkDerivativeContent(dsl, sourceEntity.id, projectEntity.id)
 
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
@@ -392,7 +390,7 @@ class CollectionRepository(
             ).execute()
     }
 
-    private fun linkContent(dsl: DSLContext, sourceId: Int, projectId: Int) {
+    private fun linkDerivativeContent(dsl: DSLContext, sourceId: Int, projectId: Int) {
         dsl.insertInto(
             CONTENT_DERIVATIVE,
             CONTENT_DERIVATIVE.CONTENT_FK,

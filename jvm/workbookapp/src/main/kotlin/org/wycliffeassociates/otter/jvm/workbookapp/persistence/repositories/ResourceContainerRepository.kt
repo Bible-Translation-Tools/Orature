@@ -19,7 +19,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceLinkEntity
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.resourceLinkEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
@@ -49,10 +49,12 @@ class ResourceContainerRepository(
             database.transaction { dsl ->
                 val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
                 val metadata = dublinCore.mapToMetadata(rc.file, language)
-                val dublinCoreFk = insertMetadataOrThrow(dsl, metadata)
+                    .let {
+                        insertMetadataOrThrow(dsl, it)
+                    }
 
                 val relatedDublinCoreIds: List<Int> =
-                    linkRelatedResourceContainers(dublinCoreFk, dublinCore.relation, dublinCore.creator, dsl)
+                    linkRelatedResourceContainers(metadata, dublinCore.relation, dublinCore.creator, dsl)
 
                 // TODO: Make enum
                 if (rc.type() == "help") {
@@ -60,11 +62,11 @@ class ResourceContainerRepository(
                         throw ImportException(ImportResult.UNMATCHED_HELP)
                     }
                     relatedDublinCoreIds.forEach { relatedId ->
-                        val ih = ImportHelper(dublinCoreFk, relatedId, dsl)
+                        val ih = ImportHelper(metadata, relatedId, dsl)
                         ih.import(rcTree)
                     }
                 } else {
-                    val ih = ImportHelper(dublinCoreFk, null, dsl)
+                    val ih = ImportHelper(metadata, null, dsl)
                     ih.import(rcTree)
                 }
             }
@@ -74,21 +76,25 @@ class ResourceContainerRepository(
             .subscribeOn(Schedulers.io())
     }
 
-    /** Insert ResourceMetadata, returning row ID, or throw [ImportException] if a matching row already exists. */
+    /**
+     * Insert metadata, return metadata modified to include row ID.
+     * @throws [ImportException] if a matching row already exists.
+     */
     private fun insertMetadataOrThrow(
         dsl: DSLContext,
         metadata: ResourceMetadata
-    ): Int {
+    ): ResourceMetadata {
         val existingRow = resourceMetadataDao.fetchLatestVersion(metadata.language.slug, metadata.identifier)
         if (existingRow != null) {
             throw ImportException(ImportResult.ALREADY_EXISTS)
         }
         val entity = ResourceMetadataMapper().mapToEntity(metadata)
-        return resourceMetadataDao.insert(entity, dsl)
+        val rowId = resourceMetadataDao.insert(entity, dsl)
+        return metadata.copy(id = rowId)
     }
 
     private fun linkRelatedResourceContainers(
-        dublinCoreFk: Int,
+        newDublinCore: ResourceMetadata,
         relations: List<String>,
         creator: String,
         dsl: DSLContext
@@ -105,7 +111,7 @@ class ResourceContainerRepository(
                 dsl = dsl
             )
                 ?.let { relatedDublinCore ->
-                    resourceMetadataDao.addLink(dublinCoreFk, relatedDublinCore.id, dsl)
+                    resourceMetadataDao.addLink(newDublinCore.id, relatedDublinCore.id, dsl)
                     relatedIds.add(relatedDublinCore.id)
                 }
         }
@@ -113,11 +119,11 @@ class ResourceContainerRepository(
     }
 
     inner class ImportHelper(
-        private val dublinCoreId: Int,
+        private val metadata: ResourceMetadata,
         private val relatedBundleDublinCoreId: Int?,
         private val dsl: DSLContext
     ) {
-        private val dublinCoreIdDslVal = DSL.`val`(dublinCoreId)
+        private val dublinCoreIdDslVal = DSL.`val`(metadata.id)
 
         fun import(node: OtterTreeNode<CollectionOrContent>) {
             importCollection(null, node)
@@ -135,29 +141,35 @@ class ResourceContainerRepository(
                 .map { it.id }
         }
 
-        private fun findCollectionId(collection: Collection, containerId: Int): Int? {
+        /** Finds a collection from the database that matches the given collection on slug, label, and containerId. */
+        private fun fetchCollectionFromDb(collection: Collection, containerId: Int): Collection? {
             val entity = collectionDao.fetch(
                 slug = collection.slug,
                 label = collection.labelKey,
                 containerId = containerId
             )
-            return entity?.id
-        }
 
-        private fun addCollection(collection: Collection, parentId: Int?): Int {
-            val entity = CollectionMapper().mapToEntity(collection).apply {
-                parentFk = parentId
-                dublinCoreFk = dublinCoreId
+            return entity?.let {
+                CollectionMapper().mapFromEntity(it, collection.resourceContainer)
             }
-            return collectionDao.insert(entity, dsl)
         }
 
-        private fun importCollection(parentId: Int?, node: OtterTreeNode<CollectionOrContent>): Int? {
-            val collectionId = (node.value as Collection).let { collection ->
+        /** Add collection to the database, return copy of collection that includes database row id. */
+        private fun addCollection(collection: Collection, parent: Collection?): Collection {
+            val entity = CollectionMapper().mapToEntity(collection).apply {
+                parentFk = parent?.id
+                dublinCoreFk = metadata.id
+            }
+            val insertedId = collectionDao.insert(entity, dsl)
+            return collection.copy(id = insertedId)
+        }
+
+        private fun importCollection(parent: Collection?, node: OtterTreeNode<CollectionOrContent>): Collection? {
+            val collection = (node.value as Collection).let { collection ->
                 when (relatedBundleDublinCoreId) {
-                    null -> addCollection(collection, parentId)
-                    else -> findCollectionId(collection, relatedBundleDublinCoreId)
-                    // TODO: If we don't find a corresponding collection, we continue on, passing null to collectionId.
+                    null -> addCollection(collection, parent)
+                    else -> fetchCollectionFromDb(collection, relatedBundleDublinCoreId)
+                    // TODO: If we don't find a corresponding collection, we continue on, setting collection = null.
                     // TODO: ... Eventually, contents will not be created if there is no parentId. This will happen for
                     // TODO: ... front matter until we have another solution.
                 }
@@ -165,54 +177,52 @@ class ResourceContainerRepository(
 
             val children = (node as? OtterTree<CollectionOrContent>)?.children
             if (children != null) {
-                if (collectionId != null) {
+                if (collection != null) {
                     val contents = children.filter { it.value is Content }
-                    importContent(collectionId, contents)
+                    importContent(collection, contents)
                 }
                 children
                     .filter { it.value is Collection }
                     .forEach {
-                        importCollection(collectionId, it)
+                        importCollection(collection, it)
                     }
-                if (collectionId != null) {
-                    linkChapterResources(collectionId)
-                    linkVerseResources(collectionId)
+                if (collection != null) {
+                    linkChapterResources(collection)
+                    linkVerseResources(collection)
                 }
             }
 
-            return collectionId
+            return collection
         }
 
-        private fun importContent(parentId: Int, nodes: List<OtterTreeNode<CollectionOrContent>>) {
+        private fun importContent(parent: Collection, nodes: List<OtterTreeNode<CollectionOrContent>>) {
             val entities = nodes
                 .mapNotNull { it.value as? Content }
-                .map { contentMapper.mapToEntity(it).apply { collectionFk = parentId } }
+                .map { contentMapper.mapToEntity(it).apply { collectionFk = parent.id } }
             if (entities.isNotEmpty()) contentDao.insertNoReturn(*entities.toTypedArray())
         }
 
-        private fun linkVerseResources(parentCollectionId: Int) {
+        private fun linkVerseResources(parentCollection: Collection) {
             @Suppress("UNCHECKED_CAST")
             val matchingVerses = contentDao.selectLinkableVerses(
                 primaryContentTypes,
                 helpContentTypes,
-                parentCollectionId,
+                parentCollection.id,
                 dublinCoreIdDslVal
             ) as Select<Record3<Int, Int, Int>>
 
             resourceLinkDao.insertContentResourceNoReturn(matchingVerses)
         }
 
-        private fun linkChapterResources(parentCollectionId: Int) {
-            val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollectionId, 0, helpContentTypes)
+        private fun linkChapterResources(parentCollection: Collection) {
+            val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollection.id, 0, helpContentTypes)
 
             val resourceEntities = chapterHelps
                 .map { helpContent ->
-                    ResourceLinkEntity(
-                        id = 0,
-                        resourceContentFk = helpContent.id,
-                        contentFk = null,
-                        collectionFk = parentCollectionId,
-                        dublinCoreFk = dublinCoreId
+                    resourceLinkEntity(
+                        resource = helpContent,
+                        collection = CollectionMapper().mapToEntity(parentCollection),
+                        metadata = ResourceMetadataMapper().mapToEntity(metadata)
                     )
                 }
                 .toTypedArray()
