@@ -8,6 +8,9 @@ import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
+import org.jooq.Record3
+import org.jooq.Select
+import org.jooq.impl.DSL
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
 import org.wycliffeassociates.otter.common.OratureInfo
@@ -20,6 +23,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.resourceLinkEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
@@ -38,9 +42,11 @@ class CollectionRepository(
 ) : ICollectionRepository {
 
     private val collectionDao = database.collectionDao
+    private val contentDao = database.contentDao
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
     private val contentTypeDao = database.contentTypeDao
+    private val resourceLinkDao = database.resourceLinkDao
 
     override fun delete(obj: Collection): Completable {
         return Completable
@@ -221,6 +227,8 @@ class CollectionRepository(
 
                     // Link the derivative content
                     linkDerivativeContent(dsl, sourceEntity.id, projectEntity.id)
+                    linkChapterResources(dsl, projectEntity, metadataEntity)
+                    linkVerseResources(dsl, projectEntity, metadataEntity)
 
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
@@ -483,6 +491,36 @@ class CollectionRepository(
                         )
                 )
         ).execute()
+    }
+
+    private fun linkVerseResources(
+        dsl: DSLContext,
+        parentCollection: CollectionEntity,
+        metadataEntity: ResourceMetadataEntity
+    ) {
+        @Suppress("UNCHECKED_CAST")
+        val matchingVerses = contentDao.selectLinkableVerses(
+            primaryContentTypes,
+            helpContentTypes,
+            parentCollection.id,
+            DSL.`val`(metadataEntity.id)
+        ) as Select<Record3<Int, Int, Int>>
+
+        resourceLinkDao.insertContentResourceNoReturn(matchingVerses, dsl)
+    }
+
+    private fun linkChapterResources(
+        dsl: DSLContext,
+        parentCollection: CollectionEntity,
+        metadataEntity: ResourceMetadataEntity
+    ) {
+        val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollection.id, 0, helpContentTypes)
+
+        val resourceEntities = chapterHelps
+            .map { helpContent -> resourceLinkEntity(helpContent, parentCollection, metadataEntity) }
+            .toTypedArray()
+
+        resourceLinkDao.insertNoReturn(*resourceEntities, dsl = dsl)
     }
 
     private fun buildCollection(entity: CollectionEntity): Collection {
