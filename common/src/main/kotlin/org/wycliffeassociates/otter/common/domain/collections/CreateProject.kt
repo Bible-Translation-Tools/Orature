@@ -20,31 +20,43 @@ class CreateProject(
         targetLanguage: Language,
         resourceId: String? = null
     ): Observable<Collection> {
+        // Find the source RC and its linked (help) RCs
         val sourceRc = sourceProject.resourceContainer
             ?: throw NullPointerException("Source project has no metadata")
-
-        val helpRcs = resourceMetadataRepo.getLinked(sourceRc)
+        val sourceLinkedRcs = resourceMetadataRepo.getLinked(sourceRc)
             .toObservable()
             .concatMapIterable()
-
-        val rcs = helpRcs
+        val sourceAndLinkedRcs = sourceLinkedRcs
             .startWith(sourceRc)
             .filter { resourceId == null || resourceId == it.identifier }
 
-        val derivedProjects = rcs.concatMapSingle {
-            collectionRepo.deriveProject(it, sourceProject, targetLanguage)
-        }.cache()
-
-        // Link RC-derived-from-sourceRC to RCs-derived-from-RCs-linked-to-sourceRC
-        val mainDerived = derivedProjects.firstElement().cache()
-        derivedProjects.subscribe {
-            val linkingRc = it.resourceContainer
-            val mainRc = mainDerived.blockingGet().resourceContainer
-            if (mainRc != linkingRc && mainRc != null && linkingRc != null) {
-                resourceMetadataRepo.addLink(mainRc, linkingRc).blockingAwait()
+        // Create derived projects for each of the sources
+        val derivedProjects = sourceAndLinkedRcs
+            .concatMapSingle {
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage)
             }
-        }
+            .cache()
+
+        linkDerivedRcs(derivedProjects)
 
         return derivedProjects
+    }
+
+    /**
+     *  Link RC-derived-from-sourceRC to RCs-derived-from-RCs-linked-to-sourceRC.
+     *  @param derivedProjects a CACHED observable, with the main project as the first element
+     */
+    private fun linkDerivedRcs(derivedProjects: Observable<Collection>) {
+        val mainDerived = derivedProjects.firstElement().cache()
+        val linkDerived = derivedProjects.skip(1)
+
+        linkDerived.subscribe {
+            it.resourceContainer?.let { linkingRc ->
+                mainDerived.blockingGet().resourceContainer?.let { mainRc ->
+
+                    resourceMetadataRepo.addLink(mainRc, linkingRc).blockingAwait()
+                }
+            }
+        }
     }
 }
