@@ -117,8 +117,6 @@ class ResourceContainerRepository(
         private val relatedBundleDublinCoreId: Int?,
         private val dsl: DSLContext
     ) {
-        private val mainContentTypes = listOf(ContentType.TEXT)
-        private val helpContentTypes = listOf(ContentType.TITLE, ContentType.BODY)
         private val dublinCoreIdDslVal = DSL.`val`(dublinCoreId)
 
         fun import(node: OtterTreeNode<CollectionOrContent>) {
@@ -195,7 +193,7 @@ class ResourceContainerRepository(
         private fun linkVerseResources(parentCollectionId: Int) {
             @Suppress("UNCHECKED_CAST")
             val matchingVerses = contentDao.selectLinkableVerses(
-                mainContentTypes,
+                primaryContentTypes,
                 helpContentTypes,
                 parentCollectionId,
                 dublinCoreIdDslVal
