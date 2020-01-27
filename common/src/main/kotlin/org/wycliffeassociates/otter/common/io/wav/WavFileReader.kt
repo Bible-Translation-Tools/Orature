@@ -13,17 +13,14 @@ class WavFileReader(val wav: WavFile) : AudioFileReader {
     override val framePosition: Int
         get() = mappedFile.position() / wav.frameSizeInBytes
 
-    private lateinit var mappedFile: MappedByteBuffer
-
-    init {
+    private val mappedFile: MappedByteBuffer =
         RandomAccessFile(wav.file, "r").use {
-            mappedFile = it.channel.map(
+            it.channel.map(
                 FileChannel.MapMode.READ_ONLY,
                 44,
                 wav.totalAudioLength.toLong()
             )
         }
-    }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
         val written = mappedFile.remaining().coerceAtMost(bytes.size)

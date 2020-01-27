@@ -18,22 +18,18 @@ class CueChunk : RiffChunk {
 
     val cues: List<WavCue> = mutableListOf()
 
-    private val cueListBuilder = CueListBuilder()
-
     val cueChunkSize: Int
         get() = CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
 
     override val totalSize: Int
-        get() = run {
-            return if (cues.isNotEmpty()) 4 + cueChunkSize + 12 + (12 * cues.size) + computeTextSize(cues) else 0
-        }
+        get() = if (cues.isNotEmpty()) 4 + cueChunkSize + 12 + (12 * cues.size) + computeTextSize(cues) else 0
 
     fun addCue(cue: WavCue) {
         cues as MutableList
         cues.add(cue)
     }
 
-    override fun create(): ByteArray {
+    override fun toByteArray(): ByteArray {
         if (cues.isEmpty()) {
             return ByteArray(0)
         }
@@ -97,14 +93,13 @@ class CueChunk : RiffChunk {
 
     private fun wordAlignedLabel(cue: WavCue): ByteArray {
         val label = cue.label
-        var alignedLength = cue.label.length
-        if (alignedLength % 4 != 0) {
-            alignedLength += 4 - alignedLength % 4
-        }
+        val alignedLength = getWordAlignedLength(cue.label.length)
         return label.toByteArray().copyOf(alignedLength)
     }
 
     override fun parse(chunk: ByteBuffer) {
+        val cueListBuilder = CueListBuilder()
+
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         cueListBuilder.clear()
         while (chunk.remaining() > 8) {
@@ -122,8 +117,8 @@ class CueChunk : RiffChunk {
             buffer.limit(buffer.position() + subchunkSize)
 
             when (subchunkLabel) {
-                LIST_LABEL -> parseLabels(buffer)
-                CUE_LABEL -> parseCue(buffer)
+                LIST_LABEL -> parseLabels(buffer, cueListBuilder)
+                CUE_LABEL -> parseCue(buffer, cueListBuilder)
                 else -> {
                 }
             }
@@ -154,7 +149,7 @@ class CueChunk : RiffChunk {
      *
      * @param chunk
      */
-    private fun parseCue(chunk: ByteBuffer) {
+    private fun parseCue(chunk: ByteBuffer, cueListBuilder: CueListBuilder) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         if (!chunk.hasRemaining()) {
             return
@@ -179,7 +174,7 @@ class CueChunk : RiffChunk {
         }
     }
 
-    private fun parseLabels(chunk: ByteBuffer) {
+    private fun parseLabels(chunk: ByteBuffer, cueListBuilder: CueListBuilder) {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
 
         // Skip List Chunks that are not subtype "adtl"
@@ -216,29 +211,23 @@ private class CueListBuilder() {
     fun addLocation(id: Int, location: Int?) {
         map[id]?.let {
             it.location = location
-        } ?: run {
-            map.put(id, TempCue(location, null))
-        }
+        } ?: map.put(id, TempCue(location, null))
     }
 
     fun addLabel(id: Int, label: String) {
         map[id]?.let {
             it.label = label
-        } ?: run {
-            map.put(id, TempCue(null, label))
-        }
+        } ?: map.put(id, TempCue(null, label))
     }
 
-    fun build(): MutableList<WavCue> {
-        val cues = mutableListOf<WavCue>()
-        for (cue in map.values) {
+    fun build(): List<WavCue> {
+        return map.values.mapNotNull { cue ->
             cue.location?.let { loc ->
                 cue.label?.let { label ->
-                    cues.add(WavCue(loc, label))
+                    WavCue(loc, label)
                 }
             }
         }
-        return cues
     }
 
     fun clear() {

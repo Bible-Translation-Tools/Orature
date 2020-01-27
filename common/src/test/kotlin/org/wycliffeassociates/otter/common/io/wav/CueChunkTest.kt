@@ -44,14 +44,15 @@ class CueChunkTest {
             for (cue in testCues) {
                 cues.addCue(cue)
             }
-            val outArray = cues.create()
-            cues.parse(ByteBuffer.wrap(outArray))
+            val outArray = cues.toByteArray()
+            val outParser = CueChunk()
+            outParser.parse(ByteBuffer.wrap(outArray))
 
-            val outCues = cues.cues
+            val outCues = outParser.cues
 
             assertEquals(testCues.size, outCues.size)
             for (cue in testCues) {
-                assertEquals(true, outCues.contains(cue))
+                assertTrue(outCues.contains(cue))
             }
         }
     }

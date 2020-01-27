@@ -4,6 +4,6 @@ import java.nio.ByteBuffer
 
 interface RiffChunk {
     fun parse(chunk: ByteBuffer)
-    fun create(): ByteArray
+    fun toByteArray(): ByteArray
     val totalSize: Int
 }

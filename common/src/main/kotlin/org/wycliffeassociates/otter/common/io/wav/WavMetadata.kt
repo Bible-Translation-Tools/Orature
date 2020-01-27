@@ -9,24 +9,14 @@ class WavMetadata {
     private val chunks = setOf<RiffChunk>(cueChunk)
 
     val totalSize
-        get() = run {
-            var sum = 0
-            for (chunk in chunks) {
-                sum += chunk.totalSize
-            }
-            sum
-        }
+        get() = chunks.sumBy { it.totalSize }
 
     fun parseMetadata(buffer: ByteBuffer) {
-        for (parser in chunks) {
-            parser.parse(buffer.slice())
-        }
+        chunks.forEach { it.parse(buffer.slice()) }
     }
 
     fun writeMetadata(out: OutputStream) {
-        for (chunk in chunks) {
-            out.write(chunk.create())
-        }
+        chunks.forEach { out.write(it.toByteArray()) }
     }
 
     fun addCue(location: Int, label: String) {

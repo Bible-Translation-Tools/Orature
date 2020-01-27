@@ -16,6 +16,7 @@ private const val DEFAULT_CHANNELS = 1
 private const val DEFAULT_BITS_PER_SAMPLE = 16
 
 internal const val HEADER_SIZE = 44
+private const val CHUNK_HEADER_SIZE = 8
 private const val AUDIO_LENGTH_LOCATION = 40
 private const val PCM_POSITION = 20
 private const val CHANNEL_POSITION = 22
@@ -93,11 +94,11 @@ class WavFile private constructor() {
     @Throws(IOException::class)
     fun finishWrite(totalAudioLength: Int) {
         this.totalAudioLength = totalAudioLength
-        this.totalDataLength = HEADER_SIZE - 8 + totalAudioLength + metadata.totalSize
+        this.totalDataLength = HEADER_SIZE - CHUNK_HEADER_SIZE + totalAudioLength + metadata.totalSize
     }
 
     fun initializeWavFile() {
-        totalDataLength = HEADER_SIZE - 8 // the 8 accounts for chunk id and chunk size fields
+        totalDataLength = HEADER_SIZE - CHUNK_HEADER_SIZE
         totalAudioLength = 0
 
         FileOutputStream(file, false).use {

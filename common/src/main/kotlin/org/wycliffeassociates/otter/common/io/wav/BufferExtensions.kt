@@ -12,6 +12,5 @@ internal fun ByteBuffer.getText(bytesToRead: Int, charset: Charset = Charsets.US
 }
 
 internal fun ByteBuffer.seek(bytesToSeek: Int) {
-    val bytes = ByteArray(bytesToSeek)
-    this.get(bytes)
+    this.position(this.position() + bytesToSeek)
 }
