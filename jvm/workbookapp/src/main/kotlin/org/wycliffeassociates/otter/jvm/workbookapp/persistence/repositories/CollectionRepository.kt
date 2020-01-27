@@ -10,6 +10,7 @@ import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
+import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
@@ -32,7 +33,8 @@ class CollectionRepository(
     private val directoryProvider: IDirectoryProvider,
     private val collectionMapper: CollectionMapper = CollectionMapper(),
     private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
-    private val languageMapper: LanguageMapper = LanguageMapper()
+    private val languageMapper: LanguageMapper = LanguageMapper(),
+    private val dublinCoreCreator: String = OratureInfo.SUITE_NAME
 ) : ICollectionRepository {
 
     private val collectionDao = database.collectionDao
@@ -256,7 +258,7 @@ class CollectionRepository(
         val matches = existingMetadata.filter {
             it.identifier == source.resourceContainer?.identifier &&
                     it.languageFk == language.id &&
-                    it.creator == "Orature" &&
+                    it.creator == dublinCoreCreator &&
                     it.version == source.resourceContainer?.version &&
                     it.derivedFromFk == source.resourceContainer?.id
         }
@@ -294,7 +296,7 @@ class CollectionRepository(
                 direction = targetLanguage.direction
                 title = targetLanguage.name
             }
-            creator = "Orature"
+            creator = dublinCoreCreator
             version = metadata.version
             format = MimeType.USFM.norm
             subject = metadata.subject
