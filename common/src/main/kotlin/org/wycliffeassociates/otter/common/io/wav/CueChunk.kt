@@ -81,12 +81,9 @@ class CueChunk : RiffChunk {
     }
 
     private fun computeTextSize(cues: List<WavCue>): Int {
-        var total = 0
-        for (i in cues.indices) {
-            val length = cues[i].label.length
-            total += getWordAlignedLength(length)
-        }
-        return total
+        return cues
+            .map { getWordAlignedLength(it.label.length) }
+            .sum()
     }
 
     private fun getWordAlignedLength(length: Int) = if (length % 4 != 0) length + 4 - (length % 4) else length
