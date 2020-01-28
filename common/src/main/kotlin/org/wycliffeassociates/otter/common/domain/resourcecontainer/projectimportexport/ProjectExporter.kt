@@ -97,7 +97,7 @@ class ProjectExporter(
 
     private fun fetchSelectedTakes(chaptersOnly: Boolean = false): Observable<Take> {
         val chapters = workbook.target.chapters
-        val bookElements = when {
+        val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
             else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
         }
@@ -107,14 +107,17 @@ class ProjectExporter(
     }
 
     private fun getAudioForCurrentResource(bookElement: BookElement): Observable<AssociatedAudio> {
-        val matchingResourceGroup: ResourceGroup? =
-            bookElement.resources.firstOrNull { it.metadata.identifier == resourceMetadata.identifier }
+        val isMainResourceActive = resourceMetadata.identifier == workbook.target.resourceMetadata.identifier
+        if (isMainResourceActive) {
+            return Observable.just(bookElement.audio)
+        }
 
-        return if (matchingResourceGroup != null) {
-            matchingResourceGroup.resources
-                .flatMapIterable { r -> listOfNotNull(r.title.audio, r.body?.audio) }
-        } else {
-            Observable.just(bookElement.audio)
+        val resourceGroup = bookElement.resources
+            .firstOrNull { it.metadata.identifier == resourceMetadata.identifier }
+            ?: return Observable.empty()
+
+        return resourceGroup.resources.flatMapIterable { resource ->
+            listOfNotNull(resource.title.audio, resource.body?.audio)
         }
     }
 
