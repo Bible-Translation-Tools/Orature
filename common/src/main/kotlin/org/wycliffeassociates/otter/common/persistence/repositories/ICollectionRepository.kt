@@ -17,7 +17,7 @@ interface ICollectionRepository : IRepository<Collection> {
     fun updateSource(collection: Collection, newSource: Collection): Completable
     fun updateParent(collection: Collection, newParent: Collection): Completable
     fun deriveProject(
-        sourceMetadata: ResourceMetadata,
+        sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
         language: Language
     ): Single<Collection>

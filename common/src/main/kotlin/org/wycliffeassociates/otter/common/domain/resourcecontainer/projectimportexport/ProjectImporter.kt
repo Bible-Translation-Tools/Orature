@@ -149,7 +149,7 @@ class ProjectImporter(
     private fun createDerivedProject(language: Language, sourceCollection: Collection, resourceId: String): Collection {
         return CreateProject(collectionRepository, resourceMetadataRepository)
             .create(sourceCollection, language, resourceId)
-            .blockingSingle()
+            .blockingGet()
     }
 
     private fun findSourceCollection(manifestSources: Set<Source>, manifestProject: Project): Collection {

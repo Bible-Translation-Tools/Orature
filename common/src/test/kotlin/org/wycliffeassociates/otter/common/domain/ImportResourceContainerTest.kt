@@ -113,7 +113,7 @@ class MockCollectionRepository : ICollectionRepository {
     }
 
     override fun deriveProject(
-        sourceMetadata: ResourceMetadata,
+        sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
         language: Language
     ): Single<Collection> {

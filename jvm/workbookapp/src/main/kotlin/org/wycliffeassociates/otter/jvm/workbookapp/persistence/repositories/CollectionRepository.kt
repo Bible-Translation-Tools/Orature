@@ -4,15 +4,15 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import jooq.Tables
+import jooq.Tables.RESOURCE_LINK
 import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
-import org.jooq.impl.DSL
 import org.jooq.impl.DSL.and
 import org.jooq.impl.DSL.field
 import org.jooq.impl.DSL.value
+import org.jooq.impl.DSL.*
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -44,6 +44,7 @@ class CollectionRepository(
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
     private val contentTypeDao = database.contentTypeDao
+    private val resourceMetadataDao = database.resourceMetadataDao
 
     override fun delete(obj: Collection): Completable {
         return Completable
@@ -200,40 +201,39 @@ class CollectionRepository(
     }
 
     override fun deriveProject(
-        sourceMetadata: ResourceMetadata,
+        sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
         language: Language
     ): Single<Collection> {
         return Single
             .fromCallable {
                 database.transactionResult { dsl ->
-                    val metadataEntity = findOrInsertMetadataEntity(dsl, sourceMetadata, language)
+
+                    val derivedMetadata = deriveAndLinkMetadata(sourceMetadatas, language, dsl)
+                    val mainDerivedMetadata = derivedMetadata.first()
 
                     // Insert the derived project
-                    val sourceEntity = collectionDao.fetchById(sourceCollection.id, dsl)
-                    val projectEntity = sourceEntity
-                        // parentFk null for now. May be non-null if derivative categories added
-                        .copy(id = 0, dublinCoreFk = metadataEntity.id, parentFk = null, sourceFk = sourceEntity.id)
-                    projectEntity.id = collectionDao.insert(projectEntity, dsl)
+                    val sourceCollectionEntity = collectionDao.fetchById(sourceCollection.id, dsl)
+                    val projectEntity = deriveProjectCollection(sourceCollectionEntity, mainDerivedMetadata, dsl)
 
                     // Copy the chapters
-                    copyChapters(dsl, sourceEntity.id, projectEntity.id, metadataEntity.id)
+                    copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
 
                     // Copy the content
-                    copyContent(dsl, sourceEntity.id, metadataEntity.id)
+                    copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
 
                     // Link the derivative content
-                    linkDerivativeContent(dsl, sourceEntity.id, projectEntity.id)
-                    copyResourceLinks(dsl, sourceEntity, projectEntity)
+                    linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+                    copyResourceLinks(dsl, sourceCollectionEntity, projectEntity)
 
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
-                    ResourceContainer.load(File(metadataEntity.path)).use { container ->
+                    ResourceContainer.load(File(mainDerivedMetadata.path)).use { container ->
                         if (container.manifest.projects.none { it.identifier == sourceCollection.slug }) {
                             container.manifest.projects = container.manifest.projects.plus(
                                 project {
                                     sort = if (
-                                        metadataEntity.subject.toLowerCase() == "bible" &&
+                                        mainDerivedMetadata.subject.toLowerCase() == "bible" &&
                                         projectEntity.sort > 39
                                     ) {
                                         projectEntity.sort + 1
@@ -253,11 +253,46 @@ class CollectionRepository(
                     }
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
-                        metadataMapper.mapFromEntity(metadataEntity, language)
+                        metadataMapper.mapFromEntity(mainDerivedMetadata, language)
                     )
                 }
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun deriveProjectCollection(
+        sourceEntity: CollectionEntity,
+        derivedMetadata: ResourceMetadataEntity,
+        dsl: DSLContext
+    ): CollectionEntity {
+        return sourceEntity
+            .copy(
+                id = 0,
+                parentFk = null,
+                dublinCoreFk = derivedMetadata.id,
+                sourceFk = sourceEntity.id
+            )
+            .let { derivedProject ->
+                val id = collectionDao.insert(derivedProject, dsl)
+                derivedProject.copy(id = id)
+            }
+    }
+
+    private fun deriveAndLinkMetadata(
+        sourceMetadatas: List<ResourceMetadata>,
+        newLanguage: Language,
+        dsl: DSLContext
+    ): List<ResourceMetadataEntity> {
+        val derivedMetadata = sourceMetadatas.map {
+            findOrInsertMetadataEntity(dsl, it, newLanguage)
+        }
+
+        val mainDerived = derivedMetadata.first()
+        val linkDerived = derivedMetadata.drop(1)
+        linkDerived.forEach {
+            resourceMetadataDao.addLink(mainDerived.id, it.id, dsl)
+        }
+        return derivedMetadata
     }
 
     private fun findOrInsertMetadataEntity(
@@ -421,41 +456,47 @@ class CollectionRepository(
 
         dsl
             .insertInto(
-                Tables.RESOURCE_LINK,
-                Tables.RESOURCE_LINK.RESOURCE_CONTENT_FK,
-                Tables.RESOURCE_LINK.DUBLIN_CORE_FK,
-                Tables.RESOURCE_LINK.COLLECTION_FK,
-                Tables.RESOURCE_LINK.CONTENT_FK
+                RESOURCE_LINK,
+                RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                RESOURCE_LINK.DUBLIN_CORE_FK,
+                RESOURCE_LINK.COLLECTION_FK,
+                RESOURCE_LINK.CONTENT_FK
             )
             .select(
                 dsl
                     .select(
                         derivedResourceColumn,
-                        DSL.`val`(project.dublinCoreFk),
+                        `val`(project.dublinCoreFk),
                         derivedCollectionColumn,
                         derivedContentColumn
                     )
-                    .from(Tables.RESOURCE_LINK)
+                    .from(RESOURCE_LINK)
                     // Map RESOURCE_CONTENT_FK to new resource fk, by joining two CONTENT_ENTITY tables on details.
-                    .join(sourceResourceCont).on(Tables.RESOURCE_LINK.RESOURCE_CONTENT_FK.eq(sourceResourceCont.ID))
-                    .join(derivedResourceCont).on(and(
-                        derivedResourceCont.TYPE_FK.eq(sourceResourceCont.TYPE_FK),
-                        derivedResourceCont.START.eq(sourceResourceCont.START),
-                        derivedResourceCont.COLLECTION_FK.eq(project.id)
-                    ))
+                    .join(sourceResourceCont).on(RESOURCE_LINK.RESOURCE_CONTENT_FK.eq(sourceResourceCont.ID))
+                    .join(derivedResourceCont).on(
+                        and(
+                            derivedResourceCont.TYPE_FK.eq(sourceResourceCont.TYPE_FK),
+                            derivedResourceCont.START.eq(sourceResourceCont.START),
+                            derivedResourceCont.COLLECTION_FK.eq(project.id)
+                        )
+                    )
                     // Map CONTENT_FK to new book content using CONTENT_DERIVATIVE table
-                    .leftJoin(CONTENT_DERIVATIVE).on(Tables.RESOURCE_LINK.CONTENT_FK.eq(CONTENT_DERIVATIVE.SOURCE_FK))
+                    .leftJoin(CONTENT_DERIVATIVE).on(RESOURCE_LINK.CONTENT_FK.eq(CONTENT_DERIVATIVE.SOURCE_FK))
                     // Map COLLECTION_FK to derived collection. Join two COLLECTION_ENTITY tables on details.
-                    .leftJoin(sourceColl).on(Tables.RESOURCE_LINK.COLLECTION_FK.eq(sourceColl.ID))
-                    .leftJoin(derivedColl).on(and(
-                        derivedColl.SLUG.eq(sourceColl.SLUG),
-                        derivedColl.LABEL.eq(sourceColl.LABEL),
-                        derivedColl.DUBLIN_CORE_FK.eq(project.dublinCoreFk ?: -1)
-                    ))
-                    .where(and(
-                        Tables.RESOURCE_LINK.DUBLIN_CORE_FK.eq(sourceCollectionEntity.dublinCoreFk ?: -1),
-                        DSL.or(derivedContentColumn.isNotNull, derivedCollectionColumn.isNotNull)
-                    ))
+                    .leftJoin(sourceColl).on(RESOURCE_LINK.COLLECTION_FK.eq(sourceColl.ID))
+                    .leftJoin(derivedColl).on(
+                        and(
+                            derivedColl.SLUG.eq(sourceColl.SLUG),
+                            derivedColl.LABEL.eq(sourceColl.LABEL),
+                            derivedColl.DUBLIN_CORE_FK.eq(project.dublinCoreFk ?: -1)
+                        )
+                    )
+                    .where(
+                        and(
+                            RESOURCE_LINK.DUBLIN_CORE_FK.eq(sourceCollectionEntity.dublinCoreFk ?: -1),
+                            or(derivedContentColumn.isNotNull, derivedCollectionColumn.isNotNull)
+                        )
+                    )
             ).execute()
     }
 
