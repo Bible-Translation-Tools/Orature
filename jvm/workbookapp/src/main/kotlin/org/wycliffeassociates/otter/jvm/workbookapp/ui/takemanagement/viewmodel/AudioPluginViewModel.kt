@@ -25,7 +25,7 @@ class AudioPluginViewModel : ViewModel() {
     fun record(recordable: Recordable): Single<RecordTake.Result> =
         recordTake.record(
             audio = recordable.audio,
-            projectAudioDir = workbookViewModel.projectAudioDirectory,
+            projectAudioDir = workbookViewModel.activeProjectAudioDirectory,
             namer = createFileNamer(recordable)
         )
 

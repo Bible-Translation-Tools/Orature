@@ -30,7 +30,7 @@ class WorkbookViewModel : ViewModel() {
         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeProjectAudioDirectoryProperty = SimpleObjectProperty<File>()
-    val projectAudioDirectory: File
+    val activeProjectAudioDirectory: File
         get() = activeProjectAudioDirectoryProperty.value
             ?: throw IllegalStateException("Project audio directory is null")
 

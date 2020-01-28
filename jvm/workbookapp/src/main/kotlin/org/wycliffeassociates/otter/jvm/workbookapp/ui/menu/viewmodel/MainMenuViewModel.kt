@@ -43,7 +43,7 @@ class MainMenuViewModel : ViewModel() {
         ProjectExporter(
             workbookVM.activeResourceMetadata,
             workbookVM.workbook,
-            workbookVM.projectAudioDirectory,
+            workbookVM.activeProjectAudioDirectory,
             directoryProvider
         ).export(directory)
             .observeOnFx()
