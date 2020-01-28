@@ -14,7 +14,7 @@ data class ResourceMetadata(
     val modified: LocalDate,
     val publisher: String,
     val subject: String,
-    val type: String,
+    val type: ContainerType,
     val title: String,
     val version: String,
     val path: File,

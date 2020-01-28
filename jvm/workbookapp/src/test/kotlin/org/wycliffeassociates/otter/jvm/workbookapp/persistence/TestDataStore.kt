@@ -25,7 +25,7 @@ object TestDataStore {
                     LocalDate.now(),
                     "Name of Publisher",
                     "Bible",
-                    "book",
+                    ContainerType.Book,
                     "Unlocked Literal Bible",
                     "3",
                     File("/path/to/my/container")
@@ -41,7 +41,7 @@ object TestDataStore {
                     LocalDate.now(),
                     "Allen & Unwin",
                     "Fiction",
-                    "book",
+                    ContainerType.Book,
                     "The Lord of the Rings",
                     "1",
                     File("/path/to/my/amazing/esource")

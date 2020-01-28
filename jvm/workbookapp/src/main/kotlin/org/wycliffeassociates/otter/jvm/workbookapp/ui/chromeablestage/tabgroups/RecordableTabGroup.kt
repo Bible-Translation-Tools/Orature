@@ -13,8 +13,9 @@ class RecordableTabGroup : TabGroup() {
         workbookViewModel.activeChunkProperty.set(null)
 
         when (workbookViewModel.activeResourceMetadata.type) {
-            ContainerType.Book.slug -> createChunkTab()
-            ContainerType.Help.slug -> createResourceTab()
+            ContainerType.Book -> createChunkTab()
+            ContainerType.Help -> createResourceTab()
+            else -> Unit
         }
     }
 

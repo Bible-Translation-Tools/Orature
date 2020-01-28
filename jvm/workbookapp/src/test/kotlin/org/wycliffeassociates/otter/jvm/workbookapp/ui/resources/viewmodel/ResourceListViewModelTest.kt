@@ -5,11 +5,9 @@ import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Observable
 import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.ContentType
-import org.wycliffeassociates.otter.common.data.model.Language
-import org.wycliffeassociates.otter.common.data.model.MimeType
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
@@ -33,7 +31,7 @@ class ResourceListViewModelTest : ViewModel() {
         modified = LocalDate.now(),
         publisher = "unfoldingWord",
         subject = "Translator Notes",
-        type = "help",
+        type = ContainerType.Help,
         title = "translationNotes",
         version = "1",
         path = File(".")
