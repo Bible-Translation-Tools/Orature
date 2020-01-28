@@ -227,8 +227,7 @@ class CollectionRepository(
 
                     // Link the derivative content
                     linkDerivativeContent(dsl, sourceEntity.id, projectEntity.id)
-                    linkChapterResources(dsl, projectEntity, metadataEntity)
-                    linkVerseResources(dsl, projectEntity, metadataEntity)
+                    linkResources(dsl, projectEntity, metadataEntity)
 
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
@@ -491,6 +490,20 @@ class CollectionRepository(
                         )
                 )
         ).execute()
+    }
+
+    private fun linkResources(
+        dsl: DSLContext,
+        parentCollection: CollectionEntity,
+        metadataEntity: ResourceMetadataEntity
+    ) {
+        linkChapterResources(dsl, parentCollection, metadataEntity)
+        linkVerseResources(dsl, parentCollection, metadataEntity)
+
+        val children = collectionDao.fetchChildren(parentCollection, dsl)
+        for (c in children) {
+            linkResources(dsl, c, metadataEntity)
+        }
     }
 
     private fun linkVerseResources(
