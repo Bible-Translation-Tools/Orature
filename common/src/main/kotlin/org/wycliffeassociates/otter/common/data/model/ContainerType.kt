@@ -6,11 +6,14 @@ package org.wycliffeassociates.otter.common.data.model
  * See Resource Container [Container Types](https://resource-container.readthedocs.io/en/latest/container_types.html)
  */
 enum class ContainerType(val slug: String) {
+    Bundle("bundle"),
     Book("book"),
     Help("help"),
+
+    @Deprecated("Type not supported")
     Dictionary("dict"),
-    Manual("man"),
-    Bundle("bundle");
+    @Deprecated("Type not supported")
+    Manual("man");
 
     companion object {
         private val map = values().associateBy { it.slug.toLowerCase() }
