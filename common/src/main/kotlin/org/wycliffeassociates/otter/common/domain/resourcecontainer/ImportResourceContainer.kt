@@ -5,6 +5,7 @@ import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
@@ -181,7 +182,9 @@ class ImportResourceContainer(
 
     private fun makeExpandedContainer(container: ResourceContainer): ImportResult {
         val dublinCore = container.manifest.dublinCore
-        if (dublinCore.type == "bundle" && MimeType.of(dublinCore.format) == MimeType.USFM) {
+        val containerType = ContainerType.of(dublinCore.type)
+        val mimeType = MimeType.of(dublinCore.format)
+        if (containerType == ContainerType.Bundle && mimeType == MimeType.USFM) {
             return if (container.expandUSFMBundle()) ImportResult.SUCCESS else ImportResult.INVALID_CONTENT
         }
         return ImportResult.SUCCESS
@@ -191,7 +194,7 @@ class ImportResourceContainer(
     private fun constructContainerTree(container: ResourceContainer): OtterTree<CollectionOrContent> {
         val projectReader = IProjectReader.build(
             format = container.manifest.dublinCore.format,
-            isHelp = container.manifest.dublinCore.type == "help"
+            isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help
         )
             ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
 
