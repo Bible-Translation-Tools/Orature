@@ -13,7 +13,7 @@ data class CardData(
     val chapterSource: Chapter? = null
 ) {
     constructor(chunk: Chunk) : this(
-        item = ContentLabel.VERSE.value,
+        item = ContentLabel.of(chunk.contentType).value,
         dataType = CardDataType.CONTENT.value,
         bodyText = chunk.start.toString(),
         sort = chunk.sort,

@@ -22,6 +22,13 @@ class RecordScriptureFragment : RecordableFragment(
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
+    private val takesList = TakesFlowPane(
+        recordableViewModel.alternateTakes,
+        audioPluginViewModel::audioPlayer,
+        lastPlayOrPauseEvent,
+        recordableViewModel::recordNewTake
+    )
+
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
@@ -69,16 +76,15 @@ class RecordScriptureFragment : RecordableFragment(
                     isFitToWidth = true
                     addClass(RecordScriptureStyles.scrollpane)
                     add(
-                        TakesFlowPane(
-                            recordableViewModel.alternateTakes,
-                            audioPluginViewModel::audioPlayer,
-                            lastPlayOrPauseEvent,
-                            recordableViewModel::recordNewTake
-                        )
+                        takesList
                     )
                 }
             }
         }
+    }
+
+    override fun closePlayers() {
+        takesList.closePlayers()
     }
 
     override fun createTakeCard(take: Take): TakeCard {

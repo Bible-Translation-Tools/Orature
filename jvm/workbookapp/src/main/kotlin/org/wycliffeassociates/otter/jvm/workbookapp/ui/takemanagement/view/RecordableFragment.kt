@@ -99,9 +99,12 @@ abstract class RecordableFragment(
             recordableViewModel.deleteTake(it.take)
         }
         addEventHandler(EditTakeEvent.EDIT_TAKE) {
+            closePlayers()
             recordableViewModel.editTake(it)
         }
     }
+
+    abstract fun closePlayers()
 
     private fun createSnackBar(pane: Pane) {
         // TODO: This doesn't actually handle anything correctly. Need to know whether the user

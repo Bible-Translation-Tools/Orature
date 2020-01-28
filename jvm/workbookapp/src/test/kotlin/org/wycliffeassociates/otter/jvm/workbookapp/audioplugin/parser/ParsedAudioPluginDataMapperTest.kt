@@ -6,18 +6,32 @@ import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import java.io.File
 
 class ParsedAudioPluginDataMapperTest {
+
+    var win = File.createTempFile("windows", ".exe").apply {
+        setExecutable(true)
+        deleteOnExit()
+    }
+    var linux = File.createTempFile("linux", ".exe").apply {
+        setExecutable(true)
+        deleteOnExit()
+    }
+    var mac = File.createTempFile("mac", ".exe").apply {
+        setExecutable(true)
+        deleteOnExit()
+    }
+
     val PLUGIN_PLATFORM_TABLE = listOf(
         mapOf(
             "os.name" to "Mac OS X",
-            "expectedExecutable" to "/Applications/Audacity.workbookapp/Contents/MacOS/Audacity"
+            "expectedExecutable" to mac.absolutePath
         ),
         mapOf(
             "os.name" to "Windows 10",
-            "expectedExecutable" to "C:\\Program Files (x86)\\Audacity\\audacity.exe"
+            "expectedExecutable" to win.absolutePath
         ),
         mapOf(
             "os.name" to "Linux",
-            "expectedExecutable" to "audacity"
+            "expectedExecutable" to linux.absolutePath
         )
     )
 
@@ -31,9 +45,9 @@ class ParsedAudioPluginDataMapperTest {
             true,
             false,
             ParsedExecutable(
-                "/Applications/Audacity.workbookapp/Contents/MacOS/Audacity",
-                "C:\\Program Files (x86)\\Audacity\\audacity.exe",
-                "audacity"
+                listOf(mac.absolutePath),
+                listOf(win.absolutePath),
+                listOf(linux.absolutePath)
             ),
             listOf("-t value")
         )
@@ -107,9 +121,9 @@ class ParsedAudioPluginDataMapperTest {
             true,
             false,
             ParsedExecutable(
-                "/Applications/Audacity.workbookapp/Contents/MacOS/Audacity",
-                "C:\\Program Files (x86)\\Audacity\\audacity.exe",
-                "audacity"
+                listOf(mac.absolutePath),
+                listOf(win.absolutePath),
+                listOf(linux.absolutePath)
             ),
             listOf("-t value")
         )
@@ -124,7 +138,7 @@ class ParsedAudioPluginDataMapperTest {
             inputPluginData.version,
             inputPluginData.canEdit,
             inputPluginData.canRecord,
-            "audacity",
+            linux.absolutePath,
             inputPluginData.args,
             inputPluginFile
         )

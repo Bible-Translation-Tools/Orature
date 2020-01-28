@@ -204,7 +204,7 @@ class CollectionRepository(
                 direction = targetLanguage.direction
                 title = targetLanguage.name
             }
-            creator = "otter"
+            creator = "Orature"
             version = metadata.version
             format = MimeType.USFM.norm
             subject = metadata.subject
@@ -239,7 +239,7 @@ class CollectionRepository(
                     val matches = existingMetadata.filter {
                         it.identifier == source.resourceContainer?.identifier &&
                                 it.languageFk == language.id &&
-                                it.creator == "otter" &&
+                                it.creator == "Orature" &&
                                 it.version == source.resourceContainer?.version &&
                                 it.derivedFromFk == source.resourceContainer?.id
                     }
