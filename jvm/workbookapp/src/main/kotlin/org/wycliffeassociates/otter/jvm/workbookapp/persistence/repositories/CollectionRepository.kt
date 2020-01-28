@@ -300,7 +300,7 @@ class CollectionRepository(
             version = metadata.version
             format = MimeType.USFM.norm
             subject = metadata.subject
-            type = "book"
+            type = ContainerType.Book.slug
             title = metadata.title
         }
         val directory = directoryProvider.getDerivedContainerDirectory(

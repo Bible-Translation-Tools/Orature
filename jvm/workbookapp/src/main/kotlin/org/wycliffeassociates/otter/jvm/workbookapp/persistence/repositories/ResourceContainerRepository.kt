@@ -56,8 +56,7 @@ class ResourceContainerRepository(
                 val relatedDublinCoreIds: List<Int> =
                     linkRelatedResourceContainers(metadata, dublinCore.relation, dublinCore.creator, dsl)
 
-                // TODO: Make enum
-                if (rc.type() == "help") {
+                if (ContainerType.of(rc.type()) == ContainerType.Help) {
                     if (relatedDublinCoreIds.isEmpty()) {
                         throw ImportException(ImportResult.UNMATCHED_HELP)
                     }
