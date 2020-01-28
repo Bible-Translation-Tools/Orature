@@ -5,6 +5,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.ContentLabel
@@ -16,7 +17,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class CardGridViewModel : ViewModel() {
-    private val workbookViewModel: WorkbookViewModel by inject()
+    val workbookViewModel: WorkbookViewModel by inject()
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -26,6 +27,8 @@ class CardGridViewModel : ViewModel() {
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(CardGridViewModel::loading)
 
+    var chapterOpen = SimpleBooleanProperty(false)
+    var chapterCard = SimpleObjectProperty<CardData?>(null)
     private val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 
     init {
@@ -51,11 +54,20 @@ class CardGridViewModel : ViewModel() {
         workbookViewModel.activeChapterProperty.onChange { chapter ->
             when (chapter) {
                 null -> workbookViewModel.activeWorkbookProperty.value?.let { workbook ->
+                    chapterOpen.set(false)
                     loadChapters(workbook)
                 }
-                else -> loadChapterContents(chapter)
+                else -> {
+                    chapterOpen.value = true
+                    loadChapterBanner()
+                    loadChapterContents(chapter)
+                }
             }
         }
+    }
+
+    private fun loadChapterBanner() {
+        chapterCard.value = allContent.firstOrNull { it.item == ContentLabel.CHAPTER.value }
     }
 
     private fun loadChapterContents(chapter: Chapter) {
@@ -70,7 +82,7 @@ class CardGridViewModel : ViewModel() {
             .observeOnFx()
             .toList()
             .subscribe { list: List<CardData> ->
-                allContent.setAll(list)
+                allContent.setAll(list.filter { it.item != ContentLabel.CHAPTER.value })
             }
     }
 

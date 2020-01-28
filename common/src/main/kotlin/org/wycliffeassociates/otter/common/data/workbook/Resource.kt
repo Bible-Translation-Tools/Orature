@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import org.wycliffeassociates.otter.common.data.model.ContentType
-import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
 
 data class Resource(
     val title: Component,
@@ -12,5 +12,5 @@ data class Resource(
         override val textItem: TextItem,
         override val audio: AssociatedAudio,
         override val contentType: ContentType
-    ) : Recordable
+    ) : ResourceRecordable
 }
