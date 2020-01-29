@@ -224,7 +224,9 @@ class CollectionRepository(
 
                     // Link the derivative content
                     linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
-                    copyResourceLinks(dsl, sourceCollectionEntity, projectEntity)
+
+                    val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
+                    copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
 
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
@@ -442,8 +444,8 @@ class CollectionRepository(
 
     private fun copyResourceLinks(
         dsl: DSLContext,
-        sourceCollectionEntity: CollectionEntity,
-        project: CollectionEntity
+        project: CollectionEntity,
+        metadataSourceToDerived: Map<ResourceMetadata, ResourceMetadataEntity>
     ) {
         val sourceResourceCont = CONTENT_ENTITY.`as`("sourceResourceContent")
         val derivedResourceCont = CONTENT_ENTITY.`as`("derivedResourceContent")
@@ -454,50 +456,52 @@ class CollectionRepository(
         val derivedCollectionColumn = derivedColl.ID
         val derivedResourceColumn = derivedResourceCont.ID
 
-        dsl
-            .insertInto(
-                RESOURCE_LINK,
-                RESOURCE_LINK.RESOURCE_CONTENT_FK,
-                RESOURCE_LINK.DUBLIN_CORE_FK,
-                RESOURCE_LINK.COLLECTION_FK,
-                RESOURCE_LINK.CONTENT_FK
-            )
-            .select(
-                dsl
-                    .select(
-                        derivedResourceColumn,
-                        `val`(project.dublinCoreFk),
-                        derivedCollectionColumn,
-                        derivedContentColumn
-                    )
-                    .from(RESOURCE_LINK)
-                    // Map RESOURCE_CONTENT_FK to new resource fk, by joining two CONTENT_ENTITY tables on details.
-                    .join(sourceResourceCont).on(RESOURCE_LINK.RESOURCE_CONTENT_FK.eq(sourceResourceCont.ID))
-                    .join(derivedResourceCont).on(
-                        and(
-                            derivedResourceCont.TYPE_FK.eq(sourceResourceCont.TYPE_FK),
-                            derivedResourceCont.START.eq(sourceResourceCont.START),
-                            derivedResourceCont.COLLECTION_FK.eq(project.id)
+        metadataSourceToDerived.forEach { sourceMetadata, derivedMetadata ->
+            dsl
+                .insertInto(
+                    RESOURCE_LINK,
+                    RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                    RESOURCE_LINK.DUBLIN_CORE_FK,
+                    RESOURCE_LINK.COLLECTION_FK,
+                    RESOURCE_LINK.CONTENT_FK
+                )
+                .select(
+                    dsl
+                        .select(
+                            derivedResourceColumn,
+                            `val`(derivedMetadata.id),
+                            derivedCollectionColumn,
+                            derivedContentColumn
                         )
-                    )
-                    // Map CONTENT_FK to new book content using CONTENT_DERIVATIVE table
-                    .leftJoin(CONTENT_DERIVATIVE).on(RESOURCE_LINK.CONTENT_FK.eq(CONTENT_DERIVATIVE.SOURCE_FK))
-                    // Map COLLECTION_FK to derived collection. Join two COLLECTION_ENTITY tables on details.
-                    .leftJoin(sourceColl).on(RESOURCE_LINK.COLLECTION_FK.eq(sourceColl.ID))
-                    .leftJoin(derivedColl).on(
-                        and(
-                            derivedColl.SLUG.eq(sourceColl.SLUG),
-                            derivedColl.LABEL.eq(sourceColl.LABEL),
-                            derivedColl.DUBLIN_CORE_FK.eq(project.dublinCoreFk ?: -1)
+                        .from(RESOURCE_LINK)
+                        // Map RESOURCE_CONTENT_FK to new resource fk, by joining two CONTENT_ENTITY tables on details.
+                        .join(sourceResourceCont).on(RESOURCE_LINK.RESOURCE_CONTENT_FK.eq(sourceResourceCont.ID))
+                        .join(derivedResourceCont).on(
+                            and(
+                                derivedResourceCont.TYPE_FK.eq(sourceResourceCont.TYPE_FK),
+                                derivedResourceCont.START.eq(sourceResourceCont.START),
+                                derivedResourceCont.COLLECTION_FK.eq(project.id)
+                            )
                         )
-                    )
-                    .where(
-                        and(
-                            RESOURCE_LINK.DUBLIN_CORE_FK.eq(sourceCollectionEntity.dublinCoreFk ?: -1),
-                            or(derivedContentColumn.isNotNull, derivedCollectionColumn.isNotNull)
+                        // Map CONTENT_FK to new book content using CONTENT_DERIVATIVE table
+                        .leftJoin(CONTENT_DERIVATIVE).on(RESOURCE_LINK.CONTENT_FK.eq(CONTENT_DERIVATIVE.SOURCE_FK))
+                        // Map COLLECTION_FK to derived collection. Join two COLLECTION_ENTITY tables on details.
+                        .leftJoin(sourceColl).on(RESOURCE_LINK.COLLECTION_FK.eq(sourceColl.ID))
+                        .leftJoin(derivedColl).on(
+                            and(
+                                derivedColl.SLUG.eq(sourceColl.SLUG),
+                                derivedColl.LABEL.eq(sourceColl.LABEL),
+                                derivedColl.DUBLIN_CORE_FK.eq(project.dublinCoreFk ?: -1)
+                            )
                         )
-                    )
-            ).execute()
+                        .where(
+                            and(
+                                or(derivedContentColumn.isNotNull, derivedCollectionColumn.isNotNull),
+                                RESOURCE_LINK.DUBLIN_CORE_FK.eq(sourceMetadata.id)
+                            )
+                        )
+                ).execute()
+        }
     }
 
     private fun linkDerivativeContent(dsl: DSLContext, sourceId: Int, projectId: Int) {
