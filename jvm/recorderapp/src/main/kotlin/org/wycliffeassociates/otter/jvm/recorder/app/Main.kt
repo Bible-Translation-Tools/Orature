@@ -1,0 +1,23 @@
+package org.wycliffeassociates.otter.jvm.recorder.app
+
+import javafx.application.Application
+
+/**
+ * @param args array of cli arguments
+ * options include:
+ *
+ * --wav= the filepath to write to
+ * --lang= the language name to display
+ * --book= the book name to display
+ * --chap= the text for "Chapter"
+ * --cnum= the chapter number
+ * --unit= the text for either "Verse" or "Chunk"
+ * --unum= the unit number
+ *
+ * All arguments are optional. By default the recording will be written to recording.wav and the
+ * display text will be the filename.
+ *
+ */
+fun main(args: Array<String>) {
+    Application.launch(RecordingApp::class.java, *args)
+}

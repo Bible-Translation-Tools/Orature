@@ -10,11 +10,12 @@ class RecorderView : PluginEntrypoint() {
 
     private var viewInflated = false
 
-    val info = InfoFragment()
-    val waveform = RecordingVisualizerFragment()
-    val control = ControlFragment()
+    private val info = InfoFragment()
+    private val waveform = RecordingVisualizerFragment()
+    private val control = ControlFragment()
+    private val source = SourceAudioFragment()
 
-    val recorderViewModel: RecorderViewModel by inject()
+    private val recorderViewModel: RecorderViewModel by inject()
 
     override val root = vbox {
         prefHeight = Screen.getPrimary().visualBounds.height - 50.0
@@ -22,6 +23,7 @@ class RecorderView : PluginEntrypoint() {
 
         add(info)
         add(waveform)
+        add(source)
         add(control)
     }
 
