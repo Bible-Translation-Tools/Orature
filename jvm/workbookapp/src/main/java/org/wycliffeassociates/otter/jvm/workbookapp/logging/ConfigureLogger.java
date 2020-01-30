@@ -4,6 +4,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.config.builder.api.*;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
+import org.wycliffeassociates.otter.common.OratureInfo;
+
 import java.io.File;
 
 
@@ -11,7 +13,7 @@ public class ConfigureLogger {
 
     private final String FILE_LOGGER_REF = "logfile";
     private final String CONSOLE_LOGGER_REF = "stdout";
-    private final String LOG_FILE_NAME = "orature";
+    private final String LOG_FILE_NAME = OratureInfo.SUITE_NAME.toLowerCase();
     private final String LOG_EXT = ".log";
 
     private File logDir;
