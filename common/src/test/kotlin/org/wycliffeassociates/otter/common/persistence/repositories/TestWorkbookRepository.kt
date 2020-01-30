@@ -33,7 +33,7 @@ class TestWorkbookRepository {
         modified = LocalDate.now(),
         publisher = "unfoldingWord",
         subject = "Bible",
-        type = "bundle",
+        type = ContainerType.Bundle,
         title = "Unlocked Literal Bible",
         version = "1",
         path = File(".")
@@ -52,7 +52,7 @@ class TestWorkbookRepository {
         modified = LocalDate.now(),
         publisher = "unfoldingWord",
         subject = "Translator Notes",
-        type = "help",
+        type = ContainerType.Help,
         title = "translationNotes",
         version = "1",
         path = File(".")

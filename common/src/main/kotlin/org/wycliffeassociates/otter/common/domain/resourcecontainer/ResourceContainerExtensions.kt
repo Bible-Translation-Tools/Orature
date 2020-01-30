@@ -1,13 +1,14 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.ParseUsfm
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 
 fun ResourceContainer.expandUSFMBundle(): Boolean {
-    manifest.dublinCore.type = "book"
+    manifest.dublinCore.type = ContainerType.Book.slug
     for (project in manifest.projects) {
         val result = project.expandUSFMProject(file)
         if (!result) return result

@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
+import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.view.CardGridFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.view.ResourceListFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
@@ -12,8 +13,9 @@ class RecordableTabGroup : TabGroup() {
         workbookViewModel.activeChunkProperty.set(null)
 
         when (workbookViewModel.activeResourceMetadata.type) {
-            "book" -> createChunkTab()
-            "help" -> createResourceTab()
+            ContainerType.Book -> createChunkTab()
+            ContainerType.Help -> createResourceTab()
+            else -> Unit
         }
     }
 
