@@ -14,7 +14,6 @@ import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
 import org.wycliffeassociates.otter.jvm.recorder.device.AudioRecorder
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
 import tornadofx.ViewModel
 import tornadofx.add
 import tornadofx.getValue
@@ -26,7 +25,7 @@ class RecorderViewModel : ViewModel() {
     val parameters = (scope as ParameterizedScope).parameters
     val wav = WavFile(File(parameters.named["wav"]), 1, 44100, 16)
     val recorder = AudioRecorder()
-    var volumeTest: AudioRecorder? = null //AudioRecorder()
+    var volumeTest: AudioRecorder? = null // AudioRecorder()
 
     val writer = WavFileWriter(wav, recorder.getAudioStream()) {
         (scope as ParameterizedScope).navigateBack()
@@ -37,7 +36,7 @@ class RecorderViewModel : ViewModel() {
 
     val fps = FramerateView()
 
-    //val volumeBar = VolumeBar(recorder.getAudioStream().mergeWith(volumeTest!!.getAudioStream()))
+    // val volumeBar = VolumeBar(recorder.getAudioStream().mergeWith(volumeTest!!.getAudioStream()))
 
     val timer = RecordingTimer()
     val timerTextProperty = SimpleStringProperty("00:00:00")
@@ -58,7 +57,7 @@ class RecorderViewModel : ViewModel() {
     }
 
     init {
-        //volumeBarView.addDrawable(volumeBar)
+        // volumeBarView.addDrawable(volumeBar)
         waveformView.addDrawable(BaseWaveLine())
         if (app.parameters.named.containsKey("debug")) {
             waveformView.add(fps)
