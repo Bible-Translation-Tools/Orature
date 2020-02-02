@@ -1,0 +1,49 @@
+.root {
+    -fx-font-size: 16px; /* This sets the base em value to 16px */
+    
+    /*Primary Color */
+    -primary: #015AD9;
+    -primary-light: #CEE6FF;
+    -primary-dark: #00377C;
+
+    /*Accent Color */
+    -accent: #FFB100;
+    -accent-light: #FFD671;
+    -accent-dark: #9E6600;
+
+    /* Gradients */
+    -cta-gradient: linear-gradient(to bottom, -accent-light, -accent);
+
+    /* Neutral Colors */
+    -gray-darker: rgba(26,26,26,1); /* Base text color and icon hover color */
+    -gray-dark: rgba(26,26,26,0.8); /* active icon */
+    -gray: rgba(26,26,26,0.6);  /* Disabled button text */
+    -gray-light: rgba(26,26,26,0.4);
+    -gray-lighter: rgba(26,26,26,0.1); /* used for disabled backgrounds, light borders */
+    -white: #ffffff;
+    -white-30: rgba(255,255,255,0.3); /* Used for CTA Border */
+    -transparent: rgba(255,255,255,0);
+    -background: #F7FAFF;   
+
+    /* Extra Colors */
+    -green: #1EDD76;    /* this is used as a confirmation or success indicator */
+    -green-dark: #004525;
+    -green-light: rgba(30, 221, 119, 0.3);
+
+    -purple: #8B00DE;
+    -purple-dark: #430193;
+    -purple-light: rgba(141, 0, 222, 0.3);
+
+    -orange: #FF342E;   /* this color is used as an error indicator */
+    -orange-dark: #900300;
+    -orange-light: rgba(255, 53, 46, 0.3);
+
+/* -------------------- Shadows --------------------*/
+    -level0: dropshadow(gaussian, rgba(0, 0, 0, 0.0), 0, 0, 0, 0); /* No Shadow */
+    -level1: dropshadow(gaussian, rgba(0, 0, 0, 0.24), 2, 0, 0, 1); /* [blur], [color], [radius], [choke], [x], [y] */
+    -level2: dropshadow(gaussian, rgba(0,0,0,0.23), 6, 0, 0, 3);
+    -level3: dropshadow(gaussian, rgba(0,0,0,0.23), 6, 0, 0, 6);
+    -level4: dropshadow(gaussian, rgba(0,0,0,0.22), 10, 0, 0, 10);
+    -level5: dropshadow(gaussian, rgba(0,0,0,0.22), 12, 0, 0, 15); /* Highest Priorty / Shadow */
+}
+

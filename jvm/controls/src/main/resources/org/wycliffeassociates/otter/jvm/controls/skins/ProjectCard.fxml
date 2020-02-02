@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="224.0" prefWidth="176.0" stylesheets="@../../../../../../../../../../../../../../Downloads/root.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER">
+         <children>
+            <Text fx:id="bookTitle" strokeType="OUTSIDE" strokeWidth="0.0" text="Book">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Text>
+            <HBox HBox.hgrow="ALWAYS" />
+            <FontIcon fx:id="cardMoreButton" iconLiteral="mdi-dots-vertical" iconSize="24" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </VBox.margin>
+      </HBox>
+      <StackPane prefHeight="128.0" prefWidth="176.0" style="-fx-background-color: ffc0cb;">
+         <children>
+            <Text fx:id="bookSlug" fill="#8d1919" strokeType="OUTSIDE" strokeWidth="0.0" text="Slug">
+               <font>
+                  <Font size="72.0" />
+               </font>
+            </Text>
+         </children>
+      </StackPane>
+      <JFXButton fx:id="cardPrimaryButton" prefHeight="40.0" prefWidth="160.0" styleClass="btn--secondary" stylesheets="@../../../../../../../../../../../../../../Downloads/Button.css">
+         <VBox.margin>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </VBox.margin>
+         <graphic>
+            <FontIcon iconLiteral="mdi-arrow-right" iconSize="22" />
+         </graphic>
+      </JFXButton>
+   </children>
+</VBox>
