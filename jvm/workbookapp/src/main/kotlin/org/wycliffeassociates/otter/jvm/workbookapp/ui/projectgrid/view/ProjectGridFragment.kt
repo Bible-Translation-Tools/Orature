@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.controls.card.ProjectCard
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
 import tornadofx.*
 
@@ -58,6 +57,7 @@ class ProjectGridFragment : Fragment() {
                     titleTextProperty().set(item.titleKey)
                     slugTextProperty().set(item.slug)
                     actionTextProperty().set(messages["openProject"])
+                    languageTextProperty().set(item.resourceContainer?.language?.name)
                     setOnAction {
                         viewModel.selectProject(item)
                     }
