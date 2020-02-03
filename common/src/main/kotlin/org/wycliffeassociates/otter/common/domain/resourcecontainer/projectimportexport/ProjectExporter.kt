@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class ProjectExporter(
-    private val resourceMetadata: ResourceMetadata,
+    private val projectMetadataToExport: ResourceMetadata,
     private val workbook: Workbook,
     private val projectAudioDirectory: File,
     private val directoryProvider: IDirectoryProvider
@@ -24,7 +24,7 @@ class ProjectExporter(
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     private val projectSourceMetadata = workbook.source.linkedResources
-        .firstOrNull { it.identifier == resourceMetadata.identifier }
+        .firstOrNull { it.identifier == projectMetadataToExport.identifier }
         ?: workbook.source.resourceMetadata
 
     fun export(directory: File): Single<ExportResult> {
@@ -54,7 +54,7 @@ class ProjectExporter(
         ResourceContainer
             .create(zipFile) {
                 val projectPath = "./${RcConstants.MEDIA_DIR}"
-                manifest = buildManifest(resourceMetadata, workbook, projectPath)
+                manifest = buildManifest(projectMetadataToExport, workbook, projectPath)
             }
             .use {
                 it.write()
@@ -107,13 +107,13 @@ class ProjectExporter(
     }
 
     private fun getAudioForCurrentResource(bookElement: BookElement): Observable<AssociatedAudio> {
-        val isMainResourceActive = resourceMetadata.identifier == workbook.target.resourceMetadata.identifier
-        if (isMainResourceActive) {
+        val projectToExportIsBook = projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
+        if (projectToExportIsBook) {
             return Observable.just(bookElement.audio)
         }
 
         val resourceGroup = bookElement.resources
-            .firstOrNull { it.metadata.identifier == resourceMetadata.identifier }
+            .firstOrNull { it.metadata.identifier == projectMetadataToExport.identifier }
             ?: return Observable.empty()
 
         return resourceGroup.resources.flatMapIterable { resource ->
