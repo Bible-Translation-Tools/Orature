@@ -70,6 +70,10 @@ install4j {
     if (project.hasProperty('gradlewCommandLicenseProp')) {
         license = gradlewCommandLicenseProp
     }
+    //gradle command Property for the code signing cert password
+    if (project.hasProperty('gradlewwinKeystorePassword')) {
+        winKeystorePassword = gradlewwinKeystorePassword
+    }
 }
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
