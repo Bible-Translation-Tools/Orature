@@ -164,6 +164,7 @@ dependencies {
 // tell gradle what to put in the jar
 shadowJar {
     archiveFileName = 'workbookapp.jar'
+    mergeServiceFiles()
     manifest {
         attributes(
                 'Main-Class': "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
