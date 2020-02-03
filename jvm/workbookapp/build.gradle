@@ -110,6 +110,11 @@ dependencies {
     implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
     implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
 
+    // Ikonli
+    implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
+
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofitVer"
     implementation "com.squareup.retrofit2:converter-moshi:$retrofitMoshiVer"
