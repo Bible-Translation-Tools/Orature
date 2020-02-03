@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
+import org.wycliffeassociates.otter.jvm.controls.card.ProjectCard
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
 import tornadofx.*
 
@@ -32,6 +33,11 @@ class ProjectGridFragment : Fragment() {
     }
 
     override val root = anchorpane {
+
+        importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/button.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/projectcard.css").toExternalForm())
+
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
         addClass(AppStyles.whiteBackground)
@@ -45,6 +51,8 @@ class ProjectGridFragment : Fragment() {
             }
             addClass(AppStyles.whiteBackground)
             addClass(ProjectGridStyles.projectsGrid)
+            cellWidthProperty.set(176.0)
+            cellHeightProperty.set(224.0)
             cellCache { item ->
                 projectcard {
                     titleTextProperty().set(item.titleKey)
