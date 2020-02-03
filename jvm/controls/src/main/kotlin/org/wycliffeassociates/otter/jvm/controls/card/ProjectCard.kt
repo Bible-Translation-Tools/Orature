@@ -12,12 +12,14 @@ import tornadofx.*
 class ProjectCard(
     private val title: String = "",
     private val slug: String = "",
+    private val language: String = "",
     private val actionText: String = ""
 ) : Control() {
 
     private val onPrimaryAction = SimpleObjectProperty<() -> Unit>()
     private val titleTextProperty = SimpleStringProperty(title)
     private val slugTextProperty = SimpleStringProperty(slug)
+    private val languageTextProperty = SimpleStringProperty(language)
     private val actionTextProperty = SimpleStringProperty(actionText)
 
     fun titleTextProperty(): StringProperty {
@@ -26,6 +28,10 @@ class ProjectCard(
 
     fun slugTextProperty(): StringProperty {
         return slugTextProperty
+    }
+
+    fun languageTextProperty(): StringProperty {
+        return languageTextProperty
     }
 
     fun actionTextProperty(): StringProperty {
@@ -46,6 +52,7 @@ class ProjectCard(
 fun EventTarget.projectcard(
     title: String = "",
     slug: String = "",
+    language: String = "",
     actionText: String = "",
     op: ProjectCard.() -> Unit = {}
-) = ProjectCard(title, slug, actionText).attachTo(this, op)
+) = ProjectCard(title, slug, language, actionText).attachTo(this, op)
