@@ -7,8 +7,8 @@ import org.wycliffeassociates.otter.common.data.model.ContentType.*
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import java.io.File
 
 class TestRcImport {
@@ -52,12 +52,13 @@ class TestRcImport {
     }
 
     @Test
-    fun ulbAndTn() {
+    fun ulbAndHelps() {
         ImportEnvironment()
             .import("en_ulb.zip")
             .import("en_tn.zip")
             .assertRowCounts(
-                Counts(
+                message = "Row counts after importing TN",
+                expected = Counts(
                     contents = mapOf(
                         META to 1189,
                         TEXT to 31103,
@@ -66,6 +67,20 @@ class TestRcImport {
                     ),
                     collections = 1256,
                     links = 157573
+                )
+            )
+            .import("en_tq-v19-10.zip")
+            .assertRowCounts(
+                message = "Row counts after importing TQ",
+                expected = Counts(
+                    contents = mapOf(
+                        META to 1189,
+                        TEXT to 31103,
+                        TITLE to 98520,
+                        BODY to 95805
+                    ),
+                    collections = 1256,
+                    links = 194315
                 )
             )
     }
@@ -165,12 +180,13 @@ private class ImportEnvironment {
         return this
     }
 
-    fun assertRowCounts(expected: Counts): ImportEnvironment {
+    fun assertRowCounts(expected: Counts, message: String? = null): ImportEnvironment {
         val contentsByType = db.contentDao.fetchAll()
             .groupBy { it.type_fk }
             .mapValues { it.value.count() }
             .mapKeys { db.contentTypeDao.fetchForId(it.key)!! }
         Assert.assertEquals(
+            message,
             expected,
             Counts(
                 collections = db.collectionDao.fetchAll().count(),
