@@ -34,6 +34,7 @@ dependencies {
     implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
 
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
 
     // Atlassian commonmark (for rendering markdown)
