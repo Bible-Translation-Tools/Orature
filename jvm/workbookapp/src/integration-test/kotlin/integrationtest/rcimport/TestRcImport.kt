@@ -1,24 +1,16 @@
 package integrationtest.rcimport
 
-import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.data.model.ContentType.*
-import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
-import java.io.File
 
 class TestRcImport {
 
     @Test
     fun ulb() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("en_ulb.zip")
             .assertRowCounts(
-                Counts(
+                RowCount(
                     contents = mapOf(
                         TEXT to 31103,
                         META to 1189
@@ -37,10 +29,10 @@ class TestRcImport {
      */
     @Test
     fun ulbFromWacs() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("en_ulb.zip", true)
             .assertRowCounts(
-                Counts(
+                RowCount(
                     contents = mapOf(
                         TEXT to 31104,
                         META to 1189
@@ -53,12 +45,12 @@ class TestRcImport {
 
     @Test
     fun ulbAndHelps() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("en_ulb.zip")
             .import("en_tn.zip")
             .assertRowCounts(
                 message = "Row counts after importing TN",
-                expected = Counts(
+                expected = RowCount(
                     contents = mapOf(
                         META to 1189,
                         TEXT to 31103,
@@ -72,7 +64,7 @@ class TestRcImport {
             .import("en_tq-v19-10.zip")
             .assertRowCounts(
                 message = "Row counts after importing TQ",
-                expected = Counts(
+                expected = RowCount(
                     contents = mapOf(
                         META to 1189,
                         TEXT to 31103,
@@ -87,10 +79,10 @@ class TestRcImport {
 
     @Test
     fun obsV6() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("obs-biel-v6.zip")
             .assertRowCounts(
-                Counts(
+                RowCount(
                     collections = 57,
                     contents = mapOf(
                         META to 55,
@@ -103,11 +95,11 @@ class TestRcImport {
 
     @Test
     fun obsAndTnV6() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("obs-biel-v6.zip")
             .import("obs-tn-biel-v6.zip")
             .assertRowCounts(
-                Counts(
+                RowCount(
                     contents = mapOf(
                         META to 55,
                         TEXT to 1314,
@@ -122,7 +114,7 @@ class TestRcImport {
 
     @Test
     fun obsSlugs() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("obs-biel-v6.zip")
             .assertSlugs(
                 "obs",
@@ -134,7 +126,7 @@ class TestRcImport {
 
     @Test
     fun ulbSlugs() {
-        ImportEnvironment()
+        DatabaseEnvironment()
             .import("en_ulb.zip")
             .assertSlugs(
                 "ulb",
@@ -144,106 +136,3 @@ class TestRcImport {
             )
     }
 }
-
-private class ImportEnvironment {
-    val persistenceComponent: TestPersistenceComponent =
-        DaggerTestPersistenceComponent
-            .builder()
-            .testDirectoryProviderModule(TestDirectoryProviderModule())
-            .build()
-    val db: AppDatabase = persistenceComponent.injectDatabase()
-    val injector = Injector(persistenceComponent = persistenceComponent)
-
-    init {
-        setUpDatabase()
-    }
-
-    val importer
-        get() = ImportResourceContainer(
-            injector.resourceMetadataRepository,
-            injector.resourceContainerRepository,
-            injector.collectionRepo,
-            injector.contentRepository,
-            injector.takeRepository,
-            injector.languageRepo,
-            injector.directoryProvider,
-            injector.zipEntryTreeBuilder
-        )
-
-    fun import(rcFile: String, importAsStream: Boolean = false): ImportEnvironment {
-        val result = if (importAsStream) {
-            importer.import(rcFile, rcResourceStream(rcFile)).blockingGet()
-        } else {
-            importer.import(rcResourceFile(rcFile)).blockingGet()
-        }
-        Assert.assertEquals(ImportResult.SUCCESS, result)
-        return this
-    }
-
-    fun assertRowCounts(expected: Counts, message: String? = null): ImportEnvironment {
-        val contentsByType = db.contentDao.fetchAll()
-            .groupBy { it.type_fk }
-            .mapValues { it.value.count() }
-            .mapKeys { db.contentTypeDao.fetchForId(it.key)!! }
-        Assert.assertEquals(
-            message,
-            expected,
-            Counts(
-                collections = db.collectionDao.fetchAll().count(),
-                contents = contentsByType,
-                links = db.resourceLinkDao.fetchAll().count()
-            )
-        )
-
-        return this
-    }
-
-    fun assertSlugs(
-        rcSlug: String,
-        vararg collectionSlug: CollectionDescriptor
-    ): ImportEnvironment {
-        val rc = db.resourceMetadataDao.fetchAll().firstOrNull { it.identifier == rcSlug }
-        Assert.assertNotNull("Retrieving resource container info", rc)
-
-        collectionSlug.forEach { (label, slug) ->
-            val entity = db.collectionDao.fetch(containerId = rc!!.id, label = label, slug = slug)
-            Assert.assertNotNull("Retrieving $label $slug", entity)
-        }
-
-        return this
-    }
-
-    private fun setUpDatabase() {
-        val langNames = ClassLoader.getSystemResourceAsStream("content/langnames.json")!!
-        ImportLanguages(langNames, injector.languageRepo)
-            .import()
-            .onErrorComplete()
-            .blockingAwait()
-    }
-
-    private fun rcResourceFile(rcFile: String) =
-        File(
-            TestRcImport::class.java.classLoader
-                .getResource("resource-containers/$rcFile")!!
-                .toURI()
-                .path
-        )
-
-    /**
-     * The path here should match that of the resource structure of main
-     */
-    private fun rcResourceStream(rcFile: String) =
-        TestRcImport::class.java.classLoader
-            .getResourceAsStream("content/$rcFile")!!
-}
-
-private data class Counts(
-    val collections: Int,
-    val links: Int,
-    val contents: Map<ContentType, Int>
-)
-
-private data class CollectionDescriptor(
-    val label: String,
-    val slug: String
-)
