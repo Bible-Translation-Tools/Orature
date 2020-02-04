@@ -72,7 +72,7 @@ class ContentDao(
     }
 
     /**
-     *  Build a JOOQ select statement that locates linkable resource/verse pairs within the given collection.
+     *  Build a JOOQ select statement that locates linkable verse/resource pairs within the given collection.
      *  Resources that are already linked are skipped.
      *  For convenience, [extraFields] will be appended in columns to the right of each row.
      */
@@ -104,7 +104,7 @@ class ContentDao(
     }
 
     /**
-     *  Build a JOOQ select statement that locates linkable chapter/verse pairs within the given collection.
+     *  Build a JOOQ select statement that locates linkable chapter/resource pairs within the given collection.
      *  Resources that are already linked are skipped.
      *  For convenience, [extraFields] will be appended in columns to the right of each row.
      */
