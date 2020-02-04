@@ -19,7 +19,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.resourceLinkEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
@@ -214,19 +213,14 @@ class ResourceContainerRepository(
         }
 
         private fun linkChapterResources(parentCollection: Collection) {
-            val chapterHelps = contentDao.fetchByCollectionIdAndStart(parentCollection.id, 0, helpContentTypes)
+            @Suppress("UNCHECKED_CAST")
+            val matchingVerses = contentDao.selectLinkableChapters(
+                helpContentTypes,
+                parentCollection.id,
+                dublinCoreIdDslVal
+            ) as Select<Record3<Int, Int, Int>>
 
-            val resourceEntities = chapterHelps
-                .map { helpContent ->
-                    resourceLinkEntity(
-                        resource = helpContent,
-                        collection = CollectionMapper().mapToEntity(parentCollection),
-                        metadata = ResourceMetadataMapper().mapToEntity(metadata)
-                    )
-                }
-                .toTypedArray()
-
-            resourceLinkDao.insertNoReturn(*resourceEntities, dsl = dsl)
+            resourceLinkDao.insertCollectionResourceNoReturn(matchingVerses)
         }
     }
 }

@@ -103,6 +103,36 @@ class ContentDao(
             .and(help.ID.notIn(existingLinkSubquery))
     }
 
+    /**
+     *  Build a JOOQ select statement that locates linkable chapter/verse pairs within the given collection.
+     *  Resources that are already linked are skipped.
+     *  For convenience, [extraFields] will be appended in columns to the right of each row.
+     */
+    fun selectLinkableChapters(
+        helpTypes: Collection<ContentType>,
+        collectionId: Int,
+        vararg extraFields: SelectFieldOrAsterisk,
+        dsl: DSLContext = instanceDsl
+    ): Select<Record> {
+        val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
+
+        val main = COLLECTION_ENTITY.`as`("main")
+        val help = CONTENT_ENTITY.`as`("help")
+        val existingLink = RESOURCE_LINK.`as`("existingLink")
+        val existingLinkSubquery = dsl.select(existingLink.RESOURCE_CONTENT_FK).from(existingLink)
+
+        return dsl
+            .select(main.ID, help.ID, *extraFields)
+            .from(main)
+            .join(help)
+            .onKey()
+            .where(main.ID.eq(collectionId))
+            .and(help.TYPE_FK.`in`(helpTypeIds))
+            .and(help.START.eq(0))
+            // Skip already-linked resources.
+            .and(help.ID.notIn(existingLinkSubquery))
+    }
+
     fun fetchSources(entity: ContentEntity, dsl: DSLContext = instanceDsl): List<ContentEntity> {
         val sourceIds = dsl
             .select(CONTENT_DERIVATIVE.SOURCE_FK)
