@@ -3,7 +3,7 @@ package integrationtest.projects
 import integrationtest.DaggerTestPersistenceComponent
 import integrationtest.TestDirectoryProviderModule
 import integrationtest.TestPersistenceComponent
-import jooq.Tables
+import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
@@ -52,21 +52,14 @@ class DatabaseEnvironment {
     }
 
     fun assertRowCounts(expected: RowCount, message: String? = null): DatabaseEnvironment {
-        val contentsByType = db.contentDao.fetchAll()
-            .groupBy { it.type_fk }
-            .mapValues { it.value.count() }
-            .mapKeys { db.contentTypeDao.fetchForId(it.key)!! }
-        Assert.assertEquals(
-            message,
-            expected,
-            RowCount(
-                collections = db.collectionDao.fetchAll().count(),
-                contents = contentsByType,
-                links = db.resourceLinkDao.fetchAll().count(),
-                derivatives = db.dsl.selectCount().from(Tables.CONTENT_DERIVATIVE).fetchOne(0) as Int
-            )
+        val actual = RowCount(
+            // These ?.let constructs let us skip comparing counts that aren't specified in [expected].
+            contents = expected.contents?.let { _ -> fetchContentRowCount() },
+            collections = expected.collections?.let { _ -> fetchCollectionRowCount() },
+            links = expected.links?.let { _ -> fetchLinkRowCount() },
+            derivatives = expected.derivatives?.let { _ -> fetchDerivativeRowCount() }
         )
-
+        Assert.assertEquals(message, expected, actual)
         return this
     }
 
@@ -110,6 +103,15 @@ class DatabaseEnvironment {
     private fun rcResourceStream(rcFile: String) =
         TestRcImport::class.java.classLoader
             .getResourceAsStream("content/$rcFile")!!
+
+    private fun fetchCollectionRowCount() = db.collectionDao.fetchAll().count()
+    private fun fetchLinkRowCount() = db.resourceLinkDao.fetchAll().count()
+    private fun fetchDerivativeRowCount() = db.dsl.selectCount().from(CONTENT_DERIVATIVE).fetchOne(0) as Int
+    private fun fetchContentRowCount() =
+        db.contentDao.fetchAll()
+            .groupBy { it.type_fk }
+            .mapValues { it.value.count() }
+            .mapKeys { db.contentTypeDao.fetchForId(it.key)!! }
 }
 
 data class CollectionDescriptor(
