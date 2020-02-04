@@ -1,4 +1,4 @@
-package integrationtest.rcimport
+package integrationtest
 
 import dagger.Module
 import dagger.Provides

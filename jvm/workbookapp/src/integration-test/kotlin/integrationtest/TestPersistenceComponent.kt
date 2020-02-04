@@ -1,4 +1,4 @@
-package integrationtest.rcimport
+package integrationtest
 
 import dagger.Component
 import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AppDatabaseModule

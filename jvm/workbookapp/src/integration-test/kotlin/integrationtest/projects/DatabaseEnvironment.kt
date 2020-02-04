@@ -1,5 +1,8 @@
-package integrationtest.rcimport
+package integrationtest.projects
 
+import integrationtest.DaggerTestPersistenceComponent
+import integrationtest.TestDirectoryProviderModule
+import integrationtest.TestPersistenceComponent
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer

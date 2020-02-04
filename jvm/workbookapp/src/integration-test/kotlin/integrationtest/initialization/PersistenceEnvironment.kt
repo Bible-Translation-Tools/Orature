@@ -1,6 +1,8 @@
 package integrationtest.initialization
 
-import integrationtest.rcimport.*
+import integrationtest.DaggerTestPersistenceComponent
+import integrationtest.TestDirectoryProviderModule
+import integrationtest.TestPersistenceComponent
 import org.wycliffeassociates.otter.assets.initialization.LANGNAMES_PATH
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase

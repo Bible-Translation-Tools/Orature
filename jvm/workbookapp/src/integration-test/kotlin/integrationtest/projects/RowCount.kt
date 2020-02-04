@@ -1,4 +1,4 @@
-package integrationtest.rcimport
+package integrationtest.projects
 
 import org.wycliffeassociates.otter.common.data.model.ContentType
 
