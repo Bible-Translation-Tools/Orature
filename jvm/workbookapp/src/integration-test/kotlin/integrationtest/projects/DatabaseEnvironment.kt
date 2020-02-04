@@ -5,6 +5,9 @@ import integrationtest.TestDirectoryProviderModule
 import integrationtest.TestPersistenceComponent
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
+import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -18,8 +21,9 @@ class DatabaseEnvironment {
             .builder()
             .testDirectoryProviderModule(TestDirectoryProviderModule())
             .build()
-    private val db: AppDatabase = persistenceComponent.injectDatabase()
-    private val injector =
+
+    val db: AppDatabase = persistenceComponent.injectDatabase()
+    val injector =
         Injector(persistenceComponent = persistenceComponent)
 
     init {
@@ -50,6 +54,11 @@ class DatabaseEnvironment {
         )
         return this
     }
+
+    fun createProject(sourceProject: Collection, targetLanguage: Language): Collection =
+        CreateProject(injector.collectionRepo, injector.resourceMetadataRepository)
+            .create(sourceProject, targetLanguage)
+            .blockingGet()
 
     fun assertRowCounts(expected: RowCount, message: String? = null): DatabaseEnvironment {
         val actual = RowCount(
