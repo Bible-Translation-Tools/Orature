@@ -3,6 +3,7 @@ package integrationtest.projects
 import integrationtest.DaggerTestPersistenceComponent
 import integrationtest.TestDirectoryProviderModule
 import integrationtest.TestPersistenceComponent
+import jooq.Tables
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
@@ -61,7 +62,8 @@ class DatabaseEnvironment {
             RowCount(
                 collections = db.collectionDao.fetchAll().count(),
                 contents = contentsByType,
-                links = db.resourceLinkDao.fetchAll().count()
+                links = db.resourceLinkDao.fetchAll().count(),
+                derivatives = db.dsl.selectCount().from(Tables.CONTENT_DERIVATIVE).fetchOne(0) as Int
             )
         )
 
