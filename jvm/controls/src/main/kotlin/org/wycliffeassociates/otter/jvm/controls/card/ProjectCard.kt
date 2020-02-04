@@ -3,8 +3,11 @@ package org.wycliffeassociates.otter.jvm.controls.card
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.Control
+import javafx.scene.control.Label
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.ProjectCardSkin
 import tornadofx.*
@@ -21,6 +24,8 @@ class ProjectCard(
     private val slugTextProperty = SimpleStringProperty(slug)
     private val languageTextProperty = SimpleStringProperty(language)
     private val actionTextProperty = SimpleStringProperty(actionText)
+
+    public val extraActions = FXCollections.observableArrayList<Label>()
 
     fun titleTextProperty(): StringProperty {
         return titleTextProperty
@@ -42,6 +47,10 @@ class ProjectCard(
 
     fun setOnAction(op: () -> Unit) {
         onPrimaryAction.set(op)
+    }
+
+    fun addActions(labels: List<Label>) {
+        extraActions.addAll(labels)
     }
 
     override fun createDefaultSkin(): Skin<*> {
