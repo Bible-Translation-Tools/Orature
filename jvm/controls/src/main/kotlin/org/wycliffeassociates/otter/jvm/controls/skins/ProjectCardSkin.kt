@@ -3,18 +3,21 @@ package org.wycliffeassociates.otter.jvm.controls.skins
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXListView
 import com.jfoenix.controls.JFXPopup
-import com.jfoenix.controls.JFXRippler
-import com.jfoenix.controls.JFXRippler.RipplerMask
-import com.jfoenix.controls.JFXRippler.RipplerPos
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.event.EventTarget
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
+import javafx.scene.layout.Priority
 import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.ProjectCard
-import tornadofx.onChange
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 
 class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(card) {
@@ -22,7 +25,7 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
     @FXML
     lateinit var bookTitle: Text
     @FXML
-    lateinit var cardMoreButton: FontIcon
+    lateinit var cardMoreButton: JFXButton
     @FXML
     lateinit var bookSlug: Text
     @FXML
@@ -30,7 +33,8 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
     @FXML
     lateinit var cardPrimaryButton: JFXButton
 
-    val list = JFXListView<Label>()
+    private val popup = JFXPopup()
+    private val list = JFXListView<Label>()
 
     init {
         loadFXML()
@@ -62,10 +66,26 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
     }
 
     private fun bindPopup() {
-        list.items = card.extraActions
-        val popup = JFXPopup(list)
-        cardMoreButton.setOnMouseClicked {
-            popup.show(cardMoreButton, JFXPopup.PopupVPosition.TOP, JFXPopup.PopupHPosition.LEFT)
+        card.secondaryActionsList.onChangeAndDoNow { actions ->
+            val popup = JFXPopup()
+            val items = actions.map { action ->
+                Label().apply {
+                    vgrow = Priority.ALWAYS
+                    text = action.text
+                    graphic = FontIcon(action.iconCode)
+                    setOnMouseClicked {
+                        action.onClicked.invoke()
+                    }
+                }
+            }
+            list.setOnMouseClicked {
+                popup.hide()
+            }
+            list.items.setAll(items)
+            popup.popupContent = list
+            cardMoreButton.setOnAction {
+                popup.show(cardMoreButton)
+            }
         }
     }
 
