@@ -93,7 +93,7 @@ class ProjectImporter(
 
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
-        importTakes(zipFileReader, derivedProject, manifestProject, metadata, sourceMetadata)
+        importTakes(zipFileReader, derivedProject, manifestProject, metadata, sourceMetadata, sourceCollection)
     }
 
     private fun importTakes(
@@ -101,8 +101,15 @@ class ProjectImporter(
         project: Collection,
         manifestProject: Project,
         metadata: ResourceMetadata,
-        sourceMetadata: ResourceMetadata
+        sourceMetadata: ResourceMetadata,
+        sourceCollection: Collection
     ) {
+        val collectionForTakes = when (metadata.type) {
+            // Work around the quirk that resource takes are attached to source, not target project
+            ContainerType.Help -> sourceCollection
+            else -> project
+        }
+
         val audioDir = directoryProvider.getProjectAudioDirectory(
             source = sourceMetadata,
             target = metadata,
@@ -119,7 +126,7 @@ class ProjectImporter(
                 zipFileReader.copyDirectory(audioDirInRc, audioDir, this::isAudioFile)
             }
             .subscribe { newTakeFile ->
-                insertTake(newTakeFile, audioDir, project, selectedTakes)
+                insertTake(newTakeFile, audioDir, collectionForTakes, selectedTakes)
             }
     }
 
