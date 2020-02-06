@@ -27,6 +27,9 @@ class ProjectExporter(
         .firstOrNull { it.identifier == projectMetadataToExport.identifier }
         ?: workbook.source.resourceMetadata
 
+    private val projectToExportIsBook: Boolean =
+        projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
+
     fun export(directory: File): Single<ExportResult> {
         return Single
             .fromCallable {
@@ -96,7 +99,11 @@ class ProjectExporter(
     }
 
     private fun fetchSelectedTakes(chaptersOnly: Boolean = false): Observable<Take> {
-        val chapters = workbook.target.chapters
+        val chapters = when {
+            projectToExportIsBook -> workbook.target.chapters
+            // Work around a quirk that records resource takes to the source tree
+            else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
+        }
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
             else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
@@ -107,7 +114,6 @@ class ProjectExporter(
     }
 
     private fun getAudioForCurrentResource(bookElement: BookElement): Observable<AssociatedAudio> {
-        val projectToExportIsBook = projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
         if (projectToExportIsBook) {
             return Observable.just(bookElement.audio)
         }
