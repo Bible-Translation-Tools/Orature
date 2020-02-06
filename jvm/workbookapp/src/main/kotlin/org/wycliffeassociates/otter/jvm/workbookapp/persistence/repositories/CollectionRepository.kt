@@ -4,12 +4,12 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import jooq.Tables.RESOURCE_LINK
 import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
-import org.jooq.impl.DSL.field
-import org.jooq.impl.DSL.value
+import org.jooq.impl.DSL.*
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -41,6 +41,7 @@ class CollectionRepository(
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
     private val contentTypeDao = database.contentTypeDao
+    private val resourceMetadataDao = database.resourceMetadataDao
 
     override fun delete(obj: Collection): Completable {
         return Completable
@@ -82,7 +83,11 @@ class CollectionRepository(
                     if (deleteAudio) {
                         val sourceMetadata = it.resourceContainer
                             ?: throw RuntimeException("No source metadata found.")
-                        val audioDirectory = directoryProvider.getProjectAudioDirectory(sourceMetadata, project)
+                        val audioDirectory = directoryProvider.getProjectAudioDirectory(
+                            source = sourceMetadata,
+                            target = project.resourceContainer,
+                            book = project
+                        )
                         audioDirectory.deleteRecursively()
                     }
                 }.ignoreElement()
@@ -192,36 +197,42 @@ class CollectionRepository(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun deriveProject(source: Collection, language: Language): Single<Collection> {
+    override fun deriveProject(
+        sourceMetadatas: List<ResourceMetadata>,
+        sourceCollection: Collection,
+        language: Language
+    ): Single<Collection> {
         return Single
             .fromCallable {
                 database.transactionResult { dsl ->
-                    val metadataEntity = findOrInsertMetadataEntity(dsl, source, language)
+
+                    val derivedMetadata = deriveAndLinkMetadata(sourceMetadatas, language, dsl)
+                    val mainDerivedMetadata = derivedMetadata.first()
 
                     // Insert the derived project
-                    val sourceEntity = collectionDao.fetchById(source.id, dsl)
-                    val projectEntity = sourceEntity
-                        // parentFk null for now. May be non-null if derivative categories added
-                        .copy(id = 0, dublinCoreFk = metadataEntity.id, parentFk = null, sourceFk = sourceEntity.id)
-                    projectEntity.id = collectionDao.insert(projectEntity, dsl)
+                    val sourceCollectionEntity = collectionDao.fetchById(sourceCollection.id, dsl)
+                    val projectEntity = deriveProjectCollection(sourceCollectionEntity, mainDerivedMetadata, dsl)
 
                     // Copy the chapters
-                    copyChapters(dsl, sourceEntity.id, projectEntity.id, metadataEntity.id)
+                    copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
 
                     // Copy the content
-                    copyContent(dsl, sourceEntity.id, metadataEntity.id)
+                    copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
 
                     // Link the derivative content
-                    linkDerivativeContent(dsl, sourceEntity.id, projectEntity.id)
+                    linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+
+                    val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
+                    copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
 
                     // Add a project to the container if necessary
                     // Load the existing resource container and see if we need to add another project
-                    ResourceContainer.load(File(metadataEntity.path)).use { container ->
-                        if (container.manifest.projects.none { it.identifier == source.slug }) {
+                    ResourceContainer.load(File(mainDerivedMetadata.path)).use { container ->
+                        if (container.manifest.projects.none { it.identifier == sourceCollection.slug }) {
                             container.manifest.projects = container.manifest.projects.plus(
                                 project {
                                     sort = if (
-                                        metadataEntity.subject.toLowerCase() == "bible" &&
+                                        mainDerivedMetadata.subject.toLowerCase() == "bible" &&
                                         projectEntity.sort > 39
                                     ) {
                                         projectEntity.sort + 1
@@ -241,26 +252,61 @@ class CollectionRepository(
                     }
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
-                        metadataMapper.mapFromEntity(metadataEntity, language)
+                        metadataMapper.mapFromEntity(mainDerivedMetadata, language)
                     )
                 }
             }
             .subscribeOn(Schedulers.io())
     }
 
+    private fun deriveProjectCollection(
+        sourceEntity: CollectionEntity,
+        derivedMetadata: ResourceMetadataEntity,
+        dsl: DSLContext
+    ): CollectionEntity {
+        return sourceEntity
+            .copy(
+                id = 0,
+                parentFk = null,
+                dublinCoreFk = derivedMetadata.id,
+                sourceFk = sourceEntity.id
+            )
+            .let { derivedProject ->
+                val id = collectionDao.insert(derivedProject, dsl)
+                derivedProject.copy(id = id)
+            }
+    }
+
+    private fun deriveAndLinkMetadata(
+        sourceMetadatas: List<ResourceMetadata>,
+        newLanguage: Language,
+        dsl: DSLContext
+    ): List<ResourceMetadataEntity> {
+        val derivedMetadata = sourceMetadatas.map {
+            findOrInsertMetadataEntity(dsl, it, newLanguage)
+        }
+
+        val mainDerived = derivedMetadata.first()
+        val linkDerived = derivedMetadata.drop(1)
+        linkDerived.forEach {
+            resourceMetadataDao.addLink(mainDerived.id, it.id, dsl)
+        }
+        return derivedMetadata
+    }
+
     private fun findOrInsertMetadataEntity(
         dsl: DSLContext,
-        source: Collection,
+        source: ResourceMetadata,
         language: Language
     ): ResourceMetadataEntity {
         // Check for existing resource containers
         val existingMetadata = metadataDao.fetchAll(dsl)
         val matches = existingMetadata.filter {
-            it.identifier == source.resourceContainer?.identifier &&
+            it.identifier == source.identifier &&
                     it.languageFk == language.id &&
                     it.creator == dublinCoreCreator &&
-                    it.version == source.resourceContainer?.version &&
-                    it.derivedFromFk == source.resourceContainer?.id
+                    it.version == source.version &&
+                    it.derivedFromFk == source.id
         }
 
         val metadataEntity = if (matches.isEmpty()) {
@@ -272,7 +318,7 @@ class CollectionRepository(
 
                 // Insert ResourceMetadata into database
                 val entity = metadataMapper.mapToEntity(metadata)
-                entity.derivedFromFk = source.resourceContainer?.id
+                entity.derivedFromFk = source.id
                 entity.id = metadataDao.insert(entity, dsl)
                 entity
             }
@@ -283,12 +329,13 @@ class CollectionRepository(
         return metadataEntity
     }
 
-    private fun createResourceContainer(source: Collection, targetLanguage: Language): ResourceContainer {
-        val metadata = source.resourceContainer
-        metadata ?: throw NullPointerException("Source has no resource metadata")
-
+    private fun createResourceContainer(source: ResourceMetadata, targetLanguage: Language): ResourceContainer {
+        val derivedContainerType = when (source.type) {
+            ContainerType.Bundle -> ContainerType.Book // Sources can be bundles, but not our derived containers.
+            else -> source.type
+        }
         val dublinCore = dublincore {
-            identifier = metadata.identifier
+            identifier = source.identifier
             issued = LocalDate.now().toString()
             modified = LocalDate.now().toString()
             language = language {
@@ -297,18 +344,18 @@ class CollectionRepository(
                 title = targetLanguage.name
             }
             creator = dublinCoreCreator
-            version = metadata.version
+            version = source.version
             format = MimeType.USFM.norm
-            subject = metadata.subject
-            type = ContainerType.Book.slug
-            title = metadata.title
+            subject = source.subject
+            type = derivedContainerType.slug
+            title = source.title
         }
         val directory = directoryProvider.getDerivedContainerDirectory(
             // A placeholder file is needed here for the mapping function
             // The file is never used, since the DP doesn't look at the directory
             // to generate the derived directory.
             dublinCore.mapToMetadata(File("."), targetLanguage),
-            metadata
+            source
         )
         val container = ResourceContainer.create(directory) {
             // Set up the manifest
@@ -392,6 +439,68 @@ class CollectionRepository(
             ).execute()
     }
 
+    private fun copyResourceLinks(
+        dsl: DSLContext,
+        project: CollectionEntity,
+        metadataSourceToDerived: Map<ResourceMetadata, ResourceMetadataEntity>
+    ) {
+        val sourceResourceCont = CONTENT_ENTITY.`as`("sourceResourceContent")
+        val derivedResourceCont = CONTENT_ENTITY.`as`("derivedResourceContent")
+        val sourceColl = COLLECTION_ENTITY.`as`("sourceCollectionTable")
+        val derivedColl = COLLECTION_ENTITY.`as`("derivedCollectionTable")
+
+        val derivedContentColumn = CONTENT_DERIVATIVE.CONTENT_FK
+        val derivedCollectionColumn = derivedColl.ID
+        val derivedResourceColumn = derivedResourceCont.ID
+
+        metadataSourceToDerived.forEach { sourceMetadata, derivedMetadata ->
+            dsl
+                .insertInto(
+                    RESOURCE_LINK,
+                    RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                    RESOURCE_LINK.DUBLIN_CORE_FK,
+                    RESOURCE_LINK.COLLECTION_FK,
+                    RESOURCE_LINK.CONTENT_FK
+                )
+                .select(
+                    dsl
+                        .select(
+                            derivedResourceColumn,
+                            `val`(derivedMetadata.id),
+                            derivedCollectionColumn,
+                            derivedContentColumn
+                        )
+                        .from(RESOURCE_LINK)
+                        // Map RESOURCE_CONTENT_FK to new resource fk, by joining two CONTENT_ENTITY tables on details.
+                        .join(sourceResourceCont).on(RESOURCE_LINK.RESOURCE_CONTENT_FK.eq(sourceResourceCont.ID))
+                        .join(derivedResourceCont).on(
+                            and(
+                                derivedResourceCont.TYPE_FK.eq(sourceResourceCont.TYPE_FK),
+                                derivedResourceCont.START.eq(sourceResourceCont.START),
+                                derivedResourceCont.COLLECTION_FK.eq(project.id)
+                            )
+                        )
+                        // Map CONTENT_FK to new book content using CONTENT_DERIVATIVE table
+                        .leftJoin(CONTENT_DERIVATIVE).on(RESOURCE_LINK.CONTENT_FK.eq(CONTENT_DERIVATIVE.SOURCE_FK))
+                        // Map COLLECTION_FK to derived collection. Join two COLLECTION_ENTITY tables on details.
+                        .leftJoin(sourceColl).on(RESOURCE_LINK.COLLECTION_FK.eq(sourceColl.ID))
+                        .leftJoin(derivedColl).on(
+                            and(
+                                derivedColl.SLUG.eq(sourceColl.SLUG),
+                                derivedColl.LABEL.eq(sourceColl.LABEL),
+                                derivedColl.DUBLIN_CORE_FK.eq(project.dublinCoreFk ?: -1)
+                            )
+                        )
+                        .where(
+                            and(
+                                or(derivedContentColumn.isNotNull, derivedCollectionColumn.isNotNull),
+                                RESOURCE_LINK.DUBLIN_CORE_FK.eq(sourceMetadata.id)
+                            )
+                        )
+                ).execute()
+        }
+    }
+
     private fun linkDerivativeContent(dsl: DSLContext, sourceId: Int, projectId: Int) {
         dsl.insertInto(
             CONTENT_DERIVATIVE,
@@ -421,11 +530,6 @@ class CollectionRepository(
                                         .select(COLLECTION_ENTITY.ID)
                                         .from(COLLECTION_ENTITY)
                                         .where(COLLECTION_ENTITY.PARENT_FK.eq(sourceId))
-                                ).and(
-                                    // Only create content derivative entries for text contents
-                                    CONTENT_ENTITY.TYPE_FK.eq(
-                                        contentTypeDao.fetchId(ContentType.TEXT)
-                                    )
                                 )
                             )
                         )

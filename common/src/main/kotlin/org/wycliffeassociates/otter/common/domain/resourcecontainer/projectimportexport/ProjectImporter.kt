@@ -11,12 +11,9 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -29,6 +26,7 @@ import java.util.regex.Pattern
 class ProjectImporter(
     private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
+    private val resourceMetadataRepository: IResourceMetadataRepository,
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
@@ -36,8 +34,16 @@ class ProjectImporter(
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
-    private val contentCache = mutableMapOf<ChapterVerse, Content>()
-    private val takeFilenamePattern = Pattern.compile("""_c(\d+)_v(\d+)_t(\d+)\.""")
+    private val contentCache = mutableMapOf<ContentSignature, Content>()
+    private val takeFilenamePattern = run {
+        val chapter = """_c(\d+)"""
+        val verse = """(?:_v(\d+))?"""
+        val sort = """(?:_s(\d+))?"""
+        val type = """(?:_([A-Za-z]+))?"""
+        val take = """_t(\d+)"""
+        val extensionDelim = """\."""
+        Pattern.compile(chapter + verse + sort + type + take + extensionDelim)
+    }
 
     fun isResumableProject(resourceContainer: File): Boolean {
         return try {
@@ -91,19 +97,32 @@ class ProjectImporter(
         importSources(zipFileReader)
 
         val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+        val sourceMetadata = sourceCollection.resourceContainer!!
 
-        val derivedProject = createDerivedProject(metadata, sourceCollection)
+        val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
-        importTakes(zipFileReader, derivedProject, manifestProject, sourceCollection.resourceContainer!!)
+        importTakes(zipFileReader, derivedProject, manifestProject, metadata, sourceMetadata, sourceCollection)
     }
 
     private fun importTakes(
         zipFileReader: IZipFileReader,
         project: Collection,
         manifestProject: Project,
-        sourceMetadata: ResourceMetadata
+        metadata: ResourceMetadata,
+        sourceMetadata: ResourceMetadata,
+        sourceCollection: Collection
     ) {
-        val audioDir = directoryProvider.getProjectAudioDirectory(sourceMetadata, project)
+        val collectionForTakes = when (metadata.type) {
+            // Work around the quirk that resource takes are attached to source, not target project
+            ContainerType.Help -> sourceCollection
+            else -> project
+        }
+
+        val audioDir = directoryProvider.getProjectAudioDirectory(
+            source = sourceMetadata,
+            target = metadata,
+            book = project
+        )
 
         val selectedTakes = zipFileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
@@ -115,7 +134,7 @@ class ProjectImporter(
                 zipFileReader.copyDirectory(audioDirInRc, audioDir, this::isAudioFile)
             }
             .subscribe { newTakeFile ->
-                insertTake(newTakeFile, audioDir, project, selectedTakes)
+                insertTake(newTakeFile, audioDir, collectionForTakes, selectedTakes)
             }
     }
 
@@ -125,8 +144,8 @@ class ProjectImporter(
         project: Collection,
         selectedTakes: Set<String>
     ) {
-        parseNumbers(filepath)?.let { (chapterVerse, takeNumber) ->
-            getContent(chapterVerse, project)?.let { chunk ->
+        parseNumbers(filepath)?.let { (sig, takeNumber) ->
+            getContent(sig, project)?.let { chunk ->
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
@@ -142,9 +161,9 @@ class ProjectImporter(
         }
     }
 
-    private fun createDerivedProject(metadata: ResourceMetadata, sourceCollection: Collection): Collection {
-        return CreateProject(collectionRepository)
-            .create(sourceCollection, metadata.language)
+    private fun createDerivedProjects(language: Language, sourceCollection: Collection): Collection {
+        return CreateProject(collectionRepository, resourceMetadataRepository)
+            .create(sourceCollection, language)
             .blockingGet()
     }
 
@@ -206,37 +225,43 @@ class ProjectImporter(
 
     private fun isAudioFile(file: File) = file.extension.toLowerCase().let { it == "wav" || it == "mp3" }
 
-    private fun getContent(cv: ChapterVerse, project: Collection): Content? {
-        return contentCache.computeIfAbsent(cv) { (c, v) ->
+    private fun getContent(sig: ContentSignature, project: Collection): Content? {
+        return contentCache.computeIfAbsent(sig) { (chapter, verse, sort, type) ->
             val collection: Observable<Collection> = collectionRepository
                 .getChildren(project)
                 .flattenAsObservable { it }
-                .filter { chapterCollection -> chapterCollection.slug.endsWith("_$c") }
+                .filter { chapterCollection -> chapterCollection.slug.endsWith("_$chapter") }
 
             val content: Maybe<Content> = collection
                 .flatMap {
                     contentRepository.getByCollection(it).flattenAsObservable { it }
                 }
-                .filter { content -> content.start == v }
-                .filter { content -> content.type == ContentType.TEXT }
+                // If type isn't specified in filename, match on TEXT.
+                .filter { content -> content.type == (type ?: ContentType.TEXT) }
+                // If verse number isn't specified in filename, assume chapter helps (verse 0).
+                .filter { content -> content.start == (verse ?: 0) }
+                // If sort isn't specified in filename, DON'T filter on it, because we only need it for helps.
+                .filter { content -> sort?.let { content.sort == sort } ?: true }
                 .firstElement()
 
             content.blockingGet()
         }
     }
 
-    private fun parseNumbers(filename: String): ChapterVerseTake? {
+    private fun parseNumbers(filename: String): TakeSignature? {
         val matcher = takeFilenamePattern.matcher(filename)
         return if (matcher.find()) {
             val chapter = matcher.group(1).toInt()
-            val verse = matcher.group(2).toInt()
-            val take = matcher.group(3).toInt()
-            ChapterVerseTake(ChapterVerse(chapter, verse), take)
+            val verse = matcher.group(2)?.toIntOrNull()
+            val sort = matcher.group(3)?.toIntOrNull()
+            val type = matcher.group(4)?.let { ContentType.of(it) }
+            val take = matcher.group(5).toInt()
+            TakeSignature(ContentSignature(chapter, verse, sort, type), take)
         } else {
             null
         }
     }
 
-    data class ChapterVerse(val chapter: Int, val verse: Int)
-    data class ChapterVerseTake(val chapterVerse: ChapterVerse, val take: Int)
+    data class ContentSignature(val chapter: Int, val verse: Int?, val sort: Int?, val type: ContentType?)
+    data class TakeSignature(val contentSignature: ContentSignature, val take: Int)
 }

@@ -23,7 +23,14 @@ enum class ContentType {
      * The ContentType for detail within a reference or supplemental work, always (so far) paired with (preceded by)
      * one or more elements of type [TITLE].
      */
-    BODY
+    BODY;
+
+    companion object {
+        fun of(s: String): ContentType? {
+            val lower = s.toLowerCase()
+            return values().firstOrNull { lower == it.name.toLowerCase() }
+        }
+    }
 }
 
 /** The set of ContentTypes for primary content. Only contains [ContentType.TEXT]. */

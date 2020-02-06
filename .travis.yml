@@ -3,7 +3,10 @@ dist: trusty
 jdk:
 - openjdk11
 env:
-- secure: "Nlu+D15N4JVUb1pv6Db+ZrRrHHDVyFO/BkIUYFu+8hyMsp8l+VlyaIBbzsgePPecNMkcJKN8y+sgrjEjSSgEXLyoSPJYMxv7ZFp4EaWhhGAU9KIJVw/o6RCHhjtcYo82kdrcwKPUXL86C4BmoNCqfMa1VJqVzyVgxX5iVIdBQESDo2m6/fposnA6B4Sxk1YsTiQ07scee5PX+pdjGdgfY9SRGEwOL8LuBLFOKoQCwvUjw0d/vGNCjSitqHotiMnkOrAZSafs17xAhG7lrNah/eRWdoAI7CBGQpxvhDY+d1/1vNd08jL0lTeLKKJ4oqYnrLzXYnYymyxKVEzOOnJbZS29CBNTDgLF/OrFjvqNP1OU9v8yudcA93zgMUl6OKxm7KIWGe15Xa74LvjJxRPtKkeUdt7E2uLQv1KM3IspYKbO/yieMJ+xB6KJSsxNdGtCmGJd09qNMm2Gu8HutAk5UokcEzpvCF6RTKilqs8FpVEVehjgF9djXtVtsZogzSIFu20S9SKDMc9mWOtI9Yy3gX3wBbJCq2PDDklaBQWpKV2E0es3fyvFaW/8MycIrKFmA4odKJ2JTsSvkrBUIz8FPqJ6MBiZ4wqBWaL5tn18pwIGpQh9/82UMtT88VQCDVUbctGlTsDH5S/UNi4P4tpHdTs4bU2/z3lMgxJbVgWVr3U="
+  matrix:
+  - secure: Nlu+D15N4JVUb1pv6Db+ZrRrHHDVyFO/BkIUYFu+8hyMsp8l+VlyaIBbzsgePPecNMkcJKN8y+sgrjEjSSgEXLyoSPJYMxv7ZFp4EaWhhGAU9KIJVw/o6RCHhjtcYo82kdrcwKPUXL86C4BmoNCqfMa1VJqVzyVgxX5iVIdBQESDo2m6/fposnA6B4Sxk1YsTiQ07scee5PX+pdjGdgfY9SRGEwOL8LuBLFOKoQCwvUjw0d/vGNCjSitqHotiMnkOrAZSafs17xAhG7lrNah/eRWdoAI7CBGQpxvhDY+d1/1vNd08jL0lTeLKKJ4oqYnrLzXYnYymyxKVEzOOnJbZS29CBNTDgLF/OrFjvqNP1OU9v8yudcA93zgMUl6OKxm7KIWGe15Xa74LvjJxRPtKkeUdt7E2uLQv1KM3IspYKbO/yieMJ+xB6KJSsxNdGtCmGJd09qNMm2Gu8HutAk5UokcEzpvCF6RTKilqs8FpVEVehjgF9djXtVtsZogzSIFu20S9SKDMc9mWOtI9Yy3gX3wBbJCq2PDDklaBQWpKV2E0es3fyvFaW/8MycIrKFmA4odKJ2JTsSvkrBUIz8FPqJ6MBiZ4wqBWaL5tn18pwIGpQh9/82UMtT88VQCDVUbctGlTsDH5S/UNi4P4tpHdTs4bU2/z3lMgxJbVgWVr3U=
+  global:
+  - secure: pEcSosqCWUi4u+7LSJcB0IXjdm7RDfa+iu4qSsUJojChA2R9umki0njrsiX5xb/JQjPU2Ics5nSzG2PAiFMm4oDteiQbHAwSmZoS15vr7zsitZmQBN2XLS6fmGxrsgQZko6nW+v97HDnUp/4SRTrA7gtJC0OhK2l4nItZKkSfDV29iB516WYCPLHMIEwf2tLg0PlA6wyy5dbtEtHxoazUCTAW+Kugibt/quYLbvGj3nEavzNXA6+2OSERIFhKL/ml9lvcN6c8pmK9/dunggdRZGAqkFAW7om5pw6Wep+vcWj3WyVjBzrcCkaSci5MBL5KFh5lMQYP8RzfI8XFu8GvnBW/30E2FMfxCs4Rw8TjG+wOfadTv8jWS1UnQSCpe7hnYGHrjt3tFYKKDSNyqr7on3mF7IV/MNE3RaqalX87uyF+x1jN91kfaXsrfuEtg1vkCAp/IBeGDerUR8eymfdpUOyoeqoON6z90ZV+nXYgZJ+AJJtuFCtzlT3EtL7fxjiDc6GOdpA4C153hPAtuhbbVf7ZaZgWdRVV7i8o1qPHKlkmEhgjnysYyRbLapIZNKA5ycCS05c3yP2M/KRzY5qYp08qukAOjo9wmyz+3iOLfINGO8YxZyM6aWw+AiTcMZ+ANhSOXt6LL51XkJzwaHiKJu8UVql5G8bK5COy80t/jc=
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
 - rm -f $HOME/.gradle/caches/*/plugin-resoloution/
@@ -12,6 +15,8 @@ cache:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper"
 before_install:
+- openssl aes-256-cbc -K $encrypted_c9743a57a079_key -iv $encrypted_c9743a57a079_iv
+  -in signing.p12.enc -out $HOME/signing.p12 -d
 - wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_8_0_4.tar.gz
 - tar -zxf install4j_unix_8_0_4.tar.gz
 - export INSTALL4JDIR="$(pwd)/install4j8.0.4"
@@ -23,7 +28,7 @@ jobs:
   include:
   - stage: build
     script:
-    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR :jvm:workbookapp:install4jdeploy"
+    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW :jvm:workbookapp:install4jdeploy"
 stages:
 - build
 addons:
@@ -40,9 +45,9 @@ deploy:
   api_key:
     secure: LRAYPt/rUQGYht5N392POYbbx6miXQ3uf1WMg81gPAFo9VmUtAjns4fsdq39/6sU3bYsXElbSihNOAUXgMSXTpP9GoBiFJVpkpchMsrxuPs5gl1HDTUKvJPDlEH6EC+j+dPWeWBOe/m1yHIjLyc1JfyDtWOvoHSoNI7or7JXpGv5wAyMjHfgrwkuFc7cfK/WrKFBL0JJQW3YHs379IVLJ9+mAQCnj0RVg7YWvvz8Le0EeFJwXUKhYL9dWqYxqKmhKCiXEG4MlVhnozUjBbqvsph8gLPLwZQFbTwBlQikz+UnrQFC2IccwlTzQRk3dE9U33worQjO9VeEiYXtvq0vYuX8+X85b7biQAE2Kan4RFR3IlU75lcQ8BSIzZnwr0ry6nUSwdqO8cxRqq6P2KS2B//d+y7u4jlKi43LGVklOQyRTmNbl4/gx6U+CWQzOpytbH5b3izZFqQbpYBPcgxDtcl/DVD+W0As3PbjvDXDZBBkhcuilDzsvBxG1TX3pMeuwSu2EOVUtoUOeoBRT12JjE4y4LluVsABkVQEZFRPfNZsukhaEqRkfcKlUpcpnLBA16S30vjUtVwfiwIognJEDkHxyFFRKA7aFWRVLb1uoV7Z96TzQeNLRyS49n4JF+kdJn95eNsiNfuktYY45+Z7UDZB5bvHy82tPBQcCxd69no=
   file:
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
-    - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
+  - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-linux-0.1.0.${TRAVIS_BUILD_NUMBER}.deb"
+  - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-macos-0.1.0.${TRAVIS_BUILD_NUMBER}.dmg"
+  - "/home/travis/build/Bible-Translation-Tools/otter/jvm/workbookapp/.exec/orature-windows-x64-0.1.0.${TRAVIS_BUILD_NUMBER}.exe"
   skip_cleanup: true
   file_glob: true
   on:

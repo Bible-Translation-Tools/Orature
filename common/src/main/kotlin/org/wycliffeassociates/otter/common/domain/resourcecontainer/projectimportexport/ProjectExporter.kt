@@ -6,10 +6,9 @@ import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -17,12 +16,19 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class ProjectExporter(
-    private val resourceMetadata: ResourceMetadata,
+    private val projectMetadataToExport: ResourceMetadata,
     private val workbook: Workbook,
     private val projectAudioDirectory: File,
     private val directoryProvider: IDirectoryProvider
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
+
+    private val projectSourceMetadata = workbook.source.linkedResources
+        .firstOrNull { it.identifier == projectMetadataToExport.identifier }
+        ?: workbook.source.resourceMetadata
+
+    private val projectToExportIsBook: Boolean =
+        projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
 
     fun export(directory: File): Single<ExportResult> {
         return Single
@@ -51,7 +57,7 @@ class ProjectExporter(
         ResourceContainer
             .create(zipFile) {
                 val projectPath = "./${RcConstants.MEDIA_DIR}"
-                manifest = buildManifest(resourceMetadata, workbook, projectPath)
+                manifest = buildManifest(projectMetadataToExport, workbook, projectPath)
             }
             .use {
                 it.write()
@@ -60,9 +66,11 @@ class ProjectExporter(
 
     /** Export a copy of the source RCs for the current book and the current project. */
     private fun copySourceResources(zipWriter: IZipFileWriter) {
-        sequenceOf(resourceMetadata, workbook.source.resourceMetadata)
+        val bookSource = workbook.source.resourceMetadata
+
+        sequenceOf(bookSource, projectSourceMetadata)
             .map(directoryProvider::getSourceContainerDirectory)
-            .toSet()
+            .distinct()
             .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
     }
 
@@ -84,18 +92,39 @@ class ProjectExporter(
 
     private fun makeExportFilename(): String {
         val lang = workbook.target.language.slug
+        val resource = projectSourceMetadata.identifier
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
-        return "$lang-$project-$timestamp.zip"
+        return "$lang-$resource-$project-$timestamp.zip"
     }
 
     private fun fetchSelectedTakes(chaptersOnly: Boolean = false): Observable<Take> {
-        val chapters = workbook.target.chapters
-        val bookElements = when {
+        val chapters = when {
+            projectToExportIsBook -> workbook.target.chapters
+            // Work around a quirk that records resource takes to the source tree
+            else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
+        }
+        val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
             else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
         }
-        return bookElements.mapNotNull { chapterOrChunk -> chapterOrChunk.audio.selected.value?.value }
+        return bookElements
+            .flatMap { getAudioForCurrentResource(it) }
+            .mapNotNull { audio -> audio.selected.value?.value }
+    }
+
+    private fun getAudioForCurrentResource(bookElement: BookElement): Observable<AssociatedAudio> {
+        if (projectToExportIsBook) {
+            return Observable.just(bookElement.audio)
+        }
+
+        val resourceGroup = bookElement.resources
+            .firstOrNull { it.metadata.identifier == projectMetadataToExport.identifier }
+            ?: return Observable.empty()
+
+        return resourceGroup.resources.flatMapIterable { resource ->
+            listOfNotNull(resource.title.audio, resource.body?.audio)
+        }
     }
 
     private fun selectedChapterFilePaths(): Set<String> {

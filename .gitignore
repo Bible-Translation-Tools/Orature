@@ -92,3 +92,6 @@ hs_err_pid*
 
 # Ignores artifacts included as jar plugins
 /jvm/workbookapp/src/main/resources/plugins/jars/
+
+# Ignores install4j build artifacts
+/jvm/workbookapp/.exec/

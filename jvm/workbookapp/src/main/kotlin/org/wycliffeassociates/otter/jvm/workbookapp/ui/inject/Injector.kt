@@ -28,9 +28,16 @@ class Injector(
     val contentRepository = ContentRepository(database)
     val resourceRepository = ResourceRepository(database)
     val resourceContainerRepository = ResourceContainerRepository(database, collectionRepo, resourceRepository)
+    val resourceMetadataRepository = ResourceMetadataRepository(database)
     val takeRepository = TakeRepository(database)
     val pluginRepository = AudioPluginRepository(database, preferences)
-    val workbookRepository = WorkbookRepository(collectionRepo, contentRepository, resourceRepository, takeRepository)
+    val workbookRepository = WorkbookRepository(
+        collectionRepo,
+        contentRepository,
+        resourceRepository,
+        resourceMetadataRepository,
+        takeRepository
+    )
     val installedEntityRepository = InstalledEntityRepository(database)
 
     val audioPlayer
