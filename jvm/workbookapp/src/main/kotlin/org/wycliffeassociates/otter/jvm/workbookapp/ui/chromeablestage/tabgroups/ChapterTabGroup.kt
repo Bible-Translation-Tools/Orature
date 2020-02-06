@@ -29,20 +29,15 @@ class ChapterTabGroup : TabGroup() {
     }
 
     private fun shouldRestoreActiveResourceMetadata(metadataToRestore: ResourceMetadata?): Boolean {
-        return metadataToRestore != null &&
-                getAssociatedMetadatas().contains(metadataToRestore)
+        return metadataToRestore != null && getAssociatedMetadatas().contains(metadataToRestore)
     }
 
     private fun getTargetBookResourceMetadata(): ResourceMetadata {
         return workbookViewModel.workbook.target.resourceMetadata
     }
 
-    private fun getSourceBookSubtreeResources(): List<ResourceMetadata> {
-        return workbookViewModel.workbook.source.subtreeResources
-    }
-
     private fun getAssociatedMetadatas(): Sequence<ResourceMetadata> {
-        return sequenceOf(getTargetBookResourceMetadata()) + getSourceBookSubtreeResources()
+        return sequenceOf(getTargetBookResourceMetadata()) + workbookViewModel.workbook.target.linkedResources
     }
 
     private fun createTabs() {
@@ -62,6 +57,7 @@ class ChapterTabGroup : TabGroup() {
             add(CardGridFragment().root)
             onSelected {
                 workbookViewModel.activeResourceMetadataProperty.set(resourceMetadata)
+                workbookViewModel.setProjectAudioDirectory(resourceMetadata)
             }
         }
 

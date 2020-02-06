@@ -97,6 +97,20 @@ class ResourceLinkDao(
             .execute()
     }
 
+    /** @param select a triple record containing values for collection ID, resource content ID, dublinCore ID */
+    @Synchronized
+    fun insertCollectionResourceNoReturn(select: Select<Record3<Int, Int, Int>>, dsl: DSLContext = instanceDsl) {
+        dsl
+            .insertInto(
+                RESOURCE_LINK,
+                RESOURCE_LINK.COLLECTION_FK,
+                RESOURCE_LINK.RESOURCE_CONTENT_FK,
+                RESOURCE_LINK.DUBLIN_CORE_FK
+            )
+            .select(select)
+            .execute()
+    }
+
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): ResourceLinkEntity {
         return dsl
             .select()

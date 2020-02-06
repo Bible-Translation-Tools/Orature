@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
-import jooq.Tables.CONTENT_DERIVATIVE
-import jooq.Tables.CONTENT_ENTITY
+import jooq.Tables.*
 import org.jooq.DSLContext
 import org.jooq.Record
 import org.jooq.Select
@@ -72,6 +71,11 @@ class ContentDao(
             .limit(1)
     }
 
+    /**
+     *  Build a JOOQ select statement that locates linkable verse/resource pairs within the given collection.
+     *  Resources that are already linked are skipped.
+     *  For convenience, [extraFields] will be appended in columns to the right of each row.
+     */
     fun selectLinkableVerses(
         mainTypes: Collection<ContentType>,
         helpTypes: Collection<ContentType>,
@@ -79,10 +83,14 @@ class ContentDao(
         vararg extraFields: SelectFieldOrAsterisk,
         dsl: DSLContext = instanceDsl
     ): Select<Record> {
-        val main = CONTENT_ENTITY.`as`("main")
-        val help = CONTENT_ENTITY.`as`("help")
         val mainTypeIds = mainTypes.map(contentTypeDao::fetchId)
         val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
+
+        val main = CONTENT_ENTITY.`as`("main")
+        val help = CONTENT_ENTITY.`as`("help")
+        val existingLink = RESOURCE_LINK.`as`("existingLink")
+        val existingLinkSubquery = dsl.select(existingLink.RESOURCE_CONTENT_FK).from(existingLink)
+
         return dsl
             .select(main.ID, help.ID, *extraFields)
             .from(main)
@@ -91,6 +99,38 @@ class ContentDao(
             .where(main.COLLECTION_FK.eq(parentCollectionId))
             .and(main.TYPE_FK.`in`(mainTypeIds))
             .and(help.TYPE_FK.`in`(helpTypeIds))
+            // Skip already-linked resources.
+            .and(help.ID.notIn(existingLinkSubquery))
+    }
+
+    /**
+     *  Build a JOOQ select statement that locates linkable chapter/resource pairs within the given collection.
+     *  Resources that are already linked are skipped.
+     *  For convenience, [extraFields] will be appended in columns to the right of each row.
+     */
+    fun selectLinkableChapters(
+        helpTypes: Collection<ContentType>,
+        collectionId: Int,
+        vararg extraFields: SelectFieldOrAsterisk,
+        dsl: DSLContext = instanceDsl
+    ): Select<Record> {
+        val helpTypeIds = helpTypes.map(contentTypeDao::fetchId)
+
+        val main = COLLECTION_ENTITY.`as`("main")
+        val help = CONTENT_ENTITY.`as`("help")
+        val existingLink = RESOURCE_LINK.`as`("existingLink")
+        val existingLinkSubquery = dsl.select(existingLink.RESOURCE_CONTENT_FK).from(existingLink)
+
+        return dsl
+            .select(main.ID, help.ID, *extraFields)
+            .from(main)
+            .join(help)
+            .onKey()
+            .where(main.ID.eq(collectionId))
+            .and(help.TYPE_FK.`in`(helpTypeIds))
+            .and(help.START.eq(0))
+            // Skip already-linked resources.
+            .and(help.ID.notIn(existingLinkSubquery))
     }
 
     fun fetchSources(entity: ContentEntity, dsl: DSLContext = instanceDsl): List<ContentEntity> {

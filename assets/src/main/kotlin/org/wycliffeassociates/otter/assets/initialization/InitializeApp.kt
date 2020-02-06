@@ -15,6 +15,7 @@ class InitializeApp(
     val pluginRepository: IAudioPluginRepository,
     val languageRepo: ILanguageRepository,
     val takeRepo: ITakeRepository,
+    val resourceMetadataRepo: IResourceMetadataRepository,
     val resourceContainerRepo: IResourceContainerRepository,
     val collectionRepo: ICollectionRepository,
     val contentRepo: IContentRepository,
@@ -32,6 +33,7 @@ class InitializeApp(
                     ),
                     InitializeUlb(
                         installedEntityRepo,
+                        resourceMetadataRepo,
                         resourceContainerRepo,
                         collectionRepo,
                         contentRepo,

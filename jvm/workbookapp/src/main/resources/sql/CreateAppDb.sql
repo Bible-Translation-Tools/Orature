@@ -70,6 +70,8 @@ CREATE TABLE IF NOT EXISTS content_derivative (
     content_fk       INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE,
     source_fk        INTEGER NOT NULL REFERENCES content_entity(id) ON DELETE CASCADE
 );
+CREATE INDEX IF NOT EXISTS idx_content_derivative_content ON content_derivative (content_fk);
+CREATE INDEX IF NOT EXISTS idx_content_derivative_source ON content_derivative (source_fk);
 
 CREATE TABLE IF NOT EXISTS take_entity (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,

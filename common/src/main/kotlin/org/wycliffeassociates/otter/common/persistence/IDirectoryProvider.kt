@@ -16,7 +16,18 @@ interface IDirectoryProvider {
     fun getAppDataDirectory(appendedPath: String = ""): File
 
     /** Directory for project audio */
-    fun getProjectAudioDirectory(sourceMetadata: ResourceMetadata, book: Collection): File
+    fun getProjectAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        book: Collection
+    ): File
+
+    /** Directory for project audio */
+    fun getProjectAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        bookSlug: String
+    ): File
 
     /** Internal-use directory of the given source RC */
     fun getSourceContainerDirectory(container: ResourceContainer): File
