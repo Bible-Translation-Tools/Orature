@@ -9,9 +9,6 @@ import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
-import org.jooq.impl.DSL.and
-import org.jooq.impl.DSL.field
-import org.jooq.impl.DSL.value
 import org.jooq.impl.DSL.*
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.model.*
@@ -533,11 +530,6 @@ class CollectionRepository(
                                         .select(COLLECTION_ENTITY.ID)
                                         .from(COLLECTION_ENTITY)
                                         .where(COLLECTION_ENTITY.PARENT_FK.eq(sourceId))
-                                ).and(
-                                    // Only create content derivative entries for text contents
-                                    CONTENT_ENTITY.TYPE_FK.eq(
-                                        contentTypeDao.fetchId(ContentType.TEXT)
-                                    )
                                 )
                             )
                         )
