@@ -91,7 +91,7 @@ class ProjectImporter(
         val sourceCollection = findSourceCollection(manifestSources, manifestProject)
         val sourceMetadata = sourceCollection.resourceContainer!!
 
-        val derivedProject = createDerivedProject(metadata.language, sourceCollection, metadata.identifier)
+        val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
         importTakes(zipFileReader, derivedProject, manifestProject, metadata, sourceMetadata)
     }
@@ -146,9 +146,9 @@ class ProjectImporter(
         }
     }
 
-    private fun createDerivedProject(language: Language, sourceCollection: Collection, resourceId: String): Collection {
+    private fun createDerivedProjects(language: Language, sourceCollection: Collection): Collection {
         return CreateProject(collectionRepository, resourceMetadataRepository)
-            .create(sourceCollection, language, resourceId)
+            .create(sourceCollection, language)
             .blockingGet()
     }
 
