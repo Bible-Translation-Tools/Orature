@@ -15,6 +15,7 @@ private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
 class InitializeUlb(
     private val installedEntityRepo: IInstalledEntityRepository,
+    private val resourceMetadataRepo: IResourceMetadataRepository,
     private val resourceContainerRepo: IResourceContainerRepository,
     private val collectionRepo: ICollectionRepository,
     private val contentRepo: IContentRepository,
@@ -23,6 +24,7 @@ class InitializeUlb(
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
     private val rcImporter: ImportResourceContainer = ImportResourceContainer(
+        resourceMetadataRepo,
         resourceContainerRepo,
         collectionRepo,
         contentRepo,

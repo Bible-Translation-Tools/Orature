@@ -62,16 +62,23 @@ class DirectoryProvider(
     }
 
     override fun getProjectAudioDirectory(
-        sourceMetadata: ResourceMetadata,
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
         book: Collection
+    ) = getProjectAudioDirectory(source = source, target = target, bookSlug = book.slug)
+
+    override fun getProjectAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        bookSlug: String
     ): File {
         val appendedPath = listOf(
-            book.resourceContainer?.creator ?: ".",
-            sourceMetadata.creator,
-            "${sourceMetadata.language.slug}_${sourceMetadata.identifier}",
-            "v${book.resourceContainer?.version ?: "-none"}",
-            book.resourceContainer?.language?.slug ?: "no_language",
-            book.slug
+            target?.creator ?: ".",
+            source.creator,
+            "${source.language.slug}_${source.identifier}",
+            "v${target?.version ?: "-none"}",
+            target?.language?.slug ?: "no_language",
+            bookSlug
         ).joinToString(pathSeparator)
         val path = getUserDataDirectory(appendedPath)
         path.mkdirs()

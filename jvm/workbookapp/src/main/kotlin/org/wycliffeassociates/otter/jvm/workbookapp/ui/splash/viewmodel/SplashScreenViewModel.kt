@@ -23,6 +23,7 @@ class SplashScreenViewModel : ViewModel() {
         injector.pluginRepository,
         injector.languageRepo,
         injector.takeRepository,
+        injector.resourceMetadataRepository,
         injector.resourceContainerRepository,
         injector.collectionRepo,
         injector.contentRepository,

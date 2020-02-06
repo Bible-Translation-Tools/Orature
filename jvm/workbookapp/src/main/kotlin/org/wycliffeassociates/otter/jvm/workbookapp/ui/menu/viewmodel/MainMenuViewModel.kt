@@ -43,7 +43,7 @@ class MainMenuViewModel : ViewModel() {
         ProjectExporter(
             workbookVM.activeResourceMetadata,
             workbookVM.workbook,
-            workbookVM.projectAudioDirectory,
+            workbookVM.activeProjectAudioDirectory,
             directoryProvider
         ).export(directory)
             .observeOnFx()
@@ -60,6 +60,7 @@ class MainMenuViewModel : ViewModel() {
         showImportDialogProperty.value = true
 
         ImportResourceContainer(
+            injector.resourceMetadataRepository,
             injector.resourceContainerRepository,
             injector.collectionRepo,
             injector.contentRepository,

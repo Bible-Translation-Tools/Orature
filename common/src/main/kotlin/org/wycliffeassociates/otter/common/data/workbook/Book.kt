@@ -11,6 +11,7 @@ data class Book(
     val title: String,
     val chapters: Observable<Chapter>,
     val resourceMetadata: ResourceMetadata,
+    val linkedResources: List<ResourceMetadata>,
 
     override val subtreeResources: List<ResourceMetadata>
 
