@@ -1,12 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import javafx.application.Platform
+import io.reactivex.Completable
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContainerType
-import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -18,7 +17,6 @@ class ProjectGridViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val collectionRepo = injector.collectionRepo
     private val workbookRepo = injector.workbookRepository
-    private val directoryProvider = injector.directoryProvider
 
     private val navigator: ChromeableStage by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
@@ -47,12 +45,9 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun deleteProject(project: Collection) {
-        DeleteProject(collectionRepo, directoryProvider)
-            .delete(project, true)
+        collectionRepo.deleteProject(project, false)
             .observeOnFx()
-            .doOnComplete {
-                Platform.runLater { loadProjects() }
-            }
+            .andThen(Completable.fromAction { loadProjects() })
             .subscribe()
     }
 
