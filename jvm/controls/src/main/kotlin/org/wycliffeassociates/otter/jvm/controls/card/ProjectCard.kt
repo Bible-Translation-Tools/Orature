@@ -7,11 +7,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.Control
-import javafx.scene.control.Label
 import javafx.scene.control.Skin
-import javafx.scene.layout.Priority
-import javafx.scene.text.Text
-import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.skins.ProjectCardSkin
 import tornadofx.*
 

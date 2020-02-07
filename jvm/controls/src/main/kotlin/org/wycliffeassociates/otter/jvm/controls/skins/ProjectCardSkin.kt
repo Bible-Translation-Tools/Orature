@@ -3,9 +3,6 @@ package org.wycliffeassociates.otter.jvm.controls.skins
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXListView
 import com.jfoenix.controls.JFXPopup
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.event.EventTarget
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -17,8 +14,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.ProjectCard
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
-import tornadofx.FX.Companion.messages
-
 
 class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(card) {
 
