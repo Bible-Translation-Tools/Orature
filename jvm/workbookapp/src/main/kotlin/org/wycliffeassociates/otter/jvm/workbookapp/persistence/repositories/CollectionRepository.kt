@@ -77,21 +77,7 @@ class CollectionRepository(
                         }
                     }
                 }
-            }.andThen(
-                getSource(project).doOnSuccess {
-                    // If project audio should be deleted, get the folder for the project audio and delete it
-                    if (deleteAudio) {
-                        val sourceMetadata = it.resourceContainer
-                            ?: throw RuntimeException("No source metadata found.")
-                        val audioDirectory = directoryProvider.getProjectAudioDirectory(
-                            source = sourceMetadata,
-                            target = project.resourceContainer,
-                            book = project
-                        )
-                        audioDirectory.deleteRecursively()
-                    }
-                }.ignoreElement()
-            )
+            }
             .subscribeOn(Schedulers.io())
     }
 
