@@ -4,7 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import jooq.Tables.RESOURCE_LINK
+import jooq.Tables.*
 import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
@@ -73,12 +73,100 @@ class CollectionRepository(
                             // 4b. If the manifest has no projects left,
                             // delete the RC folder and the metadata from the database
                             metadata.path.deleteRecursively()
+                            val links = metadataDao.fetchLinks(metadata.id)
+                            links.forEach {
+                                metadataDao.delete(it)
+                            }
                             metadataDao.delete(metadataMapper.mapToEntity(metadata))
                         }
                     }
                 }
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun deleteResources(project: Collection, deleteAudio: Boolean): Completable {
+        return Completable.fromAction {
+            val files = arrayListOf<File>()
+            database.transaction { dsl ->
+
+                // Get resource content entries related to the project (content of tn/tq)
+                val resourceContent = dsl.select(RESOURCE_LINK.RESOURCE_CONTENT_FK)
+                    .from(RESOURCE_LINK)
+                    .where(
+                        RESOURCE_LINK.DUBLIN_CORE_FK.`in`(
+                            // get resources linked to source dublin core
+                            dsl.select(RC_LINK_ENTITY.RC2_FK)
+                                .from(RC_LINK_ENTITY)
+                                .where(
+                                    RC_LINK_ENTITY.RC1_FK.`in`(
+                                        // get source dublin core of derived project
+                                        dsl.select(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
+                                            .from(DUBLIN_CORE_ENTITY)
+                                            .where(
+                                                DUBLIN_CORE_ENTITY.ID.`in`(
+                                                    // get dublin core of project
+                                                    dsl.select(COLLECTION_ENTITY.DUBLIN_CORE_FK)
+                                                        .from(COLLECTION_ENTITY)
+                                                        .where(
+                                                            COLLECTION_ENTITY.ID.eq(
+                                                                project.id
+                                                            )
+                                                        )
+                                                )
+                                            )
+                                    )
+                                )
+                        ).and(
+                            // Filter Resource Content to just what's in the project being deleted
+                            RESOURCE_LINK.RESOURCE_CONTENT_FK.`in`(
+                                dsl.select(CONTENT_ENTITY.ID)
+                                    .from(CONTENT_ENTITY)
+                                    .where(
+                                        CONTENT_ENTITY.COLLECTION_FK.`in`(
+                                            // Look up the chapter collection the resource content belongs to
+                                            dsl.select(COLLECTION_ENTITY.ID)
+                                                .from(COLLECTION_ENTITY)
+                                                .where(
+                                                    COLLECTION_ENTITY.PARENT_FK.`in`(
+                                                        // Look up the project the chapter collection belongs to
+                                                        dsl.select(COLLECTION_ENTITY.ID)
+                                                            .from(COLLECTION_ENTITY)
+                                                            .where(
+                                                                // We need the source, not the derived,
+                                                                // just use the slug. It will result in derived results
+                                                                // in addition to source, but resources aren't attached
+                                                                // to the derived anyway
+                                                                COLLECTION_ENTITY.SLUG.eq(project.slug)
+                                                            )
+                                                    )
+                                                )
+                                        )
+                                    )
+                            )
+                        )
+                    )
+
+
+                // get all files associated with the resource content
+                // to delete outside of the db transaction
+                val paths = dsl.select(TAKE_ENTITY.PATH)
+                    .from(TAKE_ENTITY)
+                    .where(
+                        TAKE_ENTITY.CONTENT_FK.`in`(
+                            resourceContent
+                        )
+                    ).fetch { it.value1() }
+                files.addAll(paths.map { File(it) })
+
+                // delete the take entries of resource content from the database
+                dsl.deleteFrom(TAKE_ENTITY)
+                    .where(TAKE_ENTITY.CONTENT_FK.`in`(resourceContent))
+                    .execute()
+            }
+            // actually delete the resource recordings
+            files.forEach { it.delete() }
+        }.subscribeOn(Schedulers.io())
     }
 
     override fun getAll(): Single<List<Collection>> {

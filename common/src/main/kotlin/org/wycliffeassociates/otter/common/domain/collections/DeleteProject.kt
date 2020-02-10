@@ -11,8 +11,13 @@ class DeleteProject(
 ) {
 
     fun delete(project: Collection, deleteAudio: Boolean): Completable {
+        // Order matters here, files won't remove anything from the database
+        // delete resources will only remove take entries, but needs derived RCs and links in tact
+        // delete project may remove derived RCs and links, and thus needs to be last
         return deleteFiles(project, deleteAudio)
-            .mergeWith(collectionRepository.deleteProject(project, deleteAudio))
+            .andThen(collectionRepository.deleteResources(project, deleteAudio))
+            .andThen(collectionRepository.deleteProject(project, deleteAudio))
+
     }
 
     private fun deleteFiles(project: Collection, deleteAudio: Boolean): Completable {
