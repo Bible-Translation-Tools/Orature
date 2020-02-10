@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS content_entity (
     collection_fk    INTEGER NOT NULL REFERENCES collection_entity(id) ON DELETE CASCADE,
     type_fk          INTEGER NOT NULL REFERENCES content_type(id) ON DELETE RESTRICT,
     label            TEXT NOT NULL,
-    selected_take_fk INTEGER REFERENCES take_entity(id),
+    selected_take_fk INTEGER REFERENCES take_entity(id) ON DELETE SET NULL,
     start            INTEGER NOT NULL,
     sort             INTEGER NOT NULL,
     text             TEXT,

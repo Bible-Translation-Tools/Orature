@@ -22,4 +22,5 @@ interface ICollectionRepository : IRepository<Collection> {
         language: Language
     ): Single<Collection>
     fun deleteProject(project: Collection, deleteAudio: Boolean): Completable
+    fun deleteResources(project: Collection, deleteAudio: Boolean): Completable
 }
