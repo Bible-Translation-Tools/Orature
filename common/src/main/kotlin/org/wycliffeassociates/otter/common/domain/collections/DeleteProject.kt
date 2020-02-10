@@ -17,7 +17,6 @@ class DeleteProject(
         return deleteFiles(project, deleteAudio)
             .andThen(collectionRepository.deleteResources(project, deleteAudio))
             .andThen(collectionRepository.deleteProject(project, deleteAudio))
-
     }
 
     private fun deleteFiles(project: Collection, deleteAudio: Boolean): Completable {
