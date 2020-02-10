@@ -147,7 +147,6 @@ class CollectionRepository(
                         )
                     )
 
-
                 // get all files associated with the resource content
                 // to delete outside of the db transaction
                 val paths = dsl.select(TAKE_ENTITY.PATH)
