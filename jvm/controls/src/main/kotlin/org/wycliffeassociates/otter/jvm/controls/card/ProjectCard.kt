@@ -12,11 +12,11 @@ import org.wycliffeassociates.otter.jvm.controls.skins.ProjectCardSkin
 import tornadofx.*
 
 class ProjectCard(
-    private val title: String = "",
-    private val slug: String = "",
-    private val language: String = "",
-    private val actionText: String = "",
-    private val secondaryActions: List<Action>? = null
+    title: String = "",
+    slug: String = "",
+    language: String = "",
+    actionText: String = "",
+    secondaryActions: List<Action> = listOf()
 ) : Control() {
 
     private val onPrimaryAction = SimpleObjectProperty<() -> Unit>()
@@ -27,9 +27,7 @@ class ProjectCard(
     val secondaryActionsList: ObservableList<Action> = FXCollections.observableArrayList<Action>()
 
     init {
-        if (secondaryActions != null) {
-            addActions(*secondaryActions.toTypedArray())
-        }
+        addActions(*secondaryActions.toTypedArray())
     }
 
     fun titleTextProperty(): StringProperty {
@@ -68,7 +66,7 @@ fun EventTarget.projectcard(
     slug: String = "",
     language: String = "",
     actionText: String = "",
-    moreActions: List<Action>? = null,
+    moreActions: List<Action> = listOf(),
     op: ProjectCard.() -> Unit = {}
 ) = ProjectCard(title, slug, language, actionText, moreActions).attachTo(this, op)
 

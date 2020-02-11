@@ -10,6 +10,7 @@ import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.*
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -26,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
+import java.io.FileNotFoundException
 import java.time.LocalDate
 
 class CollectionRepository(
@@ -36,6 +38,8 @@ class CollectionRepository(
     private val languageMapper: LanguageMapper = LanguageMapper(),
     private val dublinCoreCreator: String = OratureInfo.SUITE_NAME
 ) : ICollectionRepository {
+
+    val log = LoggerFactory.getLogger(CollectionRepository::class.java)
 
     private val collectionDao = database.collectionDao
     private val metadataDao = database.resourceMetadataDao
@@ -163,8 +167,12 @@ class CollectionRepository(
                     .where(TAKE_ENTITY.CONTENT_FK.`in`(resourceContent))
                     .execute()
             }
-            // actually delete the resource recordings
-            files.forEach { it.delete() }
+            try {
+                // actually delete the resource recordings
+                files.forEach { it.delete() }
+            } catch (e: FileNotFoundException) {
+                log.error("File not found when deleting resources of project: $project.", e)
+            }
         }.subscribeOn(Schedulers.io())
     }
 

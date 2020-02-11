@@ -20,9 +20,10 @@ class DeleteProject(
     }
 
     private fun deleteFiles(project: Collection, deleteAudio: Boolean): Completable {
-        return collectionRepository.getSource(project).doOnSuccess {
-            // If project audio should be deleted, get the folder for the project audio and delete it
-            if (deleteAudio) {
+        return if (deleteAudio) {
+            // source is used here because we attach takes to the source tree
+            collectionRepository.getSource(project).doOnSuccess {
+                // If project audio should be deleted, get the folder for the project audio and delete it
                 val sourceMetadata = it.resourceContainer
                     ?: throw RuntimeException("No source metadata found.")
                 val audioDirectory = directoryProvider.getProjectAudioDirectory(
@@ -31,7 +32,9 @@ class DeleteProject(
                     book = project
                 )
                 audioDirectory.deleteRecursively()
-            }
-        }.ignoreElement()
+            }.ignoreElement()
+        } else {
+            Completable.complete()
+        }
     }
 }
