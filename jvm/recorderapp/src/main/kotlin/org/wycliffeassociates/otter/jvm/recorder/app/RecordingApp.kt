@@ -9,12 +9,12 @@ import tornadofx.launch
  * options include:
  *
  * --wav= the filepath to write to
- * --lang= the language name to display
+ * --language= the language name to display
  * --book= the book name to display
- * --chap= the text for "Chapter"
- * --cnum= the chapter number
+ * --chapter= the text for "Chapter"
+ * --chapter_number= the chapter number
  * --unit= the text for either "Verse" or "Chunk"
- * --unum= the unit number
+ * --unit_number= the unit number
  *
  * All arguments are optional. By default the recording will be written to recording.wav and the
  * display text will be the filename.
