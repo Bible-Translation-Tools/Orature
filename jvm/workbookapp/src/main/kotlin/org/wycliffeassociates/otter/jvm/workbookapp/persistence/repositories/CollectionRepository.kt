@@ -167,11 +167,14 @@ class CollectionRepository(
                     .where(TAKE_ENTITY.CONTENT_FK.`in`(resourceContent))
                     .execute()
             }
-            try {
-                // actually delete the resource recordings
-                files.forEach { it.delete() }
-            } catch (e: FileNotFoundException) {
-                log.error("File not found when deleting resources of project: $project.", e)
+
+            // actually delete the resource recordings
+            files.forEach {
+                try {
+                    it.delete()
+                } catch (e: FileNotFoundException) {
+                    log.error("File not found when deleting resources of project: $project.", e)
+                }
             }
         }.subscribeOn(Schedulers.io())
     }
