@@ -4,17 +4,16 @@ import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.*
-import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.jvm.controls.card.Action
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.controls.card.card
+import org.wycliffeassociates.otter.jvm.controls.card.projectcard
 import tornadofx.*
 
 class ProjectGridFragment : Fragment() {
@@ -34,6 +33,11 @@ class ProjectGridFragment : Fragment() {
     }
 
     override val root = anchorpane {
+
+        importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/button.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/projectcard.css").toExternalForm())
+
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
         addClass(AppStyles.whiteBackground)
@@ -47,25 +51,24 @@ class ProjectGridFragment : Fragment() {
             }
             addClass(AppStyles.whiteBackground)
             addClass(ProjectGridStyles.projectsGrid)
+            cellWidthProperty.set(176.0)
+            cellHeightProperty.set(224.0)
             cellCache { item ->
-                card {
-                    addClass(DefaultStyles.defaultCard)
-                    cardfront {
-                        isActive = true
-                        innercard(AppStyles.projectGraphic()) {
-                            majorLabel = item.titleKey
-                            minorLabel = item.resourceContainer?.language?.name
-                        }
-                        cardbutton {
-                            addClass(DefaultStyles.defaultCardButton)
-                            text = messages["openProject"]
-                            graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                .apply { fill = AppTheme.colors.appRed }
-                            onMousePressed = EventHandler {
-                                viewModel.selectProject(item)
-                            }
-                        }
+                projectcard {
+                    titleTextProperty().set(item.titleKey)
+                    slugTextProperty().set(item.slug)
+                    actionTextProperty().set(messages["openProject"])
+                    languageTextProperty().set(item.resourceContainer?.language?.name)
+                    setOnAction {
+                        viewModel.selectProject(item)
                     }
+                    addActions(
+                        Action(
+                            text = messages["delete"],
+                            iconCode = "gmi-delete",
+                            onClicked = { viewModel.deleteProject(item) }
+                        )
+                    )
                 }
             }
         }

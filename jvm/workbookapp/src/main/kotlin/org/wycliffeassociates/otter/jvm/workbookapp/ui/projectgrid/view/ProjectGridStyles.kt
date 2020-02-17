@@ -19,8 +19,6 @@ class ProjectGridStyles : Stylesheet() {
         projectsGrid {
             vgap = 32.px
             hgap = 24.px
-            horizontalCellSpacing = 24.0.px
-            verticalCellSpacing = 32.0.px
             alignment = Pos.TOP_LEFT
             // Add larger padding on bottom to keep FAB from blocking last row cards
             padding = box(0.px, 0.px, 95.px, 0.px)

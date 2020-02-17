@@ -1,0 +1,8 @@
+.project-card {
+    -fx-background-color: -white;
+    -fx-effect: -level2;
+}
+
+.project-card:hover {
+    -fx-effect: -level4
+}

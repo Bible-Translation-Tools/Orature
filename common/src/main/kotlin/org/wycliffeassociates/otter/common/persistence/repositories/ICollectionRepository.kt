@@ -21,5 +21,24 @@ interface ICollectionRepository : IRepository<Collection> {
         sourceCollection: Collection,
         language: Language
     ): Single<Collection>
+
+    /**
+     * Deletes a derived project. This should remove all associated derived collections, content, and takes associated
+     * with the project. Any backing derived manifests will have the project removed, and if the project is the last
+     * referenced, then the manifest will be deleted.
+     *
+     * @param project the Collection corresponding to the project (Book) being deleted
+     * @param deleteAudio flag for if take files referenced by Take entries should be removed from the filesystem
+     */
     fun deleteProject(project: Collection, deleteAudio: Boolean): Completable
+
+    /**
+     * Deletes a derived project's resources. This should remove all associated takes.
+     * Because takes are not attached to a derived project, but instead the source, the collections and content entries
+     * will persist.
+     *
+     * @param project the Collection corresponding to the project (Book) being deleted (Note: this is NOT the resource!)
+     * @param deleteAudio flag for if take files referenced by Take entries should be removed from the filesystem
+     */
+    fun deleteResources(project: Collection, deleteAudio: Boolean): Completable
 }
