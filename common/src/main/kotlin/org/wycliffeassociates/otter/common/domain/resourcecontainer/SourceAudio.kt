@@ -26,11 +26,11 @@ class SourceAudio(
         return if (rc.media != null) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
-                val reader = rc.accessor.getReader(path)
+                val inputStream = rc.accessor.getInputStream(path)
                 val extension = File(path).extension
                 val temp = File.createTempFile("source", ".$extension")
                 temp.deleteOnExit()
-                reader.transferTo(temp.bufferedWriter())
+                inputStream.use { it.transferTo(temp.outputStream().buffered()) }
                 temp
             } else {
                 null
