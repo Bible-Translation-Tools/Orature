@@ -31,7 +31,7 @@ class AudioPlayer : IAudioPlayer {
         )
     }
 
-    override fun load(file: File): Completable {
+    override fun load(file: File) {
         pause()
         if (clip.isOpen) {
             clip.flush()
@@ -47,10 +47,8 @@ class AudioPlayer : IAudioPlayer {
                 clip.framePosition = 0
             }
         }
-        return Completable.fromAction {
-            clip.open(audioInputStream)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-        }.subscribeOn(Schedulers.io())
+        clip.open(audioInputStream)
+        listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
     }
 
     override fun play() {
@@ -82,6 +80,22 @@ class AudioPlayer : IAudioPlayer {
         clip.close()
         audioInputStream?.close()
         System.gc()
+    }
+
+    override fun seek(position: Int) {
+        var resume = false
+        if (clip.isRunning) {
+            resume = true
+            clip.stop()
+        }
+        clip.framePosition = position
+        if (resume) {
+            clip.start()
+        }
+    }
+
+    override fun isPlaying(): Boolean {
+        return clip.isRunning
     }
 
     override fun getAbsoluteDurationInFrames(): Int {

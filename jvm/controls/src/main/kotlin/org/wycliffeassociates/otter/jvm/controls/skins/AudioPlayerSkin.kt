@@ -12,14 +12,14 @@ import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.AudioPlayer
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
+import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import java.util.concurrent.TimeUnit
-import javax.sound.sampled.LineEvent
 
 private const val PLAY_ICON = "fa-play"
 private const val PAUSE_ICON = "fa-pause"
 
-class AudioPlayerSkin(private val player: AudioPlayer) : SkinBase<AudioPlayer>(player) {
+class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlayerNode>(player) {
 
     @FXML
     lateinit var recordBtn: Button
@@ -87,21 +87,17 @@ class AudioPlayerSkin(private val player: AudioPlayer) : SkinBase<AudioPlayer>(p
         disposable?.dispose()
         println(player.isPlaying)
         if (player.isPlaying) {
-            println("was playing now pause")
             player.pause()
             recordBtn.graphic = FontIcon(PLAY_ICON)
         } else {
-            println("was pause now playing")
             disposable = startProgressUpdate()
             player.play()
-            player.clip.addLineListener {
-                if (it.type == LineEvent.Type.STOP) {
+            player.player?.addEventListener {
+                if (it == AudioPlayerEvent.STOP) {
                     disposable?.dispose()
-                    player.clip.microsecondPosition = 0L
-                    audioSlider.value = 0.0
-                    Platform.runLater {
-                        recordBtn.graphic = FontIcon(PLAY_ICON)
-                    }
+                }
+                Platform.runLater {
+                    recordBtn.graphic = FontIcon(PLAY_ICON)
                 }
             }
             recordBtn.graphic = FontIcon(PAUSE_ICON)
