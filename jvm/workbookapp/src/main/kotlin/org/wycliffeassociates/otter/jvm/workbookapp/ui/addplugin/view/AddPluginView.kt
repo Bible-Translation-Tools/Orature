@@ -44,7 +44,7 @@ class AddPluginView : View() {
                         val files = chooseFile(
                                 messages["chooseExecutable"],
                                 arrayOf(),
-                                FileChooserMode.Single
+                                mode = FileChooserMode.Single
                         )
                         if (files.isNotEmpty()) {
                             viewModel.path = files.first().toString()
