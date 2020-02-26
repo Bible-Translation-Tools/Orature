@@ -23,14 +23,14 @@ class SourceAudio(
     }
 
     fun get(media: Media, chapter: Int): File? {
-        return if (rc.media != null) {
+        return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
-                val reader = rc.accessor.getInputStream(path)
+                val inputStream = rc.accessor.getInputStream(path)
                 val extension = File(path).extension
                 val temp = File.createTempFile("source", ".$extension")
                 temp.deleteOnExit()
-                reader.transferTo(temp.outputStream())
+                inputStream.copyTo(temp.outputStream())
                 temp
             } else {
                 null

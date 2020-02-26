@@ -10,7 +10,6 @@
     -fx-border-style: solid;
     -fx-font-size: 1em;
     -fx-cursor: hand;
-    
 }
 
 /* -------------- Button Icon -------------- */
@@ -18,7 +17,6 @@
     -fx-icon-color: inherit;
     -fx-icon-size: 20px;
     -fx-space:10px;
-
 }
 
 /* -------------- Primary Button -------------- */
