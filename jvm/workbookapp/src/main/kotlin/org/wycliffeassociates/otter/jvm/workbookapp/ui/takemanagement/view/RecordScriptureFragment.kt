@@ -5,6 +5,8 @@ import javafx.geometry.Pos
 import javafx.scene.control.ContentDisplay
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
+import org.wycliffeassociates.otter.jvm.controls.skins.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget.DragTargetBuilder
@@ -29,15 +31,23 @@ class RecordScriptureFragment : RecordableFragment(
         recordableViewModel::recordNewTake
     )
 
+    private val sourceAudioPlayer =
+        AudioPlayerNode(null).apply {
+            style {
+                skin = SourceAudioSkin::class
+            }
+        }
+
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
+        importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
-            hbox(15.0) {
+            hbox(1.0) {
                 addClass(RecordScriptureStyles.pageTop)
                 alignment = Pos.CENTER
                 vgrow = Priority.ALWAYS
@@ -80,6 +90,8 @@ class RecordScriptureFragment : RecordableFragment(
                     )
                 }
             }
+
+            add(sourceAudioPlayer)
         }
     }
 

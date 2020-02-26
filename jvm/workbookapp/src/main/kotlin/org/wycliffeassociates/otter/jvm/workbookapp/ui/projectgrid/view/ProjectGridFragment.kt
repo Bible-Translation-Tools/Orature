@@ -40,7 +40,10 @@ class ProjectGridFragment : Fragment() {
 
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
-        addClass(AppStyles.whiteBackground)
+
+        style {
+            unsafe("-fx-background-color", "#F7FAFF")
+        }
 
         datagrid(viewModel.projects) {
             anchorpaneConstraints {
@@ -49,7 +52,6 @@ class ProjectGridFragment : Fragment() {
                 bottomAnchor = 0
                 leftAnchor = 0
             }
-            addClass(AppStyles.whiteBackground)
             addClass(ProjectGridStyles.projectsGrid)
             cellWidthProperty.set(176.0)
             cellHeightProperty.set(224.0)

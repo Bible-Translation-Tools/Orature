@@ -1,0 +1,6 @@
+.audioplayer--takes {
+    -fx-background-color: -white;
+    -fx-effect: -level2;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+}
