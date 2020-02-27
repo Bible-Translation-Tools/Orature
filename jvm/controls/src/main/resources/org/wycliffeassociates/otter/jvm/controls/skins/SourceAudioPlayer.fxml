@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="audioplayer--takes" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="audioplayer--scripture-takes" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <JFXSlider fx:id="audioSlider">
          <VBox.margin>
@@ -16,9 +17,9 @@
          <children>
             <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
                <children>
-                  <Label text="Source Audio">
+                  <Label styleClass="audioplayer--scripture-takes__label" text="Source Audio">
                      <graphic>
-                        <FontIcon iconLiteral="gmi-hearing" iconSize="22" />
+                        <FontIcon iconLiteral="gmi-hearing" iconSize="22" styleClass="audioplayer--scripture-takes__label__icon" />
                      </graphic>
                   </Label>
                </children>
@@ -27,8 +28,12 @@
                <children>
                   <JFXButton fx:id="playBtn">
                      <graphic>
-                        <FontIcon iconLiteral="mdi-play" iconSize="64" selectionEnd="1" />
+                        <FontIcon iconLiteral="mdi-play" iconSize="10" selectionEnd="1" styleClass="audioplayer--scripture-takes__play-btn__icon" />
                      </graphic>
+                     <styleClass>
+                        <String fx:value="audioplayer--scripture-takes__play-btn" />
+                        <String fx:value="btn--cta" />
+                     </styleClass>
                   </JFXButton>
                </children>
             </HBox>

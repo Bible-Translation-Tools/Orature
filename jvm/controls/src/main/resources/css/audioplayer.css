@@ -1,6 +1,24 @@
-.audioplayer--takes {
+.audioplayer--scripture-takes {
     -fx-background-color: -white;
     -fx-effect: -level2;
     -fx-background-radius: 16px;
     -fx-border-radius: 16px;
+}
+
+.audioplayer--scripture-takes__label {
+    -fx-font-size: 1em;
+}
+
+.audioplayer--scripture-takes__label__icon {
+    -fx-icon-size: 24px;
+}
+
+.audioplayer--scripture-takes__play-btn {
+    -fx-effect: -level2;
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+}
+
+.audioplayer--scripture-takes__play-btn__icon {
+    -fx-icon-size: 20px;
 }
