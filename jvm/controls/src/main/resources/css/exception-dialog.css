@@ -1,0 +1,46 @@
+.dialog {
+
+}
+
+.show_more {
+    -fx-cursor: hand;
+}
+
+.send_report {
+    -fx-cursor: hand;
+    -jfx-checked-color: #127de8;
+}
+
+.scrollpane {
+    -fx-background-color: #cee6ff;
+    -fx-background-radius: 10px;
+}
+
+.anchor_pane {
+    -fx-background-color: #cee6ff;
+}
+
+.show_more_button {
+    -fx-text-fill: #0394ff;
+}
+
+.show_more_icon {
+    -fx-icon-color: #0394ff;
+}
+
+.show_more_icon--more {
+    -fx-icon-code: gmi-expand-more;
+}
+
+.show_more_icon--less {
+    -fx-icon-code: gmi-expand-less;
+}
+
+.close_button {
+    -fx-background-color: #015ad9;
+    -fx-text-fill: white;
+}
+
+.close_button__icon {
+    -fx-icon-color: white;
+}
