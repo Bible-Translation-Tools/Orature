@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.*
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -33,6 +33,13 @@ class WorkbookViewModel : ViewModel() {
     val activeProjectAudioDirectory: File
         get() = activeProjectAudioDirectoryProperty.value
             ?: throw IllegalStateException("Project audio directory is null")
+
+    val sourceAudioFileProperty = activeChapterProperty.objectBinding { chap ->
+        chap?.let {
+            workbook.sourceAudioAccessor.get(it.sort)
+        }
+    }
+    val sourceAudioAvailableProperty = sourceAudioFileProperty.booleanBinding { it?.exists() ?: false }
 
     fun setProjectAudioDirectory(resourceMetadata: ResourceMetadata) {
         val projectAudioDir = directoryProvider.getProjectAudioDirectory(

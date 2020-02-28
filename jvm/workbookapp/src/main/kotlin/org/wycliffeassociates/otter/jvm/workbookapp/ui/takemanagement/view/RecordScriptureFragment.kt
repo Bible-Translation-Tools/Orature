@@ -7,10 +7,12 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.skins.SourceAudioSkin
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
 private class RecordableViewModelProvider : Component() {
@@ -42,6 +44,14 @@ class RecordScriptureFragment : RecordableFragment(
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
+
+        sourceAudioPlayer.visibleWhen { recordScriptureViewModel.sourceAudioAvailableProperty }
+        sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
+        recordScriptureViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
+            it?.let {
+                sourceAudioPlayer.load(it)
+            }
+        }
 
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)

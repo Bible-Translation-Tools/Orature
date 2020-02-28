@@ -7,12 +7,11 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
 class RecordScriptureViewModel : ViewModel() {
@@ -20,6 +19,9 @@ class RecordScriptureViewModel : ViewModel() {
         FORWARD,
         BACKWARD
     }
+
+    private val injector: Injector by inject()
+
 
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -40,13 +42,11 @@ class RecordScriptureViewModel : ViewModel() {
 
     private var activeChunkSubscription: Disposable? = null
 
-    private val sourceAudio: SourceAudio
-    val sourceAudioPath = SimpleStringProperty()
+    val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
+    val sourceAudioFileProperty = workbookViewModel.sourceAudioFileProperty
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
     init {
-        val rcPath = workbookViewModel.workbook.source.resourceMetadata.path
-        sourceAudio = SourceAudio(ResourceContainer.load(rcPath))
-
         activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
 
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
@@ -59,19 +59,26 @@ class RecordScriptureViewModel : ViewModel() {
                 setHasNextAndPrevious()
                 // This will trigger loading takes in the RecordableViewModel
                 recordableViewModel.recordable = chunk
-                updateSourceAudio(workbookViewModel.activeChapterProperty.value, chunk)
             } else {
                 workbookViewModel.activeChapterProperty.value?.let {
                     recordableViewModel.recordable = it
                 }
-                sourceAudioPath.set(null)
+            }
+        }
+
+        workbookViewModel.sourceAudioFileProperty.onChangeAndDoNow {
+            it?.let {
+                val audioPlayer = injector.audioPlayer
+                audioPlayer.load(it)
+                sourceAudioPlayerProperty.set(audioPlayer)
             }
         }
     }
 
-    private fun updateSourceAudio(chapter: Chapter, chunk: Chunk) {
-        println(chunk)
-        sourceAudioPath.set(sourceAudio.get(workbookViewModel.workbook.source.slug, chapter.sort)?.absolutePath)
+    private fun updateSourceAudio() {
+        activeChunkProperty.value?.let { chunk ->
+            workbookViewModel.workbook.sourceAudioAccessor.get(workbookViewModel.activeChapterProperty.value.sort)
+        }
     }
 
     fun nextChunk() {

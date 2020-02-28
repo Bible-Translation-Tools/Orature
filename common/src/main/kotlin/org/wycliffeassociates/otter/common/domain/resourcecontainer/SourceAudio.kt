@@ -1,14 +1,18 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 
 class SourceAudio(
-    private val rc: ResourceContainer
+    metadata: ResourceMetadata,
+    val project: String
 ) {
 
-    fun get(project: String, chapter: Int): File? {
+    private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
+
+    fun get(chapter: Int): File? {
         if (rc.media != null) {
             val mediaProject = rc.media!!.projects.find { it.identifier == project }
             var media = mediaProject?.media?.find { it.identifier == "mp3" }
