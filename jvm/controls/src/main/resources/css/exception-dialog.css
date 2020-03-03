@@ -17,11 +17,11 @@
 }
 
 /* Scrollbar style */
-.dialog--exception__stacktrace-container .scroll-bar:vertical {
+.dialog--exception__stacktrace-container .scroll-bar {
     -fx-background-color: transparent;
 }
 
-.dialog--exception__stacktrace-container .scroll-bar:vertical .track {
+.dialog--exception__stacktrace-container .scroll-bar .track {
     -fx-background-color: transparent;
 	-fx-border-color: transparent;
 }
