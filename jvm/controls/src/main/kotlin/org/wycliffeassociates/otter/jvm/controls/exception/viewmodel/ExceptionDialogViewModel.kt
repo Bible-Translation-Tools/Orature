@@ -1,23 +1,25 @@
 package org.wycliffeassociates.otter.jvm.controls.exception.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import tornadofx.*
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 
-class ExceptionDialogViewModel : ViewModel() {
+class ExceptionDialogViewModel {
 
-    val stackTrace = SimpleStringProperty("")
-    val showMore = SimpleBooleanProperty(false)
-    val sendReport = SimpleBooleanProperty(true)
+    val titleTextProperty = SimpleStringProperty()
+    val headerTextProperty = SimpleStringProperty()
+    val showMoreTextProperty = SimpleStringProperty()
+    val showLessTextProperty = SimpleStringProperty()
+    val showMore = SimpleBooleanProperty()
+    val sendReportTextProperty = SimpleStringProperty()
+    val sendReportProperty = SimpleBooleanProperty()
+    val stackTraceProperty = SimpleStringProperty()
+    val onCloseAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val closeTextProperty = SimpleStringProperty()
 
     fun toggleShowMore() {
-        showMore.value = !showMore.value
-    }
-
-    fun sendReport() {
-        if(sendReport.value) {
-            println("Report is being sent...")
-            // TODO implement sending report
-        }
+        showMore.set(!showMore.get())
     }
 }

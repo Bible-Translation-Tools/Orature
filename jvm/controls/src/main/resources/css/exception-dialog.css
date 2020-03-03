@@ -1,46 +1,46 @@
-.dialog {
-
+.dialog--exception {
+    -fx-background-color: -white;
 }
 
-.show_more {
+.dialog--exception__send-report {
     -fx-cursor: hand;
+    -jfx-checked-color: -primary;
 }
 
-.send_report {
-    -fx-cursor: hand;
-    -jfx-checked-color: #127de8;
-}
-
-.scrollpane {
-    -fx-background-color: #cee6ff;
+.dialog--exception__stacktrace-container {
+    -fx-background-color: -primary-light;
     -fx-background-radius: 10px;
 }
 
-.anchor_pane {
-    -fx-background-color: #cee6ff;
+.dialog--exception__stacktrace-container__sub {
+    -fx-background-color: -primary-light;
 }
 
-.show_more_button {
-    -fx-text-fill: #0394ff;
+/* Scrollbar style */
+.dialog--exception__stacktrace-container .scroll-bar:vertical {
+    -fx-background-color: transparent;
 }
 
-.show_more_icon {
-    -fx-icon-color: #0394ff;
+.dialog--exception__stacktrace-container .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+	-fx-border-color: transparent;
 }
 
-.show_more_icon--more {
-    -fx-icon-code: gmi-expand-more;
+.dialog--exception__stacktrace-container .scroll-bar .increment-button,
+.dialog--exception__stacktrace-container .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 0;
 }
 
-.show_more_icon--less {
-    -fx-icon-code: gmi-expand-less;
+.dialog--exception__stacktrace-container .scroll-bar .increment-arrow,
+.dialog--exception__stacktrace-container .scroll-bar .decrement-arrow {
+	-fx-background-color: transparent;
+	-fx-padding: 0 5;
 }
 
-.close_button {
-    -fx-background-color: #015ad9;
-    -fx-text-fill: white;
-}
-
-.close_button__icon {
-    -fx-icon-color: white;
+.dialog--exception__stacktrace-container .scroll-bar .thumb {
+    -fx-background-color: -gray;
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 10px;
 }
