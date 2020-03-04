@@ -10,6 +10,8 @@ class SourceAudio(
     val project: String
 ) {
 
+    val cache = mutableMapOf<String, File>()
+
     private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
 
     fun get(chapter: Int): File? {
@@ -30,9 +32,13 @@ class SourceAudio(
         return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
+                if (cache.containsKey(path)) {
+                    cache[path]
+                }
                 val inputStream = rc.accessor.getInputStream(path)
                 val extension = File(path).extension
                 val temp = File.createTempFile("source", ".$extension")
+                cache[path] = temp
                 temp.deleteOnExit()
                 inputStream.copyTo(temp.outputStream())
                 temp
