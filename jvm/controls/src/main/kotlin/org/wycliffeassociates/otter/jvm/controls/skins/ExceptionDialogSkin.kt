@@ -33,6 +33,9 @@ class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<Except
     @FXML
     private lateinit var closeButton: Button
 
+    private val showMoreIcon = FontIcon("gmi-expand-more").apply { styleClass.add("btn__icon") }
+    private val showLessIcon = FontIcon("gmi-expand-less").apply { styleClass.add("btn__icon") }
+
     init {
         loadFXML()
         bindText()
@@ -60,12 +63,8 @@ class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<Except
             )
             graphicProperty().bind(
                 Bindings.`when`(dialog.showMore)
-                    .then(FontIcon("gmi-expand-less").apply {
-                        styleClass.add("btn__icon")
-                    })
-                    .otherwise(FontIcon("gmi-expand-more").apply {
-                        styleClass.add("btn__icon")
-                    })
+                    .then(showLessIcon)
+                    .otherwise(showMoreIcon)
             )
         }
     }
