@@ -1,0 +1,46 @@
+.dialog--exception {
+    -fx-background-color: -white;
+}
+
+.dialog--exception__send-report {
+    -fx-cursor: hand;
+    -jfx-checked-color: -primary;
+}
+
+.dialog--exception__stacktrace-container {
+    -fx-background-color: -primary-light;
+    -fx-background-radius: 10px;
+}
+
+.dialog--exception__stacktrace-container__sub {
+    -fx-background-color: -primary-light;
+}
+
+/* Scrollbar style */
+.dialog--exception__stacktrace-container .scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.dialog--exception__stacktrace-container .scroll-bar .track {
+    -fx-background-color: transparent;
+	-fx-border-color: transparent;
+}
+
+.dialog--exception__stacktrace-container .scroll-bar .increment-button,
+.dialog--exception__stacktrace-container .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+	-fx-border-color: transparent;
+	-fx-padding: 0;
+}
+
+.dialog--exception__stacktrace-container .scroll-bar .increment-arrow,
+.dialog--exception__stacktrace-container .scroll-bar .decrement-arrow {
+	-fx-background-color: transparent;
+	-fx-padding: 0 5;
+}
+
+.dialog--exception__stacktrace-container .scroll-bar .thumb {
+    -fx-background-color: -gray;
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 10px;
+}
