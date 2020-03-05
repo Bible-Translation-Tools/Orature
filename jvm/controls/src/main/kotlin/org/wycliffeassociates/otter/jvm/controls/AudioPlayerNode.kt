@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls
 
-import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -12,6 +12,8 @@ class AudioPlayerNode(var player: IAudioPlayer?) : Control() {
 
     val isPlaying: Boolean
         get() = player?.isPlaying() ?: false
+
+    val isPlayingProperty = SimpleBooleanProperty(false)
 
     val sourceAvailable: Boolean
         get() = player != null

@@ -14,12 +14,13 @@ import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import java.util.concurrent.TimeUnit
 
-private const val PLAY_ICON = "fa-play"
-private const val PAUSE_ICON = "fa-pause"
-
 class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlayerNode>(player) {
+
+    private val PLAY_ICON = FontIcon("fa-play")
+    private val PAUSE_ICON = FontIcon("fa-pause")
 
     @FXML
     lateinit var playBtn: Button
@@ -30,9 +31,9 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
     @FXML
     lateinit var audioSlider: Slider
 
-    var disposable: Disposable? = null
-    var dragging = false
-    var resumeAfterDrag = false
+    private var disposable: Disposable? = null
+    private var dragging = false
+    private var resumeAfterDrag = false
 
     init {
         loadFXML()
@@ -58,7 +59,6 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
             }
             dragging = true
         }
-
         audioSlider.setOnMouseReleased {
             player.seek(audioSlider.value.toFloat() / 100F)
             if (dragging) {
@@ -67,6 +67,13 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
                     toggle()
                     resumeAfterDrag = false
                 }
+            }
+        }
+        player.isPlayingProperty.onChangeAndDoNow {
+            if (it == true) {
+                playBtn.graphicProperty().set(PAUSE_ICON)
+            } else {
+                playBtn.graphicProperty().set(PLAY_ICON)
             }
         }
     }
@@ -86,19 +93,25 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
         disposable?.dispose()
         if (player.isPlaying) {
             player.pause()
-            playBtn.graphic = FontIcon(PLAY_ICON)
         } else {
             disposable = startProgressUpdate()
             player.play()
             player.player?.addEventListener {
-                if (it == AudioPlayerEvent.STOP) {
+                if (
+                    it == AudioPlayerEvent.PAUSE ||
+                    it == AudioPlayerEvent.STOP ||
+                    it == AudioPlayerEvent.COMPLETE
+                ) {
                     disposable?.dispose()
-                }
-                Platform.runLater {
-                    playBtn.graphic = FontIcon(PLAY_ICON)
+                    Platform.runLater {
+                        player.isPlayingProperty.set(false)
+                        if (it == AudioPlayerEvent.COMPLETE) {
+                            audioSlider.value = 0.0
+                        }
+                    }
                 }
             }
-            playBtn.graphic = FontIcon(PAUSE_ICON)
+            player.isPlayingProperty.set(true)
         }
     }
 
