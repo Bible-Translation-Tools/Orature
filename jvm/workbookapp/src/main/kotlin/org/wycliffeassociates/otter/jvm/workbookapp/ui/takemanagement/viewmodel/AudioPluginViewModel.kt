@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {
@@ -37,8 +36,6 @@ class AudioPluginViewModel : ViewModel() {
 
     private fun constructPluginParameters(): PluginParameters {
         val workbook = workbookViewModel.workbook
-        val sourceRc = ResourceContainer.load(workbook.source.resourceMetadata.path)
-
         val sourceAudio = SourceAudio(workbook.source.resourceMetadata, workbook.source.slug)
         val sourceAudioFile = sourceAudio.get(workbookViewModel.activeChapterProperty.value.sort)
 

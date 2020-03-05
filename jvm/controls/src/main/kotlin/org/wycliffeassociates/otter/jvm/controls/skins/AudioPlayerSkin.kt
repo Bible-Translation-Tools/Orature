@@ -22,7 +22,7 @@ private const val PAUSE_ICON = "fa-pause"
 class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlayerNode>(player) {
 
     @FXML
-    lateinit var recordBtn: Button
+    lateinit var playBtn: Button
     @FXML
     lateinit var sourceMissing: HBox
     @FXML
@@ -40,7 +40,7 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
     }
 
     private fun initializeControl() {
-        recordBtn.setOnMouseClicked {
+        playBtn.setOnMouseClicked {
             toggle()
         }
         if (player.sourceAvailable) {
@@ -88,7 +88,7 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
         println(player.isPlaying)
         if (player.isPlaying) {
             player.pause()
-            recordBtn.graphic = FontIcon(PLAY_ICON)
+            playBtn.graphic = FontIcon(PLAY_ICON)
         } else {
             disposable = startProgressUpdate()
             player.play()
@@ -97,10 +97,10 @@ class AudioPlayerSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
                     disposable?.dispose()
                 }
                 Platform.runLater {
-                    recordBtn.graphic = FontIcon(PLAY_ICON)
+                    playBtn.graphic = FontIcon(PLAY_ICON)
                 }
             }
-            recordBtn.graphic = FontIcon(PAUSE_ICON)
+            playBtn.graphic = FontIcon(PAUSE_ICON)
         }
     }
 

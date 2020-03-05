@@ -29,7 +29,7 @@
         </HBox>
         <HBox fx:id="audioPlayer" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" visible="false">
             <children>
-                <JFXButton fx:id="recordBtn" text=" ">
+                <JFXButton fx:id="playBtn" text=" ">
                     <graphic>
                         <FontIcon iconLiteral="fa-play" />
                     </graphic>

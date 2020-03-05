@@ -74,12 +74,6 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
-    private fun updateSourceAudio() {
-        activeChunkProperty.value?.let { chunk ->
-            workbookViewModel.workbook.sourceAudioAccessor.get(workbookViewModel.activeChapterProperty.value.sort)
-        }
-    }
-
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
     }
