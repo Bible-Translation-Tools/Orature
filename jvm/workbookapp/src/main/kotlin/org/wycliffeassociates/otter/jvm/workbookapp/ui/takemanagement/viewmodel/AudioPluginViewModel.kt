@@ -39,8 +39,8 @@ class AudioPluginViewModel : ViewModel() {
         val workbook = workbookViewModel.workbook
         val sourceRc = ResourceContainer.load(workbook.source.resourceMetadata.path)
 
-        val sourceAudio = SourceAudio(sourceRc)
-        val sourceAudioFile = sourceAudio.get(workbook.source.slug, workbookViewModel.activeChapterProperty.value.sort)
+        val sourceAudio = SourceAudio(workbook.source.resourceMetadata, workbook.source.slug)
+        val sourceAudioFile = sourceAudio.get(workbookViewModel.activeChapterProperty.value.sort)
 
         return PluginParameters(
             languageName = workbook.target.language.name,

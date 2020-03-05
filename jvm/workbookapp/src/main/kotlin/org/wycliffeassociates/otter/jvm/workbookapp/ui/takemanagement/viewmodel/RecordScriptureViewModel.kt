@@ -8,8 +8,10 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
 class RecordScriptureViewModel : ViewModel() {
@@ -17,6 +19,8 @@ class RecordScriptureViewModel : ViewModel() {
         FORWARD,
         BACKWARD
     }
+
+    private val injector: Injector by inject()
 
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -37,6 +41,10 @@ class RecordScriptureViewModel : ViewModel() {
 
     private var activeChunkSubscription: Disposable? = null
 
+    val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
+    val sourceAudioFileProperty = workbookViewModel.sourceAudioFileProperty
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
     init {
         activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
 
@@ -55,6 +63,20 @@ class RecordScriptureViewModel : ViewModel() {
                     recordableViewModel.recordable = it
                 }
             }
+        }
+
+        workbookViewModel.sourceAudioFileProperty.onChangeAndDoNow {
+            it?.let {
+                val audioPlayer = injector.audioPlayer
+                audioPlayer.load(it)
+                sourceAudioPlayerProperty.set(audioPlayer)
+            }
+        }
+    }
+
+    private fun updateSourceAudio() {
+        activeChunkProperty.value?.let { chunk ->
+            workbookViewModel.workbook.sourceAudioAccessor.get(workbookViewModel.activeChapterProperty.value.sort)
         }
     }
 

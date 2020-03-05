@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import java.io.File
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
