@@ -22,7 +22,6 @@ class RecordScriptureViewModel : ViewModel() {
 
     private val injector: Injector by inject()
 
-
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 

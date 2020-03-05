@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
 private class RecordableViewModelProvider : Component() {
