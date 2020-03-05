@@ -7,8 +7,8 @@ data class PluginParameters(
     val bookTitle: String,
     val chapterLabel: String,
     val chapterNumber: Int,
-    val unitLabel: String? = null,
-    val unitNumber: Int? = null,
+    val chunkLabel: String? = null,
+    val chunkNumber: Int? = null,
     val sourceChapterAudio: File? = null,
     val sourceChunkStart: Int? = null,
     val sourceChunkEnd: Int? = null
