@@ -8,13 +8,10 @@ import org.wycliffeassociates.otter.jvm.controls.skins.AudioPlayerSkin
 
 class AudioPlayerNode(var player: IAudioPlayer?) : Control() {
 
-    var loaded = false
     var startAtPercent = 0F
 
     val isPlaying: Boolean
         get() = player?.isPlaying() ?: false
-
-    val playbackPercentage = SimpleDoubleProperty(0.0)
 
     val sourceAvailable: Boolean
         get() = player != null
@@ -24,18 +21,26 @@ class AudioPlayerNode(var player: IAudioPlayer?) : Control() {
     }
 
     fun play() {
+        seek(startAtPercent)
         player?.play()
+        startAtPercent = 0F
     }
 
     fun pause() {
-        player?.pause()
+        player?.let {
+            startAtPercent = it.getAbsoluteLocationInFrames() / it.getAbsoluteDurationInFrames().toFloat()
+            it.pause()
+        }
     }
 
     fun seek(percent: Float) {
         player?.let {
             val position = (it.getAbsoluteDurationInFrames() * percent).toInt()
             it.seek(position)
-        }
+            if (!it.isPlaying()) {
+                startAtPercent = percent
+            }
+        } ?: run { startAtPercent = percent }
     }
 
     fun playbackPosition(): Double {

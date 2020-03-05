@@ -49,7 +49,6 @@ class SourceAudioSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
 
         audioSlider.setOnMouseReleased {
             player.seek(audioSlider.value.toFloat() / 100F)
-            println(audioSlider.value)
             if (dragging) {
                 dragging = false
                 if (resumeAfterDrag) {
@@ -73,7 +72,6 @@ class SourceAudioSkin(private val player: AudioPlayerNode) : SkinBase<AudioPlaye
 
     private fun toggle() {
         disposable?.dispose()
-        println(player.isPlaying)
         if (player.isPlaying) {
             player.pause()
             playBtn.graphic = FontIcon(PLAY_ICON)
