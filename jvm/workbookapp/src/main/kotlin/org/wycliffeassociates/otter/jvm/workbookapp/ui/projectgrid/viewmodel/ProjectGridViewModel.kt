@@ -50,10 +50,9 @@ class ProjectGridViewModel : ViewModel() {
         DeleteProject(collectionRepo, directoryProvider)
             .delete(project, true)
             .observeOnFx()
-            .doOnComplete {
+            .subscribe {
                 Platform.runLater { loadProjects() }
             }
-            .subscribe()
     }
 
     fun selectProject(targetProject: Collection) {

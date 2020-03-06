@@ -14,7 +14,7 @@
   </files>
   <launchers>
     <launcher name="orature" id="59">
-      <executable name="orature" iconSet="true" executableDir="." executableMode="gui" />
+      <executable name="orature" iconSet="true" iconFile="./orature_icon.ico" executableDir="." executableMode="gui" />
       <java mainClass="org.wycliffeassociates.otter.jvm.workbookapp.MainKt">
         <classPath>
           <archive location="workbookapp.jar" />
@@ -22,6 +22,7 @@
       </java>
       <macStaticAssociationActions mode="selected" />
       <iconImageFiles>
+        <file path="./orature_icon_48x48.png" />
         <file path="./orature_icon_128x128.png" />
       </iconImageFiles>
     </launcher>
@@ -164,12 +165,6 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
           <screen id="15" beanClass="com.install4j.runtime.beans.screens.InstallationScreen" rollbackBarrier="true" rollbackBarrierExitCode="0">
             <actions>
               <action id="17" beanClass="com.install4j.runtime.beans.actions.InstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" failureStrategy="quit" errorMessage="${i18n:FileCorrupted}" />
-              <action id="18" beanClass="com.install4j.runtime.beans.actions.desktop.CreateProgramGroupAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
-                <serializedBean>
-                  <property name="uninstallerMenuName" type="string">${i18n:UninstallerMenuEntry(${compiler:sys.fullName})}</property>
-                </serializedBean>
-                <condition>!context.getBooleanVariable("sys.programGroupDisabled")</condition>
-              </action>
               <action id="19" beanClass="com.install4j.runtime.beans.actions.desktop.RegisterAddRemoveAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
                   <property name="itemName" type="string">${compiler:sys.fullName} ${compiler:sys.version}</property>
@@ -186,12 +181,38 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
           </screen>
           <screen id="20" beanClass="com.install4j.runtime.beans.screens.FinishedScreen" styleId="41" rollbackBarrierExitCode="0" finishScreen="true">
             <actions>
+              <action id="323" beanClass="com.install4j.runtime.beans.actions.desktop.CreateStartMenuEntryAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="entryName" type="string">Orature</property>
+                  <property name="file">
+                    <object class="java.io.File">
+                      <string>orature</string>
+                    </object>
+                  </property>
+                  <property name="unixIconFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>./orature_icon_128x128.png</string>
+                    </object>
+                  </property>
+                </serializedBean>
+                <condition>!context.getBooleanVariable("sys.programGroupDisabled")</condition>
+              </action>
               <action id="154" beanClass="com.install4j.runtime.beans.actions.desktop.CreateDesktopLinkAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
+                  <property name="file">
+                    <object class="java.io.File">
+                      <string>orature</string>
+                    </object>
+                  </property>
                   <property name="name" type="string">${compiler:sys.fullName}</property>
                   <property name="unixIconFile">
                     <object class="com.install4j.api.beans.ExternalFile">
                       <string>./orature_icon_128x128.png</string>
+                    </object>
+                  </property>
+                  <property name="winIconFile">
+                    <object class="com.install4j.api.beans.ExternalFile">
+                      <string>./orature_icon.ico</string>
                     </object>
                   </property>
                 </serializedBean>
@@ -202,6 +223,24 @@ By using this software, you agree to the Oracle Binary Code License Agreement fo
                   <property name="launcherId" type="string">59</property>
                 </serializedBean>
                 <condition>context.getBooleanVariable("executeLauncherAction") &amp;&amp; (!context.isUnattended())</condition>
+              </action>
+              <action id="414" beanClass="com.install4j.runtime.beans.actions.files.CopyFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
+                <serializedBean>
+                  <property name="destinationFile">
+                    <object class="java.io.File">
+                      <string>/home/${installer:sys.userName}/Desktop/orature.desktop</string>
+                    </object>
+                  </property>
+                  <property name="files" type="array" class="java.io.File" length="1">
+                    <element index="0">
+                      <object class="java.io.File">
+                        <string>/opt/orature/orature.desktop</string>
+                      </object>
+                    </element>
+                  </property>
+                  <property name="mode" type="string">755</property>
+                  <property name="triggerReboot" type="boolean" value="false" />
+                </serializedBean>
               </action>
             </actions>
             <formComponents>
@@ -518,10 +557,14 @@ return console.askYesNo(message, true);
   </installerGui>
   <mediaSets>
     <windows name="Windows" id="60">
+      <excludedBeans>
+        <bean refId="414" />
+      </excludedBeans>
       <jreBundle jreBundleSource="preCreated" includedJre="windows-amd64-11.0.3.tar.gz" manualJreEntry="true" />
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158">
       <jreBundle jreBundleSource="preCreated" includedJre="linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
+      <postInstallScript>cp /opt/${compiler:sys.shortName}/${compiler:sys.shortName}.desktop ~/Desktop/</postInstallScript>
     </linuxDeb>
     <macosFolder name="macOS Folder" id="166">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />

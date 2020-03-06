@@ -95,3 +95,6 @@ hs_err_pid*
 
 # Ignores install4j build artifacts
 /jvm/workbookapp/.exec/
+
+# Ignore unencrypted signing file
+signing.p12

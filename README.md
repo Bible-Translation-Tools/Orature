@@ -1,14 +1,16 @@
-# otter-jvm
-JVM specific packages for the otter project
-Supports Windows, MacOs, Linux, and any other operating system that supports the desktop JVM
+# otter
+Otter is a modular suite of Oral Translation libraries and distributable software.
 
+# Desktop Workbook App
+The workbook app runs on OpenJDK 11. Installers for Windows, Debian-based Linux, and Mac are available in the Releases section of the repo on GitHub.
 
-# Setup
-Requires java version 8 (note: use of the openjdk will require importing openjfx as a dependency)
+# Building/dev
+Requires java version 11. JavaFX is included as a gradle dependency
 
-- Clone this, otter-common and kotlin-resource-container into the same directory (note settings.gradle in this repo).
-- Run the gradle task ```generateSampleJooqSchemaSource``` in order to generate jooq classes
-- Run the gradle task ```kaptKotlin```
+- Clone this repo
+- Run the gradle task ```:jvm:workbookapp:generateSampleJooqSchemaSource``` in order to generate jooq classes
+- Run the gradle task ```:jvm:workbookapp:kaptKotlin```
 
  From there you should be able to build and run, the entrypoint is under org.wycliffeassociates.otter.jvm.workbookapp.Mainkt
 
+- Run the gradle task ```:jvm:workbookapp:build``` to build an executable shadow Jar file. 
