@@ -1,10 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -22,23 +24,44 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    fun record(recordable: Recordable): Single<RecordTake.Result> =
-        recordTake.record(
+    fun record(recordable: Recordable): Single<RecordTake.Result> {
+        val params = constructPluginParameters()
+        return recordTake.record(
             audio = recordable.audio,
             projectAudioDir = workbookViewModel.activeProjectAudioDirectory,
-            namer = createFileNamer(recordable)
+            namer = createFileNamer(recordable),
+            pluginParameters = params
         )
+    }
 
-    private fun createFileNamer(recordable: Recordable) =
-        WorkbookFileNamerBuilder.createFileNamer(
+    private fun constructPluginParameters(): PluginParameters {
+        val workbook = workbookViewModel.workbook
+        val sourceAudio = SourceAudio(workbook.source.resourceMetadata, workbook.source.slug)
+        val sourceAudioFile = sourceAudio.get(workbookViewModel.activeChapterProperty.value.sort)
+
+        return PluginParameters(
+            languageName = workbook.target.language.name,
+            bookTitle = workbook.target.title,
+            chapterLabel = workbookViewModel.activeChapterProperty.value.title,
+            chapterNumber = workbookViewModel.activeChapterProperty.value.sort,
+            sourceChapterAudio = sourceAudioFile
+        )
+    }
+
+    private fun createFileNamer(recordable: Recordable): FileNamer {
+        return WorkbookFileNamerBuilder.createFileNamer(
             workbook = workbookViewModel.workbook,
             chapter = workbookViewModel.chapter,
             chunk = workbookViewModel.chunk,
             recordable = recordable,
             rcSlug = workbookViewModel.activeResourceMetadata.identifier
         )
+    }
 
-    fun edit(take: Take): Single<EditTake.Result> = editTake.edit(take)
+    fun edit(take: Take): Single<EditTake.Result> {
+        val params = constructPluginParameters()
+        return editTake.edit(take, params)
+    }
 
     fun audioPlayer(): IAudioPlayer = injector.audioPlayer
 

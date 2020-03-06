@@ -197,10 +197,10 @@ abstract class RecordableFragment(
         // to trigger select take
         val dragTargetReducedBounds = dragTargetBounds.let {
             BoundingBox(
-                it.minX + it.width*.05,
-                it.minY + it.height*.05,
-                it.width*.9,
-                it.height*.9
+                it.minX + it.width * .05,
+                it.minY + it.height * .05,
+                it.width * .9,
+                it.height * .9
             )
         }
         return draggingNodeBounds.intersects(dragTargetReducedBounds)

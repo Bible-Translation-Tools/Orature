@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
@@ -22,7 +23,8 @@ class RecordTake(
     fun record(
         audio: AssociatedAudio,
         projectAudioDir: File,
-        namer: FileNamer
+        namer: FileNamer,
+        pluginParameters: PluginParameters
     ): Single<Result> {
         return audio.getNewTakeNumber()
             .map { newTakeNumber ->
@@ -31,7 +33,7 @@ class RecordTake(
                 create(newTakeNumber, filename, chapterAudioDir)
             }
             .flatMap {
-                doLaunchPlugin(audio::insertTake, it)
+                doLaunchPlugin(audio::insertTake, it, pluginParameters)
             }
     }
 
@@ -59,8 +61,12 @@ class RecordTake(
         return newTake
     }
 
-    private fun doLaunchPlugin(insertTake: (Take) -> Unit, take: Take): Single<Result> = launchPlugin
-        .launchRecorder(take.file)
+    private fun doLaunchPlugin(
+        insertTake: (Take) -> Unit,
+        take: Take,
+        pluginParameters: PluginParameters
+    ): Single<Result> = launchPlugin
+        .launchRecorder(take.file, pluginParameters)
         .map {
             handlePluginResult(insertTake, take, it)
         }

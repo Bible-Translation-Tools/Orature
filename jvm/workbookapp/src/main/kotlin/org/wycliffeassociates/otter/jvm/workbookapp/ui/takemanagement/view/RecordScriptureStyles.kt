@@ -41,7 +41,8 @@ class RecordScriptureStyles : Stylesheet() {
 
     init {
         background {
-            backgroundColor += AppTheme.colors.white
+            backgroundColor += c("#F7FAFF")
+            padding = box(0.px, 30.px, 20.px, 30.px)
         }
         viewTakesTitle {
             fontSize = 40.px
@@ -53,7 +54,7 @@ class RecordScriptureStyles : Stylesheet() {
         takeGrid {
             borderColor += box(Color.LIGHTGRAY)
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
-            backgroundColor += AppTheme.colors.white
+            backgroundColor += Color.TRANSPARENT
             spacing = 10.px
             alignment = Pos.CENTER_LEFT
             vgap = 16.px
@@ -62,8 +63,8 @@ class RecordScriptureStyles : Stylesheet() {
         }
 
         pageTop {
-            minHeight = 400.px
-            maxHeight = minHeight
+            padding = box(10.px, 20.px, 10.px, 20.px)
+            spacing = 30.px
         }
 
         scrollpane {

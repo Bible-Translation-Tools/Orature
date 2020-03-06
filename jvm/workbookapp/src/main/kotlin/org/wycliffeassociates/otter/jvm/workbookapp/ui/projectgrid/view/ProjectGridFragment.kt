@@ -10,7 +10,6 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.jvm.controls.card.Action
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
@@ -40,7 +39,10 @@ class ProjectGridFragment : Fragment() {
 
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
-        addClass(AppStyles.whiteBackground)
+
+        style {
+            unsafe("-fx-background-color", "#F7FAFF")
+        }
 
         datagrid(viewModel.projects) {
             anchorpaneConstraints {
@@ -49,7 +51,6 @@ class ProjectGridFragment : Fragment() {
                 bottomAnchor = 0
                 leftAnchor = 0
             }
-            addClass(AppStyles.whiteBackground)
             addClass(ProjectGridStyles.projectsGrid)
             cellWidthProperty.set(176.0)
             cellHeightProperty.set(224.0)
