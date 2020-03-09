@@ -23,7 +23,6 @@ class AudioBufferPlayer() : IAudioPlayer {
     private var begin = 0
     private var end = 0
 
-
     private val listeners = mutableListOf<IAudioPlayerListener>()
 
     override fun addEventListener(listener: IAudioPlayerListener) {
@@ -112,7 +111,9 @@ class AudioBufferPlayer() : IAudioPlayer {
     }
 
     override fun close() {
-        player.close()
+        if(::player.isInitialized) {
+            player.close()
+        }
     }
 
     override fun seek(position: Int) {

@@ -36,7 +36,7 @@ class WorkbookViewModel : ViewModel() {
 
     val sourceAudioFileProperty = activeChapterProperty.objectBinding { chap ->
         chap?.let {
-            workbook.sourceAudioAccessor.get(it.sort)
+            workbook.sourceAudioAccessor.getChapter(it.sort)?.file
         }
     }
     val sourceAudioAvailableProperty = sourceAudioFileProperty.booleanBinding { it?.exists() ?: false }
