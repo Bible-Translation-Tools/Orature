@@ -18,16 +18,19 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
     private val mappedFile: MappedByteBuffer
 
     init {
-        var begin = if(start != null) min(max(0, start), wav.totalAudioLength) else 0
+        val totalFrames = wav.totalAudioLength / wav.frameSizeInBytes
+        var begin = if (start != null) min(max(0, start), totalFrames) else 0
+        var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
+        begin *= wav.frameSizeInBytes
         begin += 44
-        var end = if (end != null) min(max(begin, end), wav.totalAudioLength) else wav.totalAudioLength
+        end *= wav.frameSizeInBytes
         end += 44
         mappedFile =
             RandomAccessFile(wav.file, "r").use {
                 it.channel.map(
                     FileChannel.MapMode.READ_ONLY,
                     begin.toLong(),
-                        (end - begin).toLong()
+                    (end - begin).toLong()
                 )
             }
     }

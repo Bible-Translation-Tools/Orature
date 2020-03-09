@@ -20,6 +20,9 @@ class AudioBufferPlayer() : IAudioPlayer {
     private lateinit var player: SourceDataLine
     private lateinit var bytes: ByteArray
     private lateinit var playbackThread: Thread
+    private var begin = 0
+    private var end = 0
+
 
     private val listeners = mutableListOf<IAudioPlayerListener>()
 
@@ -39,6 +42,8 @@ class AudioBufferPlayer() : IAudioPlayer {
 
     override fun load(file: File) {
         reader = WavFileReader(WavFile(file))
+        begin = 0
+        end = reader.totalFrames
         bytes = ByteArray(reader.sampleRate * reader.channels)
         player = AudioSystem.getSourceDataLine(
             AudioFormat(
@@ -54,6 +59,8 @@ class AudioBufferPlayer() : IAudioPlayer {
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+        begin = frameStart
+        end = frameEnd
         reader = WavFileReader(WavFile(file), frameStart, frameEnd)
         bytes = ByteArray(reader.sampleRate * reader.channels)
         player = AudioSystem.getSourceDataLine(
@@ -80,7 +87,7 @@ class AudioBufferPlayer() : IAudioPlayer {
                     val written = reader.getPcmBuffer(bytes)
                     player.write(bytes, 0, written)
                 }
-                player.close()
+                player.drain()
                 if (!pause) {
                     listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                 }
@@ -94,13 +101,13 @@ class AudioBufferPlayer() : IAudioPlayer {
         pause = true
         player.stop()
         player.flush()
+        player.close()
         listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
         reader.seek(stoppedAt)
     }
 
     override fun stop() {
         pause()
-        player.flush()
         listeners.forEach { it.onEvent(AudioPlayerEvent.STOP) }
     }
 
@@ -127,11 +134,11 @@ class AudioBufferPlayer() : IAudioPlayer {
     }
 
     override fun getAbsoluteDurationInFrames(): Int {
-        return reader.totalFrames
+        return end - begin
     }
 
     override fun getAbsoluteDurationMs(): Int {
-        return (reader.totalFrames / 44.1).toInt()
+        return ((end - begin) / 44.1).toInt()
     }
 
     override fun getAbsoluteLocationInFrames(): Int {
