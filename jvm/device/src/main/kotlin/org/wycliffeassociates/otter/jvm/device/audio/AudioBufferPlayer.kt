@@ -38,7 +38,7 @@ class AudioBufferPlayer() : IAudioPlayer {
     }
 
     override fun load(file: File) {
-        reader = WavFileReader(WavFile(file),  428839*2, 676929*2)
+        reader = WavFileReader(WavFile(file))
         bytes = ByteArray(reader.sampleRate * reader.channels)
         player = AudioSystem.getSourceDataLine(
             AudioFormat(
