@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
-import org.wycliffeassociates.otter.jvm.device.audio.AudioPlayer
+import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.Fragment
 import java.io.File
@@ -27,7 +27,7 @@ class SourceAudioFragment : Fragment() {
     }
 
     private fun initializeAudioPlayer(file: File): IAudioPlayer? {
-        val player = AudioPlayer()
+        val player = AudioBufferPlayer()
         return try {
             player.load(file)
             player

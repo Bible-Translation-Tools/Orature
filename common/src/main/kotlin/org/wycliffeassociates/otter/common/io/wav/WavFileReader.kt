@@ -2,10 +2,12 @@ package org.wycliffeassociates.otter.common.io.wav
 
 import org.wycliffeassociates.otter.common.io.AudioFileReader
 import java.io.RandomAccessFile
+import java.lang.Integer.max
+import java.lang.Integer.min
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-class WavFileReader(val wav: WavFile) : AudioFileReader {
+class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = null) : AudioFileReader {
 
     override val sampleRate: Int = wav.sampleRate
     override val channels: Int = wav.channels
@@ -13,14 +15,22 @@ class WavFileReader(val wav: WavFile) : AudioFileReader {
     override val framePosition: Int
         get() = mappedFile.position() / wav.frameSizeInBytes
 
-    private val mappedFile: MappedByteBuffer =
-        RandomAccessFile(wav.file, "r").use {
-            it.channel.map(
-                FileChannel.MapMode.READ_ONLY,
-                44,
-                wav.totalAudioLength.toLong()
-            )
-        }
+    private val mappedFile: MappedByteBuffer
+
+    init {
+        var begin = if(start != null) min(max(0, start), wav.totalAudioLength) else 0
+        begin += 44
+        var end = if (end != null) min(max(begin, end), wav.totalAudioLength) else wav.totalAudioLength
+        end += 44
+        mappedFile =
+            RandomAccessFile(wav.file, "r").use {
+                it.channel.map(
+                    FileChannel.MapMode.READ_ONLY,
+                    begin.toLong(),
+                        (end - begin).toLong()
+                )
+            }
+    }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
         val written = mappedFile.remaining().coerceAtMost(bytes.size)
