@@ -1,11 +1,14 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.io.wav.WavFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 
-class SourceAudio(
+data class SourceAudio(val file: File, val start: Int, val end: Int)
+
+class SourceAudioAccessor(
     metadata: ResourceMetadata,
     val project: String
 ) {
@@ -14,7 +17,7 @@ class SourceAudio(
 
     private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
 
-    fun get(chapter: Int): File? {
+    fun getChapter(chapter: Int): SourceAudio? {
         if (rc.media != null) {
             val mediaProject = rc.media!!.projects.find { it.identifier == project }
             var media = mediaProject?.media?.find { it.identifier == "mp3" }
@@ -22,13 +25,13 @@ class SourceAudio(
                 media = mediaProject?.media?.find { it.identifier == "wav" }
             }
             if (media != null) {
-                return get(media, chapter)
+                return getChapter(media, chapter)
             }
         }
         return null
     }
 
-    fun get(media: Media, chapter: Int): File? {
+    private fun getChapter(media: Media, chapter: Int): SourceAudio? {
         return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
@@ -41,12 +44,30 @@ class SourceAudio(
                 cache[path] = temp
                 temp.deleteOnExit()
                 inputStream.copyTo(temp.outputStream())
-                temp
+                val wav = WavFile(temp)
+                val size = wav.totalAudioLength / wav.frameSizeInBytes
+                SourceAudio(temp, 0, size)
             } else {
                 null
             }
         } else {
             null
         }
+    }
+
+    fun getChunk(chapter: Int, chunk: Int): SourceAudio? {
+        val file = getChapter(chapter)?.file
+        if (file != null) {
+            val wav = WavFile(file)
+            val cues = wav.metadata.getCues()
+            cues.sortedBy { it.location }
+            val index = chunk - 1
+            if (cues.size > index) {
+                val start = cues[index].location
+                val end = if (cues.size > chunk) cues[chunk].location else wav.totalAudioLength / wav.frameSizeInBytes
+                return SourceAudio(file, start, end)
+            }
+        }
+        return null
     }
 }
