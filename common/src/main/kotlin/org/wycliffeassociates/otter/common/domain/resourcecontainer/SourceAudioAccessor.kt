@@ -6,9 +6,9 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 
-data class SourceResult(val file: File, val start: Int, val end: Int)
+data class SourceAudio(val file: File, val start: Int, val end: Int)
 
-class SourceAudio(
+class SourceAudioAccessor(
     metadata: ResourceMetadata,
     val project: String
 ) {
@@ -17,7 +17,7 @@ class SourceAudio(
 
     private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
 
-    fun getChapter(chapter: Int): SourceResult? {
+    fun getChapter(chapter: Int): SourceAudio? {
         if (rc.media != null) {
             val mediaProject = rc.media!!.projects.find { it.identifier == project }
             var media = mediaProject?.media?.find { it.identifier == "mp3" }
@@ -31,7 +31,7 @@ class SourceAudio(
         return null
     }
 
-    private fun getChapter(media: Media, chapter: Int): SourceResult? {
+    private fun getChapter(media: Media, chapter: Int): SourceAudio? {
         return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
@@ -46,7 +46,7 @@ class SourceAudio(
                 inputStream.copyTo(temp.outputStream())
                 val wav = WavFile(temp)
                 val size = wav.totalAudioLength / wav.frameSizeInBytes
-                SourceResult(temp, 0, size)
+                SourceAudio(temp, 0, size)
             } else {
                 null
             }
@@ -55,7 +55,7 @@ class SourceAudio(
         }
     }
 
-    fun getChunk(chapter: Int, chunk: Int): SourceResult? {
+    fun getChunk(chapter: Int, chunk: Int): SourceAudio? {
         val file = getChapter(chapter)?.file
         if (file != null) {
             val wav = WavFile(file)
@@ -65,7 +65,7 @@ class SourceAudio(
             if (cues.size > index) {
                 val start = cues[index].location
                 val end = if (cues.size > chunk) cues[chunk].location else wav.totalAudioLength / wav.frameSizeInBytes
-                return SourceResult(file, start, end)
+                return SourceAudio(file, start, end)
             }
         }
         return null
