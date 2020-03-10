@@ -1,13 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import javafx.application.Platform
 import javafx.application.Platform.runLater
-import javafx.scene.control.Alert
-import javafx.scene.control.Alert.AlertType.ERROR
-import javafx.scene.control.Label
-import javafx.scene.control.TextArea
-import javafx.scene.layout.VBox
-import javafx.scene.paint.Color
+import javafx.scene.control.Dialog
+import javafx.stage.Modality
+import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.exception.exceptionDialog
 import java.io.ByteArrayOutputStream
 import java.io.PrintWriter
 import tornadofx.*
@@ -51,64 +50,34 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     }
 
     private fun showErrorDialog(error: Throwable) {
-        val cause = Label(if (error.cause != null) error.cause?.message else "").apply {
-            style = "-fx-font-weight: bold"
-        }
+        Dialog<Unit>().apply {
+            dialogPane.content = exceptionDialog {
+                titleTextProperty().set(FX.messages["needsRestart"])
+                headerTextProperty().set(FX.messages["yourWorkSaved"])
+                showMoreTextProperty().set(FX.messages["showMore"])
+                showLessTextProperty().set(FX.messages["showLess"])
+                sendReportTextProperty().set(FX.messages["sendErrorReport"])
+                stackTraceProperty().set(stringFromError(error))
+                closeTextProperty().set(FX.messages["closeApp"])
+                onCloseAction {
+                    if(sendReportProperty().get()) {
 
-        val textarea = TextArea().apply {
-            prefRowCount = 20
-            prefColumnCount = 50
-            text = stringFromError(error)
-        }
-
-        Alert(ERROR).apply {
-            title = error.message ?: "An error occured"
-            isResizable = true
-            headerText = if (error.stackTrace.isNullOrEmpty()) "Error" else "Error in " + error.stackTrace[0].toString()
-            dialogPane.content = VBox().apply {
-                add(cause)
-                if (error is RestException) {
-                    try {
-
-                        title = "HTTP Request Error: $title"
-                        form {
-                            fieldset(error.message) {
-                                val response = error.response
-                                if (response != null) {
-                                    field("Status") {
-                                        label("${response.statusCode} ${response.reason}")
-                                    }
-
-                                    val c = response.text()
-
-                                    if (c != null) {
-                                        tabpane {
-                                            background = Color.TRANSPARENT.asBackground()
-
-                                            tab("Plain text") {
-                                                textarea(c)
-                                            }
-                                            tab("Stacktrace") {
-                                                add(textarea)
-                                            }
-                                            tabs.withEach { isClosable = false }
-                                        }
-                                    } else {
-                                        add(textarea)
-                                    }
-                                } else {
-                                    add(textarea)
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        add(textarea)
+                    } else {
+                        Platform.exit()
                     }
-                } else {
-                    add(textarea)
                 }
             }
-            showAndWait()
+
+            dialogPane.stylesheets.addAll(listOf(
+                javaClass.getResource("/css/root.css").toExternalForm(),
+                javaClass.getResource("/css/button.css").toExternalForm(),
+                javaClass.getResource("/css/exception-dialog.css").toExternalForm()
+            ))
+
+            initModality(Modality.APPLICATION_MODAL)
+            initStyle(StageStyle.TRANSPARENT)
+
+            show()
         }
     }
 }
