@@ -22,8 +22,13 @@ class SourceAudioFragment : Fragment() {
             parameters?.let {
                 val sourceAudio: String? = parameters.named["chapter_audio"]
                 sourceFile = if (sourceAudio != null && File(sourceAudio).exists()) File(sourceAudio) else null
-                startFrame = parameters.named["source_chunk_start"]?.toInt()
-                endFrame = parameters.named["source_chunk_end"]?.toInt()
+                try {
+                    startFrame = parameters.named["source_chunk_start"]?.toInt()
+                    endFrame = parameters.named["source_chunk_end"]?.toInt()
+                } catch (e: NumberFormatException) {
+                    startFrame = null
+                    endFrame = null
+                }
             }
         }
         val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }

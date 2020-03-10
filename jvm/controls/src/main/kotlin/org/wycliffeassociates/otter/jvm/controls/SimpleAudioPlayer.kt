@@ -71,6 +71,7 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
                     loaded = true
                 }
             }
+            player.seek(0)
             player.play()
         } else player.pause()
     }

@@ -36,7 +36,6 @@ class WorkbookViewModel : ViewModel() {
         get() = activeProjectAudioDirectoryProperty.value
             ?: throw IllegalStateException("Project audio directory is null")
 
-
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
 
@@ -57,7 +56,7 @@ class WorkbookViewModel : ViewModel() {
     fun updateSourceAudio() {
         val _chunk = activeChunkProperty.get()
         val _chapter = activeChapterProperty.get()
-        if(_chapter != null && _chunk != null) {
+        if (_chapter != null && _chunk != null) {
             sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(_chapter.sort, _chunk.sort))
         } else if (_chapter != null) {
             sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(_chapter.sort))
