@@ -6,7 +6,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -36,15 +35,23 @@ class AudioPluginViewModel : ViewModel() {
 
     private fun constructPluginParameters(): PluginParameters {
         val workbook = workbookViewModel.workbook
-        val sourceAudio = SourceAudio(workbook.source.resourceMetadata, workbook.source.slug)
-        val sourceAudioFile = sourceAudio.get(workbookViewModel.activeChapterProperty.value.sort)
+        val sourceAudio = workbook.sourceAudioAccessor
+
+        val sourceAudioFile = workbookViewModel.chunk?.let { chunk ->
+            sourceAudio.getChunk(
+                workbookViewModel.activeChapterProperty.value.sort,
+                chunk.start
+            )
+        } ?: run { sourceAudio.getChapter(workbookViewModel.activeChapterProperty.value.sort) }
 
         return PluginParameters(
             languageName = workbook.target.language.name,
             bookTitle = workbook.target.title,
             chapterLabel = workbookViewModel.activeChapterProperty.value.title,
             chapterNumber = workbookViewModel.activeChapterProperty.value.sort,
-            sourceChapterAudio = sourceAudioFile
+            sourceChapterAudio = sourceAudioFile?.file,
+            sourceChunkStart = sourceAudioFile?.start,
+            sourceChunkEnd = sourceAudioFile?.end
         )
     }
 

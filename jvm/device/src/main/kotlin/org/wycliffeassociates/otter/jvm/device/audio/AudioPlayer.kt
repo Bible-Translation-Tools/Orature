@@ -49,6 +49,14 @@ class AudioPlayer : IAudioPlayer {
         listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
     }
 
+    /**
+     * Note: clip is not compatible with only loading a section of an audio file
+     * This simply calls load instead
+     */
+    override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+        load(file)
+    }
+
     override fun play() {
         if (!clip.isRunning && clip.frameLength > 0) {
             clip.start()
