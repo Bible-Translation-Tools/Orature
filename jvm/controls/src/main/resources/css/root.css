@@ -1,5 +1,6 @@
 .root {
     -fx-font-size: 16px; /* This sets the base em value to 16px */
+    -fx-text-base-color: #141414;
     
     /*Primary Color */
     -primary: #015AD9;

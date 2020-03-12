@@ -6,7 +6,7 @@ import javafx.scene.control.ContentDisplay
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
-import org.wycliffeassociates.otter.jvm.controls.skins.SourceAudioSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel

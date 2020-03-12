@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.skins
+package org.wycliffeassociates.otter.jvm.controls.skins.media
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable

@@ -4,7 +4,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.skins.AudioPlayerSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.media.AudioPlayerSkin
 
 class AudioPlayerNode(var player: IAudioPlayer?) : Control() {
 

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="208.0" prefWidth="392.0" styleClass="card--scripture-take" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER_LEFT" spacing="8.0" VBox.vgrow="ALWAYS">
+         <children>
+            <Label fx:id="takeLabel" styleClass="card--scripture-take__take-label" text="Take 01">
+               <graphic>
+                  <FontIcon iconLiteral="mdi-drag" iconSize="24" />
+               </graphic>
+               <font>
+                  <Font name="System Bold" />
+               </font>
+            </Label>
+            <Label fx:id="timestampLabel" styleClass="card--scripture-take__timestamp-label" text="01/01/1991" textFill="#141414">
+               <font>
+                  <Font name="System Italic" />
+               </font>
+            </Label>
+            <HBox HBox.hgrow="SOMETIMES" />
+            <JFXButton fx:id="deleteBtn" text="Delete">
+               <graphic>
+                  <FontIcon iconLiteral="mdi-delete" />
+               </graphic>
+               <styleClass>
+                  <String fx:value="card--scripture-take__btn" />
+                  <String fx:value="card--scripture-take__btn--delete" />
+               </styleClass>
+            </JFXButton>
+         </children>
+      </HBox>
+      <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
+         <children>
+            <JFXSlider fx:id="slider" HBox.hgrow="ALWAYS" />
+         </children></HBox>
+      <HBox alignment="CENTER" spacing="16.0" VBox.vgrow="ALWAYS">
+         <children>
+            <JFXButton fx:id="playBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Play" HBox.hgrow="ALWAYS">
+               <graphic>
+                  <FontIcon iconLiteral="mdi-play" />
+               </graphic>
+               <font>
+                  <Font name="System Bold" />
+               </font>
+               <styleClass>
+                  <String fx:value="card--scripture-take__btn" />
+                  <String fx:value="card--scripture-take__btn--play" />
+               </styleClass>
+            </JFXButton>
+            <JFXButton fx:id="editBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Edit" HBox.hgrow="ALWAYS">
+               <graphic>
+                  <FontIcon iconLiteral="gmi-mode-edit" styleClass=".card--scripture-take__btn--edit" />
+               </graphic>
+               <font>
+                  <Font name="System Bold" />
+               </font>
+               <styleClass>
+                  <String fx:value="card--scripture-take__btn" />
+                  <String fx:value="card--scripture-take__btn--edit" />
+               </styleClass>
+            </JFXButton>
+         </children>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+   </padding>
+</VBox>

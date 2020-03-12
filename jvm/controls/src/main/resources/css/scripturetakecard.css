@@ -1,0 +1,38 @@
+.card--scripture-take {
+    -fx-background-color: -white;
+    -fx-effect: -level2;
+    -fx-icon-size: 20px;
+    -fx-font-size: 1em; /* This sets the base em value to 16px */
+}
+
+.card--scripture-take__btn {
+    -fx-background-color: #FEFEFE;
+    -fx-effect: -level2;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-font-size: 1.5em;
+    -fx-font-weight: bold;
+}
+
+.card--scripture-take__btn:hover {
+    -fx-effect: -level4;
+}
+
+.card--scripture-take__btn--play {
+}
+
+.card--scripture-take__btn--edit {
+    -fx-text-fill: -green-dark;
+    -fx-icon-color: -green-dark;
+}
+
+.card--scripture-take__btn--delete {
+    -fx-font-size: 1em;
+}
+
+.card--scripture-take__take-label {
+    -fx-font-weight: bold;
+}
+
+.card--scripture-take__timestamp-label {
+}
