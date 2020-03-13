@@ -58,7 +58,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     }
 
     fun initController() {
-        audioPlayerController = AudioPlayerController(card.player, slider)
+        audioPlayerController = AudioPlayerController(card.audioPlayerProperty().value, slider)
         audioPlayerController.isPlayingProperty.onChangeAndDoNow { isPlaying ->
             if (isPlaying != null && isPlaying == true) {
                 playBtn.textProperty().set(card.playTextProperty().value)
@@ -70,6 +70,11 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         }
         playBtn.setOnAction {
             audioPlayerController.toggle()
+        }
+        card.audioPlayerProperty().onChange { player ->
+            player?.let {
+                audioPlayerController.load(it)
+            }
         }
     }
 
