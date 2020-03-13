@@ -1,15 +1,22 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import javafx.application.Platform
 import javafx.application.Platform.runLater
 import javafx.scene.control.Dialog
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.jvm.controls.exception.exceptionDialog
-import java.io.ByteArrayOutputStream
-import java.io.PrintWriter
+import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersistenceComponent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.PrintWriter
 
 class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
@@ -60,19 +67,28 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
                 stackTraceProperty().set(stringFromError(error))
                 closeTextProperty().set(FX.messages["closeApp"])
                 onCloseAction {
-                    if(sendReportProperty().get()) {
-
+                    if (sendReportProperty().get()) {
+                        sendReport(error)
+                            .doOnSubscribe { sendingReportProperty().set(true) }
+                            .doOnComplete {
+                                sendingReportProperty().set(false)
+                                Platform.exit()
+                            }
+                            .subscribeOn(Schedulers.computation())
+                            .subscribe()
                     } else {
                         Platform.exit()
                     }
                 }
             }
 
-            dialogPane.stylesheets.addAll(listOf(
-                javaClass.getResource("/css/root.css").toExternalForm(),
-                javaClass.getResource("/css/button.css").toExternalForm(),
-                javaClass.getResource("/css/exception-dialog.css").toExternalForm()
-            ))
+            dialogPane.stylesheets.addAll(
+                listOf(
+                    javaClass.getResource("/css/root.css").toExternalForm(),
+                    javaClass.getResource("/css/button.css").toExternalForm(),
+                    javaClass.getResource("/css/exception-dialog.css").toExternalForm()
+                )
+            )
 
             initModality(Modality.APPLICATION_MODAL)
             initStyle(StageStyle.TRANSPARENT)
@@ -80,6 +96,41 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
             show()
         }
     }
+}
+
+private fun sendReport(error: Throwable): Completable {
+    return Completable.fromAction {
+        val githubReporter = GithubReporter(
+            "https://api.github.com/repos/Bible-Translation-Tools/otter/issues",
+            ""
+        )
+        githubReporter.reportCrash(
+            getEnvironment(),
+            stringFromError(error),
+            getLog()
+        )
+    }
+}
+
+private fun getEnvironment(): AppInfo {
+    return AppInfo()
+}
+
+private fun getLog(): String? {
+    val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
+    val logExt = ".log"
+    val persistenceComponent = DaggerPersistenceComponent.builder().build()
+    val directoryProvider = persistenceComponent.injectDirectoryProvider()
+    val logFile = StringBuilder()
+        .append(directoryProvider.logsDirectory.absolutePath)
+        .append("/")
+        .append(logFileName)
+        .append(logExt)
+        .toString()
+
+    return try {
+        File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
+    } finally {}
 }
 
 private fun stringFromError(e: Throwable): String {

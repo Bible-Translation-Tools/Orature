@@ -194,6 +194,16 @@ task printVersionName {
     }
 }
 
+task createVersionProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/version.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = getVersionName().toString()
+            p.store w, null
+        }
+    }
+}
+
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
     testLogging {
@@ -241,6 +251,7 @@ idea {
 }
 
 compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+compileJava.dependsOn createVersionProperties
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

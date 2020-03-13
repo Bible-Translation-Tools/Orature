@@ -7,8 +7,6 @@ import javafx.scene.Node
 import javafx.scene.control.*
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.exception.ExceptionDialog
-import tornadofx.*
-
 
 class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<ExceptionDialog>(dialog) {
 
@@ -42,27 +40,27 @@ class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<Except
         bindAction()
 
         stacktraceScrollPane.apply {
-            visibleProperty().bind(dialog.showMore)
-            managedProperty().bind(dialog.showMore)
+            visibleProperty().bind(dialog.showMoreProperty())
+            managedProperty().bind(dialog.showMoreProperty())
         }
     }
 
     private fun bindText() {
-        titleLabel.textProperty().bind(dialog.titleTextProperty)
-        headerLabel.textProperty().bind(dialog.headerTextProperty)
+        titleLabel.textProperty().bind(dialog.titleTextProperty())
+        headerLabel.textProperty().bind(dialog.headerTextProperty())
         sendReportCheckbox.apply {
-            textProperty().bind(dialog.sendReportTextProperty)
-            dialog.sendReportProperty.bind(selectedProperty())
+            textProperty().bind(dialog.sendReportTextProperty())
+            dialog.sendReportProperty().bind(selectedProperty())
         }
-        stacktraceText.textProperty().bind(dialog.stackTraceProperty)
+        stacktraceText.textProperty().bind(dialog.stackTraceProperty())
         showMoreButton.apply {
             textProperty().bind(
-                Bindings.`when`(dialog.showMore)
-                    .then(dialog.showLessTextProperty)
-                    .otherwise(dialog.showMoreTextProperty)
+                Bindings.`when`(dialog.showMoreProperty())
+                    .then(dialog.showLessTextProperty())
+                    .otherwise(dialog.showMoreTextProperty())
             )
             graphicProperty().bind(
-                Bindings.`when`(dialog.showMore)
+                Bindings.`when`(dialog.showMoreProperty())
                     .then(showLessIcon)
                     .otherwise(showMoreIcon)
             )
@@ -74,13 +72,14 @@ class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<Except
             showMore()
         }
         closeButton.apply {
-            onActionProperty().bind(dialog.onCloseAction)
-            textProperty().bind(dialog.closeTextProperty)
+            onActionProperty().bind(dialog.onCloseActionProperty())
+            textProperty().bind(dialog.closeTextProperty())
+            disableProperty().bind(dialog.sendingReportProperty())
         }
     }
 
     private fun showMore() {
-        dialog.showMore.set(!dialog.showMore.get())
+        dialog.showMoreProperty().set(!dialog.showMoreProperty().get())
         dialog.scene.window.sizeToScene()
     }
 
