@@ -130,7 +130,7 @@ private fun getLog(): String? {
 
     return try {
         File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
-    } catch(e: Exception) {
+    } catch (e: Exception) {
         null
     }
 }

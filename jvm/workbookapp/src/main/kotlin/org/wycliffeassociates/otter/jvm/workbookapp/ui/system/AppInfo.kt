@@ -17,7 +17,7 @@ class AppInfo : Environment() {
         val prop = Properties()
         val inputStream = javaClass.classLoader.getResourceAsStream("version.properties")
 
-        if(inputStream != null) {
+        if (inputStream != null) {
             prop.load(inputStream)
             return prop.getProperty("version")
         }
