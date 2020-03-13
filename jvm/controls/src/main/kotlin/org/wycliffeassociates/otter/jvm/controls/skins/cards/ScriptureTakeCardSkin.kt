@@ -7,7 +7,10 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
@@ -25,6 +28,11 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     @FXML
     lateinit var timestampLabel: Label
 
+    lateinit var audioPlayerController: AudioPlayerController
+
+    private val PLAY_ICON = FontIcon("fa-play")
+    private val PAUSE_ICON = FontIcon("fa-pause")
+
     init {
         loadFXML()
         initializeControl()
@@ -33,6 +41,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     fun initializeControl() {
         bindText()
         bindActions()
+        initController()
     }
 
     fun bindText() {
@@ -46,6 +55,22 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     fun bindActions() {
         deleteBtn.onActionProperty().bind(card.onDeleteProperty())
         editBtn.onActionProperty().bind(card.onEditProperty())
+    }
+
+    fun initController() {
+        audioPlayerController = AudioPlayerController(card.player, slider)
+        audioPlayerController.isPlayingProperty.onChangeAndDoNow { isPlaying ->
+            if (isPlaying != null && isPlaying == true) {
+                playBtn.textProperty().set(card.playTextProperty().value)
+                playBtn.graphicProperty().set(PLAY_ICON)
+            } else {
+                playBtn.textProperty().set(card.pauseTextProperty().value)
+                playBtn.graphicProperty().set(PAUSE_ICON)
+            }
+        }
+        playBtn.setOnAction {
+            audioPlayerController.toggle()
+        }
     }
 
     private fun loadFXML() {

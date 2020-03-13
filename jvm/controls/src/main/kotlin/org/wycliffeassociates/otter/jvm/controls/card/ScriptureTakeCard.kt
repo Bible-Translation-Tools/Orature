@@ -3,20 +3,19 @@ package org.wycliffeassociates.otter.jvm.controls.card
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
-import javafx.beans.value.ObservableValue
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
 
 class ScriptureTakeCard(
-
+    val player: IAudioPlayer
 ) : Control() {
 
     private val onDeleteProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(EventHandler {})
     private val onEditProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(EventHandler {})
-    private val onPlayProperty = SimpleObjectProperty<() -> Unit>()
     private val deleteTextProperty = SimpleStringProperty("delete")
     private val editTextProperty = SimpleStringProperty("edit")
     private val playTextProperty = SimpleStringProperty("play")
@@ -50,7 +49,6 @@ class ScriptureTakeCard(
 
     fun onDeleteProperty() = onDeleteProperty
     fun onEditProperty() = onEditProperty
-    fun onPlayProperty() = onPlayProperty
 
     fun setOnDelete(op: () -> Unit) {
         onDeleteProperty.set(EventHandler { op() })
