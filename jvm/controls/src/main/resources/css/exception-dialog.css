@@ -13,7 +13,6 @@
 
 /* Exception dialog style */
 .dialog--exception {
-    -fx-background-color: -white;
     -fx-padding: 15 5;
     -fx-background-color: -white;
     -fx-background-insets: 15 5;
