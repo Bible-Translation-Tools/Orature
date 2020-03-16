@@ -17,6 +17,7 @@ import tornadofx.*
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.PrintWriter
+import java.util.*
 
 class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
@@ -100,15 +101,18 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
 
 private fun sendReport(error: Throwable): Completable {
     return Completable.fromAction {
-        val githubReporter = GithubReporter(
-            "https://api.github.com/repos/Bible-Translation-Tools/otter/issues",
-            ""
-        )
-        githubReporter.reportCrash(
-            getEnvironment(),
-            stringFromError(error),
-            getLog()
-        )
+        val props = githubProperties()
+        if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
+            val githubReporter = GithubReporter(
+                props.getProperty("repo-url"),
+                props.getProperty("oauth-token")
+            )
+            githubReporter.reportCrash(
+                getEnvironment(),
+                stringFromError(error),
+                getLog()
+            )
+        }
     }
 }
 
@@ -133,6 +137,18 @@ private fun getLog(): String? {
     } catch (e: Exception) {
         null
     }
+}
+
+private fun githubProperties(): Properties? {
+    val prop = Properties()
+    val inputStream = OtterExceptionHandler::class.java.classLoader.getResourceAsStream("github.properties")
+
+    if (inputStream != null) {
+        prop.load(inputStream)
+        return prop
+    }
+
+    return null
 }
 
 private fun stringFromError(e: Throwable): String {
