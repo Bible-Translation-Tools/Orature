@@ -7,9 +7,13 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
+import javafx.scene.input.MouseEvent
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -76,6 +80,34 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                 audioPlayerController.load(it)
             }
         }
+    }
+
+    private fun startDrag(evt: MouseEvent) {
+        skinnable.fireEvent(
+            StartDragEvent(
+                evt,
+                card,
+                skinnable.take
+            )
+        )
+    }
+
+    private fun animateDrag(evt: MouseEvent) {
+        skinnable.fireEvent(AnimateDragEvent(evt))
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun completeDrag(evt: MouseEvent) {
+        skinnable.fireEvent(
+            CompleteDragEvent(
+                skinnable.take,
+                ::onCancelDrag
+            )
+        )
+    }
+
+    private fun onCancelDrag() {
+        //stackPane.add(front)
     }
 
     private fun loadFXML() {

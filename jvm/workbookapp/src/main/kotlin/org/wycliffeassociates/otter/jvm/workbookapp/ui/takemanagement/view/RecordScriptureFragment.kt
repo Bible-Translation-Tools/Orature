@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
 import tornadofx.*
 
@@ -25,12 +25,14 @@ class RecordScriptureFragment : RecordableFragment(
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
-    private val takesList = TakesFlowPane(
-        recordableViewModel.alternateTakes,
-        audioPluginViewModel::audioPlayer,
-        lastPlayOrPauseEvent,
-        recordableViewModel::recordNewTake
-    )
+//    private val takesList = TakesFlowPane(
+//        recordableViewModel.alternateTakes,
+//        audioPluginViewModel::audioPlayer,
+//        lastPlayOrPauseEvent,
+//        recordableViewModel::recordNewTake
+//    )
+
+    private val takesList = ScriptureTakesGridView(recordableViewModel::recordNewTake)
 
     private val sourceAudioPlayer =
         AudioPlayerNode(null).apply {
@@ -52,6 +54,8 @@ class RecordScriptureFragment : RecordableFragment(
                 sourceAudioPlayer.load(it)
             }
         }
+
+        takesList.gridItems.set(recordableViewModel.takeModels)
 
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)
@@ -106,7 +110,7 @@ class RecordScriptureFragment : RecordableFragment(
     }
 
     override fun closePlayers() {
-        takesList.closePlayers()
+        // takesList.closePlayers()
     }
 
     override fun createTakeCard(take: Take): TakeCard {

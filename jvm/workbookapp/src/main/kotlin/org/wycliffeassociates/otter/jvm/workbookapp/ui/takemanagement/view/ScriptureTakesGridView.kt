@@ -10,12 +10,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
 import tornadofx.*
 import kotlin.math.pow
 
-class ScriptureTakesGridView : GridView<Pair<TakeCardType, TakeModel?>>() {
+class ScriptureTakesGridView(
+    val recordNewTake: () -> Unit
+) : GridView<Pair<TakeCardType, TakeModel?>>() {
 
     val gridItems = SimpleObjectProperty<ObservableList<TakeModel>>(FXCollections.observableArrayList())
 
     init {
-        setCellFactory { ScriptureTakesGridCell({}) }
+        setCellFactory { ScriptureTakesGridCell(recordNewTake) }
         cellHeightProperty().set(208.0)
         cellWidthProperty().set(392.0)
 

@@ -16,12 +16,15 @@ import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.EditTakeEvent
-import tornadofx.FX.Companion.messages
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
 import tornadofx.*
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
-) {
+) : ViewModel() {
+    val injector: Injector by inject()
+
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
@@ -36,6 +39,7 @@ open class RecordableViewModel(
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
+    val takeModels: ObservableList<TakeModel> = FXCollections.observableArrayList()
 
     init {
         recordableProperty.onChange {
@@ -44,6 +48,23 @@ open class RecordableViewModel(
                 subscribeSelectedTakePropertyToRelay(audio)
                 loadTakes(audio)
             }
+        }
+
+        alternateTakes.onChange {
+            takeModels.setAll(
+                it.list.map { take ->
+                    val ap = injector.audioPlayer
+                    ap.load(take.file)
+                    TakeModel(
+                        take.name,
+                        take.createdTimestamp,
+                        ap,
+                        messages["edit"],
+                        messages["delete"],
+                        messages["play"]
+                        )
+                }
+            )
         }
     }
 
@@ -58,7 +79,8 @@ open class RecordableViewModel(
                     showPluginActive = false
                     when (result) {
                         RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
-                        RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {}
+                        RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {
+                        }
                     }
                 }
         } ?: throw IllegalStateException("Recordable is null")
