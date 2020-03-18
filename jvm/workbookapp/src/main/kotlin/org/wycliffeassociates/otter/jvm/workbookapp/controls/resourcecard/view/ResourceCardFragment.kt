@@ -47,7 +47,9 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
                         }
                     )
                 }
-                text(item.title)
+                text(item.title) {
+                    wrappingWidth = 700.0
+                }
                 maxWidth = 150.0
             }
 
