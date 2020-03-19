@@ -1,15 +1,15 @@
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
+import com.sun.javafx.event.EventUtil.fireEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
-import javafx.scene.control.Button
-import javafx.scene.control.Label
-import javafx.scene.control.SkinBase
-import javafx.scene.control.Slider
+import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
+import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
@@ -44,7 +44,6 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
 
     fun initializeControl() {
         bindText()
-        bindActions()
         initController()
     }
 
@@ -54,11 +53,6 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         playBtn.textProperty().set(card.playTextProperty().value)
         takeLabel.textProperty().bind(card.takeNumberProperty())
         timestampLabel.textProperty().bind(card.timestampProperty())
-    }
-
-    fun bindActions() {
-        deleteBtn.onActionProperty().bind(card.onDeleteProperty())
-        editBtn.onActionProperty().bind(card.onEditProperty())
     }
 
     fun initController() {
@@ -74,6 +68,28 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         }
         playBtn.setOnAction {
             audioPlayerController.toggle()
+        }
+        deleteBtn.setOnAction {
+            error(
+                FX.messages["deleteTakePrompt"],
+                FX.messages["cannotBeUndone"],
+                ButtonType.YES,
+                ButtonType.NO,
+                title = FX.messages["deleteTakePrompt"]
+            ) { button: ButtonType ->
+                if (button == ButtonType.YES) {
+                    skinnable.fireEvent(
+                        DeleteTakeEvent(card.takeProperty().value)
+                    )
+                }
+            }
+        }
+        editBtn.setOnAction {
+            skinnable.fireEvent(
+                EditTakeEvent(card.takeProperty().value) {
+                    card.audioPlayerProperty().value.load(card.takeProperty().value.file)
+                }
+            )
         }
         card.audioPlayerProperty().onChange { player ->
             player?.let {

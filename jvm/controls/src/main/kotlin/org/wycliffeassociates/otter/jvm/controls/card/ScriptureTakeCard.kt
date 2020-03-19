@@ -6,18 +6,21 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.control.ButtonType
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
+import tornadofx.*
+import kotlin.error
 
-class ScriptureTakeCard() : Control() {
+class ScriptureTakeCard : Control() {
 
     private val takeProperty = SimpleObjectProperty<Take>()
     private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    private val onDeleteProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(EventHandler {})
-    private val onEditProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(EventHandler {})
     private val deleteTextProperty = SimpleStringProperty("delete")
     private val editTextProperty = SimpleStringProperty("edit")
     private val playTextProperty = SimpleStringProperty("play")
@@ -55,17 +58,6 @@ class ScriptureTakeCard() : Control() {
 
     fun timestampProperty(): StringProperty {
         return timestampProperty
-    }
-
-    fun onDeleteProperty() = onDeleteProperty
-    fun onEditProperty() = onEditProperty
-
-    fun setOnDelete(op: () -> Unit) {
-        onDeleteProperty.set(EventHandler { op() })
-    }
-
-    fun setOnEdit(op: () -> Unit) {
-        onEditProperty.set(EventHandler { op() })
     }
 
     override fun createDefaultSkin(): Skin<*> {
