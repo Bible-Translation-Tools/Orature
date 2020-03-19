@@ -5,6 +5,7 @@ import io.reactivex.schedulers.Schedulers
 import javafx.application.Platform
 import javafx.application.Platform.runLater
 import javafx.scene.control.Dialog
+import javafx.scene.paint.Color
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
@@ -93,6 +94,7 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
 
             initModality(Modality.APPLICATION_MODAL)
             initStyle(StageStyle.TRANSPARENT)
+            dialogPane.scene.fill = Color.TRANSPARENT
 
             show()
         }
