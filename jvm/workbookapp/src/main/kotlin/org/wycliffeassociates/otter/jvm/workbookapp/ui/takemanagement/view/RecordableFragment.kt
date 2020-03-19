@@ -15,6 +15,9 @@ import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.util.Duration
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
@@ -25,7 +28,6 @@ import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragE
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 

@@ -105,7 +105,7 @@ dependencies {
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
     // ControlsFX
-    implementation "org.controlsfx:controlsfx:$controlsfxVer"
+    implementation 'com.github.jsarabia:javafx-gridview:-SNAPSHOT'
 
     // FontAwesomeFX
     implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"

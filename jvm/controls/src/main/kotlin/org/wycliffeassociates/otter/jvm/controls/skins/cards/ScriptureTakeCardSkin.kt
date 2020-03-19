@@ -64,7 +64,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     fun initController() {
         audioPlayerController = AudioPlayerController(card.audioPlayerProperty().value, slider)
         audioPlayerController.isPlayingProperty.onChangeAndDoNow { isPlaying ->
-            if (isPlaying != null && isPlaying == true) {
+            if (isPlaying != null && isPlaying != true) {
                 playBtn.textProperty().set(card.playTextProperty().value)
                 playBtn.graphicProperty().set(PLAY_ICON)
             } else {
@@ -87,7 +87,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
             StartDragEvent(
                 evt,
                 card,
-                skinnable.take
+                skinnable.takeProperty().value
             )
         )
     }
@@ -100,15 +100,13 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     private fun completeDrag(evt: MouseEvent) {
         skinnable.fireEvent(
             CompleteDragEvent(
-                skinnable.take,
+                skinnable.takeProperty().value,
                 ::onCancelDrag
             )
         )
     }
 
-    private fun onCancelDrag() {
-        //stackPane.add(front)
-    }
+    private fun onCancelDrag() {}
 
     private fun loadFXML() {
         val loader = FXMLLoader(javaClass.getResource("ScriptureTakeCard.fxml"))

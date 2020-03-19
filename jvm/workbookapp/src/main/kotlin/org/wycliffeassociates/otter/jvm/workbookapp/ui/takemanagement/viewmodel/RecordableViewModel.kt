@@ -15,7 +15,7 @@ import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
 import tornadofx.*
@@ -56,8 +56,7 @@ open class RecordableViewModel(
                     val ap = injector.audioPlayer
                     ap.load(take.file)
                     TakeModel(
-                        take.name,
-                        take.createdTimestamp,
+                        take,
                         ap,
                         messages["edit"],
                         messages["delete"],

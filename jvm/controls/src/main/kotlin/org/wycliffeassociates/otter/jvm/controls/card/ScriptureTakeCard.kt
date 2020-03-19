@@ -8,11 +8,13 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
 
-class ScriptureTakeCard : Control() {
+class ScriptureTakeCard() : Control() {
 
+    private val takeProperty = SimpleObjectProperty<Take>()
     private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     private val onDeleteProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(EventHandler {})
     private val onEditProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(EventHandler {})
@@ -22,6 +24,10 @@ class ScriptureTakeCard : Control() {
     private val pauseTextProperty = SimpleStringProperty("pause")
     private val takeNumberProperty = SimpleStringProperty("Take 01")
     private val timestampProperty = SimpleStringProperty("")
+
+    fun takeProperty(): ObjectProperty<Take> {
+        return takeProperty
+    }
 
     fun audioPlayerProperty(): ObjectProperty<IAudioPlayer> {
         return audioPlayerProperty
