@@ -1,5 +1,23 @@
+/* Dialog style */
+.dialog-pane {
+    -fx-background-color: transparent;
+}
+
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 0;
+}
+
+.dialog-pane > .content {
+    -fx-padding: 0;
+}
+
+/* Exception dialog style */
 .dialog--exception {
+    -fx-padding: 15 5;
     -fx-background-color: -white;
+    -fx-background-insets: 15 5;
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0.5, 0.0, 0.0);
 }
 
 .dialog--exception__send-report {

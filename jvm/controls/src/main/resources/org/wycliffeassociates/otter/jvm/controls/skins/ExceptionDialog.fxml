@@ -15,7 +15,7 @@
       minHeight="-Infinity" minWidth="-Infinity"
       prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <ImageView fitHeight="217.0" fitWidth="637.0" pickOnBounds="true" preserveRatio="true">
+        <ImageView fitHeight="217.0" fitWidth="592.0" pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@/images/exception_header.png"/>
             </image>
