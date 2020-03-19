@@ -10,16 +10,17 @@ import org.wycliffeassociates.otter.jvm.controls.skins.ExceptionDialogSkin
 
 class ExceptionDialog : Control() {
 
-    val titleTextProperty = SimpleStringProperty()
-    val headerTextProperty = SimpleStringProperty()
-    val showMoreTextProperty = SimpleStringProperty()
-    val showLessTextProperty = SimpleStringProperty()
-    val showMore = SimpleBooleanProperty()
-    val sendReportTextProperty = SimpleStringProperty()
-    val sendReportProperty = SimpleBooleanProperty()
-    val stackTraceProperty = SimpleStringProperty()
-    val onCloseAction = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val closeTextProperty = SimpleStringProperty()
+    private val titleTextProperty = SimpleStringProperty()
+    private val headerTextProperty = SimpleStringProperty()
+    private val showMoreTextProperty = SimpleStringProperty()
+    private val showLessTextProperty = SimpleStringProperty()
+    private val showMoreProperty = SimpleBooleanProperty()
+    private val sendReportTextProperty = SimpleStringProperty()
+    private val sendReportProperty = SimpleBooleanProperty()
+    private val stackTraceProperty = SimpleStringProperty()
+    private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val closeTextProperty = SimpleStringProperty()
+    private val sendingReportProperty = SimpleBooleanProperty()
 
     fun titleTextProperty(): StringProperty {
         return titleTextProperty
@@ -35,6 +36,10 @@ class ExceptionDialog : Control() {
 
     fun showLessTextProperty(): StringProperty {
         return showLessTextProperty
+    }
+
+    fun showMoreProperty(): BooleanProperty {
+        return showMoreProperty
     }
 
     fun sendReportTextProperty(): StringProperty {
@@ -54,7 +59,15 @@ class ExceptionDialog : Control() {
     }
 
     fun onCloseAction(op: () -> Unit) {
-        onCloseAction.set(EventHandler { op.invoke() })
+        onCloseActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    fun onCloseActionProperty(): ObjectProperty<EventHandler<ActionEvent>> {
+        return onCloseActionProperty
+    }
+
+    fun sendingReportProperty(): BooleanProperty {
+        return sendingReportProperty
     }
 
     override fun createDefaultSkin(): Skin<*> {
