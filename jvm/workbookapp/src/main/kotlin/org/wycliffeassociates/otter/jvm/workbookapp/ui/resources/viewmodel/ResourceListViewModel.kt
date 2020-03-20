@@ -8,12 +8,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.resourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.utils.observeOnFxSafe
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import tornadofx.*
 
 class ResourceListViewModel : ViewModel() {
     internal val recordResourceViewModel: RecordResourceViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
+    var selectedGroupCardItem: ResourceGroupCardItem? = null
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
 
     init {
@@ -28,6 +30,19 @@ class ResourceListViewModel : ViewModel() {
         return workbookViewModel.workbook.source.chapters.filter {
             it.title == targetChapter.title
         }.blockingFirst()
+    }
+
+    private fun getResourceGroupCardItem(resource: Resource): ResourceGroupCardItem? {
+        for (item: ResourceGroupCardItem in resourceGroupCardItemList) {
+            val card = item.resources.filter {
+                it.resource == resource
+            }.blockingFirst(null)
+
+            if (card != null) {
+                return item
+            }
+        }
+        return null
     }
 
     internal fun loadResourceGroups(chapter: Chapter) {
@@ -54,5 +69,6 @@ class ResourceListViewModel : ViewModel() {
         recordResourceViewModel.setRecordableListItems(
             listOfNotNull(resource.title, resource.body)
         )
+        selectedGroupCardItem = getResourceGroupCardItem(resource)
     }
 }
