@@ -32,17 +32,15 @@ class ResourceListViewModel : ViewModel() {
         }.blockingFirst()
     }
 
-    private fun getResourceGroupCardItem(resource: Resource): ResourceGroupCardItem? {
-        for (item: ResourceGroupCardItem in resourceGroupCardItemList) {
-            val card = item.resources.filter {
-                it.resource == resource
-            }.blockingFirst(null)
-
-            if (card != null) {
-                return item
-            }
+    private fun setSelectedResourceGroupCardItem(resource: Resource) {
+        resourceGroupCardItemList.forEach { groupCardItem ->
+            groupCardItem.resources
+                .filter { it.resource == resource }
+                .singleElement()
+                .subscribe {
+                    selectedGroupCardItem = groupCardItem
+                }
         }
-        return null
     }
 
     internal fun loadResourceGroups(chapter: Chapter) {
@@ -69,6 +67,6 @@ class ResourceListViewModel : ViewModel() {
         recordResourceViewModel.setRecordableListItems(
             listOfNotNull(resource.title, resource.body)
         )
-        selectedGroupCardItem = getResourceGroupCardItem(resource)
+        setSelectedResourceGroupCardItem(resource)
     }
 }
