@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.controlsfx.control.GridView
+import dev.jbs.gridview.control.GridView
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
@@ -18,15 +18,17 @@ class ScriptureTakesGridView(
 
     init {
         setCellFactory { ScriptureTakesGridCell(recordNewTake) }
-        cellHeightProperty().set(208.0)
-        cellWidthProperty().set(392.0)
+        cellHeightProperty().set(148.0)
+        cellWidthProperty().set(332.0)
 
         widthProperty().onChange {
             updateItems()
         }
 
         gridItems.onChangeAndDoNow {
-            updateItems()
+            it?.onChangeAndDoNow {
+                updateItems()
+            }
         }
     }
 
@@ -62,7 +64,7 @@ class ScriptureTakesGridView(
     private fun calculateColumnCount(width: Double, cellWidth: Double, spacing: Double): Int {
         var count = Math.floor(width / cellWidth).toInt()
         println("Width is: $width cell width: $cellWidth count: $count")
-        if (width - (count * cellWidth) - ((count) * spacing) < 0.0) {
+        if (width - (count * cellWidth) - ((count) * 2.0 * spacing) < 0.0) {
             return Math.min(count - 1, 1)
         } else {
             return count

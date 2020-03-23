@@ -59,6 +59,8 @@ class RecordScriptureFragment : RecordableFragment(
 
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)
+
+            hgrow = Priority.ALWAYS
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox(1.0) {

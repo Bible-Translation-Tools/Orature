@@ -1,24 +1,18 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
-import javafx.scene.paint.Color
-import javafx.scene.shape.Rectangle
 import dev.jbs.gridview.control.GridCell
+import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
 
-
 class ScriptureTakesGridCell(
-    private val newRecordingAction: () -> Unit
+    newRecordingAction: () -> Unit
 ) : GridCell<Pair<TakeCardType, TakeModel?>>() {
 
-    var rect = Rectangle()
-    var takeCard = ScriptureTakeCard()
-    var newRecording = NewRecordingCard(newRecordingAction)
-
-    init {
-        rect.fill = Color.GRAY
-    }
+    private var rect = EmptyCardCell()
+    private var takeCard = ScriptureTakeCard()
+    private var newRecording = NewRecordingCard(newRecordingAction)
 
     override fun updateItem(item: Pair<TakeCardType, TakeModel?>?, empty: Boolean) {
         super.updateItem(item, empty)

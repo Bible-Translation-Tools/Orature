@@ -47,10 +47,10 @@ class AudioPlayerController(
         disposable?.dispose()
         player?.let { _player ->
             if (_player.isPlaying()) {
-                _player.pause()
+                pause()
             } else {
                 disposable = startProgressUpdate()
-                _player.play()
+                play()
                 _player.addEventListener {
                     if (
                         it == AudioPlayerEvent.PAUSE ||

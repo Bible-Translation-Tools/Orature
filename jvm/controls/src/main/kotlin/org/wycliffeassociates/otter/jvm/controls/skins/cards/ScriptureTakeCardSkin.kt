@@ -1,12 +1,13 @@
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
-import com.sun.javafx.event.EventUtil.fireEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.input.MouseEvent
+import javafx.scene.layout.StackPane
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
@@ -18,6 +19,10 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
+
+    private val dragDropContainer = StackPane()
+    private lateinit var cardNode: Node
+    protected val back = EmptyCardCell()
 
     @FXML
     lateinit var playBtn: Button
@@ -45,6 +50,8 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     fun initializeControl() {
         bindText()
         initController()
+        back.widthProperty().bind(skinnable.widthProperty())
+        back.heightProperty().bind(skinnable.heightProperty())
     }
 
     fun bindText() {
@@ -96,13 +103,18 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                 audioPlayerController.load(it)
             }
         }
+        cardNode.apply {
+            addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
+            addEventHandler(MouseEvent.MOUSE_DRAGGED, ::animateDrag)
+            addEventHandler(MouseEvent.MOUSE_RELEASED, ::completeDrag)
+        }
     }
 
     private fun startDrag(evt: MouseEvent) {
         skinnable.fireEvent(
             StartDragEvent(
                 evt,
-                card,
+                cardNode,
                 skinnable.takeProperty().value
             )
         )
@@ -122,13 +134,18 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         )
     }
 
-    private fun onCancelDrag() {}
+    private fun onCancelDrag() {
+        dragDropContainer.add(cardNode)
+    }
 
     private fun loadFXML() {
         val loader = FXMLLoader(javaClass.getResource("ScriptureTakeCard.fxml"))
         loader.setController(this)
-        val root: Node = loader.load()
-        children.add(root)
+        cardNode = loader.load()
+
+        dragDropContainer.add(back)
+        dragDropContainer.add(cardNode)
+        children.addAll(dragDropContainer)
 
         importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
