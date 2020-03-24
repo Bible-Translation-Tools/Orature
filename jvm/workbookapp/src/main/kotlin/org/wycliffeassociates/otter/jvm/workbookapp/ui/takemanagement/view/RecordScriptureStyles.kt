@@ -23,8 +23,8 @@ class RecordScriptureStyles : Stylesheet() {
         val scrollpaneContainer by cssclass()
         val pageTop by cssclass()
 
-        val takeMaxWidth = 348.px
-        val takeMinHeight = 200.px
+        val takeMaxWidth = 332.px
+        val takeMinHeight = 148.px
 
         fun takeWidthHeight() = mixin {
             minHeight = takeMinHeight

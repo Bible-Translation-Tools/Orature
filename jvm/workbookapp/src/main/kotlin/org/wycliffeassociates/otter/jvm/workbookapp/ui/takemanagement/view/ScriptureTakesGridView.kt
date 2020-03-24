@@ -21,6 +21,9 @@ class ScriptureTakesGridView(
         cellHeightProperty().set(148.0)
         cellWidthProperty().set(332.0)
 
+        fitToParentWidth()
+        fitToParentHeight()
+
         widthProperty().onChange {
             updateItems()
         }

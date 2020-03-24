@@ -25,13 +25,6 @@ class RecordScriptureFragment : RecordableFragment(
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
-//    private val takesList = TakesFlowPane(
-//        recordableViewModel.alternateTakes,
-//        audioPluginViewModel::audioPlayer,
-//        lastPlayOrPauseEvent,
-//        recordableViewModel::recordNewTake
-//    )
-
     private val takesList = ScriptureTakesGridView(recordableViewModel::recordNewTake)
 
     private val sourceAudioPlayer =
@@ -60,10 +53,11 @@ class RecordScriptureFragment : RecordableFragment(
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)
 
+            vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
-            hbox(1.0) {
+            hbox {
                 addClass(RecordScriptureStyles.pageTop)
                 alignment = Pos.CENTER
                 vgrow = Priority.ALWAYS
@@ -76,13 +70,7 @@ class RecordScriptureFragment : RecordableFragment(
                     enableWhen(recordScriptureViewModel.hasPrevious)
                 }
                 vbox {
-                    region {
-                        vgrow = Priority.ALWAYS
-                    }
                     add(dragTarget)
-                    region {
-                        vgrow = Priority.ALWAYS
-                    }
                 }
 
                 // next verse button
@@ -97,9 +85,14 @@ class RecordScriptureFragment : RecordableFragment(
             }
 
             vbox {
+
+                hgrow = Priority.ALWAYS
+                vgrow = Priority.ALWAYS
+
                 addClass(RecordScriptureStyles.scrollpaneContainer)
                 scrollpane {
                     isFitToWidth = true
+                    isFitToHeight = true
                     addClass(RecordScriptureStyles.scrollpane)
                     add(
                         takesList
