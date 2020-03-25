@@ -7,6 +7,7 @@ import javafx.application.Application.Parameters
 import javafx.application.Platform
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
+import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
@@ -22,15 +23,15 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
     private val monitor = Object()
 
-    override fun launch(audioFile: File): Completable {
+    override fun launch(audioFile: File, pluginParameters: PluginParameters): Completable {
         return when (File(pluginData.executable).extension) {
-            "jar" -> launchJar(audioFile)
+            "jar" -> launchJar(audioFile, pluginParameters)
             else -> launchBin(audioFile)
         }
     }
 
-    private fun launchJar(audioFile: File): Completable {
-        val parameters = buildJarArguments(pluginData.args, audioFile.absolutePath)
+    private fun launchJar(audioFile: File, pluginParameters: PluginParameters): Completable {
+        val parameters = buildJarArguments(pluginData.args, audioFile.absolutePath, pluginParameters)
         return Completable
             .fromCallable {
                 val pluginClass = findPlugin(File(pluginData.executable))
@@ -63,17 +64,32 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
             .subscribeOn(Schedulers.io())
     }
 
-    private fun buildJarArguments(requestedArgs: List<String>, audioFilePath: String): Parameters {
+    private fun buildJarArguments(
+        requestedArgs: List<String>,
+        audioFilePath: String,
+        pluginParameters: PluginParameters
+    ): Parameters {
         val insertedArgs =
             requestedArgs.map { arg ->
                 when (arg) {
                     "\${wav}" -> "--wav=$audioFilePath"
+                    "\${language}" -> "--language=${pluginParameters.languageName}"
+                    "\${book}" -> "--book=${pluginParameters.bookTitle}"
                     else -> ""
                 }
             }.filterNot {
                 it.isEmpty()
             }.ifEmpty {
-                listOf("--wav=$audioFilePath")
+                listOf(
+                    "--wav=$audioFilePath",
+                    "--language=${pluginParameters.languageName}",
+                    "--book=${pluginParameters.bookTitle}",
+                    "--chapter=${pluginParameters.chapterLabel}",
+                    "--chapter_number=${pluginParameters.chapterNumber}",
+                    "--chapter_audio=${pluginParameters.sourceChapterAudio?.absolutePath}",
+                    "--source_chunk_start=${pluginParameters.sourceChunkStart}",
+                    "--source_chunk_end=${pluginParameters.sourceChunkEnd}"
+                )
             }
         return ParametersImpl(insertedArgs)
     }

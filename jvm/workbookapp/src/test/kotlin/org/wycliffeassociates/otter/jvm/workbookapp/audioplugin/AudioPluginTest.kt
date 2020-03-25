@@ -2,10 +2,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin
 
 import org.junit.Assert
 import org.junit.Test
+import org.mockito.Mockito
+import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import java.io.File
 
 class AudioPluginTest {
+
+    val parameters = Mockito.mock(PluginParameters::class.java)
 
     var exe = File.createTempFile("test", ".exe").apply {
         setExecutable(true)
@@ -39,7 +43,7 @@ class AudioPluginTest {
         // Create the plugin
         val audioPlugin = AudioPlugin(inputAudioPluginData)
         audioPlugin
-            .launch(inputFile)
+            .launch(inputFile, parameters)
             .blockingAwait()
         // Test only finishes if completable finishes
     }
@@ -50,7 +54,7 @@ class AudioPluginTest {
         val audioPlugin = AudioPlugin(missingExecutablePlugin)
         try {
             audioPlugin
-                .launch(inputFile)
+                .launch(inputFile, parameters)
                 .blockingAwait()
             Assert.fail()
         } catch (e: RuntimeException) {

@@ -17,6 +17,7 @@ class ProjectGridStyles : Stylesheet() {
     init {
 
         projectsGrid {
+            unsafe("-fx-background-color", "-background")
             vgap = 32.px
             hgap = 24.px
             alignment = Pos.TOP_LEFT

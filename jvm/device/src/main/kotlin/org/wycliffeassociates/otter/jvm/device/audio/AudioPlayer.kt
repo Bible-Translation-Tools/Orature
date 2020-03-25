@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import java.io.File
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -31,7 +29,7 @@ class AudioPlayer : IAudioPlayer {
         )
     }
 
-    override fun load(file: File): Completable {
+    override fun load(file: File) {
         pause()
         if (clip.isOpen) {
             clip.flush()
@@ -47,10 +45,16 @@ class AudioPlayer : IAudioPlayer {
                 clip.framePosition = 0
             }
         }
-        return Completable.fromAction {
-            clip.open(audioInputStream)
-            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-        }.subscribeOn(Schedulers.io())
+        clip.open(audioInputStream)
+        listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+    }
+
+    /**
+     * Note: clip is not compatible with only loading a section of an audio file
+     * This simply calls load instead
+     */
+    override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
+        load(file)
     }
 
     override fun play() {
@@ -82,6 +86,22 @@ class AudioPlayer : IAudioPlayer {
         clip.close()
         audioInputStream?.close()
         System.gc()
+    }
+
+    override fun seek(position: Int) {
+        var resume = false
+        if (clip.isRunning) {
+            resume = true
+            clip.stop()
+        }
+        clip.framePosition = position
+        if (resume) {
+            clip.start()
+        }
+    }
+
+    override fun isPlaying(): Boolean {
+        return clip.isRunning
     }
 
     override fun getAbsoluteDurationInFrames(): Int {

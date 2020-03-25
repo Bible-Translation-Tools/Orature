@@ -1,10 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.*
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 import java.io.File
@@ -34,6 +36,14 @@ class WorkbookViewModel : ViewModel() {
         get() = activeProjectAudioDirectoryProperty.value
             ?: throw IllegalStateException("Project audio directory is null")
 
+    val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
+    val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
+
+    init {
+        activeChapterProperty.onChange { updateSourceAudio() }
+        activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
+    }
+
     fun setProjectAudioDirectory(resourceMetadata: ResourceMetadata) {
         val projectAudioDir = directoryProvider.getProjectAudioDirectory(
             source = workbook.source.resourceMetadata,
@@ -41,5 +51,17 @@ class WorkbookViewModel : ViewModel() {
             bookSlug = workbook.target.slug
         )
         activeProjectAudioDirectoryProperty.set(projectAudioDir)
+    }
+
+    fun updateSourceAudio() {
+        val _chunk = activeChunkProperty.get()
+        val _chapter = activeChapterProperty.get()
+        if (_chapter != null && _chunk != null) {
+            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChunk(_chapter.sort, _chunk.sort))
+        } else if (_chapter != null) {
+            sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(_chapter.sort))
+        } else {
+            sourceAudioProperty.set(null)
+        }
     }
 }
