@@ -194,6 +194,29 @@ task printVersionName {
     }
 }
 
+task createVersionProperties(dependsOn: processResources) {
+    doLast {
+        new File("$buildDir/resources/main/version.properties").withWriter { w ->
+            Properties p = new Properties()
+            p['version'] = getVersionName().toString()
+            p.store w, null
+        }
+    }
+}
+
+task createGithubProperties(dependsOn: processResources) {
+    doLast {
+        if(project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
+            new File("$buildDir/resources/main/github.properties").withWriter { w ->
+                Properties p = new Properties()
+                p['repo-url'] = githubRepoUrl
+                p['oauth-token'] = githubOauthToken
+                p.store w, null
+            }
+        }
+    }
+}
+
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
     testLogging {
@@ -241,6 +264,8 @@ idea {
 }
 
 compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+compileJava.dependsOn createVersionProperties
+compileJava.dependsOn createGithubProperties
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'
