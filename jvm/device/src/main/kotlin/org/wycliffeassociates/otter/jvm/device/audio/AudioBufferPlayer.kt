@@ -11,7 +11,7 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 
-class AudioBufferPlayer() : IAudioPlayer {
+class AudioBufferPlayer : IAudioPlayer {
 
     private var pause = false
     private var startPosition: Int = 0

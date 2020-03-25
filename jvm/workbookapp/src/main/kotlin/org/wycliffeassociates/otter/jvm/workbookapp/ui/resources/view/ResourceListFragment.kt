@@ -22,7 +22,14 @@ class ResourceListFragment : Fragment() {
             }
         )
         add(
-            ResourceListView(resourceListViewModel.resourceGroupCardItemList)
+            ResourceListView(resourceListViewModel.resourceGroupCardItemList).apply {
+                whenDocked {
+                    if (resourceListViewModel.selectedGroupCardItem != null) {
+                        scrollTo(resourceListViewModel.selectedGroupCardItem)
+                        resourceListViewModel.selectedGroupCardItem = null
+                    }
+                }
+            }
         )
     }
 }
