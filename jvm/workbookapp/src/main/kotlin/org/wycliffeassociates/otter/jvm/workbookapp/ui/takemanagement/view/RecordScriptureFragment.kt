@@ -48,7 +48,6 @@ class RecordScriptureFragment : RecordableFragment(
         sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
         recordScriptureViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
             it?.let {
-                sourceAudioPlayer.pause()
                 sourceAudioPlayer.load(it)
             }
         }
