@@ -429,7 +429,7 @@ class CollectionRepository(
             }
             creator = dublinCoreCreator
             version = source.version
-            format = MimeType.USFM.norm
+            format = MimeType.of(source.format).norm
             subject = source.subject
             type = derivedContainerType.slug
             title = source.title
