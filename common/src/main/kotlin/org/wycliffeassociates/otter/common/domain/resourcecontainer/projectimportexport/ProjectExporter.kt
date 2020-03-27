@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -19,7 +20,8 @@ class ProjectExporter(
     private val projectMetadataToExport: ResourceMetadata,
     private val workbook: Workbook,
     private val projectAudioDirectory: File,
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
+    private val workbookRepository: WorkbookRepository
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -76,7 +78,11 @@ class ProjectExporter(
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {
         val selectedChapters = selectedChapterFilePaths()
-        zipWriter.copyDirectory(projectAudioDirectory, RcConstants.TAKE_DIR) { !selectedChapters.contains(it) }
+        val deletedTakes = deletedTakeFilePaths()
+        zipWriter.copyDirectory(
+            projectAudioDirectory,
+            RcConstants.TAKE_DIR
+        ) { !selectedChapters.contains(it) && !deletedTakes.contains(it) }
         zipWriter.copyDirectory(projectAudioDirectory, RcConstants.MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
@@ -134,8 +140,25 @@ class ProjectExporter(
             .blockingGet()
     }
 
+    private fun deletedTakeFilePaths(): List<String> {
+        val deletedTakes = workbookRepository
+            .getSoftDeletedTakes(workbook.source)
+            .blockingGet()
+            .map { relativeTakePath(it.path) }
+        val targetTakes = workbookRepository
+            .getSoftDeletedTakes(workbook.target)
+            .blockingGet()
+            .map { relativeTakePath(it.path) }
+        deletedTakes.toMutableList().addAll(targetTakes)
+        return deletedTakes
+    }
+
     private fun relativeTakePath(take: Take): String {
-        val relativeFile = take.file.relativeToOrSelf(projectAudioDirectory)
+        return relativeTakePath(take.file)
+    }
+
+    private fun relativeTakePath(file: File): String {
+        val relativeFile = file.relativeToOrSelf(projectAudioDirectory)
         return relativeFile.invariantSeparatorsPath
     }
 }

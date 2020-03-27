@@ -46,6 +46,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         )
     }
 
+    override fun getSoftDeletedTakes(book: Book): Single<List<ModelTake>> {
+        return db.getSoftDeletedTakes(book.resourceMetadata, book.slug)
+    }
+
     private fun book(bookCollection: Collection): Book {
         val resourceMetadata = bookCollection.resourceContainer
             ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
@@ -308,6 +312,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun insertTakeForContent(take: ModelTake, content: Content): Single<Int>
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
         fun deleteTake(take: ModelTake, date: DateHolder): Completable
+        fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
     }
 }
 
@@ -341,4 +346,7 @@ private class DefaultDatabaseAccessors(
     override fun insertTakeForContent(take: ModelTake, content: Content) = takeRepo.insertForContent(take, content)
     override fun getTakeByContent(content: Content) = takeRepo.getByContent(content, includeDeleted = true)
     override fun deleteTake(take: ModelTake, date: DateHolder) = takeRepo.update(take.copy(deleted = date.value))
+
+    override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =
+        takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
 }
