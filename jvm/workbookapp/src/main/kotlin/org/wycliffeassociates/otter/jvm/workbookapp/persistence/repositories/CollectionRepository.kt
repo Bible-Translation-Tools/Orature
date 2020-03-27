@@ -28,6 +28,7 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
 import java.io.FileNotFoundException
+import java.lang.NullPointerException
 import java.time.LocalDate
 
 class CollectionRepository(
@@ -241,6 +242,17 @@ class CollectionRepository(
                     .map(this::buildCollection)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun getProjectBySlugAndMetadata(slug: String, metadata: ResourceMetadata): Single<Collection> {
+        return Single
+            .fromCallable {
+                collectionDao.fetch(slug, metadata.id)?.let {
+                    buildCollection(it)
+                } ?: throw NullPointerException(
+                    "A collection matching slug: $slug and metadata: [$metadata] was not found."
+                )
+            }.subscribeOn(Schedulers.io())
     }
 
     override fun updateSource(collection: Collection, newSource: Collection): Completable {

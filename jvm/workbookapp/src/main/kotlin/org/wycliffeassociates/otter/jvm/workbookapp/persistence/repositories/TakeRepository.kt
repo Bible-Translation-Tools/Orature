@@ -4,11 +4,13 @@ import io.reactivex.Completable
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
@@ -17,7 +19,8 @@ import java.time.LocalDate
 class TakeRepository(
     private val database: AppDatabase,
     private val takeMapper: TakeMapper = TakeMapper(),
-    private val markerMapper: MarkerMapper = MarkerMapper()
+    private val markerMapper: MarkerMapper = MarkerMapper(),
+    private val collectionMapper: CollectionMapper = CollectionMapper()
 ) : ITakeRepository {
     private val takeDao = database.takeDao
     private val markerDao = database.markerDao
@@ -118,6 +121,15 @@ class TakeRepository(
                         }
                     }
                 }
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getSoftDeletedTakes(project: Collection): Single<List<Take>> {
+        return Single
+            .fromCallable {
+                takeDao.fetchSoftDeletedTakes(collectionMapper.mapToEntity(project))
+                    .map(this::buildTake)
             }
             .subscribeOn(Schedulers.io())
     }
