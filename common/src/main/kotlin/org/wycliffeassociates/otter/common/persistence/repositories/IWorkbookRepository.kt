@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
