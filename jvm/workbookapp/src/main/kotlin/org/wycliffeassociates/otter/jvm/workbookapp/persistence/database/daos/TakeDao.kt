@@ -1,9 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
-import jooq.Tables.TAKE_ENTITY
+import jooq.Tables.*
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.max
+import org.jooq.impl.DSL.select
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 
 class TakeDao(
@@ -99,5 +101,37 @@ class TakeDao(
             .deleteFrom(TAKE_ENTITY)
             .where(TAKE_ENTITY.ID.eq(entity.id))
             .execute()
+    }
+
+    /**
+     * Fetches the takes listed for soft delete (but presumably haven't been deleted yet)
+     *
+     * @param collectionEntity the collection entity representing the project (book) level of which the takes belong
+     */
+    fun fetchSoftDeletedTakes(
+        collectionEntity: CollectionEntity,
+        dsl: DSLContext = instanceDsl
+    ): List<TakeEntity> {
+        return dsl
+            .select()
+            .from(TAKE_ENTITY)
+            .where(
+                TAKE_ENTITY.CONTENT_FK.`in`(
+                    select(CONTENT_ENTITY.ID)
+                        .from(CONTENT_ENTITY)
+                        .where(
+                            CONTENT_ENTITY.COLLECTION_FK.`in`(
+                                select(COLLECTION_ENTITY.ID)
+                                    .from(COLLECTION_ENTITY)
+                                    .where(COLLECTION_ENTITY.PARENT_FK.eq(collectionEntity.id))
+                            )
+                        )
+                ).and(
+                    TAKE_ENTITY.DELETED_TS.isNotNull
+                )
+            )
+            .fetch {
+                RecordMappers.mapToTakeEntity(it)
+            }
     }
 }
