@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.view
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.application.Platform
 import javafx.beans.property.*
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
@@ -13,6 +14,8 @@ import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
+import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import tornadofx.*
 
 class ProjectGridFragment : Fragment() {
@@ -29,6 +32,7 @@ class ProjectGridFragment : Fragment() {
         val listProperty = SimpleListProperty<Collection>()
         listProperty.bind(SimpleObjectProperty(viewModel.projects))
         noProjectsProperty = listProperty.emptyProperty()
+        initializeProgressDialogs()
     }
 
     override val root = anchorpane {
@@ -132,5 +136,16 @@ class ProjectGridFragment : Fragment() {
     override fun onDock() {
         viewModel.loadProjects()
         viewModel.clearSelectedProject()
+    }
+
+    private fun initializeProgressDialogs() {
+        val deletingProjectDialog = progressdialog {
+            text = messages["deleteingProject"]
+            graphic = ProjectGridStyles.deleteIcon("60px")
+            root.addClass(AppStyles.progressDialog)
+        }
+        viewModel.showDeleteDialogProperty.onChange {
+            Platform.runLater { if (it) deletingProjectDialog.open() else deletingProjectDialog.close() }
+        }
     }
 }
