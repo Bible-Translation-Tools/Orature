@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
-import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizard
