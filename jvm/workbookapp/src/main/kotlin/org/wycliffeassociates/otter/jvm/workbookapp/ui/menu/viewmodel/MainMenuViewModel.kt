@@ -69,6 +69,7 @@ class MainMenuViewModel : ViewModel() {
             directoryProvider,
             injector.zipEntryTreeBuilder
         ).import(fileOrDir)
+            .subscribeOn(Schedulers.io())
             .observeOnFx()
             .subscribe { result: ImportResult ->
                 if (result == ImportResult.SUCCESS) {
