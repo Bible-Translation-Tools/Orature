@@ -57,4 +57,3 @@ internal fun Path.copyFileTo(dest: Path): Observable<String> {
     }
     return pairsOfFilesToCopy.map { (_, toFile) -> toFile.toString() }
 }
-
