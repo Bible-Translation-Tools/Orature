@@ -71,7 +71,7 @@ class ProjectExporter(
         sequenceOf(bookSource, projectSourceMetadata)
             .map { it.path }
             .distinct()
-            .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
+            .forEach { zipWriter.copyFile(it, RcConstants.SOURCE_DIR) }
     }
 
     private fun copyTakeFiles(zipWriter: IZipFileWriter) {
