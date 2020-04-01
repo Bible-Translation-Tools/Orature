@@ -140,7 +140,7 @@ class ProjectGridFragment : Fragment() {
 
     private fun initializeProgressDialogs() {
         val deletingProjectDialog = progressdialog {
-            text = messages["deleteingProject"]
+            text = messages["deletingProject"]
             graphic = ProjectGridStyles.deleteIcon("60px")
             root.addClass(AppStyles.progressDialog)
         }
