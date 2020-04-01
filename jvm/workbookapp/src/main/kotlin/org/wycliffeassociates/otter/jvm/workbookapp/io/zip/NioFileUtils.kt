@@ -42,3 +42,19 @@ internal fun Path.copyDirectoryTo(dest: Path, filter: (String) -> Boolean): Obse
 
     return pairsOfFilesToCopy.map { (_, toFile) -> toFile.toString() }
 }
+
+/** Copy a File, possibly to another [java.nio.file.FileSystem] */
+internal fun Path.copyFile(dest: Path): Observable<String> {
+    val sourceRoot = toAbsolutePath().parent
+    val fromFile = this
+    val relativePath = sourceRoot.relativize(fromFile).toString()
+    val toFile = dest.resolve(relativePath)
+    toFile.createParentDirectories()
+    val pairsOfFilesToCopy = Observable.just(Pair(fromFile, toFile)).cache()
+    pairsOfFilesToCopy.forEach { (fromFile, toFile) ->
+        toFile.createParentDirectories()
+        Files.copy(fromFile, toFile, StandardCopyOption.REPLACE_EXISTING)
+    }
+    return pairsOfFilesToCopy.map { (_, toFile) -> toFile.toString() }
+}
+
