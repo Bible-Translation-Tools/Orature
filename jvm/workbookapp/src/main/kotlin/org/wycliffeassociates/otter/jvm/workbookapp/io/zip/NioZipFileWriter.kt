@@ -30,7 +30,7 @@ class NioZipFileWriter(
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         if (Files.isRegularFile(sourcePath)) {
-            sourcePath.copyFile(destPath)
+            sourcePath.copyFileTo(destPath)
         }
     }
 }

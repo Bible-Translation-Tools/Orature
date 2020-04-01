@@ -44,7 +44,7 @@ internal fun Path.copyDirectoryTo(dest: Path, filter: (String) -> Boolean): Obse
 }
 
 /** Copy a File, possibly to another [java.nio.file.FileSystem] */
-internal fun Path.copyFile(dest: Path): Observable<String> {
+internal fun Path.copyFileTo(dest: Path): Observable<String> {
     val sourceRoot = toAbsolutePath().parent
     val fromFile = this
     val relativePath = sourceRoot.relativize(fromFile).toString()
