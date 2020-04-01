@@ -69,7 +69,7 @@ class ProjectExporter(
         val bookSource = workbook.source.resourceMetadata
 
         sequenceOf(bookSource, projectSourceMetadata)
-            .map(directoryProvider::getSourceContainerDirectory)
+            .map { it.path }
             .distinct()
             .forEach { zipWriter.copyDirectory(it, RcConstants.SOURCE_DIR) }
     }
