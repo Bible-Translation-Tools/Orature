@@ -82,7 +82,10 @@ class ProjectExporter(
         zipWriter.copyDirectory(
             projectAudioDirectory,
             RcConstants.TAKE_DIR
-        ) { !selectedChapters.contains(it) && !deletedTakes.contains(it) }
+        ) {
+            val normalized = File(it).invariantSeparatorsPath
+            !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
+        }
         zipWriter.copyDirectory(projectAudioDirectory, RcConstants.MEDIA_DIR) { selectedChapters.contains(it) }
     }
 
