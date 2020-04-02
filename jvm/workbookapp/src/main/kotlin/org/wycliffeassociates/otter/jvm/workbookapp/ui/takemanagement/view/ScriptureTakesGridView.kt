@@ -4,6 +4,8 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import dev.jbs.gridview.control.GridView
+import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
@@ -20,6 +22,9 @@ class ScriptureTakesGridView(
         setCellFactory { ScriptureTakesGridCell(recordNewTake) }
         cellHeightProperty().set(148.0)
         cellWidthProperty().set(332.0)
+
+        hgrow = Priority.ALWAYS
+        vgrow = Priority.ALWAYS
 
         fitToParentWidth()
         fitToParentHeight()

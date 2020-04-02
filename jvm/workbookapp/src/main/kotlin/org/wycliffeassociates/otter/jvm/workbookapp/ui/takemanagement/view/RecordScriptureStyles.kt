@@ -42,7 +42,6 @@ class RecordScriptureStyles : Stylesheet() {
     init {
         background {
             backgroundColor += c("#F7FAFF")
-            // padding = box(0.px, 30.px, 20.px, 30.px)
         }
         viewTakesTitle {
             fontSize = 40.px
@@ -56,19 +55,15 @@ class RecordScriptureStyles : Stylesheet() {
             borderWidth += box(0.px, 0.px, 0.px, 0.px)
             backgroundColor += Color.TRANSPARENT
             spacing = 10.px
-            // alignment = Pos.CENTER_LEFT
             vgap = 16.px
             hgap = 16.px
-            // padding = box(5.0.px)
         }
 
         pageTop {
-            // padding = box(10.px, 20.px, 10.px, 20.px)
             spacing = 30.px
         }
 
         scrollpane {
-            padding = box(0.px, 10.px, 0.px, 30.px)
             viewport {
                 backgroundColor += Color.TRANSPARENT
             }
@@ -76,7 +71,7 @@ class RecordScriptureStyles : Stylesheet() {
         }
 
         scrollpaneContainer {
-            padding = box(0.px, 5.px, 0.px, 0.px)
+
         }
 
         glow {

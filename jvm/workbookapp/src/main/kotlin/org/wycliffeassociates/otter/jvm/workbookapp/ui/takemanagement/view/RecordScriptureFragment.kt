@@ -53,14 +53,12 @@ class RecordScriptureFragment : RecordableFragment(
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)
 
-            vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox {
                 addClass(RecordScriptureStyles.pageTop)
                 alignment = Pos.CENTER
-                vgrow = Priority.ALWAYS
                 // previous verse button
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
@@ -83,23 +81,7 @@ class RecordScriptureFragment : RecordableFragment(
                     }
                 }
             }
-
-            vbox {
-
-                hgrow = Priority.ALWAYS
-                vgrow = Priority.ALWAYS
-
-                addClass(RecordScriptureStyles.scrollpaneContainer)
-                scrollpane {
-                    isFitToWidth = true
-                    isFitToHeight = true
-                    addClass(RecordScriptureStyles.scrollpane)
-                    add(
-                        takesList
-                    )
-                }
-            }
-
+            add(takesList)
             add(sourceAudioPlayer)
         }
     }
