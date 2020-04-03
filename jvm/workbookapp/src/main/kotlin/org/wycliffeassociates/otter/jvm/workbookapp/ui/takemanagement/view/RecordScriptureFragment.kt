@@ -48,7 +48,9 @@ class RecordScriptureFragment : RecordableFragment(
             }
         }
 
-        takesList.gridItems.set(recordableViewModel.takeModels)
+        recordableViewModel.takeModels.onChangeAndDoNow {
+            takesList.gridItems.setAll(it)
+        }
 
         mainContainer.apply {
             addClass(RecordScriptureStyles.background)

@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import dev.jbs.gridview.control.GridView
+import impl.dev.jbs.gridview.skin.GridViewSkin
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -16,7 +17,7 @@ class ScriptureTakesGridView(
     val recordNewTake: () -> Unit
 ) : GridView<Pair<TakeCardType, TakeModel?>>() {
 
-    val gridItems = SimpleObjectProperty<ObservableList<TakeModel>>(FXCollections.observableArrayList())
+    val gridItems = FXCollections.observableArrayList<TakeModel>()
 
     init {
         setCellFactory { ScriptureTakesGridCell(recordNewTake) }
@@ -34,9 +35,7 @@ class ScriptureTakesGridView(
         }
 
         gridItems.onChangeAndDoNow {
-            it?.onChangeAndDoNow {
-                updateItems()
-            }
+            updateItems()
         }
     }
 
@@ -48,7 +47,7 @@ class ScriptureTakesGridView(
                 verticalCellSpacingProperty().value
             ), 1
         )
-        val _items = gridItems.get()
+        val _items = gridItems
         if (_items == null || _items.isEmpty()) {
             items.clear()
             items.add(Pair(TakeCardType.NEW, null))
@@ -65,6 +64,12 @@ class ScriptureTakesGridView(
             val needed = columnCount - mod
             for (i in 1..needed) {
                 items.add(Pair(TakeCardType.EMPTY, null))
+            }
+            val remaining = columnCount.toDouble().pow(2.0).toInt() - items.size
+            if (remaining > 0) {
+                for (i in 1..remaining) {
+                    items.add(Pair(TakeCardType.EMPTY, null))
+                }
             }
         }
     }
