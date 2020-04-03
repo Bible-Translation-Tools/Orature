@@ -7,6 +7,7 @@ import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
 
 /**
@@ -36,7 +37,7 @@ internal fun Path.copyDirectoryTo(dest: Path, filter: (String) -> Boolean): Obse
 
     pairsOfFilesToCopy.forEach { (fromFile, toFile) ->
         toFile.createParentDirectories()
-        Files.copy(fromFile, toFile)
+        Files.copy(fromFile, toFile, StandardCopyOption.REPLACE_EXISTING)
     }
 
     return pairsOfFilesToCopy.map { (_, toFile) -> toFile.toString() }
