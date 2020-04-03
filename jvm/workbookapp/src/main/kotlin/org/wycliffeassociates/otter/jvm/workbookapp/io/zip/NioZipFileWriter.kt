@@ -30,4 +30,12 @@ class NioZipFileWriter(
         val destPath = fileSystem.getPath(destination)
         sourcePath.copyDirectoryTo(destPath, filter)
     }
+
+    override fun copyFile(source: File, destination: String) {
+        val sourcePath = source.toPath()
+        val destPath = fileSystem.getPath(destination)
+        if (Files.isRegularFile(sourcePath)) {
+            sourcePath.copyFileTo(destPath)
+        }
+    }
 }
