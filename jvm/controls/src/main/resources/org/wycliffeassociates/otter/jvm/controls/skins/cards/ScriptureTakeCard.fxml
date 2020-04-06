@@ -57,7 +57,7 @@
             </JFXButton>
             <JFXButton fx:id="editBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Edit" HBox.hgrow="ALWAYS">
                <graphic>
-                  <FontIcon iconLiteral="gmi-mode-edit" styleClass=".card--scripture-take__btn--edit" />
+                  <FontIcon iconLiteral="gmi-mode-edit" styleClass="card--scripture-take__btn--edit" />
                </graphic>
                <font>
                   <Font name="System Bold" />

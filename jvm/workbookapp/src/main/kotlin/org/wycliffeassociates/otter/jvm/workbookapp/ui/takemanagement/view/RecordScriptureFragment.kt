@@ -3,15 +3,21 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.geometry.Pos
 import javafx.scene.control.ContentDisplay
+import javafx.scene.input.Dragboard
+import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
+import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.ScriptureTakeCardSkin
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
 import tornadofx.*
 
 private class RecordableViewModelProvider : Component() {
@@ -50,6 +56,27 @@ class RecordScriptureFragment : RecordableFragment(
 
         recordableViewModel.takeModels.onChangeAndDoNow {
             takesList.gridItems.setAll(it)
+        }
+
+        dragTarget.setOnDragDropped {
+            val db: Dragboard = it.dragboard
+            var success = false
+            if (db.hasString()) {
+                recordableViewModel.selectTake(db.string)
+                success = true
+            }
+            (it.source as? ScriptureTakeCard)?.let {
+                it.isDraggingProperty().value = false
+            }
+            it.setDropCompleted(success)
+            it.consume()
+        }
+
+        dragTarget.setOnDragOver {
+            if(it.gestureSource != dragTarget && it.dragboard.hasString()) {
+                it.acceptTransferModes(*TransferMode.ANY)
+            }
+            it.consume()
         }
 
         mainContainer.apply {

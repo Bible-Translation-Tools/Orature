@@ -106,6 +106,11 @@ open class RecordableViewModel(
         recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
     }
 
+    fun selectTake(filename: String) {
+        val take = alternateTakes.find { it.name == filename }
+        selectTake(take)
+    }
+
     fun deleteTake(take: Take) {
         take.deletedTimestamp.accept(DateHolder.now())
     }
