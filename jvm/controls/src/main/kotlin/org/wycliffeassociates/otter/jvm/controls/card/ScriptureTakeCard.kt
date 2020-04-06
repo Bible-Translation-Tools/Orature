@@ -1,9 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
-import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
+import javafx.beans.property.*
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ButtonType
@@ -27,6 +24,7 @@ class ScriptureTakeCard : Control() {
     private val pauseTextProperty = SimpleStringProperty("pause")
     private val takeNumberProperty = SimpleStringProperty("Take 01")
     private val timestampProperty = SimpleStringProperty("")
+    private val isDraggingProperty = SimpleBooleanProperty(false)
 
     fun takeProperty(): ObjectProperty<Take> {
         return takeProperty
@@ -58,6 +56,10 @@ class ScriptureTakeCard : Control() {
 
     fun timestampProperty(): StringProperty {
         return timestampProperty
+    }
+
+    fun isDraggingProperty(): BooleanProperty {
+        return isDraggingProperty
     }
 
     override fun createDefaultSkin(): Skin<*> {

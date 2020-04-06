@@ -3,9 +3,13 @@ package org.wycliffeassociates.otter.jvm.controls.skins.cards
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
+import javafx.scene.SnapshotParameters
 import javafx.scene.control.*
+import javafx.scene.input.ClipboardContent
 import javafx.scene.input.MouseEvent
+import javafx.scene.input.TransferMode
 import javafx.scene.layout.StackPane
+import javafx.scene.paint.Color
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
@@ -14,14 +18,13 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
 
     private val dragDropContainer = StackPane()
-    private lateinit var cardNode: Node
+    public lateinit var cardNode: Node
     protected val back = EmptyCardCell()
 
     @FXML
@@ -104,38 +107,36 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
             }
         }
         cardNode.apply {
-            addEventHandler(MouseEvent.MOUSE_PRESSED, ::startDrag)
-            addEventHandler(MouseEvent.MOUSE_DRAGGED, ::animateDrag)
-            addEventHandler(MouseEvent.MOUSE_RELEASED, ::completeDrag)
+            setOnDragDetected {
+                startDrag(it)
+                card.isDraggingProperty().value = true
+                it.consume()
+            }
+            setOnDragDone {
+                card.isDraggingProperty().value = false
+                it.consume()
+            }
+            setOnDragExited {
+                card.isDraggingProperty().value = false
+                it.consume()
+            }
+            setOnMouseReleased {
+                card.isDraggingProperty().value = false
+                it.consume()
+            }
+            hiddenWhen(card.isDraggingProperty())
         }
     }
 
     private fun startDrag(evt: MouseEvent) {
-        skinnable.fireEvent(
-            StartDragEvent(
-                evt,
-                cardNode,
-                skinnable.takeProperty().value
-            )
-        )
-    }
-
-    private fun animateDrag(evt: MouseEvent) {
-        skinnable.fireEvent(AnimateDragEvent(evt))
-    }
-
-    @Suppress("UNUSED_PARAMETER")
-    private fun completeDrag(evt: MouseEvent) {
-        skinnable.fireEvent(
-            CompleteDragEvent(
-                skinnable.takeProperty().value,
-                ::onCancelDrag
-            )
-        )
-    }
-
-    private fun onCancelDrag() {
-        dragDropContainer.add(cardNode)
+        val db = skinnable.startDragAndDrop(*TransferMode.ANY)
+        val content = ClipboardContent()
+        content.putString(card.takeProperty().value.name)
+        db.setContent(content)
+        val sp = SnapshotParameters()
+        sp.setFill(Color.TRANSPARENT)
+        db.setDragView(skinnable.snapshot(sp, null))
+        evt.consume()
     }
 
     private fun loadFXML() {
