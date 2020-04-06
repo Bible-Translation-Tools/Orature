@@ -307,7 +307,7 @@ return console.askYesNo(message, true);
               <action id="29" beanClass="com.install4j.runtime.beans.actions.UninstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" />
               <action id="257" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
-                  <property name="files" type="array" class="java.io.File" length="4">
+                  <property name="files" type="array" class="java.io.File" length="2">
                     <element index="0">
                       <object class="java.io.File">
                         <string>${installer:sys.appdataDir}${installer:sys.fileSeparator}Orature</string>
@@ -315,17 +315,7 @@ return console.askYesNo(message, true);
                     </element>
                     <element index="1">
                       <object class="java.io.File">
-                        <string>${installer:sys.userHome}/.config/Orature</string>
-                      </object>
-                    </element>
-                    <element index="2">
-                      <object class="java.io.File">
                         <string>${installer:sys.userHome}${installer:sys.fileSeparator}Orature</string>
-                      </object>
-                    </element>
-                    <element index="3">
-                      <object class="java.io.File">
-                        <string>/home/${installer:sys.userName}/.config/Orature</string>
                       </object>
                     </element>
                   </property>
@@ -574,7 +564,8 @@ return console.askYesNo(message, true);
     </windows>
     <linuxDeb name="Linux Deb Archive" id="158">
       <jreBundle jreBundleSource="preCreated" includedJre="linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
-      <postInstallScript>cp /opt/${compiler:sys.shortName}/${compiler:sys.shortName}.desktop ~/Desktop/</postInstallScript>
+      <postInstallScript>for i in $(ls -d -1 /home/**); do cp /opt/${compiler:sys.shortName}/${compiler:sys.shortName}.desktop $i/Desktop/; done</postInstallScript>
+      <postUninstallScript>for i in $(ls -d -1 /home/**); do rm -rf $i/orature; done</postUninstallScript>
     </linuxDeb>
     <macosFolder name="macOS Folder" id="166">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
