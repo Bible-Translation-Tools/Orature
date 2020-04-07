@@ -147,8 +147,5 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         dragDropContainer.add(back)
         dragDropContainer.add(cardNode)
         children.addAll(dragDropContainer)
-
-        importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
     }
 }
