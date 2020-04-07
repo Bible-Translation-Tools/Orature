@@ -1,18 +1,11 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.*
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
-import javafx.scene.control.ButtonType
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
-import tornadofx.*
-import kotlin.error
 
 class ScriptureTakeCard : Control() {
 

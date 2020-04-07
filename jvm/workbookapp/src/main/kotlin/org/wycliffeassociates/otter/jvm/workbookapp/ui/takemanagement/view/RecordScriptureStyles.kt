@@ -61,6 +61,7 @@ class RecordScriptureStyles : Stylesheet() {
 
         pageTop {
             spacing = 30.px
+            padding = box(20.px, 0.px, 20.px, 0.px)
         }
 
         scrollpane {
@@ -71,7 +72,6 @@ class RecordScriptureStyles : Stylesheet() {
         }
 
         scrollpaneContainer {
-
         }
 
         glow {

@@ -3,8 +3,8 @@
 .card--scripture-take {
     -fx-background-color: -white;
     -fx-effect: -level2;
-    -fx-icon-size: 20px;
-    -fx-font-size: 1em; /* This sets the base em value to 16px */
+    -fx-icon-size: 16px;
+    -fx-font-size: 1em;
 }
 
 .card--scripture-take__btn {
@@ -12,7 +12,7 @@
     -fx-effect: -level2;
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
-    -fx-font-size: 1.5em;
+    -fx-font-size: 1.25em;
     -fx-font-weight: bold;
 }
 
@@ -21,20 +21,32 @@
 }
 
 .card--scripture-take__btn--play {
+    -fx-background-color: -white;
 }
 
 .card--scripture-take__btn--edit {
-    -fx-text-fill: -green-dark;
-    -fx-icon-color: -green-dark;
+    -fx-background-color: -white;
+    -fx-text-fill: #58BD2F;
+    -fx-icon-color: #58BD2F;
 }
 
 .card--scripture-take__btn--delete {
-    -fx-font-size: 1em;
+    -fx-font-size: 16px;
+    -fx-background-color: -white;
+    -fx-font-weight: normal;
+    -fx-icon-size: 26px;
+    -fx-effect: -level0;
 }
 
 .card--scripture-take__take-label {
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
+    -fx-icon-size: 20px;
 }
 
 .card--scripture-take__timestamp-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: lighter;
+    -fx-font-style: italic;
+    -fx-text-fill: -gray;
 }

@@ -35,6 +35,7 @@ dependencies {
 
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome5-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-material-pack:$ikonliVer"
 

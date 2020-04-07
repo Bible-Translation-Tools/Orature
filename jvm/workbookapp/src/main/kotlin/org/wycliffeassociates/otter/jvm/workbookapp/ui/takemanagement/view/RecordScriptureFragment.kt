@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.ScriptureTakeCardSkin
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
@@ -75,7 +74,7 @@ class RecordScriptureFragment : RecordableFragment(
         }
 
         dragTarget.setOnDragOver {
-            if(it.gestureSource != dragTarget && it.dragboard.hasString()) {
+            if (it.gestureSource != dragTarget && it.dragboard.hasString()) {
                 it.acceptTransferModes(*TransferMode.ANY)
             }
             it.consume()

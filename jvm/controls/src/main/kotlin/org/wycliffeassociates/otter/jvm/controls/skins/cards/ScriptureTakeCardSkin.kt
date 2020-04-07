@@ -16,15 +16,13 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
 
     private val dragDropContainer = StackPane()
-    public lateinit var cardNode: Node
+    lateinit var cardNode: Node
     protected val back = EmptyCardCell()
 
     @FXML
