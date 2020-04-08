@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.control.ContentDisplay
+import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
@@ -32,6 +34,19 @@ class RecordScriptureFragment : RecordableFragment(
 
     private val takesGrid = ScriptureTakesGridView(recordableViewModel::recordNewTake)
 
+    private val isDraggingProperty = SimpleBooleanProperty(false)
+
+    private val scriptureDragTarget =
+        DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
+            .build(isDraggingProperty.toBinding())
+            .apply {
+                recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
+                    /* We can't just add the node being dragged, since the selected take might have just been
+                        loaded from the database */
+                    this.selectedNodeProperty.value = take?.let { createTakeCard(take) }
+                }
+            }
+
     private val sourceAudioPlayer =
         AudioPlayerNode(null).apply {
             style {
@@ -59,7 +74,7 @@ class RecordScriptureFragment : RecordableFragment(
             takesGrid.gridItems.setAll(it)
         }
 
-        dragTarget.setOnDragDropped {
+        scriptureDragTarget.setOnDragDropped {
             val db: Dragboard = it.dragboard
             var success = false
             if (db.hasString()) {
@@ -73,14 +88,18 @@ class RecordScriptureFragment : RecordableFragment(
             it.consume()
         }
 
-        dragTarget.setOnDragOver {
-            if (it.gestureSource != dragTarget && it.dragboard.hasString()) {
+        scriptureDragTarget.setOnDragOver {
+            if (it.gestureSource != scriptureDragTarget && it.dragboard.hasString()) {
                 it.acceptTransferModes(*TransferMode.ANY)
             }
             it.consume()
         }
 
         mainContainer.apply {
+
+            addEventHandler(DragEvent.DRAG_ENTERED, { isDraggingProperty.value = true })
+            addEventHandler(DragEvent.DRAG_EXITED, { isDraggingProperty.value = false })
+
             addClass(RecordScriptureStyles.background)
 
             hgrow = Priority.ALWAYS
@@ -98,7 +117,7 @@ class RecordScriptureFragment : RecordableFragment(
                     enableWhen(recordScriptureViewModel.hasPrevious)
                 }
                 vbox {
-                    add(dragTarget)
+                    add(scriptureDragTarget)
                 }
 
                 // next verse button

@@ -58,9 +58,9 @@ open class RecordableViewModel(
                     TakeModel(
                         take,
                         ap,
-                        messages["edit"],
-                        messages["delete"],
-                        messages["play"]
+                        messages["edit"].capitalize(),
+                        messages["delete"].capitalize(),
+                        messages["play"].capitalize()
                         )
                 }
             )
