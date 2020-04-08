@@ -30,7 +30,7 @@ class RecordScriptureFragment : RecordableFragment(
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
 
-    private val takesList = ScriptureTakesGridView(recordableViewModel::recordNewTake)
+    private val takesGrid = ScriptureTakesGridView(recordableViewModel::recordNewTake)
 
     private val sourceAudioPlayer =
         AudioPlayerNode(null).apply {
@@ -56,7 +56,7 @@ class RecordScriptureFragment : RecordableFragment(
         }
 
         recordableViewModel.takeModels.onChangeAndDoNow {
-            takesList.gridItems.setAll(it)
+            takesGrid.gridItems.setAll(it)
         }
 
         dragTarget.setOnDragDropped {
@@ -111,13 +111,13 @@ class RecordScriptureFragment : RecordableFragment(
                     }
                 }
             }
-            add(takesList)
+            add(takesGrid)
             add(sourceAudioPlayer)
         }
     }
 
     override fun closePlayers() {
-        // takesList.closePlayers()
+        // takesGrid.closePlayers()
     }
 
     override fun createTakeCard(take: Take): TakeCard {
