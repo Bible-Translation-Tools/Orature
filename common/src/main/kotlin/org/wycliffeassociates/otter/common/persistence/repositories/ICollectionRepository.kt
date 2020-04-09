@@ -14,6 +14,7 @@ interface ICollectionRepository : IRepository<Collection> {
     fun getRootSources(): Single<List<Collection>>
     fun getSource(project: Collection): Maybe<Collection>
     fun getChildren(collection: Collection): Single<List<Collection>>
+    fun getProjectBySlugAndMetadata(slug: String, metadata: ResourceMetadata): Single<Collection>
     fun updateSource(collection: Collection, newSource: Collection): Completable
     fun updateParent(collection: Collection, newParent: Collection): Completable
     fun deriveProject(

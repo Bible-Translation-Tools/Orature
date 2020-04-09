@@ -54,9 +54,25 @@ class RecordScriptureFragment : RecordableFragment(
             }
         }
 
+    private val sourceAudioPlayer =
+        AudioPlayerNode(null).apply {
+            style {
+                skin = SourceAudioSkin::class
+            }
+        }
+
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
+        importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
+
+        sourceAudioPlayer.visibleWhen { recordScriptureViewModel.sourceAudioAvailableProperty }
+        sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
+        recordScriptureViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
+            it?.let {
+                sourceAudioPlayer.load(it)
+            }
+        }
 
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())

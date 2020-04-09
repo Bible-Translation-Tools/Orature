@@ -1,16 +1,24 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
+import javafx.application.Platform
 import javafx.application.Platform.runLater
-import javafx.scene.control.Alert
-import javafx.scene.control.Alert.AlertType.ERROR
-import javafx.scene.control.Label
-import javafx.scene.control.TextArea
-import javafx.scene.layout.VBox
+import javafx.scene.control.Dialog
 import javafx.scene.paint.Color
+import javafx.stage.Modality
+import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayOutputStream
-import java.io.PrintWriter
+import org.wycliffeassociates.otter.common.OratureInfo
+import org.wycliffeassociates.otter.jvm.controls.exception.exceptionDialog
+import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersistenceComponent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.PrintWriter
+import java.util.*
 
 class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
@@ -51,66 +59,98 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     }
 
     private fun showErrorDialog(error: Throwable) {
-        val cause = Label(if (error.cause != null) error.cause?.message else "").apply {
-            style = "-fx-font-weight: bold"
-        }
-
-        val textarea = TextArea().apply {
-            prefRowCount = 20
-            prefColumnCount = 50
-            text = stringFromError(error)
-        }
-
-        Alert(ERROR).apply {
-            title = error.message ?: "An error occured"
-            isResizable = true
-            headerText = if (error.stackTrace.isNullOrEmpty()) "Error" else "Error in " + error.stackTrace[0].toString()
-            dialogPane.content = VBox().apply {
-                add(cause)
-                if (error is RestException) {
-                    try {
-
-                        title = "HTTP Request Error: $title"
-                        form {
-                            fieldset(error.message) {
-                                val response = error.response
-                                if (response != null) {
-                                    field("Status") {
-                                        label("${response.statusCode} ${response.reason}")
-                                    }
-
-                                    val c = response.text()
-
-                                    if (c != null) {
-                                        tabpane {
-                                            background = Color.TRANSPARENT.asBackground()
-
-                                            tab("Plain text") {
-                                                textarea(c)
-                                            }
-                                            tab("Stacktrace") {
-                                                add(textarea)
-                                            }
-                                            tabs.withEach { isClosable = false }
-                                        }
-                                    } else {
-                                        add(textarea)
-                                    }
-                                } else {
-                                    add(textarea)
-                                }
+        Dialog<Unit>().apply {
+            dialogPane.content = exceptionDialog {
+                titleTextProperty().set(FX.messages["needsRestart"])
+                headerTextProperty().set(FX.messages["yourWorkSaved"])
+                showMoreTextProperty().set(FX.messages["showMore"])
+                showLessTextProperty().set(FX.messages["showLess"])
+                sendReportTextProperty().set(FX.messages["sendErrorReport"])
+                stackTraceProperty().set(stringFromError(error))
+                closeTextProperty().set(FX.messages["closeApp"])
+                onCloseAction {
+                    if (sendReportProperty().get()) {
+                        sendReport(error)
+                            .doOnSubscribe { sendingReportProperty().set(true) }
+                            .doOnComplete {
+                                sendingReportProperty().set(false)
+                                Platform.exit()
                             }
-                        }
-                    } catch (e: Exception) {
-                        add(textarea)
+                            .subscribeOn(Schedulers.computation())
+                            .subscribe()
+                    } else {
+                        Platform.exit()
                     }
-                } else {
-                    add(textarea)
                 }
             }
-            showAndWait()
+
+            dialogPane.stylesheets.addAll(
+                listOf(
+                    javaClass.getResource("/css/root.css").toExternalForm(),
+                    javaClass.getResource("/css/button.css").toExternalForm(),
+                    javaClass.getResource("/css/exception-dialog.css").toExternalForm()
+                )
+            )
+
+            initModality(Modality.APPLICATION_MODAL)
+            initStyle(StageStyle.TRANSPARENT)
+            dialogPane.scene.fill = Color.TRANSPARENT
+
+            show()
         }
     }
+}
+
+private fun sendReport(error: Throwable): Completable {
+    return Completable.fromAction {
+        val props = githubProperties()
+        if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
+            val githubReporter = GithubReporter(
+                props.getProperty("repo-url"),
+                props.getProperty("oauth-token")
+            )
+            githubReporter.reportCrash(
+                getEnvironment(),
+                stringFromError(error),
+                getLog()
+            )
+        }
+    }
+}
+
+private fun getEnvironment(): AppInfo {
+    return AppInfo()
+}
+
+private fun getLog(): String? {
+    val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
+    val logExt = ".log"
+    val persistenceComponent = DaggerPersistenceComponent.builder().build()
+    val directoryProvider = persistenceComponent.injectDirectoryProvider()
+    val logFile = StringBuilder()
+        .append(directoryProvider.logsDirectory.absolutePath)
+        .append("/")
+        .append(logFileName)
+        .append(logExt)
+        .toString()
+
+    return try {
+        File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+private fun githubProperties(): Properties? {
+    val prop = Properties()
+    val inputStream = OtterExceptionHandler::class.java.classLoader.getResourceAsStream("github.properties")
+
+    if (inputStream != null) {
+        prop.load(inputStream)
+        return prop
+    }
+
+    return null
 }
 
 private fun stringFromError(e: Throwable): String {

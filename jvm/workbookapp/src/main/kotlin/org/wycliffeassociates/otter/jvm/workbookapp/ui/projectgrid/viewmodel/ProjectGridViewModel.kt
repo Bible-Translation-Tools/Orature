@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -22,6 +23,7 @@ class ProjectGridViewModel : ViewModel() {
 
     private val navigator: ChromeableStage by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
+    val showDeleteDialogProperty = SimpleBooleanProperty(false)
 
     val projects: ObservableList<Collection> = FXCollections.observableArrayList<Collection>()
 
@@ -47,10 +49,12 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun deleteProject(project: Collection) {
+        showDeleteDialogProperty.set(true)
         DeleteProject(collectionRepo, directoryProvider)
             .delete(project, true)
             .observeOnFx()
             .subscribe {
+                showDeleteDialogProperty.set(false)
                 Platform.runLater { loadProjects() }
             }
     }

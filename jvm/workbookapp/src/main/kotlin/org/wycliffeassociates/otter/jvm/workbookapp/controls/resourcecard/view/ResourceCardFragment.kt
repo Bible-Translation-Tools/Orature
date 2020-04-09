@@ -25,9 +25,7 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
 
     init {
         root.apply {
-            isFillHeight = false
             alignment = Pos.CENTER_LEFT
-            maxHeight = 50.0
 
             vbox {
                 spacing = 3.0
@@ -47,8 +45,9 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
                         }
                     )
                 }
-                text(item.title)
-                maxWidth = 150.0
+                text(item.title) {
+                    wrappingWidthProperty().bind(navigator.root.widthProperty().divide(1.5))
+                }
             }
 
             region {
@@ -61,7 +60,6 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
                     secondaryColor = Color.WHITE
                     isHighlightedProperty.bind(isCurrentResourceProperty)
                     graphic = MaterialIconView(MaterialIcon.APPS, "25px")
-                    maxWidth = 500.0
                     text = messages["viewRecordings"]
                     action {
                         item.onSelect()

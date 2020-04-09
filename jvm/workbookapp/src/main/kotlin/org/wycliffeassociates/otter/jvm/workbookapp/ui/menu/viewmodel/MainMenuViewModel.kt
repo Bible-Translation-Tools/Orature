@@ -21,6 +21,7 @@ class MainMenuViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
+    private val workbookRepository = injector.workbookRepository
 
     private val workbookVM = find<WorkbookViewModel>()
     val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
@@ -44,7 +45,8 @@ class MainMenuViewModel : ViewModel() {
             workbookVM.activeResourceMetadata,
             workbookVM.workbook,
             workbookVM.activeProjectAudioDirectory,
-            directoryProvider
+            directoryProvider,
+            workbookRepository
         ).export(directory)
             .observeOnFx()
             .subscribe { result: ExportResult ->
@@ -69,6 +71,7 @@ class MainMenuViewModel : ViewModel() {
             directoryProvider,
             injector.zipEntryTreeBuilder
         ).import(fileOrDir)
+            .subscribeOn(Schedulers.io())
             .observeOnFx()
             .subscribe { result: ImportResult ->
                 if (result == ImportResult.SUCCESS) {

@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileReader
@@ -72,8 +73,14 @@ class DirectoryProvider(
         target: ResourceMetadata?,
         bookSlug: String
     ): File {
+        // Audio is being stored in the source creator directory for resources
+        val targetCreator = when {
+            target?.type == ContainerType.Help -> source.creator
+            target?.creator != null -> target.creator
+            else -> "."
+        }
         val appendedPath = listOf(
-            target?.creator ?: ".",
+            targetCreator,
             source.creator,
             "${source.language.slug}_${source.identifier}",
             "v${target?.version ?: "-none"}",

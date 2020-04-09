@@ -67,6 +67,10 @@ class RecordResourceViewModel : ViewModel() {
                 setLabelProperty(ContentType.TITLE, messages["snippet"])
                 setLabelProperty(ContentType.BODY, messages["note"])
             }
+            "tq" -> {
+                setLabelProperty(ContentType.TITLE, messages["question"])
+                setLabelProperty(ContentType.BODY, messages["answer"])
+            }
         }
     }
 

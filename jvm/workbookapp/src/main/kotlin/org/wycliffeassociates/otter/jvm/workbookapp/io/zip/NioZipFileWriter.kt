@@ -10,7 +10,12 @@ import java.nio.file.Files
 class NioZipFileWriter(
     zipFile: File
 ) : IZipFileWriter {
-    private val fileSystem: FileSystem = FileSystems.newFileSystem(zipFile.jarUri(), mapOf("create" to "true"))
+
+    // useTempFile set to true to reduce memory usage when writing large zip files
+    private val fileSystem: FileSystem = FileSystems.newFileSystem(
+        zipFile.jarUri(),
+        mapOf("create" to "true", "useTempFile" to true)
+    )
 
     override fun close() = fileSystem.close()
 
@@ -24,5 +29,13 @@ class NioZipFileWriter(
         val sourcePath = source.toPath()
         val destPath = fileSystem.getPath(destination)
         sourcePath.copyDirectoryTo(destPath, filter)
+    }
+
+    override fun copyFile(source: File, destination: String) {
+        val sourcePath = source.toPath()
+        val destPath = fileSystem.getPath(destination)
+        if (Files.isRegularFile(sourcePath)) {
+            sourcePath.copyFileTo(destPath)
+        }
     }
 }

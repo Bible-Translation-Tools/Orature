@@ -86,7 +86,7 @@ class ImportResourceContainer(
             // Copy to the internal directory
             val newZipFile = copyFileToInternalDirectory(file, internalDir)
 
-            importFromInternalDir(newZipFile, internalDir).blockingGet()
+            importFromInternalDir(newZipFile).blockingGet()
         }.onErrorReturn { e ->
             e.castOrFindImportException()?.result ?: throw e
         }.subscribeOn(Schedulers.io())
@@ -110,7 +110,7 @@ class ImportResourceContainer(
                 // Copy to the internal directory
                 val newDirectory = copyRecursivelyToInternalDirectory(containerDir, internalDir)
 
-                return@flatMap importFromInternalDir(newDirectory, newDirectory)
+                return@flatMap importFromInternalDir(newDirectory)
             }
             .subscribeOn(Schedulers.io())
 
@@ -126,30 +126,30 @@ class ImportResourceContainer(
         return directoryProvider.getSourceContainerDirectory(extContainer)
     }
 
-    private fun importFromInternalDir(fileToLoad: File, newDir: File): Single<ImportResult> {
+    private fun importFromInternalDir(fileToLoad: File): Single<ImportResult> {
         // Load the internal container
         val container = try {
             ResourceContainer.load(fileToLoad, OtterResourceContainerConfig())
         } catch (e: Exception) {
-            return cleanUp(newDir, ImportResult.LOAD_RC_ERROR)
+            return cleanUp(fileToLoad, ImportResult.LOAD_RC_ERROR)
         }
 
         val tree = try {
             constructContainerTree(container)
         } catch (e: ImportException) {
-            return cleanUp(newDir, e.result)
+            return cleanUp(fileToLoad, e.result)
         }
 
         return resourceContainerRepository
             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
-                if (result != ImportResult.SUCCESS || err != null) newDir.deleteRecursively()
+                if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
             }
             .subscribeOn(Schedulers.io())
     }
 
-    private fun cleanUp(containerDir: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {
-        containerDir.deleteRecursively()
+    private fun cleanUp(container: File, result: ImportResult): Single<ImportResult> = Single.fromCallable {
+        container.deleteRecursively()
         return@fromCallable result
     }
 
