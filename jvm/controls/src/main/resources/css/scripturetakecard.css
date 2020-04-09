@@ -3,7 +3,6 @@
 .card--scripture-take {
     -fx-background-color: -white;
     -fx-effect: -level2;
-    -fx-icon-size: 16px;
     -fx-font-size: 1em;
 }
 
@@ -41,7 +40,7 @@
 .card--scripture-take__take-label {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-icon-size: 20px;
+    -fx-icon-size: 26px;
 }
 
 .card--scripture-take__timestamp-label {

@@ -92,7 +92,7 @@ object DragTargetStyles {
             }
             selectedTakePlaceHolder {
                 +takeRadius()
-                backgroundColor += c("#EEEEEE")
+                backgroundColor += c("#DDDDDD")
             }
             borderGlow {
                 +borderGlowMixin(glowColor)

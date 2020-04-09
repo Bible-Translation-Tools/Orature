@@ -14,7 +14,7 @@
          <children>
             <Label fx:id="takeLabel" styleClass="card--scripture-take__take-label" text="Take 01">
                <graphic>
-                  <FontIcon iconLiteral="fas-grip-vertical"/>
+                  <FontIcon iconLiteral="mdi-drag" styleClass="card--scripture-take__take-label"/>
                </graphic>
                <font>
                   <Font name="System Bold" />
