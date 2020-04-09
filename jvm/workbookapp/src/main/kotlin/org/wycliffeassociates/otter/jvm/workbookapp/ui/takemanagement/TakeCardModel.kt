@@ -14,5 +14,6 @@ data class TakeModel(
     val audioPlayer: IAudioPlayer,
     val editText: String,
     val deleteText: String,
-    val playText: String
+    val playText: String,
+    val pauseText: String
 )

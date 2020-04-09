@@ -60,8 +60,9 @@ open class RecordableViewModel(
                         ap,
                         messages["edit"].capitalize(),
                         messages["delete"].capitalize(),
-                        messages["play"].capitalize()
-                        )
+                        messages["play"].capitalize(),
+                        messages["pause"].capitalize()
+                    )
                 }
             )
         }

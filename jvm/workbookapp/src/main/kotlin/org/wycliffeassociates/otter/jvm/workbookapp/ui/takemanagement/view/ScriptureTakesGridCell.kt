@@ -27,6 +27,7 @@ class ScriptureTakesGridCell(
                 takeCard.audioPlayerProperty().set(model.audioPlayer)
                 takeCard.deleteTextProperty().set(model.deleteText)
                 takeCard.playTextProperty().set(model.playText)
+                takeCard.pauseTextProperty().set(model.pauseText)
                 takeCard.timestampProperty().set(model.take.createdTimestamp.toString())
                 takeCard.takeNumberProperty().set(model.take.number.toString())
                 this.graphic = takeCard
