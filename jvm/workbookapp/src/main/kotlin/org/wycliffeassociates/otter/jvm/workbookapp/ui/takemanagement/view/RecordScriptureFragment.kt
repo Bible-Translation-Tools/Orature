@@ -112,6 +112,7 @@ class RecordScriptureFragment : RecordableFragment(
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
                     action {
+                        closePlayers()
                         recordScriptureViewModel.previousChunk()
                     }
                     enableWhen(recordScriptureViewModel.hasPrevious)
@@ -125,6 +126,7 @@ class RecordScriptureFragment : RecordableFragment(
                     addClass(RecordScriptureStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     action {
+                        closePlayers()
                         recordScriptureViewModel.nextChunk()
                         enableWhen(recordScriptureViewModel.hasNext)
                     }
@@ -136,7 +138,7 @@ class RecordScriptureFragment : RecordableFragment(
     }
 
     override fun closePlayers() {
-        // takesGrid.closePlayers()
+        takesGrid.closePlayers()
     }
 
     override fun createTakeCard(take: Take): TakeCard {
