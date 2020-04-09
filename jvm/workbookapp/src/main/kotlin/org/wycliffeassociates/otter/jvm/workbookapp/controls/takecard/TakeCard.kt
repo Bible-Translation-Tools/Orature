@@ -8,11 +8,11 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.simpleaudioplayer
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.EditTakeEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.PlayOrPauseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.PlayOrPauseEvent.PauseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.PlayOrPauseEvent.PlayEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PlayEvent
 
 class TakeCard(
     val take: Take,

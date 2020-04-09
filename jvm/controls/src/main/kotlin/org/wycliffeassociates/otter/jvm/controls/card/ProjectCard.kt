@@ -8,7 +8,7 @@ import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
-import org.wycliffeassociates.otter.jvm.controls.skins.ProjectCardSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.cards.ProjectCardSkin
 import tornadofx.*
 
 class ProjectCard(

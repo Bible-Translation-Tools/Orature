@@ -1,22 +1,34 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget
+package org.wycliffeassociates.otter.jvm.controls.dragtarget
 
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.text.FontPosture
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordResourceStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordScriptureStyles
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.label
 
 object DragTargetStyles {
+    val takeMaxWidth = 332.px
+    val takeMinHeight = 148.px
+
+    fun takeWidthHeight() = mixin {
+        minHeight = takeMinHeight
+        maxWidth = takeMaxWidth
+        prefWidth = maxWidth
+        maxHeight = minHeight
+    }
+
+    fun takeRadius() = mixin {
+        borderRadius += box(10.px)
+        backgroundRadius += box(10.px)
+    }
+
     private fun borderGlowMixin(glowColor: Color) = mixin { effect = DropShadow(5.0, glowColor) }
 
     private fun dragTargetOverlayMixin(glowColor: Color): CssSelectionBlock {
         return mixin {
-            backgroundColor += AppTheme.colors.cardBackground.deriveColor(
+            backgroundColor += Color.WHITE.deriveColor(
                 0.0,
                 1.0,
                 1.0,
@@ -39,16 +51,16 @@ object DragTargetStyles {
             val borderGlow by cssclass()
         }
 
-        private val glowColor = AppTheme.colors.appBlue
+        private val glowColor = c("#0094F0")
 
         init {
             resourceDragTargetSize {
-                +RecordResourceStyles.takeWidthHeight()
+                +takeWidthHeight()
             }
             selectedResourceTakePlaceHolder {
-                +RecordResourceStyles.takeRadius()
+                +takeRadius()
                 alignment = Pos.CENTER
-                backgroundColor += AppTheme.colors.defaultBackground
+                backgroundColor += c("#EEEEEE")
                 borderColor += box(Color.DARKGRAY)
                 borderStyle += BorderStrokeStyle.DASHED
                 borderWidth += box(2.px)
@@ -59,7 +71,7 @@ object DragTargetStyles {
             }
             resourceDragTargetOverlay {
                 +dragTargetOverlayMixin(glowColor)
-                +RecordResourceStyles.takeRadius()
+                +takeRadius()
             }
         }
     }
@@ -72,22 +84,22 @@ object DragTargetStyles {
             val borderGlow by cssclass()
         }
 
-        private val glowColor = AppTheme.colors.appBlue
+        private val glowColor = c("#0094F0")
 
         init {
             dragTargetSize {
-                +RecordScriptureStyles.takeWidthHeight()
+                +takeWidthHeight()
             }
             selectedTakePlaceHolder {
-                +RecordScriptureStyles.takeRadius()
-                backgroundColor += AppTheme.colors.defaultBackground
+                +takeRadius()
+                backgroundColor += c("#DDDDDD")
             }
             borderGlow {
                 +borderGlowMixin(glowColor)
             }
             dragTargetOverlay {
                 +dragTargetOverlayMixin(glowColor)
-                +RecordScriptureStyles.takeRadius()
+                +takeRadius()
             }
         }
     }
