@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
 import javafx.collections.FXCollections
 import dev.jbs.gridview.control.GridView
+import impl.dev.jbs.gridview.skin.GridViewSkin
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
@@ -40,7 +41,7 @@ class ScriptureTakesGridView(
             calculateColumnCount(
                 widthProperty().value,
                 cellWidthProperty().value,
-                verticalCellSpacingProperty().value
+                horizontalCellSpacingProperty().value
             ), 1
         )
         val _items = gridItems
@@ -56,7 +57,6 @@ class ScriptureTakesGridView(
             items.add(Pair(TakeCardType.NEW, null))
             items.addAll(_items.map { Pair(TakeCardType.TAKE, it) })
             val mod = items.size % columnCount
-            println("items ${items.size} columns $columnCount mod $mod")
             val needed = columnCount - mod
             for (i in 1..needed) {
                 items.add(Pair(TakeCardType.EMPTY, null))
@@ -71,12 +71,20 @@ class ScriptureTakesGridView(
     }
 
     private fun calculateColumnCount(width: Double, cellWidth: Double, spacing: Double): Int {
-        var count = Math.floor(width / cellWidth).toInt()
-        println("Width is: $width cell width: $cellWidth count: $count")
-        if (width - (count * cellWidth) - ((count) * 2.0 * spacing) < 0.0) {
-            return Math.min(count - 1, 1)
+         /* Skin can be null while the layout is being created and inflated
+         so give a rough guess at the count in case but prefer what the skin is using
+         in small situations where the difference is off, the skin will display more or less items
+         in a row than expected and the result would mean adding the wrong number of blank cards to completely
+         fill out the row */
+        if (skin != null && skin is GridViewSkin<*>) {
+            return (skin as GridViewSkin<*>).computeMaxCellsInRow()
         } else {
-            return count
+            var count = Math.floor(width / cellWidth).toInt()
+            if (width - (count * cellWidth) - ((count - 1) * spacing * 2) < 0.0) {
+                return Math.max(count - 1, 1)
+            } else {
+                return count
+            }
         }
     }
 }
