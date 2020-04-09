@@ -78,11 +78,11 @@ class ScriptureTakesGridView(
     }
 
     private fun calculateColumnCount(width: Double, cellWidth: Double, spacing: Double): Int {
-         /* Skin can be null while the layout is being created and inflated
-         so give a rough guess at the count in case but prefer what the skin is using
-         in small situations where the difference is off, the skin will display more or less items
-         in a row than expected and the result would mean adding the wrong number of blank cards to completely
-         fill out the row */
+        /* Skin can be null while the layout is being created and inflated
+        so give a rough guess at the count in case but prefer what the skin is using
+        in small situations where the difference is off, the skin will display more or less items
+        in a row than expected and the result would mean adding the wrong number of blank cards to completely
+        fill out the row */
         if (skin != null && skin is GridViewSkin<*>) {
             return (skin as GridViewSkin<*>).computeMaxCellsInRow()
         } else {
