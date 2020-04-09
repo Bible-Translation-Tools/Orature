@@ -20,6 +20,7 @@ before_install:
 - wget --no-verbose https://download-gcdn.ej-technologies.com/install4j/install4j_unix_8_0_4.tar.gz
 - tar -zxf install4j_unix_8_0_4.tar.gz
 - export INSTALL4JDIR="$(pwd)/install4j8.0.4"
+- export APIURL="https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues"
 - wget --no-verbose -P $HOME/.install4j8/jres "https://download.ej-technologies.com/bundles/java9/windows-amd64-11.0.3.tar.gz"
 - wget --no-verbose -P $HOME/.install4j8/jres "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz"
 - wget --no-verbose -P $HOME/.install4j8/jres "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz"
@@ -28,7 +29,7 @@ jobs:
   include:
   - stage: build
     script:
-    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW :jvm:workbookapp:install4jdeploy"
+    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN :jvm:workbookapp:install4jdeploy"
 stages:
 - build
 addons:

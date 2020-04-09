@@ -28,7 +28,11 @@ class CollectionDao(
             }
     }
 
-    fun fetch(slug: String, containerId: Int, label: String, dsl: DSLContext = instanceDsl): CollectionEntity? {
+    /**
+     * Fetches the collection by slug, container id, and label. If a label is not provided,
+     * assume it is the project level collection (book)
+     */
+    fun fetch(slug: String, containerId: Int, label: String = "project", dsl: DSLContext = instanceDsl): CollectionEntity? {
         return dsl
             .select()
             .from(COLLECTION_ENTITY)

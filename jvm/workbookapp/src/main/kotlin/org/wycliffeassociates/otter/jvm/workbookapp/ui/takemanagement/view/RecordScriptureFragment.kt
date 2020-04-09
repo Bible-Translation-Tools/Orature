@@ -57,7 +57,6 @@ class RecordScriptureFragment : RecordableFragment(
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
-
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
@@ -65,7 +64,6 @@ class RecordScriptureFragment : RecordableFragment(
         sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
         recordScriptureViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
             it?.let {
-                sourceAudioPlayer.pause()
                 sourceAudioPlayer.load(it)
             }
         }

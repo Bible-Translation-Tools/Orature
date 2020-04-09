@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.view
 
+import de.jensd.fx.glyphs.materialicons.MaterialIcon
+import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.text.FontWeight
@@ -8,6 +10,7 @@ import tornadofx.*
 
 class ProjectGridStyles : Stylesheet() {
     companion object {
+        fun deleteIcon(size: String) = MaterialIconView(MaterialIcon.DELETE, size)
         val projectsGrid by cssclass()
         val noProjectsLabel by cssclass()
         val tryCreatingLabel by cssclass()

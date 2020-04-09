@@ -1,0 +1,3 @@
+files:
+  - source: /jvm/workbookapp/src/main/resources/Messages_en.properties
+    translation: /jvm/workbookapp/src/main/resources/Messages_%two_letters_code%.properties
