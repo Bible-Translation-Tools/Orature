@@ -23,24 +23,7 @@ class AudioPlayerController(
     val isPlayingProperty = SimpleBooleanProperty(false)
 
     init {
-        audioSlider.value = 0.0
-        audioSlider.setOnDragDetected {
-            if (player?.isPlaying() == true) {
-                resumeAfterDrag = true
-                toggle()
-            }
-            dragging = true
-        }
-        audioSlider.setOnMouseReleased {
-            seek(audioSlider.value.toFloat() / 100F)
-            if (dragging) {
-                dragging = false
-                if (resumeAfterDrag) {
-                    toggle()
-                    resumeAfterDrag = false
-                }
-            }
-        }
+        initializeSliderActions()
     }
 
     fun toggle() {
@@ -71,6 +54,37 @@ class AudioPlayerController(
         }
     }
 
+    fun load(player: IAudioPlayer) {
+        this.player?.let { oldPlayer ->
+            oldPlayer.pause()
+            oldPlayer.close()
+        }
+        startAtPercent = 0F
+        audioSlider.value = 0.0
+        this.player = player
+    }
+
+    private fun initializeSliderActions() {
+        audioSlider.value = 0.0
+        audioSlider.setOnDragDetected {
+            if (player?.isPlaying() == true) {
+                resumeAfterDrag = true
+                toggle()
+            }
+            dragging = true
+        }
+        audioSlider.setOnMouseReleased {
+            seek(audioSlider.value.toFloat() / 100F)
+            if (dragging) {
+                dragging = false
+                if (resumeAfterDrag) {
+                    toggle()
+                    resumeAfterDrag = false
+                }
+            }
+        }
+    }
+
     private fun startProgressUpdate(): Disposable {
         return Observable
             .interval(20, TimeUnit.MILLISECONDS)
@@ -80,16 +94,6 @@ class AudioPlayerController(
                     audioSlider.value = playbackPosition()
                 }
             }
-    }
-
-    fun load(player: IAudioPlayer) {
-        this.player?.let { oldPlayer ->
-            oldPlayer.pause()
-            oldPlayer.close()
-        }
-        startAtPercent = 0F
-        audioSlider.value = 0.0
-        this.player = player
     }
 
     private fun play() {

@@ -8,11 +8,11 @@ import javafx.scene.control.SkinBase
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.AnimateDragEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.CompleteDragEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.PlayOrPauseEvent.PauseEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.PlayOrPauseEvent.PlayEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.StartDragEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PauseEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PlayEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -62,7 +62,11 @@ abstract class TakeCardSkin(val control: TakeCard) : SkinBase<TakeCard>(control)
     }
 
     private fun animateDrag(evt: MouseEvent) {
-        skinnable.fireEvent(AnimateDragEvent(evt))
+        skinnable.fireEvent(
+            AnimateDragEvent(
+                evt
+            )
+        )
     }
 
     @Suppress("UNUSED_PARAMETER")
