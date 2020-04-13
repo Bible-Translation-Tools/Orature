@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.card
+package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader

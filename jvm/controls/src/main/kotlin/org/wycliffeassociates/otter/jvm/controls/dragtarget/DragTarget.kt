@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget
+package org.wycliffeassociates.otter.jvm.controls.dragtarget
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleObjectProperty

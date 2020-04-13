@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.skins
+package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXListView
