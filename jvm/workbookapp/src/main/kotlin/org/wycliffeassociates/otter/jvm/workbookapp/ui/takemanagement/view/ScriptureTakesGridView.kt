@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import tornadofx.*
 import kotlin.math.pow
 
 class ScriptureTakesGridView(
