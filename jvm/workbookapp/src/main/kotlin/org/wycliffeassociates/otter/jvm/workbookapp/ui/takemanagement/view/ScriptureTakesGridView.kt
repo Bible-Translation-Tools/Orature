@@ -6,15 +6,14 @@ import impl.dev.jbs.gridview.skin.GridViewSkin
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
-import tornadofx.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import kotlin.math.pow
 
 class ScriptureTakesGridView(
     val recordNewTake: () -> Unit
-) : GridView<Pair<TakeCardType, TakeModel?>>() {
+) : GridView<Pair<TakeCardType, TakeCardModel?>>() {
 
-    val gridItems = FXCollections.observableArrayList<TakeModel>()
+    val gridItems = FXCollections.observableArrayList<TakeCardModel>()
 
     init {
         setCellFactory { ScriptureTakesGridCell(recordNewTake) }

@@ -68,7 +68,7 @@ class RecordScriptureFragment : RecordableFragment(
             }
         }
 
-        recordableViewModel.takeModels.onChangeAndDoNow {
+        recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)
         }
 
