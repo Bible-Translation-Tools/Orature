@@ -84,8 +84,8 @@ class RecordScriptureFragment : RecordableFragment(
                     contentDisplay = ContentDisplay.RIGHT
                     action {
                         recordScriptureViewModel.nextChunk()
-                        enableWhen(recordScriptureViewModel.hasNext)
                     }
+                    enableWhen(recordScriptureViewModel.hasNext)
                 }
             }
 
