@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<StackPane alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox fx:id="sourceMissing" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity">
+            <children>
+                <FontIcon iconLiteral="mdi-volume-off">
+                    <font>
+                        <Font size="18.0" />
+                    </font></FontIcon>
+                <Label text="No Source Audio">
+                    <padding>
+                        <Insets left="8.0" />
+                    </padding>
+                    <font>
+                        <Font name="System Bold Italic" size="12.0" />
+                    </font></Label>
+            </children>
+            <padding>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+            </padding>
+        </HBox>
+        <HBox fx:id="audioPlayer" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" visible="false">
+            <children>
+                <JFXButton fx:id="playBtn" text=" ">
+                    <graphic>
+                        <FontIcon iconLiteral="fa-play" />
+                    </graphic>
+                </JFXButton>
+                <JFXSlider fx:id="audioSlider" HBox.hgrow="ALWAYS" />
+            </children>
+            <padding>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+            </padding>
+        </HBox>
+    </children>
+</StackPane>

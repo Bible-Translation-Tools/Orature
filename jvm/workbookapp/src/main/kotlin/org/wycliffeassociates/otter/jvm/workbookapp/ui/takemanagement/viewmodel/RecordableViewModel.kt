@@ -15,13 +15,16 @@ import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.EditTakeEvent
-import tornadofx.FX.Companion.messages
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import tornadofx.*
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
-) {
+) : ViewModel() {
+    val injector: Injector by inject()
+
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
@@ -36,6 +39,7 @@ open class RecordableViewModel(
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
+    val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
 
     init {
         recordableProperty.onChange {
@@ -44,6 +48,23 @@ open class RecordableViewModel(
                 subscribeSelectedTakePropertyToRelay(audio)
                 loadTakes(audio)
             }
+        }
+
+        alternateTakes.onChange {
+            takeCardModels.setAll(
+                it.list.map { take ->
+                    val ap = injector.audioPlayer
+                    ap.load(take.file)
+                    TakeCardModel(
+                        take,
+                        ap,
+                        messages["edit"].capitalize(),
+                        messages["delete"].capitalize(),
+                        messages["play"].capitalize(),
+                        messages["pause"].capitalize()
+                    )
+                }
+            )
         }
     }
 
@@ -58,7 +79,8 @@ open class RecordableViewModel(
                     showPluginActive = false
                     when (result) {
                         RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
-                        RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {}
+                        RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {
+                        }
                     }
                 }
         } ?: throw IllegalStateException("Recordable is null")
@@ -83,6 +105,11 @@ open class RecordableViewModel(
         // selectedTakeProperty will be updated when the relay emits the item that it accepts
         updateAlternateTakes(selectedTakeProperty.value, take)
         recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+    }
+
+    fun selectTake(filename: String) {
+        val take = alternateTakes.find { it.name == filename }
+        selectTake(take)
     }
 
     fun deleteTake(take: Take) {

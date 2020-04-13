@@ -98,13 +98,15 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun pause() {
-        val stoppedAt = getAbsoluteLocationInFrames()
-        pause = true
-        player.stop()
-        player.flush()
-        player.close()
-        listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
-        reader.seek(stoppedAt)
+        if (::player.isInitialized) {
+            val stoppedAt = getAbsoluteLocationInFrames()
+            pause = true
+            player.stop()
+            player.flush()
+            player.close()
+            listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
+            reader.seek(stoppedAt)
+        }
     }
 
     override fun stop() {

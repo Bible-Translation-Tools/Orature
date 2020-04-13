@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.controls.dragtarget
+package org.wycliffeassociates.otter.jvm.controls.dragtarget
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView

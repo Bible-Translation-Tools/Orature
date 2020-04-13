@@ -9,7 +9,7 @@ import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
-import org.wycliffeassociates.otter.jvm.controls.card.ChapterBanner
+import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.CardData

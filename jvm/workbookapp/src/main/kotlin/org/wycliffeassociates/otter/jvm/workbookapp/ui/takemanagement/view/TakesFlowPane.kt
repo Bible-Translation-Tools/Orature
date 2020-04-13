@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.events.PlayOrPauseEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import tornadofx.FX.Companion.messages
