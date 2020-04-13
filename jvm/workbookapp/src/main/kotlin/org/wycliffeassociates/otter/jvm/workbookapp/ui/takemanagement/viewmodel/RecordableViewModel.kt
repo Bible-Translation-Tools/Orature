@@ -17,7 +17,7 @@ import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import tornadofx.*
 
 open class RecordableViewModel(
@@ -39,7 +39,7 @@ open class RecordableViewModel(
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
-    val takeModels: ObservableList<TakeModel> = FXCollections.observableArrayList()
+    val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
 
     init {
         recordableProperty.onChange {
@@ -51,11 +51,11 @@ open class RecordableViewModel(
         }
 
         alternateTakes.onChange {
-            takeModels.setAll(
+            takeCardModels.setAll(
                 it.list.map { take ->
                     val ap = injector.audioPlayer
                     ap.load(take.file)
-                    TakeModel(
+                    TakeCardModel(
                         take,
                         ap,
                         messages["edit"].capitalize(),

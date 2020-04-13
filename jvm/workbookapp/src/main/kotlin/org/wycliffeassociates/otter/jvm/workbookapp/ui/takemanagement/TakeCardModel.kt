@@ -9,7 +9,7 @@ enum class TakeCardType {
     TAKE
 }
 
-data class TakeModel(
+data class TakeCardModel(
     val take: Take,
     val audioPlayer: IAudioPlayer,
     val editText: String,
