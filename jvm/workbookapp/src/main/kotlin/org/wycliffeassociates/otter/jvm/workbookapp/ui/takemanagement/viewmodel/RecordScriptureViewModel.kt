@@ -50,7 +50,7 @@ class RecordScriptureViewModel : ViewModel() {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
             chapter?.let {
                 getChunkList(chapter.chunks)
-                if(activeChunkProperty.value == null) {
+                if (activeChunkProperty.value == null) {
                     recordableViewModel.recordable = it
                     setHasNextAndPrevious()
                 }
