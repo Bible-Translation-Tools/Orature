@@ -55,10 +55,16 @@ class AudioPlayerController(
     }
 
     fun load(player: IAudioPlayer) {
+        this.player?.let { oldPlayer ->
+            oldPlayer.pause()
+            oldPlayer.close()
+        }
+        startAtPercent = 0F
+        audioSlider.value = 0.0
         this.player = player
     }
 
-    fun initializeSliderActions() {
+    private fun initializeSliderActions() {
         audioSlider.value = 0.0
         audioSlider.setOnDragDetected {
             if (player?.isPlaying() == true) {
