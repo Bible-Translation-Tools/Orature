@@ -9,21 +9,6 @@ import tornadofx.*
 import tornadofx.Stylesheet.Companion.label
 
 object DragTargetStyles {
-    val takeMaxWidth = 332.px
-    val takeMinHeight = 148.px
-
-    fun takeWidthHeight() = mixin {
-        minHeight = takeMinHeight
-        maxWidth = takeMaxWidth
-        prefWidth = maxWidth
-        maxHeight = minHeight
-    }
-
-    fun takeRadius() = mixin {
-        borderRadius += box(10.px)
-        backgroundRadius += box(10.px)
-    }
-
     private fun borderGlowMixin(glowColor: Color) = mixin { effect = DropShadow(5.0, glowColor) }
 
     private fun dragTargetOverlayMixin(glowColor: Color): CssSelectionBlock {
@@ -44,6 +29,21 @@ object DragTargetStyles {
     }
 
     class Resource : Stylesheet() {
+
+        private val takeMaxWidth = 500.px
+        private val takeMinHeight = 80.px
+
+        fun takeWidthHeight() = mixin {
+            minHeight = takeMinHeight
+            maxWidth = takeMaxWidth
+            maxHeight = minHeight
+        }
+
+        fun takeRadius() = mixin {
+            borderRadius += box(5.px)
+            backgroundRadius += box(5.px)
+        }
+
         companion object {
             val resourceDragTargetSize by cssclass()
             val selectedResourceTakePlaceHolder by cssclass()
@@ -77,6 +77,22 @@ object DragTargetStyles {
     }
 
     class Scripture : Stylesheet() {
+
+        val takeMaxWidth = 332.px
+        val takeMinHeight = 148.px
+
+        fun takeWidthHeight() = mixin {
+            minHeight = takeMinHeight
+            maxWidth = takeMaxWidth
+            prefWidth = maxWidth
+            maxHeight = minHeight
+        }
+
+        fun takeRadius() = mixin {
+            borderRadius += box(10.px)
+            backgroundRadius += box(10.px)
+        }
+
         companion object {
             val dragTargetSize by cssclass()
             val selectedTakePlaceHolder by cssclass()
