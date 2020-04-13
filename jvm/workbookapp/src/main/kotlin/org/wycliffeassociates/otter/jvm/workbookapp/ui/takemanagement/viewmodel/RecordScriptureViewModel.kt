@@ -48,7 +48,13 @@ class RecordScriptureViewModel : ViewModel() {
         activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
 
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
-            chapter?.let { getChunkList(chapter.chunks) }
+            chapter?.let {
+                getChunkList(chapter.chunks)
+                if (activeChunkProperty.value == null) {
+                    recordableViewModel.recordable = it
+                    setHasNextAndPrevious()
+                }
+            }
         }
 
         activeChunkProperty.onChangeAndDoNow { chunk ->

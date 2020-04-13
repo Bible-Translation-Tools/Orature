@@ -90,9 +90,9 @@ class CardGridViewModel : ViewModel() {
         cardData.chapterSource?.let {
             workbookViewModel.activeChapterProperty.set(it)
         }
-        cardData.chunkSource?.let {
-            workbookViewModel.activeChunkProperty.set(it)
-        }
+        // Chunk will be null if the chapter recording is opened. This needs to happen to update the recordable to
+        // use the chapter recordable.
+        workbookViewModel.activeChunkProperty.set(cardData.chunkSource)
     }
 
     private fun loadChapters(workbook: Workbook) {
