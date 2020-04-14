@@ -307,15 +307,10 @@ return console.askYesNo(message, true);
               <action id="29" beanClass="com.install4j.runtime.beans.actions.UninstallFilesAction" actionElevationType="elevated" rollbackBarrierExitCode="0" />
               <action id="257" beanClass="com.install4j.runtime.beans.actions.files.DeleteFileAction" actionElevationType="elevated" rollbackBarrierExitCode="0">
                 <serializedBean>
-                  <property name="files" type="array" class="java.io.File" length="2">
+                  <property name="files" type="array" class="java.io.File" length="1">
                     <element index="0">
                       <object class="java.io.File">
                         <string>${installer:sys.appdataDir}${installer:sys.fileSeparator}Orature</string>
-                      </object>
-                    </element>
-                    <element index="1">
-                      <object class="java.io.File">
-                        <string>${installer:sys.userHome}${installer:sys.fileSeparator}Orature</string>
                       </object>
                     </element>
                   </property>
