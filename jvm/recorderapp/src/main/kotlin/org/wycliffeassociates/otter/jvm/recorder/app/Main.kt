@@ -13,6 +13,7 @@ import javafx.application.Application
  * --chapter_number= the chapter number
  * --unit= the text for either "Verse" or "Chunk"
  * --unit_number= the unit number
+ * --content_type= the resource content type
  *
  * All arguments are optional. By default the recording will be written to recording.wav and the
  * display text will be the filename.

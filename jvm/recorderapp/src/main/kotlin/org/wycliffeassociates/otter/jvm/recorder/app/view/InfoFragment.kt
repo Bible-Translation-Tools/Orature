@@ -14,6 +14,7 @@ class InfoFragment : Fragment() {
     val chapterIcon = MaterialIconView(MaterialIcon.BOOK, "24pt")
     val unitIcon = MaterialIconView(MaterialIcon.BOOKMARK_BORDER, "24pt")
     val fileIcon = MaterialIconView(MaterialIcon.INSERT_DRIVE_FILE, "24pt")
+    val contentTypeIcon = MaterialIconView(MaterialIcon.FORUM, "24pt")
 
     override val root = hbox {
         addClass("info")
@@ -35,6 +36,7 @@ class InfoFragment : Fragment() {
                 val cnum = parameters.named["chapter_number"]
                 val unit = parameters.named["unit"]
                 val unum = parameters.named["unit_number"]
+                val contentType = parameters.named["content_type"]
 
                 language?.let {
                     root.add(InfoItem(it, null, languageIcon))
@@ -47,6 +49,9 @@ class InfoFragment : Fragment() {
                 }
                 unit?.let {
                     root.add(InfoItem(it, unum, unitIcon))
+                }
+                contentType?.let {
+                    root.add(InfoItem(it, null, contentTypeIcon))
                 }
 
                 if (arrayOf(language, book, chapter, unit).all { it == null }) {
