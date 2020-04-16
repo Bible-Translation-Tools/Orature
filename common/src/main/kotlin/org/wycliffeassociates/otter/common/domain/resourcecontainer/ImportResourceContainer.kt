@@ -45,7 +45,7 @@ class ImportResourceContainer(
         }
 
         val exists = isAlreadyImported(file)
-        return if(exists) {
+        return if (exists) {
             Single.just(ImportResult.ALREADY_EXISTS)
         } else {
             val resumable = projectImporter.isResumableProject(file)

@@ -1,10 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
-import jooq.tables.DublinCoreEntity
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
-import org.jooq.impl.DSL
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
