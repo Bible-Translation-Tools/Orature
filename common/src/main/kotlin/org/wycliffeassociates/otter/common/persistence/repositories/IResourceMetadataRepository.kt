@@ -6,6 +6,7 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 
 interface IResourceMetadataRepository : IRepository<ResourceMetadata> {
+    fun exists(metadata: ResourceMetadata): Single<Boolean>
     fun insert(metadata: ResourceMetadata): Single<Int>
     fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable
     fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata>

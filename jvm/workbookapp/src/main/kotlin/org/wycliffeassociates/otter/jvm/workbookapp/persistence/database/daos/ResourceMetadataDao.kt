@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
+import jooq.tables.DublinCoreEntity
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
+import org.jooq.impl.DSL
 import org.jooq.impl.DSL.max
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
@@ -10,6 +12,25 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Resourc
 class ResourceMetadataDao(
     private val instanceDsl: DSLContext
 ) {
+
+    fun exists(
+        languageId: Int,
+        identifier: String,
+        version: String,
+        creator: String,
+        dsl: DSLContext = instanceDsl
+    ): Boolean {
+        return dsl.selectCount()
+            .from(DUBLIN_CORE_ENTITY)
+            .where(
+                DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(languageId)
+                    .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
+                    .and(DUBLIN_CORE_ENTITY.VERSION.eq(version))
+                    .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator))
+            ).fetchOne {
+                it.value1() > 0
+            }
+    }
 
     fun fetchLinks(entityId: Int, dsl: DSLContext = instanceDsl): List<ResourceMetadataEntity> {
         val linkIds = dsl
