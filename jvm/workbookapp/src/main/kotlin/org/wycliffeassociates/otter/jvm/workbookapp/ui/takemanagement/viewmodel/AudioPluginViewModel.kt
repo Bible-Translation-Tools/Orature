@@ -47,7 +47,7 @@ class AudioPluginViewModel : ViewModel() {
         return PluginParameters(
             languageName = workbook.target.language.name,
             bookTitle = workbook.target.title,
-            chapterLabel = workbookViewModel.activeChapterProperty.value.title,
+            chapterLabel = workbookViewModel.activeChapterProperty.value.label,
             chapterNumber = workbookViewModel.activeChapterProperty.value.sort,
             sourceChapterAudio = sourceAudioFile?.file,
             sourceChunkStart = sourceAudioFile?.start,

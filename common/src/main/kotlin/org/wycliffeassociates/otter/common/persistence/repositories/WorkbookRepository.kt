@@ -77,6 +77,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .map { metaContent ->
                 Chapter(
                     title = chapterCollection.titleKey,
+                    label = chapterCollection.labelKey,
                     sort = chapterCollection.sort,
                     resources = constructResourceGroups(chapterCollection),
                     audio = constructAssociatedAudio(metaContent),
@@ -97,6 +98,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
     private fun chunk(content: Content) = Chunk(
         sort = content.sort,
+        label = content.labelKey,
         audio = constructAssociatedAudio(content),
         resources = constructResourceGroups(content),
         textItem = textItem(content),
