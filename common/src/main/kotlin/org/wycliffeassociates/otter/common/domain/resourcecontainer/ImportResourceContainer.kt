@@ -152,10 +152,21 @@ class ImportResourceContainer(
 
     private fun copyToInternalDirectory(file: File, destinationDirectory: File): File {
         return if (file.isDirectory) {
-            copyToInternalDirectory(file, destinationDirectory)
+            copyRecursivelyToInternalDirectory(file, destinationDirectory)
         } else {
             copyFileToInternalDirectory(file, destinationDirectory)
         }
+    }
+
+    private fun copyRecursivelyToInternalDirectory(filepath: File, destinationDirectory: File): File {
+        // Copy the resource container into the correct directory
+        if (filepath.absoluteFile != destinationDirectory) {
+            val success = filepath.copyRecursively(destinationDirectory, true)
+            if (!success) {
+                throw IOException("Could not copy resource container ${filepath.name} to resource container directory")
+            }
+        }
+        return destinationDirectory
     }
 
     private fun copyFileToInternalDirectory(filepath: File, destinationDirectory: File): File {
