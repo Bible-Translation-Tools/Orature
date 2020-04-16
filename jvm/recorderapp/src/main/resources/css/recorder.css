@@ -1,0 +1,53 @@
+.controls {
+    -fx-background-color: #282CBD;
+}
+
+.info {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0.5, 0.0, 0.0);
+    -fx-min-height: 80px;
+    -fx-alignment: center-left;
+}
+
+.info__item {
+    -fx-padding: 0 0 0 20px;
+    -fx-alignment: center;
+}
+
+.info__item__major {
+    -fx-text-fill: #1A1A1A;
+    -fx-font-size: 14pt;
+    -fx-font-family: 'noto sans';
+
+}
+
+.info__item__major__icon {
+    -fx-fill: #282CBD;
+}
+
+.info__item__minor {
+    -fx-font-size: 14pt;
+    -fx-alignment: center;
+    -fx-text-fill: #1A1A1A;
+    -fx-padding: 0 0 0 5px;
+}
+
+.continue-button {
+    -fx-min-height: 30px;
+    -fx-min-width: 160px;
+    -fx-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-font-size: 14px;
+}
+
+.continue-button * {
+    -fx-fill: #282CBD;
+}
+
+.waveform {
+    -fx-background-color: #F7FAFF;
+}
+
+.volume-bar {
+    -fx-background-color: #F7FAFF;
+}

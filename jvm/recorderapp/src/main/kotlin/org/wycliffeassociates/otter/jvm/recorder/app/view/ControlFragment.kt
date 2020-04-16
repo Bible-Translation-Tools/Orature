@@ -4,12 +4,8 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.scene.text.Font
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
@@ -21,11 +17,12 @@ class ControlFragment : Fragment() {
     val timer = label {
         textProperty().bind(vm.timerTextProperty)
     }
-    val saveBtn = MaterialIconView(MaterialIcon.CHECK, "48px")
+    val continueBtn = button(messages["continue"])
+    val cancelBtn = button(messages["cancel"])
     val recordBtn = MaterialIconView(MaterialIcon.MIC, "48px")
 
     override val root = borderpane {
-        background = Background(BackgroundFill(Paint.valueOf("#C2185B"), CornerRadii.EMPTY, Insets.EMPTY))
+        addClass("controls")
 
         left {
             vbox {
@@ -42,7 +39,12 @@ class ControlFragment : Fragment() {
             hbox {
                 padding = Insets(10.0, 10.0, 10.0, 0.0)
                 alignment = Pos.CENTER_RIGHT
-                add(saveBtn)
+                add(continueBtn.apply {
+                    graphic = MaterialIconView(MaterialIcon.CHECK, "32px")
+                })
+                add(cancelBtn.apply {
+                    graphic = MaterialIconView(MaterialIcon.UNDO, "32px")
+                })
             }
         }
     }
@@ -60,9 +62,19 @@ class ControlFragment : Fragment() {
             }
         }
 
-        saveBtn.apply {
-            fill = Color.WHITE
+        continueBtn.apply {
+            addClass("continue-button")
             visibleProperty().bind(vm.canSaveProperty)
+            managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
+            setOnMouseClicked {
+                vm.save()
+            }
+        }
+
+        cancelBtn.apply {
+            addClass("continue-button")
+            visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
+            managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             setOnMouseClicked {
                 vm.save()
             }
