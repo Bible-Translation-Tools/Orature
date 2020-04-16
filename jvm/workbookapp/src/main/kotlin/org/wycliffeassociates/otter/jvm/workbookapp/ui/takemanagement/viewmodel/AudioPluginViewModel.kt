@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.PluginParameters
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -24,7 +25,11 @@ class AudioPluginViewModel : ViewModel() {
     private val editTake = EditTake(launchPlugin)
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
-        val params = constructPluginParameters()
+        val contentType = resourceContentType(
+            recordable.contentType,
+            workbookViewModel.activeResourceMetadataProperty.value.identifier
+        )
+        val params = constructPluginParameters(contentType)
         return recordTake.record(
             audio = recordable.audio,
             projectAudioDir = workbookViewModel.activeProjectAudioDirectory,
@@ -33,7 +38,7 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    private fun constructPluginParameters(): PluginParameters {
+    private fun constructPluginParameters(contentType: String? = null): PluginParameters {
         val workbook = workbookViewModel.workbook
         val sourceAudio = workbook.sourceAudioAccessor
 
@@ -44,11 +49,21 @@ class AudioPluginViewModel : ViewModel() {
             )
         } ?: run { sourceAudio.getChapter(workbookViewModel.activeChapterProperty.value.sort) }
 
+        val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
+        val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
+        val chunkLabel = workbookViewModel.activeChunkProperty.value?.let {
+            messages[workbookViewModel.activeChunkProperty.value.label]
+        }
+        val chunkNumber = workbookViewModel.activeChunkProperty.value?.sort
+
         return PluginParameters(
             languageName = workbook.target.language.name,
             bookTitle = workbook.target.title,
-            chapterLabel = workbookViewModel.activeChapterProperty.value.label,
-            chapterNumber = workbookViewModel.activeChapterProperty.value.sort,
+            chapterLabel = chapterLabel,
+            chapterNumber = chapterNumber,
+            chunkLabel = chunkLabel,
+            chunkNumber = chunkNumber,
+            contentType = contentType,
             sourceChapterAudio = sourceAudioFile?.file,
             sourceChunkStart = sourceAudioFile?.start,
             sourceChunkEnd = sourceAudioFile?.end
@@ -78,5 +93,25 @@ class AudioPluginViewModel : ViewModel() {
             canEdit = edit
         }
         find<AddPluginView>().openModal()
+    }
+
+    private fun resourceContentType(contenType: ContentType, identifier: String): String {
+        return when (identifier) {
+            "tn" -> {
+                when (contenType) {
+                    ContentType.TITLE -> messages["snippet"]
+                    ContentType.BODY -> messages["note"]
+                    else -> ""
+                }
+            }
+            "tq" -> {
+                when (contenType) {
+                    ContentType.TITLE -> messages["question"]
+                    ContentType.BODY -> messages["answer"]
+                    else -> ""
+                }
+            }
+            else -> ""
+        }
     }
 }
