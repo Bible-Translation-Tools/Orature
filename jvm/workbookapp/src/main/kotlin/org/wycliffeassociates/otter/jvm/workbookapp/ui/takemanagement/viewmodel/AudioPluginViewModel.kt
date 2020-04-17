@@ -25,11 +25,11 @@ class AudioPluginViewModel : ViewModel() {
     private val editTake = EditTake(launchPlugin)
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
-        val localizedContentType = resourceContentType(
+        val resource = localizedResource(
             recordable.contentType,
             workbookViewModel.activeResourceMetadataProperty.value.identifier
         )
-        val params = constructPluginParameters(localizedContentType)
+        val params = constructPluginParameters(resource)
         return recordTake.record(
             audio = recordable.audio,
             projectAudioDir = workbookViewModel.activeProjectAudioDirectory,
@@ -38,7 +38,7 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    private fun constructPluginParameters(contentType: String? = null): PluginParameters {
+    private fun constructPluginParameters(resource: String? = null): PluginParameters {
         val workbook = workbookViewModel.workbook
         val sourceAudio = workbook.sourceAudioAccessor
 
@@ -63,7 +63,7 @@ class AudioPluginViewModel : ViewModel() {
             chapterNumber = chapterNumber,
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
-            contentType = contentType,
+            resource = resource,
             sourceChapterAudio = sourceAudioFile?.file,
             sourceChunkStart = sourceAudioFile?.start,
             sourceChunkEnd = sourceAudioFile?.end
@@ -95,7 +95,7 @@ class AudioPluginViewModel : ViewModel() {
         find<AddPluginView>().openModal()
     }
 
-    private fun resourceContentType(contentType: ContentType, identifier: String): String? {
+    private fun localizedResource(contentType: ContentType, identifier: String): String? {
         return when (identifier) {
             "tn" -> {
                 when (contentType) {
