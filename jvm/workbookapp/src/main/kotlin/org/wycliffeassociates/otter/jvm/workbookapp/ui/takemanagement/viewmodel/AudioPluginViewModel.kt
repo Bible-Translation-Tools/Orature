@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.PluginParameters
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -24,12 +24,14 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
+    private var resource: String? = null
+
     fun record(recordable: Recordable): Single<RecordTake.Result> {
-        val resource = localizedResource(
-            recordable.contentType,
-            workbookViewModel.activeResourceMetadataProperty.value.identifier
-        )
-        val params = constructPluginParameters(resource)
+        if(recordable is Resource.Component) {
+            resource = messages[recordable.label]
+        }
+
+        val params = constructPluginParameters()
         return recordTake.record(
             audio = recordable.audio,
             projectAudioDir = workbookViewModel.activeProjectAudioDirectory,
@@ -38,7 +40,7 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    private fun constructPluginParameters(resource: String? = null): PluginParameters {
+    private fun constructPluginParameters(): PluginParameters {
         val workbook = workbookViewModel.workbook
         val sourceAudio = workbook.sourceAudioAccessor
 
@@ -93,25 +95,5 @@ class AudioPluginViewModel : ViewModel() {
             canEdit = edit
         }
         find<AddPluginView>().openModal()
-    }
-
-    private fun localizedResource(contentType: ContentType, identifier: String): String? {
-        return when (identifier) {
-            "tn" -> {
-                when (contentType) {
-                    ContentType.TITLE -> messages["snippet"]
-                    ContentType.BODY -> messages["note"]
-                    else -> null
-                }
-            }
-            "tq" -> {
-                when (contentType) {
-                    ContentType.TITLE -> messages["question"]
-                    ContentType.BODY -> messages["answer"]
-                    else -> null
-                }
-            }
-            else -> null
-        }
     }
 }

@@ -119,13 +119,14 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 //        } ?: throw IllegalStateException("Content format is null")
     }
 
-    private fun constructResource(title: Content, body: Content?): Resource? {
+    private fun constructResource(title: Content, body: Content?, identifier: String): Resource? {
         val bodyComponent = body?.let {
             Resource.Component(
                 sort = it.sort,
                 textItem = textItem(it),
                 audio = constructAssociatedAudio(it),
-                contentType = ContentType.BODY
+                contentType = ContentType.BODY,
+                label = resourceLabel(ContentType.BODY, identifier)
             )
         }
 
@@ -133,7 +134,8 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             sort = title.sort,
             textItem = textItem(title),
             audio = constructAssociatedAudio(title),
-            contentType = ContentType.TITLE
+            contentType = ContentType.TITLE,
+            label = resourceLabel(ContentType.TITLE, identifier)
         )
 
         return Resource(
@@ -159,14 +161,14 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         return resourceMetadataList.map {
             val resources = Observable.defer {
                 getResourceContents(it)
-                    .contentsToResources()
+                    .contentsToResources(it.identifier)
             }.cache()
 
             ResourceGroup(it, resources)
         }
     }
 
-    private fun Observable<Content>.contentsToResources(): Observable<Resource> {
+    private fun Observable<Content>.contentsToResources(identifier: String): Observable<Resource> {
         return this
             .buffer(2, 1) // create a rolling window of size 2
             .concatMapIterable { list ->
@@ -180,10 +182,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
                         // If the second element isn't a body, just use the title. (The second
                         // element will appear again in the next window.)
-                        b?.type != ContentType.BODY -> constructResource(a, null)
+                        b?.type != ContentType.BODY -> constructResource(a, null, identifier)
 
                         // Else, we have a title/body pair, so use it.
-                        else -> constructResource(a, b)
+                        else -> constructResource(a, b, identifier)
                     }
                 )
             }
@@ -298,6 +300,26 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         connections += takesRelaySubscription
         connections += selectedTakeRelaySubscription
         return AssociatedAudio(takesRelay, selectedTakeRelay)
+    }
+
+    private fun resourceLabel(contentType: ContentType, identifier: String): String {
+        return when (identifier) {
+            "tn" -> {
+                when (contentType) {
+                    ContentType.TITLE -> "snippet"
+                    ContentType.BODY -> "note"
+                    else -> ""
+                }
+            }
+            "tq" -> {
+                when (contentType) {
+                    ContentType.TITLE -> "question"
+                    ContentType.BODY -> "answer"
+                    else -> ""
+                }
+            }
+            else -> ""
+        }
     }
 
     interface IDatabaseAccessors {
