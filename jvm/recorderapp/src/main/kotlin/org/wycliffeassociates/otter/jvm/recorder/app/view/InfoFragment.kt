@@ -1,20 +1,17 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class InfoFragment : Fragment() {
 
-    val languageIcon = MaterialIconView(MaterialIcon.FAVORITE, "24pt")
-    val bookIcon = FontAwesomeIconView(FontAwesomeIcon.BOOK, "24pt")
-    val chapterIcon = MaterialIconView(MaterialIcon.BOOK, "24pt")
-    val unitIcon = MaterialIconView(MaterialIcon.BOOKMARK_BORDER, "24pt")
-    val fileIcon = MaterialIconView(MaterialIcon.INSERT_DRIVE_FILE, "24pt")
-    val contentTypeIcon = MaterialIconView(MaterialIcon.FORUM, "24pt")
+    val languageIcon = FontIcon("gmi-favorite")
+    val bookIcon = FontIcon("fas-book")
+    val chapterIcon = FontIcon("gmi-book")
+    val unitIcon = FontIcon("gmi-bookmark-border")
+    val fileIcon = FontIcon("gmi-insert-drive-file")
+    val resourceIcon = FontIcon("gmi-forum")
 
     override val root = hbox {
         addClass("info")
@@ -36,7 +33,7 @@ class InfoFragment : Fragment() {
                 val cnum = parameters.named["chapter_number"]
                 val unit = parameters.named["unit"]
                 val unum = parameters.named["unit_number"]
-                val contentType = parameters.named["content_type"]
+                val resource = parameters.named["resource"]
 
                 language?.let {
                     root.add(InfoItem(it, null, languageIcon))
@@ -50,8 +47,8 @@ class InfoFragment : Fragment() {
                 unit?.let {
                     root.add(InfoItem(it, unum, unitIcon))
                 }
-                contentType?.let {
-                    root.add(InfoItem(it, null, contentTypeIcon))
+                resource?.let {
+                    root.add(InfoItem(it, null, resourceIcon))
                 }
 
                 if (arrayOf(language, book, chapter, unit).all { it == null }) {

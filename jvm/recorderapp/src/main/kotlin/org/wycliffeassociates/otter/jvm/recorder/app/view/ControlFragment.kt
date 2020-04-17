@@ -1,12 +1,11 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
 
@@ -17,9 +16,9 @@ class ControlFragment : Fragment() {
     val timer = label {
         textProperty().bind(vm.timerTextProperty)
     }
-    val continueBtn = button(messages["continue"])
-    val cancelBtn = button(messages["cancel"])
-    val recordBtn = MaterialIconView(MaterialIcon.MIC, "48px")
+    val continueBtn = button(messages["continue"], FontIcon("fas-check"))
+    val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
+    val recordBtn = FontIcon("gmi-mic")
 
     override val root = borderpane {
         addClass("controls")
@@ -39,12 +38,8 @@ class ControlFragment : Fragment() {
             hbox {
                 padding = Insets(10.0, 10.0, 10.0, 0.0)
                 alignment = Pos.CENTER_RIGHT
-                add(continueBtn.apply {
-                    graphic = MaterialIconView(MaterialIcon.CHECK, "32px")
-                })
-                add(cancelBtn.apply {
-                    graphic = MaterialIconView(MaterialIcon.UNDO, "32px")
-                })
+                add(continueBtn)
+                add(cancelBtn)
             }
         }
     }
@@ -56,6 +51,7 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
+            iconSize = 48
             fill = Color.WHITE
             setOnMouseClicked {
                 toggleRecording()
@@ -83,9 +79,9 @@ class ControlFragment : Fragment() {
 
     private fun toggleRecording() {
         if (!vm.isRecording) {
-            recordBtn.setIcon(MaterialIcon.PAUSE_CIRCLE_OUTLINE)
+            recordBtn.iconLiteral = "gmi-pause-circle-outline"
         } else {
-            recordBtn.setIcon(MaterialIcon.MIC)
+            recordBtn.iconLiteral = "gmi-mic"
         }
         vm.toggle()
     }

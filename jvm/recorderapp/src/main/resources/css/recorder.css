@@ -18,11 +18,11 @@
     -fx-text-fill: #1A1A1A;
     -fx-font-size: 14pt;
     -fx-font-family: 'noto sans';
-
 }
 
 .info__item__major__icon {
     -fx-fill: #282CBD;
+    -fx-icon-size: 28px;
 }
 
 .info__item__minor {
@@ -42,6 +42,10 @@
 
 .continue-button * {
     -fx-fill: #282CBD;
+}
+
+.continue-button > .ikonli-font-icon {
+    -fx-icon-size: 28px;
 }
 
 .waveform {
