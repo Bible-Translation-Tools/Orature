@@ -27,7 +27,7 @@ class AudioPluginViewModel : ViewModel() {
     private var resource: String? = null
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
-        if(recordable is Resource.Component) {
+        if (recordable is Resource.Component) {
             resource = messages[recordable.label]
         }
 
