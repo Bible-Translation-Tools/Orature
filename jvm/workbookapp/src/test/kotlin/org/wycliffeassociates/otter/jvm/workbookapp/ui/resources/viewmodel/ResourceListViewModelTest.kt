@@ -101,13 +101,15 @@ class ResourceListViewModelTest : ViewModel() {
         sort,
         TextItem(title, MimeType.MARKDOWN),
         createAssociatedAudio(),
-        ContentType.TITLE
+        ContentType.TITLE,
+        "Title"
     )
     private fun createBodyComponent(sort: Int, title: String) = Resource.Component(
         sort,
         TextItem(title, MimeType.MARKDOWN),
         createAssociatedAudio(),
-        ContentType.BODY
+        ContentType.BODY,
+        "Body"
     )
 
     private val chapterResourceGroup = ResourceGroup(
