@@ -173,7 +173,8 @@ class ResourceListViewModelTest : ViewModel() {
         start = 1,
         end = 1,
         contentType = ContentType.TEXT,
-        resources = listOf(chunk1ResourceGroup)
+        resources = listOf(chunk1ResourceGroup),
+        label = "Chunk"
     )
 
     private val chunk2 = Chunk(
@@ -183,7 +184,8 @@ class ResourceListViewModelTest : ViewModel() {
         start = 2,
         end = 2,
         contentType = ContentType.TEXT,
-        resources = listOf(chunk2ResourceGroup)
+        resources = listOf(chunk2ResourceGroup),
+        label = "Chunk"
     )
 
     private val testChapter = Chapter(
@@ -197,6 +199,7 @@ class ResourceListViewModelTest : ViewModel() {
                 chunk1,
                 chunk2
             )
-        )
+        ),
+        label = "Chapter"
     )
 }
