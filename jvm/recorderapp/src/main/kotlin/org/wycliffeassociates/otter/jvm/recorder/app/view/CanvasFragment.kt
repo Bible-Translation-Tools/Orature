@@ -6,7 +6,7 @@ import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.Drawable
 import tornadofx.*
 
-class CanvasFragment(cssClass: String) : StackPane() {
+class CanvasFragment : StackPane() {
 
     private val drawables = arrayListOf<Drawable>()
 
@@ -17,7 +17,7 @@ class CanvasFragment(cssClass: String) : StackPane() {
     private val ctx = cvs.graphicsContext2D
 
     init {
-        addClass(cssClass)
+        addClass("waveform")
         alignment = Pos.TOP_LEFT
 
         add(cvs)
