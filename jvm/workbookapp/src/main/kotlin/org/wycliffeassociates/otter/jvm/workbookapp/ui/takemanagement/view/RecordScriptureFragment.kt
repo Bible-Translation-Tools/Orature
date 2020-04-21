@@ -126,8 +126,8 @@ class RecordScriptureFragment : RecordableFragment(
                     action {
                         closePlayers()
                         recordScriptureViewModel.nextChunk()
-                        enableWhen(recordScriptureViewModel.hasNext)
                     }
+                    enableWhen(recordScriptureViewModel.hasNext)
                 }
             }
             add(takesGrid)

@@ -64,6 +64,7 @@ class CardGridFragment : Fragment() {
                                 }
                             }
                         openButton.setOnMouseClicked {
+                            viewModel.onCardSelection(CardData(chapter))
                             navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)
                         }
                         this@vbox.add(chapterBanner)
