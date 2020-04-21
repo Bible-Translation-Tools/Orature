@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view.drawables
 
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
-import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 
 private const val USHORT_SIZE = 65535.0
@@ -10,7 +10,7 @@ private const val USHORT_SIZE = 65535.0
 class WaveformLayer(private val renderer: ActiveRecordingRenderer) : Drawable {
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {
-        context.stroke = Color.GRAY
+        context.stroke = Paint.valueOf("#1A1A1A")
         context.lineWidth = 1.0
 
         val buffer = renderer.floatBuffer.array

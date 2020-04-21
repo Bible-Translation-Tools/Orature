@@ -31,8 +31,8 @@ class RecorderViewModel : ViewModel() {
         (scope as ParameterizedScope).navigateBack()
     }
 
-    val waveformView = CanvasFragment("#000000")
-    val volumeBarView = CanvasFragment("#000000")
+    val waveformView = CanvasFragment()
+    val volumeBarView = CanvasFragment()
 
     val fps = FramerateView()
 
