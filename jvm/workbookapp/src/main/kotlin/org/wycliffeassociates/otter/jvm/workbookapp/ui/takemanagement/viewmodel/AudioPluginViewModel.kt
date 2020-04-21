@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.PluginParameters
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -23,7 +24,13 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
+    private var resource: String? = null
+
     fun record(recordable: Recordable): Single<RecordTake.Result> {
+        if (recordable is Resource.Component) {
+            resource = messages[recordable.label]
+        }
+
         val params = constructPluginParameters()
         return recordTake.record(
             audio = recordable.audio,
@@ -44,11 +51,21 @@ class AudioPluginViewModel : ViewModel() {
             )
         } ?: run { sourceAudio.getChapter(workbookViewModel.activeChapterProperty.value.sort) }
 
+        val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
+        val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
+        val chunkLabel = workbookViewModel.activeChunkProperty.value?.let {
+            messages[workbookViewModel.activeChunkProperty.value.label]
+        }
+        val chunkNumber = workbookViewModel.activeChunkProperty.value?.sort
+
         return PluginParameters(
             languageName = workbook.target.language.name,
             bookTitle = workbook.target.title,
-            chapterLabel = workbookViewModel.activeChapterProperty.value.title,
-            chapterNumber = workbookViewModel.activeChapterProperty.value.sort,
+            chapterLabel = chapterLabel,
+            chapterNumber = chapterNumber,
+            chunkLabel = chunkLabel,
+            chunkNumber = chunkNumber,
+            resource = resource,
             sourceChapterAudio = sourceAudioFile?.file,
             sourceChunkStart = sourceAudioFile?.start,
             sourceChunkEnd = sourceAudioFile?.end

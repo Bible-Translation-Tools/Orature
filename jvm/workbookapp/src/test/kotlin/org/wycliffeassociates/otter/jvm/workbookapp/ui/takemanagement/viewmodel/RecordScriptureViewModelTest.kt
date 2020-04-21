@@ -20,7 +20,8 @@ class RecordScriptureViewModelTest {
         start = 1,
         end = 1,
         contentType = ContentType.TEXT,
-        resources = listOf()
+        resources = listOf(),
+        label = "Chunk"
     )
 
     private var selectedTake: Take?

@@ -11,6 +11,7 @@ data class Resource(
         override val sort: Int,
         override val textItem: TextItem,
         override val audio: AssociatedAudio,
-        override val contentType: ContentType
+        override val contentType: ContentType,
+        override val label: String
     ) : ResourceRecordable
 }
