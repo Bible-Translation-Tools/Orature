@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.PluginParameters
-import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -24,13 +23,7 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    private var resource: String? = null
-
     fun record(recordable: Recordable): Single<RecordTake.Result> {
-        if (recordable is Resource.Component) {
-            resource = messages[recordable.label]
-        }
-
         val params = constructPluginParameters()
         return recordTake.record(
             audio = recordable.audio,
@@ -57,6 +50,9 @@ class AudioPluginViewModel : ViewModel() {
             messages[workbookViewModel.activeChunkProperty.value.label]
         }
         val chunkNumber = workbookViewModel.activeChunkProperty.value?.sort
+        val resourceLabel = workbookViewModel.activeResourceComponentProperty.value?.let {
+            messages[workbookViewModel.activeResourceComponentProperty.value.label]
+        }
 
         return PluginParameters(
             languageName = workbook.target.language.name,
@@ -65,7 +61,7 @@ class AudioPluginViewModel : ViewModel() {
             chapterNumber = chapterNumber,
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
-            resource = resource,
+            resourceLabel = resourceLabel,
             sourceChapterAudio = sourceAudioFile?.file,
             sourceChunkStart = sourceAudioFile?.start,
             sourceChunkEnd = sourceAudioFile?.end
