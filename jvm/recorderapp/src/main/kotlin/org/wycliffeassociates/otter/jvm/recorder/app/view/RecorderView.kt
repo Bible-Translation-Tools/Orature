@@ -32,10 +32,12 @@ class RecorderView : PluginEntrypoint() {
     }
 
     init {
-        val css = this@RecorderView.javaClass.getResource("/css/recorder.css")
-            .toExternalForm()
-            .replace(" ", "%20")
-        importStylesheet(css)
+        runLater {
+            val css = this@RecorderView.javaClass.getResource("/css/recorder.css")
+                .toExternalForm()
+                .replace(" ", "%20")
+            importStylesheet(css)
+        }
 
         // notifies viewmodel that views have been inflated and the canvas now has a width
         waveform.root.widthProperty().onChange { width ->
