@@ -10,14 +10,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import java.util.EnumMap
 import javafx.collections.ListChangeListener
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class RecordResourceViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-
-    private var activeRecordable: Recordable? = null
 
     internal val recordableList: ObservableList<Recordable> = FXCollections.observableArrayList()
 
@@ -47,7 +46,7 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun onTabSelect(recordable: Recordable) {
-        activeRecordable = recordable
+        workbookViewModel.activeResourceComponentProperty.set(recordable as Resource.Component)
     }
 
     fun setRecordableListItems(items: List<Recordable>) {

@@ -5,6 +5,7 @@ import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
 
 data class Chunk(
     override val sort: Int,
+    override val label: String,
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
 

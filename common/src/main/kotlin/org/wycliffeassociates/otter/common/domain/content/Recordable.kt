@@ -7,6 +7,7 @@ interface Recordable {
     val audio: AssociatedAudio
     val contentType: ContentType
     val sort: Int
+    val label: String
 }
 
 interface ResourceRecordable : Recordable {

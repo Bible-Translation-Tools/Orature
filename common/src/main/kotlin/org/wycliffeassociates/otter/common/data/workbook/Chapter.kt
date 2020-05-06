@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.common.domain.content.Recordable
 data class Chapter(
     override val sort: Int,
     override val title: String,
+    override val label: String,
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
