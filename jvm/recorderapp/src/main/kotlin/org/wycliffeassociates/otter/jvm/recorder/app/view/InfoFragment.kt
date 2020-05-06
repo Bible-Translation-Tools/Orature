@@ -1,21 +1,20 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import javafx.geometry.Insets
-import javafx.geometry.Pos
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
-import javafx.scene.paint.Paint
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import tornadofx.Fragment
-import tornadofx.hbox
+import tornadofx.*
 
 class InfoFragment : Fragment() {
 
+    val languageIcon = FontIcon("gmi-favorite")
+    val bookIcon = FontIcon("fas-book")
+    val chapterIcon = FontIcon("gmi-book")
+    val unitIcon = FontIcon("gmi-bookmark-border")
+    val fileIcon = FontIcon("gmi-insert-drive-file")
+    val resourceIcon = FontIcon("gmi-forum")
+
     override val root = hbox {
-        minHeight = 50.0
-        alignment = Pos.CENTER_LEFT
-        background = Background(BackgroundFill(Paint.valueOf("#333333"), CornerRadii.EMPTY, Insets.EMPTY))
+        addClass("info")
     }
 
     init {
@@ -34,24 +33,28 @@ class InfoFragment : Fragment() {
                 val cnum = parameters.named["chapter_number"]
                 val unit = parameters.named["unit"]
                 val unum = parameters.named["unit_number"]
+                val resource = parameters.named["resource"]
 
                 language?.let {
-                    root.add(InfoItem(it))
+                    root.add(InfoItem(it, null, languageIcon))
                 }
                 book?.let {
-                    root.add(InfoItem(it))
+                    root.add(InfoItem(it, null, bookIcon))
                 }
                 chapter?.let {
-                    root.add(InfoItem(it, cnum, false))
+                    root.add(InfoItem(it, cnum, chapterIcon))
                 }
                 unit?.let {
-                    root.add(InfoItem(it, unum, false))
+                    root.add(InfoItem(it, unum, unitIcon))
+                }
+                resource?.let {
+                    root.add(InfoItem(it, null, resourceIcon))
                 }
 
                 if (arrayOf(language, book, chapter, unit).all { it == null }) {
                     val wav = app.parameters.named["wav"]
                     wav?.let {
-                        root.add(InfoItem(it))
+                        root.add(InfoItem(it, null, fileIcon))
                     }
                 }
             }
