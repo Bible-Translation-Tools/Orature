@@ -3,10 +3,9 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
+import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
-import org.wycliffeassociates.otter.common.data.model.ContainerType
-import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
@@ -40,11 +39,21 @@ class ImportResourceContainer(
             languageRepository
         )
 
-        return when {
-            projectImporter.isResumableProject(file) -> projectImporter.importResumableProject(file)
-            file.isDirectory -> importContainerDirectory(file)
-            file.extension == "zip" -> importContainerZipFile(file)
-            else -> Single.just(ImportResult.INVALID_RC)
+        val valid = validateRc(file)
+        if (!valid) {
+            return Single.just(ImportResult.INVALID_RC)
+        }
+
+        val exists = isAlreadyImported(file)
+        return if (exists) {
+            Single.just(ImportResult.ALREADY_EXISTS)
+        } else {
+            val resumable = projectImporter.isResumableProject(file)
+            if (resumable) {
+                projectImporter.importResumableProject(file)
+            } else {
+                importContainer(file)
+            }
         }
     }
 
@@ -63,56 +72,44 @@ class ImportResourceContainer(
             .subscribeOn(Schedulers.io())
     }
 
+    private fun validateRc(rc: File): Boolean {
+        return try {
+            ResourceContainer.load(rc, true).use { true }
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun isAlreadyImported(file: File): Boolean {
+        val rc = ResourceContainer.load(file, true)
+        val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
+        val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
+        return resourceMetadataRepository.exists(resourceMetadata).blockingGet()
+    }
+
+    private fun importContainer(file: File): Single<ImportResult> {
+        return Single.fromCallable {
+            val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
+            if (internalDir.exists()) {
+                val rcFileExists = file.isFile && internalDir.contains(file.name)
+                val rcDirExists = file.isDirectory && internalDir.listFiles().isNotEmpty()
+                if (rcFileExists || rcDirExists) {
+                    throw ImportException(ImportResult.ALREADY_EXISTS)
+                }
+            }
+            val copiedRc = copyToInternalDirectory(file, internalDir)
+            importFromInternalDir(copiedRc).blockingGet()
+        }.onErrorReturn { e ->
+            e.castOrFindImportException()?.result ?: throw e
+        }.subscribeOn(Schedulers.io())
+    }
+
     private fun File.contains(name: String): Boolean {
         if (!this.isDirectory) {
             throw Exception("Cannot call contains on non-directory file")
         }
         return this.listFiles().map { it.name }.contains(name)
     }
-
-    private fun importContainerZipFile(file: File): Single<ImportResult> {
-        return Single.fromCallable {
-            validateRcZip(file) // throws
-
-            val internalDir = getInternalDirectory(file)
-                ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
-
-            if (internalDir.exists() && internalDir.contains(file.name)) {
-                // Collision on disk: Can't import the resource container
-                // Assumes that filesystem internal workbookapp directory and database are in sync
-                throw ImportException(ImportResult.ALREADY_EXISTS)
-            }
-
-            // Copy to the internal directory
-            val newZipFile = copyFileToInternalDirectory(file, internalDir)
-
-            importFromInternalDir(newZipFile).blockingGet()
-        }.onErrorReturn { e ->
-            e.castOrFindImportException()?.result ?: throw e
-        }.subscribeOn(Schedulers.io())
-    }
-
-    private fun importContainerDirectory(directory: File) =
-        Single
-            .just(directory)
-            .flatMap { containerDir ->
-                // Is this a valid resource container
-                if (!validateRcDir(containerDir)) return@flatMap Single.just(ImportResult.INVALID_RC)
-
-                val internalDir = getInternalDirectory(containerDir)
-                    ?: return@flatMap Single.just(ImportResult.LOAD_RC_ERROR)
-                if (internalDir.exists() && internalDir.listFiles().isNotEmpty()) {
-                    // Collision on disk: Can't import the resource container
-                    // Assumes that filesystem internal workbookapp directory and database are in sync
-                    return@flatMap Single.just(ImportResult.ALREADY_EXISTS)
-                }
-
-                // Copy to the internal directory
-                val newDirectory = copyRecursivelyToInternalDirectory(containerDir, internalDir)
-
-                return@flatMap importFromInternalDir(newDirectory)
-            }
-            .subscribeOn(Schedulers.io())
 
     private fun getInternalDirectory(file: File): File? {
         // Load the external container to get the metadata we need to figure out where to copy to
@@ -153,10 +150,24 @@ class ImportResourceContainer(
         return@fromCallable result
     }
 
-    private fun validateRcDir(dir: File): Boolean = dir.contains("manifest.yaml")
+    private fun copyToInternalDirectory(file: File, destinationDirectory: File): File {
+        return if (file.isDirectory) {
+            copyRecursivelyToInternalDirectory(file, destinationDirectory)
+        } else {
+            copyFileToInternalDirectory(file, destinationDirectory)
+        }
+    }
 
-    /** Throws appropriately if RC zip is invalid, otherwise returns true. */
-    private fun validateRcZip(zip: File): Boolean = ResourceContainer.load(zip, true).use { true }
+    private fun copyRecursivelyToInternalDirectory(filepath: File, destinationDirectory: File): File {
+        // Copy the resource container into the correct directory
+        if (filepath.absoluteFile != destinationDirectory) {
+            val success = filepath.copyRecursively(destinationDirectory, true)
+            if (!success) {
+                throw IOException("Could not copy resource container ${filepath.name} to resource container directory")
+            }
+        }
+        return destinationDirectory
+    }
 
     private fun copyFileToInternalDirectory(filepath: File, destinationDirectory: File): File {
         // Copy the resource container zip file into the correct directory
@@ -169,17 +180,6 @@ class ImportResourceContainer(
             }
         }
         return destinationFile
-    }
-
-    private fun copyRecursivelyToInternalDirectory(filepath: File, destinationDirectory: File): File {
-        // Copy the resource container into the correct directory
-        if (filepath.absoluteFile != destinationDirectory) {
-            val success = filepath.copyRecursively(destinationDirectory, true)
-            if (!success) {
-                throw IOException("Could not copy resource container ${filepath.name} to resource container directory")
-            }
-        }
-        return destinationDirectory
     }
 
     private fun makeExpandedContainer(container: ResourceContainer): ImportResult {
