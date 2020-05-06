@@ -1,20 +1,12 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
-import javafx.scene.layout.CornerRadii
-import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.Drawable
-import tornadofx.add
-import tornadofx.canvas
-import tornadofx.hgrow
-import tornadofx.vgrow
+import tornadofx.*
 
-class CanvasFragment(color: String = "#000000") : StackPane() {
+class CanvasFragment : StackPane() {
 
     private val drawables = arrayListOf<Drawable>()
 
@@ -25,7 +17,7 @@ class CanvasFragment(color: String = "#000000") : StackPane() {
     private val ctx = cvs.graphicsContext2D
 
     init {
-        background = Background(BackgroundFill(Paint.valueOf(color), CornerRadii.EMPTY, Insets.EMPTY))
+        addClass("waveform")
         alignment = Pos.TOP_LEFT
 
         add(cvs)

@@ -3,8 +3,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
-import tornadofx.onChange
-import tornadofx.vbox
+import tornadofx.*
 
 class RecorderView : PluginEntrypoint() {
 
@@ -15,6 +14,10 @@ class RecorderView : PluginEntrypoint() {
     private val control = ControlFragment()
     private val source = SourceAudioFragment()
 
+    private val spacer = region().apply {
+        prefHeight = 2.0
+    }
+
     private val recorderViewModel: RecorderViewModel by inject()
 
     override val root = vbox {
@@ -22,12 +25,18 @@ class RecorderView : PluginEntrypoint() {
         prefWidth = Screen.getPrimary().visualBounds.width - 50.0
 
         add(info)
+        add(spacer)
         add(waveform)
         add(source)
         add(control)
     }
 
     init {
+        val css = this@RecorderView.javaClass.getResource("/css/recorder.css")
+            .toExternalForm()
+            .replace(" ", "%20")
+        importStylesheet(css)
+
         // notifies viewmodel that views have been inflated and the canvas now has a width
         waveform.root.widthProperty().onChange { width ->
             if (!viewInflated && width.toInt() > 0) {
