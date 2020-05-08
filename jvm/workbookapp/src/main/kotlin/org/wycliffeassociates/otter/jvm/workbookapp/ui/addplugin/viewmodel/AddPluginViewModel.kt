@@ -7,12 +7,14 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 import java.io.File
 
 class AddPluginViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val pluginRepository = injector.pluginRepository
+    private val mainMenuViewModel: MainMenuViewModel by inject()
 
     var name: String by property("")
     val nameProperty = getProperty(AddPluginViewModel::name)
@@ -68,6 +70,12 @@ class AddPluginViewModel : ViewModel() {
             )
             CreatePlugin(pluginRepository)
                     .create(pluginData)
+                    .doOnSuccess {
+                        pluginData.id = it
+                        mainMenuViewModel.selectRecorder(pluginData)
+                        mainMenuViewModel.selectEditor(pluginData)
+                        mainMenuViewModel.refreshPlugins()
+                    }
                     .onErrorComplete()
                     .subscribe()
         }
