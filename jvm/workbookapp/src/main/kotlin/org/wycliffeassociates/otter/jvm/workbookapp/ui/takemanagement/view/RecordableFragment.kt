@@ -19,16 +19,16 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
-import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.sourcedialog.sourcedialog
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import tornadofx.*
 
 abstract class RecordableFragment(
@@ -134,14 +134,46 @@ abstract class RecordableFragment(
 
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
-        val dialog = progressdialog {
-            root.addClass(AppStyles.progressDialog)
-            recordableViewModel.contextProperty.toObservable().subscribe { newContext ->
-                graphic = when (newContext) {
-                    TakeContext.RECORD -> AppStyles.recordIcon("60px")
-                    TakeContext.EDIT_TAKES -> AppStyles.editIcon("60px")
-                    null -> null
+        /*recordableViewModel.contextProperty.toObservable().subscribe { newContext ->
+            var appName: String = ""
+            when (newContext) {
+                TakeContext.RECORD -> {
+                    audioPluginViewModel.recorderData.subscribe {
+                        appName = it.name
+                    }
                 }
+                TakeContext.EDIT_TAKES -> {
+                    audioPluginViewModel.editorData.subscribe {
+                        appName = it.name
+                    }
+                }
+                null -> {}
+            }
+            recordableViewModel.currentTakeProperty.toObservable().subscribe { take ->
+
+            }
+        }*/
+        val dialog = sourcedialog {
+            root.addClass(AppStyles.sourceDialog)
+            dialogTitle = String.format(
+                messages["sourceDialogTitle"],
+                12,
+                "efafawg"
+            )
+            text = String.format(
+                messages["sourceDialogMessage"],
+                12,
+                "awgawgaw",
+                "awgawgag"
+            )
+            closeText = messages["restoreOrature"]
+            recordableViewModel.sourceAudioPlayerProperty.toObservable().subscribe {
+                player = it
+                audioAvailable = recordableViewModel.sourceAudioAvailableProperty.get()
+            }
+            onCloseAction {
+                recordableViewModel.sourceAudioPlayerProperty.get()?.stop()
+                close()
             }
         }
         recordableViewModel.showPluginActiveProperty.onChange {

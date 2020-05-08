@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.theme
+package org.wycliffeassociates.otter.jvm.controls.styles
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
@@ -30,6 +30,7 @@ class AppStyles : Stylesheet() {
         fun bookIcon(size: String = "1em") = MaterialIconView(MaterialIcon.BOOK, size)
         fun chapterIcon(size: String = "1em") = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
         fun verseIcon(size: String = "1em") = MaterialIconView(MaterialIcon.BOOKMARK, size)
+        fun closeIcon(size: String = "1em") = MaterialIconView(MaterialIcon.CLOSE, size)
         fun projectGraphic() = ImageLoader.load(
             ClassLoader.getSystemResourceAsStream("images/project_image.png"),
             ImageLoader.Format.PNG

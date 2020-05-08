@@ -41,8 +41,8 @@ class RecordScriptureViewModel : ViewModel() {
 
     private var activeChunkSubscription: Disposable? = null
 
-    val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
-    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+    // val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
+    // val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
     init {
         activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
@@ -70,13 +70,13 @@ class RecordScriptureViewModel : ViewModel() {
             }
         }
 
-        workbookViewModel.sourceAudioProperty.onChangeAndDoNow {
+        /*workbookViewModel.sourceAudioProperty.onChangeAndDoNow {
             it?.let { source ->
                 val audioPlayer = injector.audioPlayer
                 audioPlayer.loadSection(source.file, source.start, source.end)
                 sourceAudioPlayerProperty.set(audioPlayer)
             }
-        }
+        }*/
     }
 
     fun nextChunk() {
