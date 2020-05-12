@@ -19,6 +19,13 @@ class ResourceMetadataRepository(
     private val resourceMetadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
 
+    override fun exists(metadata: ResourceMetadata): Single<Boolean> {
+        return Single.fromCallable {
+            val languageFk = languageDao.fetchBySlug(metadata.language.slug).id
+            resourceMetadataDao.exists(languageFk, metadata.identifier, metadata.version, metadata.creator)
+        }.subscribeOn(Schedulers.io())
+    }
+
     override fun insert(metadata: ResourceMetadata): Single<Int> {
         return Single
             .fromCallable {
