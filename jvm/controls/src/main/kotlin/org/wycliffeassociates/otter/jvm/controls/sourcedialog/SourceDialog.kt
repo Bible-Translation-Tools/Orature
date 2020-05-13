@@ -35,28 +35,32 @@ class SourceDialog : Fragment() {
     val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        importStylesheet<SourceDialogStyles>()
+        importStylesheet(javaClass.getResource("/css/source-dialog.css").toExternalForm())
     }
 
     override val root = borderpane {
-        addClass(SourceDialogStyles.defaultSourceDialog)
+        addClass("source-dialog")
 
         top {
-            label(dialogTitleProperty) {
-                visibleProperty().bind(textProperty().isNotEmpty)
-                managedProperty().bind(visibleProperty())
+            vbox {
+                alignment = Pos.CENTER
+                label(dialogTitleProperty) {
+                    addClass("source-dialog__label")
+                    visibleWhen(textProperty().isNotEmpty)
+                    managedProperty().bind(visibleProperty())
+                }
             }
         }
         center {
             vbox {
                 alignment = Pos.CENTER
                 label(textProperty) {
-                    addClass(SourceDialogStyles.message)
+                    addClass("source-dialog__label", "source-dialog__label--message")
                     visibleWhen(textProperty().isNotEmpty)
                     managedWhen { visibleProperty() }
                 }
                 button(closeTextProperty, AppStyles.closeIcon("20px")) {
-                    addClass(SourceDialogStyles.closeButton)
+                    addClass("source-dialog__close-button")
                     onActionProperty().bind(onCloseActionProperty)
                 }
             }
