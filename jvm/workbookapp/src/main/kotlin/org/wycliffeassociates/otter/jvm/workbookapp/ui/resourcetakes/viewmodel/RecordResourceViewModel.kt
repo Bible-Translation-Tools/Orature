@@ -1,5 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -10,13 +15,35 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import java.util.EnumMap
 import javafx.collections.ListChangeListener
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
 
 class RecordResourceViewModel : ViewModel() {
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
+    }
+
     private val workbookViewModel: WorkbookViewModel by inject()
+    private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+
+    val recordableViewModel = RecordableViewModel(audioPluginViewModel)
+
+    // This will be bidirectionally bound to workbookViewModel's activeChunkProperty
+    private val activeChunkProperty = SimpleObjectProperty<Chunk>()
+    private val activeChunk: Chunk
+        get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
+
+    private val chunkList: ObservableList<Chunk> = observableListOf()
+    val hasNext = SimpleBooleanProperty(false)
+    val hasPrevious = SimpleBooleanProperty(false)
+    private var activeChunkSubscription: Disposable? = null
 
     internal val recordableList: ObservableList<Recordable> = FXCollections.observableArrayList()
 
@@ -34,6 +61,8 @@ class RecordResourceViewModel : ViewModel() {
         RecordableTabViewModel(SimpleStringProperty(), audioPluginViewModel)
 
     init {
+        activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
+
         initTabs()
 
         recordableList.onChange {
@@ -42,6 +71,25 @@ class RecordResourceViewModel : ViewModel() {
 
         workbookViewModel.activeResourceMetadataProperty.onChangeAndDoNow { metadata ->
             metadata?.let { setTabLabels(metadata.identifier) }
+        }
+
+        /*workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
+            chapter?.let {
+                getChunkList(chapter.chunks)
+                if (activeChunkProperty.value == null) {
+                    recordableViewModel.recordable = it
+                    setHasNextAndPrevious()
+                }
+            }
+        }*/
+
+        activeChunkProperty.onChangeAndDoNow { chunk ->
+            if (chunk != null) {
+                // setTitle(chunk) TODO !!!
+                setHasNextAndPrevious()
+                // This will trigger loading takes in the RecordableViewModel
+                recordableViewModel.recordable = chunk
+            }
         }
     }
 
@@ -94,5 +142,49 @@ class RecordResourceViewModel : ViewModel() {
 
     private fun removeRecordableFromTabViewModel(item: Recordable) {
         contentTypeToViewModelMap.getNotNull(item.contentType).recordable = null
+    }
+
+    fun nextChunk() {
+        stepToChunk(StepDirection.FORWARD)
+    }
+
+    fun previousChunk() {
+        stepToChunk(StepDirection.BACKWARD)
+    }
+
+    private fun stepToChunk(direction: StepDirection) {
+        val amount = when (direction) {
+            StepDirection.FORWARD -> 1
+            StepDirection.BACKWARD -> -1
+        }
+        chunkList
+            .find { it.start == activeChunk.start + amount }
+            ?.let { newChunk -> activeChunkProperty.set(newChunk) }
+    }
+
+    private fun setHasNextAndPrevious() {
+        activeChunkProperty.value?.let { chunk ->
+            if (chunkList.isNotEmpty()) {
+                hasNext.set(chunk.start < chunkList.last().start)
+                hasPrevious.set(chunk.start > chunkList.first().start)
+            } else {
+                hasNext.set(false)
+                hasPrevious.set(false)
+                chunkList.sizeProperty.onChangeOnce {
+                    setHasNextAndPrevious()
+                }
+            }
+        }
+    }
+
+    private fun getChunkList(chunks: Observable<Chunk>) {
+        activeChunkSubscription?.dispose()
+        activeChunkSubscription = chunks
+            .toList()
+            .map { it.sortedBy { chunk -> chunk.start } }
+            .observeOnFx()
+            .subscribe { list ->
+                chunkList.setAll(list)
+            }
     }
 }
