@@ -24,9 +24,9 @@ class ResourceListFragment : Fragment() {
         add(
             ResourceListView(resourceListViewModel.resourceGroupCardItemList).apply {
                 whenDocked {
-                    if (resourceListViewModel.selectedGroupCardItem != null) {
-                        scrollTo(resourceListViewModel.selectedGroupCardItem)
-                        resourceListViewModel.selectedGroupCardItem = null
+                    resourceListViewModel.selectedGroupCardItem.get()?.let {
+                        scrollTo(it)
+                        resourceListViewModel.selectedGroupCardItem.set(null)
                     }
                 }
             }

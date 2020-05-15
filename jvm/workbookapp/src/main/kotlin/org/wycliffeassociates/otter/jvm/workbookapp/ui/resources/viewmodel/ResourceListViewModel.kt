@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel
 
+import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
@@ -15,7 +16,7 @@ class ResourceListViewModel : ViewModel() {
     internal val recordResourceViewModel: RecordResourceViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
-    var selectedGroupCardItem: ResourceGroupCardItem? = null
+    var selectedGroupCardItem = SimpleObjectProperty<ResourceGroupCardItem>()
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
 
     init {
@@ -38,7 +39,7 @@ class ResourceListViewModel : ViewModel() {
                 .filter { it.resource == resource }
                 .singleElement()
                 .subscribe {
-                    selectedGroupCardItem = groupCardItem
+                    selectedGroupCardItem.set(groupCardItem)
                 }
         }
     }
@@ -64,6 +65,7 @@ class ResourceListViewModel : ViewModel() {
 
     internal fun setActiveChunkAndRecordables(bookElement: BookElement, resource: Resource) {
         workbookViewModel.activeChunkProperty.set(bookElement as? Chunk)
+        workbookViewModel.activeResourceProperty.set(resource)
         recordResourceViewModel.setRecordableListItems(
             listOfNotNull(resource.title, resource.body)
         )
