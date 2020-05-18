@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.workbookheader
 
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.controls.styles.AppTheme
 import tornadofx.*
 
 class WorkbookHeaderStyles : Stylesheet() {

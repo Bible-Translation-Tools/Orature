@@ -1,0 +1,36 @@
+@import "root.css"
+
+.source-dialog {
+    -fx-background-color: white;
+}
+
+.source-dialog__label {
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 20px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+    -fx-fill-width: true;
+}
+
+.source-dialog__label--message {
+    -fx-font-weight: normal;
+    -fx-padding: 0 50px 30px 50px;
+}
+
+.source-dialog__close-button {
+    -fx-min-height: 40px;
+    -fx-min-width: 185px;
+    -fx-background-color: -white;
+    -fx-border-color: -primary;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.source-dialog__close-button * {
+    -fx-fill: -primary;
+}
