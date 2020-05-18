@@ -1,7 +1,7 @@
 @import "root.css"
 
 .source-dialog {
-    -fx-pref-width: 700px;
+    -fx-background-color: white;
 }
 
 .source-dialog__label {

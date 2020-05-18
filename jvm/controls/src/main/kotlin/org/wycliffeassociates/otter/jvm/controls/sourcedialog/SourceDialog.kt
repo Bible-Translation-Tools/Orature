@@ -8,10 +8,10 @@ import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.stage.Modality
 import javafx.stage.StageStyle
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
-import org.wycliffeassociates.otter.jvm.controls.styles.AppStyles
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -59,7 +59,7 @@ class SourceDialog : Fragment() {
                     visibleWhen(textProperty().isNotEmpty)
                     managedWhen { visibleProperty() }
                 }
-                button(closeTextProperty, AppStyles.closeIcon("20px")) {
+                button(closeTextProperty, FontIcon("gmi-close:20")) {
                     addClass("source-dialog__close-button")
                     onActionProperty().bind(onCloseActionProperty)
                 }

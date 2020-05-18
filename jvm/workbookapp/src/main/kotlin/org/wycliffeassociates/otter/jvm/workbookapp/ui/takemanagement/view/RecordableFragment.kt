@@ -139,8 +139,6 @@ abstract class RecordableFragment(
         val recordingAppName = SimpleStringProperty()
 
         val dialog = sourcedialog {
-            root.addClass(AppStyles.sourceDialog)
-
             recordingAppName.toObservable().subscribe { appName ->
                 recordableViewModel.currentTakeProperty.toObservable().subscribe { take ->
                     dialogTitle = String.format(
@@ -186,7 +184,7 @@ abstract class RecordableFragment(
                                         recordingAppName.set(it.name)
                                     }
                             }
-                            null -> recordingAppName.set("unknown")
+                            null -> throw IllegalStateException("Action is not supported!")
                         }
                     }
                     dialog.open()
