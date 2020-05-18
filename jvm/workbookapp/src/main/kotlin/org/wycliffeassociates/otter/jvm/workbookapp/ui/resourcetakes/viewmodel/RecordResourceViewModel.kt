@@ -19,8 +19,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
 
 class RecordResourceViewModel : ViewModel() {
@@ -33,17 +33,12 @@ class RecordResourceViewModel : ViewModel() {
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val recordableViewModel = RecordableViewModel(audioPluginViewModel)
-
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
-    private val activeChunk: Chunk
-        get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
+    private val activeChunk: Chunk by activeChunkProperty
 
     private val activeResourceProperty = SimpleObjectProperty<Resource>()
-    private val activeResource: Resource
-        get() = activeResourceProperty.value ?: throw IllegalStateException("Resource is null")
+    private val activeResource: Resource by activeResourceProperty
 
-    private val chunkList: ObservableList<Chunk> = observableListOf()
     private val resourceList: ObservableList<Resource> = observableListOf()
 
     val hasNext = SimpleBooleanProperty(false)
@@ -68,8 +63,6 @@ class RecordResourceViewModel : ViewModel() {
         RecordableTabViewModel(SimpleStringProperty(), audioPluginViewModel)
 
     init {
-        // activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
-
         initTabs()
 
         recordableList.onChange {
@@ -82,9 +75,8 @@ class RecordResourceViewModel : ViewModel() {
 
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
             chapter?.let {
-                getChunkList(chapter.chunks)
                 if (activeChunkProperty.value == null) {
-                    // setHasNextAndPrevious()
+                    setHasNextAndPrevious()
                 }
             }
         }
@@ -92,6 +84,7 @@ class RecordResourceViewModel : ViewModel() {
         resourceListViewModel.selectedGroupCardItem.onChangeAndDoNow { item ->
             item?.let {
                 getResourceList(it.resources)
+                setHasNextAndPrevious()
             }
         }
 
@@ -101,16 +94,10 @@ class RecordResourceViewModel : ViewModel() {
 
         workbookViewModel.activeResourceProperty.onChangeAndDoNow {
             activeResourceProperty.set(it)
-        }
-
-        /*activeChunkProperty.onChangeAndDoNow { chunk ->
-            if (chunk != null) {
-                // setTitle(chunk) TODO !!!
+            if (it != null) {
                 setHasNextAndPrevious()
-                // This will trigger loading takes in the RecordableViewModel
-                // recordableViewModel.recordable = chunk TODO !!!
             }
-        }*/
+        }
     }
 
     fun onTabSelect(recordable: Recordable) {
@@ -165,91 +152,43 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun nextChunk() {
-        // stepToChunk(StepDirection.FORWARD)
-
-        var currentResource = resourceList.indexOf(activeResource)
-        currentResource++
-        val nextResource = resourceList.getOrNull(currentResource)
-
-        if (nextResource != null) {
-            resourceListViewModel.setActiveChunkAndRecordables(activeChunk, nextResource)
-        } else {
-            var current = resourceListViewModel.resourceGroupCardItemList.indexOf(resourceListViewModel.selectedGroupCardItem.get())
-            current++
-            val nextItem = resourceListViewModel.resourceGroupCardItemList.getOrNull(current)
-
-            if (nextItem != null) {
-                chunkList
-                    .find { it.start == activeChunk.start + 1 }
-                    ?.let { newChunk -> activeChunkProperty.set(newChunk) }
-
-                nextItem.resources.firstElement().subscribe {
-                    resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it.resource)
-                }
-            }
-        }
+        stepToChunk(StepDirection.FORWARD)
     }
 
     fun previousChunk() {
-        // stepToChunk(StepDirection.BACKWARD)
+        stepToChunk(StepDirection.BACKWARD)
+    }
 
-        var currentResource = resourceList.indexOf(activeResource)
-        currentResource--
-        val previousResource = resourceList.getOrNull(currentResource)
-
-        if (previousResource != null) {
-            resourceListViewModel.setActiveChunkAndRecordables(activeChunk, previousResource)
-        } else {
-            var current = resourceListViewModel.resourceGroupCardItemList.indexOf(resourceListViewModel.selectedGroupCardItem.get())
-            current--
-            val previousItem = resourceListViewModel.resourceGroupCardItemList.getOrNull(current)
-
-            if (previousItem != null) {
-                chunkList
-                    .find { it.start == activeChunk.start - 1 }
-                    ?.let { newChunk -> activeChunkProperty.set(newChunk) }
-
-                previousItem.resources.lastElement().subscribe {
-                    resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it.resource)
+    private fun stepToChunk(direction: StepDirection) {
+        when (direction) {
+            StepDirection.FORWARD -> {
+                nextResource()?.let {
+                    resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
+                } ?: run {
+                    nextGroupCardItem()?.let { nextItem ->
+                        nextItem.resources.firstElement().subscribe {
+                            resourceListViewModel.setActiveChunkAndRecordables(nextItem.bookElement, it.resource)
+                        }
+                    }
+                }
+            }
+            StepDirection.BACKWARD -> {
+                previousResource()?.let {
+                    resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
+                } ?: run {
+                    previousGroupCardItem()?.let { previousItem ->
+                        previousItem.resources.lastElement().subscribe {
+                            resourceListViewModel.setActiveChunkAndRecordables(previousItem.bookElement, it.resource)
+                        }
+                    }
                 }
             }
         }
     }
 
-    /*private fun stepToChunk(direction: StepDirection) {
-        val amount = when (direction) {
-            StepDirection.FORWARD -> 1
-            StepDirection.BACKWARD -> -1
-        }
-        chunkList
-            .find { it.start == activeChunk.start + amount }
-            ?.let { newChunk -> activeChunkProperty.set(newChunk) }
-    }*/
-
-    /*private fun setHasNextAndPrevious() {
-        activeChunkProperty.value?.let { chunk ->
-            if (chunkList.isNotEmpty()) {
-                hasNext.set(chunk.start < chunkList.last().start)
-                hasPrevious.set(chunk.start > chunkList.first().start)
-            } else {
-                hasNext.set(false)
-                hasPrevious.set(false)
-                chunkList.sizeProperty.onChangeOnce {
-                    setHasNextAndPrevious()
-                }
-            }
-        }
-    }*/
-
-    private fun getChunkList(chunks: Observable<Chunk>) {
-        activeChunkSubscription?.dispose()
-        activeChunkSubscription = chunks
-            .toList()
-            .map { it.sortedBy { chunk -> chunk.start } }
-            .observeOnFx()
-            .subscribe { list ->
-                chunkList.setAll(list)
-            }
+    private fun setHasNextAndPrevious() {
+        hasNext.set(nextResource() != null || nextGroupCardItem() != null)
+        hasPrevious.set(previousResource() != null || previousGroupCardItem() != null)
     }
 
     private fun getResourceList(resources: Observable<ResourceCardItem>) {
@@ -263,5 +202,33 @@ class RecordResourceViewModel : ViewModel() {
                     resourceList.add(it.resource)
                 }
             }
+    }
+
+    private fun nextResource(): Resource? {
+        var currentResourceIndex = resourceList.indexOf(activeResource)
+        return resourceList.getOrNull(currentResourceIndex + 1)
+    }
+
+    private fun previousResource(): Resource? {
+        var currentResourceIndex = resourceList.indexOf(activeResource)
+        return resourceList.getOrNull(currentResourceIndex - 1)
+    }
+
+    private fun nextGroupCardItem(): ResourceGroupCardItem? {
+        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+            resourceListViewModel.selectedGroupCardItem.get()
+        )
+        return resourceListViewModel.resourceGroupCardItemList.getOrNull(
+            currentGroupCardItemIndex + 1
+        )
+    }
+
+    private fun previousGroupCardItem(): ResourceGroupCardItem? {
+        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+            resourceListViewModel.selectedGroupCardItem.get()
+        )
+        return resourceListViewModel.resourceGroupCardItemList.getOrNull(
+            currentGroupCardItemIndex - 1
+        )
     }
 }

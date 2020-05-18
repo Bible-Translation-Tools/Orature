@@ -8,9 +8,7 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.effect.BlurType
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -55,22 +53,22 @@ class RecordResourceFragment(
         addClass(RecordResourceStyles.bottomButton)
         text = messages["previousChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
-
         action {
             closePlayers()
             recordResourceViewModel.previousChunk()
         }
+        enableWhen(recordResourceViewModel.hasPrevious)
     }
 
     private val nextButton = JFXButton().apply {
         addClass(RecordResourceStyles.bottomButton)
         text = messages["nextChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
-
         action {
             closePlayers()
             recordResourceViewModel.nextChunk()
         }
+        enableWhen(recordResourceViewModel.hasNext)
     }
 
     private val leftRegion = VBox().apply {
