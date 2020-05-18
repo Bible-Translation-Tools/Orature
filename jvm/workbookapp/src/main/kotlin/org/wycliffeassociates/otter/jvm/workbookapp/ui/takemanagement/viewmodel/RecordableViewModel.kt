@@ -11,19 +11,23 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
 ) : ViewModel() {
     val injector: Injector by inject()
+    val workbookViewModel: WorkbookViewModel by inject()
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
@@ -31,6 +35,7 @@ open class RecordableViewModel(
     private val disposables = CompositeDisposable()
 
     val selectedTakeProperty = SimpleObjectProperty<Take?>()
+    val currentTakeProperty = SimpleObjectProperty<Take?>()
 
     val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
     val showPluginActiveProperty = SimpleBooleanProperty(false)
@@ -40,6 +45,9 @@ open class RecordableViewModel(
 
     val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
     val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
+
+    val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
     init {
         recordableProperty.onChange {
@@ -66,6 +74,14 @@ open class RecordableViewModel(
                 }
             )
         }
+
+        workbookViewModel.sourceAudioProperty.onChangeAndDoNow {
+            it?.let { source ->
+                val audioPlayer = injector.audioPlayer
+                audioPlayer.loadSection(source.file, source.start, source.end)
+                sourceAudioPlayerProperty.set(audioPlayer)
+            }
+        }
     }
 
     fun recordNewTake() {
@@ -88,12 +104,14 @@ open class RecordableViewModel(
 
     fun editTake(editTakeEvent: EditTakeEvent) {
         contextProperty.set(TakeContext.EDIT_TAKES)
+        currentTakeProperty.set(editTakeEvent.take)
         showPluginActive = true
         audioPluginViewModel
             .edit(editTakeEvent.take)
             .observeOnFx()
             .subscribe { result: EditTake.Result ->
                 showPluginActive = false
+                currentTakeProperty.set(null)
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
