@@ -5,6 +5,11 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 
+
+/**
+ * Merges the media contents from one resource container to the other.
+ * This will overwrite media with matching names.
+ */
 class MediaMerge(
     val directoryProvider: IDirectoryProvider,
     val from: ResourceContainer,
@@ -41,12 +46,11 @@ class MediaMerge(
         to.write()
     }
 
-    private fun copyUnmatchedProjects(from: MutableMap<String, MediaProject>, to: MutableMap<String, MediaProject>) {
-        to.putAll(from)
-    }
-
-    private fun mergeMatchingProjects(from: MutableMap<String, MediaProject>, to: MutableMap<String, MediaProject>) {
-        from.forEach { key, value ->
+    private fun mergeMatchingProjects(
+        from: MutableMap<String, MediaProject>,
+        to: MutableMap<String, MediaProject>
+    ) {
+        from.forEach { (key, value) ->
             val fromMediaMap = value.media.associateBy { it.identifier } as MutableMap
             val toMediaMap = to[key]!!.media.associateBy { it.identifier } as MutableMap
 
@@ -64,16 +68,16 @@ class MediaMerge(
         _fromMedia?.let { fromMedia ->
             fromMedia.projects.forEach {
                 it.media.forEach { media ->
-                    val files = getPossibleFiles(media)
-                    files.forEach {
-                        copyMediaFile(it)
+                    val files = mediaFilePermutations(media)
+                    files.forEach { path ->
+                        copyMediaFile(path)
                     }
                 }
             }
         }
     }
 
-    private fun getPossibleFiles(media: Media): List<String> {
+    private fun mediaFilePermutations(media: Media): List<String> {
         val list = mutableListOf<String>()
         if (media.chapterUrl.isNotEmpty()) list.add(media.chapterUrl)
         if (media.url.isNotEmpty()) list.add(media.url)
@@ -130,4 +134,5 @@ class MediaMerge(
     }
 }
 
-private fun String.isURL(): Boolean = this.toLowerCase().startsWith("http")
+// This is not exhaustive or sufficient by itself, but a fileExists call is still used after  
+private fun String.isURL(): Boolean = this.toLowerCase().startsWith("http://")
