@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 
 class MediaMerge(
@@ -61,11 +62,51 @@ class MediaMerge(
         _fromMedia?.let { fromMedia ->
             fromMedia.projects.forEach {
                 it.media.forEach { media ->
-                    if (media.chapterUrl.isNotEmpty()) copyMediaFile(media.chapterUrl)
-                    if (media.url.isNotEmpty()) copyMediaFile(media.url)
+                    val files = getPossibleFiles(media)
+                    files.forEach {
+                        copyMediaFile(it)
+                    }
                 }
             }
         }
+    }
+
+    private fun getPossibleFiles(media: Media): List<String> {
+        val list = mutableListOf<String>()
+        if (media.chapterUrl.isNotEmpty()) list.add(media.chapterUrl)
+        if (media.url.isNotEmpty()) list.add(media.url)
+
+        insertVariables(list, "{quality}", media.quality)
+        insertVariables(list, "{version}", listOf(media.version))
+        insertVariables(list, "{chapter}", generateChapterOptions())
+
+        return list
+    }
+
+    private fun insertVariables(list: MutableList<String>, variable: String, options: List<String>) {
+        if(options.isNotEmpty()) {
+            val toAdd = mutableListOf<String>()
+            list.forEach { unqualified ->
+                if(unqualified.contains(variable)) {
+                    options.forEach {
+                        toAdd.add(unqualified.replace(variable, it))
+                    }
+                }
+            }
+            list.removeAll { it.contains(variable) }
+            list.addAll(toAdd)
+        }
+    }
+
+    private fun generateChapterOptions(max: Int = 200): List<String> {
+        val list = mutableListOf<String>()
+        val digits = max.toString().length
+        for(i in 0..max) {
+            for(j in 1..digits) {
+                list.add(i.toString().padStart(j, '0'))
+            }
+        }
+        return list
     }
 
     private fun copyMediaFile(file: String) {
