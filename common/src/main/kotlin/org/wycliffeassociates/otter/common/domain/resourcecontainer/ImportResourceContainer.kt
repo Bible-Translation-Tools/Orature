@@ -49,7 +49,11 @@ class ImportResourceContainer(
         return if (exists) {
             Single.fromCallable {
                 val existingRC = getExistingMetadata(file)
-                MediaMerge(directoryProvider, ResourceContainer.load(file), ResourceContainer.load(existingRC.path)).merge()
+                MediaMerge(
+                    directoryProvider,
+                    ResourceContainer.load(file),
+                    ResourceContainer.load(existingRC.path)
+                ).merge()
                 ImportResult.SUCCESS
             }
         } else {
