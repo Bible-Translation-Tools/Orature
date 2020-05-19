@@ -7,7 +7,7 @@ import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.controls.styles.AppTheme
 import tornadofx.*
 
 class DefaultStyles : Stylesheet() {

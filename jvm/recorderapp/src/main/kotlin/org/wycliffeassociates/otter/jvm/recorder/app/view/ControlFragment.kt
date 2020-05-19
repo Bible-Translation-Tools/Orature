@@ -1,16 +1,11 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
-import javafx.scene.layout.CornerRadii
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.scene.text.Font
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
 
@@ -21,11 +16,12 @@ class ControlFragment : Fragment() {
     val timer = label {
         textProperty().bind(vm.timerTextProperty)
     }
-    val saveBtn = MaterialIconView(MaterialIcon.CHECK, "48px")
-    val recordBtn = MaterialIconView(MaterialIcon.MIC, "48px")
+    val continueBtn = button(messages["continue"], FontIcon("fas-check"))
+    val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
+    val recordBtn = FontIcon("gmi-mic")
 
     override val root = borderpane {
-        background = Background(BackgroundFill(Paint.valueOf("#C2185B"), CornerRadii.EMPTY, Insets.EMPTY))
+        addClass("controls")
 
         left {
             vbox {
@@ -42,7 +38,8 @@ class ControlFragment : Fragment() {
             hbox {
                 padding = Insets(10.0, 10.0, 10.0, 0.0)
                 alignment = Pos.CENTER_RIGHT
-                add(saveBtn)
+                add(continueBtn)
+                add(cancelBtn)
             }
         }
     }
@@ -54,15 +51,26 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
+            iconSize = 48
             fill = Color.WHITE
             setOnMouseClicked {
                 toggleRecording()
             }
         }
 
-        saveBtn.apply {
-            fill = Color.WHITE
+        continueBtn.apply {
+            addClass("continue-button")
             visibleProperty().bind(vm.canSaveProperty)
+            managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
+            setOnMouseClicked {
+                vm.save()
+            }
+        }
+
+        cancelBtn.apply {
+            addClass("continue-button")
+            visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
+            managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             setOnMouseClicked {
                 vm.save()
             }
@@ -71,9 +79,9 @@ class ControlFragment : Fragment() {
 
     private fun toggleRecording() {
         if (!vm.isRecording) {
-            recordBtn.setIcon(MaterialIcon.PAUSE_CIRCLE_OUTLINE)
+            recordBtn.iconLiteral = "gmi-pause-circle-outline"
         } else {
-            recordBtn.setIcon(MaterialIcon.MIC)
+            recordBtn.iconLiteral = "gmi-mic"
         }
         vm.toggle()
     }

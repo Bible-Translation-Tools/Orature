@@ -1,5 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -10,14 +15,37 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import java.util.EnumMap
 import javafx.collections.ListChangeListener
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
 import tornadofx.*
 
 class RecordResourceViewModel : ViewModel() {
+    private enum class StepDirection {
+        FORWARD,
+        BACKWARD
+    }
+
     private val workbookViewModel: WorkbookViewModel by inject()
+    private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    private var activeRecordable: Recordable? = null
+    private val activeChunkProperty = SimpleObjectProperty<Chunk>()
+    private val activeChunk: Chunk by activeChunkProperty
+
+    private val activeResourceProperty = SimpleObjectProperty<Resource>()
+    private val activeResource: Resource by activeResourceProperty
+
+    private val resourceList: ObservableList<Resource> = observableListOf()
+
+    val hasNext = SimpleBooleanProperty(false)
+    val hasPrevious = SimpleBooleanProperty(false)
+
+    private var activeChunkSubscription: Disposable? = null
+    private var activeResourceSubscription: Disposable? = null
 
     internal val recordableList: ObservableList<Recordable> = FXCollections.observableArrayList()
 
@@ -44,10 +72,36 @@ class RecordResourceViewModel : ViewModel() {
         workbookViewModel.activeResourceMetadataProperty.onChangeAndDoNow { metadata ->
             metadata?.let { setTabLabels(metadata.identifier) }
         }
+
+        workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
+            chapter?.let {
+                if (activeChunkProperty.value == null) {
+                    setHasNextAndPrevious()
+                }
+            }
+        }
+
+        resourceListViewModel.selectedGroupCardItem.onChangeAndDoNow { item ->
+            item?.let {
+                getResourceList(it.resources)
+                setHasNextAndPrevious()
+            }
+        }
+
+        workbookViewModel.activeChunkProperty.onChangeAndDoNow {
+            activeChunkProperty.set(it)
+        }
+
+        workbookViewModel.activeResourceProperty.onChangeAndDoNow {
+            activeResourceProperty.set(it)
+            if (it != null) {
+                setHasNextAndPrevious()
+            }
+        }
     }
 
     fun onTabSelect(recordable: Recordable) {
-        activeRecordable = recordable
+        workbookViewModel.activeResourceComponentProperty.set(recordable as Resource.Component)
     }
 
     fun setRecordableListItems(items: List<Recordable>) {
@@ -95,5 +149,86 @@ class RecordResourceViewModel : ViewModel() {
 
     private fun removeRecordableFromTabViewModel(item: Recordable) {
         contentTypeToViewModelMap.getNotNull(item.contentType).recordable = null
+    }
+
+    fun nextChunk() {
+        stepToChunk(StepDirection.FORWARD)
+    }
+
+    fun previousChunk() {
+        stepToChunk(StepDirection.BACKWARD)
+    }
+
+    private fun stepToChunk(direction: StepDirection) {
+        when (direction) {
+            StepDirection.FORWARD -> {
+                nextResource()?.let {
+                    resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
+                } ?: run {
+                    nextGroupCardItem()?.let { nextItem ->
+                        nextItem.resources.firstElement().subscribe {
+                            resourceListViewModel.setActiveChunkAndRecordables(nextItem.bookElement, it.resource)
+                        }
+                    }
+                }
+            }
+            StepDirection.BACKWARD -> {
+                previousResource()?.let {
+                    resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
+                } ?: run {
+                    previousGroupCardItem()?.let { previousItem ->
+                        previousItem.resources.lastElement().subscribe {
+                            resourceListViewModel.setActiveChunkAndRecordables(previousItem.bookElement, it.resource)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setHasNextAndPrevious() {
+        hasNext.set(nextResource() != null || nextGroupCardItem() != null)
+        hasPrevious.set(previousResource() != null || previousGroupCardItem() != null)
+    }
+
+    private fun getResourceList(resources: Observable<ResourceCardItem>) {
+        resourceList.clear()
+        activeResourceSubscription?.dispose()
+        activeResourceSubscription = resources
+            .toList()
+            .observeOnFx()
+            .subscribe { list ->
+                list.forEach {
+                    resourceList.add(it.resource)
+                }
+            }
+    }
+
+    private fun nextResource(): Resource? {
+        var currentResourceIndex = resourceList.indexOf(activeResource)
+        return resourceList.getOrNull(currentResourceIndex + 1)
+    }
+
+    private fun previousResource(): Resource? {
+        var currentResourceIndex = resourceList.indexOf(activeResource)
+        return resourceList.getOrNull(currentResourceIndex - 1)
+    }
+
+    private fun nextGroupCardItem(): ResourceGroupCardItem? {
+        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+            resourceListViewModel.selectedGroupCardItem.get()
+        )
+        return resourceListViewModel.resourceGroupCardItemList.getOrNull(
+            currentGroupCardItemIndex + 1
+        )
+    }
+
+    private fun previousGroupCardItem(): ResourceGroupCardItem? {
+        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+            resourceListViewModel.selectedGroupCardItem.get()
+        )
+        return resourceListViewModel.resourceGroupCardItemList.getOrNull(
+            currentGroupCardItemIndex - 1
+        )
     }
 }

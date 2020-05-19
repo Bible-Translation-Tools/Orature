@@ -4,6 +4,7 @@ import javafx.beans.property.*
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -26,6 +27,9 @@ class WorkbookViewModel : ViewModel() {
 
     val activeChunkProperty = SimpleObjectProperty<Chunk>()
     val chunk: Chunk? by activeChunkProperty
+
+    val activeResourceComponentProperty = SimpleObjectProperty<Resource.Component>()
+    val activeResourceProperty = SimpleObjectProperty<Resource>()
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
     val activeResourceMetadata

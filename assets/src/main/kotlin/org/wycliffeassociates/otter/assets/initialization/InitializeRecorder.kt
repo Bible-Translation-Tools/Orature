@@ -47,13 +47,13 @@ class InitializeRecorder(
 
     private fun importOtterRecorder(): Completable {
         val pluginsDir = directoryProvider.audioPluginDirectory
-        val jar = File(pluginsDir, "OtterRecorder.jar")
+        val jar = File(pluginsDir, "OratureRecorder.jar")
         ClassLoader.getSystemResourceAsStream("plugins/jars/recorderapp")
             ?.transferTo(FileOutputStream(jar))
         return pluginRepository.insert(
             AudioPluginData(
                 0,
-                "OtterRecorder",
+                "OratureRecorder",
                 "1.0.0",
                 canEdit = false,
                 canRecord = true,

@@ -86,6 +86,9 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     "--book=${pluginParameters.bookTitle}",
                     "--chapter=${pluginParameters.chapterLabel}",
                     "--chapter_number=${pluginParameters.chapterNumber}",
+                    (if (pluginParameters.chunkLabel != null) "--unit=${pluginParameters.chunkLabel}" else ""),
+                    (if (pluginParameters.chunkNumber != null) "--unit_number=${pluginParameters.chunkNumber}" else ""),
+                    (if (pluginParameters.resourceLabel != null)"--resource=${pluginParameters.resourceLabel}" else ""),
                     "--chapter_audio=${pluginParameters.sourceChapterAudio?.absolutePath}",
                     "--source_chunk_start=${pluginParameters.sourceChunkStart}",
                     "--source_chunk_end=${pluginParameters.sourceChunkEnd}"
