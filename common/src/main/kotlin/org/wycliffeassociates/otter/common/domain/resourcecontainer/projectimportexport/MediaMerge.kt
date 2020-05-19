@@ -5,7 +5,6 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
 
-
 /**
  * Merges the media contents from one resource container to the other.
  * This will overwrite media with matching names.
@@ -90,10 +89,10 @@ class MediaMerge(
     }
 
     private fun insertVariables(list: MutableList<String>, variable: String, options: List<String>) {
-        if(options.isNotEmpty()) {
+        if (options.isNotEmpty()) {
             val toAdd = mutableListOf<String>()
             list.forEach { unqualified ->
-                if(unqualified.contains(variable)) {
+                if (unqualified.contains(variable)) {
                     options.forEach {
                         toAdd.add(unqualified.replace(variable, it))
                     }
@@ -107,8 +106,8 @@ class MediaMerge(
     private fun generateChapterOptions(max: Int = 200): List<String> {
         val list = mutableListOf<String>()
         val digits = max.toString().length
-        for(i in 0..max) {
-            for(j in 1..digits) {
+        for (i in 0..max) {
+            for (j in 1..digits) {
                 list.add(i.toString().padStart(j, '0'))
             }
         }
