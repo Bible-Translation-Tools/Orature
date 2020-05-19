@@ -29,16 +29,6 @@ class MergeMediaTest {
 
     @Test
     fun testMerge() {
-//        val toFile = createTempDir()
-//        val toRc = ResourceContainer.create(toFile) {
-//            manifest = manifest {  }
-//        }
-//        val mergeMedia = MediaMerge(directoryProvider, fromRc, toRc)
-//        mergeMedia.merge()
-    }
-
-    @Test
-    fun testMerge2() {
         val fromRc = ResourceContainer.load(fromFile)
         val toRc = ResourceContainer.load(toFile)
 
