@@ -19,6 +19,7 @@ class ResourceListFragment : Fragment() {
             workbookheader {
                 labelText = "${workbookViewModel.chapter.title} ${messages["resources"]}"
                 filterText = messages["hideCompleted"]
+                workbookProgressProperty.bind(resourceListViewModel.workbookProgressProperty)
             }
         )
         add(
