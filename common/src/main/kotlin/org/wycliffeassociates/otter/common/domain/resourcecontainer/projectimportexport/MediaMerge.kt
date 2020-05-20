@@ -134,4 +134,6 @@ class MediaMerge(
 }
 
 // This is not exhaustive or sufficient by itself, but a fileExists call is still used after
-private fun String.isURL(): Boolean = this.toLowerCase().startsWith("http://")
+private fun String.isURL(): Boolean {
+    return this.toLowerCase().startsWith("http://") || this.toLowerCase().startsWith("https://")
+}
