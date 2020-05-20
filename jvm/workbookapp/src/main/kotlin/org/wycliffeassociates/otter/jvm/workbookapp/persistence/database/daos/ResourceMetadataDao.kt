@@ -30,6 +30,25 @@ class ResourceMetadataDao(
             }
     }
 
+    fun fetch(
+        languageId: Int,
+        identifier: String,
+        version: String,
+        creator: String,
+        dsl: DSLContext = instanceDsl
+    ): ResourceMetadataEntity {
+        return dsl.select()
+            .from(DUBLIN_CORE_ENTITY)
+            .where(
+                DUBLIN_CORE_ENTITY.LANGUAGE_FK.eq(languageId)
+                    .and(DUBLIN_CORE_ENTITY.IDENTIFIER.eq(identifier))
+                    .and(DUBLIN_CORE_ENTITY.VERSION.eq(version))
+                    .and(DUBLIN_CORE_ENTITY.CREATOR.eq(creator))
+            ).fetchOne {
+                RecordMappers.mapToResourceMetadataEntity(it)
+            }
+    }
+
     fun fetchLinks(entityId: Int, dsl: DSLContext = instanceDsl): List<ResourceMetadataEntity> {
         val linkIds = dsl
             .select()

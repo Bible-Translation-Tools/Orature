@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.wycliffeassociates.resourcecontainer.Config
+import java.io.OutputStream
 import java.io.Reader
-import java.io.Writer
 
 class OtterResourceContainerConfig : Config {
     var config: OtterConfig? = null
@@ -25,13 +25,11 @@ class OtterResourceContainerConfig : Config {
         return this
     }
 
-    override fun write(writer: Writer) {
+    override fun write(writer: OutputStream) {
         val mapper = ObjectMapper(YAMLFactory())
         mapper.registerModule(KotlinModule())
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        writer.use {
-            mapper.writeValue(it, config)
-        }
+        mapper.writeValue(writer, config)
     }
 }
 
