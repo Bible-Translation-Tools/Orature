@@ -17,9 +17,15 @@ class ResourceListFragment : Fragment() {
     override val root = vbox {
         add(
             workbookheader {
-                labelText = "${workbookViewModel.chapter.title} ${messages["resources"]}"
+                labelText = StringBuilder()
+                    .append(messages[workbookViewModel.chapter.label])
+                    .append(" ")
+                    .append(workbookViewModel.chapter.title)
+                    .append(" ")
+                    .append(messages["resources"])
+                    .toString()
                 filterText = messages["hideCompleted"]
-                workbookProgressProperty.bind(resourceListViewModel.workbookProgressProperty)
+                workbookProgressProperty.bind(resourceListViewModel.completionProgressProperty)
             }
         )
         add(
@@ -28,6 +34,7 @@ class ResourceListFragment : Fragment() {
                     resourceListViewModel.selectedGroupCardItem.get()?.let {
                         scrollTo(it)
                         resourceListViewModel.selectedGroupCardItem.set(null)
+                        resourceListViewModel.calculateCompletionProgress()
                     }
                 }
             }

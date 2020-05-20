@@ -20,7 +20,7 @@ class ResourceListViewModel : ViewModel() {
     var selectedGroupCardItem = SimpleObjectProperty<ResourceGroupCardItem>()
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
 
-    val workbookProgressProperty = SimpleDoubleProperty(0.0)
+    val completionProgressProperty = SimpleDoubleProperty(0.0)
 
     init {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
@@ -62,7 +62,7 @@ class ResourceListViewModel : ViewModel() {
             .buffer(2) // Buffering by 2 prevents the list UI from jumping while groups are loading
             .observeOnFxSafe()
             .doFinally {
-                addChangeListeners()
+                calculateCompletionProgress()
             }
             .subscribe {
                 resourceGroupCardItemList.addAll(it)
@@ -78,24 +78,7 @@ class ResourceListViewModel : ViewModel() {
         setSelectedResourceGroupCardItem(resource)
     }
 
-    fun addChangeListeners() {
-        resourceGroupCardItemList.forEach { item ->
-            item.resources
-                .toList()
-                .subscribe { list ->
-                    list.forEach {
-                        it.titleProgressProperty.onChangeAndDoNow {
-                            calculateWorkbookProgress()
-                        }
-                        it.bodyProgressProperty?.onChangeAndDoNow {
-                            calculateWorkbookProgress()
-                        }
-                    }
-                }
-        }
-    }
-
-    fun calculateWorkbookProgress() {
+    fun calculateCompletionProgress() {
         var completed = 0.0
         var totalItems = 0
 
@@ -113,7 +96,7 @@ class ResourceListViewModel : ViewModel() {
                             totalItems++
                         }
                         if (totalItems > 0) {
-                            runLater { workbookProgressProperty.set(completed / totalItems) }
+                            runLater { completionProgressProperty.set(completed / totalItems) }
                         }
                     }
                 }
