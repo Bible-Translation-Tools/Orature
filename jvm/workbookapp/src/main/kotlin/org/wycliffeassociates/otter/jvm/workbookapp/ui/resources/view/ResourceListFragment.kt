@@ -14,16 +14,14 @@ class ResourceListFragment : Fragment() {
     init {
         importStylesheet<ResourceListStyles>()
     }
+
     override val root = vbox {
         add(
             workbookheader {
-                labelText = StringBuilder()
-                    .append(messages[workbookViewModel.chapter.label])
-                    .append(" ")
-                    .append(workbookViewModel.chapter.title)
-                    .append(" ")
-                    .append(messages["resources"])
-                    .toString()
+                labelText =
+                    "${messages[workbookViewModel.chapter.label]} "
+                        .plus("${workbookViewModel.chapter.title} ")
+                        .plus("${messages["resources"]}")
                 filterText = messages["hideCompleted"]
                 workbookProgressProperty.bind(resourceListViewModel.completionProgressProperty)
             }
