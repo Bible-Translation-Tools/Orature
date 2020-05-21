@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
@@ -18,7 +19,7 @@ import tornadofx.*
 
 class ResourceCardFragment(
     private val item: ResourceCardItem,
-    private val isFilterOnProperty: SimpleBooleanProperty
+    private val isFilterOnProperty: BooleanProperty
 ) : Fragment() {
     private val navigator: ChromeableStage by inject()
     override val root = HBox()
@@ -87,6 +88,6 @@ class ResourceCardFragment(
 
 fun resourceCardFragment(
     resource: ResourceCardItem,
-    isFilterOnProperty: SimpleBooleanProperty,
+    isFilterOnProperty: BooleanProperty,
     init: ResourceCardFragment.() -> Unit = {}
 ) = ResourceCardFragment(resource, isFilterOnProperty).apply { init.invoke(this) }

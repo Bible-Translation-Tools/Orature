@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
-import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.BooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
@@ -10,7 +10,7 @@ import tornadofx.*
 
 class ResourceListView(
     items: ObservableList<ResourceGroupCardItem>,
-    isFilterOnProperty: SimpleBooleanProperty
+    isFilterOnProperty: BooleanProperty
 ) : ListView<ResourceGroupCardItem>(items) {
     init {
         cellFormat {

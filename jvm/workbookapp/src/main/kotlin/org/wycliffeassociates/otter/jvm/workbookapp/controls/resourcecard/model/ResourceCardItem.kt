@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
-import tornadofx.*
 import java.util.concurrent.Callable
 
 data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
@@ -48,8 +47,8 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     }
 
     fun cardCompletedBinding(): BooleanBinding {
-        val dependencies = mutableListOf(titleProgressProperty)
-        bodyProgressProperty?.let { dependencies.add(it) }
+        val dependencies = arrayOf(titleProgressProperty)
+        bodyProgressProperty?.let { dependencies.plus(it) }
 
         return Bindings.createBooleanBinding(
             Callable {
@@ -59,7 +58,7 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
                             .or(bodyProgressProperty?.get() == 1.0)
                     )
             },
-            dependencies.toObservable()
+            *dependencies
         )
     }
 }
