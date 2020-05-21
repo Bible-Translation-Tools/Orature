@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
@@ -18,6 +19,8 @@ class ResourceListViewModel : ViewModel() {
 
     var selectedGroupCardItem = SimpleObjectProperty<ResourceGroupCardItem>()
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
+
+    val completionProgressProperty = SimpleDoubleProperty(0.0)
 
     init {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
@@ -58,6 +61,9 @@ class ResourceListViewModel : ViewModel() {
             }
             .buffer(2) // Buffering by 2 prevents the list UI from jumping while groups are loading
             .observeOnFxSafe()
+            .doFinally {
+                calculateCompletionProgress()
+            }
             .subscribe {
                 resourceGroupCardItemList.addAll(it)
             }
@@ -70,5 +76,30 @@ class ResourceListViewModel : ViewModel() {
             listOfNotNull(resource.title, resource.body)
         )
         setSelectedResourceGroupCardItem(resource)
+    }
+
+    fun calculateCompletionProgress() {
+        var completed = 0.0
+        var totalItems = 0
+
+        resourceGroupCardItemList.forEach { item ->
+            item.resources
+                .toList()
+                .subscribe { list ->
+                    list.forEach {
+                        it.titleProgressProperty.get().let { progress ->
+                            completed += progress
+                            totalItems++
+                        }
+                        it.bodyProgressProperty?.get()?.let { progress ->
+                            completed += progress
+                            totalItems++
+                        }
+                        if (totalItems > 0) {
+                            runLater { completionProgressProperty.set(completed / totalItems) }
+                        }
+                    }
+                }
+        }
     }
 }

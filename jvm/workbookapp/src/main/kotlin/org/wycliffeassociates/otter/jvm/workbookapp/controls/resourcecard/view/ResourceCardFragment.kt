@@ -12,8 +12,8 @@ import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
-import org.wycliffeassociates.otter.jvm.statusindicator.control.StatusIndicator
-import org.wycliffeassociates.otter.jvm.statusindicator.control.statusindicator
+import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
+import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
 import tornadofx.*
 
 class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
