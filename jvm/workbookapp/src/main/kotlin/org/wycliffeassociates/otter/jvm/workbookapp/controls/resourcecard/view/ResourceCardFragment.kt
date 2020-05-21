@@ -16,7 +16,10 @@ import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
 import tornadofx.*
 
-class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
+class ResourceCardFragment(
+    private val item: ResourceCardItem,
+    private val isFilterOnProperty: SimpleBooleanProperty
+) : Fragment() {
     private val navigator: ChromeableStage by inject()
     override val root = HBox()
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
@@ -26,6 +29,9 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
     init {
         root.apply {
             alignment = Pos.CENTER_LEFT
+
+            hiddenWhen { item.cardCompletedBinding().and(isFilterOnProperty) }
+            managedWhen { visibleProperty() }
 
             vbox {
                 spacing = 3.0
@@ -81,5 +87,6 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
 
 fun resourceCardFragment(
     resource: ResourceCardItem,
+    isFilterOnProperty: SimpleBooleanProperty,
     init: ResourceCardFragment.() -> Unit = {}
-) = ResourceCardFragment(resource).apply { init.invoke(this) }
+) = ResourceCardFragment(resource, isFilterOnProperty).apply { init.invoke(this) }
