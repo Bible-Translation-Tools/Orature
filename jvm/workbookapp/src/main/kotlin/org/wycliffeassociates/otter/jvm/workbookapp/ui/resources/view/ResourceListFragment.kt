@@ -6,6 +6,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.R
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
+import java.text.MessageFormat
 
 class ResourceListFragment : Fragment() {
     private val workbookViewModel: WorkbookViewModel by inject()
@@ -18,10 +19,12 @@ class ResourceListFragment : Fragment() {
     override val root = vbox {
         add(
             workbookheader {
-                labelText =
-                    "${messages[workbookViewModel.chapter.label]} "
-                        .plus("${workbookViewModel.chapter.title} ")
-                        .plus("${messages["resources"]}")
+                labelText = MessageFormat.format(
+                    messages["chapterResourcesLabel"],
+                    messages[workbookViewModel.chapter.label],
+                    workbookViewModel.chapter.title,
+                    messages["resources"]
+                )
                 filterText = messages["hideCompleted"]
                 workbookProgressProperty.bind(resourceListViewModel.completionProgressProperty)
             }
