@@ -60,9 +60,9 @@ class RecordScriptureFragment : RecordableFragment(
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
-        sourceAudioPlayer.visibleWhen { recordScriptureViewModel.sourceAudioAvailableProperty }
+        sourceAudioPlayer.visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
         sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
-        recordScriptureViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
+        recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
             it?.let {
                 sourceAudioPlayer.load(it)
             }

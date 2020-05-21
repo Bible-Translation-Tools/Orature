@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.theme
+package org.wycliffeassociates.otter.jvm.controls.styles
 
 import javafx.scene.paint.Color
 import tornadofx.c

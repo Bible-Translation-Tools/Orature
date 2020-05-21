@@ -7,9 +7,11 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 data class ResourceGroupCardItem(
-    val title: String,
+    val bookElement: BookElement,
     val resources: Observable<ResourceCardItem>
 ) {
+    val title = getGroupTitle(bookElement)
+
     fun onRemove() {
         resources.forEach {
             it.clearDisposables()
@@ -24,7 +26,7 @@ fun resourceGroupCardItem(
 ): ResourceGroupCardItem? {
     return findResourceGroup(element, slug)?.let { rg ->
         ResourceGroupCardItem(
-            getGroupTitle(element),
+            element,
             getResourceCardItems(rg, element, onSelect)
         )
     }

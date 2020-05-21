@@ -29,6 +29,7 @@ class WorkbookViewModel : ViewModel() {
     val chunk: Chunk? by activeChunkProperty
 
     val activeResourceComponentProperty = SimpleObjectProperty<Resource.Component>()
+    val activeResourceProperty = SimpleObjectProperty<Resource>()
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
     val activeResourceMetadata

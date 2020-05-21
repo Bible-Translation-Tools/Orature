@@ -24,13 +24,10 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    private var resource: String? = null
+    val recorderData = pluginRepository.getRecorderData()
+    val editorData = pluginRepository.getEditorData()
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
-        if (recordable is Resource.Component) {
-            resource = messages[recordable.label]
-        }
-
         val params = constructPluginParameters()
         return recordTake.record(
             audio = recordable.audio,
