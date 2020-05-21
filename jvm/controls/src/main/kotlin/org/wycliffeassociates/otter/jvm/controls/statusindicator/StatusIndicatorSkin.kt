@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.statusindicator.control
+package org.wycliffeassociates.otter.jvm.controls.statusindicator
 
 import javafx.beans.property.*
 import javafx.geometry.HPos

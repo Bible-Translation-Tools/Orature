@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.statusindicator.control.statusindicator
+import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
 import tornadofx.*
 
 class WorkbookHeader : VBox() {
@@ -25,7 +25,7 @@ class WorkbookHeader : VBox() {
     val progressBarTrackFillProperty = SimpleObjectProperty<Color>(Color.ORANGE)
     var progressBarTrackFill by progressBarTrackFillProperty
 
-    val workbookProgressProperty = SimpleDoubleProperty(0.5)
+    val workbookProgressProperty = SimpleDoubleProperty(0.0)
     var workbookProgress by workbookProgressProperty
 
     init {

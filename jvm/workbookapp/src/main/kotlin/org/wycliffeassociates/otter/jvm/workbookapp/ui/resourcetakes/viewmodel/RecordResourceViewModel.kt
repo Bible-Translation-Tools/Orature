@@ -44,7 +44,6 @@ class RecordResourceViewModel : ViewModel() {
     val hasNext = SimpleBooleanProperty(false)
     val hasPrevious = SimpleBooleanProperty(false)
 
-    private var activeChunkSubscription: Disposable? = null
     private var activeResourceSubscription: Disposable? = null
 
     internal val recordableList: ObservableList<Recordable> = FXCollections.observableArrayList()
