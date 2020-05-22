@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import java.util.*
 
@@ -8,6 +9,7 @@ class Workbook(
     val target: Book
 ) {
     val sourceAudioAccessor: SourceAudioAccessor by lazy { SourceAudioAccessor(source.resourceMetadata, source.slug) }
+    val coverArtAccessor: CoverArtAccessor by lazy { CoverArtAccessor(source.resourceMetadata, source.slug) }
 
     override fun hashCode(): Int {
         return Objects.hash(
