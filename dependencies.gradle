@@ -9,7 +9,7 @@ ext {
     shadowPluginVer = '5.2.0'
 
     // Libraries
-    kotlinVer = '1.3.50'
+    kotlinVer = '1.3.72'
     javafxVer = '11'
     tornadofxVer = '2.0.0-SNAPSHOT'
     rxkotlinVer = '2.4.0'
@@ -29,7 +29,7 @@ ext {
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
-    kotlinresourcecontainerVer = '0.3.0'
+    kotlinresourcecontainerVer = '0.4.0'
     chromeabletabpaneVer = '0.1.0'
     jdenticonKoltinVer = '1.0'
     slf4jApiVer = '2.0.0-alpha1'

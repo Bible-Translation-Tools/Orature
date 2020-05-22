@@ -8,6 +8,7 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
@@ -46,7 +47,15 @@ class ImportResourceContainer(
 
         val exists = isAlreadyImported(file)
         return if (exists) {
-            Single.just(ImportResult.ALREADY_EXISTS)
+            Single.fromCallable {
+                val existingRC = getExistingMetadata(file)
+                MediaMerge(
+                    directoryProvider,
+                    ResourceContainer.load(file),
+                    ResourceContainer.load(existingRC.path)
+                ).merge()
+                ImportResult.SUCCESS
+            }
         } else {
             val resumable = projectImporter.isResumableProject(file)
             if (resumable) {
@@ -85,6 +94,13 @@ class ImportResourceContainer(
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
         val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
         return resourceMetadataRepository.exists(resourceMetadata).blockingGet()
+    }
+
+    private fun getExistingMetadata(file: File): ResourceMetadata {
+        val rc = ResourceContainer.load(file, true)
+        val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
+        val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
+        return resourceMetadataRepository.get(resourceMetadata).blockingGet()
     }
 
     private fun importContainer(file: File): Single<ImportResult> {

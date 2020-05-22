@@ -26,6 +26,19 @@ class ResourceMetadataRepository(
         }.subscribeOn(Schedulers.io())
     }
 
+    override fun get(metadata: ResourceMetadata): Single<ResourceMetadata> {
+        return Single.fromCallable {
+            val languageEntity = languageDao.fetchBySlug(metadata.language.slug)
+            val metadataEntity = resourceMetadataDao.fetch(
+                languageEntity.id,
+                metadata.identifier,
+                metadata.version,
+                metadata.creator
+            )
+            metadataMapper.mapFromEntity(metadataEntity, languageMapper.mapFromEntity(languageEntity))
+        }.subscribeOn(Schedulers.io())
+    }
+
     override fun insert(metadata: ResourceMetadata): Single<Int> {
         return Single
             .fromCallable {
