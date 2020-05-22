@@ -19,7 +19,7 @@ import tornadofx.*
 
 class ResourceCardFragment(
     private val item: ResourceCardItem,
-    private val isFilterOnProperty: BooleanProperty
+    private val filterCompletedCardsProperty: BooleanProperty
 ) : Fragment() {
     private val navigator: ChromeableStage by inject()
     override val root = HBox()
@@ -31,7 +31,7 @@ class ResourceCardFragment(
         root.apply {
             alignment = Pos.CENTER_LEFT
 
-            hiddenWhen { item.cardCompletedBinding().and(isFilterOnProperty) }
+            hiddenWhen { item.cardCompletedBinding().and(filterCompletedCardsProperty) }
             managedWhen { visibleProperty() }
 
             vbox {
@@ -88,6 +88,6 @@ class ResourceCardFragment(
 
 fun resourceCardFragment(
     resource: ResourceCardItem,
-    isFilterOnProperty: BooleanProperty,
+    filterCompletedCardsProperty: BooleanProperty,
     init: ResourceCardFragment.() -> Unit = {}
-) = ResourceCardFragment(resource, isFilterOnProperty).apply { init.invoke(this) }
+) = ResourceCardFragment(resource, filterCompletedCardsProperty).apply { init.invoke(this) }

@@ -10,12 +10,12 @@ import tornadofx.*
 
 class ResourceListView(
     items: ObservableList<ResourceGroupCardItem>,
-    isFilterOnProperty: BooleanProperty
+    filterCompletedCardsProperty: BooleanProperty
 ) : ListView<ResourceGroupCardItem>(items) {
     init {
         cellFormat {
             graphic = cache(it.title) {
-                resourcegroupcard(it, isFilterOnProperty)
+                resourcegroupcard(it, filterCompletedCardsProperty)
             }
         }
 

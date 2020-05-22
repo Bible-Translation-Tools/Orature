@@ -6,7 +6,7 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import tornadofx.*
 
-class ResourceGroupCard(group: ResourceGroupCardItem, isFilterOnProperty: BooleanProperty) : VBox() {
+class ResourceGroupCard(group: ResourceGroupCardItem, filterCompletedCardsProperty: BooleanProperty) : VBox() {
     companion object {
         const val RENDER_BATCH_SIZE = 10
     }
@@ -21,7 +21,7 @@ class ResourceGroupCard(group: ResourceGroupCardItem, isFilterOnProperty: Boolea
             Platform.runLater {
                 items.forEach {
                     add(
-                        resourceCardFragment(it, isFilterOnProperty).root
+                        resourceCardFragment(it, filterCompletedCardsProperty).root
                     )
                 }
             }
@@ -31,10 +31,10 @@ class ResourceGroupCard(group: ResourceGroupCardItem, isFilterOnProperty: Boolea
 
 fun resourcegroupcard(
     group: ResourceGroupCardItem,
-    isFilterOnProperty: BooleanProperty,
+    filterCompletedCardsProperty: BooleanProperty,
     init: ResourceGroupCard.() -> Unit = {}
 ): ResourceGroupCard {
-    val rgc = ResourceGroupCard(group, isFilterOnProperty)
+    val rgc = ResourceGroupCard(group, filterCompletedCardsProperty)
     rgc.init()
     return rgc
 }
