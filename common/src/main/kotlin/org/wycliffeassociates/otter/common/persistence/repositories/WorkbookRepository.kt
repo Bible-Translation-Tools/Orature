@@ -6,7 +6,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.plusAssign
+import io.reactivex.disposables.Disposable
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
@@ -34,78 +34,97 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
     )
 
     /** Disposers for Relays in the current workbook. */
-    private val connections = CompositeDisposable()
+    private val connections = mutableMapOf<Workbook, CompositeDisposable>()
 
     override fun get(source: Collection, target: Collection): Workbook {
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
-        connections.clear()
-        return Workbook(
-            book(source),
-            book(target)
-        )
+        val disposables = mutableListOf<Disposable>()
+        val workbook = Workbook(book(source, disposables), book(target, disposables))
+        connections[workbook] = CompositeDisposable(disposables)
+        return workbook
+    }
+
+    fun closeWorkbook(workbook: Workbook) {
+        connections[workbook]?.let {
+            it.dispose()
+            connections.remove(workbook)
+        }
     }
 
     override fun getSoftDeletedTakes(book: Book): Single<List<ModelTake>> {
         return db.getSoftDeletedTakes(book.resourceMetadata, book.slug)
     }
 
-    private fun book(bookCollection: Collection): Book {
+    private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
         val resourceMetadata = bookCollection.resourceContainer
             ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
         return Book(
+            collectionId = bookCollection.id,
             title = bookCollection.titleKey,
+            label = bookCollection.labelKey,
             sort = bookCollection.sort,
             slug = bookCollection.slug,
-            chapters = constructBookChapters(bookCollection),
+            chapters = constructBookChapters(bookCollection, disposables),
             resourceMetadata = resourceMetadata,
             linkedResources = db.getLinkedResourceMetadata(resourceMetadata),
             subtreeResources = db.getSubtreeResourceMetadata(bookCollection)
         )
     }
 
-    private fun constructBookChapters(bookCollection: Collection): Observable<Chapter> {
+    private fun constructBookChapters(
+        bookCollection: Collection,
+        disposables: MutableList<Disposable>
+    ): Observable<Chapter> {
         return Observable.defer {
             db.getChildren(bookCollection)
                 .flattenAsObservable { it }
-                .concatMapEager { constructChapter(it).toObservable() }
+                .concatMapEager { constructChapter(it, disposables).toObservable() }
         }.cache()
     }
 
-    private fun constructChapter(chapterCollection: Collection): Single<Chapter> {
+    private fun constructChapter(
+        chapterCollection: Collection,
+        disposables: MutableList<Disposable>
+    ): Single<Chapter> {
         return db.getCollectionMetaContent(chapterCollection)
             .map { metaContent ->
                 Chapter(
                     title = chapterCollection.titleKey,
                     label = chapterCollection.labelKey,
                     sort = chapterCollection.sort,
-                    resources = constructResourceGroups(chapterCollection),
-                    audio = constructAssociatedAudio(metaContent),
-                    chunks = constructChunks(chapterCollection),
+                    resources = constructResourceGroups(chapterCollection, disposables),
+                    audio = constructAssociatedAudio(metaContent, disposables),
+                    chunks = constructChunks(chapterCollection, disposables),
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection)
                 )
             }
     }
 
-    private fun constructChunks(chapterCollection: Collection): Observable<Chunk> {
+    private fun constructChunks(
+        chapterCollection: Collection,
+        disposables: MutableList<Disposable>
+    ): Observable<Chunk> {
         return Observable.defer {
             db.getContentByCollection(chapterCollection)
                 .flattenAsObservable { it }
                 .filter { it.type == ContentType.TEXT }
-                .map(this::chunk)
+                .map { chunk(it, disposables) }
         }.cache()
     }
 
-    private fun chunk(content: Content) = Chunk(
-        sort = content.sort,
-        label = content.labelKey,
-        audio = constructAssociatedAudio(content),
-        resources = constructResourceGroups(content),
-        textItem = textItem(content),
-        start = content.start,
-        end = content.end,
-        contentType = content.type
-    )
+    private fun chunk(content: Content, disposables: MutableList<Disposable>): Chunk {
+        return Chunk(
+            sort = content.sort,
+            label = content.labelKey,
+            audio = constructAssociatedAudio(content, disposables),
+            resources = constructResourceGroups(content, disposables),
+            textItem = textItem(content),
+            start = content.start,
+            end = content.end,
+            contentType = content.type
+        )
+    }
 
     private fun textItem(content: Content): TextItem {
         return content.format?.let { format ->
@@ -119,12 +138,18 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 //        } ?: throw IllegalStateException("Content format is null")
     }
 
-    private fun constructResource(title: Content, body: Content?, identifier: String): Resource? {
+    private fun constructResource(
+        title: Content,
+        body: Content?,
+        identifier: String,
+        disposables: MutableList<Disposable>
+    ): Resource? {
+
         val bodyComponent = body?.let {
             Resource.Component(
                 sort = it.sort,
                 textItem = textItem(it),
-                audio = constructAssociatedAudio(it),
+                audio = constructAssociatedAudio(it, disposables),
                 contentType = ContentType.BODY,
                 label = resourceLabel(ContentType.BODY, identifier)
             )
@@ -133,7 +158,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         val titleComponent = Resource.Component(
             sort = title.sort,
             textItem = textItem(title),
-            audio = constructAssociatedAudio(title),
+            audio = constructAssociatedAudio(title, disposables),
             contentType = ContentType.TITLE,
             label = resourceLabel(ContentType.TITLE, identifier)
         )
@@ -144,31 +169,43 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         )
     }
 
-    private fun constructResourceGroups(content: Content) = constructResourceGroups(
+    private fun constructResourceGroups(
+        content: Content,
+        disposables: MutableList<Disposable>
+    ) = constructResourceGroups(
         resourceMetadataList = db.getResourceMetadata(content),
-        getResourceContents = { db.getResources(content, it) }
+        getResourceContents = { db.getResources(content, it) },
+        disposables = disposables
     )
 
-    private fun constructResourceGroups(collection: Collection) = constructResourceGroups(
+    private fun constructResourceGroups(
+        collection: Collection,
+        disposables: MutableList<Disposable>
+    ) = constructResourceGroups(
         resourceMetadataList = db.getResourceMetadata(collection),
-        getResourceContents = { db.getResources(collection, it) }
+        getResourceContents = { db.getResources(collection, it) },
+        disposables = disposables
     )
 
     private fun constructResourceGroups(
         resourceMetadataList: List<ResourceMetadata>,
-        getResourceContents: (ResourceMetadata) -> Observable<Content>
+        getResourceContents: (ResourceMetadata) -> Observable<Content>,
+        disposables: MutableList<Disposable>
     ): List<ResourceGroup> {
         return resourceMetadataList.map {
             val resources = Observable.defer {
                 getResourceContents(it)
-                    .contentsToResources(it.identifier)
+                    .contentsToResources(it.identifier, disposables)
             }.cache()
 
             ResourceGroup(it, resources)
         }
     }
 
-    private fun Observable<Content>.contentsToResources(identifier: String): Observable<Resource> {
+    private fun Observable<Content>.contentsToResources(
+        identifier: String,
+        disposables: MutableList<Disposable>
+    ): Observable<Resource> {
         return this
             .buffer(2, 1) // create a rolling window of size 2
             .concatMapIterable { list ->
@@ -182,32 +219,33 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
                         // If the second element isn't a body, just use the title. (The second
                         // element will appear again in the next window.)
-                        b?.type != ContentType.BODY -> constructResource(a, null, identifier)
+                        b?.type != ContentType.BODY -> constructResource(a, null, identifier, disposables)
 
                         // Else, we have a title/body pair, so use it.
-                        else -> constructResource(a, b, identifier)
+                        else -> constructResource(a, b, identifier, disposables)
                     }
                 )
             }
     }
 
-    private fun deselectUponDelete(take: WorkbookTake, selectedTakeRelay: BehaviorRelay<TakeHolder>) {
-        val subscription = take.deletedTimestamp
+    private fun deselectUponDelete(
+        take: WorkbookTake,
+        selectedTakeRelay: BehaviorRelay<TakeHolder>
+    ): Disposable {
+        return take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
             .filter { take == selectedTakeRelay.value?.value }
             .map { TakeHolder(null) }
             .subscribe(selectedTakeRelay)
-        connections += subscription
     }
 
-    private fun deleteFromDbUponDelete(take: WorkbookTake, modelTake: ModelTake) {
-        val subscription = take.deletedTimestamp
+    private fun deleteFromDbUponDelete(take: WorkbookTake, modelTake: ModelTake): Disposable {
+        return take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
             .subscribe {
                 db.deleteTake(modelTake, it)
                     .subscribe()
             }
-        connections += subscription
     }
 
     private fun workbookTake(modelTake: ModelTake): WorkbookTake {
@@ -233,7 +271,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         )
     }
 
-    private fun constructAssociatedAudio(content: Content): AssociatedAudio {
+    private fun constructAssociatedAudio(
+        content: Content,
+        disposables: MutableList<Disposable>
+    ): AssociatedAudio {
         /** Map to recover model.Take objects from workbook.Take objects. */
         val takeMap = synchronizedMap(WeakHashMap<WorkbookTake, ModelTake>())
 
@@ -297,8 +338,9 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                     .subscribe { insertionId -> modelTake.id = insertionId }
             }
 
-        connections += takesRelaySubscription
-        connections += selectedTakeRelaySubscription
+        disposables.add(takesRelaySubscription)
+        disposables.add(selectedTakeRelaySubscription)
+
         return AssociatedAudio(takesRelay, selectedTakeRelay)
     }
 
@@ -355,6 +397,7 @@ private class DefaultDatabaseAccessors(
 
     override fun getResources(content: Content, metadata: ResourceMetadata) =
         resourceRepo.getResources(content, metadata)
+
     override fun getResources(collection: Collection, metadata: ResourceMetadata) =
         resourceRepo.getResources(collection, metadata)
 

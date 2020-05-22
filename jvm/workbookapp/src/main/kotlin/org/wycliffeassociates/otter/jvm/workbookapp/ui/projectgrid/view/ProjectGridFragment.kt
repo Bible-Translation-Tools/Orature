@@ -7,7 +7,7 @@ import javafx.application.Platform
 import javafx.beans.property.*
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.Action
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
@@ -29,7 +29,7 @@ class ProjectGridFragment : Fragment() {
         // Setup property bindings to bind to empty property
         // https://stackoverflow.com/questions/21612969/is-it-possible-to-bind-the-non-empty-state-of-
         // an-observablelist-inside-an-object
-        val listProperty = SimpleListProperty<Collection>()
+        val listProperty = SimpleListProperty<Workbook>()
         listProperty.bind(SimpleObjectProperty(viewModel.projects))
         noProjectsProperty = listProperty.emptyProperty()
         initializeProgressDialogs()
@@ -60,10 +60,10 @@ class ProjectGridFragment : Fragment() {
             cellHeightProperty.set(224.0)
             cellCache { item ->
                 projectcard {
-                    titleTextProperty().set(item.titleKey)
-                    slugTextProperty().set(item.slug)
+                    titleTextProperty().set(item.target.title)
+                    slugTextProperty().set(item.target.slug)
                     actionTextProperty().set(messages["openProject"])
-                    languageTextProperty().set(item.resourceContainer?.language?.name)
+                    languageTextProperty().set(item.target.resourceMetadata.language.name)
                     setOnAction {
                         viewModel.selectProject(item)
                     }
@@ -71,7 +71,9 @@ class ProjectGridFragment : Fragment() {
                         Action(
                             text = messages["delete"],
                             iconCode = "gmi-delete",
-                            onClicked = { viewModel.deleteProject(item) }
+                            onClicked = {
+                                viewModel.deleteProject(item)
+                            }
                         )
                     )
                 }
