@@ -32,7 +32,8 @@ class ResourceGroupCard(group: ResourceGroupCardItem, isFilterOnProperty: Boolea
 fun resourcegroupcard(
     group: ResourceGroupCardItem,
     isFilterOnProperty: BooleanProperty,
-    init: ResourceGroupCard.() -> Unit = {}): ResourceGroupCard {
+    init: ResourceGroupCard.() -> Unit = {}
+): ResourceGroupCard {
     val rgc = ResourceGroupCard(group, isFilterOnProperty)
     rgc.init()
     return rgc
