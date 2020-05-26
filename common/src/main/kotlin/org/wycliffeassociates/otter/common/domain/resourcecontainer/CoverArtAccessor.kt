@@ -6,11 +6,18 @@ import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
 
 class CoverArtAccessor(val metadata: ResourceMetadata, val project: String) {
-    // val cache = mutableMapOf<String, File>()
+    companion object {
+        private val cache = mutableMapOf<String, File>()
+    }
 
     private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
 
     fun getArtwork(): File? {
+        synchronized(cache) {
+            cache[cacheKey(metadata, project)]?.let {
+                return it
+            }
+        }
         if (rc.media != null) {
             val mediaProject = rc.media!!.projects.find { it.identifier == project }
             var media = mediaProject?.media?.find { it.identifier == "jpg" || it.identifier == "jpeg" }
@@ -43,10 +50,16 @@ class CoverArtAccessor(val metadata: ResourceMetadata, val project: String) {
                         it.transferTo(fos)
                     }
                 }
-                // cache[project] = file
+                synchronized(cache) {
+                    cache[cacheKey(metadata, project)] = file
+                }
                 return file
             }
         }
         return null
+    }
+
+    private fun cacheKey(metadata: ResourceMetadata, project: String): String {
+        return "${metadata.language.slug}-${metadata.identifier}-${project}"
     }
 }

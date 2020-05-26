@@ -64,6 +64,7 @@ class ProjectGridFragment : Fragment() {
                     slugTextProperty().set(item.target.slug)
                     actionTextProperty().set(messages["openProject"])
                     languageTextProperty().set(item.target.resourceMetadata.language.name)
+                    coverArtProperty().set(item.coverArtAccessor.getArtwork())
                     setOnAction {
                         viewModel.selectProject(item)
                     }
