@@ -6,7 +6,10 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import tornadofx.*
 
-class ResourceGroupCard(group: ResourceGroupCardItem, filterCompletedCardsProperty: BooleanProperty) : VBox() {
+class ResourceGroupCard(
+    group: ResourceGroupCardItem,
+    filterCompletedCardsProperty: BooleanProperty
+) : VBox() {
     companion object {
         const val RENDER_BATCH_SIZE = 10
     }
