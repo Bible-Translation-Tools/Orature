@@ -12,6 +12,7 @@ class ChapterTabGroup : TabGroup() {
 
     override fun activate() {
         workbookViewModel.activeChapterProperty.set(null)
+        showHorizontalNavBarProperty.set(false)
         val activeResourceMetadata = workbookViewModel.activeResourceMetadataProperty.value
 
         createTabs()

@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import org.wycliffeassociates.controls.ChromeableTabPane
 import org.wycliffeassociates.otter.common.navigation.INavigator
 import org.wycliffeassociates.otter.common.navigation.ITabGroup
@@ -15,26 +17,39 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     val chrome: Node by param()
     val headerScalingFactor: Double by param()
     val canNavigateBackProperty = SimpleBooleanProperty(false)
+    val showHorizontalNavBarProperty = SimpleBooleanProperty(false)
+    val tabPane = ChromeableTabPane(chrome, headerScalingFactor)
 
     override val tabGroupMap: MutableMap<TabGroupType, ITabGroup> = mutableMapOf()
     override val navBackStack = Stack<ITabGroup>()
     override val tabGroupBuilder = TabGroupBuilder()
-    override val root = ChromeableTabPane(chrome, headerScalingFactor)
+    override val root = VBox()
 
     override var currentGroup: ITabGroup? = null
 
     init {
         root.apply {
             importStylesheet<MainScreenStyles>()
-            addClass(Stylesheet.tabPane)
 
-            // Using a size property binding and toggleClass() did not work consistently. This does.
-            tabs.onChange {
-                if (it.list.size == 1) {
-                    addClass(MainScreenStyles.singleTab)
-                } else {
-                    removeClass(MainScreenStyles.singleTab)
+            tabPane.apply {
+                addClass(Stylesheet.tabPane)
+                vgrow = Priority.ALWAYS
+
+                // Using a size property binding and toggleClass() did not work consistently. This does.
+                tabs.onChange {
+                    if (it.list.size == 1) {
+                        addClass(MainScreenStyles.singleTab)
+                    } else {
+                        removeClass(MainScreenStyles.singleTab)
+                    }
                 }
+            }
+            add(tabPane)
+
+            label("********* ************* **********").apply {
+                visibleWhen { showHorizontalNavBarProperty }
+                managedWhen { visibleProperty() }
+                prefHeight = 70.0
             }
         }
     }
@@ -56,6 +71,6 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     }
 
     private fun clearTabs() {
-        root.tabs.clear()
+        tabPane.tabs.clear()
     }
 }

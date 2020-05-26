@@ -21,6 +21,7 @@ class RecordResourceTabGroup : TabGroup() {
     }
 
     override fun activate() {
+        showHorizontalNavBarProperty.set(true)
         tabs.forEach { recordableTab ->
             if (recordableTab.hasRecordable()) {
                 tabPane.tabs.add(recordableTab)
