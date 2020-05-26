@@ -145,4 +145,12 @@ class AudioPluginRepository(
 
     override fun setRecorderData(default: AudioPluginData): Completable =
         if (default.canRecord) preferences.setRecorderPluginId(default.id) else Completable.complete()
+
+    override fun isInternal(): Single<Boolean> {
+        return getRecorder()
+            .flatMap {
+                Maybe.just(it.isInternal())
+            }
+            .toSingle(false)
+    }
 }

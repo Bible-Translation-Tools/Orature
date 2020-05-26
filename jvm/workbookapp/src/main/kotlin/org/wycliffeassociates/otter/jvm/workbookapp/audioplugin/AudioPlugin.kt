@@ -23,6 +23,11 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
     private val monitor = Object()
 
+    override fun isInternal(): Boolean {
+        val pluginClass = findPlugin(File(pluginData.executable))
+        return pluginClass != null
+    }
+
     override fun launch(audioFile: File, pluginParameters: PluginParameters): Completable {
         return when (File(pluginData.executable).extension) {
             "jar" -> launchJar(audioFile, pluginParameters)

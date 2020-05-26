@@ -25,6 +25,7 @@ class AudioPluginViewModel : ViewModel() {
 
     val recorderData = pluginRepository.getRecorderData()
     val editorData = pluginRepository.getEditorData()
+    fun isInternal() = pluginRepository.isInternal()
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
         val params = constructPluginParameters()

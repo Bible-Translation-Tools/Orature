@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
@@ -35,11 +36,12 @@ open class RecordableViewModel(
     private val disposables = CompositeDisposable()
 
     val selectedTakeProperty = SimpleObjectProperty<Take?>()
-    val currentTakeProperty = SimpleObjectProperty<Take?>()
+    val currentTakeProperty = SimpleObjectProperty<Int?>()
 
     val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
     val showPluginActiveProperty = SimpleBooleanProperty(false)
     var showPluginActive by showPluginActiveProperty
+    var showPluginSubscription: Disposable? = null
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -87,9 +89,15 @@ open class RecordableViewModel(
     fun recordNewTake() {
         recordable?.let {
             contextProperty.set(TakeContext.RECORD)
-            // showPluginActive = true
-            audioPluginViewModel
-                .record(it)
+            it.audio.getNewTakeNumber()
+                .flatMap { take ->
+                    currentTakeProperty.set(take)
+                    audioPluginViewModel.isInternal()
+                }
+                .flatMap { isInternal ->
+                    showPluginActive = !isInternal
+                    audioPluginViewModel.record(it)
+                }
                 .observeOnFx()
                 .subscribe { result: RecordTake.Result ->
                     showPluginActive = false
@@ -104,7 +112,7 @@ open class RecordableViewModel(
 
     fun editTake(editTakeEvent: EditTakeEvent) {
         contextProperty.set(TakeContext.EDIT_TAKES)
-        currentTakeProperty.set(editTakeEvent.take)
+        currentTakeProperty.set(editTakeEvent.take.number)
         showPluginActive = true
         audioPluginViewModel
             .edit(editTakeEvent.take)

@@ -5,6 +5,8 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import io.reactivex.schedulers.Schedulers
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventHandler
@@ -32,6 +34,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContex
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
+import java.util.concurrent.Callable
 
 abstract class RecordableFragment(
     protected val recordableViewModel: RecordableViewModel,
@@ -48,6 +51,7 @@ abstract class RecordableFragment(
     protected val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent> = SimpleObjectProperty()
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
+    private val recordingAppNameProperty = SimpleStringProperty()
 
     val dragTarget =
         dragTargetBuilder
@@ -136,24 +140,31 @@ abstract class RecordableFragment(
 
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
-        val recordingAppName = SimpleStringProperty()
+        recordableViewModel.showPluginSubscription?.dispose()
+        recordableViewModel.contextProperty.toObservable().subscribe { ctx ->
+            when (ctx) {
+                TakeContext.RECORD -> {
+                    audioPluginViewModel.recorderData
+                        .subscribeOn(Schedulers.io())
+                        .subscribe {
+                            recordingAppNameProperty.set(it.name)
+                        }
+                }
+                TakeContext.EDIT_TAKES -> {
+                    audioPluginViewModel.editorData
+                        .subscribeOn(Schedulers.io())
+                        .subscribe {
+                            recordingAppNameProperty.set(it.name)
+                        }
+                }
+                null -> throw IllegalStateException("Action is not supported!")
+            }
+        }
 
         val dialog = sourcedialog {
-            recordingAppName.toObservable().subscribe { appName ->
-                recordableViewModel.currentTakeProperty.toObservable().subscribe { take ->
-                    dialogTitle = String.format(
-                        messages["sourceDialogTitle"],
-                        take?.number,
-                        appName
-                    )
-                    text = String.format(
-                        messages["sourceDialogMessage"],
-                        take?.number,
-                        appName,
-                        appName
-                    )
-                }
-            }
+
+            dialogTitleProperty.bind(dialogTitleBinding())
+            textProperty.bind(dialogTextBinding())
 
             closeText = messages["restoreOrature"]
             recordableViewModel.sourceAudioPlayerProperty.toObservable().subscribe {
@@ -165,34 +176,11 @@ abstract class RecordableFragment(
                 close()
             }
         }
-        recordableViewModel.showPluginActiveProperty.onChange {
+        recordableViewModel.showPluginActiveProperty.toObservable().subscribe {
             Platform.runLater {
-                if (it) {
-                    recordableViewModel.contextProperty.toObservable().subscribe { ctx ->
-                        when (ctx) {
-                            TakeContext.RECORD -> {
-                                audioPluginViewModel.recorderData
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe {
-                                        recordingAppName.set(it.name)
-                                    }
-                            }
-                            TakeContext.EDIT_TAKES -> {
-                                audioPluginViewModel.editorData
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe {
-                                        recordingAppName.set(it.name)
-                                    }
-                            }
-                            null -> throw IllegalStateException("Action is not supported!")
-                        }
-                    }
-                    dialog.open()
-                } else {
-                    dialog.close()
-                }
+                if (it) dialog.open() else dialog.close()
             }
-        }
+        }?.let { recordableViewModel.showPluginSubscription = it }
     }
 
     private fun getPointInRoot(node: Node, pointInNode: Point2D): Point2D {
@@ -264,5 +252,34 @@ abstract class RecordableFragment(
             }
             draggingNodeProperty.set(null)
         }
+    }
+
+    private fun dialogTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                String.format(
+                    messages["sourceDialogTitle"],
+                    recordableViewModel.currentTakeProperty.get(),
+                    recordingAppNameProperty.get()
+                )
+            },
+            recordingAppNameProperty,
+            recordableViewModel.currentTakeProperty
+        )
+    }
+
+    private fun dialogTextBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                String.format(
+                    messages["sourceDialogMessage"],
+                    recordableViewModel.currentTakeProperty.get(),
+                    recordingAppNameProperty.get(),
+                    recordingAppNameProperty.get()
+                )
+            },
+            recordingAppNameProperty,
+            recordableViewModel.currentTakeProperty
+        )
     }
 }
