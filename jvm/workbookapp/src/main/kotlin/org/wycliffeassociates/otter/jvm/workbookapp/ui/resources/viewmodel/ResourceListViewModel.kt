@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.transformation.FilteredList
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
@@ -19,13 +21,24 @@ class ResourceListViewModel : ViewModel() {
 
     var selectedGroupCardItem = SimpleObjectProperty<ResourceGroupCardItem>()
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
+    val filteredResourceGroupCardItemList = FilteredList(resourceGroupCardItemList)
 
     val completionProgressProperty = SimpleDoubleProperty(0.0)
+    val isFilterOnProperty = SimpleBooleanProperty(false)
 
     init {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
             targetChapter?.let {
                 loadResourceGroups(getSourceChapter(targetChapter))
+            }
+        }
+        isFilterOnProperty.onChange { checked ->
+            if (checked) {
+                filteredResourceGroupCardItemList.setPredicate {
+                    it.groupCompletedBinding().get().not()
+                }
+            } else {
+                filteredResourceGroupCardItemList.predicate = null
             }
         }
     }

@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
@@ -16,7 +17,10 @@ import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
 import tornadofx.*
 
-class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
+class ResourceCardFragment(
+    private val item: ResourceCardItem,
+    private val filterCompletedCardsProperty: BooleanProperty
+) : Fragment() {
     private val navigator: ChromeableStage by inject()
     override val root = HBox()
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
@@ -26,6 +30,9 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
     init {
         root.apply {
             alignment = Pos.CENTER_LEFT
+
+            hiddenWhen { item.cardCompletedBinding().and(filterCompletedCardsProperty) }
+            managedWhen { visibleProperty() }
 
             vbox {
                 spacing = 3.0
@@ -81,5 +88,6 @@ class ResourceCardFragment(private val item: ResourceCardItem) : Fragment() {
 
 fun resourceCardFragment(
     resource: ResourceCardItem,
+    filterCompletedCardsProperty: BooleanProperty,
     init: ResourceCardFragment.() -> Unit = {}
-) = ResourceCardFragment(resource).apply { init.invoke(this) }
+) = ResourceCardFragment(resource, filterCompletedCardsProperty).apply { init.invoke(this) }
