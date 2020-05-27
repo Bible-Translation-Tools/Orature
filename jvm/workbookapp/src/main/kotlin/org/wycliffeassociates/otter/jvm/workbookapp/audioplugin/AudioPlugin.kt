@@ -23,7 +23,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
     private val monitor = Object()
 
-    override fun isInternal(): Boolean {
+    override fun isNativePlugin(): Boolean {
         val pluginClass = findPlugin(File(pluginData.executable))
         return pluginClass != null
     }

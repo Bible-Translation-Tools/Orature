@@ -5,6 +5,8 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
@@ -23,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
+import java.util.concurrent.Callable
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -92,7 +95,7 @@ open class RecordableViewModel(
             it.audio.getNewTakeNumber()
                 .flatMap { take ->
                     currentTakeProperty.set(take)
-                    audioPluginViewModel.isInternal()
+                    audioPluginViewModel.isNativePlugin()
                 }
                 .flatMap { isInternal ->
                     showPluginActive = !isInternal
@@ -140,6 +143,54 @@ open class RecordableViewModel(
 
     fun deleteTake(take: Take) {
         take.deletedTimestamp.accept(DateHolder.now())
+    }
+
+    fun dialogTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                String.format(
+                    messages["sourceDialogTitle"],
+                    currentTakeProperty.get(),
+                    audioPluginViewModel.pluginNameProperty.get()
+                )
+            },
+            audioPluginViewModel.pluginNameProperty,
+            currentTakeProperty
+        )
+    }
+
+    fun dialogTextBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                String.format(
+                    messages["sourceDialogMessage"],
+                    currentTakeProperty.get(),
+                    audioPluginViewModel.pluginNameProperty.get(),
+                    audioPluginViewModel.pluginNameProperty.get()
+                )
+            },
+            audioPluginViewModel.pluginNameProperty,
+            currentTakeProperty
+        )
+    }
+
+    fun pluginNameBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                when (contextProperty.get()) {
+                    TakeContext.RECORD -> {
+                        audioPluginViewModel.selectedRecorderProperty.get().name
+                    }
+                    TakeContext.EDIT_TAKES -> {
+                        audioPluginViewModel.selectedEditorProperty.get().name
+                    }
+                    null -> throw IllegalStateException("Action is not supported!")
+                }
+            },
+            contextProperty,
+            audioPluginViewModel.selectedRecorderProperty,
+            audioPluginViewModel.selectedEditorProperty
+        )
     }
 
     @Suppress("ProtectedInFinal", "Unused")

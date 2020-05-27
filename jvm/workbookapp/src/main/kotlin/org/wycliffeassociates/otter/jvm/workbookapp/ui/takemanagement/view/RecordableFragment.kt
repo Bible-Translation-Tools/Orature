@@ -3,12 +3,10 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import io.reactivex.schedulers.Schedulers
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventHandler
 import javafx.geometry.BoundingBox
 import javafx.geometry.Bounds
@@ -51,7 +49,6 @@ abstract class RecordableFragment(
     protected val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent> = SimpleObjectProperty()
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
-    private val recordingAppNameProperty = SimpleStringProperty()
 
     val dragTarget =
         dragTargetBuilder
@@ -140,42 +137,21 @@ abstract class RecordableFragment(
 
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
+        audioPluginViewModel.pluginNameProperty.bind(recordableViewModel.pluginNameBinding())
         recordableViewModel.showPluginSubscription?.dispose()
-        recordableViewModel.contextProperty.toObservable().subscribe { ctx ->
-            when (ctx) {
-                TakeContext.RECORD -> {
-                    audioPluginViewModel.recorderData
-                        .subscribeOn(Schedulers.io())
-                        .subscribe {
-                            recordingAppNameProperty.set(it.name)
-                        }
-                }
-                TakeContext.EDIT_TAKES -> {
-                    audioPluginViewModel.editorData
-                        .subscribeOn(Schedulers.io())
-                        .subscribe {
-                            recordingAppNameProperty.set(it.name)
-                        }
-                }
-                null -> throw IllegalStateException("Action is not supported!")
-            }
-        }
 
         val dialog = sourcedialog {
 
-            dialogTitleProperty.bind(dialogTitleBinding())
-            textProperty.bind(dialogTextBinding())
+            dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
+            textProperty.bind(recordableViewModel.dialogTextBinding())
 
             closeText = messages["restoreOrature"]
-            recordableViewModel.sourceAudioPlayerProperty.toObservable().subscribe {
+            recordableViewModel.sourceAudioPlayerProperty.get()?.let {
                 player = it
                 audioAvailable = recordableViewModel.sourceAudioAvailableProperty.get()
             }
-            onCloseAction {
-                recordableViewModel.sourceAudioPlayerProperty.get()?.stop()
-                close()
-            }
         }
+
         recordableViewModel.showPluginActiveProperty.toObservable().subscribe {
             Platform.runLater {
                 if (it) dialog.open() else dialog.close()
@@ -252,34 +228,5 @@ abstract class RecordableFragment(
             }
             draggingNodeProperty.set(null)
         }
-    }
-
-    private fun dialogTitleBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                String.format(
-                    messages["sourceDialogTitle"],
-                    recordableViewModel.currentTakeProperty.get(),
-                    recordingAppNameProperty.get()
-                )
-            },
-            recordingAppNameProperty,
-            recordableViewModel.currentTakeProperty
-        )
-    }
-
-    private fun dialogTextBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                String.format(
-                    messages["sourceDialogMessage"],
-                    recordableViewModel.currentTakeProperty.get(),
-                    recordingAppNameProperty.get(),
-                    recordingAppNameProperty.get()
-                )
-            },
-            recordingAppNameProperty,
-            recordableViewModel.currentTakeProperty
-        )
     }
 }

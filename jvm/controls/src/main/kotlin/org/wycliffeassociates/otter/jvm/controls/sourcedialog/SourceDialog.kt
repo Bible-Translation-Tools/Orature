@@ -59,10 +59,6 @@ class SourceDialog : Fragment() {
                     visibleWhen(textProperty().isNotEmpty)
                     managedWhen { visibleProperty() }
                 }
-                // button(closeTextProperty, FontIcon("gmi-close:20")) {
-                //     addClass("source-dialog__close-button")
-                //     onActionProperty().bind(onCloseActionProperty)
-                // }
             }
         }
         bottom {
