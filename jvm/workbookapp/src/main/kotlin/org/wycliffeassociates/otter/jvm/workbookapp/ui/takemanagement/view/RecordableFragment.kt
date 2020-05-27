@@ -4,8 +4,6 @@ import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
-import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.BoundingBox
@@ -28,11 +26,9 @@ import org.wycliffeassociates.otter.jvm.controls.sourcedialog.sourcedialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
-import java.util.concurrent.Callable
 
 abstract class RecordableFragment(
     protected val recordableViewModel: RecordableViewModel,
