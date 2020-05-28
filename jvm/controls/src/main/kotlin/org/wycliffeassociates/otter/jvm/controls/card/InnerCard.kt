@@ -2,15 +2,23 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.effect.GaussianBlur
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
+import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
+import java.io.File
 
-class InnerCard(cardGraphic: Node? = null) : VBox() {
+class InnerCard(val cardGraphic: Node? = null) : VBox() {
+
+    val graphicPathProperty = SimpleObjectProperty<File>()
+
     val titleProperty = SimpleStringProperty()
     var title by titleProperty
 
@@ -34,6 +42,9 @@ class InnerCard(cardGraphic: Node? = null) : VBox() {
 
     init {
         importStylesheet<DefaultStyles>()
+        graphicPathProperty.onChange {
+            updateGraphic(it)
+        }
         addClass(DefaultStyles.defaultInnerCard)
         stackpane {
             if (cardGraphic != null) {
@@ -92,6 +103,26 @@ class InnerCard(cardGraphic: Node? = null) : VBox() {
                         .booleanBinding { it != null && 0.9999 <= it.toDouble() })
                 }
             }
+        }
+    }
+
+    private fun updateGraphic(graphic: File?) {
+        graphic?.let {
+            val image = Image(graphic.inputStream())
+            val iv = ImageView(image)
+            iv.fitWidthProperty().value = 150.0
+            iv.fitHeightProperty().value = 150.0
+            (this@InnerCard.children.first() as StackPane).children.removeAt(0)
+            (this@InnerCard.children.first() as StackPane).children.add(0, iv)
+        } ?: run {
+            resetGraphicToDefault()
+        }
+    }
+
+    private fun resetGraphicToDefault() {
+        cardGraphic?.let {
+            (this@InnerCard.children.first() as StackPane).children.removeAt(0)
+            (this@InnerCard.children.first() as StackPane).children.add(0, it)
         }
     }
 }
