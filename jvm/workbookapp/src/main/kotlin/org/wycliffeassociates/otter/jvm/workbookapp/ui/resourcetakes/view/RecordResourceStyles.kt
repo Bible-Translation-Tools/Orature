@@ -14,7 +14,6 @@ class RecordResourceStyles : Stylesheet() {
         val newTakeRegion by cssclass()
         val contentScrollPane by cssclass()
         val takesList by cssclass()
-        val bottomButton by cssclass()
 
         private val takeMaxWidth = 500.px
         private val takeMinHeight = 80.px
@@ -80,17 +79,6 @@ class RecordResourceStyles : Stylesheet() {
         listCell {
             backgroundColor += Color.TRANSPARENT
             padding = box(0.px, 0.px, 15.px, 0.px)
-        }
-
-        bottomButton {
-            borderColor += box(AppTheme.colors.appBlue)
-            borderWidth += box(2.px)
-            borderRadius += box(5.px)
-            child("*") {
-                fill = AppTheme.colors.appBlue
-                fontSize = 16.px
-            }
-            maxWidth = 500.px
         }
     }
 }

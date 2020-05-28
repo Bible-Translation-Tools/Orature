@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourcetakecard
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import tornadofx.*
 
@@ -26,7 +27,8 @@ class RecordResourceFragment(
     recordableViewModel,
     DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
 ) {
-    val recordResourceViewModel: RecordResourceViewModel by inject()
+    private val recordResourceViewModel: RecordResourceViewModel by inject()
+    private val navigator: ChromeableStage by inject()
     val formattedTextProperty = SimpleStringProperty()
 
     val alternateTakesList = TakesListView(
@@ -48,28 +50,6 @@ class RecordResourceFragment(
                 recordableViewModel.recordNewTake()
             }
         }
-
-    private val previousButton = JFXButton().apply {
-        addClass(RecordResourceStyles.bottomButton)
-        text = messages["previousChunk"]
-        graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
-        action {
-            closePlayers()
-            recordResourceViewModel.previousChunk()
-        }
-        enableWhen(recordResourceViewModel.hasPrevious)
-    }
-
-    private val nextButton = JFXButton().apply {
-        addClass(RecordResourceStyles.bottomButton)
-        text = messages["nextChunk"]
-        graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
-        action {
-            closePlayers()
-            recordResourceViewModel.nextChunk()
-        }
-        enableWhen(recordResourceViewModel.hasNext)
-    }
 
     private val leftRegion = VBox().apply {
         vgrow = Priority.ALWAYS
@@ -110,8 +90,7 @@ class RecordResourceFragment(
         vgrow = Priority.ALWAYS
         addClass(RecordResourceStyles.takesTab)
 
-        constraintsForRow(0).percentHeight = 90.0
-        constraintsForRow(1).percentHeight = 10.0
+        setFillHeightSingleRow()
 
         row {
             vbox {
@@ -129,24 +108,6 @@ class RecordResourceFragment(
                 add(alternateTakesList)
             }
         }
-
-        row {
-            vbox {
-                alignment = Pos.CENTER
-                gridpaneColumnConstraints {
-                    percentWidth = 50.0
-                }
-                add(previousButton)
-            }
-
-            vbox {
-                alignment = Pos.CENTER
-                gridpaneColumnConstraints {
-                    percentWidth = 50.0
-                }
-                add(nextButton)
-            }
-        }
     }
 
     init {
@@ -154,6 +115,22 @@ class RecordResourceFragment(
 
         mainContainer.apply {
             add(grid)
+        }
+
+        navigator.resourceNavBar.hasNextProperty().bind(recordResourceViewModel.hasNext)
+        navigator.resourceNavBar.onNextAction {
+            closePlayers()
+            recordResourceViewModel.nextChunk()
+            navigator.tabPane.selectionModel.select(0)
+            recordResourceViewModel.resourceChangedProperty.set(true)
+        }
+
+        navigator.resourceNavBar.hasPreviousProperty().bind(recordResourceViewModel.hasPrevious)
+        navigator.resourceNavBar.onPreviousAction {
+            closePlayers()
+            recordResourceViewModel.previousChunk()
+            navigator.tabPane.selectionModel.select(0)
+            recordResourceViewModel.resourceChangedProperty.set(true)
         }
     }
 

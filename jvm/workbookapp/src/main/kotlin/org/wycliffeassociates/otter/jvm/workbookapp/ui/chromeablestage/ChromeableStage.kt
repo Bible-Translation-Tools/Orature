@@ -8,6 +8,7 @@ import org.wycliffeassociates.controls.ChromeableTabPane
 import org.wycliffeassociates.otter.common.navigation.INavigator
 import org.wycliffeassociates.otter.common.navigation.ITabGroup
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.controls.resourcenavbar.ResourceNavBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups.TabGroupBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenStyles
 import tornadofx.*
@@ -17,8 +18,9 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     val chrome: Node by param()
     val headerScalingFactor: Double by param()
     val canNavigateBackProperty = SimpleBooleanProperty(false)
-    val showHorizontalNavBarProperty = SimpleBooleanProperty(false)
+    val resourceNavBarVisibleProperty = SimpleBooleanProperty(false)
     val tabPane = ChromeableTabPane(chrome, headerScalingFactor)
+    val resourceNavBar = ResourceNavBar()
 
     override val tabGroupMap: MutableMap<TabGroupType, ITabGroup> = mutableMapOf()
     override val navBackStack = Stack<ITabGroup>()
@@ -46,11 +48,17 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
             }
             add(tabPane)
 
-            label("********* ************* **********").apply {
-                visibleWhen { showHorizontalNavBarProperty }
+            resourceNavBar.apply {
+                visibleWhen { resourceNavBarVisibleProperty }
                 managedWhen { visibleProperty() }
                 prefHeight = 70.0
+
+                previousButtonTextProperty().set(messages["previousChunk"])
+                nextButtonTextProperty().set(messages["nextChunk"])
+
+                importStylesheet(userAgentStylesheet)
             }
+            add(resourceNavBar)
         }
     }
 

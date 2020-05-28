@@ -9,7 +9,7 @@ class ProjectTabGroup : TabGroup() {
 
     override fun activate() {
         workbookViewModel.activeWorkbookProperty.set(null)
-        showHorizontalNavBarProperty.set(false)
+        resourceNavBarVisibleProperty.set(false)
 
         tabPane.apply {
             tab<ProjectGridFragment> {}

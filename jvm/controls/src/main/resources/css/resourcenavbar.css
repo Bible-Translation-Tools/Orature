@@ -1,0 +1,16 @@
+@import "root.css"
+
+.navbar--resource {
+    -fx-background-color: white;
+}
+
+.navbar--resource__button {
+    -fx-border-color: -primary;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+}
+
+.navbar--resource__button * {
+    -fx-fill: -primary;
+    -fx-font-size: 16px;
+}

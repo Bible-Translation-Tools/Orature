@@ -10,13 +10,13 @@ abstract class TabGroup : Component(), ITabGroup {
     private val chromeableStage: ChromeableStage by inject()
     protected val tabPane: TabPane = chromeableStage.tabPane
 
-    val showHorizontalNavBarProperty = SimpleBooleanProperty(false)
+    val resourceNavBarVisibleProperty = SimpleBooleanProperty(false)
 
     init {
-        chromeableStage.showHorizontalNavBarProperty.bind(showHorizontalNavBarProperty)
+        chromeableStage.resourceNavBarVisibleProperty.bind(resourceNavBarVisibleProperty)
     }
 
     override fun deactivate() {
-        showHorizontalNavBarProperty.set(false)
+        resourceNavBarVisibleProperty.set(false)
     }
 }

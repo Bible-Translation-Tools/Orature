@@ -13,7 +13,7 @@ class RecordableTabGroup : TabGroup() {
         workbookViewModel.activeChunkProperty.set(null)
         workbookViewModel.activeResourceComponentProperty.set(null)
         workbookViewModel.activeResourceProperty.set(null)
-        showHorizontalNavBarProperty.set(false)
+        resourceNavBarVisibleProperty.set(false)
 
         when (workbookViewModel.activeResourceMetadata.type) {
             ContainerType.Book -> createChunkTab()

@@ -1,9 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
+import javafx.beans.property.SimpleBooleanProperty
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.*
 
 class RecordResourceTabGroup : TabGroup() {
     private val viewModel: RecordResourceViewModel by inject()
@@ -20,11 +23,21 @@ class RecordResourceTabGroup : TabGroup() {
         )
     }
 
-    override fun activate() {
-        showHorizontalNavBarProperty.set(true)
+    private fun initTabs() {
+        tabPane.tabs.clear()
         tabs.forEach { recordableTab ->
             if (recordableTab.hasRecordable()) {
                 tabPane.tabs.add(recordableTab)
+            }
+        }
+    }
+
+    override fun activate() {
+        resourceNavBarVisibleProperty.set(true)
+        initTabs()
+        viewModel.resourceChangedProperty.onChange {
+            if (it) {
+                initTabs()
             }
         }
     }

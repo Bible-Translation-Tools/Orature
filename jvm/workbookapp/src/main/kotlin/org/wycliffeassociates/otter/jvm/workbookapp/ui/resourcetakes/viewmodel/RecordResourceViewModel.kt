@@ -36,8 +36,10 @@ class RecordResourceViewModel : ViewModel() {
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
     private val activeChunk: Chunk by activeChunkProperty
 
-    private val activeResourceProperty = SimpleObjectProperty<Resource>()
+    val activeResourceProperty = SimpleObjectProperty<Resource>()
     private val activeResource: Resource by activeResourceProperty
+
+    val resourceChangedProperty = SimpleBooleanProperty(false)
 
     private val resourceList: ObservableList<Resource> = observableListOf()
 
