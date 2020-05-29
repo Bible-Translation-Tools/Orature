@@ -60,6 +60,6 @@ class CoverArtAccessor(val metadata: ResourceMetadata, val project: String) {
     }
 
     private fun cacheKey(metadata: ResourceMetadata, project: String): String {
-        return "${metadata.language.slug}-${metadata.identifier}-${project}"
+        return "${metadata.language.slug}-${metadata.identifier}-$project"
     }
 }
