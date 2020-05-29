@@ -132,15 +132,14 @@ abstract class RecordableFragment(
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
         sourcedialog {
-
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
-            recordableViewModel.sourceAudioPlayerProperty.get()?.let {
+            recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
                 player = it
-                audioAvailable = recordableViewModel.sourceAudioAvailableProperty.get()
             }
 
+            audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
             shouldOpenDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
         }
     }

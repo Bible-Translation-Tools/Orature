@@ -1,19 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.github.thomasnield.rxkotlinfx.toObservableChanges
-import io.reactivex.Completable
-import io.reactivex.Maybe
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.value.ChangeListener
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -100,16 +94,12 @@ open class RecordableViewModel(
             contextProperty.set(TakeContext.RECORD)
 
             rec.audio.getNewTakeNumber()
-                .doOnSuccess { take ->
-                    currentTakeProperty.set(take)
-                }
-                .flatMapMaybe {
+                .flatMapMaybe { takeNumber ->
+                    currentTakeProperty.set(takeNumber)
                     audioPluginViewModel.getRecorder()
                 }
-                .doOnSuccess { plugin ->
+                .flatMapSingle { plugin ->
                     showPluginActive = !plugin.isNativePlugin()
-                }
-                .flatMapSingle {
                     audioPluginViewModel.record(rec)
                 }
                 .observeOnFx()
@@ -130,10 +120,7 @@ open class RecordableViewModel(
         audioPluginViewModel
             .getEditor()
             .flatMapSingle { plugin ->
-                Single.just(plugin.isNativePlugin())
-            }
-            .flatMap { isNative ->
-                showPluginActive = !isNative
+                showPluginActive = !plugin.isNativePlugin()
                 audioPluginViewModel.edit(editTakeEvent.take)
             }
             .observeOnFx()
