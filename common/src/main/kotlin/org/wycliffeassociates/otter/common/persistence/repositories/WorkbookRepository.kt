@@ -338,8 +338,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                     .subscribe { insertionId -> modelTake.id = insertionId }
             }
 
-        disposables.add(takesRelaySubscription)
-        disposables.add(selectedTakeRelaySubscription)
+        synchronized(disposables) {
+            disposables.add(takesRelaySubscription)
+            disposables.add(selectedTakeRelaySubscription)
+        }
 
         return AssociatedAudio(takesRelay, selectedTakeRelay)
     }
