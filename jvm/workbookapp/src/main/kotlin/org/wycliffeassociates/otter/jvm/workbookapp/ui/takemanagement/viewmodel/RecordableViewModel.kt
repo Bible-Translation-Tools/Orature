@@ -1,6 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.toObservableChanges
+import io.reactivex.Completable
+import io.reactivex.Maybe
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
@@ -9,6 +13,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ChangeListener
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -44,7 +49,6 @@ open class RecordableViewModel(
     val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
     val showPluginActiveProperty = SimpleBooleanProperty(false)
     var showPluginActive by showPluginActiveProperty
-    var showPluginSubscription: Disposable? = null
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -87,19 +91,26 @@ open class RecordableViewModel(
                 sourceAudioPlayerProperty.set(audioPlayer)
             }
         }
+
+        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
     }
 
     fun recordNewTake() {
-        recordable?.let {
+        recordable?.let { rec ->
             contextProperty.set(TakeContext.RECORD)
-            it.audio.getNewTakeNumber()
-                .flatMap { take ->
+
+            rec.audio.getNewTakeNumber()
+                .doOnSuccess { take ->
                     currentTakeProperty.set(take)
-                    audioPluginViewModel.isNativePlugin()
                 }
-                .flatMap { isInternal ->
-                    showPluginActive = !isInternal
-                    audioPluginViewModel.record(it)
+                .flatMapMaybe {
+                    audioPluginViewModel.getRecorder()
+                }
+                .doOnSuccess { plugin ->
+                    showPluginActive = !plugin.isNativePlugin()
+                }
+                .flatMapSingle {
+                    audioPluginViewModel.record(rec)
                 }
                 .observeOnFx()
                 .subscribe { result: RecordTake.Result ->
@@ -116,9 +127,15 @@ open class RecordableViewModel(
     fun editTake(editTakeEvent: EditTakeEvent) {
         contextProperty.set(TakeContext.EDIT_TAKES)
         currentTakeProperty.set(editTakeEvent.take.number)
-        showPluginActive = true
         audioPluginViewModel
-            .edit(editTakeEvent.take)
+            .getEditor()
+            .flatMapSingle { plugin ->
+                Single.just(plugin.isNativePlugin())
+            }
+            .flatMap { isNative ->
+                showPluginActive = !isNative
+                audioPluginViewModel.edit(editTakeEvent.take)
+            }
             .observeOnFx()
             .subscribe { result: EditTake.Result ->
                 showPluginActive = false

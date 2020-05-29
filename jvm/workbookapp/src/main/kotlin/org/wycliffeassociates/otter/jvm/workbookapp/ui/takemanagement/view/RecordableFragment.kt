@@ -1,9 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
-import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventHandler
 import javafx.geometry.BoundingBox
@@ -133,26 +131,18 @@ abstract class RecordableFragment(
 
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
-        audioPluginViewModel.pluginNameProperty.bind(recordableViewModel.pluginNameBinding())
-        recordableViewModel.showPluginSubscription?.dispose()
-
-        val dialog = sourcedialog {
+        sourcedialog {
 
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
-            textProperty.bind(recordableViewModel.dialogTextBinding())
+            dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
-            closeText = messages["restoreOrature"]
             recordableViewModel.sourceAudioPlayerProperty.get()?.let {
                 player = it
                 audioAvailable = recordableViewModel.sourceAudioAvailableProperty.get()
             }
-        }
 
-        recordableViewModel.showPluginActiveProperty.toObservable().subscribe {
-            Platform.runLater {
-                if (it) dialog.open() else dialog.close()
-            }
-        }?.let { recordableViewModel.showPluginSubscription = it }
+            shouldOpenDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
+        }
     }
 
     private fun getPointInRoot(node: Node, pointInNode: Point2D): Point2D {

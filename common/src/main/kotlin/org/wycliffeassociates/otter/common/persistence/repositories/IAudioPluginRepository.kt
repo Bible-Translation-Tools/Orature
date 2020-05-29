@@ -16,5 +16,4 @@ interface IAudioPluginRepository : IRepository<AudioPluginData> {
     fun getRecorderData(): Maybe<AudioPluginData>
     fun getRecorder(): Maybe<IAudioPlugin>
     fun initSelected(): Completable
-    fun isNativePlugin(): Single<Boolean>
 }

@@ -28,7 +28,8 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    fun isNativePlugin() = pluginRepository.isNativePlugin()
+    fun getRecorder() = pluginRepository.getRecorder()
+    fun getEditor() = pluginRepository.getEditor()
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()

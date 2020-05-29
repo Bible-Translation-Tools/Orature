@@ -145,12 +145,4 @@ class AudioPluginRepository(
 
     override fun setRecorderData(default: AudioPluginData): Completable =
         if (default.canRecord) preferences.setRecorderPluginId(default.id) else Completable.complete()
-
-    override fun isNativePlugin(): Single<Boolean> {
-        return getRecorder()
-            .flatMap {
-                Maybe.just(it.isNativePlugin())
-            }
-            .toSingle(false)
-    }
 }

@@ -1,14 +1,12 @@
 package org.wycliffeassociates.otter.jvm.controls.sourcedialog
 
+import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.stage.Modality
 import javafx.stage.StageStyle
-import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
@@ -20,22 +18,26 @@ class SourceDialog : Fragment() {
     val dialogTitleProperty = SimpleStringProperty()
     var dialogTitle by dialogTitleProperty
 
-    val textProperty = SimpleStringProperty()
-    var text by textProperty
+    val dialogTextProperty = SimpleStringProperty()
+    var dialogText by dialogTextProperty
 
     val playerProperty = SimpleObjectProperty<IAudioPlayer>()
     var player by playerProperty
 
-    val closeTextProperty = SimpleStringProperty("Back")
-    var closeText by closeTextProperty
-
     val audioAvailableProperty = SimpleBooleanProperty(false)
     var audioAvailable by audioAvailableProperty
 
-    val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val shouldOpenDialogProperty = SimpleBooleanProperty()
 
     init {
+        println(this)
         importStylesheet(javaClass.getResource("/css/source-dialog.css").toExternalForm())
+
+        shouldOpenDialogProperty.onChange {
+            Platform.runLater {
+                if (it) open() else close()
+            }
+        }
     }
 
     override val root = borderpane {
@@ -54,7 +56,7 @@ class SourceDialog : Fragment() {
         center {
             vbox {
                 alignment = Pos.CENTER
-                label(textProperty) {
+                label(dialogTextProperty) {
                     addClass("source-dialog__label", "source-dialog__label--message")
                     visibleWhen(textProperty().isNotEmpty)
                     managedWhen { visibleProperty() }
@@ -81,10 +83,6 @@ class SourceDialog : Fragment() {
 
     fun open() {
         openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
-    }
-
-    fun onCloseAction(op: () -> Unit) {
-        onCloseActionProperty.set(EventHandler { op.invoke() })
     }
 }
 
