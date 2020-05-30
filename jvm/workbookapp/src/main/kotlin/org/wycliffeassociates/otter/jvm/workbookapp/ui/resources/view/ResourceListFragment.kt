@@ -27,10 +27,14 @@ class ResourceListFragment : Fragment() {
                 )
                 filterText = messages["hideCompleted"]
                 workbookProgressProperty.bind(resourceListViewModel.completionProgressProperty)
+                resourceListViewModel.isFilterOnProperty.bind(isFilterOnProperty)
             }
         )
         add(
-            ResourceListView(resourceListViewModel.resourceGroupCardItemList).apply {
+            ResourceListView(
+                resourceListViewModel.filteredResourceGroupCardItemList,
+                resourceListViewModel.isFilterOnProperty
+            ).apply {
                 whenDocked {
                     resourceListViewModel.selectedGroupCardItem.get()?.let {
                         scrollTo(it)

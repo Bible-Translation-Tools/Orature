@@ -1,12 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model
 
 import io.reactivex.disposables.CompositeDisposable
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleDoubleProperty
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
+import java.util.concurrent.Callable
 
 data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     val title: String = renderTitleAsPlainText()
@@ -41,5 +44,19 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     private fun renderTitleAsPlainText(): String {
         val document = parser.parse(resource.title.textItem.text)
         return renderer.render(document)
+    }
+
+    fun cardCompletedBinding(): BooleanBinding {
+        val dependencies = arrayOf(titleProgressProperty)
+        bodyProgressProperty?.let { dependencies.plus(it) }
+
+        return Bindings.createBooleanBinding(
+            Callable {
+                val titleCompleted = titleProgressProperty.get() == 1.0
+                val bodyCompleted = bodyProgressProperty?.get() == 1.0
+                titleCompleted && bodyCompleted
+            },
+            *dependencies
+        )
     }
 }
