@@ -68,6 +68,11 @@ class MainScreenView : View() {
                                         majorLabelProperty.bind(viewModel.selectedProjectName)
                                         minorLabelProperty.bind(viewModel.selectedProjectLanguage)
                                         visibleOnPropertyNotNull(workbookViewModel.activeWorkbookProperty)
+                                        workbookViewModel.activeWorkbookProperty.onChange { workbook ->
+                                            workbook?.let {
+                                                graphicPathProperty.value = workbook.coverArtAccessor.getArtwork()
+                                            }
+                                        }
                                     }
                                     NavBoxType.CHAPTER -> {
                                         titleProperty.bind(viewModel.selectedChapterTitle)
