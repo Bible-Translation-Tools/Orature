@@ -38,7 +38,7 @@ open class RecordableViewModel(
     private val disposables = CompositeDisposable()
 
     val selectedTakeProperty = SimpleObjectProperty<Take?>()
-    val currentTakeProperty = SimpleObjectProperty<Int?>()
+    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
     val showPluginActiveProperty = SimpleBooleanProperty(false)
@@ -95,7 +95,7 @@ open class RecordableViewModel(
 
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
-                    currentTakeProperty.set(takeNumber)
+                    currentTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getRecorder()
                 }
                 .flatMapSingle { plugin ->
@@ -116,7 +116,7 @@ open class RecordableViewModel(
 
     fun editTake(editTakeEvent: EditTakeEvent) {
         contextProperty.set(TakeContext.EDIT_TAKES)
-        currentTakeProperty.set(editTakeEvent.take.number)
+        currentTakeNumberProperty.set(editTakeEvent.take.number)
         audioPluginViewModel
             .getEditor()
             .flatMapSingle { plugin ->
@@ -126,7 +126,7 @@ open class RecordableViewModel(
             .observeOnFx()
             .subscribe { result: EditTake.Result ->
                 showPluginActive = false
-                currentTakeProperty.set(null)
+                currentTakeNumberProperty.set(null)
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
@@ -154,12 +154,12 @@ open class RecordableViewModel(
             Callable {
                 String.format(
                     messages["sourceDialogTitle"],
-                    currentTakeProperty.get(),
+                    currentTakeNumberProperty.get(),
                     audioPluginViewModel.pluginNameProperty.get()
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeProperty
+            currentTakeNumberProperty
         )
     }
 
@@ -168,13 +168,13 @@ open class RecordableViewModel(
             Callable {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeProperty.get(),
+                    currentTakeNumberProperty.get(),
                     audioPluginViewModel.pluginNameProperty.get(),
                     audioPluginViewModel.pluginNameProperty.get()
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeProperty
+            currentTakeNumberProperty
         )
     }
 
