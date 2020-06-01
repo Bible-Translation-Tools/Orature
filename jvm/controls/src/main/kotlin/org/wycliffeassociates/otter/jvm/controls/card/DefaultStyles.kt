@@ -128,16 +128,18 @@ class DefaultStyles : Stylesheet() {
         }
 
         defaultMajorLabel {
+            padding = box(0.px, 5.px, 0.px, 5.px)
             fontSize = 16.px
             fontWeight = FontWeight.BOLD
             textFill = AppTheme.colors.white
-            backgroundColor += c("#000", 0.1)
+            backgroundColor += c("#000", 0.4)
         }
         defaultMinorLabel {
+            padding = box(0.px, 5.px, 0.px, 5.px)
             fontSize = 16.px
             fontWeight = FontWeight.BOLD
             textFill = AppTheme.colors.white
-            backgroundColor += c("#000", 0.1)
+            backgroundColor += c("#000", 0.4)
         }
     }
 }

@@ -8,7 +8,10 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
+import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.ProjectCard
@@ -17,6 +20,8 @@ import tornadofx.*
 
 class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(card) {
 
+    @FXML
+    lateinit var root: VBox
     @FXML
     lateinit var bookTitle: Text
     @FXML
@@ -27,6 +32,8 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
     lateinit var language: Label
     @FXML
     lateinit var cardPrimaryButton: JFXButton
+    @FXML
+    lateinit var coverArt: ImageView
 
     private val popup = JFXPopup()
     private val list = JFXListView<Label>()
@@ -40,6 +47,17 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
         bindText()
         bindActions()
         bindPopup()
+
+        coverArt.fitWidthProperty().bind(root.widthProperty())
+
+        card.coverArtProperty().onChangeAndDoNow {
+            it?.let {
+                coverArt.image = Image(it.inputStream())
+            }
+        }
+        coverArt.visibleWhen { card.coverArtProperty().isNotNull }
+        bookSlug.visibleWhen { card.coverArtProperty().isNull }
+        language.visibleWhen { card.coverArtProperty().isNull }
     }
 
     private fun bindText() {

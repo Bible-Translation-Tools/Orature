@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Maybe
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContainerType
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
@@ -25,7 +27,7 @@ class ProjectGridViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
 
-    val projects: ObservableList<Collection> = FXCollections.observableArrayList<Collection>()
+    val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
 
     init {
         loadProjects()
@@ -33,9 +35,18 @@ class ProjectGridViewModel : ViewModel() {
 
     fun loadProjects() {
         collectionRepo.getDerivedProjects()
+            .toObservable()
             .observeOnFx()
+            .map { derivedProjects ->
+                derivedProjects.filter { it.resourceContainer?.type == ContainerType.Book }
+            }
+            .flatMapIterable { it }
+            .map {
+                getWorkbook(it)
+            }
+            .collectInto(mutableListOf<Maybe<Workbook>>(), { list, item -> list.add(item) })
             .subscribe { derivedProjects ->
-                val bookProjects = derivedProjects.filter { it.resourceContainer?.type == ContainerType.Book }
+                val bookProjects = derivedProjects.mapNotNull { it.blockingGet() }
                 projects.setAll(bookProjects)
             }
     }
@@ -48,10 +59,11 @@ class ProjectGridViewModel : ViewModel() {
         workspace.dock<ProjectWizard>()
     }
 
-    fun deleteProject(project: Collection) {
+    fun deleteProject(project: Workbook) {
         showDeleteDialogProperty.set(true)
+        workbookRepo.closeWorkbook(project)
         DeleteProject(collectionRepo, directoryProvider)
-            .delete(project, true)
+            .delete(project.target.toCollection(), true)
             .observeOnFx()
             .subscribe {
                 showDeleteDialogProperty.set(false)
@@ -59,16 +71,16 @@ class ProjectGridViewModel : ViewModel() {
             }
     }
 
-    fun selectProject(targetProject: Collection) {
-        collectionRepo.getSource(targetProject)
-            .observeOnFx()
-            .subscribe { sourceProject ->
-                val workbook = workbookRepo.get(sourceProject, targetProject)
-                workbookViewModel.activeWorkbookProperty.set(workbook)
+    fun selectProject(workbook: Workbook) {
+        workbookViewModel.activeWorkbookProperty.set(workbook)
+        workbook.target.resourceMetadata.let(workbookViewModel::setProjectAudioDirectory)
+        navigator.navigateTo(TabGroupType.CHAPTER)
+    }
 
-                targetProject.resourceContainer?.let(workbookViewModel::setProjectAudioDirectory)
-
-                navigator.navigateTo(TabGroupType.CHAPTER)
+    private fun getWorkbook(targetProject: Collection): Maybe<Workbook> {
+        return collectionRepo.getSource(targetProject)
+            .map { sourceProject ->
+                workbookRepo.get(sourceProject, targetProject)
             }
     }
 }
