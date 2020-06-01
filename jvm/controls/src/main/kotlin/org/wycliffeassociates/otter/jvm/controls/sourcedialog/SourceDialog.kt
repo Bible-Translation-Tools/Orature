@@ -13,7 +13,7 @@ import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-object SourceDialog : Fragment() {
+class SourceDialog : Fragment() {
 
     val dialogTitleProperty = SimpleStringProperty()
     var dialogTitle by dialogTitleProperty
@@ -93,7 +93,7 @@ object SourceDialog : Fragment() {
 }
 
 fun sourcedialog(setup: SourceDialog.() -> Unit = {}): SourceDialog {
-    val sourceDialog = SourceDialog
+    val sourceDialog = SourceDialog()
     sourceDialog.setup()
     return sourceDialog
 }
