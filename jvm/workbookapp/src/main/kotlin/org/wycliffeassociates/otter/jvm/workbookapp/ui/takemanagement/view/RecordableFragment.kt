@@ -1,12 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
-import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import io.reactivex.schedulers.Schedulers
-import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventHandler
 import javafx.geometry.BoundingBox
 import javafx.geometry.Bounds
@@ -28,7 +24,6 @@ import org.wycliffeassociates.otter.jvm.controls.sourcedialog.sourcedialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
@@ -136,62 +131,16 @@ abstract class RecordableFragment(
 
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
-        val recordingAppName = SimpleStringProperty()
+        sourcedialog {
+            dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
+            dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
-        val dialog = sourcedialog {
-            recordingAppName.toObservable().subscribe { appName ->
-                recordableViewModel.currentTakeProperty.toObservable().subscribe { take ->
-                    dialogTitle = String.format(
-                        messages["sourceDialogTitle"],
-                        take?.number,
-                        appName
-                    )
-                    text = String.format(
-                        messages["sourceDialogMessage"],
-                        take?.number,
-                        appName,
-                        appName
-                    )
-                }
-            }
-
-            closeText = messages["restoreOrature"]
-            recordableViewModel.sourceAudioPlayerProperty.toObservable().subscribe {
+            recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
                 player = it
-                audioAvailable = recordableViewModel.sourceAudioAvailableProperty.get()
             }
-            onCloseAction {
-                recordableViewModel.sourceAudioPlayerProperty.get()?.stop()
-                close()
-            }
-        }
-        recordableViewModel.showPluginActiveProperty.onChange {
-            Platform.runLater {
-                if (it) {
-                    recordableViewModel.contextProperty.toObservable().subscribe { ctx ->
-                        when (ctx) {
-                            TakeContext.RECORD -> {
-                                audioPluginViewModel.recorderData
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe {
-                                        recordingAppName.set(it.name)
-                                    }
-                            }
-                            TakeContext.EDIT_TAKES -> {
-                                audioPluginViewModel.editorData
-                                    .subscribeOn(Schedulers.io())
-                                    .subscribe {
-                                        recordingAppName.set(it.name)
-                                    }
-                            }
-                            null -> throw IllegalStateException("Action is not supported!")
-                        }
-                    }
-                    dialog.open()
-                } else {
-                    dialog.close()
-                }
-            }
+
+            audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
+            shouldOpenDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
         }
     }
 

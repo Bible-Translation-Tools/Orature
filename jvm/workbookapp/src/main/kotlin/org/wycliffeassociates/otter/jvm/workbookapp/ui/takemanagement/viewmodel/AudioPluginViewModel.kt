@@ -1,7 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.PluginParameters
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -11,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {
@@ -18,13 +22,23 @@ class AudioPluginViewModel : ViewModel() {
     private val pluginRepository = injector.pluginRepository
 
     private val workbookViewModel: WorkbookViewModel by inject()
+    private val mainMenuViewModel: MainMenuViewModel by inject()
 
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    val recorderData = pluginRepository.getRecorderData()
-    val editorData = pluginRepository.getEditorData()
+    fun getRecorder() = pluginRepository.getRecorder()
+    fun getEditor() = pluginRepository.getEditor()
+
+    val pluginNameProperty = SimpleStringProperty()
+    val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
+    val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
+
+    init {
+        selectedRecorderProperty.bind(mainMenuViewModel.selectedRecorderProperty)
+        selectedEditorProperty.bind(mainMenuViewModel.selectedEditorProperty)
+    }
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
         val params = constructPluginParameters()
