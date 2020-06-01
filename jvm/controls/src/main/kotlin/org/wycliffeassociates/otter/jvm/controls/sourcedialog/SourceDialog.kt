@@ -85,6 +85,11 @@ object SourceDialog : Fragment() {
     fun open() {
         openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
     }
+
+    override fun onUndock() {
+        player?.stop()
+        super.onUndock()
+    }
 }
 
 fun sourcedialog(setup: SourceDialog.() -> Unit = {}): SourceDialog {
