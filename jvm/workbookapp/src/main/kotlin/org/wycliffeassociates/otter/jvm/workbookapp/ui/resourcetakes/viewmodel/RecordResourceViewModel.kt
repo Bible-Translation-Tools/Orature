@@ -39,8 +39,6 @@ class RecordResourceViewModel : ViewModel() {
     val activeResourceProperty = SimpleObjectProperty<Resource>()
     private val activeResource: Resource by activeResourceProperty
 
-    val resourceChangedProperty = SimpleBooleanProperty(false)
-
     private val resourceList: ObservableList<Resource> = observableListOf()
 
     val hasNext = SimpleBooleanProperty(false)

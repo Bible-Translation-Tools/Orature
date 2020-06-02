@@ -1,12 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
-import javafx.beans.property.SimpleBooleanProperty
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.*
 
 class RecordResourceTabGroup : TabGroup() {
     private val viewModel: RecordResourceViewModel by inject()
@@ -23,22 +21,22 @@ class RecordResourceTabGroup : TabGroup() {
         )
     }
 
-    private fun initTabs() {
-        tabPane.tabs.clear()
+    override fun activate() {
+        chromeableStage.resourceNavBarVisibleProperty.set(true)
         tabs.forEach { recordableTab ->
-            if (recordableTab.hasRecordable()) {
-                tabPane.tabs.add(recordableTab)
+            recordableTab.bindProperties()
+            recordableTab.recordableProperty.onChangeAndDoNow { rec ->
+                rec?.let {
+                    if (!tabPane.tabs.contains(recordableTab)) tabPane.tabs.add(recordableTab)
+                } ?: tabPane.tabs.remove(recordableTab)
             }
         }
     }
 
-    override fun activate() {
-        resourceNavBarVisibleProperty.set(true)
-        initTabs()
-        viewModel.resourceChangedProperty.onChange {
-            if (it) {
-                initTabs()
-            }
+    override fun deactivate() {
+        tabs.forEach { recordableTab ->
+            recordableTab.unbindProperties()
         }
+        super.deactivate()
     }
 }

@@ -1,14 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view
 
 import com.github.thomasnield.rxkotlinfx.toObservable
-import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -122,7 +120,6 @@ class RecordResourceFragment(
             closePlayers()
             recordResourceViewModel.nextChunk()
             navigator.tabPane.selectionModel.select(0)
-            recordResourceViewModel.resourceChangedProperty.set(true)
         }
 
         navigator.resourceNavBar.hasPreviousProperty().bind(recordResourceViewModel.hasPrevious)
@@ -130,7 +127,6 @@ class RecordResourceFragment(
             closePlayers()
             recordResourceViewModel.previousChunk()
             navigator.tabPane.selectionModel.select(0)
-            recordResourceViewModel.resourceChangedProperty.set(true)
         }
     }
 

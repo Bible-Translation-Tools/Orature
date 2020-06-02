@@ -12,7 +12,7 @@ class ChapterTabGroup : TabGroup() {
 
     override fun activate() {
         workbookViewModel.activeChapterProperty.set(null)
-        resourceNavBarVisibleProperty.set(false)
+        chromeableStage.resourceNavBarVisibleProperty.set(false)
         val activeResourceMetadata = workbookViewModel.activeResourceMetadataProperty.value
 
         createTabs()
