@@ -4,6 +4,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
+import java.io.File
 
 /**
  * Merges the media contents from one resource container to the other.
@@ -68,9 +69,7 @@ class MediaMerge(
             fromMedia.projects.forEach {
                 it.media.forEach { media ->
                     val files = mediaFilePermutations(media)
-                    files.forEach { path ->
-                        copyMediaFile(path)
-                    }
+                    copyMediaFiles(files)
                 }
             }
         }
@@ -114,21 +113,28 @@ class MediaMerge(
         return list
     }
 
-    private fun copyMediaFile(file: String) {
-        if (!file.isURL()) {
-            if (from.accessor.fileExists(file)) {
-                from.accessor.getInputStream(file).use { ifs ->
-                    val temp = createTempFile()
-                    try {
+    private fun copyMediaFiles(files: List<String>) {
+        val filtered = files.filter { !it.isURL() }
+        val tempFiles = mutableMapOf<File, String>()
+        try {
+            var start = System.currentTimeMillis()
+            filtered.forEach { file ->
+                if (from.accessor.fileExists(file)) {
+                    from.accessor.getInputStream(file).use { ifs ->
+                        val temp = createTempFile()
                         temp.outputStream().use { ofs ->
                             ifs.transferTo(ofs)
                         }
-                        to.addFileToContainer(temp, file)
-                    } finally {
-                        temp.delete()
+                        tempFiles.put(temp, file)
                     }
                 }
             }
+            println("Temp copy took ${(System.currentTimeMillis() - start)}ms")
+            start = System.currentTimeMillis()
+            to.addFilesToContainer(tempFiles)
+            println("rc insert took ${(System.currentTimeMillis() - start)}ms")
+        } finally {
+            tempFiles.keys.forEach { it.delete() }
         }
     }
 }
