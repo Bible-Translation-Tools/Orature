@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.Chromeabl
 import tornadofx.Component
 
 abstract class TabGroup : Component(), ITabGroup {
-    val chromeableStage: ChromeableStage by inject()
+    protected val chromeableStage: ChromeableStage by inject()
     protected val tabPane: TabPane = chromeableStage.tabPane
 
     override fun deactivate() {
