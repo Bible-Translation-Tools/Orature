@@ -6,7 +6,6 @@ import tornadofx.*
 
 class RecordScriptureTabGroup : TabGroup() {
     override fun activate() {
-        chromeableStage.resourceNavBarVisibleProperty.set(false)
         tabPane.tabs.add(
             Tab().apply {
                 add(RecordScriptureFragment().root)

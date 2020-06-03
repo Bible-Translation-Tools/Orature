@@ -38,6 +38,7 @@ class RecordResourceViewModel : ViewModel() {
 
     val activeResourceProperty = SimpleObjectProperty<Resource>()
     private val activeResource: Resource by activeResourceProperty
+    val resourceNavBarVisibleProperty = SimpleBooleanProperty()
 
     private val resourceList: ObservableList<Resource> = observableListOf()
 

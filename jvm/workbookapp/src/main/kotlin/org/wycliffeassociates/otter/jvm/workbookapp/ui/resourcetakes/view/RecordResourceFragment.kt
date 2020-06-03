@@ -3,20 +3,21 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view
 import com.github.thomasnield.rxkotlinfx.toObservable
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.effect.DropShadow
-import javafx.scene.layout.*
+import javafx.scene.layout.GridPane
+import javafx.scene.layout.Priority
+import javafx.scene.layout.RowConstraints
+import javafx.scene.layout.VBox
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourcetakecard
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
 
 class RecordResourceFragment(
@@ -25,8 +26,6 @@ class RecordResourceFragment(
     recordableViewModel,
     DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
 ) {
-    private val recordResourceViewModel: RecordResourceViewModel by inject()
-    private val navigator: ChromeableStage by inject()
     val formattedTextProperty = SimpleStringProperty()
 
     val alternateTakesList = TakesListView(
@@ -113,20 +112,6 @@ class RecordResourceFragment(
 
         mainContainer.apply {
             add(grid)
-        }
-
-        navigator.resourceNavBar.hasNextProperty().bind(recordResourceViewModel.hasNext)
-        navigator.resourceNavBar.onNextAction {
-            closePlayers()
-            recordResourceViewModel.nextChunk()
-            navigator.tabPane.selectionModel.select(0)
-        }
-
-        navigator.resourceNavBar.hasPreviousProperty().bind(recordResourceViewModel.hasPrevious)
-        navigator.resourceNavBar.onPreviousAction {
-            closePlayers()
-            recordResourceViewModel.previousChunk()
-            navigator.tabPane.selectionModel.select(0)
         }
     }
 

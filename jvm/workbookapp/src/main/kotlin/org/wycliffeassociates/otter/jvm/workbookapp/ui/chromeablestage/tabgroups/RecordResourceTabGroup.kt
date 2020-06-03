@@ -1,13 +1,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
 import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.jvm.controls.resourcenavbar.ResourceNavBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.*
 
 class RecordResourceTabGroup : TabGroup() {
     private val viewModel: RecordResourceViewModel by inject()
+    private val resourceNavBar = ResourceNavBar()
 
     private val tabs: List<RecordableTab> = listOf(
         recordableTab(ContentType.TITLE),
@@ -22,7 +25,7 @@ class RecordResourceTabGroup : TabGroup() {
     }
 
     override fun activate() {
-        chromeableStage.resourceNavBarVisibleProperty.set(true)
+        viewModel.resourceNavBarVisibleProperty.set(true)
         tabs.forEach { recordableTab ->
             recordableTab.bindProperties()
             recordableTab.recordableProperty.onChangeAndDoNow { rec ->
@@ -34,9 +37,31 @@ class RecordResourceTabGroup : TabGroup() {
     }
 
     override fun deactivate() {
+        viewModel.resourceNavBarVisibleProperty.set(false)
         tabs.forEach { recordableTab ->
             recordableTab.unbindProperties()
         }
-        super.deactivate()
+    }
+
+    init {
+        root.apply {
+            resourceNavBar.apply {
+                visibleWhen { viewModel.resourceNavBarVisibleProperty }
+                managedWhen { visibleProperty() }
+                prefHeight = 70.0
+
+                previousButtonTextProperty().set(messages["previousChunk"])
+                nextButtonTextProperty().set(messages["nextChunk"])
+
+                hasPreviousProperty().bind(viewModel.hasPrevious)
+                hasNextProperty().bind(viewModel.hasNext)
+
+                onPreviousAction { viewModel.previousChunk() }
+                onNextAction { viewModel.nextChunk() }
+
+                importStylesheet(userAgentStylesheet)
+            }
+            add(resourceNavBar)
+        }
     }
 }
