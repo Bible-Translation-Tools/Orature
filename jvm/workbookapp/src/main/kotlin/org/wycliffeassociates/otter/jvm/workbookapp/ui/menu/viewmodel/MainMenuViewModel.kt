@@ -13,6 +13,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 import java.io.File
@@ -22,6 +23,7 @@ class MainMenuViewModel : ViewModel() {
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
     private val workbookRepository = injector.workbookRepository
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val workbookVM = find<WorkbookViewModel>()
     val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
@@ -35,6 +37,8 @@ class MainMenuViewModel : ViewModel() {
     val showImportDialogProperty = SimpleBooleanProperty(false)
 
     init {
+        audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
+        audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         refreshPlugins()
     }
 
