@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view
 
-import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.scene.control.Menu
@@ -114,9 +113,7 @@ class MainMenu : MenuBar() {
                                 radiomenuitem(pluginData.name, pluginToggleGroup) {
                                     userData = pluginData
                                     action { if (isSelected) viewModel.selectRecorder(pluginData) }
-                                    viewModel.selectedRecorderProperty.toObservable().subscribe {
-                                        isSelected = (it == pluginData)
-                                    }
+                                    isSelected = viewModel.selectedRecorderProperty.value == pluginData
                                 }
                             }
                         )
@@ -132,9 +129,7 @@ class MainMenu : MenuBar() {
                                 radiomenuitem(pluginData.name, pluginToggleGroup) {
                                     userData = pluginData
                                     action { if (isSelected) viewModel.selectEditor(pluginData) }
-                                    viewModel.selectedEditorProperty.toObservable().subscribe {
-                                        isSelected = (it == pluginData)
-                                    }
+                                    isSelected = viewModel.selectedEditorProperty.value == pluginData
                                 }
                             }
                         )
