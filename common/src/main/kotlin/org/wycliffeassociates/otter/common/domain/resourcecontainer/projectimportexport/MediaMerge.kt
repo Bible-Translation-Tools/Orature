@@ -65,13 +65,19 @@ class MediaMerge(
 
     private fun mergeMediaFiles() {
         val _fromMedia = from.media
-        _fromMedia?.let { fromMedia ->
-            fromMedia.projects.forEach {
-                it.media.forEach { media ->
-                    val files = mediaFilePermutations(media)
-                    copyMediaFiles(files)
+        val filesToMerge = mutableMapOf<String, File>()
+        try {
+            _fromMedia?.let { fromMedia ->
+                fromMedia.projects.forEach {
+                    it.media.forEach { media ->
+                        val files = mediaFilePermutations(media)
+                        filesToMerge.putAll(getMediaFilesToMerge(files))
+                    }
                 }
             }
+            to.addFilesToContainer(filesToMerge)
+        } finally {
+            filesToMerge.values.forEach { it.delete() }
         }
     }
 
@@ -113,29 +119,21 @@ class MediaMerge(
         return list
     }
 
-    private fun copyMediaFiles(files: List<String>) {
+    private fun getMediaFilesToMerge(files: List<String>): Map<String, File> {
         val filtered = files.filter { !it.isURL() }
-        val tempFiles = mutableMapOf<File, String>()
-        try {
-            var start = System.currentTimeMillis()
-            filtered.forEach { file ->
-                if (from.accessor.fileExists(file)) {
-                    from.accessor.getInputStream(file).use { ifs ->
-                        val temp = createTempFile()
-                        temp.outputStream().use { ofs ->
-                            ifs.transferTo(ofs)
-                        }
-                        tempFiles.put(temp, file)
+        val filesToMerge = mutableMapOf<String, File>()
+        filtered.forEach { filename ->
+            if (from.accessor.fileExists(filename)) {
+                from.accessor.getInputStream(filename).use { ifs ->
+                    val temp = createTempFile()
+                    temp.outputStream().use { ofs ->
+                        ifs.transferTo(ofs)
                     }
+                    filesToMerge.put(filename, temp)
                 }
             }
-            println("Temp copy took ${(System.currentTimeMillis() - start)}ms")
-            start = System.currentTimeMillis()
-            to.addFilesToContainer(tempFiles)
-            println("rc insert took ${(System.currentTimeMillis() - start)}ms")
-        } finally {
-            tempFiles.keys.forEach { it.delete() }
         }
+        return filesToMerge
     }
 }
 
