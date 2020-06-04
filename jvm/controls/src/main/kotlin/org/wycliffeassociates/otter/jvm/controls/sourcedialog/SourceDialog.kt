@@ -27,12 +27,12 @@ class SourceDialog : Fragment() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     var audioAvailable by audioAvailableProperty
 
-    val shouldOpenDialogProperty = SimpleBooleanProperty()
+    val showDialogProperty = SimpleBooleanProperty()
 
     init {
         importStylesheet(javaClass.getResource("/css/source-dialog.css").toExternalForm())
 
-        shouldOpenDialogProperty.onChangeAndDoNow {
+        showDialogProperty.onChangeAndDoNow {
             it?.let {
                 Platform.runLater {
                     if (it) open() else close()

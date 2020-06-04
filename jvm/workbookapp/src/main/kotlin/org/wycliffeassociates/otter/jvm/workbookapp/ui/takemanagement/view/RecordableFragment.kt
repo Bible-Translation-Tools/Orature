@@ -140,7 +140,7 @@ abstract class RecordableFragment(
             }
 
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            shouldOpenDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
+            showDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
         }
     }
 

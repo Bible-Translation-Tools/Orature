@@ -14,7 +14,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPl
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {
@@ -22,7 +21,6 @@ class AudioPluginViewModel : ViewModel() {
     private val pluginRepository = injector.pluginRepository
 
     private val workbookViewModel: WorkbookViewModel by inject()
-    private val mainMenuViewModel: MainMenuViewModel by inject()
 
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
@@ -34,11 +32,6 @@ class AudioPluginViewModel : ViewModel() {
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
-
-    init {
-        selectedRecorderProperty.bind(mainMenuViewModel.selectedRecorderProperty)
-        selectedEditorProperty.bind(mainMenuViewModel.selectedEditorProperty)
-    }
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
         val params = constructPluginParameters()
