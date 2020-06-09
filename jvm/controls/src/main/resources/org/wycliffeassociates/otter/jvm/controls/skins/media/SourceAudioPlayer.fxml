@@ -7,8 +7,8 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.*?>
+<?import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.*?>
 
-<?import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.SourceAudioToggle?>
 <VBox fx:id="root" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="audioplayer--scripture-takes" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
@@ -29,7 +29,8 @@
                <children>
                   <Label fx:id="sourceAudioLabel" styleClass="audioplayer--scripture-takes__label" text="Source Audio">
                      <graphic>
-                        <FontIcon iconLiteral="gmi-hearing" iconSize="22" styleClass="audioplayer--scripture-takes__label__icon" />
+                        <FontIcon iconLiteral="gmi-hearing" iconSize="22"
+                                  styleClass="audioplayer--scripture-takes__label__icon" />
                      </graphic>
                   </Label>
                </children>
@@ -38,11 +39,11 @@
                <children>
                   <JFXButton fx:id="playBtn">
                      <graphic>
-                        <FontIcon iconLiteral="mdi-play" iconSize="10" selectionEnd="1" styleClass="audioplayer--scripture-takes__play-btn__icon" />
+                        <FontIcon iconLiteral="mdi-play" iconSize="10" selectionEnd="1" />
                      </graphic>
                      <styleClass>
                         <String fx:value="audioplayer--scripture-takes__play-btn" />
-                        <String fx:value="btn--cta" />
+                        <String fx:value="btn--secondary" />
                      </styleClass>
                   </JFXButton>
                </children>
