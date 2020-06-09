@@ -24,6 +24,7 @@ import org.wycliffeassociates.otter.jvm.controls.sourcedialog.sourcedialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
@@ -43,6 +44,8 @@ abstract class RecordableFragment(
     protected val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent> = SimpleObjectProperty()
 
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
+
+    protected val navigator: ChromeableStage by inject()
 
     val dragTarget =
         dragTargetBuilder
@@ -135,12 +138,12 @@ abstract class RecordableFragment(
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
-            recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
-                player = it
-            }
+            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            showDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
+            recordableViewModel.showPluginActiveProperty.onChange {
+                showDialogProperty.set(it)
+            }
         }
     }
 

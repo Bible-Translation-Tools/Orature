@@ -44,6 +44,8 @@ class SourceDialog : Fragment() {
     override val root = borderpane {
         addClass("source-dialog")
 
+        prefWidthProperty().bind(primaryStage.widthProperty())
+
         top {
             vbox {
                 alignment = Pos.CENTER
@@ -55,12 +57,13 @@ class SourceDialog : Fragment() {
             }
         }
         center {
-            vbox {
+            hbox {
                 alignment = Pos.CENTER
-                label(dialogTextProperty) {
-                    addClass("source-dialog__label", "source-dialog__label--message")
+                text(dialogTextProperty) {
+                    addClass("source-dialog__text")
                     visibleWhen(textProperty().isNotEmpty)
                     managedWhen { visibleProperty() }
+                    wrappingWidthProperty().bind(primaryStage.widthProperty().divide(1.4))
                 }
             }
         }
@@ -71,12 +74,13 @@ class SourceDialog : Fragment() {
                     managedWhen { visibleProperty() }
                     style {
                         skin = SourceAudioSkin::class
+                        paddingTop = 10
                     }
-                    playerProperty.onChangeAndDoNow {
-                        it?.let {
-                            load(it)
-                        }
-                    }
+                    audioPlayerProperty.bind(playerProperty)
+                    sourceTextWidthProperty.bind(primaryStage.widthProperty().divide(1.4))
+
+                    refreshParentProperty.set(true)
+                    sourceAudioLabelProperty.set(messages["sourceAudio"])
                 }
             )
         }

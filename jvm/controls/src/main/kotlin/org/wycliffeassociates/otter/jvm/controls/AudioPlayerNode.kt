@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.controls
 
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -9,6 +12,9 @@ import org.wycliffeassociates.otter.jvm.controls.skins.media.AudioPlayerSkin
 class AudioPlayerNode(private var player: IAudioPlayer?) : Control() {
 
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>(player)
+    val sourceTextWidthProperty = SimpleDoubleProperty(0.0)
+    val refreshParentProperty = SimpleBooleanProperty(false)
+    val sourceAudioLabelProperty = SimpleStringProperty("Source Audio")
 
     val sourceAvailable: Boolean
         get() = player != null

@@ -21,6 +21,7 @@ class AudioPlayerController(
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
+    val displayPlayerProperty = SimpleBooleanProperty(true)
 
     init {
         initializeSliderActions()
@@ -52,6 +53,10 @@ class AudioPlayerController(
                 isPlayingProperty.set(true)
             }
         }
+    }
+
+    fun sourceToggle() {
+        displayPlayerProperty.set(!displayPlayerProperty.value)
     }
 
     fun load(player: IAudioPlayer) {

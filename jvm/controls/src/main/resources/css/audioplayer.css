@@ -3,8 +3,6 @@
 .audioplayer--scripture-takes {
     -fx-background-color: -white;
     -fx-effect: -level2;
-    -fx-background-radius: 16px;
-    -fx-border-radius: 16px;
 }
 
 .audioplayer--scripture-takes__label {
@@ -23,4 +21,15 @@
 
 .audioplayer--scripture-takes__play-btn__icon {
     -fx-icon-size: 20px;
+}
+
+.audioplayer--source-text {
+    -fx-font-size: 16px;
+    -fx-alignment: center;
+    -fx-text-alignment: justify;
+}
+
+.audioplayer--scripture-takes_controls {
+    -fx-border-color: #ccc;
+    -fx-border-width: 1 0 0 0;
 }

@@ -105,6 +105,7 @@ open class RecordableViewModel(
                 .observeOnFx()
                 .subscribe { result: RecordTake.Result ->
                     showPluginActive = false
+                    currentTakeNumberProperty.set(null)
                     when (result) {
                         RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
                         RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {

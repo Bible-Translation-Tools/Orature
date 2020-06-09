@@ -52,6 +52,9 @@ class RecordScriptureFragment : RecordableFragment(
             style {
                 skin = SourceAudioSkin::class
             }
+            sourceAudioLabelProperty.set(messages["sourceAudio"])
+            refreshParentProperty.set(false)
+            sourceTextWidthProperty.bind(navigator.root.widthProperty().divide(2))
         }
 
     init {
@@ -62,11 +65,7 @@ class RecordScriptureFragment : RecordableFragment(
 
         sourceAudioPlayer.visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
         sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
-        recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
-            it?.let {
-                sourceAudioPlayer.load(it)
-            }
-        }
+        sourceAudioPlayer.audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
         recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)

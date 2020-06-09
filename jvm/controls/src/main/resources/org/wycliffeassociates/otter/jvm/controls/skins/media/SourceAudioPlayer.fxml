@@ -5,26 +5,36 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="audioplayer--scripture-takes" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+<?import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.SourceAudioToggle?>
+<VBox fx:id="root" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="audioplayer--scripture-takes" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <JFXSlider fx:id="audioSlider">
+      <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <VBox.margin>
             <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-         </VBox.margin></JFXSlider>
-      <HBox>
+         </VBox.margin>
          <children>
-            <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+            <JFXSlider fx:id="audioSlider" visible="true" VBox.vgrow="ALWAYS" />
+            <Text fx:id="sourceText" managed="false" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="audioplayer--source-text" text="jg lrj gskej glskejgl ksjelk gjslek jglsekj lgksjel kgjslek jglksjel gkjsle kgjslek jglksej lgksjel kgjlske jlgksje lkgjslek jglsekj lgksje lkgjslek jglskej lgksjelg" visible="false" wrappingWidth="400.0" VBox.vgrow="ALWAYS" />
+         </children>
+         <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+         </padding>
+      </VBox>
+      <HBox styleClass="audioplayer--scripture-takes_controls" VBox.vgrow="ALWAYS">
+         <children>
+            <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                <children>
-                  <Label styleClass="audioplayer--scripture-takes__label" text="Source Audio">
+                  <Label fx:id="sourceAudioLabel" styleClass="audioplayer--scripture-takes__label" text="Source Audio">
                      <graphic>
                         <FontIcon iconLiteral="gmi-hearing" iconSize="22" styleClass="audioplayer--scripture-takes__label__icon" />
                      </graphic>
                   </Label>
                </children>
             </HBox>
-            <HBox alignment="CENTER" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
                <children>
                   <JFXButton fx:id="playBtn">
                      <graphic>
@@ -37,11 +47,21 @@
                   </JFXButton>
                </children>
             </HBox>
-            <HBox maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+            <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
+               <children>
+                  <SourceAudioToggle fx:id="sourceToggle" />
+               </children>
+            </HBox>
          </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
+         </padding>
       </HBox>
    </children>
-   <padding>
-      <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
-   </padding>
 </VBox>
