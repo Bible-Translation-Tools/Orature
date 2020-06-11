@@ -68,4 +68,10 @@ class WorkbookViewModel : ViewModel() {
             sourceAudioProperty.set(null)
         }
     }
+
+    fun getSourceChapter(targetChapter: Chapter): Chapter {
+        return workbook.source.chapters.filter {
+            it.title == targetChapter.title
+        }.blockingFirst()
+    }
 }

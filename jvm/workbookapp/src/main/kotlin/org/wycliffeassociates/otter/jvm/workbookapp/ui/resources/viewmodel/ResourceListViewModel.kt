@@ -29,7 +29,7 @@ class ResourceListViewModel : ViewModel() {
     init {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
             targetChapter?.let {
-                loadResourceGroups(getSourceChapter(targetChapter))
+                loadResourceGroups(workbookViewModel.getSourceChapter(targetChapter))
             }
         }
         isFilterOnProperty.onChange { checked ->
@@ -41,12 +41,6 @@ class ResourceListViewModel : ViewModel() {
                 filteredResourceGroupCardItemList.predicate = null
             }
         }
-    }
-
-    private fun getSourceChapter(targetChapter: Chapter): Chapter {
-        return workbookViewModel.workbook.source.chapters.filter {
-            it.title == targetChapter.title
-        }.blockingFirst()
     }
 
     private fun setSelectedResourceGroupCardItem(resource: Resource) {

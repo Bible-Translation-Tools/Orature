@@ -25,7 +25,7 @@ class RecordableTabViewModel(
         selectedTakeProperty
     )
 
-    private fun getFormattedText(): String? = (recordable as? ResourceRecordable)?.textItem?.text
+    private fun getFormattedText(): String? = recordable?.textItem?.text
 
     private fun getProgress(): Double = selectedTakeProperty.get()?.let { 1.0 } ?: 0.0
 }

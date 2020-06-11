@@ -52,9 +52,16 @@ class RecordScriptureFragment : RecordableFragment(
             style {
                 skin = SourceAudioSkin::class
             }
+            visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
+            managedWhen { visibleProperty() }
+
             sourceAudioLabelProperty.set(messages["sourceAudio"])
             refreshParentProperty.set(false)
             sourceTextWidthProperty.bind(navigator.root.widthProperty().divide(2))
+            recordableViewModel.recordableProperty.onChangeAndDoNow {
+                sourceTextProperty.set(it?.textItem?.text)
+            }
+            audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
         }
 
     init {
@@ -62,10 +69,6 @@ class RecordScriptureFragment : RecordableFragment(
         importStylesheet<TakeCardStyles>()
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
-
-        sourceAudioPlayer.visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
-        sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
-        sourceAudioPlayer.audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
         recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)

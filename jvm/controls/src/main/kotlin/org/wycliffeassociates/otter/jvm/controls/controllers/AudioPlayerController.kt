@@ -55,7 +55,7 @@ class AudioPlayerController(
         }
     }
 
-    fun sourceToggle() {
+    fun toggleSource() {
         displayPlayerProperty.set(!displayPlayerProperty.value)
     }
 

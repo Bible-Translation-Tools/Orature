@@ -27,6 +27,9 @@ class SourceDialog : Fragment() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     var audioAvailable by audioAvailableProperty
 
+    val sourceTextProperty = SimpleStringProperty()
+    var sourceText by sourceTextProperty
+
     val showDialogProperty = SimpleBooleanProperty()
 
     init {
@@ -58,6 +61,7 @@ class SourceDialog : Fragment() {
         }
         center {
             hbox {
+                paddingBottom = 20
                 alignment = Pos.CENTER
                 text(dialogTextProperty) {
                     addClass("source-dialog__text")
@@ -74,13 +78,14 @@ class SourceDialog : Fragment() {
                     managedWhen { visibleProperty() }
                     style {
                         skin = SourceAudioSkin::class
-                        paddingTop = 10
                     }
                     audioPlayerProperty.bind(playerProperty)
                     sourceTextWidthProperty.bind(primaryStage.widthProperty().divide(1.4))
 
                     refreshParentProperty.set(true)
                     sourceAudioLabelProperty.set(messages["sourceAudio"])
+
+                    sourceTextProperty.bind(this@SourceDialog.sourceTextProperty)
                 }
             )
         }

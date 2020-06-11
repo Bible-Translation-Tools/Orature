@@ -12,7 +12,8 @@ import org.wycliffeassociates.otter.jvm.controls.skins.media.AudioPlayerSkin
 class AudioPlayerNode(private var player: IAudioPlayer?) : Control() {
 
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>(player)
-    val sourceTextWidthProperty = SimpleDoubleProperty(0.0)
+    val sourceTextProperty = SimpleStringProperty()
+    val sourceTextWidthProperty = SimpleDoubleProperty(Double.MAX_VALUE)
     val refreshParentProperty = SimpleBooleanProperty(false)
     val sourceAudioLabelProperty = SimpleStringProperty("Source Audio")
 

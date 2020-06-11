@@ -144,6 +144,10 @@ abstract class RecordableFragment(
             recordableViewModel.showPluginActiveProperty.onChange {
                 showDialogProperty.set(it)
             }
+
+            recordableViewModel.recordableProperty.onChangeAndDoNow {
+                sourceTextProperty.set(it?.textItem?.text)
+            }
         }
     }
 
