@@ -2,7 +2,12 @@
 
 .audioplayer--scripture-takes {
     -fx-background-color: -white;
-    -fx-effect: -level2;
+}
+
+.audioplayer--scripture-takes--rounded {
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-effect: -all-sides;
 }
 
 .audioplayer--scripture-takes__label {
@@ -27,6 +32,10 @@
     -fx-fill: -primary;
 }
 
+.audioplayer--scripture-takes__source-container {
+    -fx-background: white;
+}
+
 .audioplayer--scripture-takes__source-text {
     -fx-font-size: 16px;
     -fx-alignment: center;
@@ -37,9 +46,4 @@
     -fx-border-color: #ccc;
     -fx-border-width: 1 0 0 0;
     -fx-min-height: 100px;
-}
-
-.audioplayer--scripture-takes__source-box {
-    -fx-alignment: center;
-    -fx-background: white;
 }

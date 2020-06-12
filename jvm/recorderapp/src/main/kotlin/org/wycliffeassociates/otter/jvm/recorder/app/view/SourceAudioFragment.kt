@@ -12,6 +12,21 @@ class SourceAudioFragment : Fragment() {
 
     override val root = initializeAudioNode()
 
+    init {
+        initializeSourceText()
+        root.sourceTextWidthProperty.bind(root.widthProperty().divide(2))
+    }
+
+    private fun initializeSourceText() {
+        if (scope is ParameterizedScope) {
+            val parameters = (scope as? ParameterizedScope)?.parameters
+            parameters?.let {
+                val sourceText: String? = parameters.named["source_text"] ?: ""
+                root.sourceTextProperty.set(sourceText)
+            }
+        }
+    }
+
     private fun initializeAudioNode(): AudioPlayerNode {
         var sourceFile: File? = null
         var startFrame: Int? = null

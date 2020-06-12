@@ -102,6 +102,7 @@ open class RecordableViewModel(
                     showPluginActive = !plugin.isNativePlugin()
                     audioPluginViewModel.record(rec)
                 }
+                .onErrorReturn { RecordTake.Result.NO_RECORDER }
                 .observeOnFx()
                 .subscribe { result: RecordTake.Result ->
                     showPluginActive = false

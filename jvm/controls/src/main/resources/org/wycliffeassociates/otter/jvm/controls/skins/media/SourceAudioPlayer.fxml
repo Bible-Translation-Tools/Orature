@@ -14,7 +14,7 @@
       <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <children>
             <JFXSlider fx:id="audioSlider" VBox.vgrow="ALWAYS" />
-            <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" managed="false" styleClass="audioplayer--scripture-takes__source-box" visible="false" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" managed="false" styleClass="audioplayer--scripture-takes__source-container" visible="false" VBox.vgrow="ALWAYS">
                <content>
                   <Text fx:id="sourceText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="audioplayer--scripture-takes__source-text" />
                </content>

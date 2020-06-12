@@ -43,6 +43,18 @@ class SourceAudioSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
 
     private fun initializeControl() {
         audioController = AudioPlayerController(playerNode.audioPlayerProperty.value, audioSlider)
+
+        root.apply {
+            playerNode.roundedStyleProperty.onChangeAndDoNow {
+                it?.let {
+                    if (it) {
+                        addClass("audioplayer--scripture-takes--rounded")
+                    } else {
+                        removeClass("audioplayer--scripture-takes--rounded")
+                    }
+                }
+            }
+        }
         playBtn.apply {
             setOnMouseClicked {
                 audioController.toggle()

@@ -51,12 +51,14 @@ class RecordScriptureFragment : RecordableFragment(
         AudioPlayerNode(null).apply {
             style {
                 skin = SourceAudioSkin::class
+                padding = box(0.px, 10.px, 20.px, 10.px)
             }
             visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
             managedWhen { visibleProperty() }
 
             sourceAudioLabelProperty.set(messages["sourceAudio"])
             refreshParentProperty.set(false)
+            roundedStyleProperty.set(true)
             sourceTextWidthProperty.bind(navigator.root.widthProperty().divide(2))
             recordableViewModel.recordableProperty.onChangeAndDoNow {
                 sourceTextProperty.set(it?.textItem?.text)

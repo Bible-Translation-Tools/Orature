@@ -16,9 +16,8 @@ class AudioPlayerNode(private var player: IAudioPlayer?) : Control() {
     val sourceTextWidthProperty = SimpleDoubleProperty(Double.MAX_VALUE)
     val refreshParentProperty = SimpleBooleanProperty(false)
     val sourceAudioLabelProperty = SimpleStringProperty("Source Audio")
-
-    val sourceAvailable: Boolean
-        get() = player != null
+    val roundedStyleProperty = SimpleBooleanProperty(false)
+    val sourceAvailableProperty = audioPlayerProperty.isNotNull
 
     fun load(player: IAudioPlayer) {
         this.player = player
