@@ -3,10 +3,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.media
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
-import javafx.scene.control.Button
-import javafx.scene.control.ScrollPane
-import javafx.scene.control.SkinBase
-import javafx.scene.control.Slider
+import javafx.scene.control.*
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -44,6 +41,8 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
     lateinit var sourceToggle: SourceAudioToggle
     @FXML
     lateinit var sourceText: Text
+    @FXML
+    lateinit var noSourceAudioLabel: Label
 
     lateinit var audioController: AudioPlayerController
 

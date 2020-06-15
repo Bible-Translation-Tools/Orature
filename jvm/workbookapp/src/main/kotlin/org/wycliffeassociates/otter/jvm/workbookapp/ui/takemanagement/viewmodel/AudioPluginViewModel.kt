@@ -54,6 +54,12 @@ class AudioPluginViewModel : ViewModel() {
             )
         } ?: run { sourceAudio.getChapter(workbookViewModel.activeChapterProperty.value.sort) }
 
+        val sourceText = workbookViewModel.chunk?.let {
+            workbookViewModel.getSourceChunk(workbookViewModel.chapter, it).textItem.text
+        } ?: run {
+            workbookViewModel.getSourceChapter(workbookViewModel.chapter).textItem.text
+        }
+
         val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
         val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
         val chunkLabel = workbookViewModel.activeChunkProperty.value?.let {
@@ -63,7 +69,6 @@ class AudioPluginViewModel : ViewModel() {
         val resourceLabel = workbookViewModel.activeResourceComponentProperty.value?.let {
             messages[workbookViewModel.activeResourceComponentProperty.value.label]
         }
-        val sourceText = "Hjef hsef hsej fhksejh fksehf kjsehkfjshef kjfse fhskejh fksjeh kfsjehk fhsekf hskehf sehfskje  sijefse jsfelfjs elkjf lskej lfskje lfksjel kfjsle kjflske jlfksjel kvslek vjlsje lksjel kvjlskej lvksjel kvjsle kjvlskej lvskje lvksjel kvjslek jvlskej lvksjel kvjlske jvlskej lkvsjel kvjslkej vlskjel vkjslekv jslke jvlskje vlksjel vjslekv"
 
         return PluginParameters(
             languageName = workbook.target.language.name,

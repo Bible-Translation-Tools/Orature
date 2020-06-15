@@ -24,17 +24,12 @@ data class Chapter(
         get() = textItem()
 
     private fun textItem(): TextItem {
-        val textItem = Pair("", MimeType.USFM)
+        val initTextItem = TextItem("", MimeType.USFM)
         return chunks
-            .reduce(textItem) { acc, elm ->
-                val newAcc = acc.copy(
-                    acc.first.plus("${chunkLabel(elm.start, elm.end)} ${elm.textItem.text} "),
-                    elm.textItem.format
-                )
+            .reduce(initTextItem) { acc, elm ->
+                val newText = acc.text.plus("${chunkLabel(elm.start, elm.end)} ${elm.textItem.text} ")
+                val newAcc = acc.copy(text = newText, format = elm.textItem.format)
                 newAcc
-            }
-            .map {
-                TextItem(it.first, it.second)
             }
             .blockingGet()
     }

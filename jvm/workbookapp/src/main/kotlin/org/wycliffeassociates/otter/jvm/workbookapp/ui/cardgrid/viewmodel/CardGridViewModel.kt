@@ -60,7 +60,7 @@ class CardGridViewModel : ViewModel() {
                 else -> {
                     chapterOpen.set(true)
                     loadChapterBanner()
-                    loadChapterContents(workbookViewModel.getSourceChapter(chapter))
+                    loadChapterContents(chapter)
                 }
             }
         }

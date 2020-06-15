@@ -61,7 +61,9 @@ class RecordScriptureFragment : RecordableFragment(
             roundedStyleProperty.set(true)
             sourceTextWidthProperty.bind(navigator.root.widthProperty().divide(2))
             recordableViewModel.recordableProperty.onChangeAndDoNow {
-                sourceTextProperty.set(it?.textItem?.text)
+                it?.let {
+                    sourceTextProperty.set(recordableViewModel.sourceTextItem()?.text)
+                }
             }
             audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
         }

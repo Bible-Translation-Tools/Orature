@@ -74,4 +74,11 @@ class WorkbookViewModel : ViewModel() {
             it.title == targetChapter.title
         }.blockingFirst()
     }
+
+    fun getSourceChunk(targetChapter: Chapter, targetChunk: Chunk): Chunk {
+        val sourceChapter = getSourceChapter(targetChapter)
+        return sourceChapter.chunks.filter {
+            it.start == targetChunk.start
+        }.blockingFirst()
+    }
 }
