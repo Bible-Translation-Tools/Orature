@@ -13,6 +13,9 @@ import tornadofx.*
 
 class SourceAudioToggleSkin(private val toggle: SourceAudioToggle): SkinBase<SourceAudioToggle>(toggle) {
 
+    private val TOGGLE_SOURCE_ACTIVE = "toggle--source_audio__box--active"
+    private val TOGGLE_SOURCE_ICON_ACTIVE = "toggle--source_audio__box__icon--active"
+
     @FXML
     lateinit var root: HBox
     @FXML
@@ -44,17 +47,17 @@ class SourceAudioToggleSkin(private val toggle: SourceAudioToggle): SkinBase<Sou
     }
 
     private fun activatePlayer() {
-        textBox.removeClass("toggle--source_audio__box--active")
-        textIcon.removeClass("toggle--source_audio__box__icon--active")
-        audioBox.addClass("toggle--source_audio__box--active")
-        audioIcon.addClass("toggle--source_audio__box__icon--active")
+        textBox.removeClass(TOGGLE_SOURCE_ACTIVE)
+        textIcon.removeClass(TOGGLE_SOURCE_ICON_ACTIVE)
+        audioBox.addClass(TOGGLE_SOURCE_ACTIVE)
+        audioIcon.addClass(TOGGLE_SOURCE_ICON_ACTIVE)
     }
 
     private fun activateText() {
-        textBox.addClass("toggle--source_audio__box--active")
-        textIcon.addClass("toggle--source_audio__box__icon--active")
-        audioBox.removeClass("toggle--source_audio__box--active")
-        audioIcon.removeClass("toggle--source_audio__box__icon--active")
+        textBox.addClass(TOGGLE_SOURCE_ACTIVE)
+        textIcon.addClass(TOGGLE_SOURCE_ICON_ACTIVE)
+        audioBox.removeClass(TOGGLE_SOURCE_ACTIVE)
+        audioIcon.removeClass(TOGGLE_SOURCE_ICON_ACTIVE)
     }
 
     private fun loadFXML() {
