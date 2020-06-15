@@ -46,12 +46,10 @@ class SourceAudioSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
 
         root.apply {
             playerNode.roundedStyleProperty.onChangeAndDoNow {
-                it?.let {
-                    if (it) {
-                        addClass("audioplayer--scripture-takes--rounded")
-                    } else {
-                        removeClass("audioplayer--scripture-takes--rounded")
-                    }
+                if (it == true) {
+                    addClass("audioplayer--scripture-takes--rounded")
+                } else {
+                    removeClass("audioplayer--scripture-takes--rounded")
                 }
             }
         }
