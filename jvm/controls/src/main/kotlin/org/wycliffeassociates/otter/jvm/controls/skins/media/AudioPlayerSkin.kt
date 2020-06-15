@@ -5,8 +5,6 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
@@ -21,8 +19,6 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
     private val PAUSE_ICON = FontIcon("fa-pause:22")
     private val MAX_HEIGHT = 200.0
 
-    @FXML
-    lateinit var root: VBox
     @FXML
     lateinit var playBtn: Button
     @FXML
@@ -41,8 +37,6 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
     lateinit var sourceToggle: SourceAudioToggle
     @FXML
     lateinit var sourceText: Text
-    @FXML
-    lateinit var noSourceAudioLabel: Label
 
     lateinit var audioController: AudioPlayerController
 
@@ -53,9 +47,7 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
 
     private fun initializeControl() {
         audioController = AudioPlayerController(playerNode.audioPlayerProperty.value, audioSlider)
-        root.apply {
-            vgrow = Priority.ALWAYS
-        }
+
         playBtn.setOnMouseClicked {
             audioController.toggle()
         }
