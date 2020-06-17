@@ -90,7 +90,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
                 root.selectionModel.select(0)
             } else {
                 val tab: ChromeableTab? = root.tabs[0] as? ChromeableTab
-                if(tab != null) {
+                if (tab != null) {
                     animateTabContent(tab.animatedContent, direction)
                 }
             }
@@ -98,7 +98,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     }
 
     fun animateTabContent(content: Node, direction: Direction) {
-        val contentWidth = when(direction) {
+        val contentWidth = when (direction) {
             Direction.LEFT -> root.width
             Direction.RIGHT -> -root.width
         }
