@@ -27,16 +27,16 @@ class SourceAudioSkin(override val playerNode: AudioPlayerNode) : PlayerSkin(pla
         root.apply {
             playerNode.roundedStyleProperty.onChangeAndDoNow {
                 if (it == true) {
-                    addClass("audioplayer--scripture-takes--rounded")
+                    addClass("scripture-takes-audioplayer--rounded")
                 } else {
-                    removeClass("audioplayer--scripture-takes--rounded")
+                    removeClass("scripture-takes-audioplayer--rounded")
                 }
             }
         }
         playBtn.apply {
             visibleWhen { audioController.displayPlayerProperty }
         }
-        sourceToggle.apply {
+        sourceFormatToggle.apply {
             setOnMouseClicked {
                 audioController.toggleSource()
                 if (playerNode.refreshParentProperty.value) {

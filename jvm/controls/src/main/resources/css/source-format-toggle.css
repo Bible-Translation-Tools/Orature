@@ -1,23 +1,23 @@
 @import "root.css"
 
-.toggle--source_audio {
+.source-format-toggle {
     -fx-border-color: -primary;
     -fx-border-radius: 3;
     -fx-cursor: hand;
 }
 
-.toggle--source_audio__box {
+.source-format-toggle__box {
     -fx-padding: 8;
 }
 
-.toggle--source_audio__box--active {
+.source-format-toggle__box--active {
     -fx-background-color: -primary;
 }
 
-.toggle--source_audio__box__icon {
+.source-format-toggle__icon {
     -fx-fill: -primary;
 }
 
-.toggle--source_audio__box__icon--active {
+.source-format-toggle__icon--active {
     -fx-fill: white;
 }

@@ -11,7 +11,7 @@ import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.SourceAudioToggle
+import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -29,7 +29,7 @@ abstract class PlayerSkin(protected open val playerNode: AudioPlayerNode) : Skin
     @FXML
     lateinit var sourceText: Text
     @FXML
-    lateinit var sourceToggle: SourceAudioToggle
+    lateinit var sourceFormatToggle: SourceFormatToggle
 
     lateinit var audioController: AudioPlayerController
 
@@ -53,7 +53,7 @@ abstract class PlayerSkin(protected open val playerNode: AudioPlayerNode) : Skin
                 audioController.load(it)
             }
         }
-        sourceToggle.apply {
+        sourceFormatToggle.apply {
             setOnMouseClicked {
                 audioController.toggleSource()
             }

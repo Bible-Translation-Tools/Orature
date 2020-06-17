@@ -78,7 +78,6 @@ class ResourceListViewModel : ViewModel() {
 
     internal fun setActiveChunkAndRecordables(bookElement: BookElement?, resource: Resource) {
         workbookViewModel.activeChunkProperty.set(bookElement as? Chunk)
-        println(resource.title.textItem.text)
         workbookViewModel.activeResourceProperty.set(resource)
         recordResourceViewModel.setRecordableListItems(
             listOfNotNull(resource.title, resource.body)

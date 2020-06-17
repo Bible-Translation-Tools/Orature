@@ -1,25 +1,29 @@
 @import "root.css"
 
-.audioplayer--scripture-takes {
+.scripture-takes-audioplayer {
     -fx-background-color: -white;
 }
 
-.audioplayer--scripture-takes--rounded {
+.scripture-takes-audioplayer--rounded {
     -fx-background-radius: 16px;
     -fx-border-radius: 16px;
     -fx-effect: -all-sides;
 }
 
-.audioplayer--scripture-takes__label {
+.scripture-takes-audioplayer__label {
     -fx-font-size: 1.2em;
     -fx-font-weight: bold;
 }
 
-.audioplayer--scripture-takes__label__icon {
+.scripture-takes-audioplayer__icon {
     -fx-icon-size: 26px;
 }
 
-.audioplayer--scripture-takes__play-btn {
+.scripture-takes-audioplayer__play-btn {
+
+}
+
+.scripture-takes-audioplayer__play-btn--rounded {
     -fx-background-radius: 50%;
     -fx-border-radius: 50%;
     -fx-border-width: 1px;
@@ -27,22 +31,26 @@
     -fx-pref-height: 60px;
 }
 
-.audioplayer--scripture-takes__play-btn .ikonli-font-icon {
+.scripture-takes-audioplayer__play-btn .ikonli-font-icon {
+    -fx-icon-size: 18px;
+}
+
+.scripture-takes-audioplayer__play-btn--rounded .ikonli-font-icon {
     -fx-icon-size: 18px;
     -fx-fill: -primary;
 }
 
-.audioplayer--scripture-takes__source-container {
+.scripture-takes-audioplayer__source-container {
     -fx-background: white;
 }
 
-.audioplayer--scripture-takes__source-text {
+.scripture-takes-audioplayer__source-text {
     -fx-font-size: 16px;
     -fx-alignment: center;
     -fx-text-alignment: justify;
 }
 
-.audioplayer--scripture-takes__controls {
+.scripture-takes-audioplayer__controls {
     -fx-border-color: #ccc;
     -fx-border-width: 1 0 0 0;
     -fx-min-height: 100px;

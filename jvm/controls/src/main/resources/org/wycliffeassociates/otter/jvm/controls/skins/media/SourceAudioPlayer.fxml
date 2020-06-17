@@ -7,16 +7,16 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.*?>
-<?import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.*?>
+<?import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle?>
 
-<VBox fx:id="root" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="audioplayer--scripture-takes" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+<VBox fx:id="root" maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="scripture-takes-audioplayer" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <children>
             <JFXSlider fx:id="audioSlider" VBox.vgrow="ALWAYS" />
-            <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" managed="false" styleClass="audioplayer--scripture-takes__source-container" visible="false" VBox.vgrow="ALWAYS">
+            <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" managed="false" styleClass="scripture-takes-audioplayer__source-container" visible="false" VBox.vgrow="ALWAYS">
                <content>
-                  <Text fx:id="sourceText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="audioplayer--scripture-takes__source-text" />
+                  <Text fx:id="sourceText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="scripture-takes-audioplayer__source-text" />
                </content>
             </ScrollPane>
          </children>
@@ -24,13 +24,13 @@
             <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
          </padding>
       </VBox>
-      <HBox styleClass="audioplayer--scripture-takes__controls" VBox.vgrow="ALWAYS">
+      <HBox styleClass="scripture-takes-audioplayer__controls" VBox.vgrow="ALWAYS">
          <children>
             <HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                <children>
-                  <Label fx:id="sourceAudioLabel" styleClass="audioplayer--scripture-takes__label" text="Source Audio">
+                  <Label fx:id="sourceAudioLabel" styleClass="scripture-takes-audioplayer__label" text="Source Audio">
                      <graphic>
-                        <FontIcon iconLiteral="gmi-hearing" iconSize="22" styleClass="audioplayer--scripture-takes__label__icon" />
+                        <FontIcon iconLiteral="gmi-hearing" iconSize="22" styleClass="scripture-takes-audioplayer__icon" />
                      </graphic>
                   </Label>
                </children>
@@ -42,7 +42,8 @@
                         <FontIcon iconLiteral="mdi-play" iconSize="10" selectionEnd="1" />
                      </graphic>
                      <styleClass>
-                        <String fx:value="audioplayer--scripture-takes__play-btn" />
+                        <String fx:value="scripture-takes-audioplayer__play-btn" />
+                        <String fx:value="scripture-takes-audioplayer__play-btn--rounded" />
                         <String fx:value="btn--secondary" />
                      </styleClass>
                   </JFXButton>
@@ -50,7 +51,7 @@
             </HBox>
             <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
                <children>
-                  <SourceAudioToggle fx:id="sourceToggle" />
+                  <SourceFormatToggle fx:id="sourceFormatToggle" />
                </children>
             </HBox>
          </children>

@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.*?>
-<?import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.*?>
+<?import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle?>
 
 <VBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -34,7 +34,7 @@
             <children>
                 <HBox fx:id="audioPlayer" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
                     <children>
-                        <JFXButton fx:id="playBtn" text=" ">
+                        <JFXButton fx:id="playBtn" text=" " styleClass="scripture-takes-audioplayer__play-btn">
                             <graphic>
                                 <FontIcon iconLiteral="fa-play" />
                             </graphic>
@@ -49,14 +49,14 @@
                     <children>
                         <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" maxHeight="-Infinity" HBox.hgrow="ALWAYS">
                             <content>
-                                <Text fx:id="sourceText" styleClass="audioplayer--scripture-takes__source-text" textAlignment="JUSTIFY" />
+                                <Text fx:id="sourceText" styleClass="scripture-takes-audioplayer__source-text" textAlignment="JUSTIFY" />
                             </content>
                         </ScrollPane>
                     </children>
                 </HBox>
                 <HBox alignment="BOTTOM_RIGHT" maxWidth="-Infinity" HBox.hgrow="ALWAYS">
                     <children>
-                        <SourceAudioToggle fx:id="sourceToggle" maxHeight="-Infinity" maxWidth="-Infinity" HBox.hgrow="ALWAYS" />
+                        <SourceFormatToggle fx:id="sourceFormatToggle" maxHeight="-Infinity" maxWidth="-Infinity" HBox.hgrow="ALWAYS" />
                     </children>
                <padding>
                   <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />

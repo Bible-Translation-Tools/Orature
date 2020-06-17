@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<HBox fx:id="root" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" styleClass="source-format-toggle" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+
+    <VBox fx:id="textBox" styleClass="source-format-toggle__box">
+        <FontIcon fx:id="textIcon" iconLiteral="gmi-sort-by-alpha" iconSize="22" styleClass="source-format-toggle__icon" />
+        <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+        </padding>
+    </VBox>
+
+    <VBox fx:id="audioBox" styleClass="toggle--source_audio__box">
+        <FontIcon fx:id="audioIcon" iconLiteral="gmi-hearing" iconSize="22" styleClass="source-format-toggle__icon" />
+        <padding>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+        </padding>
+    </VBox>
+</HBox>

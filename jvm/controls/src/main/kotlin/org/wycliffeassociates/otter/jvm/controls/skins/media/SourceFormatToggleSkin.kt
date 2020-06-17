@@ -7,14 +7,14 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.Icon
-import org.wycliffeassociates.otter.jvm.controls.sourceaudiotoggle.SourceAudioToggle
+import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class SourceAudioToggleSkin(private val toggle: SourceAudioToggle): SkinBase<SourceAudioToggle>(toggle) {
+class SourceFormatToggleSkin(private val toggle: SourceFormatToggle): SkinBase<SourceFormatToggle>(toggle) {
 
-    private val TOGGLE_SOURCE_ACTIVE = "toggle--source_audio__box--active"
-    private val TOGGLE_SOURCE_ICON_ACTIVE = "toggle--source_audio__box__icon--active"
+    private val TOGGLE_SOURCE_ACTIVE = "source-format-toggle__box--active"
+    private val TOGGLE_SOURCE_ICON_ACTIVE = "source-format-toggle__icon--active"
 
     @FXML
     lateinit var root: HBox
@@ -61,7 +61,7 @@ class SourceAudioToggleSkin(private val toggle: SourceAudioToggle): SkinBase<Sou
     }
 
     private fun loadFXML() {
-        val loader = FXMLLoader(javaClass.getResource("SourceAudioToggle.fxml"))
+        val loader = FXMLLoader(javaClass.getResource("SourceFormatToggle.fxml"))
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
