@@ -1,17 +1,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view
 
-import javafx.scene.control.Tab
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordableTabViewModel
 import tornadofx.*
 
 class RecordableTab(
     private val viewModel: RecordableTabViewModel,
     private val onTabSelect: (Recordable) -> Unit
-) : Tab() {
+) : ChromeableTab() {
+
+    private val mainContent = RecordResourceFragment(viewModel)
 
     init {
         textProperty().bind(viewModel.labelProperty)
@@ -21,7 +23,7 @@ class RecordableTab(
             progressProperty.bind(viewModel.getProgressBinding())
         }
 
-        RecordResourceFragment(viewModel).apply {
+        mainContent.apply {
             formattedTextProperty.bind(viewModel.getFormattedTextBinding())
             this@RecordableTab.content = this.root
         }
@@ -46,5 +48,9 @@ class RecordableTab(
         accentFill = Color.LIGHTGRAY
         trackFill = Color.LIGHTGRAY
         indicatorRadius = 4.0
+    }
+
+    override fun setAnimatedContent() {
+        animatedContent = mainContent.container
     }
 }

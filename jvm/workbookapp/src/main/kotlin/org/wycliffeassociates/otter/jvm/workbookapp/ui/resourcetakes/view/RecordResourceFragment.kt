@@ -34,6 +34,8 @@ class RecordResourceFragment(
         createTakeNode = ::createTakeCard
     )
 
+    val container = mainContainer
+
     private val newTakeButton =
         highlightablebutton {
             highlightColor = AppTheme.colors.appBlue
@@ -50,7 +52,7 @@ class RecordResourceFragment(
         }
 
     private val previousButton = JFXButton().apply {
-        addClass(RecordResourceStyles.bottomButton)
+        addClass(RecordResourceStyles.navbarButton)
         text = messages["previousChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
         action {
@@ -61,7 +63,7 @@ class RecordResourceFragment(
     }
 
     private val nextButton = JFXButton().apply {
-        addClass(RecordResourceStyles.bottomButton)
+        addClass(RecordResourceStyles.navbarButton)
         text = messages["nextChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
         action {
@@ -109,9 +111,7 @@ class RecordResourceFragment(
     private val grid = gridpane {
         vgrow = Priority.ALWAYS
         addClass(RecordResourceStyles.takesTab)
-
-        constraintsForRow(0).percentHeight = 90.0
-        constraintsForRow(1).percentHeight = 10.0
+        setFillHeightSingleRow()
 
         row {
             vbox {
@@ -129,23 +129,25 @@ class RecordResourceFragment(
                 add(alternateTakesList)
             }
         }
+    }
 
-        row {
-            vbox {
-                alignment = Pos.CENTER
-                gridpaneColumnConstraints {
-                    percentWidth = 50.0
-                }
-                add(previousButton)
-            }
+    private val navbar = hbox {
+        addClass(RecordResourceStyles.navbar)
+        anchorpaneConstraints {
+            bottomAnchor = 0.0
+            leftAnchor = 0.0
+            rightAnchor = 0.0
+        }
+        vbox {
+            hgrow = Priority.ALWAYS
+            alignment = Pos.CENTER
+            add(previousButton)
+        }
 
-            vbox {
-                alignment = Pos.CENTER
-                gridpaneColumnConstraints {
-                    percentWidth = 50.0
-                }
-                add(nextButton)
-            }
+        vbox {
+            hgrow = Priority.ALWAYS
+            alignment = Pos.CENTER
+            add(nextButton)
         }
     }
 
@@ -153,8 +155,15 @@ class RecordResourceFragment(
         importStylesheet<RecordResourceStyles>()
 
         mainContainer.apply {
+            navbar.heightProperty().onChange {
+                anchorpaneConstraints {
+                    bottomAnchor = it
+                }
+            }
             add(grid)
         }
+
+        add(navbar)
     }
 
     override fun createTakeCard(take: Take): TakeCard {

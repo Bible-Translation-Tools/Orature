@@ -10,6 +10,7 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
@@ -23,6 +24,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val navigator: ChromeableStage by inject()
 
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
@@ -69,10 +71,12 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
+        navigator.animateTabContent(ChromeableStage.Direction.LEFT)
     }
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
+        navigator.animateTabContent(ChromeableStage.Direction.RIGHT)
     }
 
     private fun setHasNextAndPrevious() {

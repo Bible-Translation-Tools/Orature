@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroup
 import javafx.scene.control.Tab
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.view.CardGridFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
@@ -51,7 +52,7 @@ class ChapterTabGroup : TabGroup() {
         tabMap[resourceMetadata.identifier]?.select()
     }
 
-    private inner class ChapterSelectTab(val resourceMetadata: ResourceMetadata) : Tab() {
+    private inner class ChapterSelectTab(val resourceMetadata: ResourceMetadata) : ChromeableTab() {
         init {
             text = resourceMetadata.identifier
             add(CardGridFragment().root)
