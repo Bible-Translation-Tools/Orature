@@ -20,7 +20,7 @@
 }
 
 .scripture-takes-audioplayer__play-btn {
-
+    -fx-fill: -gray-darker;
 }
 
 .scripture-takes-audioplayer__play-btn--rounded {
