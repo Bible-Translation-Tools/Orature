@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Tab
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.content.Recordable
@@ -13,9 +14,9 @@ class RecordableTab(
     private val onTabSelect: (Recordable) -> Unit
 ) : Tab() {
 
-    init {
-        textProperty().bind(viewModel.labelProperty)
+    val recordableProperty = SimpleObjectProperty<Recordable?>()
 
+    init {
         graphic = statusindicator {
             initForRecordableTab()
             progressProperty.bind(viewModel.getProgressBinding())
@@ -33,7 +34,15 @@ class RecordableTab(
         }
     }
 
-    fun hasRecordable(): Boolean = viewModel.recordable != null
+    fun bindProperties() {
+        textProperty().bind(viewModel.labelProperty)
+        recordableProperty.bind(viewModel.recordableProperty)
+    }
+
+    fun unbindProperties() {
+        textProperty().unbind()
+        recordableProperty.unbind()
+    }
 
     private fun callOnTabSelect() {
         viewModel.recordable?.let { onTabSelect(it) }
