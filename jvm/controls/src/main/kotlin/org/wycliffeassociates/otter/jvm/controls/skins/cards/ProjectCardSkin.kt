@@ -23,7 +23,7 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
     @FXML
     lateinit var root: VBox
     @FXML
-    lateinit var bookTitle: Text
+    lateinit var bookTitle: Label
     @FXML
     lateinit var cardMoreButton: JFXButton
     @FXML
@@ -62,6 +62,9 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
 
     private fun bindText() {
         bookTitle.textProperty().bind(card.titleTextProperty())
+        bookTitle.tooltip {
+            textProperty().bind(card.titleTextProperty())
+        }
         bookSlug.textProperty().bind(card.slugTextProperty())
         language.textProperty().bind(card.languageTextProperty())
         cardPrimaryButton.textProperty().bind(card.actionTextProperty())
