@@ -29,7 +29,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
 
     override var currentGroup: ITabGroup? = null
 
-    enum class Direction {
+    enum class TransitionDirection {
         LEFT,
         RIGHT
     }
@@ -41,16 +41,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
 
             // Disable builtin tab transition animation
             disableAnimationProperty().set(true)
-
-            selectionModel.selectedIndexProperty().addListener { _, old, new ->
-                if (old.toInt() >= 0 && new.toInt() >= 0) {
-                    val direction = if (old.toInt() > new.toInt()) Direction.RIGHT else Direction.LEFT
-                    val tab: ChromeableTab? = tabs[new.toInt()] as? ChromeableTab
-                    if (tab != null) {
-                        animateTabContent(tab.animatedContent, direction)
-                    }
-                }
-            }
+            onTabSelectionChanged()
 
             // Using a size property binding and toggleClass() did not work consistently. This does.
             tabs.onChange {
@@ -83,8 +74,22 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
         root.tabs.clear()
     }
 
+    fun onTabSelectionChanged() {
+        root.selectionModel.selectedIndexProperty().addListener { _, old, new ->
+            val oldIndex = old.toInt()
+            val newIndex = new.toInt()
+            if (oldIndex >= 0 && newIndex >= 0) {
+                val direction = if (oldIndex > newIndex) TransitionDirection.RIGHT else TransitionDirection.LEFT
+                val tab: ChromeableTab? = root.tabs[newIndex] as? ChromeableTab
+                if (tab != null) {
+                    animateTabContent(tab.animatedContent, direction)
+                }
+            }
+        }
+    }
+
     // Animate first tab's content
-    fun animateTabContent(direction: Direction) {
+    fun animateTabContent(direction: TransitionDirection) {
         if (root.tabs.size > 0) {
             if (root.selectionModel.selectedIndex > 0) {
                 root.selectionModel.select(0)
@@ -97,10 +102,10 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
         }
     }
 
-    fun animateTabContent(content: Node, direction: Direction) {
+    private fun animateTabContent(content: Node, direction: TransitionDirection) {
         val contentWidth = when (direction) {
-            Direction.LEFT -> root.width
-            Direction.RIGHT -> -root.width
+            TransitionDirection.LEFT -> root.width
+            TransitionDirection.RIGHT -> -root.width
         }
 
         content.translateX = contentWidth

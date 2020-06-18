@@ -154,12 +154,12 @@ class RecordResourceViewModel : ViewModel() {
 
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
-        navigator.animateTabContent(ChromeableStage.Direction.LEFT)
+        navigator.animateTabContent(ChromeableStage.TransitionDirection.LEFT)
     }
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
-        navigator.animateTabContent(ChromeableStage.Direction.RIGHT)
+        navigator.animateTabContent(ChromeableStage.TransitionDirection.RIGHT)
     }
 
     private fun stepToChunk(direction: StepDirection) {
