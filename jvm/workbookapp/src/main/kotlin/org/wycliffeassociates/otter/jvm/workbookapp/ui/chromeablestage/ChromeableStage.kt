@@ -41,7 +41,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
 
             // Disable builtin tab transition animation
             disableAnimationProperty().set(true)
-            onTabSelectionChanged()
+            setTabSelectionAnimation()
 
             // Using a size property binding and toggleClass() did not work consistently. This does.
             tabs.onChange {
@@ -74,7 +74,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
         root.tabs.clear()
     }
 
-    fun onTabSelectionChanged() {
+    private fun setTabSelectionAnimation() {
         root.selectionModel.selectedIndexProperty().addListener { _, old, new ->
             val oldIndex = old.toInt()
             val newIndex = new.toInt()
