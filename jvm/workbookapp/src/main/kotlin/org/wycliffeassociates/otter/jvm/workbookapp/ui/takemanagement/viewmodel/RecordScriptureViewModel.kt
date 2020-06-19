@@ -57,9 +57,9 @@ class RecordScriptureViewModel : ViewModel() {
         }
 
         activeChunkProperty.onChangeAndDoNow { chunk ->
+            setHasNextAndPrevious()
             if (chunk != null) {
                 setTitle(chunk)
-                setHasNextAndPrevious()
                 // This will trigger loading takes in the RecordableViewModel
                 recordableViewModel.recordable = chunk
             } else {
@@ -92,6 +92,9 @@ class RecordScriptureViewModel : ViewModel() {
                     setHasNextAndPrevious()
                 }
             }
+        } ?: run {
+            hasNext.set(false)
+            hasPrevious.set(false)
         }
     }
 

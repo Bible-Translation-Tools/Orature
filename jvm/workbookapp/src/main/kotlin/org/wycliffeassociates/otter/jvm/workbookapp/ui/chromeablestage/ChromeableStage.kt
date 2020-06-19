@@ -37,6 +37,9 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
             importStylesheet<MainScreenStyles>()
             addClass(Stylesheet.tabPane)
 
+            // Disable builtin tab transition animation
+            disableAnimationProperty().set(true)
+
             // Using a size property binding and toggleClass() did not work consistently. This does.
             tabs.onChange {
                 if (it.list.size == 1) {

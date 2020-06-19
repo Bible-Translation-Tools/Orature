@@ -15,11 +15,11 @@
    <children>
       <HBox alignment="CENTER">
          <children>
-            <Text fx:id="bookTitle" strokeType="OUTSIDE" strokeWidth="0.0" text="Book">
+            <Label fx:id="bookTitle" text="Book">
                <font>
                   <Font size="14.0" />
                </font>
-            </Text>
+            </Label>
             <HBox HBox.hgrow="ALWAYS" />
             <JFXButton fx:id="cardMoreButton">
                <graphic>
