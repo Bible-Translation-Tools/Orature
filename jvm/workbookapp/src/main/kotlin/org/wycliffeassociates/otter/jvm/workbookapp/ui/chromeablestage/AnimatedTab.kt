@@ -5,7 +5,7 @@ import javafx.scene.Node
 import javafx.scene.control.Tab
 import tornadofx.*
 
-abstract class ChromeableTab : Tab() {
+abstract class AnimatedTab : Tab() {
     val animatedContentProperty = SimpleObjectProperty<Node>()
     var animatedContent: Node by animatedContentProperty
 

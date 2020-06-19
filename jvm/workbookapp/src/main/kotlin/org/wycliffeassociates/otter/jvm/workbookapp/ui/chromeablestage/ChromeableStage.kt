@@ -8,6 +8,7 @@ import javafx.animation.Timeline
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
 import javafx.util.Duration
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TabAnimation.TransitionDirection
 import org.wycliffeassociates.controls.ChromeableTabPane
 import org.wycliffeassociates.otter.common.navigation.INavigator
 import org.wycliffeassociates.otter.common.navigation.ITabGroup
@@ -29,17 +30,12 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
 
     override var currentGroup: ITabGroup? = null
 
-    enum class TransitionDirection {
-        LEFT,
-        RIGHT
-    }
+    val tabAnimation = TabAnimation(root)
 
     init {
         root.apply {
             importStylesheet<MainScreenStyles>()
             addClass(Stylesheet.tabPane)
-
-            setTabSelectionAnimation()
 
             // Using a size property binding and toggleClass() did not work consistently. This does.
             tabs.onChange {
@@ -70,61 +66,5 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
 
     private fun clearTabs() {
         root.tabs.clear()
-    }
-
-    private fun setTabSelectionAnimation() {
-        root.selectionModel.selectedIndexProperty().addListener { _, old, new ->
-            val oldIndex = old.toInt()
-            val newIndex = new.toInt()
-            if (oldIndex >= 0 && newIndex >= 0) {
-                val direction = if (oldIndex > newIndex) TransitionDirection.RIGHT else TransitionDirection.LEFT
-                val tab: ChromeableTab? = root.tabs[newIndex] as? ChromeableTab
-                if (tab != null) {
-                    animateTabContent(tab.animatedContent, direction)
-                }
-            }
-        }
-    }
-
-    // Animate first tab's content
-    fun animateTabContent(direction: TransitionDirection) {
-        if (root.tabs.size > 0) {
-            if (root.selectionModel.selectedIndex > 0) {
-                root.selectionModel.select(0)
-            } else {
-                val tab: ChromeableTab? = root.tabs[0] as? ChromeableTab
-                if (tab != null) {
-                    animateTabContent(tab.animatedContent, direction)
-                }
-            }
-        }
-    }
-
-    private fun animateTabContent(content: Node, direction: TransitionDirection) {
-        val contentWidth = when (direction) {
-            TransitionDirection.LEFT -> root.width
-            TransitionDirection.RIGHT -> -root.width
-        }
-
-        content.translateX = contentWidth
-
-        object : CachedTransition(
-            content,
-            Timeline(
-                KeyFrame(
-                    Duration.millis(1000.0),
-                    KeyValue(
-                        content.translateXProperty(),
-                        0.0,
-                        Interpolator.EASE_BOTH
-                    )
-                )
-            )
-        ) {
-            init {
-                cycleDuration = Duration.seconds(0.320)
-                delay = Duration.seconds(0.0)
-            }
-        }.play()
     }
 }

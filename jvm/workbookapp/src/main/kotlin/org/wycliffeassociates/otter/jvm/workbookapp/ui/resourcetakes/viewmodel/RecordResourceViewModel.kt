@@ -21,6 +21,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TabAnimation
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
 import tornadofx.*
 
@@ -154,12 +155,12 @@ class RecordResourceViewModel : ViewModel() {
 
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
-        navigator.animateTabContent(ChromeableStage.TransitionDirection.LEFT)
+        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.LEFT)
     }
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
-        navigator.animateTabContent(ChromeableStage.TransitionDirection.RIGHT)
+        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.RIGHT)
     }
 
     private fun stepToChunk(direction: StepDirection) {

@@ -4,14 +4,14 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableTab
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.AnimatedTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordableTabViewModel
 import tornadofx.*
 
 class RecordableTab(
     private val viewModel: RecordableTabViewModel,
     private val onTabSelect: (Recordable) -> Unit
-) : ChromeableTab() {
+) : AnimatedTab() {
 
     private val mainContent = RecordResourceFragment(viewModel)
 

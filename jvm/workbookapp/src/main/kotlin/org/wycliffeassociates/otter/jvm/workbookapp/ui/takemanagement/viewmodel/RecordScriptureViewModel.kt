@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TabAnimation
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
@@ -71,12 +72,12 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
-        navigator.animateTabContent(ChromeableStage.TransitionDirection.LEFT)
+        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.LEFT)
     }
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
-        navigator.animateTabContent(ChromeableStage.TransitionDirection.RIGHT)
+        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.RIGHT)
     }
 
     private fun setHasNextAndPrevious() {

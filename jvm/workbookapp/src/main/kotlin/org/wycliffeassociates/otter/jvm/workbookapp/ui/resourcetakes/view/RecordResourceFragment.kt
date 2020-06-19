@@ -132,6 +132,7 @@ class RecordResourceFragment(
     }
 
     private val navbar = hbox {
+        id = "navbar"
         addClass(RecordResourceStyles.navbar)
         anchorpaneConstraints {
             bottomAnchor = 0.0
