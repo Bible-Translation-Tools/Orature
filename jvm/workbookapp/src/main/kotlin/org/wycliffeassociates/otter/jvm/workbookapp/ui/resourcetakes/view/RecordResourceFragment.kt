@@ -52,7 +52,7 @@ class RecordResourceFragment(
         }
 
     private val previousButton = JFXButton().apply {
-        addClass(RecordResourceStyles.navbarButton)
+        addClass(RecordResourceStyles.paginationButton)
         text = messages["previousChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
         action {
@@ -63,7 +63,7 @@ class RecordResourceFragment(
     }
 
     private val nextButton = JFXButton().apply {
-        addClass(RecordResourceStyles.navbarButton)
+        addClass(RecordResourceStyles.paginationButton)
         text = messages["nextChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
         action {
