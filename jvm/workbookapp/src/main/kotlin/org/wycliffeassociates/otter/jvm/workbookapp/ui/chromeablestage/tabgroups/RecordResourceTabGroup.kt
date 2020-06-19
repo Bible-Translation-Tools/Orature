@@ -4,9 +4,20 @@ import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.AnimatedChromeableTabPane
+import tornadofx.*
 
 class RecordResourceTabGroup : TabGroup() {
     private val viewModel: RecordResourceViewModel by inject()
+
+    init {
+        viewModel.transitionDirectionProperty.onChange {
+            it?.let {
+                (tabPane as? AnimatedChromeableTabPane)?.animate(it)
+                viewModel.transitionDirectionProperty.set(null)
+            }
+        }
+    }
 
     private val tabs: List<RecordableTab> = listOf(
         recordableTab(ContentType.TITLE),

@@ -10,8 +10,7 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TabAnimation
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TransitionDirection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
@@ -25,7 +24,6 @@ class RecordScriptureViewModel : ViewModel() {
 
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val navigator: ChromeableStage by inject()
 
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
@@ -40,6 +38,7 @@ class RecordScriptureViewModel : ViewModel() {
     private val chunkList: ObservableList<Chunk> = observableListOf()
     val hasNext = SimpleBooleanProperty(false)
     val hasPrevious = SimpleBooleanProperty(false)
+    val transitionDirectionProperty = SimpleObjectProperty<TransitionDirection>()
 
     private var activeChunkSubscription: Disposable? = null
 
@@ -72,12 +71,12 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
-        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.LEFT)
+        transitionDirectionProperty.set(TransitionDirection.LEFT)
     }
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
-        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.RIGHT)
+        transitionDirectionProperty.set(TransitionDirection.RIGHT)
     }
 
     private fun setHasNextAndPrevious() {

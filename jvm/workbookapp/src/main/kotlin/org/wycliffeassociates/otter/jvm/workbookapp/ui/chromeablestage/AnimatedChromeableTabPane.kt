@@ -6,27 +6,31 @@ import javafx.animation.KeyFrame
 import javafx.animation.KeyValue
 import javafx.animation.Timeline
 import javafx.scene.Node
-import javafx.scene.control.TabPane
 import javafx.util.Duration
+import org.wycliffeassociates.controls.ChromeableTabPane
 
-class TabAnimation(private val tabPane: TabPane) {
+enum class TransitionDirection {
+    LEFT,
+    RIGHT
+}
 
-    enum class TransitionDirection {
-        LEFT,
-        RIGHT
-    }
+class AnimatedChromeableTabPane(chrome: Node, headerScalingFactor: Double) :
+    ChromeableTabPane(chrome, headerScalingFactor) {
 
     init {
+        // Disable builtin JFoenix tab transition animation
+        disableAnimationProperty().set(true)
+
         setTabSelectionAnimation()
     }
 
     private fun setTabSelectionAnimation() {
-        tabPane.selectionModel.selectedIndexProperty().addListener { _, old, new ->
+        selectionModel.selectedIndexProperty().addListener { _, old, new ->
             val oldIndex = old.toInt()
             val newIndex = new.toInt()
             if (oldIndex >= 0 && newIndex >= 0) {
                 val direction = if (oldIndex > newIndex) TransitionDirection.RIGHT else TransitionDirection.LEFT
-                val tab: AnimatedTab? = tabPane.tabs[newIndex] as? AnimatedTab
+                val tab: AnimatedTab? = tabs[newIndex] as? AnimatedTab
                 if (tab != null) {
                     animate(tab.animatedContent, direction)
                 }
@@ -36,11 +40,11 @@ class TabAnimation(private val tabPane: TabPane) {
 
     // Animate first tab's content
     fun animate(direction: TransitionDirection) {
-        if (tabPane.tabs.size > 0) {
-            if (tabPane.selectionModel.selectedIndex > 0) {
-                tabPane.selectionModel.select(0)
+        if (tabs.size > 0) {
+            if (selectionModel.selectedIndex > 0) {
+                selectionModel.select(0)
             } else {
-                val tab: AnimatedTab? = tabPane.tabs[0] as? AnimatedTab
+                val tab: AnimatedTab? = tabs[0] as? AnimatedTab
                 if (tab != null) {
                     animate(tab.animatedContent, direction)
                 }
@@ -50,8 +54,8 @@ class TabAnimation(private val tabPane: TabPane) {
 
     private fun animate(content: Node, direction: TransitionDirection) {
         val contentWidth = when (direction) {
-            TransitionDirection.LEFT -> tabPane.width
-            TransitionDirection.RIGHT -> -tabPane.width
+            TransitionDirection.LEFT -> width
+            TransitionDirection.RIGHT -> -width
         }
 
         content.translateX = contentWidth

@@ -14,7 +14,7 @@ class RecordResourceStyles : Stylesheet() {
         val newTakeRegion by cssclass()
         val contentScrollPane by cssclass()
         val takesList by cssclass()
-        val navbar by cssclass()
+        val pagination by cssclass()
         val navbarButton by cssclass()
 
         private val takeMaxWidth = 500.px
@@ -83,7 +83,7 @@ class RecordResourceStyles : Stylesheet() {
             padding = box(0.px, 0.px, 15.px, 0.px)
         }
 
-        navbar {
+        pagination {
             backgroundColor += Color.WHITE
             prefHeight = 70.px
         }

@@ -131,9 +131,8 @@ class RecordResourceFragment(
         }
     }
 
-    private val navbar = hbox {
-        id = "navbar"
-        addClass(RecordResourceStyles.navbar)
+    private val pagination = hbox {
+        addClass(RecordResourceStyles.pagination)
         anchorpaneConstraints {
             bottomAnchor = 0.0
             leftAnchor = 0.0
@@ -156,7 +155,7 @@ class RecordResourceFragment(
         importStylesheet<RecordResourceStyles>()
 
         mainContainer.apply {
-            navbar.heightProperty().onChange {
+            pagination.heightProperty().onChange {
                 anchorpaneConstraints {
                     bottomAnchor = it
                 }
@@ -164,7 +163,7 @@ class RecordResourceFragment(
             add(grid)
         }
 
-        add(navbar)
+        add(pagination)
     }
 
     override fun createTakeCard(take: Take): TakeCard {

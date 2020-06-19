@@ -20,8 +20,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TabAnimation
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TransitionDirection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
 import tornadofx.*
 
@@ -34,13 +33,14 @@ class RecordResourceViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val navigator: ChromeableStage by inject()
 
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
     private val activeChunk: Chunk by activeChunkProperty
 
     private val activeResourceProperty = SimpleObjectProperty<Resource>()
     private val activeResource: Resource by activeResourceProperty
+
+    val transitionDirectionProperty = SimpleObjectProperty<TransitionDirection>()
 
     private val resourceList: ObservableList<Resource> = observableListOf()
 
@@ -155,12 +155,12 @@ class RecordResourceViewModel : ViewModel() {
 
     fun nextChunk() {
         stepToChunk(StepDirection.FORWARD)
-        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.LEFT)
+        transitionDirectionProperty.set(TransitionDirection.LEFT)
     }
 
     fun previousChunk() {
         stepToChunk(StepDirection.BACKWARD)
-        navigator.tabAnimation.animate(TabAnimation.TransitionDirection.RIGHT)
+        transitionDirectionProperty.set(TransitionDirection.RIGHT)
     }
 
     private fun stepToChunk(direction: StepDirection) {
