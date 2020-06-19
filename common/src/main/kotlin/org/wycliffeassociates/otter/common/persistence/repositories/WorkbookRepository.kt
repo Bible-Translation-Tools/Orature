@@ -127,11 +127,11 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
     }
 
     private fun textItem(content: Content): TextItem {
-        return content.text?.let { text ->
-            content.format?.let { format ->
+        return content.format?.let { format ->
+            content.text?.let { text ->
                 TextItem(text, MimeType.of(format))
-            } ?: TextItem("[empty]", MimeType.of("usfm"))
-        } ?: TextItem("[empty]", MimeType.of("usfm"))
+            } ?: throw IllegalStateException("Content text is null")
+        } ?: TextItem("[empty]", MimeType.USFM)
     }
 
     private fun constructResource(
