@@ -8,13 +8,13 @@ import tornadofx.*
 
 class RecordScriptureTabGroup : TabGroup() {
     private val tab = RecordScriptureTab()
-    private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    private val viewModel: RecordScriptureViewModel by inject()
 
     init {
-        recordScriptureViewModel.transitionDirectionProperty.onChange {
+        viewModel.transitionDirectionProperty.onChange {
             it?.let {
                 (tabPane as? AnimatedChromeableTabPane)?.animate(it)
-                recordScriptureViewModel.transitionDirectionProperty.set(null)
+                viewModel.transitionDirectionProperty.set(null)
             }
         }
     }
