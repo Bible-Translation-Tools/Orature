@@ -128,14 +128,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
     private fun textItem(content: Content): TextItem {
         return content.format?.let { format ->
-            // TODO 6/25: Content text should never be null, but parse usfm is currently broken so
-            // TODO... only check resource contents for now
-            if (listOf(ContentType.TITLE, ContentType.BODY).contains(content.type) && content.text == null) {
-                throw IllegalStateException("Content text is null for resource")
-            }
-            TextItem(content.text ?: "[empty]", MimeType.of(format))
-        } ?: TextItem(content.text ?: "[empty]", MimeType.of("usfm")) // TODO 7/5: temporary workaround
-//        } ?: throw IllegalStateException("Content format is null")
+            content.text?.let { text ->
+                TextItem(text, MimeType.of(format))
+            } ?: throw IllegalStateException("Content text is null")
+        } ?: TextItem("[empty]", MimeType.USFM)
     }
 
     private fun constructResource(
