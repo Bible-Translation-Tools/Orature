@@ -9,15 +9,15 @@ import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
+import org.wycliffeassociates.otter.jvm.controls.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import tornadofx.*
 
@@ -31,6 +31,7 @@ class RecordScriptureFragment : RecordableFragment(
     DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    private val navigator: ChromeableStage by inject()
 
     private val takesGrid = ScriptureTakesGridView(recordableViewModel::recordNewTake)
 
@@ -47,26 +48,31 @@ class RecordScriptureFragment : RecordableFragment(
                 }
             }
 
-    private val sourceAudioPlayer =
-        AudioPlayerNode(null).apply {
+    private val sourceContent =
+        SourceContent().apply {
+            visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
+            managedWhen { visibleProperty() }
             style {
-                skin = SourceAudioSkin::class
+                padding = box(0.px, 10.px, 20.px, 10.px)
             }
+
+            sourceAudioLabelProperty.set(messages["sourceAudio"])
+            sourceTextLabelProperty.set(messages["sourceText"])
+
+            applyRoundedStyleProperty.set(true)
+            sourceTextWidthProperty.bind(navigator.root.widthProperty().divide(2))
+            recordableViewModel.recordableProperty.onChangeAndDoNow {
+                it?.let {
+                    sourceTextProperty.set(recordableViewModel.sourceTextItem()?.text)
+                }
+            }
+            audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
         }
 
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
-
-        sourceAudioPlayer.visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
-        sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
-        recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
-            it?.let {
-                sourceAudioPlayer.load(it)
-            }
-        }
 
         recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)
@@ -131,7 +137,7 @@ class RecordScriptureFragment : RecordableFragment(
                 }
             }
             add(takesGrid)
-            add(sourceAudioPlayer)
+            add(sourceContent)
         }
     }
 

@@ -10,9 +10,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
-import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
@@ -195,6 +193,23 @@ open class RecordableViewModel(
             audioPluginViewModel.selectedRecorderProperty,
             audioPluginViewModel.selectedEditorProperty
         )
+    }
+
+    fun sourceTextItem(): TextItem? {
+        return recordable?.let {
+            when (recordable) {
+                is Chapter -> {
+                    workbookViewModel.getSourceChapter((recordable as Chapter)).textItem
+                }
+                is Chunk -> {
+                    workbookViewModel.getSourceChunk(workbookViewModel.chapter, (recordable as Chunk)).textItem
+                }
+                is Resource.Component -> {
+                    (recordable as Resource.Component).textItem
+                }
+                else -> null
+            }
+        }
     }
 
     @Suppress("ProtectedInFinal", "Unused")

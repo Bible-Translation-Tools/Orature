@@ -43,4 +43,5 @@
     -level3: dropshadow(gaussian, rgba(0,0,0,0.23), 6, 0, 0, 6);
     -level4: dropshadow(gaussian, rgba(0,0,0,0.22), 10, 0, 0, 10);
     -level5: dropshadow(gaussian, rgba(0,0,0,0.22), 12, 0, 0, 15); /* Highest Priorty / Shadow */
+    -all-level2: dropshadow( three-pass-box , rgba(0,0,0,0.4) , 6, 0.0 , 0 , 1 );
 }

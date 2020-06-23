@@ -135,12 +135,16 @@ abstract class RecordableFragment(
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
-            recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
-                player = it
-            }
+            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            showDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
+            recordableViewModel.showPluginActiveProperty.onChange {
+                showDialogProperty.set(it)
+            }
+
+            recordableViewModel.recordableProperty.onChangeAndDoNow {
+                sourceTextProperty.set(recordableViewModel.sourceTextItem()?.text)
+            }
         }
     }
 

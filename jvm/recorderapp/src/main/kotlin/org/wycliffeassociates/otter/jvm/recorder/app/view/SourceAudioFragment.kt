@@ -1,21 +1,32 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
+import org.wycliffeassociates.otter.jvm.controls.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.skins.media.CompactSourceContentSkin
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import tornadofx.Fragment
+import tornadofx.*
 import java.io.File
 import java.lang.Exception
 
 class SourceAudioFragment : Fragment() {
 
-    override val root = initializeAudioNode()
+    override val root = initializeSourceContent()
 
-    private fun initializeAudioNode(): AudioPlayerNode {
+    init {
+        root.apply {
+            style {
+                skin = CompactSourceContentSkin::class
+            }
+            sourceTextWidthProperty.bind(widthProperty().divide(2))
+        }
+    }
+
+    private fun initializeSourceContent(): SourceContent {
         var sourceFile: File? = null
         var startFrame: Int? = null
         var endFrame: Int? = null
+        var sourceText: String? = null
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
 
@@ -29,10 +40,16 @@ class SourceAudioFragment : Fragment() {
                     startFrame = null
                     endFrame = null
                 }
+                sourceText = parameters.named["source_text"] ?: ""
             }
         }
+
         val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
-        return AudioPlayerNode(player)
+
+        return SourceContent().apply {
+            audioPlayerProperty.set(player)
+            sourceTextProperty.set(sourceText)
+        }
     }
 
     private fun initializeAudioPlayer(file: File, start: Int?, end: Int?): IAudioPlayer? {

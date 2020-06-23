@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.Drawable
 import tornadofx.*
@@ -9,11 +8,7 @@ import tornadofx.*
 class CanvasFragment : StackPane() {
 
     private val drawables = arrayListOf<Drawable>()
-
-    private val cvs = canvas {
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-    }
+    private val cvs = ResizableCanvas()
     private val ctx = cvs.graphicsContext2D
 
     init {
@@ -21,9 +16,6 @@ class CanvasFragment : StackPane() {
         alignment = Pos.TOP_LEFT
 
         add(cvs)
-
-        cvs.widthProperty().bind(this.widthProperty())
-        cvs.heightProperty().bind(this.heightProperty())
 
         cvs.widthProperty().addListener { _ -> draw() }
         cvs.heightProperty().addListener { _ -> draw() }

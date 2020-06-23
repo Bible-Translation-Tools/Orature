@@ -68,4 +68,17 @@ class WorkbookViewModel : ViewModel() {
             sourceAudioProperty.set(null)
         }
     }
+
+    fun getSourceChapter(targetChapter: Chapter): Chapter {
+        return workbook.source.chapters.filter {
+            it.title == targetChapter.title
+        }.blockingFirst()
+    }
+
+    fun getSourceChunk(targetChapter: Chapter, targetChunk: Chunk): Chunk {
+        val sourceChapter = getSourceChapter(targetChapter)
+        return sourceChapter.chunks.filter {
+            it.start == targetChunk.start
+        }.blockingFirst()
+    }
 }
