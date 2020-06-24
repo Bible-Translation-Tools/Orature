@@ -29,10 +29,6 @@ class ProjectGridViewModel : ViewModel() {
 
     val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
 
-    init {
-        loadProjects()
-    }
-
     fun loadProjects() {
         collectionRepo.getDerivedProjects()
             .toObservable()
