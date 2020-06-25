@@ -39,6 +39,7 @@ class SourceFormatToggleSkin(private val toggle: SourceFormatToggle): SkinBase<S
                     when(toggle.activeSourceProperty.value) {
                         SourceFormatToggle.SourceFormat.AUDIO -> SourceFormatToggle.SourceFormat.TEXT
                         SourceFormatToggle.SourceFormat.TEXT -> SourceFormatToggle.SourceFormat.AUDIO
+                        else -> SourceFormatToggle.SourceFormat.AUDIO
                     }
                 )
             }
