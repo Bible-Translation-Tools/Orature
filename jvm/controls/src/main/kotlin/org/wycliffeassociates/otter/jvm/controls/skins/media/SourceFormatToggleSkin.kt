@@ -35,13 +35,21 @@ class SourceFormatToggleSkin(private val toggle: SourceFormatToggle): SkinBase<S
     private fun initializeControl() {
         root.apply {
             setOnMouseClicked {
-                toggle.displayPlayerProperty.set(toggle.displayPlayerProperty.get().not())
+                toggle.activeSourceProperty.set(
+                    when(toggle.activeSourceProperty.value) {
+                        SourceFormatToggle.SourceFormat.AUDIO -> SourceFormatToggle.SourceFormat.TEXT
+                        SourceFormatToggle.SourceFormat.TEXT -> SourceFormatToggle.SourceFormat.AUDIO
+                    }
+                )
             }
         }
 
-        toggle.displayPlayerProperty.onChangeAndDoNow {
-            it?.let {
-                if (it) activatePlayer() else activateText()
+        toggle.activeSourceProperty.onChangeAndDoNow {
+            it?.let { activeSourceFormat ->
+                when(activeSourceFormat) {
+                    SourceFormatToggle.SourceFormat.AUDIO -> activatePlayer()
+                    SourceFormatToggle.SourceFormat.TEXT -> activateText()
+                }
             }
         }
     }
