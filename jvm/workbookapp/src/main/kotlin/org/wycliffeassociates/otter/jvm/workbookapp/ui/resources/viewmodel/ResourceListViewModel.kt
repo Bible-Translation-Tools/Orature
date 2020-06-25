@@ -29,7 +29,9 @@ class ResourceListViewModel : ViewModel() {
     init {
         workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
             targetChapter?.let {
-                loadResourceGroups(workbookViewModel.getSourceChapter(targetChapter))
+                loadResourceGroups(
+                    workbookViewModel.getSourceChapter(targetChapter).blockingGet()
+                )
             }
         }
         isFilterOnProperty.onChange { checked ->

@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
+import io.reactivex.Maybe
+import io.reactivex.Observable
 import javafx.beans.property.*
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -69,16 +71,42 @@ class WorkbookViewModel : ViewModel() {
         }
     }
 
-    fun getSourceChapter(targetChapter: Chapter): Chapter {
-        return workbook.source.chapters.filter {
-            it.title == targetChapter.title
-        }.blockingFirst()
+    fun getSourceAudio(): SourceAudio? {
+        val sourceAudio = workbook.sourceAudioAccessor
+        return chunk?.let { chunk ->
+            sourceAudio.getChunk(
+                chapter.sort,
+                chunk.start
+            )
+        } ?: run { sourceAudio.getChapter(chapter.sort) }
     }
 
-    fun getSourceChunk(targetChapter: Chapter, targetChunk: Chunk): Chunk {
-        val sourceChapter = getSourceChapter(targetChapter)
-        return sourceChapter.chunks.filter {
-            it.start == targetChunk.start
-        }.blockingFirst()
+    fun getSourceText(): Maybe<String> {
+        return chunk?.let {
+            getSourceChunk(it).map { _chunk ->
+                _chunk.textItem.text
+            }
+        } ?: run {
+            getSourceChapter(chapter).map { _chapter ->
+                _chapter.textItem.text
+            }
+        }
+    }
+
+    fun getSourceChapter(targetChapter: Chapter): Maybe<Chapter> {
+        return workbook.source.chapters.filter {
+            it.title == targetChapter.title
+        }
+            .singleElement()
+    }
+
+    private fun getSourceChunk(targetChunk: Chunk): Maybe<Chunk> {
+        return getSourceChapter(chapter)
+            .flatMap { _chapter ->
+                _chapter.chunks.filter { chunk ->
+                    chunk.start == targetChunk.start
+                }
+                    .singleElement()
+            }
     }
 }

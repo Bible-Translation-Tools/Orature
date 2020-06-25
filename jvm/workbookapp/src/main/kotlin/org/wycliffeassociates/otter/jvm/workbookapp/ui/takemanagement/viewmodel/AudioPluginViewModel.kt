@@ -45,20 +45,8 @@ class AudioPluginViewModel : ViewModel() {
 
     private fun constructPluginParameters(): PluginParameters {
         val workbook = workbookViewModel.workbook
-        val sourceAudio = workbook.sourceAudioAccessor
-
-        val sourceAudioFile = workbookViewModel.chunk?.let { chunk ->
-            sourceAudio.getChunk(
-                workbookViewModel.activeChapterProperty.value.sort,
-                chunk.start
-            )
-        } ?: run { sourceAudio.getChapter(workbookViewModel.activeChapterProperty.value.sort) }
-
-        val sourceText = workbookViewModel.chunk?.let {
-            workbookViewModel.getSourceChunk(workbookViewModel.chapter, it).textItem.text
-        } ?: run {
-            workbookViewModel.getSourceChapter(workbookViewModel.chapter).textItem.text
-        }
+        val sourceAudio = workbookViewModel.getSourceAudio()
+        val sourceText = workbookViewModel.getSourceText().blockingGet()
 
         val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
         val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
@@ -78,9 +66,9 @@ class AudioPluginViewModel : ViewModel() {
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
             resourceLabel = resourceLabel,
-            sourceChapterAudio = sourceAudioFile?.file,
-            sourceChunkStart = sourceAudioFile?.start,
-            sourceChunkEnd = sourceAudioFile?.end,
+            sourceChapterAudio = sourceAudio?.file,
+            sourceChunkStart = sourceAudio?.start,
+            sourceChunkEnd = sourceAudio?.end,
             sourceText = sourceText
         )
     }
