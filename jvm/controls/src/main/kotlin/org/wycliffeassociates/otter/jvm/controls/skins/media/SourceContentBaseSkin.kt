@@ -62,11 +62,12 @@ abstract class SourceContentBaseSkin(protected open val sourceContent: SourceCon
         }
         sourceFormatToggle.apply {
             sourceContentController.activeSourceProperty.bind(activeSourceProperty)
+            sourceContent.activeSourceFormatProperty.bind(activeSourceProperty)
         }
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
 
-            maxWidthProperty().bind(sourceContent.sourceTextWidthProperty)
+            maxWidthProperty().bind(sourceContent.widthProperty().minus(200))
             maxHeightProperty().set(MAX_HEIGHT)
 
             sourceText.boundsInParentProperty().onChangeAndDoNow { bounds ->
@@ -81,7 +82,7 @@ abstract class SourceContentBaseSkin(protected open val sourceContent: SourceCon
         }
         sourceText.apply {
             textProperty().bind(sourceContent.sourceTextProperty)
-            wrappingWidthProperty().bind(sourceContent.sourceTextWidthProperty.minus(20.0))
+            wrappingWidthProperty().bind(sourceTextScroll.maxWidthProperty().minus(20.0))
         }
     }
 

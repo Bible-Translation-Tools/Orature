@@ -7,7 +7,6 @@ import javafx.scene.control.Label
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
-import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 import tornadofx.*
 
 class SourceContentSkin(override val sourceContent: SourceContent) : SourceContentBaseSkin(sourceContent) {
@@ -29,16 +28,30 @@ class SourceContentSkin(override val sourceContent: SourceContent) : SourceConte
     override fun initializeControl() {
         super.initializeControl()
 
-        if (sourceContent.applyRoundedStyleProperty.value) {
-            root.styleClass.add("source-content--rounded")
-        }
-
         playBtn.apply {
-            visibleWhen {
-                sourceContentController.activeSourceProperty.booleanBinding {
-                    it == SourceFormatToggle.SourceFormat.AUDIO
-                }
-            }
+            visibleWhen(sourceContentController.audioActiveBinding())
+        }
+        audioSlider.apply {
+            visibleWhen(sourceContentController.audioActiveBinding())
+            managedWhen(visibleProperty())
+        }
+        sourceTextScroll.apply {
+            visibleWhen(sourceContentController.textActiveBinding())
+            managedWhen(visibleProperty())
+        }
+        sourceContentLabel.apply {
+            textProperty().bind(
+                sourceContentController.sourceContentLabelBinding(
+                    sourceContent.sourceAudioLabelProperty,
+                    sourceContent.sourceTextLabelProperty
+                )
+            )
+            graphicProperty().bind(
+                sourceContentController.sourceContentIconBinding(
+                    AUDIO_PLAYER_ICON,
+                    SOURCE_TEXT_ICON
+                )
+            )
         }
     }
 

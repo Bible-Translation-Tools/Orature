@@ -1,12 +1,14 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import javafx.beans.binding.Bindings
+import javafx.beans.binding.BooleanBinding
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.StringProperty
 import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
+import tornadofx.*
 import java.util.concurrent.Callable
 
 class SourceContentController {
@@ -42,5 +44,17 @@ class SourceContentController {
             },
             activeSourceProperty
         )
+    }
+
+    fun audioActiveBinding(): BooleanBinding {
+        return activeSourceProperty.booleanBinding {
+            it == SourceFormatToggle.SourceFormat.AUDIO
+        }
+    }
+
+    fun textActiveBinding(): BooleanBinding {
+        return activeSourceProperty.booleanBinding {
+            it == SourceFormatToggle.SourceFormat.TEXT
+        }
     }
 }
