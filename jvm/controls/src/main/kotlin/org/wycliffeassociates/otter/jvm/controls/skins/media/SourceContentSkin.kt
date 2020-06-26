@@ -7,6 +7,8 @@ import javafx.scene.control.Label
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
+import tornadofx.*
 
 class SourceContentSkin(override val sourceContent: SourceContent) : SourceContentBaseSkin(sourceContent) {
 
@@ -32,7 +34,11 @@ class SourceContentSkin(override val sourceContent: SourceContent) : SourceConte
         }
 
         playBtn.apply {
-            visibleProperty().bind(sourceContentController.displayPlayerProperty)
+            visibleWhen {
+                sourceContentController.activeSourceProperty.booleanBinding {
+                    it == SourceFormatToggle.SourceFormat.AUDIO
+                }
+            }
         }
     }
 

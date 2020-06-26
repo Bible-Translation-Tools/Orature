@@ -61,9 +61,7 @@ abstract class SourceContentBaseSkin(protected open val sourceContent: SourceCon
             }
         }
         sourceFormatToggle.apply {
-            setOnMouseClicked {
-                sourceContentController.toggleSource()
-            }
+            sourceContentController.activeSourceProperty.bind(activeSourceProperty)
         }
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
