@@ -83,28 +83,28 @@ class WorkbookViewModel : ViewModel() {
 
     fun getSourceText(): Maybe<String> {
         return chunk?.let {
-            getSourceChunk(it).map { _chunk ->
+            getSourceChunk().map { _chunk ->
                 _chunk.textItem.text
             }
         } ?: run {
-            getSourceChapter(chapter).map { _chapter ->
+            getSourceChapter().map { _chapter ->
                 _chapter.textItem.text
             }
         }
     }
 
-    fun getSourceChapter(targetChapter: Chapter): Maybe<Chapter> {
+    fun getSourceChapter(): Maybe<Chapter> {
         return workbook.source.chapters.filter {
-            it.title == targetChapter.title
+            it.title == chapter.title
         }
             .singleElement()
     }
 
-    private fun getSourceChunk(targetChunk: Chunk): Maybe<Chunk> {
-        return getSourceChapter(chapter)
+    fun getSourceChunk(): Maybe<Chunk> {
+        return getSourceChapter()
             .flatMap { _chapter ->
-                _chapter.chunks.filter { chunk ->
-                    chunk.start == targetChunk.start
+                _chapter.chunks.filter { _chunk ->
+                    _chunk.start == chunk?.start
                 }
                     .singleElement()
             }

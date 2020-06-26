@@ -27,10 +27,10 @@ class ResourceListViewModel : ViewModel() {
     val isFilterOnProperty = SimpleBooleanProperty(false)
 
     init {
-        workbookViewModel.activeChapterProperty.onChangeAndDoNow { targetChapter ->
-            targetChapter?.let {
+        workbookViewModel.activeChapterProperty.onChangeAndDoNow {
+            it?.let {
                 loadResourceGroups(
-                    workbookViewModel.getSourceChapter(targetChapter).blockingGet()
+                    workbookViewModel.getSourceChapter().blockingGet()
                 )
             }
         }
