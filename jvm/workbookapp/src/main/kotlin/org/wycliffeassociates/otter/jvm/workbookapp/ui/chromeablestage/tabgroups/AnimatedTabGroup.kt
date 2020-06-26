@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
 import com.jfoenix.transitions.CachedTransition
 import javafx.animation.Interpolator
@@ -7,30 +7,20 @@ import javafx.animation.KeyValue
 import javafx.animation.Timeline
 import javafx.scene.Node
 import javafx.util.Duration
-import org.wycliffeassociates.controls.ChromeableTabPane
 
-enum class TransitionDirection {
-    LEFT,
-    RIGHT
-}
-
-class AnimatedChromeableTabPane(chrome: Node, headerScalingFactor: Double) :
-    ChromeableTabPane(chrome, headerScalingFactor) {
+abstract class AnimatedTabGroup : TabGroup() {
 
     init {
-        // Disable builtin JFoenix tab transition animation
-        disableAnimationProperty().set(true)
-
         setTabSelectionAnimation()
     }
 
     private fun setTabSelectionAnimation() {
-        selectionModel.selectedIndexProperty().addListener { _, old, new ->
+        tabPane.selectionModel.selectedIndexProperty().addListener { _, old, new ->
             val oldIndex = old.toInt()
             val newIndex = new.toInt()
             if (oldIndex >= 0 && newIndex >= 0) {
                 val direction = if (oldIndex > newIndex) TransitionDirection.RIGHT else TransitionDirection.LEFT
-                val tab: AnimatedTab? = tabs[newIndex] as? AnimatedTab
+                val tab: AnimatedTab? = tabPane.tabs[newIndex] as? AnimatedTab
                 if (tab != null) {
                     animate(tab.animatedContent, direction)
                 }
@@ -40,11 +30,11 @@ class AnimatedChromeableTabPane(chrome: Node, headerScalingFactor: Double) :
 
     // Animate first tab's content
     fun animate(direction: TransitionDirection) {
-        if (tabs.size > 0) {
-            if (selectionModel.selectedIndex > 0) {
-                selectionModel.select(0)
+        if (tabPane.tabs.size > 0) {
+            if (tabPane.selectionModel.selectedIndex > 0) {
+                tabPane.selectionModel.select(0)
             } else {
-                val tab: AnimatedTab? = tabs[0] as? AnimatedTab
+                val tab: AnimatedTab? = tabPane.tabs[0] as? AnimatedTab
                 if (tab != null) {
                     animate(tab.animatedContent, direction)
                 }
@@ -54,8 +44,8 @@ class AnimatedChromeableTabPane(chrome: Node, headerScalingFactor: Double) :
 
     private fun animate(content: Node, direction: TransitionDirection) {
         val contentWidth = when (direction) {
-            TransitionDirection.LEFT -> width
-            TransitionDirection.RIGHT -> -width
+            TransitionDirection.LEFT -> tabPane.width
+            TransitionDirection.RIGHT -> -tabPane.width
         }
 
         content.translateX = contentWidth

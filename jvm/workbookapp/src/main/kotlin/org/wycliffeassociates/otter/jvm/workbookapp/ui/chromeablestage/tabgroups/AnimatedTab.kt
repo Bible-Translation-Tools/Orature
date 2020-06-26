@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node

@@ -10,7 +10,7 @@ import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TransitionDirection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups.TransitionDirection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 

@@ -20,7 +20,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.TransitionDirection
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups.TransitionDirection
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
 import tornadofx.*
 

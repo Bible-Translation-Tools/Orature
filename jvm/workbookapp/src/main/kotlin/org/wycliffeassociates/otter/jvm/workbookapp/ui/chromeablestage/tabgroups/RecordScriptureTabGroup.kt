@@ -1,19 +1,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.AnimatedTab
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.AnimatedChromeableTabPane
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordScriptureFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import tornadofx.*
 
-class RecordScriptureTabGroup : TabGroup() {
+class RecordScriptureTabGroup : AnimatedTabGroup() {
     private val tab = RecordScriptureTab()
     private val viewModel: RecordScriptureViewModel by inject()
 
     init {
         viewModel.transitionDirectionProperty.onChange {
             it?.let {
-                (tabPane as? AnimatedChromeableTabPane)?.animate(it)
+                animate(it)
                 viewModel.transitionDirectionProperty.set(null)
             }
         }

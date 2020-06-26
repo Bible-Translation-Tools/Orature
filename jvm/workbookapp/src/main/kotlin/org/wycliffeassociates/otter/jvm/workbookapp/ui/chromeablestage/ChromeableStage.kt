@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
+import org.wycliffeassociates.controls.ChromeableTabPane
 import org.wycliffeassociates.otter.common.navigation.INavigator
 import org.wycliffeassociates.otter.common.navigation.ITabGroup
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
@@ -18,7 +19,7 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     override val tabGroupMap: MutableMap<TabGroupType, ITabGroup> = mutableMapOf()
     override val navBackStack = Stack<ITabGroup>()
     override val tabGroupBuilder = TabGroupBuilder()
-    override val root = AnimatedChromeableTabPane(chrome, headerScalingFactor)
+    override val root = ChromeableTabPane(chrome, headerScalingFactor)
 
     override var currentGroup: ITabGroup? = null
 
@@ -26,6 +27,9 @@ class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
         root.apply {
             importStylesheet<MainScreenStyles>()
             addClass(Stylesheet.tabPane)
+
+            // Disable builtin tab transition animation
+            disableAnimationProperty().set(true)
 
             // Using a size property binding and toggleClass() did not work consistently. This does.
             tabs.onChange {
