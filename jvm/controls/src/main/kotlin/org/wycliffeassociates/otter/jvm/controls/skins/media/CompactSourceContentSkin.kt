@@ -5,7 +5,6 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.layout.HBox
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
-import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 import tornadofx.*
 
 class CompactSourceContentSkin(override val sourceContent: SourceContent) : SourceContentBaseSkin(sourceContent) {
@@ -31,28 +30,20 @@ class CompactSourceContentSkin(override val sourceContent: SourceContent) : Sour
         super.initializeControl()
 
         sourceMissing.apply {
-            hiddenWhen { sourceContent.sourceAudioAvailableProperty }
-            managedWhen { visibleProperty() }
+            hiddenWhen(sourceContent.sourceAudioAvailableProperty)
+            managedWhen(visibleProperty())
         }
         sourceContentContainer.apply {
-            visibleWhen { sourceContent.sourceAudioAvailableProperty }
-            managedWhen { visibleProperty() }
+            visibleWhen(sourceContent.sourceAudioAvailableProperty)
+            managedWhen(visibleProperty())
         }
         audioPlayerContainer.apply {
-            visibleWhen {
-                sourceContentController.activeSourceProperty.booleanBinding {
-                    it == SourceFormatToggle.SourceFormat.AUDIO
-                }
-            }
-            managedWhen { visibleProperty() }
+            visibleWhen(sourceContentController.audioActiveBinding())
+            managedWhen(visibleProperty())
         }
         sourceTextContainer.apply {
-            visibleWhen {
-                sourceContentController.activeSourceProperty.booleanBinding {
-                    it == SourceFormatToggle.SourceFormat.TEXT
-                }
-            }
-            managedWhen { visibleProperty() }
+            visibleWhen(sourceContentController.textActiveBinding())
+            managedWhen(visibleProperty())
         }
     }
 
