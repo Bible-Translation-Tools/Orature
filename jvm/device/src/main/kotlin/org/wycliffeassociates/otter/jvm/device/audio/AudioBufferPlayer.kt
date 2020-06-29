@@ -54,7 +54,6 @@ class AudioBufferPlayer : IAudioPlayer {
             )
         )
         listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-        player.open()
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
@@ -72,7 +71,6 @@ class AudioBufferPlayer : IAudioPlayer {
             )
         )
         listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-        player.open()
     }
 
     override fun play() {
