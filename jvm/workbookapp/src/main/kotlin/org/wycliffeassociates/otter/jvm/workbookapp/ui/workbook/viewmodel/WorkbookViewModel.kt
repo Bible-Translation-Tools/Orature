@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
+import io.reactivex.Maybe
 import javafx.beans.property.*
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -67,5 +68,44 @@ class WorkbookViewModel : ViewModel() {
         } else {
             sourceAudioProperty.set(null)
         }
+    }
+
+    fun getSourceAudio(): SourceAudio? {
+        val sourceAudio = workbook.sourceAudioAccessor
+        return chunk?.let { chunk ->
+            sourceAudio.getChunk(
+                chapter.sort,
+                chunk.start
+            )
+        } ?: run { sourceAudio.getChapter(chapter.sort) }
+    }
+
+    fun getSourceText(): Maybe<String> {
+        return chunk?.let {
+            getSourceChunk().map { _chunk ->
+                _chunk.textItem.text
+            }
+        } ?: run {
+            getSourceChapter().map { _chapter ->
+                _chapter.textItem.text
+            }
+        }
+    }
+
+    fun getSourceChapter(): Maybe<Chapter> {
+        return workbook.source.chapters.filter {
+            it.title == chapter.title
+        }
+            .singleElement()
+    }
+
+    fun getSourceChunk(): Maybe<Chunk> {
+        return getSourceChapter()
+            .flatMap { _chapter ->
+                _chapter.chunks.filter { _chunk ->
+                    _chunk.start == chunk?.start
+                }
+                    .singleElement()
+            }
     }
 }
