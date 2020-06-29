@@ -96,7 +96,8 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     (if (pluginParameters.resourceLabel != null)"--resource=${pluginParameters.resourceLabel}" else ""),
                     "--chapter_audio=${pluginParameters.sourceChapterAudio?.absolutePath}",
                     "--source_chunk_start=${pluginParameters.sourceChunkStart}",
-                    "--source_chunk_end=${pluginParameters.sourceChunkEnd}"
+                    "--source_chunk_end=${pluginParameters.sourceChunkEnd}",
+                    "--source_text=${pluginParameters.sourceText}"
                 )
             }
         return ParametersImpl(insertedArgs)

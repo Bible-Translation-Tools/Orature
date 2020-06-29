@@ -14,6 +14,7 @@ import javafx.application.Application
  * --unit= the text for either "Verse" or "Chunk"
  * --unit_number= the unit number
  * --resource= the resource
+ * --source_text= source text
  *
  * All arguments are optional. By default the recording will be written to recording.wav and the
  * display text will be the filename.
