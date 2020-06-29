@@ -1,0 +1,56 @@
+@import "root.css"
+
+.source-content {
+    -fx-background-color: -white;
+}
+
+.source-content__label {
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+}
+
+.source-content__icon {
+    -fx-icon-size: 26px;
+}
+
+.source-content__play-btn {
+    -fx-fill: -gray-darker;
+}
+
+.source-content__play-btn--rounded {
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-border-width: 1px;
+    -fx-pref-width: 60px;
+    -fx-pref-height: 60px;
+}
+
+.source-content__play-btn .ikonli-font-icon {
+    -fx-icon-size: 18px;
+}
+
+.source-content__play-btn--rounded .ikonli-font-icon {
+    -fx-icon-size: 18px;
+    -fx-fill: -primary;
+}
+
+.source-content__label .ikonli-font-icon {
+    -fx-icon-size: 22px;
+}
+
+.source-content__source-text-container {
+    -fx-background: -white;
+    -fx-background-color: -white;
+}
+
+.source-content__source-text {
+    -fx-font-size: 16px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+.source-content__controls {
+    -fx-border-color: #ccc;
+    -fx-border-width: 1 0 0 0;
+    -fx-min-height: 100px;
+}
