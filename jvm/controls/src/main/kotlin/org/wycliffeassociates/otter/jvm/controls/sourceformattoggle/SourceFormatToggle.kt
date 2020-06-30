@@ -5,7 +5,7 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceFormatToggleSkin
 
-class SourceFormatToggle: Control() {
+class SourceFormatToggle : Control() {
 
     enum class SourceFormat {
         AUDIO,

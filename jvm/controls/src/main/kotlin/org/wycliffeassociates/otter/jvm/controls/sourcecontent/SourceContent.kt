@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
 import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 
-class SourceContent: Control() {
+class SourceContent : Control() {
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
 
