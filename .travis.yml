@@ -36,7 +36,7 @@ addons:
   sonarcloud:
     organization: "bible-translation-tools"
     token:
-        secure: SONAR_TOKEN
+        secure: ${SONAR_TOKEN}
   artifacts:
     s3_region: us-east-1
     target_paths:
