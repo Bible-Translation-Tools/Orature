@@ -10,10 +10,7 @@ class CanvasFragment : StackPane() {
 
     private val drawables = arrayListOf<Drawable>()
 
-    private val cvs = canvas {
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-    }
+    private val cvs = ResizableCanvas()
     private val ctx = cvs.graphicsContext2D
 
     init {
@@ -21,9 +18,6 @@ class CanvasFragment : StackPane() {
         alignment = Pos.TOP_LEFT
 
         add(cvs)
-
-        cvs.widthProperty().bind(this.widthProperty())
-        cvs.heightProperty().bind(this.heightProperty())
 
         cvs.widthProperty().addListener { _ -> draw() }
         cvs.heightProperty().addListener { _ -> draw() }
