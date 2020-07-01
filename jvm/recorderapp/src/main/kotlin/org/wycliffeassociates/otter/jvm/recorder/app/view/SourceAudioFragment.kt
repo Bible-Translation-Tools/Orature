@@ -14,14 +14,6 @@ class SourceAudioFragment : Fragment() {
 
     override val root = initializeSourceContent()
 
-    init {
-        root.apply {
-            style {
-                skin = CompactSourceContentSkin::class
-            }
-        }
-    }
-
     private fun initializeSourceContent(): SourceContent {
         var sourceFile: File? = null
         var startFrame: Int? = null
@@ -47,6 +39,9 @@ class SourceAudioFragment : Fragment() {
         val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
 
         return SourceContent().apply {
+            style {
+                skin = CompactSourceContentSkin::class
+            }
             audioPlayerProperty.set(player)
             sourceTextProperty.set(sourceText)
         }
