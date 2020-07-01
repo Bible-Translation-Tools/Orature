@@ -2,6 +2,7 @@ buildscript {
     apply from: './dependencies.gradle'
 
     repositories {
+        jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -14,11 +15,31 @@ buildscript {
 plugins {
     id 'nebula.lint' version "$nebulaLintPluginVer"
     id 'com.gradle.build-scan' version "$buildscanPluginVer"
+    id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
+}
+
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+repositories {
+    jcenter()
 }
 
 buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
+}
+
+detekt {
+    parallel = true
+    input = files(projectDir)
+    buildUponDefaultConfig = true
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
+    include("**/*.kt")
+    include("**/*.kts")
+    exclude("**/resources/**")
+    exclude("**/build/**")
 }
 
 subprojects {
@@ -37,6 +58,7 @@ subprojects {
 
     ktlint {
         coloredOutput = false // Colors break source links in the IDEA console.
+        ignoreFailures = true
     }
 
     group 'org.wycliffeassociates'

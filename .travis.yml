@@ -29,7 +29,7 @@ jobs:
   include:
   - stage: build
     script:
-    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN :jvm:workbookapp:install4jdeploy"
+    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN detekt :jvm:workbookapp:install4jdeploy"
 stages:
 - build
 addons:
