@@ -52,7 +52,7 @@ class RecordResourceFragment(
         }
 
     private val previousButton = JFXButton().apply {
-        addClass(RecordResourceStyles.paginationButton)
+        addClass(RecordResourceStyles.pageToggleButton)
         text = messages["previousChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
         action {
@@ -63,7 +63,7 @@ class RecordResourceFragment(
     }
 
     private val nextButton = JFXButton().apply {
-        addClass(RecordResourceStyles.paginationButton)
+        addClass(RecordResourceStyles.pageToggleButton)
         text = messages["nextChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
         action {
@@ -131,7 +131,7 @@ class RecordResourceFragment(
         }
     }
 
-    private val pagination = hbox {
+    private val pageToggle = hbox {
         addClass(RecordResourceStyles.pagination)
         anchorpaneConstraints {
             bottomAnchor = 0.0
@@ -155,7 +155,7 @@ class RecordResourceFragment(
         importStylesheet<RecordResourceStyles>()
 
         mainContainer.apply {
-            pagination.heightProperty().onChange {
+            pageToggle.heightProperty().onChange {
                 anchorpaneConstraints {
                     bottomAnchor = it
                 }
@@ -163,7 +163,7 @@ class RecordResourceFragment(
             add(grid)
         }
 
-        add(pagination)
+        add(pageToggle)
     }
 
     override fun createTakeCard(take: Take): TakeCard {

@@ -31,6 +31,7 @@ class RecordResourceTabGroup : AnimatedTabGroup() {
     }
 
     override fun activate() {
+        super.activate()
         tabs.forEach { recordableTab ->
             if (recordableTab.hasRecordable()) {
                 tabPane.tabs.add(recordableTab)

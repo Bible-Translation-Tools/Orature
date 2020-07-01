@@ -24,6 +24,7 @@ class RecordScriptureTabGroup : AnimatedTabGroup() {
     }
 
     override fun activate() {
+        super.activate()
         tabPane.tabs.add(tab)
     }
 }

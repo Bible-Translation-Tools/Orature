@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
+import com.jfoenix.controls.JFXTabPane
 import com.jfoenix.transitions.CachedTransition
 import javafx.animation.Interpolator
 import javafx.animation.KeyFrame
@@ -19,7 +20,8 @@ abstract class AnimatedTabGroup : TabGroup() {
             val oldIndex = old.toInt()
             val newIndex = new.toInt()
             if (oldIndex >= 0 && newIndex >= 0) {
-                val direction = if (oldIndex > newIndex) TransitionDirection.RIGHT else TransitionDirection.LEFT
+                val direction =
+                    if (oldIndex > newIndex) TransitionDirection.RIGHT else TransitionDirection.LEFT
                 val tab: AnimatedTab? = tabPane.tabs[newIndex] as? AnimatedTab
                 if (tab != null) {
                     animate(tab.animatedContent, direction)
@@ -68,5 +70,13 @@ abstract class AnimatedTabGroup : TabGroup() {
                 delay = Duration.seconds(0.0)
             }
         }.play()
+    }
+
+    override fun activate() {
+        (tabPane as? JFXTabPane)?.disableAnimationProperty()?.set(true)
+    }
+
+    override fun deactivate() {
+        (tabPane as? JFXTabPane)?.disableAnimationProperty()?.set(false)
     }
 }

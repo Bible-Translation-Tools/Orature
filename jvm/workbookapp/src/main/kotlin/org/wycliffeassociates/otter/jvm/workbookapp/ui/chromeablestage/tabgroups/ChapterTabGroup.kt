@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.view.CardGridFra
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
-class ChapterTabGroup : AnimatedTabGroup() {
+class ChapterTabGroup : TabGroup() {
     private val workbookViewModel: WorkbookViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
@@ -51,7 +51,7 @@ class ChapterTabGroup : AnimatedTabGroup() {
         tabMap[resourceMetadata.identifier]?.select()
     }
 
-    private inner class ChapterSelectTab(val resourceMetadata: ResourceMetadata) : AnimatedTab() {
+    private inner class ChapterSelectTab(val resourceMetadata: ResourceMetadata) : Tab() {
         init {
             text = resourceMetadata.identifier
             add(CardGridFragment().root)

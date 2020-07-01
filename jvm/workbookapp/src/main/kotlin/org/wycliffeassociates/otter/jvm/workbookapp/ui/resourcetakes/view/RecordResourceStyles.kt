@@ -15,7 +15,7 @@ class RecordResourceStyles : Stylesheet() {
         val contentScrollPane by cssclass()
         val takesList by cssclass()
         val pagination by cssclass()
-        val paginationButton by cssclass()
+        val pageToggleButton by cssclass()
 
         private val takeMaxWidth = 500.px
         private val takeMinHeight = 80.px
@@ -88,7 +88,7 @@ class RecordResourceStyles : Stylesheet() {
             prefHeight = 70.px
         }
 
-        paginationButton {
+        pageToggleButton {
             borderColor += box(AppTheme.colors.appBlue)
             borderWidth += box(2.px)
             borderRadius += box(5.px)
