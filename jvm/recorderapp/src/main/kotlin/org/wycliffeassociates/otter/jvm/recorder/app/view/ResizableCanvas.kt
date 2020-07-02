@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.scene.canvas.Canvas
 
-class ResizableCanvas: Canvas() {
+class ResizableCanvas : Canvas() {
 
     override fun isResizable(): Boolean {
         return true

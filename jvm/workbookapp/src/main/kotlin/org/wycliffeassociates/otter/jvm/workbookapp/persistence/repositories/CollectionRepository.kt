@@ -420,7 +420,8 @@ class CollectionRepository(
             }
         } else {
             // Use the existing metadata
-            matches.first()
+            // Will throw an exception if the list has more than one element
+            matches.single()
         }
         return metadataEntity
     }

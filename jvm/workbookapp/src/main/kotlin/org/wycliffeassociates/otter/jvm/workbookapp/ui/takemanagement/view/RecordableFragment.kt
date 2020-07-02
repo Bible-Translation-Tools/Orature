@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 abstract class RecordableFragment(
@@ -36,6 +37,7 @@ abstract class RecordableFragment(
     abstract fun createTakeCard(take: Take): TakeCard
 
     protected val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val workbookViewModel: WorkbookViewModel by inject()
 
     /** Add custom components to this container, rather than root*/
     protected val mainContainer = VBox()
@@ -132,15 +134,22 @@ abstract class RecordableFragment(
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
         sourcedialog {
+            root.prefWidthProperty().bind(mainContainer.widthProperty().divide(2))
+
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
-            recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
-                player = it
-            }
-
+            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            showDialogProperty.bind(recordableViewModel.showPluginActiveProperty)
+
+            recordableViewModel.recordableProperty.onChangeAndDoNow {
+                it?.let {
+                    sourceTextProperty.set(workbookViewModel.getSourceText().blockingGet())
+                }
+            }
+            recordableViewModel.showPluginActiveProperty.onChange {
+                showDialogProperty.set(it)
+            }
         }
     }
 
