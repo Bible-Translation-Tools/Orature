@@ -9,16 +9,16 @@ import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
+import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 private class RecordableViewModelProvider : Component() {
@@ -31,6 +31,7 @@ class RecordScriptureFragment : RecordableFragment(
     DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    private val workbookViewModel: WorkbookViewModel by inject()
 
     private val takesGrid = ScriptureTakesGridView(recordableViewModel::recordNewTake)
 
@@ -47,11 +48,20 @@ class RecordScriptureFragment : RecordableFragment(
                 }
             }
 
-    private val sourceAudioPlayer =
-        AudioPlayerNode(null).apply {
-            style {
-                skin = SourceAudioSkin::class
+    private val sourceContent =
+        SourceContent().apply {
+            visibleWhen(recordableViewModel.sourceAudioAvailableProperty)
+            managedWhen(visibleProperty())
+
+            sourceAudioLabelProperty.set(messages["sourceAudio"])
+            sourceTextLabelProperty.set(messages["sourceText"])
+
+            recordableViewModel.recordableProperty.onChangeAndDoNow {
+                it?.let {
+                    sourceTextProperty.set(workbookViewModel.getSourceText().blockingGet())
+                }
             }
+            audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
         }
 
     init {
@@ -59,14 +69,6 @@ class RecordScriptureFragment : RecordableFragment(
         importStylesheet<TakeCardStyles>()
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
-
-        sourceAudioPlayer.visibleWhen { recordableViewModel.sourceAudioAvailableProperty }
-        sourceAudioPlayer.managedWhen { sourceAudioPlayer.visibleProperty() }
-        recordableViewModel.sourceAudioPlayerProperty.onChangeAndDoNow {
-            it?.let {
-                sourceAudioPlayer.load(it)
-            }
-        }
 
         recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)
@@ -131,7 +133,7 @@ class RecordScriptureFragment : RecordableFragment(
                 }
             }
             add(takesGrid)
-            add(sourceAudioPlayer)
+            add(sourceContent)
         }
     }
 

@@ -55,7 +55,7 @@ abstract class SourceContentBaseSkin(protected open val sourceContent: SourceCon
                 playBtn.graphicProperty().set(PLAY_ICON)
             }
         }
-        sourceContent.audioPlayerProperty.onChange { player ->
+        sourceContent.audioPlayerProperty.onChangeAndDoNow { player ->
             player?.let {
                 audioController.load(it)
             }
@@ -67,7 +67,7 @@ abstract class SourceContentBaseSkin(protected open val sourceContent: SourceCon
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
 
-            maxWidthProperty().bind(sourceContent.widthProperty().minus(200))
+            maxWidthProperty().bind(sourceContent.widthProperty().divide(1.5))
             maxHeightProperty().set(MAX_HEIGHT)
 
             sourceText.boundsInParentProperty().onChangeAndDoNow { bounds ->

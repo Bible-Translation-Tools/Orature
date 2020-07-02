@@ -16,7 +16,9 @@
 
 .source-dialog__label--message {
     -fx-font-weight: normal;
-    -fx-padding: 0 50px 30px 50px;
+    -fx-padding: 0 0 30px 0;
+    -fx-text-alignment: justify;
+    -fx-text-fill: -gray-darker;
 }
 
 .source-dialog__close-button {

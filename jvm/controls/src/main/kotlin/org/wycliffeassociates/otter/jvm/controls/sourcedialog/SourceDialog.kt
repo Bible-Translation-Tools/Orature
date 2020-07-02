@@ -8,8 +8,7 @@ import javafx.geometry.Pos
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
-import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceAudioSkin
+import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -26,6 +25,9 @@ class SourceDialog : Fragment() {
 
     val audioAvailableProperty = SimpleBooleanProperty(false)
     var audioAvailable by audioAvailableProperty
+
+    val sourceTextProperty = SimpleStringProperty()
+    var sourceText by sourceTextProperty
 
     val showDialogProperty = SimpleBooleanProperty()
 
@@ -60,22 +62,26 @@ class SourceDialog : Fragment() {
                 label(dialogTextProperty) {
                     addClass("source-dialog__label", "source-dialog__label--message")
                     visibleWhen(textProperty().isNotEmpty)
-                    managedWhen { visibleProperty() }
+                    managedWhen(visibleProperty())
+
+                    maxWidthProperty().bind(this@borderpane.widthProperty().divide(1.5))
                 }
             }
         }
         bottom {
             add(
-                AudioPlayerNode(null).apply {
-                    visibleWhen { audioAvailableProperty }
-                    managedWhen { visibleProperty() }
-                    style {
-                        skin = SourceAudioSkin::class
-                    }
-                    playerProperty.onChangeAndDoNow {
-                        it?.let {
-                            load(it)
-                        }
+                SourceContent().apply {
+                    visibleWhen(audioAvailableProperty)
+                    managedWhen(visibleProperty())
+
+                    sourceAudioLabelProperty.set(messages["sourceAudio"])
+                    sourceTextLabelProperty.set(messages["sourceText"])
+
+                    sourceTextProperty.bind(this@SourceDialog.sourceTextProperty)
+                    audioPlayerProperty.bind(playerProperty)
+
+                    activeSourceFormatProperty.onChange {
+                        currentWindow?.sizeToScene()
                     }
                 }
             )
