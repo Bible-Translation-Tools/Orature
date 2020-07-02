@@ -36,7 +36,7 @@ addons:
   sonarcloud:
     organization: "bible-translation-tools"
     token:
-        secure: ${SONAR_TOKEN}
+      secure: "JKo5cHneI+t7YEybGDdBa3pX5TYOY/fefcm0uJGgJ+b7xYK1Cj/v7PHvwDB4O293atbXwn+V8LfbgO0hbAnGT8fvmfiMG4+pTpjxOIP8basGgUBaV95Zy6LoEDPGvw79dY9mAW28liyrgKiTTbLR7Kj/uf5/58BEKUgVBg0cDeEKfofXpIQAw6lXZYxR0+pivrKi3FNlz0qKB4YZcIQi+E48BDjeMUaTNYzlD2F6LqEADbB7SThgnKbfMYFxGZHkbnYVku9q+FXt2ZibcNmXdwI6blzlfFIDcJkLI6zQgn6MbsoOmfTEx5LxAgw2N5fKPxgf3Cblgk4GGb+VBfwiesDBp4CyBz8+4WYnlF5KDMmZ4WB7zw8zHiSVx3rFxGaFWGI4ZL8kcdQTu2rQQStAEwgvXvf1n+3MeHf0O34lvDyuep2v5Cj9zzOurD1/txdQA6Yc+CRRrufAyU7LCJCn1EjnfWTACSDZsXue6OeMdJycfTyEYdqpbXU1Ca6APs5VppeQBNeoXjGtIZ9RKnUU3+rGvkug4y61YgCQMfd3pjmOORLK+YWVWQcNqdPRm5OgQXbCuV/FYXzBUseJp+h45tHSb39Og9hfd4uGXpORC5yVvF5zNtJ93HGbiXcUuPSXWTS7jzM0D2BgR15RGMfET+1PuSCkLbontr6MsFTJmBc="
   artifacts:
     s3_region: us-east-1
     target_paths:
