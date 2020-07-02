@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.Drawable
 import tornadofx.*
