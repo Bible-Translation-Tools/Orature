@@ -24,6 +24,7 @@ class MyApp : App(SplashScreen::class) {
 // launch the org.wycliffeassociates.otter.jvm.workbookapp
 fun main(args: Array<String>) {
     initializeLogger()
+    if(1==2)
     launch<MyApp>(args)
 }
 
