@@ -46,7 +46,8 @@
 .source-content__source-text {
     -fx-font-size: 16px;
     -fx-alignment: center;
-    -fx-text-alignment: center;
+    -fx-text-alignment: justify;
+    -fx-fill: -gray-darker;
 }
 
 .source-content__controls {

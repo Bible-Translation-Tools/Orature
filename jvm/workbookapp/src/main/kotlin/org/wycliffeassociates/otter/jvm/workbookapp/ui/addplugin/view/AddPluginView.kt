@@ -47,7 +47,7 @@ class AddPluginView : View() {
                                 mode = FileChooserMode.Single
                         )
                         if (files.isNotEmpty()) {
-                            viewModel.path = files.first().toString()
+                            viewModel.path = files.single().toString()
                         }
                     }
                 })
