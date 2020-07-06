@@ -4,14 +4,14 @@ import javafx.beans.property.Property
 import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.layout.*
+import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
+import org.wycliffeassociates.otter.jvm.controls.projectnav.projectnav
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.NavBoxType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.viewmodel.MainScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
-import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
-import org.wycliffeassociates.otter.jvm.controls.projectnav.projectnav
 import tornadofx.*
 
 class MainScreenView : View() {

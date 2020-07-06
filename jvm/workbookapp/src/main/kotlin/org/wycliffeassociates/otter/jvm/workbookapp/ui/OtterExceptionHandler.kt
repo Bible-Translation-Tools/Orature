@@ -2,6 +2,10 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.PrintWriter
+import java.util.*
 import javafx.application.Platform
 import javafx.application.Platform.runLater
 import javafx.scene.control.Dialog
@@ -15,10 +19,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersist
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.PrintWriter
-import java.util.*
 
 class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)

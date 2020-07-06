@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
+import java.util.zip.ZipFile
 import junit.framework.TestCase.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import java.util.zip.ZipFile
 
 class OtterZipFileTest {
 

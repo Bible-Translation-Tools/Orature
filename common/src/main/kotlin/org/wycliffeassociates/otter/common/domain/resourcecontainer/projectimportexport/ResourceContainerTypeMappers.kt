@@ -1,11 +1,15 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import java.time.LocalDate
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.resourcecontainer.entity.*
-import java.time.LocalDate
+import org.wycliffeassociates.resourcecontainer.entity.Checking
+import org.wycliffeassociates.resourcecontainer.entity.DublinCore
+import org.wycliffeassociates.resourcecontainer.entity.Manifest
+import org.wycliffeassociates.resourcecontainer.entity.Project
+import org.wycliffeassociates.resourcecontainer.entity.Source
 
 fun buildManifest(
     metadata: ResourceMetadata,
@@ -38,7 +42,7 @@ private fun ResourceMetadata.toEntity() = DublinCore(
     modified = LocalDate.now().toString()
 )
 
-private fun Language.toEntity() = Language(
+private fun Language.toEntity() = org.wycliffeassociates.resourcecontainer.entity.Language(
     identifier = slug,
     direction = direction,
     title = name

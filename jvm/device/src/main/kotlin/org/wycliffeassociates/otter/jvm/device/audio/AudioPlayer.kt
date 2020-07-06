@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import java.io.File
+import javax.sound.sampled.*
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import javax.sound.sampled.*
 
 class AudioPlayer : IAudioPlayer {
 

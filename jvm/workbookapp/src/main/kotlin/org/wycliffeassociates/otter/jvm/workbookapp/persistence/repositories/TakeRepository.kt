@@ -1,9 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
-
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import java.io.File
+import java.time.LocalDate
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
@@ -13,8 +14,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEnt
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
-import java.io.File
-import java.time.LocalDate
 
 class TakeRepository(
     private val database: AppDatabase,

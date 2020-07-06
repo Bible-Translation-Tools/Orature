@@ -9,14 +9,14 @@ import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
+import org.wycliffeassociates.otter.jvm.controls.card.card
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.viewmodel.CardGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
-import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.controls.card.card
 import tornadofx.*
 
 class CardGridFragment : Fragment() {

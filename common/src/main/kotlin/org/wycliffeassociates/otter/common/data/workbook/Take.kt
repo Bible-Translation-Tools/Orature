@@ -1,10 +1,9 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.BehaviorRelay
-import org.wycliffeassociates.otter.common.data.model.MimeType
 import java.io.File
 import java.time.LocalDate
-import java.util.*
+import org.wycliffeassociates.otter.common.data.model.MimeType
 
 data class Take(
     val name: String,

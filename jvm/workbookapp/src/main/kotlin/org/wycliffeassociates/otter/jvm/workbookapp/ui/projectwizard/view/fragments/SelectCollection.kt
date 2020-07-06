@@ -5,11 +5,11 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
+import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.wizardcard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
-import org.wycliffeassociates.otter.jvm.controls.wizardcard
 import tornadofx.*
 
 class SelectCollection : Fragment() {

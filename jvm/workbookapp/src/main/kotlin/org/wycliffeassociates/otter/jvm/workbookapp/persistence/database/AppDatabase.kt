@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
+import java.io.File
+import java.io.IOException
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
-import java.io.File
-import java.io.IOException
 
 const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 

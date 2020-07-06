@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
+import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.binding.ObjectBinding
@@ -9,7 +10,6 @@ import javafx.beans.property.StringProperty
 import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 import tornadofx.*
-import java.util.concurrent.Callable
 
 class SourceContentController {
 

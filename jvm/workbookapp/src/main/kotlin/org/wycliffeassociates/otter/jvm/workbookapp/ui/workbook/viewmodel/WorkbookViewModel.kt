@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
 import io.reactivex.Maybe
+import java.io.File
+import java.lang.IllegalStateException
 import javafx.beans.property.*
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -11,8 +13,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
-import java.io.File
-import java.lang.IllegalStateException
 
 class WorkbookViewModel : ViewModel() {
     private val injector: Injector by inject()

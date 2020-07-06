@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.io.wav
 
-import org.wycliffeassociates.otter.common.io.wav.IWaveFileCreator
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.AudioFileFormat
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioInputStream
 import javax.sound.sampled.AudioSystem
+import org.wycliffeassociates.otter.common.io.wav.IWaveFileCreator
 
 class WaveFileCreator : IWaveFileCreator {
     override fun createEmpty(path: File) {

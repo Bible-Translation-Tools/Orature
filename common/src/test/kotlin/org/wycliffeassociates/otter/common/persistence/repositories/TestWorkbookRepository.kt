@@ -1,18 +1,31 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import org.junit.Assert
-import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 import java.io.File
 import java.time.LocalDate
+import org.junit.Assert
+import org.junit.Test
+import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ContainerType
+import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
+import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
 class TestWorkbookRepository {
     /** When a unique ID is needed, just use this. */

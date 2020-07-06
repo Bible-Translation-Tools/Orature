@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
+import java.io.File
+import java.nio.file.FileSystems
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
@@ -7,8 +9,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileReader
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import java.io.File
-import java.nio.file.FileSystems
 
 class DirectoryProvider(
     private val appName: String,

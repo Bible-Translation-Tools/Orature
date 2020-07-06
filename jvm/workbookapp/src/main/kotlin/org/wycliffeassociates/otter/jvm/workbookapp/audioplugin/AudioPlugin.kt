@@ -3,8 +3,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin
 import com.sun.javafx.application.ParametersImpl
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import java.io.File
+import java.net.URL
+import java.net.URLClassLoader
 import javafx.application.Application.Parameters
 import javafx.application.Platform
+import kotlin.jvm.internal.Reflection
+import kotlin.reflect.KClass
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
 import org.wycliffeassociates.otter.common.data.PluginParameters
@@ -13,11 +18,6 @@ import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
-import java.io.File
-import java.net.URLClassLoader
-import kotlin.jvm.internal.Reflection
-import kotlin.reflect.KClass
-import java.net.URL
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 

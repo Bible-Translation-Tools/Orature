@@ -1,7 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import org.wycliffeassociates.otter.common.data.model.ContentType
-import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.TextItem
 
 interface Recordable {
     val audio: AssociatedAudio

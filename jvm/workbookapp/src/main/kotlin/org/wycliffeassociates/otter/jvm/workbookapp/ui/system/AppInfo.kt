@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.system
 
-import org.wycliffeassociates.otter.jvm.device.system.Environment
 import java.util.*
+import org.wycliffeassociates.otter.jvm.device.system.Environment
 
 class AppInfo : Environment() {
     override fun getSystemData(): List<Pair<String, String>> {

@@ -6,9 +6,9 @@ import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import jooq.Tables.*
-import org.jooq.SelectConditionStep
-import org.jooq.Record
 import org.jooq.DSLContext
+import org.jooq.Record
+import org.jooq.SelectConditionStep
 import org.wycliffeassociates.otter.common.collections.multimap.MultiMap
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content

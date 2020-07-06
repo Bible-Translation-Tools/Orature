@@ -1,9 +1,18 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
+import java.io.Closeable
+import java.io.File
+import java.nio.file.Path
+import java.util.ArrayDeque
+import java.util.zip.ZipFile
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
-import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
@@ -12,11 +21,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Otte
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile.Companion.otterFileF
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
-import java.io.Closeable
-import java.io.File
-import java.nio.file.Path
-import java.util.*
-import java.util.zip.ZipFile
 
 private val extensions = Regex(".+\\.(md|mkdn?|mdown|markdown)$", RegexOption.IGNORE_CASE)
 

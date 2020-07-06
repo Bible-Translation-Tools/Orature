@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin
 
-import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.parser.ParsedAudioPluginData
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -8,10 +7,11 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.io.File
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.parser.ParsedAudioPluginData
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.parser.ParsedAudioPluginDataMapper
-import java.io.File
 
 // Imports plugin data files into database
 class AudioPluginRegistrar(private val audioPluginRepository: IAudioPluginRepository) : IAudioPluginRegistrar {

@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import java.io.File
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -13,7 +14,6 @@ import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import tornadofx.*
-import java.io.File
 
 class InnerCard(val cardGraphic: Node? = null) : VBox() {
 

@@ -1,11 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.report
 
+import java.io.IOException
+import java.util.*
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.wycliffeassociates.otter.jvm.device.system.Environment
-import java.io.IOException
-import java.util.*
 
 private const val DEFAULT_CRASH_TITLE = "crash report"
 

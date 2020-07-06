@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.data.model
 
-import java.util.*
+import java.util.EnumSet
 
 /** The kinds of [Content] elements */
 enum class ContentType {

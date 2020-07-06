@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
-import junit.framework.TestCase.assertEquals
-import org.junit.Test
 import java.io.BufferedReader
 import java.io.ByteArrayInputStream
 import java.lang.AssertionError
+import junit.framework.TestCase.assertEquals
+import org.junit.Test
 
 // Input is List<String>, expected output is List<HelpResource>
 typealias TestCaseForParser = Pair<List<String>, List<HelpResource>>

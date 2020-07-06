@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.viewmodel
 
+import java.io.File
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -8,18 +9,17 @@ import org.wycliffeassociates.otter.common.io.wav.WavFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
+import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
+import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
 import org.wycliffeassociates.otter.jvm.recorder.device.AudioRecorder
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.ViewModel
 import tornadofx.add
 import tornadofx.getValue
 import tornadofx.setValue
-import java.io.File
 
 class RecorderViewModel : ViewModel() {
 

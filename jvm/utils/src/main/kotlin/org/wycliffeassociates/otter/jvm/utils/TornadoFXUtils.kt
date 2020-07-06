@@ -2,14 +2,14 @@ package org.wycliffeassociates.otter.jvm.utils
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
+import java.lang.IllegalStateException
 import javafx.application.Platform
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.scene.Node
 import javafx.scene.layout.Pane
-import tornadofx.onChange
-import java.lang.IllegalStateException
 import tornadofx.*
+import tornadofx.onChange
 
 /**
  * Runs the given operation now and also calls tornadofx's [onChange] with the given operation to set up an

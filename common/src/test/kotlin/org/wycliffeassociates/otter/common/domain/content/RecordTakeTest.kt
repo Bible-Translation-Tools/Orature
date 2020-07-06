@@ -1,14 +1,18 @@
 package org.wycliffeassociates.otter.common.domain.content
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
+import java.io.File
+import java.time.LocalDate
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.doAssertEquals
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.io.wav.EMPTY_WAVE_FILE_SIZE
-import java.io.File
-import java.time.LocalDate
 
 class RecordTakeTest {
     private val recordTake = RecordTake(mock(), mock())

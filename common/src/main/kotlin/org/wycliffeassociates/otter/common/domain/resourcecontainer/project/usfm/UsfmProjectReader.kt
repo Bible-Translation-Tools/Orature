@@ -1,9 +1,14 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
+import java.io.File
+import java.io.Reader
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
-import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
@@ -12,8 +17,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
-import java.io.File
-import java.io.Reader
 
 private const val FORMAT = "text/usfm"
 

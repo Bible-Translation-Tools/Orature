@@ -2,9 +2,9 @@ package org.wycliffeassociates.otter.common.domain.plugins
 
 import io.reactivex.Maybe
 import io.reactivex.Single
+import java.io.File
 import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import java.io.File
 
 class LaunchPlugin(
     private val pluginRepository: IAudioPluginRepository

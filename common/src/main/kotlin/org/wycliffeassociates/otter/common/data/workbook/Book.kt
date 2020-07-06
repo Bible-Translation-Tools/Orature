@@ -2,9 +2,9 @@ package org.wycliffeassociates.otter.common.data.workbook
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.model.Collection
 
 data class Book(
     val collectionId: Int,

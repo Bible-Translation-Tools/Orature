@@ -7,11 +7,11 @@ import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import javafx.stage.FileChooser
+import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.removeplugins.view.RemovePluginsView
-import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 

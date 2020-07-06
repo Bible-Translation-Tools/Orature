@@ -1,13 +1,13 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import java.io.File
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import java.io.File
 
 class InitializePlugins(
     val directoryProvider: IDirectoryProvider,

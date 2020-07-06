@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.content
 
-import org.wycliffeassociates.otter.common.data.model.ContentType
 import kotlin.IllegalStateException
+import org.wycliffeassociates.otter.common.data.model.ContentType
 
 class FileNamer(
     val start: Int? = null,

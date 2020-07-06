@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import java.io.File
+import java.io.FileOutputStream
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
@@ -8,8 +10,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
-import java.io.File
-import java.io.FileOutputStream
 
 class InitializeRecorder(
     val directoryProvider: IDirectoryProvider,

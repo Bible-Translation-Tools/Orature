@@ -7,11 +7,24 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.workbook.*
-import java.util.*
 import java.util.Collections.synchronizedMap
+import java.util.WeakHashMap
+import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.model.Marker
+import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
+import org.wycliffeassociates.otter.common.data.workbook.Resource
+import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.model.Take
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take

@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import java.io.File
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
@@ -10,7 +11,6 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ProjectCardSkin
 import tornadofx.*
-import java.io.File
 
 class ProjectCard(
     title: String = "",

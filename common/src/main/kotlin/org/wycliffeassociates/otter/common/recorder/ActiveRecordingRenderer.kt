@@ -2,10 +2,10 @@ package org.wycliffeassociates.otter.common.recorder
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
-import org.wycliffeassociates.otter.common.io.wav.DEFAULT_SAMPLE_RATE
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
+import org.wycliffeassociates.otter.common.io.wav.DEFAULT_SAMPLE_RATE
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 

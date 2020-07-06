@@ -4,6 +4,10 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import java.io.File
+import java.io.FileNotFoundException
+import java.lang.NullPointerException
+import java.time.LocalDate
 import jooq.Tables.*
 import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
@@ -26,10 +30,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
-import java.io.File
-import java.io.FileNotFoundException
-import java.lang.NullPointerException
-import java.time.LocalDate
 
 class CollectionRepository(
     private val database: AppDatabase,

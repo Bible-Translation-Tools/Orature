@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.content
 
-import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 
 object WorkbookFileNamerBuilder {
     fun createFileNamer(

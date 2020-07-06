@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.Callable
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
@@ -17,14 +18,13 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.EditTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
-import java.util.concurrent.Callable
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel

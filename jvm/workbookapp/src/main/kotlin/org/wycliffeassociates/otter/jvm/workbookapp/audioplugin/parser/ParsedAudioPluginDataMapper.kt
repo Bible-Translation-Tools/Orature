@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.parser
 
-import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import java.io.File
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 
 /** @param osName optionally overrides the value from System.getProperty("os.name") */
 class ParsedAudioPluginDataMapper(osName: String? = null) {

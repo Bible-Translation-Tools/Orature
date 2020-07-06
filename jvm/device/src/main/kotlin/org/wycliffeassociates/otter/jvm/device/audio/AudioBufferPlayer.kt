@@ -1,15 +1,15 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import java.io.File
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.io.AudioFileReader
 import org.wycliffeassociates.otter.common.io.wav.WavFile
 import org.wycliffeassociates.otter.common.io.wav.WavFileReader
-import java.io.File
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.SourceDataLine
 
 class AudioBufferPlayer : IAudioPlayer {
 

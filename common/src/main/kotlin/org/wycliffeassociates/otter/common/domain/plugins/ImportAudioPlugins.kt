@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.plugins
 
 import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 class ImportAudioPlugins(
     private val pluginRegistrar: IAudioPluginRegistrar,

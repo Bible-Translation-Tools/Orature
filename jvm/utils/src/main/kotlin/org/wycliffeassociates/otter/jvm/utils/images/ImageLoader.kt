@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.jvm.utils.images
 
 import afester.javafx.svg.SvgLoader
+import java.io.InputStream
 import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import java.io.InputStream
 
 // Loads an image with a given file path
 class ImageLoader {

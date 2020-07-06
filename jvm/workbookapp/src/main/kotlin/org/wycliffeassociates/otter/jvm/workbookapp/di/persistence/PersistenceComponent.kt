@@ -1,11 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.di.persistence
 
 import dagger.Component
+import javax.inject.Singleton
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import javax.inject.Singleton
 
 @Component(
     modules = [

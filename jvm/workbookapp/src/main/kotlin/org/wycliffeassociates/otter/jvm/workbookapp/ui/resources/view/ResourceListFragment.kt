@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.view
 
+import java.text.MessageFormat
 import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.styles.ResourceListStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.ResourceListViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
-import java.text.MessageFormat
 
 class ResourceListFragment : Fragment() {
     private val workbookViewModel: WorkbookViewModel by inject()

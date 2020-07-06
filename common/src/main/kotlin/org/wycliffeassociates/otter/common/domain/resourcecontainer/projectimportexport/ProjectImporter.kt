@@ -3,9 +3,18 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
+import java.io.File
+import java.io.IOException
+import java.time.LocalDate
+import java.util.regex.Pattern
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ContainerType
+import org.wycliffeassociates.otter.common.data.model.Content
+import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -13,15 +22,15 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.*
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import org.wycliffeassociates.resourcecontainer.entity.Source
-import java.io.File
-import java.io.IOException
-import java.time.LocalDate
-import java.util.regex.Pattern
 
 class ProjectImporter(
     private val resourceContainerImporter: ImportResourceContainer,

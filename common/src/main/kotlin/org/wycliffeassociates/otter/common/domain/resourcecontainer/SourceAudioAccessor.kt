@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
+import java.io.File
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.io.wav.WavFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
-import java.io.File
 
 data class SourceAudio(val file: File, val start: Int, val end: Int)
 

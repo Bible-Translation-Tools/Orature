@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
+import java.io.File
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
-import java.io.File
 
 class CoverArtAccessor(val metadata: ResourceMetadata, val project: String) {
     companion object {

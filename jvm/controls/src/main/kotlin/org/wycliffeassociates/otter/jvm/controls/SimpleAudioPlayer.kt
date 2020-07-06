@@ -4,6 +4,8 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXProgressBar
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import java.io.File
+import java.util.concurrent.TimeUnit
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
@@ -12,8 +14,6 @@ import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import tornadofx.*
-import java.io.File
-import java.util.concurrent.TimeUnit
 
 // Named "Simple" since just displays a progress bar and play/pause button
 // No waveform view

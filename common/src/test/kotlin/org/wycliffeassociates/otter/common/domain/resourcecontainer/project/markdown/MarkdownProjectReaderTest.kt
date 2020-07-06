@@ -1,13 +1,13 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
+import java.io.File
 import junit.framework.TestCase
+import kotlin.IllegalArgumentException
 import org.junit.Test
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
-import java.io.File
-import kotlin.IllegalArgumentException
 
 class MarkdownProjectReaderTest {
     private val pwd = File(System.getProperty("user.dir"))

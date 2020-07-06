@@ -3,8 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 import dev.jbs.gridview.control.GridCell
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 
 class ScriptureTakesGridCell(
     newRecordingAction: () -> Unit

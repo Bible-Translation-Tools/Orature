@@ -3,12 +3,12 @@ package org.wycliffeassociates.otter.jvm.controls.controllers
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
+import java.util.concurrent.TimeUnit
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Slider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import java.util.concurrent.TimeUnit
 
 class AudioPlayerController(
     private var player: IAudioPlayer?,

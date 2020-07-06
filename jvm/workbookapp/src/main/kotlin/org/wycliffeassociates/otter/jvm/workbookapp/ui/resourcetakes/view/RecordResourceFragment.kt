@@ -4,20 +4,20 @@ import com.github.thomasnield.rxkotlinfx.toObservable
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourcetakecard
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import tornadofx.*
 
 class RecordResourceFragment(

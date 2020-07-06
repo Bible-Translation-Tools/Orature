@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import java.io.File
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
-import java.io.File
 
 /**
  * Merges the media contents from one resource container to the other.

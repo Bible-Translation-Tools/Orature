@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
 import org.wycliffeassociates.otter.common.data.model.ContentType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 
 class RecordResourceTabGroup : TabGroup() {
     private val viewModel: RecordResourceViewModel by inject()

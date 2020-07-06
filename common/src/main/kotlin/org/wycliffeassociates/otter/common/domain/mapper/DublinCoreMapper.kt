@@ -1,11 +1,11 @@
 package org.wycliffeassociates.otter.common.domain.mapper
 
+import java.io.File
+import java.time.LocalDate
 import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.resourcecontainer.entity.DublinCore
-import java.io.File
-import java.time.LocalDate
 
 fun DublinCore.mapToMetadata(dir: File, lang: Language): ResourceMetadata {
     val (issuedDate, modifiedDate) = listOf(issued, modified)

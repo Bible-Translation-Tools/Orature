@@ -1,6 +1,10 @@
 package org.wycliffeassociates.otter.common.io.wav
 
-import java.io.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.io.RandomAccessFile
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

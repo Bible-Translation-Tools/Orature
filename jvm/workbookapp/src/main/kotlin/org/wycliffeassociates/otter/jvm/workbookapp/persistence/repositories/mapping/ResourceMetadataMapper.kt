@@ -1,11 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
+import java.io.File
+import java.time.LocalDate
 import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
-import java.io.File
-import java.time.LocalDate
 
 class ResourceMetadataMapper {
     fun mapFromEntity(entity: ResourceMetadataEntity, language: Language): ResourceMetadata {

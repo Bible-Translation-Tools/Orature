@@ -6,9 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import java.io.InputStream
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import java.io.InputStream
 
 // Imports from langnames.json
 class ImportLanguages(val inputStream: InputStream, val languageRepo: ILanguageRepository) {

@@ -1,11 +1,11 @@
 package org.wycliffeassociates.otter.common.persistence
 
+import java.io.File
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
 import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import java.io.File
 
 interface IDirectoryProvider {
 

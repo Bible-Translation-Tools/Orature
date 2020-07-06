@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import java.io.File
 import javafx.beans.binding.BooleanBinding
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -9,7 +10,6 @@ import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
-import java.io.File
 
 class AddPluginViewModel : ViewModel() {
     private val injector: Injector by inject()

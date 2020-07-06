@@ -2,13 +2,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.toObservable
-import org.wycliffeassociates.otter.common.utils.mapNotNull
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import kotlin.streams.asSequence
+import org.wycliffeassociates.otter.common.utils.mapNotNull
 
 /**
  *  Create a Jar:File: URI.

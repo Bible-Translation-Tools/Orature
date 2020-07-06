@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 
 class DeleteProject(
     private val collectionRepository: ICollectionRepository,

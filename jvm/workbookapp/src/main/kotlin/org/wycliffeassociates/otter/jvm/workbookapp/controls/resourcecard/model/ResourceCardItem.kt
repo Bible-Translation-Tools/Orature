@@ -1,15 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model
 
 import io.reactivex.disposables.CompositeDisposable
+import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.DoubleProperty
 import javafx.beans.property.SimpleDoubleProperty
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
-import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
-import java.util.concurrent.Callable
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Resource
 
 data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     val title: String = renderTitleAsPlainText()

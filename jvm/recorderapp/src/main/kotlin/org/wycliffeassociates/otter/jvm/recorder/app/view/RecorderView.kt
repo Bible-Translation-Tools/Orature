@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.stage.Screen
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
 class RecorderView : PluginEntrypoint() {

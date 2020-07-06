@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel
 
+import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.DoubleBinding
 import javafx.beans.binding.StringBinding
@@ -7,7 +8,6 @@ import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
-import java.util.concurrent.Callable
 
 class RecordableTabViewModel(
     val labelProperty: SimpleStringProperty,

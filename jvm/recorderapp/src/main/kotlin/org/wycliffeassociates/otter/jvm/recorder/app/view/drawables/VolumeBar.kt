@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view.drawables
 
-import javafx.scene.canvas.Canvas
-import javafx.scene.canvas.GraphicsContext
-import javafx.scene.paint.Paint
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
+import javafx.scene.paint.Paint
 import kotlin.math.absoluteValue
 import kotlin.math.max
 

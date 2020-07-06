@@ -1,15 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project
 
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterZipFile.Companion.otterFileZ
 import java.io.IOException
 import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
 import java.util.zip.ZipFile
+import org.wycliffeassociates.otter.common.collections.tree.OtterTree
+import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterZipFile.Companion.otterFileZ
 
 object ZipEntryTreeBuilder : IZipEntryTreeBuilder {
 

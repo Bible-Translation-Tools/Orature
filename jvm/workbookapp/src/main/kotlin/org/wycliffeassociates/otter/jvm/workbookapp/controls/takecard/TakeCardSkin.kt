@@ -8,10 +8,10 @@ import javafx.scene.control.SkinBase
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PlayEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
+import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import tornadofx.*
 import tornadofx.FX.Companion.messages

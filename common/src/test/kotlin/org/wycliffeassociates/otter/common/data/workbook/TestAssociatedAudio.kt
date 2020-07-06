@@ -1,12 +1,12 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.ReplayRelay
+import java.io.File
+import java.time.LocalDate
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.assertEqualsForEach
 import org.wycliffeassociates.otter.common.data.model.MimeType
-import java.io.File
-import java.time.LocalDate
 
 class TestAssociatedAudio {
     private fun createTakeWithNum(num: Int): Take =

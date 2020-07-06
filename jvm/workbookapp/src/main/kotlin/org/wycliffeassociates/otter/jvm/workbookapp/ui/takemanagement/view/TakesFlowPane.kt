@@ -9,10 +9,10 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.*
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 

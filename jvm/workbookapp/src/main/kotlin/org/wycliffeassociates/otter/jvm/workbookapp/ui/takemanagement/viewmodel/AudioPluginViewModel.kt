@@ -9,11 +9,11 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {

@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
+import java.io.File
+import java.time.LocalDate
 import org.wycliffeassociates.otter.common.data.model.Marker
 import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
-import java.io.File
-import java.time.LocalDate
 
 class TakeMapper {
     fun mapFromEntity(entity: TakeEntity, markers: List<Marker>): Take {

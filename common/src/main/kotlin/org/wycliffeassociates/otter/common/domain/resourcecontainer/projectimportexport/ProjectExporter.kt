@@ -4,17 +4,20 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import io.reactivex.schedulers.Schedulers
+import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.BookElement
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class ProjectExporter(
     private val projectMetadataToExport: ResourceMetadata,

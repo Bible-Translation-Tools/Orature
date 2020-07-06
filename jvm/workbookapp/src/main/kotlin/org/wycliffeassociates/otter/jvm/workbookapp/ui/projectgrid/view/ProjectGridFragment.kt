@@ -9,13 +9,13 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.Action
-import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
-import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
 import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
+import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import tornadofx.*
 
 class ProjectGridFragment : Fragment() {

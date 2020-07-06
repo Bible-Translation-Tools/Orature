@@ -1,14 +1,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
-import javafx.collections.FXCollections
 import dev.jbs.gridview.control.GridView
 import impl.dev.jbs.gridview.skin.GridViewSkin
+import javafx.collections.FXCollections
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
-import tornadofx.*
 import kotlin.math.pow
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
+import tornadofx.*
 
 class ScriptureTakesGridView(
     val recordNewTake: () -> Unit

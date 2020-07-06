@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
+import java.util.Objects
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
-import java.util.*
 
 class Workbook(
     val source: Book,

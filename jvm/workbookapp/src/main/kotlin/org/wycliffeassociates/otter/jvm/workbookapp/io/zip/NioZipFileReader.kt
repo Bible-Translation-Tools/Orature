@@ -1,13 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
 import io.reactivex.Observable
-import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
 import java.io.File
 import java.io.InputStream
 import java.nio.file.FileSystem
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import kotlin.streams.asSequence
+import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
 
 class NioZipFileReader(
     zipFile: File

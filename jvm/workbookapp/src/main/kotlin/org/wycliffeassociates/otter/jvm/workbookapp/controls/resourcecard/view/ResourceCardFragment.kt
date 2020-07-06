@@ -10,11 +10,11 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import tornadofx.*
 
 class ResourceCardFragment(

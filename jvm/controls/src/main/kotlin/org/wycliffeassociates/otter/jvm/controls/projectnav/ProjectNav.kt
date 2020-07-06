@@ -8,7 +8,6 @@ import javafx.scene.effect.DropShadow
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-
 import tornadofx.*
 
 class ProjectNav : VBox() {

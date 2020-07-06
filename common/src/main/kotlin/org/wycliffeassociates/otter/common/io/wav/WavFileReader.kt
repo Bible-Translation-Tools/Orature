@@ -1,11 +1,11 @@
 package org.wycliffeassociates.otter.common.io.wav
 
-import org.wycliffeassociates.otter.common.io.AudioFileReader
 import java.io.RandomAccessFile
 import java.lang.Integer.max
 import java.lang.Integer.min
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import org.wycliffeassociates.otter.common.io.AudioFileReader
 
 class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = null) : AudioFileReader {
 

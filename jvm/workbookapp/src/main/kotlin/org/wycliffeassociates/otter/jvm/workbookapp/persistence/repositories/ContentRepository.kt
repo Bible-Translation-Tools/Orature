@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import java.lang.IllegalStateException
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentType
@@ -12,7 +13,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Content
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ContentMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
-import java.lang.IllegalStateException
 
 class ContentRepository(
     database: AppDatabase

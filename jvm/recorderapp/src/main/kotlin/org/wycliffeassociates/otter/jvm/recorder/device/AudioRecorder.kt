@@ -3,9 +3,9 @@ package org.wycliffeassociates.otter.jvm.recorder.device
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioRecorder : IAudioRecorder {
 

@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain
 
 import io.reactivex.Completable
+import java.io.File
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -9,7 +10,6 @@ import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.plugins.ImportAudioPlugins
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import java.io.File
 
 class ImportAudioPluginsTest {
     val mockPluginRegistrar = Mockito.mock(IAudioPluginRegistrar::class.java)
