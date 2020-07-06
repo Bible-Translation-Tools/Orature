@@ -5,6 +5,7 @@ ext {
     install4jPluginVer = '7.0.8'
     nebulaLintPluginVer = '14.2.1' // Gradle Linter
     buildscanPluginVer = '2.4.2'
+    detektPluginVer = '1.10.0-RC1'
     ktlintPluginVer = '8.2.0'
     shadowPluginVer = '5.2.0'
 
