@@ -5,6 +5,12 @@ import java.io.Reader
 private val sep = System.lineSeparator()
 
 private const val MARKER_BOOK_NAME = "\\id"
+private const val MARKER_BOOK_ENCODING = "\\ide"
+private const val MARKER_BOOK_HEADING = "\\h"
+private const val MARKER_BOOK_TOC1 = "\\toc1"
+private const val MARKER_BOOK_TOC2 = "\\toc2"
+private const val MARKER_BOOK_TOC3 = "\\toc3"
+private const val MARKER_BOOK_MT = "\\mt"
 private const val MARKER_CHAPTER_NUMBER = "\\c"
 private const val MARKER_VERSE_NUMBER = "\\v"
 private const val MARKER_NEW_PARAGRAPH = "\\p"
@@ -40,6 +46,12 @@ class ParseUsfm(val reader: Reader) {
         }
         when (split[0]) {
             MARKER_BOOK_NAME -> return
+            MARKER_BOOK_ENCODING -> return
+            MARKER_BOOK_HEADING -> return
+            MARKER_BOOK_TOC1 -> return
+            MARKER_BOOK_TOC2 -> return
+            MARKER_BOOK_TOC3 -> return
+            MARKER_BOOK_MT -> return
             MARKER_CHAPTER_NUMBER -> {
                 current.c = split[1]
                     .replace("\\s".toRegex(), "")
@@ -57,7 +69,7 @@ class ParseUsfm(val reader: Reader) {
                 // 1) it is not needed, 2) the current parser cannot extract text from word tags, if present
                 for (verseNumber in numbers[0]..(numbers.getOrNull(1) ?: numbers[0])) {
                     current.v = verseNumber
-                    chapters[current.c]!![current.v] = Verse(current.v, "")
+                    chapters[current.c]!![current.v] = Verse(current.v, sub[1])
                 }
             }
             MARKER_NEW_PARAGRAPH -> return

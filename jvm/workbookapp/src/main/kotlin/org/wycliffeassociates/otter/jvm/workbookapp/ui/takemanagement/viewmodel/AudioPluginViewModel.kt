@@ -1,7 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import io.reactivex.Single
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.PluginParameters
+import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
@@ -23,8 +26,12 @@ class AudioPluginViewModel : ViewModel() {
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
 
-    val recorderData = pluginRepository.getRecorderData()
-    val editorData = pluginRepository.getEditorData()
+    fun getRecorder() = pluginRepository.getRecorder()
+    fun getEditor() = pluginRepository.getEditor()
+
+    val pluginNameProperty = SimpleStringProperty()
+    val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
+    val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
         val params = constructPluginParameters()
@@ -38,14 +45,8 @@ class AudioPluginViewModel : ViewModel() {
 
     private fun constructPluginParameters(): PluginParameters {
         val workbook = workbookViewModel.workbook
-        val sourceAudio = workbook.sourceAudioAccessor
-
-        val sourceAudioFile = workbookViewModel.chunk?.let { chunk ->
-            sourceAudio.getChunk(
-                workbookViewModel.activeChapterProperty.value.sort,
-                chunk.start
-            )
-        } ?: run { sourceAudio.getChapter(workbookViewModel.activeChapterProperty.value.sort) }
+        val sourceAudio = workbookViewModel.getSourceAudio()
+        val sourceText = workbookViewModel.getSourceText().blockingGet()
 
         val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
         val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
@@ -65,9 +66,10 @@ class AudioPluginViewModel : ViewModel() {
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
             resourceLabel = resourceLabel,
-            sourceChapterAudio = sourceAudioFile?.file,
-            sourceChunkStart = sourceAudioFile?.start,
-            sourceChunkEnd = sourceAudioFile?.end
+            sourceChapterAudio = sourceAudio?.file,
+            sourceChunkStart = sourceAudio?.start,
+            sourceChunkEnd = sourceAudio?.end,
+            sourceText = sourceText
         )
     }
 

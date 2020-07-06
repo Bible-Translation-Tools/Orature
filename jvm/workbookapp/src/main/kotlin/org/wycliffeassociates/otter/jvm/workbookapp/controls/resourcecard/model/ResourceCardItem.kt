@@ -53,7 +53,8 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
         return Bindings.createBooleanBinding(
             Callable {
                 val titleCompleted = titleProgressProperty.get() == 1.0
-                val bodyCompleted = bodyProgressProperty?.get() == 1.0
+                val bodyCompleted =
+                    bodyProgressProperty == null || bodyProgressProperty.get() == 1.0
                 titleCompleted && bodyCompleted
             },
             *dependencies

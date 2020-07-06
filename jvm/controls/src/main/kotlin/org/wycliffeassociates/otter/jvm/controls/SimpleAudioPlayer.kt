@@ -70,6 +70,7 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
                     player.play()
                     loaded = true
                 }
+                return
             }
             player.seek(0)
             player.play()

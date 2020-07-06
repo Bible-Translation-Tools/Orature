@@ -23,6 +23,11 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
     private val monitor = Object()
 
+    override fun isNativePlugin(): Boolean {
+        val pluginClass = findPlugin(File(pluginData.executable))
+        return pluginClass != null
+    }
+
     override fun launch(audioFile: File, pluginParameters: PluginParameters): Completable {
         return when (File(pluginData.executable).extension) {
             "jar" -> launchJar(audioFile, pluginParameters)
@@ -91,7 +96,8 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     (if (pluginParameters.resourceLabel != null)"--resource=${pluginParameters.resourceLabel}" else ""),
                     "--chapter_audio=${pluginParameters.sourceChapterAudio?.absolutePath}",
                     "--source_chunk_start=${pluginParameters.sourceChunkStart}",
-                    "--source_chunk_end=${pluginParameters.sourceChunkEnd}"
+                    "--source_chunk_end=${pluginParameters.sourceChunkEnd}",
+                    "--source_text=${pluginParameters.sourceText}"
                 )
             }
         return ParametersImpl(insertedArgs)

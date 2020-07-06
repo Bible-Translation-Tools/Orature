@@ -8,8 +8,7 @@ interface Recordable {
     val contentType: ContentType
     val sort: Int
     val label: String
-}
-
-interface ResourceRecordable : Recordable {
     val textItem: TextItem
 }
+
+interface ResourceRecordable : Recordable

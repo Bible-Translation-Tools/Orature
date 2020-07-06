@@ -4,6 +4,7 @@ import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordableTab
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 
 class RecordResourceTabGroup : TabGroup() {
     private val viewModel: RecordResourceViewModel by inject()
@@ -22,9 +23,18 @@ class RecordResourceTabGroup : TabGroup() {
 
     override fun activate() {
         tabs.forEach { recordableTab ->
-            if (recordableTab.hasRecordable()) {
-                tabPane.tabs.add(recordableTab)
+            recordableTab.bindProperties()
+            recordableTab.recordableProperty.onChangeAndDoNow { rec ->
+                rec?.let {
+                    if (!tabPane.tabs.contains(recordableTab)) tabPane.tabs.add(recordableTab)
+                } ?: tabPane.tabs.remove(recordableTab)
             }
+        }
+    }
+
+    override fun deactivate() {
+        tabs.forEach { recordableTab ->
+            recordableTab.unbindProperties()
         }
     }
 }

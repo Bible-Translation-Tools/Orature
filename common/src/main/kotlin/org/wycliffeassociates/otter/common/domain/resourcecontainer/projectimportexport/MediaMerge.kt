@@ -4,6 +4,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.entity.MediaProject
+import java.io.File
 
 /**
  * Merges the media contents from one resource container to the other.
@@ -64,15 +65,19 @@ class MediaMerge(
 
     private fun mergeMediaFiles() {
         val _fromMedia = from.media
-        _fromMedia?.let { fromMedia ->
-            fromMedia.projects.forEach {
-                it.media.forEach { media ->
-                    val files = mediaFilePermutations(media)
-                    files.forEach { path ->
-                        copyMediaFile(path)
+        val filesToMerge = mutableMapOf<String, File>()
+        try {
+            _fromMedia?.let { fromMedia ->
+                fromMedia.projects.forEach {
+                    it.media.forEach { media ->
+                        val files = mediaFilePermutations(media)
+                        filesToMerge.putAll(getMediaFilesToMerge(files))
                     }
                 }
             }
+            to.addFilesToContainer(filesToMerge)
+        } finally {
+            filesToMerge.values.forEach { it.delete() }
         }
     }
 
@@ -114,22 +119,21 @@ class MediaMerge(
         return list
     }
 
-    private fun copyMediaFile(file: String) {
-        if (!file.isURL()) {
-            if (from.accessor.fileExists(file)) {
-                from.accessor.getInputStream(file).use { ifs ->
+    private fun getMediaFilesToMerge(files: List<String>): Map<String, File> {
+        val filtered = files.filter { !it.isURL() }
+        val filesToMerge = mutableMapOf<String, File>()
+        filtered.forEach { filename ->
+            if (from.accessor.fileExists(filename)) {
+                from.accessor.getInputStream(filename).use { ifs ->
                     val temp = createTempFile()
-                    try {
-                        temp.outputStream().use { ofs ->
-                            ifs.transferTo(ofs)
-                        }
-                        to.addFileToContainer(temp, file)
-                    } finally {
-                        temp.delete()
+                    temp.outputStream().use { ofs ->
+                        ifs.transferTo(ofs)
                     }
+                    filesToMerge.put(filename, temp)
                 }
             }
         }
+        return filesToMerge
     }
 }
 

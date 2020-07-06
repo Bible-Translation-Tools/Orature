@@ -1,0 +1,23 @@
+@import "root.css"
+
+.source-format-toggle {
+    -fx-border-color: -primary;
+    -fx-border-radius: 3;
+    -fx-cursor: hand;
+}
+
+.source-format-toggle__mode {
+    -fx-padding: 8;
+}
+
+.source-format-toggle__mode--active {
+    -fx-background-color: -primary;
+}
+
+.source-format-toggle__icon {
+    -fx-fill: -primary;
+}
+
+.source-format-toggle__icon--active {
+    -fx-fill: white;
+}
