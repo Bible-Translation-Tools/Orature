@@ -29,7 +29,6 @@
 }
 
 .btn--close {
-    -fx-background-color: transparent;
     -fx-border-color: -white;
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
