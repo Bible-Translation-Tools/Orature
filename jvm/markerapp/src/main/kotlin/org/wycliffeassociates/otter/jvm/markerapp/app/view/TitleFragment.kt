@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app
+package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.geometry.Pos
 import javafx.scene.Parent
