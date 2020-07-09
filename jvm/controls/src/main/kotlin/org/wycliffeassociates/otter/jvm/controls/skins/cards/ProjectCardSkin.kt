@@ -36,7 +36,9 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
     lateinit var coverArt: ImageView
 
     private val popup = JFXPopup()
-    private val list = JFXListView<Label>()
+    private val list = JFXListView<Label>().apply {
+        addClass("project-card__popup-list")
+    }
 
     init {
         loadFXML()
