@@ -4,12 +4,26 @@ import com.jfoenix.controls.JFXButton
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.*
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.ReadOnlyDoubleProperty
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.scene.effect.*
+import javafx.geometry.Pos
+import javafx.scene.effect.Blend
+import javafx.scene.effect.BlendMode
+import javafx.scene.effect.ColorAdjust
+import javafx.scene.effect.ColorInput
+import javafx.scene.effect.Effect
 import javafx.scene.image.Image
-import javafx.scene.layout.*
+import javafx.scene.layout.Background
+import javafx.scene.layout.BackgroundImage
+import javafx.scene.layout.BackgroundPosition
+import javafx.scene.layout.BackgroundRepeat
+import javafx.scene.layout.BackgroundSize
+import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.stage.Modality
 import javafx.stage.StageStyle
@@ -70,11 +84,10 @@ class ConfirmDialog : Fragment() {
                 }
                 region {
                     hgrow = Priority.ALWAYS
-                    minWidth = 20.0
                 }
                 add(
                     JFXButton().apply {
-                        addClass("btn", "btn--secondary", "btn--close")
+                        addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
                         graphic = FontIcon("gmi-close")
                         onActionProperty().bind(onCloseActionProperty())
                     }
@@ -94,7 +107,7 @@ class ConfirmDialog : Fragment() {
 
             add(
                 JFXButton().apply {
-                    addClass("btn", "btn--primary", "btn--cancel")
+                    addClass("btn", "btn--primary", "confirm-dialog__btn--cancel")
                     graphic = FontIcon("gmi-close")
                     textProperty().bind(cancelButtonTextProperty)
                     onActionProperty().bind(onCancelActionProperty())
@@ -102,13 +115,13 @@ class ConfirmDialog : Fragment() {
             )
 
             region {
+                addClass("confirm-dialog__footer-spacer")
                 hgrow = Priority.ALWAYS
-                maxWidth = 50.0
             }
 
             add(
                 JFXButton().apply {
-                    addClass("btn", "btn--secondary", "btn--confirm")
+                    addClass("btn", "btn--secondary", "confirm-dialog__btn--confirm")
                     graphic = FontIcon("gmi-remove")
                     textProperty().bind(confirmButtonTextProperty)
                     onActionProperty().bind(onConfirmActionProperty())
