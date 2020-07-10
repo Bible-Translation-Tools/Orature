@@ -11,7 +11,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.geometry.Pos
 import javafx.scene.effect.Blend
 import javafx.scene.effect.BlendMode
 import javafx.scene.effect.ColorAdjust
