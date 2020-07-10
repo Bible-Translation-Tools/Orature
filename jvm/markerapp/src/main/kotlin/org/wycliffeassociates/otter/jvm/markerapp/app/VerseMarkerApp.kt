@@ -12,7 +12,7 @@ class VerseMarkerApp: App() {
         val args = if (!parameters?.raw.isNullOrEmpty()) {
                 parameters.raw.toTypedArray()
             } else {
-                arrayOf("--wav=recording.wav")
+                arrayOf("--wav=/Users/joe/Documents/recording.wav")
             }
         this.scope = ParameterizedScope(ParametersImpl(args)) {}
     }

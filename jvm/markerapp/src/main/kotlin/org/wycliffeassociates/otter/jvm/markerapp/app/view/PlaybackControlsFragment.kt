@@ -5,7 +5,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
-class PlaybackControlsFragment: Fragment() {
+class PlaybackControlsFragment : Fragment() {
     private val vm: VerseMarkerViewModel by inject()
 
     private val PLAY_ICON = FontIcon("fa-play")
@@ -26,8 +26,8 @@ class PlaybackControlsFragment: Fragment() {
     override val root = hbox {
         alignment = Pos.CENTER
 
-        button("Seek Left") { vm.seek() }
+        button("Seek Left") { setOnAction { vm.seekPrevious() } }
         add(playBtn.apply { setOnAction { vm.mediaToggle() } })
-        button("Seek Right") { vm.seek() }
+        button("Seek Right") { setOnAction { vm.seekNext() } }
     }
 }
