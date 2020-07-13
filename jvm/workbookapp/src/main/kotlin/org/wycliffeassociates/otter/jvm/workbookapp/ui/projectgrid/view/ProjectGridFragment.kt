@@ -116,6 +116,22 @@ class ProjectGridFragment : Fragment() {
         })
     }
 
+    private val confirmDeleteDialog = confirmdialog {
+        root.prefWidthProperty().bind(
+            this@ProjectGridFragment.root.widthProperty().divide(2)
+        )
+        root.prefHeightProperty().bind(
+            this@ProjectGridFragment.root.heightProperty().divide(2)
+        )
+
+        messageTextProperty.set(messages["deleteProjectConfirmation"])
+        confirmButtonTextProperty.set(messages["removeProject"])
+        cancelButtonTextProperty.set(messages["keepProject"])
+
+        onCloseAction { showDialogProperty.set(false) }
+        onCancelAction { showDialogProperty.set(false) }
+    }
+
     init {
         with(root) {
             add(ImageLoader.load(
@@ -156,11 +172,6 @@ class ProjectGridFragment : Fragment() {
         }
     }
 
-    private val confirmDeleteDialog = confirmdialog {
-        root.prefWidthProperty().bind(this@ProjectGridFragment.root.widthProperty().divide(2))
-        root.prefHeightProperty().bind(this@ProjectGridFragment.root.heightProperty().divide(2))
-    }
-
     private fun showDeleteConfirmDialog(item: Workbook) {
         confirmDeleteDialog.apply {
             val titleText = MessageFormat.format(
@@ -170,22 +181,9 @@ class ProjectGridFragment : Fragment() {
             )
 
             titleTextProperty.set(titleText)
-            messageTextProperty.set(messages["deleteProjectConfirmation"])
-
             backgroundImageFileProperty.set(item.coverArtAccessor.getArtwork())
 
-            confirmButtonTextProperty.set(messages["removeProject"])
-            cancelButtonTextProperty.set(messages["keepProject"])
-
             showDialogProperty.set(true)
-
-            onCloseAction {
-                showDialogProperty.set(false)
-            }
-
-            onCancelAction {
-                showDialogProperty.set(false)
-            }
 
             onConfirmAction {
                 showDialogProperty.set(false)
