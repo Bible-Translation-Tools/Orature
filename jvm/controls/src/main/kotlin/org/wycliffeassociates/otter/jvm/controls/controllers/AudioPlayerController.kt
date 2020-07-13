@@ -9,6 +9,8 @@ import javafx.scene.control.Slider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
 
 class AudioPlayerController(
     private var player: IAudioPlayer?,
@@ -73,21 +75,23 @@ class AudioPlayerController(
             }
             dragging = true
         }
-        audioSlider.setOnMouseReleased {
-            seek(audioSlider.value.toFloat() / 100F)
-            if (dragging) {
-                dragging = false
-                if (resumeAfterDrag) {
-                    toggle()
-                    resumeAfterDrag = false
-                }
+        audioSlider.setOnMouseClicked {
+            val position = max(0.0, min(it.x / audioSlider.width, 1.0))
+            var wasPlaying = false
+            if (player?.isPlaying() == true) {
+                toggle()
+                wasPlaying = true
+            }
+            seek(position.toFloat())
+            if (wasPlaying) {
+                toggle()
             }
         }
     }
 
     private fun startProgressUpdate(): Disposable {
         return Observable
-            .interval(20, TimeUnit.MILLISECONDS)
+            .interval(200, TimeUnit.MILLISECONDS)
             .observeOnFx()
             .subscribe {
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
@@ -109,14 +113,21 @@ class AudioPlayerController(
         }
     }
 
-    private fun seek(percent: Float) {
+    private fun seek(_percent: Float) {
+        var percent = if (_percent > 1.00) {
+            _percent / 100F
+        } else {
+            _percent
+        }
         player?.let {
             val position = (it.getAbsoluteDurationInFrames() * percent).toInt()
             it.seek(position)
             if (!it.isPlaying()) {
                 startAtPercent = percent
             }
-        } ?: run { startAtPercent = percent }
+        } ?: run {
+            startAtPercent = percent
+        }
     }
 
     private fun playbackPosition(): Double {
