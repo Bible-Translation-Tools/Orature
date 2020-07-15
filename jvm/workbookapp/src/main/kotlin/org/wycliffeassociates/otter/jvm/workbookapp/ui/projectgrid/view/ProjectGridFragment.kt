@@ -4,19 +4,23 @@ import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
-import javafx.beans.property.*
+import javafx.beans.property.ReadOnlyBooleanProperty
+import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.Action
-import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
-import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
+import org.wycliffeassociates.otter.jvm.controls.confirmdialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
+import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import tornadofx.*
+import java.text.MessageFormat
 
 class ProjectGridFragment : Fragment() {
 
@@ -73,7 +77,7 @@ class ProjectGridFragment : Fragment() {
                             text = messages["delete"],
                             iconCode = "gmi-delete",
                             onClicked = {
-                                viewModel.deleteProject(item)
+                                showDeleteConfirmDialog(item)
                             }
                         )
                     )
@@ -110,6 +114,22 @@ class ProjectGridFragment : Fragment() {
             }
             action { viewModel.createProject() }
         })
+    }
+
+    private val confirmDeleteDialog = confirmdialog {
+        root.prefWidthProperty().bind(
+            this@ProjectGridFragment.root.widthProperty().divide(2)
+        )
+        root.prefHeightProperty().bind(
+            this@ProjectGridFragment.root.heightProperty().divide(2)
+        )
+
+        messageTextProperty.set(messages["deleteProjectConfirmation"])
+        confirmButtonTextProperty.set(messages["removeProject"])
+        cancelButtonTextProperty.set(messages["keepProject"])
+
+        onCloseAction { showDialogProperty.set(false) }
+        onCancelAction { showDialogProperty.set(false) }
     }
 
     init {
@@ -149,6 +169,26 @@ class ProjectGridFragment : Fragment() {
         }
         viewModel.showDeleteDialogProperty.onChange {
             Platform.runLater { if (it) deletingProjectDialog.open() else deletingProjectDialog.close() }
+        }
+    }
+
+    private fun showDeleteConfirmDialog(item: Workbook) {
+        confirmDeleteDialog.apply {
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["remove"],
+                item.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(item.coverArtAccessor.getArtwork())
+
+            showDialogProperty.set(true)
+
+            onConfirmAction {
+                showDialogProperty.set(false)
+                viewModel.deleteProject(item)
+            }
         }
     }
 }
