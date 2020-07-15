@@ -9,6 +9,7 @@ class VerseMarkers(private val audio: WavFile) {
 
     private val cues = audio.metadata.getCues()
     val markerCountProperty = SimpleIntegerProperty(0)
+    val audioEnd = audio.totalFrames
 
     init {
         cues as MutableList
@@ -35,7 +36,7 @@ class VerseMarkers(private val audio: WavFile) {
                 return cue.location
             }
         }
-        return Int.MAX_VALUE
+        return audioEnd
     }
 
     fun seekPrevious(location: Int): Int {
