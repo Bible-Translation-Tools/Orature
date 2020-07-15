@@ -18,6 +18,7 @@ class AudioPlayerController(
 ) {
 
     private var startAtPercent = 0F
+    private var startAtLocation = 0
     private var disposable: Disposable? = null
     private var dragging = false
     private var resumeAfterDrag = false
@@ -82,7 +83,7 @@ class AudioPlayerController(
                 toggle()
                 wasPlaying = true
             }
-            seek(position.toFloat())
+            seekPercentage(position.toFloat())
             if (wasPlaying) {
                 toggle()
             }
@@ -101,9 +102,14 @@ class AudioPlayerController(
     }
 
     private fun play() {
-        seek(startAtPercent)
+        if (startAtLocation != 0) {
+            seekLocation(startAtLocation)
+        } else {
+            seekPercentage(startAtPercent)
+        }
         player?.play()
         startAtPercent = 0F
+        startAtLocation = 0
     }
 
     private fun pause() {
@@ -113,7 +119,7 @@ class AudioPlayerController(
         }
     }
 
-    private fun seek(_percent: Float) {
+    private fun seekPercentage(_percent: Float) {
         var percent = if (_percent > 1.00) {
             _percent / 100F
         } else {
@@ -122,11 +128,29 @@ class AudioPlayerController(
         player?.let {
             val position = (it.getAbsoluteDurationInFrames() * percent).toInt()
             it.seek(position)
+            val total = it.getAbsoluteDurationInFrames()
+            val sliderPos = (position / total.toDouble()).times(100)
+            audioSlider.value = sliderPos
             if (!it.isPlaying()) {
                 startAtPercent = percent
             }
         } ?: run {
             startAtPercent = percent
+        }
+    }
+
+    fun seekLocation(location: Int) {
+        player?.let {
+            println(location)
+            it.seek(location)
+            val total = it.getAbsoluteDurationInFrames()
+            val sliderPos = (location / total.toDouble()).times(100)
+            audioSlider.value = sliderPos
+            if(!it.isPlaying()) {
+                startAtLocation = location
+            }
+        } ?: run {
+            startAtLocation = location
         }
     }
 

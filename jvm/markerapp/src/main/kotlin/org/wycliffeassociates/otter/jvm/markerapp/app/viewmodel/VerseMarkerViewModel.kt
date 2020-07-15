@@ -41,10 +41,10 @@ class VerseMarkerViewModel: ViewModel() {
     }
 
     fun seekNext() {
-        audioPlayer.seek(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
+        audioController?.seekLocation(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
     }
 
     fun seekPrevious() {
-        audioPlayer.seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+        audioController?.seekLocation(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
     }
 }

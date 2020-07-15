@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.model
 import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.io.wav.WavCue
 import org.wycliffeassociates.otter.common.io.wav.WavFile
+import java.lang.Integer.min
 
 class VerseMarkers(private val audio: WavFile) {
 
@@ -38,9 +39,11 @@ class VerseMarkers(private val audio: WavFile) {
     }
 
     fun seekPrevious(location: Int): Int {
-        for (cue in cues.reversed()) {
+        cues as MutableList
+        cues.sortBy { it.location }
+        for ((i, cue) in cues.reversed().withIndex()) {
             if (location > cue.location) {
-                return cue.location
+                return cues.reversed().get(min(cues.size-1, i+1)).location
             }
         }
         return 0
