@@ -26,7 +26,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         private const val SCROLL_TEXT_RESIZE_RATIO = 1.05
     }
 
-    private val playIcon = FontIcon()
+    private val playIcon = FontIcon("fa-play")
     private val pauseIcon = FontIcon("fa-pause")
 
     @FXML
