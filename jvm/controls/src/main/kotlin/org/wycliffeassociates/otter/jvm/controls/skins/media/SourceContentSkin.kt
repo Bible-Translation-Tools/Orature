@@ -18,14 +18,16 @@ import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
 
-    private val playIcon = FontIcon("fa-play")
+    companion object {
+        private const val SCROLL_TEXT_MAX_HEIGHT = 150.0
+        private const val SCROLL_TEXT_MARGIN = 20.0
+        private const val SCROLL_TEXT_RESIZE_RATIO = 1.05
+    }
+
+    private val playIcon = FontIcon()
     private val pauseIcon = FontIcon("fa-pause")
-    private val maxTextHeight = 150.0
-    private val scrollTextMargin = 20.0
-    private val scrollTextResizeRatio = 1.05
 
     @FXML
     lateinit var sourceAudioContainer: HBox
@@ -132,16 +134,16 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             whenVisible { vvalue = 0.0 }
 
             maxWidthProperty().bind(
-                sourceContent.widthProperty().divide(scrollTextResizeRatio)
+                sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
             )
-            maxHeightProperty().set(maxTextHeight)
+            maxHeightProperty().set(SCROLL_TEXT_MAX_HEIGHT)
 
             sourceText.boundsInParentProperty().onChangeAndDoNow { bounds ->
                 bounds?.let {
-                    if (bounds.height < maxTextHeight) {
+                    if (bounds.height < SCROLL_TEXT_MAX_HEIGHT) {
                         sourceTextScroll.minHeightProperty().set(bounds.height)
                     } else {
-                        sourceTextScroll.minHeightProperty().set(maxTextHeight)
+                        sourceTextScroll.minHeightProperty().set(SCROLL_TEXT_MAX_HEIGHT)
                     }
                 }
             }
@@ -150,7 +152,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceText.apply {
             textProperty().bind(sourceContent.sourceTextProperty)
             wrappingWidthProperty().bind(
-                sourceTextScroll.maxWidthProperty().minus(scrollTextMargin)
+                sourceTextScroll.maxWidthProperty().minus(SCROLL_TEXT_MARGIN)
             )
         }
 
