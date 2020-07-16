@@ -21,9 +21,11 @@ import tornadofx.*
 
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
 
-    private val PLAY_ICON = FontIcon("fa-play")
-    private val PAUSE_ICON = FontIcon("fa-pause")
-    private val MAX_TEXT_HEIGHT = 150.0
+    private val playIcon = FontIcon("fa-play")
+    private val pauseIcon = FontIcon("fa-pause")
+    private val maxTextHeight = 150.0
+    private val scrollTextMargin = 20.0
+    private val scrollTextResizeRatio = 1.05
 
     @FXML
     lateinit var sourceAudioContainer: HBox
@@ -67,9 +69,17 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initializeControl() {
+        initControllers()
+        initAudioControls()
+        initTextControls()
+    }
+
+    private fun initControllers() {
         audioController = AudioPlayerController(sourceContent.audioPlayerProperty.value, audioSlider)
         sourceContentController = SourceContentController()
+    }
 
+    private fun initAudioControls() {
         sourceAudioContainer.apply {
             visibleWhen(sourceContent.sourceAudioAvailableProperty)
             managedWhen(visibleProperty())
@@ -101,7 +111,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                 audioController.load(it)
             }
         }
+    }
 
+    private fun initTextControls() {
         sourceTextNotAvailable.apply {
             hiddenWhen(sourceContent.sourceTextAvailableProperty)
             managedWhen(visibleProperty())
@@ -119,15 +131,17 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
 
-            maxWidthProperty().bind(sourceContent.widthProperty().divide(1.05))
-            maxHeightProperty().set(MAX_TEXT_HEIGHT)
+            maxWidthProperty().bind(
+                sourceContent.widthProperty().divide(scrollTextResizeRatio)
+            )
+            maxHeightProperty().set(maxTextHeight)
 
             sourceText.boundsInParentProperty().onChangeAndDoNow { bounds ->
                 bounds?.let {
-                    if (bounds.height < MAX_TEXT_HEIGHT) {
+                    if (bounds.height < maxTextHeight) {
                         sourceTextScroll.minHeightProperty().set(bounds.height)
                     } else {
-                        sourceTextScroll.minHeightProperty().set(MAX_TEXT_HEIGHT)
+                        sourceTextScroll.minHeightProperty().set(maxTextHeight)
                     }
                 }
             }
@@ -135,7 +149,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceText.apply {
             textProperty().bind(sourceContent.sourceTextProperty)
-            wrappingWidthProperty().bind(sourceTextScroll.maxWidthProperty().minus(20.0))
+            wrappingWidthProperty().bind(
+                sourceTextScroll.maxWidthProperty().minus(scrollTextMargin)
+            )
         }
 
         title.apply {
@@ -151,9 +167,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     private fun togglePlayButtonIcon(isPlaying: Boolean?) {
         if (isPlaying == true) {
-            playBtn.graphicProperty().set(PAUSE_ICON)
+            playBtn.graphicProperty().set(pauseIcon)
         } else {
-            playBtn.graphicProperty().set(PLAY_ICON)
+            playBtn.graphicProperty().set(playIcon)
         }
     }
 
