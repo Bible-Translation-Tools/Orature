@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
 import io.reactivex.Maybe
-import javafx.beans.property.*
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -12,7 +14,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 import java.io.File
-import java.lang.IllegalStateException
+import java.util.concurrent.Callable
 
 class WorkbookViewModel : ViewModel() {
     private val injector: Injector by inject()
@@ -30,6 +32,7 @@ class WorkbookViewModel : ViewModel() {
     val chunk: Chunk? by activeChunkProperty
 
     val activeResourceComponentProperty = SimpleObjectProperty<Resource.Component>()
+    val activeResourceComponent by activeResourceComponentProperty
     val activeResourceProperty = SimpleObjectProperty<Resource>()
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
@@ -81,15 +84,30 @@ class WorkbookViewModel : ViewModel() {
     }
 
     fun getSourceText(): Maybe<String> {
-        return chunk?.let {
-            getSourceChunk().map { _chunk ->
+        return when {
+            activeResourceComponent != null -> Maybe.just(
+                activeResourceComponent.textItem.text
+            )
+            chunk != null -> getSourceChunk().map { _chunk ->
                 _chunk.textItem.text
             }
-        } ?: run {
-            getSourceChapter().map { _chapter ->
+            else -> getSourceChapter().map { _chapter ->
                 _chapter.textItem.text
             }
         }
+    }
+
+    fun sourceTextBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                activeChapterProperty.value?.let {
+                    getSourceText().blockingGet()
+                }
+            },
+            activeChapterProperty,
+            activeChunkProperty,
+            activeResourceComponentProperty
+        )
     }
 
     fun getSourceChapter(): Maybe<Chapter> {
