@@ -6,25 +6,23 @@ import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import tornadofx.*
+import tornadofx.FX.Companion.stylesheets
 
 class TitleFragment: Fragment() {
+    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
+
+    init {
+        stylesheets.setAll(USER_AGENT_STYLESHEET)
+    }
+
     override val root = vbox {
         alignment = Pos.CENTER
-        text("Genesis Chapter 03") {
-            style {
-                fontSize = 1.em
-            }
-        }
+        styleClass.add("vm-header")
         text("Add Verse Markers") {
-            style {
-                fontSize = 2.em
-            }
+            styleClass.add("vm-header__title")
         }
-        style {
-            padding = box(16.px)
-            borderColor += box(Paint.valueOf("#00000020"))
-            borderStyle += BorderStrokeStyle.SOLID
-            borderWidth += box(1.px)
+        text("Genesis Chapter 03") {
+            styleClass.add("vm-header__subtitle")
         }
     }
 }

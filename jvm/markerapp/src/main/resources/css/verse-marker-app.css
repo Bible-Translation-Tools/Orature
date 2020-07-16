@@ -1,0 +1,75 @@
+@import "root.css"
+
+.vm-header {
+    -fx-padding: 20px;
+    -fx-border-color: "#00000020";
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
+}
+
+.vm-header__title {
+    -fx-font-size: 2em;
+    -fx-font-weight: bold;
+}
+
+.vm-header__subtitle {
+    -fx-font-size: 1.2em;
+}
+
+.vm-marker-count__icon {
+    -fx-background-color: "#00377C";
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-border-width: 1px;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+}
+
+.vm-minimap-container {
+    -fx-font-size: 1.2em;
+    -fx-padding: 24px;
+    -fx-spacing: 22px;
+}
+
+.vm-marker-count__icon .ikonli-font-icon {
+    -fx-icon-size: 20px;
+    -fx-icon-color: "#FFFFFF";
+}
+
+.vm-play-controls {
+    -fx-background-color: "#00377C";
+    -fx-padding: 16px;
+    -fx-spacing: 22px;
+}
+
+.vm-play-controls__btn--rounded {
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-border-width: 1px;
+}
+
+.vm-play-controls__btn--rounded .ikonli-font-icon {
+    -fx-fill: "#000000";
+}
+
+.vm-play-controls__play-btn {
+    -fx-background-color: "#FFFFFFCC";
+    -fx-pref-width: 60px;
+    -fx-pref-height: 60px;
+}
+
+.vm-play-controls__play-btn .ikonli-font-icon {
+    -fx-icon-size: 22px;
+}
+
+.vm-play-controls__seek-btn {
+    -fx-background-color: "#FFFFFF00";
+    -fx-border-color: "#FFFFFF";
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+}
+
+.vm-play-controls__seek-btn .ikonli-font-icon {
+    -fx-icon-size: 18px;
+    -fx-icon-color: "#FFFFFF"
+}
