@@ -78,12 +78,13 @@ open class RecordableViewModel(
             )
         }
 
-        workbookViewModel.sourceAudioProperty.onChangeAndDoNow {
-            it?.let { source ->
-                val audioPlayer = injector.audioPlayer
+        workbookViewModel.sourceAudioProperty.onChangeAndDoNow { source ->
+            var audioPlayer: IAudioPlayer? = null
+            if (source != null) {
+                audioPlayer = injector.audioPlayer
                 audioPlayer.loadSection(source.file, source.start, source.end)
-                sourceAudioPlayerProperty.set(audioPlayer)
             }
+            sourceAudioPlayerProperty.set(audioPlayer)
         }
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
