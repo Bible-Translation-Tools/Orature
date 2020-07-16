@@ -1,60 +1,43 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import javafx.beans.binding.Bindings
-import javafx.beans.binding.BooleanBinding
-import javafx.beans.binding.ObjectBinding
 import javafx.beans.binding.StringBinding
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.StringProperty
-import javafx.scene.Node
-import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
-import tornadofx.*
 import java.util.concurrent.Callable
 
 class SourceContentController {
 
-    val activeSourceProperty = SimpleObjectProperty<SourceFormatToggle.SourceFormat>()
-
-    fun sourceContentLabelBinding(
-        audioLabelProperty: StringProperty,
-        textLabelProperty: StringProperty
+    fun titleBinding(
+        bookTitleProperty: StringProperty,
+        chapterTitleProperty: StringProperty,
+        chunkTitleProperty: StringProperty
     ): StringBinding {
         return Bindings.createStringBinding(
             Callable {
-                when (activeSourceProperty.value) {
-                    SourceFormatToggle.SourceFormat.AUDIO -> audioLabelProperty.value
-                    SourceFormatToggle.SourceFormat.TEXT -> textLabelProperty.value
-                    else -> audioLabelProperty.value
+                val titleStringBuilder = StringBuilder()
+
+                bookTitleProperty.value?.let {
+                    titleStringBuilder
+                        .append(it)
                 }
-            },
-            activeSourceProperty,
-            audioLabelProperty,
-            textLabelProperty
-        )
-    }
 
-    fun sourceContentIconBinding(audioIcon: Node, textIcon: Node): ObjectBinding<Node> {
-        return Bindings.createObjectBinding(
-            Callable {
-                when (activeSourceProperty.value) {
-                    SourceFormatToggle.SourceFormat.AUDIO -> audioIcon
-                    SourceFormatToggle.SourceFormat.TEXT -> textIcon
-                    else -> audioIcon
+                chapterTitleProperty.value?.let {
+                    titleStringBuilder
+                        .append(" ")
+                        .append(it)
                 }
+
+                chunkTitleProperty.value?.let {
+                    titleStringBuilder
+                        .append(":")
+                        .append(it)
+                }
+
+                titleStringBuilder.toString()
             },
-            activeSourceProperty
+            bookTitleProperty,
+            chapterTitleProperty,
+            chunkTitleProperty
         )
-    }
-
-    fun audioActiveBinding(): BooleanBinding {
-        return activeSourceProperty.booleanBinding {
-            it == SourceFormatToggle.SourceFormat.AUDIO
-        }
-    }
-
-    fun textActiveBinding(): BooleanBinding {
-        return activeSourceProperty.booleanBinding {
-            it == SourceFormatToggle.SourceFormat.TEXT
-        }
     }
 }

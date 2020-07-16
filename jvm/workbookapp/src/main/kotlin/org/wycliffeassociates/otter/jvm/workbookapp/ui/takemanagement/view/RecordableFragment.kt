@@ -142,14 +142,32 @@ abstract class RecordableFragment(
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
 
-            recordableViewModel.recordableProperty.onChangeAndDoNow {
-                it?.let {
-                    sourceTextProperty.set(workbookViewModel.getSourceText().blockingGet())
-                }
-            }
+            sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
+
             recordableViewModel.showPluginActiveProperty.onChange {
                 showDialogProperty.set(it)
             }
+
+            bookTitleProperty.bind(
+                workbookViewModel.activeWorkbookProperty.stringBinding {
+                    it?.source?.title
+                }
+            )
+
+            chapterTitleProperty.bind(
+                workbookViewModel.activeChapterProperty.stringBinding {
+                    it?.title
+                }
+            )
+
+            chunkTitleProperty.bind(
+                workbookViewModel.activeChunkProperty.stringBinding {
+                    it?.start?.toString()
+                }
+            )
+
+            playLabelProperty.set(messages["playSource"])
+            pauseLabelProperty.set(messages["pauseSource"])
         }
     }
 
