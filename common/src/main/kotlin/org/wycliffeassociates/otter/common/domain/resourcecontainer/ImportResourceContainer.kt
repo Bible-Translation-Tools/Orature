@@ -3,15 +3,23 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.model.ContainerType
+import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.*
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.FileOutputStream
@@ -45,21 +53,21 @@ class ImportResourceContainer(
             return Single.just(ImportResult.INVALID_RC)
         }
 
-        val exists = isAlreadyImported(file)
-        return if (exists) {
-            Single.fromCallable {
-                val existingRC = getExistingMetadata(file)
-                MediaMerge(
-                    directoryProvider,
-                    ResourceContainer.load(file),
-                    ResourceContainer.load(existingRC.path)
-                ).merge()
-                ImportResult.SUCCESS
-            }
+        val resumable = projectImporter.isResumableProject(file)
+        return if (resumable) {
+            projectImporter.importResumableProject(file)
         } else {
-            val resumable = projectImporter.isResumableProject(file)
-            if (resumable) {
-                projectImporter.importResumableProject(file)
+            val exists = isAlreadyImported(file)
+            if (exists) {
+                Single.fromCallable {
+                    val existingRC = getExistingMetadata(file)
+                    MediaMerge(
+                        directoryProvider,
+                        ResourceContainer.load(file),
+                        ResourceContainer.load(existingRC.path)
+                    ).merge()
+                    ImportResult.SUCCESS
+                }
             } else {
                 importContainer(file)
             }

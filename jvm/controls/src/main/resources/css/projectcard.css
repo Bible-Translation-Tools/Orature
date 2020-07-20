@@ -8,3 +8,16 @@
 .project-card:hover {
     -fx-effect: -level4
 }
+
+.project-card__popup-list {
+    -fx-selection-bar: -white;
+}
+
+.project-card__popup-list .list-cell {
+    -fx-padding: 0.25em 0.583em 0.25em 0.583em; /* from modena.css */
+}
+
+.project-card__popup-list .label {
+    -fx-text-fill: -gray-darker;
+    -fx-max-width: infinity;
+}

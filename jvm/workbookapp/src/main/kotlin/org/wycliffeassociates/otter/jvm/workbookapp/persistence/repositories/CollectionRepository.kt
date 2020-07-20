@@ -305,47 +305,53 @@ class CollectionRepository(
                     val derivedMetadata = deriveAndLinkMetadata(sourceMetadatas, language, dsl)
                     val mainDerivedMetadata = derivedMetadata.first()
 
-                    // Insert the derived project
                     val sourceCollectionEntity = collectionDao.fetchById(sourceCollection.id, dsl)
-                    val projectEntity = deriveProjectCollection(sourceCollectionEntity, mainDerivedMetadata, dsl)
+                    // Try to find existent project
+                    var projectEntity = findProjectCollection(sourceCollectionEntity, mainDerivedMetadata, dsl)
 
-                    // Copy the chapters
-                    copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
+                    if (projectEntity == null) {
+                        // Insert the derived project
+                        projectEntity = deriveProjectCollection(sourceCollectionEntity, mainDerivedMetadata, dsl)
 
-                    // Copy the content
-                    copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                        // Copy the chapters
+                        copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
 
-                    // Link the derivative content
-                    linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+                        // Copy the content
+                        copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
 
-                    val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
-                    copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
+                        // Link the derivative content
+                        linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
 
-                    // Add a project to the container if necessary
-                    // Load the existing resource container and see if we need to add another project
-                    ResourceContainer.load(File(mainDerivedMetadata.path)).use { container ->
-                        if (container.manifest.projects.none { it.identifier == sourceCollection.slug }) {
-                            container.manifest.projects = container.manifest.projects.plus(
-                                project {
-                                    sort = if (
-                                        mainDerivedMetadata.subject.toLowerCase() == "bible" &&
-                                        projectEntity.sort > 39
-                                    ) {
-                                        projectEntity.sort + 1
-                                    } else {
-                                        projectEntity.sort
+                        val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
+                        copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
+
+                        // Add a project to the container if necessary
+                        // Load the existing resource container and see if we need to add another project
+                        ResourceContainer.load(File(mainDerivedMetadata.path)).use { container ->
+                            if (container.manifest.projects.none { it.identifier == sourceCollection.slug }) {
+                                container.manifest.projects = container.manifest.projects.plus(
+                                    project {
+                                        sort = if (
+                                            mainDerivedMetadata.subject.toLowerCase() == "bible" &&
+                                            projectEntity.sort > 39
+                                        ) {
+                                            projectEntity.sort + 1
+                                        } else {
+                                            projectEntity.sort
+                                        }
+                                        identifier = projectEntity.slug
+                                        path = "./${projectEntity.slug}"
+                                        // This title will not be localized into the target language
+                                        title = projectEntity.title
+                                        // Unable to get categories and versification from the source collection
                                     }
-                                    identifier = projectEntity.slug
-                                    path = "./${projectEntity.slug}"
-                                    // This title will not be localized into the target language
-                                    title = projectEntity.title
-                                    // Unable to get categories and versification from the source collection
-                                }
-                            )
-                            // Update the container
-                            container.write()
+                                )
+                                // Update the container
+                                container.write()
+                            }
                         }
                     }
+
                     return@transactionResult collectionMapper.mapFromEntity(
                         projectEntity,
                         metadataMapper.mapFromEntity(mainDerivedMetadata, language)
@@ -353,6 +359,17 @@ class CollectionRepository(
                 }
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun findProjectCollection(
+        sourceEntity: CollectionEntity,
+        derivedMetadata: ResourceMetadataEntity,
+        dsl: DSLContext
+    ): CollectionEntity? {
+        return collectionDao.fetch(
+            slug = sourceEntity.slug,
+            containerId = derivedMetadata.id,
+            dsl = dsl)
     }
 
     private fun deriveProjectCollection(
