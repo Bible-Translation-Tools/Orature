@@ -19,14 +19,7 @@ class SourceDialog : Fragment() {
     val playerProperty = SimpleObjectProperty<IAudioPlayer>()
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
-
-    val bookTitleProperty = SimpleStringProperty()
-    val chapterTitleProperty = SimpleStringProperty()
-    val chunkTitleProperty = SimpleStringProperty()
-
-    val playLabelProperty = SimpleStringProperty()
-    val pauseLabelProperty = SimpleStringProperty()
-
+    val sourceContentTitleProperty = SimpleStringProperty()
     val showDialogProperty = SimpleBooleanProperty()
 
     init {
@@ -72,13 +65,10 @@ class SourceDialog : Fragment() {
 
                     audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
                     textNotAvailableTextProperty.set(messages["textNotAvailable"])
+                    playLabelProperty.set(messages["playSource"])
+                    pauseLabelProperty.set(messages["pauseSource"])
 
-                    bookTitleProperty.bind(this@SourceDialog.bookTitleProperty)
-                    chapterTitleProperty.bind(this@SourceDialog.chapterTitleProperty)
-                    chunkTitleProperty.bind(this@SourceDialog.chunkTitleProperty)
-
-                    playLabelProperty.bind(this@SourceDialog.playLabelProperty)
-                    pauseLabelProperty.bind(this@SourceDialog.pauseLabelProperty)
+                    contentTitleProperty.bind(sourceContentTitleProperty)
                 }
             )
         }

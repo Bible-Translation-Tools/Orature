@@ -148,26 +148,7 @@ abstract class RecordableFragment(
                 showDialogProperty.set(it)
             }
 
-            bookTitleProperty.bind(
-                workbookViewModel.activeWorkbookProperty.stringBinding {
-                    it?.source?.title
-                }
-            )
-
-            chapterTitleProperty.bind(
-                workbookViewModel.activeChapterProperty.stringBinding {
-                    it?.title
-                }
-            )
-
-            chunkTitleProperty.bind(
-                workbookViewModel.activeChunkProperty.stringBinding {
-                    it?.start?.toString()
-                }
-            )
-
-            playLabelProperty.set(messages["playSource"])
-            pauseLabelProperty.set(messages["pauseSource"])
+            sourceContentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
         }
     }
 

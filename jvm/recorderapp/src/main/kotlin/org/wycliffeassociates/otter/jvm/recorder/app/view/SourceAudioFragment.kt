@@ -7,6 +7,7 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import java.lang.Exception
+import java.text.MessageFormat
 
 class SourceAudioFragment : Fragment() {
 
@@ -17,9 +18,7 @@ class SourceAudioFragment : Fragment() {
         var startFrame: Int? = null
         var endFrame: Int? = null
         var sourceText: String? = null
-        var bookTitle: String? = null
-        var chapterTitle: String? = null
-        var chunkTitle: String? = null
+        var sourceContentTitle: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -36,9 +35,11 @@ class SourceAudioFragment : Fragment() {
                 }
                 sourceText = parameters.named["source_text"] ?: ""
 
-                bookTitle = parameters.named["book"]
-                chapterTitle = parameters.named["chapter_number"]
-                chunkTitle = parameters.named["unit_number"]
+                sourceContentTitle = getSourceContentTitle(
+                    parameters.named["book"],
+                    parameters.named["chapter_number"],
+                    parameters.named["unit_number"]
+                )
             }
         }
 
@@ -50,13 +51,10 @@ class SourceAudioFragment : Fragment() {
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
-
-            bookTitleProperty.set(bookTitle)
-            chapterTitleProperty.set(chapterTitle)
-            chunkTitleProperty.set(chunkTitle)
-
             playLabelProperty.set(messages["playSource"])
             pauseLabelProperty.set(messages["pauseSource"])
+
+            contentTitleProperty.set(sourceContentTitle)
         }
     }
 
@@ -70,6 +68,27 @@ class SourceAudioFragment : Fragment() {
             }
             player
         } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {
+        return if (book != null && chapter != null) {
+            if (chunk != null) {
+                MessageFormat.format(
+                    messages["bookChapterChunkTitle"],
+                    book,
+                    chapter,
+                    chunk
+                )
+            } else {
+                MessageFormat.format(
+                    messages["bookChapterTitle"],
+                    book,
+                    chapter
+                )
+            }
+        } else {
             null
         }
     }

@@ -13,7 +13,6 @@ import javafx.scene.layout.VBox
 import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.controllers.SourceContentController
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -63,7 +62,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var title: Label
 
     lateinit var audioController: AudioPlayerController
-    lateinit var sourceContentController: SourceContentController
 
     init {
         loadFXML()
@@ -78,7 +76,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     private fun initControllers() {
         audioController = AudioPlayerController(sourceContent.audioPlayerProperty.value, audioSlider)
-        sourceContentController = SourceContentController()
     }
 
     private fun initAudioControls() {
@@ -157,13 +154,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         title.apply {
-            textProperty().bind(
-                sourceContentController.titleBinding(
-                    sourceContent.bookTitleProperty,
-                    sourceContent.chapterTitleProperty,
-                    sourceContent.chunkTitleProperty
-                )
-            )
+            textProperty().bind(sourceContent.contentTitleProperty)
         }
     }
 

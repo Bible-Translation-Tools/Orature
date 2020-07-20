@@ -55,27 +55,10 @@ class RecordScriptureFragment : RecordableFragment(
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
-
-            bookTitleProperty.bind(
-                workbookViewModel.activeWorkbookProperty.stringBinding {
-                    it?.source?.title
-                }
-            )
-
-            chapterTitleProperty.bind(
-                workbookViewModel.activeChapterProperty.stringBinding {
-                    it?.title
-                }
-            )
-
-            chunkTitleProperty.bind(
-                workbookViewModel.activeChunkProperty.stringBinding {
-                    it?.start?.toString()
-                }
-            )
-
             playLabelProperty.set(messages["playSource"])
             pauseLabelProperty.set(messages["pauseSource"])
+
+            contentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
         }
 
     init {

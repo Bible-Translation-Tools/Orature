@@ -9,6 +9,8 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
 
 class SourceContent : Control() {
+    val contentTitleProperty = SimpleStringProperty()
+
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
 
@@ -18,14 +20,10 @@ class SourceContent : Control() {
     val audioNotAvailableTextProperty = SimpleStringProperty()
     val textNotAvailableTextProperty = SimpleStringProperty()
 
-    val bookTitleProperty = SimpleStringProperty()
-    val chapterTitleProperty = SimpleStringProperty()
-    val chunkTitleProperty = SimpleStringProperty()
-
     val playLabelProperty = SimpleStringProperty()
     val pauseLabelProperty = SimpleStringProperty()
 
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/source-content.css").toExternalForm()
+    private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 
     init {
         initialize()
@@ -36,10 +34,10 @@ class SourceContent : Control() {
     }
 
     override fun getUserAgentStylesheet(): String {
-        return USER_AGENT_STYLESHEET
+        return userAgentStyleSheet
     }
 
     private fun initialize() {
-        stylesheets.setAll(USER_AGENT_STYLESHEET)
+        stylesheets.setAll(userAgentStyleSheet)
     }
 }
