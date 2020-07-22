@@ -9,17 +9,17 @@ class PlaybackControlsFragment : Fragment() {
 
     val vm: VerseMarkerViewModel by inject()
 
-    private val PLAY_ICON = FontIcon("fa-play")
-    private val PAUSE_ICON = FontIcon("fa-pause")
-    private val NEXT_ICON = FontIcon("gmi-skip-next")
-    private val PREVIOUS_ICON = FontIcon("gmi-skip-previous")
+    private val playIcon = FontIcon("fa-play")
+    private val pauseIcon = FontIcon("fa-pause")
+    private val nextIcon = FontIcon("gmi-skip-next")
+    private val previousIcon = FontIcon("gmi-skip-previous")
 
     private val playBtn = button {
         styleClass.addAll(
             "vm-play-controls__play-btn",
             "vm-play-controls__btn--rounded"
         )
-        graphic = PLAY_ICON
+        graphic = playIcon
     }
 
     private val nextBtn = button {
@@ -27,7 +27,7 @@ class PlaybackControlsFragment : Fragment() {
             "vm-play-controls__seek-btn",
             "vm-play-controls__btn--rounded"
         )
-        graphic = NEXT_ICON
+        graphic = nextIcon
     }
 
     private val previousBtn = button {
@@ -35,7 +35,7 @@ class PlaybackControlsFragment : Fragment() {
             "vm-play-controls__seek-btn",
             "vm-play-controls__btn--rounded"
         )
-        graphic = PREVIOUS_ICON
+        graphic = previousIcon
     }
 
     override val root = hbox {
