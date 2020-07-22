@@ -5,6 +5,12 @@ import tornadofx.*
 
 class MarkerView : View() {
 
+    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
+
+    init {
+        FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
+    }
+
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()

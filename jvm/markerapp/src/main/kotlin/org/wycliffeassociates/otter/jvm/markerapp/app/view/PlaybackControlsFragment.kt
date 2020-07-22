@@ -5,11 +5,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
-
-    init {
-        FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
-    }
 
     private val PLAY_ICON = FontIcon("fa-play")
     private val PAUSE_ICON = FontIcon("fa-pause")
