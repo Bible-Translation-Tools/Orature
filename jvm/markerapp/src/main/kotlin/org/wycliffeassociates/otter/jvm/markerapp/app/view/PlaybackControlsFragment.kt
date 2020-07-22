@@ -6,13 +6,8 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewM
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
 
     val vm: VerseMarkerViewModel by inject()
-
-    init {
-        FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
-    }
 
     private val PLAY_ICON = FontIcon("fa-play")
     private val PAUSE_ICON = FontIcon("fa-pause")

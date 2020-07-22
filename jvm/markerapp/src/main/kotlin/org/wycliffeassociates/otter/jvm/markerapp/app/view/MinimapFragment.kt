@@ -8,13 +8,7 @@ import tornadofx.*
 
 class MinimapFragment : Fragment() {
 
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
-
     val vm: VerseMarkerViewModel by inject()
-
-    init {
-        FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
-    }
 
     val slider = slider { }
 
