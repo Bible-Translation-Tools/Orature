@@ -18,14 +18,19 @@ class GithubReporter(
      * @param stacktrace the stracktrace
      */
     @Throws(IOException::class)
-    fun reportCrash(environment: Environment, stacktrace: String?, log: String?) {
-        val title = DEFAULT_CRASH_TITLE
+    fun reportCrash(
+        environment: Environment,
+        stacktrace: String?,
+        log: String?,
+        title: String?
+    ) {
+        val reportTitle = title ?: DEFAULT_CRASH_TITLE
         val bodyBuf = StringBuffer()
         bodyBuf.append(getEnvironmentBlock(environment))
         bodyBuf.append(getStacktraceBlock(stacktrace))
         bodyBuf.append(getLogBlock(log))
         val labels = arrayOf("crash report")
-        submit(generatePayload(title, bodyBuf.toString(), labels))
+        submit(generatePayload(reportTitle, bodyBuf.toString(), labels))
     }
 
     /**

@@ -41,6 +41,9 @@ class WavFile private constructor() {
         private set
     val frameSizeInBytes = channels * (bitsPerSample / 8)
 
+    val totalFrames: Int
+        get() = totalAudioLength / frameSizeInBytes
+
     internal var totalAudioLength = 0
     internal var totalDataLength = 0
 

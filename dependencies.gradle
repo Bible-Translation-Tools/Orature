@@ -41,4 +41,5 @@ ext {
     fontawesomeMaterialFontVer = '1.7.22-11'
     ikonliVer = '11.3.4'
     controlsfxVer = '11.0.1'
+    sentryVer = '1.7.30'
 }
