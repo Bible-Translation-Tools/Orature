@@ -9,6 +9,8 @@ import javafx.scene.control.Slider
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
+import kotlin.math.min
 
 class AudioPlayerController(
     private var player: IAudioPlayer?,
@@ -16,6 +18,7 @@ class AudioPlayerController(
 ) {
 
     private var startAtPercent = 0F
+    private var startAtLocation = 0
     private var disposable: Disposable? = null
     private var dragging = false
     private var resumeAfterDrag = false
@@ -73,21 +76,23 @@ class AudioPlayerController(
             }
             dragging = true
         }
-        audioSlider.setOnMouseReleased {
-            seek(audioSlider.value.toFloat() / 100F)
-            if (dragging) {
-                dragging = false
-                if (resumeAfterDrag) {
-                    toggle()
-                    resumeAfterDrag = false
-                }
+        audioSlider.setOnMouseClicked {
+            val position = max(0.0, min(it.x / audioSlider.width, 1.0))
+            var wasPlaying = false
+            if (player?.isPlaying() == true) {
+                toggle()
+                wasPlaying = true
+            }
+            seekPercentage(position.toFloat())
+            if (wasPlaying) {
+                toggle()
             }
         }
     }
 
     private fun startProgressUpdate(): Disposable {
         return Observable
-            .interval(20, TimeUnit.MILLISECONDS)
+            .interval(200, TimeUnit.MILLISECONDS)
             .observeOnFx()
             .subscribe {
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
@@ -97,9 +102,14 @@ class AudioPlayerController(
     }
 
     private fun play() {
-        seek(startAtPercent)
+        if (startAtLocation != 0) {
+            seekLocation(startAtLocation)
+        } else {
+            seekPercentage(startAtPercent)
+        }
         player?.play()
         startAtPercent = 0F
+        startAtLocation = 0
     }
 
     private fun pause() {
@@ -109,14 +119,39 @@ class AudioPlayerController(
         }
     }
 
-    private fun seek(percent: Float) {
+    private fun seekPercentage(_percent: Float) {
+        var percent = if (_percent > 1.00) {
+            _percent / 100F
+        } else {
+            _percent
+        }
         player?.let {
             val position = (it.getAbsoluteDurationInFrames() * percent).toInt()
             it.seek(position)
+            val total = it.getAbsoluteDurationInFrames()
+            val sliderPos = (position / total.toDouble()).times(100)
+            audioSlider.value = sliderPos
             if (!it.isPlaying()) {
                 startAtPercent = percent
             }
-        } ?: run { startAtPercent = percent }
+        } ?: run {
+            startAtPercent = percent
+        }
+    }
+
+    fun seekLocation(location: Int) {
+        player?.let {
+            println(location)
+            it.seek(location)
+            val total = it.getAbsoluteDurationInFrames()
+            val sliderPos = (location / total.toDouble()).times(100)
+            audioSlider.value = sliderPos
+            if(!it.isPlaying()) {
+                startAtLocation = location
+            }
+        } ?: run {
+            startAtLocation = location
+        }
     }
 
     private fun playbackPosition(): Double {
