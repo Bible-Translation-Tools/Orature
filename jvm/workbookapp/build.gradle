@@ -223,6 +223,18 @@ task createGithubProperties(dependsOn: processResources) {
     }
 }
 
+task createSentryProperties(dependsOn: processResources) {
+    doLast {
+        if(project.hasProperty('sentryDsn')) {
+            new File("$buildDir/resources/main/sentry.properties").withWriter { w ->
+                Properties p = new Properties()
+                p['dsn'] = sentryDsn
+                p.store w, null
+            }
+        }
+    }
+}
+
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
     testLogging {
