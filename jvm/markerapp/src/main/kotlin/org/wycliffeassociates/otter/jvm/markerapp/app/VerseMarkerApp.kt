@@ -5,7 +5,7 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.MarkerView
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
-class VerseMarkerApp: App() {
+class VerseMarkerApp : App() {
     override val primaryView = MarkerView::class
 
     init {

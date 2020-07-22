@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.stage.Screen
 import tornadofx.*
 
-class MarkerView: View() {
+class MarkerView : View() {
 
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()

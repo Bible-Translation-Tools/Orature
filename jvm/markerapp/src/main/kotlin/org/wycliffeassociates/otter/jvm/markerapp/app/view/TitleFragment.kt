@@ -4,7 +4,7 @@ import javafx.geometry.Pos
 import tornadofx.*
 import tornadofx.FX.Companion.stylesheets
 
-class TitleFragment: Fragment() {
+class TitleFragment : Fragment() {
     private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
 
     init {
