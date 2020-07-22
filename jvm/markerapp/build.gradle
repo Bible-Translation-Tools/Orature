@@ -34,4 +34,5 @@ dependencies {
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
     implementation project(':jvm:workbookplugin')
+    implementation project(':jvm:utils')
 }

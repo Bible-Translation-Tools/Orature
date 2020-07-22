@@ -28,7 +28,7 @@ class MinimapFragment : Fragment() {
                 styleClass.add("vm-marker-count__icon")
             }
             add(label().apply {
-                textProperty().bind(vm.markerCountProperty.asString())
+                textProperty().bind(vm.markerCountProperty)
             })
         }
         add(slider.apply {

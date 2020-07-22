@@ -1,15 +1,13 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import org.wycliffeassociates.otter.common.io.wav.WavFile
-import org.wycliffeassociates.otter.common.io.wav.WavFileReader
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
-import org.wycliffeassociates.otter.jvm.device.audio.AudioPlayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkers
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
@@ -20,14 +18,17 @@ class VerseMarkerViewModel: ViewModel() {
     val markers: VerseMarkers
     var audioController: AudioPlayerController? = null
     val isPlayingProperty = SimpleBooleanProperty(false)
-    val markerCountProperty = SimpleIntegerProperty(0)
+    val markerCountProperty = SimpleStringProperty("0/0")
 
     init {
         val scope = scope as ParameterizedScope
         val audioFile = File(scope.parameters.named["wav"])
+        val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: 10
         val wav = WavFile(audioFile)
-        markers = VerseMarkers(wav)
-        markerCountProperty.bind(markers.markerCountProperty)
+        markers = VerseMarkers(wav, totalMarkers)
+        markers.markerCountProperty.onChangeAndDoNow {
+            markerCountProperty.set("${it}/$totalMarkers")
+        }
         audioPlayer.load(audioFile)
     }
 
