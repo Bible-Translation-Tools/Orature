@@ -284,6 +284,7 @@ idea {
 compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
 compileJava.dependsOn createVersionProperties
 compileJava.dependsOn createGithubProperties
+compileJava.dependsOn createSentryProperties
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'
