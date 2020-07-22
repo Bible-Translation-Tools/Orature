@@ -14,7 +14,7 @@ class MarkerView : View() {
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
     val playbackControls = PlaybackControlsFragment()
-    
+
     init {
         FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
         vm.initializeAudioController(minimap.slider)
