@@ -159,7 +159,7 @@ dependencies {
     implementation "org.apache.logging.log4j:log4j-slf4j18-impl:$log4j2Ver"
 
     // Sentry
-    implementation "io.sentry:sentry:1.7.30"
+    implementation "io.sentry:sentry:$sentryVer"
 }
 
 // tell gradle what to put in the jar
