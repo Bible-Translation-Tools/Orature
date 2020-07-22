@@ -2,10 +2,13 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
     private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
+
+    val vm: VerseMarkerViewModel by inject()
 
     init {
         FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
@@ -43,8 +46,8 @@ class PlaybackControlsFragment : Fragment() {
     override val root = hbox {
         alignment = Pos.CENTER
         styleClass.add("vm-play-controls")
-        add(previousBtn)
-        add(playBtn)
-        add(nextBtn)
+        add(previousBtn.apply { setOnAction { vm.seekPrevious() } })
+        add(playBtn.apply { setOnAction { vm.mediaToggle() } })
+        add(nextBtn.apply { setOnAction { vm.seekNext() } })
     }
 }

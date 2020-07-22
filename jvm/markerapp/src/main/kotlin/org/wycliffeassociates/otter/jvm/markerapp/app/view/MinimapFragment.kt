@@ -3,11 +3,14 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
 class MinimapFragment : Fragment() {
 
     private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
+
+    val vm: VerseMarkerViewModel by inject()
 
     init {
         FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
@@ -26,6 +29,7 @@ class MinimapFragment : Fragment() {
                 styleClass.add("vm-marker-count__icon")
             }
             add(label().apply {
+                textProperty().bind(vm.markerRatioProperty)
             })
         }
         add(slider.apply {
