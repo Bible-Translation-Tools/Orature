@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+    testImplementation "junit:junit:$junitVer"
+
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
@@ -20,7 +22,17 @@ dependencies {
     // TornadoFX
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
-    testImplementation "junit:junit:$junitVer"
+    // Ikonli
+    implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome5-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-material-pack:$ikonliVer"
 
-    implementation project(":common")
+    //WA Libraries
+    implementation project(':common')
+    implementation project(':jvm:controls')
+    implementation project(':jvm:device')
+    implementation project(':jvm:workbookplugin')
+    implementation project(':jvm:utils')
 }
