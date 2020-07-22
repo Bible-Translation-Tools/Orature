@@ -38,6 +38,16 @@ class PlaybackControlsFragment : Fragment() {
         graphic = previousIcon
     }
 
+    init {
+        vm.isPlayingProperty.onChange { playing ->
+            if (playing) {
+                playBtn.graphicProperty().set(pauseIcon)
+            } else {
+                playBtn.graphicProperty().set(playIcon)
+            }
+        }
+    }
+
     override val root = hbox {
         alignment = Pos.CENTER
         styleClass.add("vm-play-controls")
