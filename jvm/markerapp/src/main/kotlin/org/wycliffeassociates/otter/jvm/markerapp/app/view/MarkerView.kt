@@ -4,9 +4,11 @@ import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
+const val WINDOW_OFFSET = 50.0
+
 class MarkerView : View() {
 
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
+    private val userAgentStylesheet = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
 
     val vm: VerseMarkerViewModel by inject()
 
@@ -16,13 +18,13 @@ class MarkerView : View() {
     val playbackControls = PlaybackControlsFragment()
     
     init {
-        FX.stylesheets.setAll(USER_AGENT_STYLESHEET)
+        FX.stylesheets.setAll(userAgentStylesheet)
         vm.initializeAudioController(minimap.slider)
     }
 
     override val root = vbox {
-        prefHeight = Screen.getPrimary().visualBounds.height - 50.0
-        prefWidth = Screen.getPrimary().visualBounds.width - 50.0
+        prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
+        prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
         add(titleFragment)
         add(minimap)
