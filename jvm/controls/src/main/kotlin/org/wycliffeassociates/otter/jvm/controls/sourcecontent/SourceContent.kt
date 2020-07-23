@@ -7,19 +7,23 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
-import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
 
 class SourceContent : Control() {
+    val contentTitleProperty = SimpleStringProperty()
+
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
 
     val sourceTextProperty = SimpleStringProperty()
-    val activeSourceFormatProperty = SimpleObjectProperty<SourceFormatToggle.SourceFormat>()
+    val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
 
-    val sourceAudioLabelProperty = SimpleStringProperty("Source Audio")
-    val sourceTextLabelProperty = SimpleStringProperty("Source Text")
+    val audioNotAvailableTextProperty = SimpleStringProperty()
+    val textNotAvailableTextProperty = SimpleStringProperty()
 
-    private val USER_AGENT_STYLESHEET = javaClass.getResource("/css/source-content.css").toExternalForm()
+    val playLabelProperty = SimpleStringProperty()
+    val pauseLabelProperty = SimpleStringProperty()
+
+    private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 
     init {
         initialize()
@@ -30,10 +34,10 @@ class SourceContent : Control() {
     }
 
     override fun getUserAgentStylesheet(): String {
-        return USER_AGENT_STYLESHEET
+        return userAgentStyleSheet
     }
 
     private fun initialize() {
-        stylesheets.setAll(USER_AGENT_STYLESHEET)
+        stylesheets.setAll(userAgentStyleSheet)
     }
 }

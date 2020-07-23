@@ -1,14 +1,13 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.skins.media.CompactSourceContentSkin
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import tornadofx.Fragment
+import tornadofx.*
 import java.io.File
 import java.lang.Exception
-import tornadofx.*
+import java.text.MessageFormat
 
 class SourceAudioFragment : Fragment() {
 
@@ -19,6 +18,8 @@ class SourceAudioFragment : Fragment() {
         var startFrame: Int? = null
         var endFrame: Int? = null
         var sourceText: String? = null
+        var sourceContentTitle: String? = null
+
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
 
@@ -33,17 +34,27 @@ class SourceAudioFragment : Fragment() {
                     endFrame = null
                 }
                 sourceText = parameters.named["source_text"] ?: ""
+
+                sourceContentTitle = getSourceContentTitle(
+                    parameters.named["book"],
+                    parameters.named["chapter_number"],
+                    parameters.named["unit_number"]
+                )
             }
         }
 
         val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
 
         return SourceContent().apply {
-            style {
-                skin = CompactSourceContentSkin::class
-            }
             audioPlayerProperty.set(player)
             sourceTextProperty.set(sourceText)
+
+            audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
+            textNotAvailableTextProperty.set(messages["textNotAvailable"])
+            playLabelProperty.set(messages["playSource"])
+            pauseLabelProperty.set(messages["pauseSource"])
+
+            contentTitleProperty.set(sourceContentTitle)
         }
     }
 
@@ -57,6 +68,27 @@ class SourceAudioFragment : Fragment() {
             }
             player
         } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {
+        return if (book != null && chapter != null) {
+            if (chunk != null) {
+                MessageFormat.format(
+                    messages["bookChapterChunkTitle"],
+                    book,
+                    chapter,
+                    chunk
+                )
+            } else {
+                MessageFormat.format(
+                    messages["bookChapterTitle"],
+                    book,
+                    chapter
+                )
+            }
+        } else {
             null
         }
     }
