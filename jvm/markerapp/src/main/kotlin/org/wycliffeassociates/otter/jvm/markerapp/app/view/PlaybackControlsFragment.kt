@@ -6,6 +6,11 @@ import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
 
+    private val rootStyles = "vm-play-controls"
+    private val playButtonStyle = "vm-play-controls__play-btn"
+    private val roundedButtonStyle = "vm-play-controls__btn--rounded"
+    private val seekButtonStyle = "vm-play-controls__seek-btn"
+
     private val playIcon = FontIcon("fa-play")
     private val pauseIcon = FontIcon("fa-pause")
     private val nextIcon = FontIcon("gmi-skip-next")
@@ -13,31 +18,31 @@ class PlaybackControlsFragment : Fragment() {
 
     private val playBtn = button {
         styleClass.addAll(
-            "vm-play-controls__play-btn",
-            "vm-play-controls__btn--rounded"
+            playButtonStyle,
+            roundedButtonStyle
         )
         graphic = playIcon
     }
 
     private val nextBtn = button {
         styleClass.addAll(
-            "vm-play-controls__seek-btn",
-            "vm-play-controls__btn--rounded"
+            seekButtonStyle,
+            roundedButtonStyle
         )
         graphic = nextIcon
     }
 
     private val previousBtn = button {
         styleClass.addAll(
-            "vm-play-controls__seek-btn",
-            "vm-play-controls__btn--rounded"
+            seekButtonStyle,
+            roundedButtonStyle
         )
         graphic = previousIcon
     }
 
     override val root = hbox {
         alignment = Pos.CENTER
-        styleClass.add("vm-play-controls")
+        styleClass.add(rootStyles)
         add(previousBtn)
         add(playBtn)
         add(nextBtn)
