@@ -2,10 +2,13 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
 
+    val viewModel: VerseMarkerViewModel by inject()
+  
     private val rootStyles = "vm-play-controls"
     private val playButtonStyle = "vm-play-controls__play-btn"
     private val roundedButtonStyle = "vm-play-controls__btn--rounded"
@@ -22,6 +25,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = playIcon
+        setOnAction { viewModel.mediaToggle() }
     }
 
     private val nextBtn = button {
@@ -30,6 +34,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = nextIcon
+        setOnAction { viewModel.seekNext() }
     }
 
     private val previousBtn = button {
@@ -38,6 +43,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = previousIcon
+        setOnAction { viewModel.seekPrevious() }
     }
 
     override val root = hbox {
