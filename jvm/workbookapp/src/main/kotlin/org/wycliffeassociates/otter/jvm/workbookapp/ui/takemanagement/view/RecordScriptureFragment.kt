@@ -50,18 +50,15 @@ class RecordScriptureFragment : RecordableFragment(
 
     private val sourceContent =
         SourceContent().apply {
-            visibleWhen(recordableViewModel.sourceAudioAvailableProperty)
-            managedWhen(visibleProperty())
-
-            sourceAudioLabelProperty.set(messages["sourceAudio"])
-            sourceTextLabelProperty.set(messages["sourceText"])
-
-            recordableViewModel.recordableProperty.onChangeAndDoNow {
-                it?.let {
-                    sourceTextProperty.set(workbookViewModel.getSourceText().blockingGet())
-                }
-            }
+            sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
             audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
+
+            audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
+            textNotAvailableTextProperty.set(messages["textNotAvailable"])
+            playLabelProperty.set(messages["playSource"])
+            pauseLabelProperty.set(messages["pauseSource"])
+
+            contentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
         }
 
     init {
