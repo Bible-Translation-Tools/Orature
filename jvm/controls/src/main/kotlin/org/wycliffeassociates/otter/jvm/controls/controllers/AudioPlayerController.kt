@@ -116,7 +116,6 @@ class AudioPlayerController(
 
     fun seek(location: Int) {
         player?.let {
-            println(location)
             it.seek(location)
             val total = it.getAbsoluteDurationInFrames()
             val sliderPos = (location / total.toDouble()).times(100)
