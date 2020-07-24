@@ -142,14 +142,13 @@ abstract class RecordableFragment(
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
 
-            recordableViewModel.recordableProperty.onChangeAndDoNow {
-                it?.let {
-                    sourceTextProperty.set(workbookViewModel.getSourceText().blockingGet())
-                }
-            }
+            sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
+
             recordableViewModel.showPluginActiveProperty.onChange {
                 showDialogProperty.set(it)
             }
+
+            sourceContentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
         }
     }
 
