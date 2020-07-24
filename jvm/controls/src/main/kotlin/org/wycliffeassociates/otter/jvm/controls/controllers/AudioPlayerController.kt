@@ -17,7 +17,6 @@ class AudioPlayerController(
     private val audioSlider: Slider
 ) {
 
-    private var startAtPercent = 0F
     private var startAtLocation = 0
     private var disposable: Disposable? = null
     private var dragging = false
@@ -62,7 +61,6 @@ class AudioPlayerController(
             oldPlayer.pause()
             oldPlayer.close()
         }
-        startAtPercent = 0F
         audioSlider.value = 0.0
         this.player = player
     }
@@ -77,13 +75,13 @@ class AudioPlayerController(
             dragging = true
         }
         audioSlider.setOnMouseClicked {
-            val position = max(0.0, min(it.x / audioSlider.width, 1.0))
+            val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
             var wasPlaying = false
             if (player?.isPlaying() == true) {
                 toggle()
                 wasPlaying = true
             }
-            seekPercentage(position.toFloat())
+            seek(percentageToLocation(percent))
             if (wasPlaying) {
                 toggle()
             }
@@ -103,43 +101,20 @@ class AudioPlayerController(
 
     private fun play() {
         if (startAtLocation != 0) {
-            seekLocation(startAtLocation)
-        } else {
-            seekPercentage(startAtPercent)
+            seek(startAtLocation)
         }
         player?.play()
-        startAtPercent = 0F
         startAtLocation = 0
     }
 
     private fun pause() {
         player?.let {
-            startAtPercent = it.getAbsoluteLocationInFrames() / it.getAbsoluteDurationInFrames().toFloat()
+            startAtLocation = it.getAbsoluteLocationInFrames()
             it.pause()
         }
     }
 
-    private fun seekPercentage(_percent: Float) {
-        var percent = if (_percent > 1.00) {
-            _percent / 100F
-        } else {
-            _percent
-        }
-        player?.let {
-            val position = (it.getAbsoluteDurationInFrames() * percent).toInt()
-            it.seek(position)
-            val total = it.getAbsoluteDurationInFrames()
-            val sliderPos = (position / total.toDouble()).times(100)
-            audioSlider.value = sliderPos
-            if (!it.isPlaying()) {
-                startAtPercent = percent
-            }
-        } ?: run {
-            startAtPercent = percent
-        }
-    }
-
-    fun seekLocation(location: Int) {
+    fun seek(location: Int) {
         player?.let {
             println(location)
             it.seek(location)
@@ -151,6 +126,15 @@ class AudioPlayerController(
             }
         } ?: run {
             startAtLocation = location
+        }
+    }
+
+    private fun percentageToLocation(percent: Double): Int {
+        var _percent = if (percent > 1.00) percent / 100F else percent
+        player?.let{
+            return (_percent * it.getAbsoluteDurationInFrames()).toInt()
+        } ?: run {
+            return 0
         }
     }
 
