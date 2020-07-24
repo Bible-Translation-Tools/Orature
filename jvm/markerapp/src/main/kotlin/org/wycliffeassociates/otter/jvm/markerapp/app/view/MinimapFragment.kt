@@ -22,12 +22,16 @@ class MinimapFragment : Fragment() {
                 graphic = FontIcon("gmi-bookmark")
                 styleClass.add("vm-marker-count__icon")
             }
-            add(label().apply {
-                textProperty().bind(vm.markerRatioProperty)
-            })
+            add(
+                label().apply {
+                    textProperty().bind(vm.markerRatioProperty)
+                }
+            )
         }
-        add(slider.apply {
-            hgrow = Priority.ALWAYS
-        })
+        add(
+            slider.apply {
+                hgrow = Priority.ALWAYS
+            }
+        )
     }
 }
