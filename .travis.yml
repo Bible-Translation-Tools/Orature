@@ -30,8 +30,9 @@ jobs:
   include:
   - stage: build
     script:
-    - "./gradlew --stacktrace -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN -PsentryDsn=$SENTRY_DSN detekt :jvm:workbookapp:install4jdeploy"
+    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN -PsentryDsn=$SENTRY_DSN detekt :jvm:workbookapp:install4jdeploy"
     - sonar-scanner
+install: skip
 stages:
 - build
 addons:
