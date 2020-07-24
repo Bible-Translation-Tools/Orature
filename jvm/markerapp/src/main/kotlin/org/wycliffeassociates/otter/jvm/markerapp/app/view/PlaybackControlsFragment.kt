@@ -47,7 +47,7 @@ class PlaybackControlsFragment : Fragment() {
     }
 
     init {
-        vm.isPlayingProperty.onChange { playing ->
+        viewModel.isPlayingProperty.onChange { playing ->
             if (playing) {
                 playBtn.graphicProperty().set(pauseIcon)
             } else {
