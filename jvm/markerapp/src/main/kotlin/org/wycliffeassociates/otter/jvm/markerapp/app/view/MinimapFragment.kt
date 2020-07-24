@@ -8,7 +8,7 @@ import tornadofx.*
 
 class MinimapFragment : Fragment() {
 
-    val vm: VerseMarkerViewModel by inject()
+    val viewModel: VerseMarkerViewModel by inject()
 
     val slider = slider { }
 
@@ -24,7 +24,7 @@ class MinimapFragment : Fragment() {
             }
             add(
                 label().apply {
-                    textProperty().bind(vm.markerRatioProperty)
+                    textProperty().bind(viewModel.markerRatioProperty)
                 }
             )
         }
