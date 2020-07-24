@@ -6,7 +6,7 @@
 
 .source-dialog__label {
     -fx-font-weight: bold;
-    -fx-font-size: 16px;
+    -fx-font-size: 1.4em;
     -fx-padding: 20px;
     -fx-alignment: center;
     -fx-text-alignment: center;
@@ -16,9 +16,10 @@
 
 .source-dialog__label--message {
     -fx-font-weight: normal;
-    -fx-padding: 0 0 30px 0;
+    -fx-padding: 0 20px 20px 20px;
     -fx-text-alignment: justify;
     -fx-text-fill: -gray-darker;
+    -fx-font-size: 1.5em;
 }
 
 .source-dialog__close-button {

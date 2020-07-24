@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 import java.io.File
+import java.text.MessageFormat
 import java.util.concurrent.Callable
 
 class WorkbookViewModel : ViewModel() {
@@ -107,6 +108,34 @@ class WorkbookViewModel : ViewModel() {
             activeChapterProperty,
             activeChunkProperty,
             activeResourceComponentProperty
+        )
+    }
+
+    fun activeChunkTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    if (activeChunkProperty.value != null) {
+                        MessageFormat.format(
+                            messages["bookChapterChunkTitle"],
+                            activeWorkbookProperty.value.source.title,
+                            activeChapterProperty.value.title,
+                            activeChunkProperty.value.start
+                        )
+                    } else {
+                        MessageFormat.format(
+                            messages["bookChapterTitle"],
+                            activeWorkbookProperty.value.source.title,
+                            activeChapterProperty.value.title
+                        )
+                    }
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty,
+            activeChunkProperty
         )
     }
 

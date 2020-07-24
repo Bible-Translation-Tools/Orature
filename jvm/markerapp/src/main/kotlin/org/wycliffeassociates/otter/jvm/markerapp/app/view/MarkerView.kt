@@ -10,16 +10,16 @@ class MarkerView : View() {
 
     private val userAgentStylesheet = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
 
-    val vm: VerseMarkerViewModel by inject()
+    val viewModel: VerseMarkerViewModel by inject()
 
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
     val playbackControls = PlaybackControlsFragment()
-
+    
     init {
         FX.stylesheets.setAll(userAgentStylesheet)
-        vm.initializeAudioController(minimap.slider)
+        viewModel.initializeAudioController(minimap.slider)
     }
 
     override val root = vbox {

@@ -2,6 +2,7 @@
 
 .source-content {
     -fx-background-color: -white;
+    -fx-padding: 20px;
 }
 
 .source-content__label {
@@ -9,49 +10,76 @@
     -fx-font-weight: bold;
 }
 
-.source-content__icon {
-    -fx-icon-size: 26px;
+.source-content__top {
+    -fx-min-height: 160px;
+    -fx-alignment: center;
+}
+
+.source-content__bottom {
+    -fx-min-height: 60px;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -gray-light;
+}
+
+.source-content__not-available {
+    -fx-alignment: center;
+    -fx-font-size: 1.3em;
+    -fx-background-color: #e7ecf5;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+}
+
+.source-content__not-available .label {
+    -fx-text-fill: -gray-dark;
+}
+
+.source-content__audio-slider {
+    -fx-padding: 0 0 0 30px;
+    -fx-background-insets: 0 0 0 30px;
 }
 
 .source-content__play-btn {
-    -fx-fill: -gray-darker;
-}
-
-.source-content__play-btn--rounded {
-    -fx-background-radius: 50%;
-    -fx-border-radius: 50%;
-    -fx-border-width: 1px;
-    -fx-pref-width: 60px;
-    -fx-pref-height: 60px;
+    -fx-pref-width: 250px;
+    -fx-pref-height: 50px;
+    -fx-font-size: 1.3em;
+    -fx-graphic-text-gap: 20px;
 }
 
 .source-content__play-btn .ikonli-font-icon {
     -fx-icon-size: 18px;
 }
 
-.source-content__play-btn--rounded .ikonli-font-icon {
-    -fx-icon-size: 18px;
+.source-content__play-btn.btn--primary .ikonli-font-icon {
+    -fx-fill: -white;
+}
+
+.source-content__play-btn.btn--secondary {
     -fx-fill: -primary;
 }
 
-.source-content__label .ikonli-font-icon {
-    -fx-icon-size: 22px;
+.source-content__play-btn.btn--secondary .ikonli-font-icon {
+    -fx-fill: -primary;
 }
 
-.source-content__source-text-container {
+.source-content__text-container {
     -fx-background: -white;
     -fx-background-color: -white;
 }
 
-.source-content__source-text {
-    -fx-font-size: 16px;
+.source-content__audio_container {
+    -fx-alignment: center-left;
+    -fx-padding: 5px 0;
+    -fx-min-height: 60px;
+}
+
+.source-content__text {
+    -fx-font-size: 1.5em;
     -fx-alignment: center;
     -fx-text-alignment: justify;
     -fx-fill: -gray-darker;
 }
 
-.source-content__controls {
-    -fx-border-color: #ccc;
-    -fx-border-width: 1 0 0 0;
-    -fx-min-height: 100px;
+.source-content__title {
+    -fx-font-size: 1.5em;
+    -fx-font-weight: bold;
 }

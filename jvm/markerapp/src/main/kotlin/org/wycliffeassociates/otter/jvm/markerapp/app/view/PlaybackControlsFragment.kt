@@ -7,7 +7,7 @@ import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
 
-    val vm: VerseMarkerViewModel by inject()
+    val viewModel: VerseMarkerViewModel by inject()
     
     private val rootStyles = "vm-play-controls"
     private val playButtonStyle = "vm-play-controls__play-btn"
@@ -25,6 +25,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = playIcon
+        setOnAction { viewModel.mediaToggle() }
     }
 
     private val nextBtn = button {
@@ -33,6 +34,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = nextIcon
+        setOnAction { viewModel.seekNext() }
     }
 
     private val previousBtn = button {
@@ -41,10 +43,11 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = previousIcon
+        setOnAction { viewModel.seekPrevious() }
     }
 
     init {
-        vm.isPlayingProperty.onChange { playing ->
+        viewModel.isPlayingProperty.onChange { playing ->
             if (playing) {
                 playBtn.graphicProperty().set(pauseIcon)
             } else {
@@ -56,8 +59,8 @@ class PlaybackControlsFragment : Fragment() {
     override val root = hbox {
         alignment = Pos.CENTER
         styleClass.add(rootStyles)
-        add(previousBtn.apply { setOnAction { vm.seekPrevious() } })
-        add(playBtn.apply { setOnAction { vm.mediaToggle() } })
-        add(nextBtn.apply { setOnAction { vm.seekNext() } })
+        add(previousBtn)
+        add(playBtn)
+        add(nextBtn)
     }
 }

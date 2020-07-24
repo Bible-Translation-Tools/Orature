@@ -8,7 +8,7 @@ import tornadofx.*
 
 class MinimapFragment : Fragment() {
 
-    val vm: VerseMarkerViewModel by inject()
+    val viewModel: VerseMarkerViewModel by inject()
 
     val slider = slider { }
 
@@ -22,12 +22,16 @@ class MinimapFragment : Fragment() {
                 graphic = FontIcon("gmi-bookmark")
                 styleClass.add("vm-marker-count__icon")
             }
-            add(label().apply {
-                textProperty().bind(vm.markerRatioProperty)
-            })
+            add(
+                label().apply {
+                    textProperty().bind(viewModel.markerRatioProperty)
+                }
+            )
         }
-        add(slider.apply {
-            hgrow = Priority.ALWAYS
-        })
+        add(
+            slider.apply {
+                hgrow = Priority.ALWAYS
+            }
+        )
     }
 }
