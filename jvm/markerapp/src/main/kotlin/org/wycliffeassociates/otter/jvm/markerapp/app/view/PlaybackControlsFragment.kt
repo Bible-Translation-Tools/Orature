@@ -25,6 +25,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = playIcon
+        setOnAction { viewModel.mediaToggle() }
     }
 
     private val nextBtn = button {
@@ -33,6 +34,7 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = nextIcon
+        setOnAction { viewModel.seekNext() }
     }
 
     private val previousBtn = button {
@@ -41,13 +43,14 @@ class PlaybackControlsFragment : Fragment() {
             roundedButtonStyle
         )
         graphic = previousIcon
+        setOnAction { viewModel.seekPrevious() }
     }
 
     override val root = hbox {
         alignment = Pos.CENTER
         styleClass.add(rootStyles)
-        add(previousBtn.apply { setOnAction { viewModel.seekPrevious() } })
-        add(playBtn.apply { setOnAction { viewModel.mediaToggle() } })
-        add(nextBtn.apply { setOnAction { viewModel.seekNext() } })
+        add(previousBtn)
+        add(playBtn)
+        add(nextBtn)
     }
 }
