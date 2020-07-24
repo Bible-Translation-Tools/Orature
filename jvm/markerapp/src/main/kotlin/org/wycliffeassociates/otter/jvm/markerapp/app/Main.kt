@@ -1,6 +1,10 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app
 
+import com.sun.javafx.application.ParametersImpl
 import javafx.application.Application
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
+import tornadofx.FX
+import tornadofx.launch
 
 /**
  * @param args array of cli arguments
@@ -17,5 +21,6 @@ import javafx.application.Application
  * --source_text= source text
  */
 fun main(args: Array<String>) {
-    Application.launch(VerseMarkerApp::class.java, *args)
+    FX.defaultScope = ParameterizedScope(ParametersImpl(args),{})
+    launch<VerseMarkerApp>(args)
 }

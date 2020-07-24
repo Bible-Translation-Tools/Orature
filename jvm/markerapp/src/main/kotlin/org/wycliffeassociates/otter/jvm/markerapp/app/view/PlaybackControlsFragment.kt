@@ -7,7 +7,7 @@ import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
 
-    val vm: VerseMarkerViewModel by inject()
+    val viewModel: VerseMarkerViewModel by inject()
     
     private val rootStyles = "vm-play-controls"
     private val playButtonStyle = "vm-play-controls__play-btn"
@@ -56,8 +56,8 @@ class PlaybackControlsFragment : Fragment() {
     override val root = hbox {
         alignment = Pos.CENTER
         styleClass.add(rootStyles)
-        add(previousBtn.apply { setOnAction { vm.seekPrevious() } })
-        add(playBtn.apply { setOnAction { vm.mediaToggle() } })
-        add(nextBtn.apply { setOnAction { vm.seekNext() } })
+        add(previousBtn.apply { setOnAction { viewModel.seekPrevious() } })
+        add(playBtn.apply { setOnAction { viewModel.mediaToggle() } })
+        add(nextBtn.apply { setOnAction { viewModel.seekNext() } })
     }
 }
