@@ -188,7 +188,7 @@ configure(integrationTest) {
 def getVersionName = { ->
     def stdout = new ByteArrayOutputStream()
     exec {
-        commandLine 'git', 'describe', '--tags'
+        commandLine 'cmd', 'git', 'describe', '--tags'
         standardOutput = stdout
     }
     return stdout.toString().trim()
