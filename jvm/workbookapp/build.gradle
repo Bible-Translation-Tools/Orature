@@ -192,6 +192,7 @@ task createVersionProperties(dependsOn: processResources) {
                 Properties p = new Properties()
                 p['version'] = gradlewCommandVersionProp
                 p.store w, null
+            }
         }
     }
 }
