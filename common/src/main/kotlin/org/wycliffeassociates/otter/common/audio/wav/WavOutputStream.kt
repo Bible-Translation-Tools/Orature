@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.io.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.BufferedOutputStream
 import java.io.Closeable
