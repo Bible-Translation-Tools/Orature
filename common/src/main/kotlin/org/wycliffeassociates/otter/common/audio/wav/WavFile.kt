@@ -1,6 +1,10 @@
 package org.wycliffeassociates.otter.common.audio.wav
 
-import java.io.*
+import java.io.File
+import java.io.OutputStream
+import java.io.FileOutputStream
+import java.io.RandomAccessFile
+import java.io.IOException
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -17,11 +21,13 @@ private const val DEFAULT_BITS_PER_SAMPLE = 16
 
 internal const val HEADER_SIZE = 44
 private const val CHUNK_HEADER_SIZE = 8
+private const val CHUNK_LABEL_SIZE = 4
 private const val AUDIO_LENGTH_LOCATION = 40
 private const val PCM_POSITION = 20
 private const val CHANNEL_POSITION = 22
 private const val SAMPLE_RATE_POSITION = 24
 private const val BITS_PER_SAMPLE_POSITION = 34
+private const val BITS_IN_BYTE = 8
 
 class InvalidWavFileException(message: String? = null) : Exception(message)
 
@@ -39,7 +45,7 @@ class WavFile private constructor() {
         private set
     var bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
         private set
-    val frameSizeInBytes = channels * (bitsPerSample / 8)
+    val frameSizeInBytes = channels * (bitsPerSample / BITS_IN_BYTE)
 
     val totalFrames: Int
         get() = totalAudioLength / frameSizeInBytes
@@ -113,7 +119,7 @@ class WavFile private constructor() {
     private fun generateHeaderArray(): ByteArray {
         val header = ByteBuffer.allocate(HEADER_SIZE)
         val longSampleRate = sampleRate
-        val byteRate = (bitsPerSample * sampleRate * channels) / 8
+        val byteRate = (bitsPerSample * sampleRate * channels) / BITS_IN_BYTE
 
         header.order(ByteOrder.LITTLE_ENDIAN)
         header.put(RIFF.toByteArray(Charsets.US_ASCII))
@@ -125,7 +131,7 @@ class WavFile private constructor() {
         header.putShort(channels.toShort()) // number of channels
         header.putInt(longSampleRate)
         header.putInt(byteRate)
-        header.putShort(((channels * bitsPerSample) / 8).toShort()) // block align
+        header.putShort(((channels * bitsPerSample) / BITS_IN_BYTE).toShort()) // block align
         header.putShort(bitsPerSample.toShort()) // bits per sample
         header.put(DATA.toByteArray(Charsets.US_ASCII))
         header.putInt(totalAudioLength) // initial size
@@ -143,10 +149,10 @@ class WavFile private constructor() {
                 it.read(header)
                 val bb = ByteBuffer.wrap(header)
                 bb.order(ByteOrder.LITTLE_ENDIAN)
-                val riff = bb.getText(4)
+                val riff = bb.getText(CHUNK_LABEL_SIZE)
                 this.totalDataLength = bb.int
-                val wave = bb.getText(4)
-                val fmt = bb.getText(4)
+                val wave = bb.getText(CHUNK_LABEL_SIZE)
+                val fmt = bb.getText(CHUNK_LABEL_SIZE)
                 bb.position(PCM_POSITION)
                 val pcm = bb.short
                 channels = bb.short.toInt()
@@ -166,8 +172,8 @@ class WavFile private constructor() {
     }
 
     private fun parseMetadata() {
-        if (totalDataLength > totalAudioLength + 36) {
-            val metadataSize = totalDataLength - totalAudioLength - 36
+        if (totalDataLength > totalAudioLength + (HEADER_SIZE - CHUNK_HEADER_SIZE)) {
+            val metadataSize = totalDataLength - totalAudioLength - (HEADER_SIZE - CHUNK_HEADER_SIZE)
             val bytes = ByteArray(metadataSize)
             file.inputStream().use {
                 val metadataStart = HEADER_SIZE + totalAudioLength
