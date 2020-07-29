@@ -67,7 +67,7 @@ class CueChunk : RiffChunk {
     override val totalSize: Int
         get(): Int {
             return if (cues.isNotEmpty()) {
-                val totalCueChunk = CHUNK_LABEL_SIZE + cueChunkSize
+                val totalCueChunk = CHUNK_HEADER_SIZE + cueChunkSize
                 // adds 1 to cue size for the extra chunk header and label
                 // that the list chunk adds as overhead
                 val totalLabelChunk =

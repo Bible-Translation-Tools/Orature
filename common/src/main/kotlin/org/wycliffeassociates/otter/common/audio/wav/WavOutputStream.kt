@@ -35,9 +35,7 @@ class WavOutputStream @Throws(FileNotFoundException::class)
         try {
             FileOutputStream(wav.file, true)
                 .channel
-                .truncate(
-                    (whereToTruncate + WAV_HEADER_SIZE).toLong()
-                )
+                .truncate((whereToTruncate + WAV_HEADER_SIZE).toLong())
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -109,7 +107,6 @@ class WavOutputStream @Throws(FileNotFoundException::class)
             // move to audio size index
             raf.seek((WAV_HEADER_SIZE - CHUNK_LABEL_SIZE).toLong())
             raf.write(bb.array())
-            raf.close()
         }
     }
 }

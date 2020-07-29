@@ -1,13 +1,10 @@
 package org.wycliffeassociates.otter.common.audio.wav
 
-import java.io.File
-import java.io.OutputStream
-import java.io.FileOutputStream
-import java.io.RandomAccessFile
-import java.io.IOException
+import java.io.*
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.channels.FileChannel
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
@@ -16,8 +13,8 @@ private const val DATA = "data"
 private const val PCM: Short = 1
 
 const val DEFAULT_SAMPLE_RATE = 44100
-private const val DEFAULT_CHANNELS = 1
-private const val DEFAULT_BITS_PER_SAMPLE = 16
+const val DEFAULT_CHANNELS = 1
+const val DEFAULT_BITS_PER_SAMPLE = 16
 
 internal const val WAV_HEADER_SIZE = 44
 private const val AUDIO_LENGTH_LOCATION = 40
@@ -197,4 +194,11 @@ class WavFile private constructor() {
     }
 
     fun sampleIndex(sample: Int) = sample * frameSizeInBytes
+
+    fun update() {
+        // the use block will write nothing, but will call .close()
+        // which will truncate the file at the end of the audio section,
+        // write out metadata, and update the header
+        WavOutputStream(this, append = true, buffered = true).use {}
+    }
 }
