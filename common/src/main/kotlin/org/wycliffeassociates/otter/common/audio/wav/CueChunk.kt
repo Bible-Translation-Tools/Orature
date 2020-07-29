@@ -9,13 +9,10 @@ private const val LIST_LABEL = "LIST"
 private const val ADTL_LABEL = "adtl"
 private const val LABEL_LABEL = "labl"
 
-private const val LABEL_SIZE = 4
-private const val CHUNK_HEADER_SIZE = 8
 private const val CUE_HEADER_SIZE = 4
 private const val CUE_COUNT_SIZE = 4
 private const val CUE_ID_SIZE = 4
 private const val CUE_DATA_SIZE = 24
-private const val WORD_SIZE = 4
 
 // We only care to read the cue id and location, seek over the next 16 bytes
 private const val DONT_CARE_CUE_DATA_SIZE = 16
@@ -70,11 +67,11 @@ class CueChunk : RiffChunk {
     override val totalSize: Int
         get(): Int {
             return if (cues.isNotEmpty()) {
-                val totalCueChunk = LABEL_SIZE + cueChunkSize
+                val totalCueChunk = CHUNK_LABEL_SIZE + cueChunkSize
                 // adds 1 to cue size for the extra chunk header and label
                 // that the list chunk adds as overhead
                 val totalLabelChunk =
-                    ((LABEL_SIZE + CHUNK_HEADER_SIZE) * (cues.size + 1)) + computeTextSize(cues)
+                    ((CHUNK_LABEL_SIZE + CHUNK_HEADER_SIZE) * (cues.size + 1)) + computeTextSize(cues)
                 return totalCueChunk + totalLabelChunk
             } else 0
         }
@@ -120,12 +117,12 @@ class CueChunk : RiffChunk {
 
     private fun createLabelChunk(cues: List<WavCue>): ByteArray {
         // size = (8 for labl header, 4 for cue id) * num cues + all strings
-        val size = (CHUNK_HEADER_SIZE + LABEL_SIZE) * cues.size + computeTextSize(cues)
+        val size = (CHUNK_HEADER_SIZE + CHUNK_LABEL_SIZE) * cues.size + computeTextSize(cues)
         // adds LIST header which is a standard chunk header and a "adtl" label
-        val buffer = ByteBuffer.allocate(size + CHUNK_HEADER_SIZE + LABEL_SIZE)
+        val buffer = ByteBuffer.allocate(size + CHUNK_HEADER_SIZE + CHUNK_LABEL_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.put(LIST_LABEL.toByteArray(Charsets.US_ASCII))
-        buffer.putInt(size + LABEL_SIZE)
+        buffer.putInt(size + CHUNK_LABEL_SIZE)
         buffer.put(ADTL_LABEL.toByteArray(Charsets.US_ASCII))
         for (i in cues.indices) {
             buffer.put(LABEL_LABEL.toByteArray(Charsets.US_ASCII))
@@ -144,7 +141,7 @@ class CueChunk : RiffChunk {
     }
 
     private fun getWordAlignedLength(length: Int) =
-        if (length % WORD_SIZE != 0) length + WORD_SIZE - (length % WORD_SIZE) else length
+        if (length % DWORD_SIZE != 0) length + DWORD_SIZE - (length % DWORD_SIZE) else length
 
     private fun wordAlignedLabel(cue: WavCue): ByteArray {
         val label = cue.label
@@ -158,7 +155,7 @@ class CueChunk : RiffChunk {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         cueListBuilder.clear()
         while (chunk.remaining() > CHUNK_HEADER_SIZE) {
-            val subchunkLabel = chunk.getText(LABEL_SIZE)
+            val subchunkLabel = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
 
             if (chunk.remaining() < subchunkSize) {
@@ -234,17 +231,17 @@ class CueChunk : RiffChunk {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
 
         // Skip List Chunks that are not subtype "adtl"
-        if (chunk.remaining() < LABEL_SIZE || ADTL_LABEL != chunk.getText(LABEL_SIZE)) {
+        if (chunk.remaining() < CHUNK_LABEL_SIZE || ADTL_LABEL != chunk.getText(CHUNK_LABEL_SIZE)) {
             return
         }
 
         while (chunk.remaining() > CHUNK_HEADER_SIZE) {
-            val subchunk = chunk.getText(LABEL_SIZE)
+            val subchunk = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
             when (subchunk) {
                 LABEL_LABEL -> {
                     val id = chunk.int
-                    val labelBytes = ByteArray(subchunkSize - LABEL_SIZE)
+                    val labelBytes = ByteArray(subchunkSize - CHUNK_LABEL_SIZE)
                     chunk.get(labelBytes)
                     // trim necessary to strip trailing 0's used to pad to double word align
                     val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
