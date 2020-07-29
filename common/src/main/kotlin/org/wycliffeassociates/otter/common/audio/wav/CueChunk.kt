@@ -12,8 +12,54 @@ private const val LABEL_LABEL = "labl"
 private const val LABEL_SIZE = 4
 private const val CHUNK_HEADER_SIZE = 8
 private const val CUE_HEADER_SIZE = 4
+private const val CUE_COUNT_SIZE = 4
+private const val CUE_ID_SIZE = 4
 private const val CUE_DATA_SIZE = 24
+private const val WORD_SIZE = 4
 
+// We only care to read the cue id and location, seek over the next 16 bytes
+private const val DONT_CARE_CUE_DATA_SIZE = 16
+
+/**
+ * Cue Chunk
+ * Our cue chunks contain a combination of two chunks:
+ * 1. A Cue chunk containing cue points and their locations
+ * 2. A labl chunk containing labels associated with the cue chunks
+ *
+ * The Cue chunk is of the following format:
+ * [size - description - value (if constant)]
+ * 4 - Chunk Id - " cue"
+ * 4 - Chunk Data Size
+ * 4 - Cue count
+ * _ - List of cue points
+ *
+ * The List of cue points is in the following format:
+ * 4 - unique cue ID
+ * 4 - play order position
+ * 4 - RIFF ID of corresponding data chunk - 0 (we only expect one wav chunk)
+ * 4 - Byte offset of data chunk - 0 (0 is for uncompressed wav formats)
+ * 4 - Block start (byte offset to sample of first channel)
+ * 4 - Sample offset (byte offset to sample byte of first channel)
+ *
+ * Thus, each cue is 24 bytes, so the total data size of the cue chunk is:
+ * 4 + (cue count) * 24
+ * where 4 accounts for the field storing the number of cues
+ *
+ * In regards to parsing, we seek over the RIFF ID, Byte offset, Block start, sample offset
+ * Play order position should be the actual location frame, so just the first two fields
+ * contain information we care about.
+ *
+ * The labl chunk is in the following format:
+ * 4 - chunk id - "list"
+ * 4 - chunk data size
+ * 4 - list type label - "adtl"
+ *
+ * For each cue, there will then be a labl entry:
+ * 4 - chunk id - "labl"
+ * 4 - chunk data size
+ * 4 - cue point id (matching the id from the cue chunk)
+ * _ - text of the label (should be word aligned, but technically we double word align
+ */
 class CueChunk : RiffChunk {
 
     val cues: List<WavCue> = mutableListOf()
@@ -22,7 +68,16 @@ class CueChunk : RiffChunk {
         get() = CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
 
     override val totalSize: Int
-        get() = if (cues.isNotEmpty()) 4 + cueChunkSize + 12 + (12 * cues.size) + computeTextSize(cues) else 0
+        get(): Int {
+            return if (cues.isNotEmpty()) {
+                val totalCueChunk = LABEL_SIZE + cueChunkSize
+                // adds 1 to cue size for the extra chunk header and label
+                // that the list chunk adds as overhead
+                val totalLabelChunk =
+                    ((LABEL_SIZE + CHUNK_HEADER_SIZE) * (cues.size + 1)) + computeTextSize(cues)
+                return totalCueChunk + totalLabelChunk
+            } else 0
+        }
 
     fun addCue(cue: WavCue) {
         cues as MutableList
@@ -39,7 +94,7 @@ class CueChunk : RiffChunk {
         val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + cueChunkSize)
         cueChunkBuffer.order(ByteOrder.LITTLE_ENDIAN)
         cueChunkBuffer.put(CUE_LABEL.toByteArray(Charsets.US_ASCII))
-        cueChunkBuffer.putInt(CUE_DATA_SIZE * cues.size + 4)
+        cueChunkBuffer.putInt(CUE_DATA_SIZE * cues.size + CUE_COUNT_SIZE)
         cueChunkBuffer.putInt(cues.size)
         for (i in cues.indices) {
             cueChunkBuffer.put(createCueData(i, cues[i]))
@@ -64,8 +119,10 @@ class CueChunk : RiffChunk {
     }
 
     private fun createLabelChunk(cues: List<WavCue>): ByteArray {
-        val size = 12 * cues.size + computeTextSize(cues) // all strings + (8 for labl header, 4 for cue id) * num cues
-        val buffer = ByteBuffer.allocate(size + CHUNK_HEADER_SIZE + 4) // adds LIST header
+        // size = (8 for labl header, 4 for cue id) * num cues + all strings
+        val size = (CHUNK_HEADER_SIZE + LABEL_SIZE) * cues.size + computeTextSize(cues)
+        // adds LIST header which is a standard chunk header and a "adtl" label
+        val buffer = ByteBuffer.allocate(size + CHUNK_HEADER_SIZE + LABEL_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.put(LIST_LABEL.toByteArray(Charsets.US_ASCII))
         buffer.putInt(size + LABEL_SIZE)
@@ -73,7 +130,7 @@ class CueChunk : RiffChunk {
         for (i in cues.indices) {
             buffer.put(LABEL_LABEL.toByteArray(Charsets.US_ASCII))
             val label = wordAlignedLabel(cues[i])
-            buffer.putInt(4 + label.size) // subchunk size here is label size plus id
+            buffer.putInt(CUE_ID_SIZE + label.size) // subchunk size here is label size plus id
             buffer.putInt(i)
             buffer.put(label)
         }
@@ -86,7 +143,8 @@ class CueChunk : RiffChunk {
             .sum()
     }
 
-    private fun getWordAlignedLength(length: Int) = if (length % 4 != 0) length + 4 - (length % 4) else length
+    private fun getWordAlignedLength(length: Int) =
+        if (length % WORD_SIZE != 0) length + WORD_SIZE - (length % WORD_SIZE) else length
 
     private fun wordAlignedLabel(cue: WavCue): ByteArray {
         val label = cue.label
@@ -99,13 +157,14 @@ class CueChunk : RiffChunk {
 
         chunk.order(ByteOrder.LITTLE_ENDIAN)
         cueListBuilder.clear()
-        while (chunk.remaining() > 8) {
+        while (chunk.remaining() > CHUNK_HEADER_SIZE) {
             val subchunkLabel = chunk.getText(LABEL_SIZE)
             val subchunkSize = chunk.int
 
             if (chunk.remaining() < subchunkSize) {
                 throw InvalidWavFileException(
-                    "Chunk $subchunkLabel is of size: $subchunkSize but remaining chunk size is ${chunk.remaining()}"
+                    """Chunk $subchunkLabel is of size: $subchunkSize 
+                        |but remaining chunk size is ${chunk.remaining()}""".trimMargin()
                 )
             }
 
@@ -167,7 +226,7 @@ class CueChunk : RiffChunk {
             cueListBuilder.addLocation(cueId, cueLoc)
 
             // Skip the next 16 bytes to the next cue point
-            chunk.seek(16)
+            chunk.seek(DONT_CARE_CUE_DATA_SIZE)
         }
     }
 
@@ -175,7 +234,7 @@ class CueChunk : RiffChunk {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
 
         // Skip List Chunks that are not subtype "adtl"
-        if (chunk.remaining() < 4 || ADTL_LABEL != chunk.getText(4)) {
+        if (chunk.remaining() < LABEL_SIZE || ADTL_LABEL != chunk.getText(LABEL_SIZE)) {
             return
         }
 
@@ -185,7 +244,7 @@ class CueChunk : RiffChunk {
             when (subchunk) {
                 LABEL_LABEL -> {
                     val id = chunk.int
-                    val labelBytes = ByteArray(subchunkSize - 4)
+                    val labelBytes = ByteArray(subchunkSize - LABEL_SIZE)
                     chunk.get(labelBytes)
                     // trim necessary to strip trailing 0's used to pad to double word align
                     val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
@@ -199,7 +258,7 @@ class CueChunk : RiffChunk {
     }
 }
 
-private class CueListBuilder() {
+private class CueListBuilder {
 
     private data class TempCue(var location: Int?, var label: String?)
 
