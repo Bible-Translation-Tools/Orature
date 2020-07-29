@@ -172,8 +172,7 @@ class CueChunk : RiffChunk {
             when (subchunkLabel) {
                 LIST_LABEL -> parseLabels(buffer, cueListBuilder)
                 CUE_LABEL -> parseCue(buffer, cueListBuilder)
-                else -> {
-                }
+                else -> Unit
             }
 
             // move on to the next chunk
