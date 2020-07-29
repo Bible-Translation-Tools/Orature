@@ -23,9 +23,9 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
         var begin = if (start != null) min(max(0, start), totalFrames) else 0
         var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
         begin *= wav.frameSizeInBytes
-        begin += 44
+        begin += HEADER_SIZE
         end *= wav.frameSizeInBytes
-        end += 44
+        end += HEADER_SIZE
         mappedFile =
             RandomAccessFile(wav.file, "r").use {
                 it.channel.map(
