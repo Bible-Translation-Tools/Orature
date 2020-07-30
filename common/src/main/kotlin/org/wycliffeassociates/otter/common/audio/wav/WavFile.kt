@@ -8,7 +8,6 @@ import java.io.IOException
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import java.nio.channels.FileChannel
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
