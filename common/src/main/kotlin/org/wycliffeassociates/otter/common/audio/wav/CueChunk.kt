@@ -81,6 +81,16 @@ class CueChunk : RiffChunk {
         cues.add(cue)
     }
 
+    fun addCues(cues: List<WavCue>) {
+        cues as MutableList
+        cues.addAll(cues)
+    }
+
+    fun clearCues() {
+        cues as MutableList
+        cues.clear()
+    }
+
     override fun toByteArray(): ByteArray {
         if (cues.isEmpty()) {
             return ByteArray(0)

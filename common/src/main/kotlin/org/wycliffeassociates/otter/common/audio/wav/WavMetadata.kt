@@ -26,4 +26,9 @@ class WavMetadata {
     fun getCues(): List<WavCue> {
         return cueChunk.cues
     }
+
+    fun replaceCues(cues: List<WavCue>) {
+        cueChunk.clearCues()
+        cueChunk.addCues(cues)
+    }
 }

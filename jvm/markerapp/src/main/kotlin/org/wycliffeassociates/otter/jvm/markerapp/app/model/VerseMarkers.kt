@@ -52,4 +52,9 @@ class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
         }
         return 0
     }
+
+    fun writeMarkers() {
+        audio.metadata.replaceCues(cues)
+        audio.update()
+    }
 }
