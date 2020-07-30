@@ -1,8 +1,8 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.model
 
 import javafx.beans.property.SimpleIntegerProperty
-import org.wycliffeassociates.otter.common.io.wav.WavCue
-import org.wycliffeassociates.otter.common.io.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavCue
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import java.lang.Integer.min
 
 class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {

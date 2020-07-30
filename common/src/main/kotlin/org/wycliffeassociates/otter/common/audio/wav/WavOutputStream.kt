@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.io.wav
+package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.BufferedOutputStream
 import java.io.Closeable
@@ -36,7 +36,7 @@ class WavOutputStream @Throws(FileNotFoundException::class)
             FileOutputStream(wav.file, true)
                 .channel
                 .truncate(
-                    (whereToTruncate + HEADER_SIZE).toLong()
+                    (whereToTruncate + WAV_HEADER_SIZE).toLong()
                 )
         } catch (e: IOException) {
             e.printStackTrace()
@@ -95,19 +95,19 @@ class WavOutputStream @Throws(FileNotFoundException::class)
     @Throws(IOException::class)
     internal fun updateHeader() {
         // file size minus riff size chunks
-        val totalDataSize = wav.file.length() - 8
-        val bb = ByteBuffer.allocate(4)
+        val totalDataSize = wav.file.length() - CHUNK_HEADER_SIZE
+        val bb = ByteBuffer.allocate(DWORD_SIZE)
         bb.order(ByteOrder.LITTLE_ENDIAN)
         bb.putInt(totalDataSize.toInt())
         RandomAccessFile(wav.file, "rw").use { raf ->
             // move to total file size index
-            raf.seek(4)
+            raf.seek(DWORD_SIZE.toLong())
             raf.write(bb.array())
             bb.clear()
             bb.order(ByteOrder.LITTLE_ENDIAN)
             bb.putInt(audioDataLength)
             // move to audio size index
-            raf.seek(40)
+            raf.seek((WAV_HEADER_SIZE - CHUNK_LABEL_SIZE).toLong())
             raf.write(bb.array())
             raf.close()
         }

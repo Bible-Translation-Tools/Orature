@@ -1,10 +1,9 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
-import org.wycliffeassociates.otter.common.io.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkers
