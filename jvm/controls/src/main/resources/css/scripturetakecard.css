@@ -1,14 +1,14 @@
 @import "root.css"
 
 .card--scripture-take {
-    -fx-background-color: -white;
-    -fx-effect: -level2;
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level2;
     -fx-font-size: 1em;
 }
 
 .card--scripture-take__btn {
     -fx-background-color: #FEFEFE;
-    -fx-effect: -level2;
+    -fx-effect: -wa-level2;
     -fx-background-radius: 5px;
     -fx-border-radius: 5px;
     -fx-font-size: 1.25em;
@@ -16,25 +16,25 @@
 }
 
 .card--scripture-take__btn:hover {
-    -fx-effect: -level4;
+    -fx-effect: -wa-level4;
 }
 
 .card--scripture-take__btn--play {
-    -fx-background-color: -white;
+    -fx-background-color: -wa-white;
 }
 
 .card--scripture-take__btn--edit {
-    -fx-background-color: -white;
+    -fx-background-color: -wa-white;
     -fx-text-fill: #58BD2F;
     -fx-icon-color: #58BD2F;
 }
 
 .card--scripture-take__btn--delete {
     -fx-font-size: 16px;
-    -fx-background-color: -white;
+    -fx-background-color: -wa-white;
     -fx-font-weight: normal;
     -fx-icon-size: 26px;
-    -fx-effect: -level0;
+    -fx-effect: -wa-level0;
 }
 
 .card--scripture-take__take-label {
@@ -47,5 +47,5 @@
     -fx-font-size: 12px;
     -fx-font-weight: lighter;
     -fx-font-style: italic;
-    -fx-text-fill: -gray;
+    -fx-text-fill: -wa-gray;
 }

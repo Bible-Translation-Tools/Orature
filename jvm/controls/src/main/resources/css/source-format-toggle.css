@@ -1,7 +1,7 @@
 @import "root.css"
 
 .source-format-toggle {
-    -fx-border-color: -primary;
+    -fx-border-color: -wa-primary;
     -fx-border-radius: 3;
     -fx-cursor: hand;
 }
@@ -11,11 +11,11 @@
 }
 
 .source-format-toggle__mode--active {
-    -fx-background-color: -primary;
+    -fx-background-color: -wa-primary;
 }
 
 .source-format-toggle__icon {
-    -fx-fill: -primary;
+    -fx-fill: -wa-primary;
 }
 
 .source-format-toggle__icon--active {

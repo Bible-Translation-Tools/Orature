@@ -14,7 +14,7 @@
 /* Exception dialog style */
 .dialog--exception {
     -fx-padding: 15 5;
-    -fx-background-color: -white;
+    -fx-background-color: -wa-white;
     -fx-background-insets: 15 5;
     -fx-background-radius: 20;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 10, 0.5, 0.0, 0.0);
@@ -22,16 +22,16 @@
 
 .dialog--exception__send-report {
     -fx-cursor: hand;
-    -jfx-checked-color: -primary;
+    -jfx-checked-color: -wa-primary;
 }
 
 .dialog--exception__stacktrace-container {
-    -fx-background-color: -primary-light;
+    -fx-background-color: -wa-primary-light;
     -fx-background-radius: 10px;
 }
 
 .dialog--exception__stacktrace-container__sub {
-    -fx-background-color: -primary-light;
+    -fx-background-color: -wa-primary-light;
 }
 
 /* Scrollbar style */
@@ -58,7 +58,7 @@
 }
 
 .dialog--exception__stacktrace-container .scroll-bar .thumb {
-    -fx-background-color: -gray;
+    -fx-background-color: -wa-gray;
 	-fx-background-insets: 2, 0, 0;
 	-fx-background-radius: 10px;
 }

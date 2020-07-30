@@ -1,8 +1,8 @@
 @import "root.css"
 
 .audioplayer--scripture-takes {
-    -fx-background-color: -white;
-    -fx-effect: -level2;
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level2;
     -fx-background-radius: 16px;
     -fx-border-radius: 16px;
 }
@@ -16,7 +16,7 @@
 }
 
 .audioplayer--scripture-takes__play-btn {
-    -fx-effect: -level2;
+    -fx-effect: -wa-level2;
     -fx-background-radius: 50%;
     -fx-border-radius: 50%;
 }

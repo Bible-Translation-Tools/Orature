@@ -1,7 +1,7 @@
 @import "root.css"
 
 .source-content {
-    -fx-background-color: -white;
+    -fx-background-color: -wa-white;
     -fx-padding: 20px;
 }
 
@@ -18,7 +18,7 @@
 .source-content__bottom {
     -fx-min-height: 60px;
     -fx-border-width: 1px 0 0 0;
-    -fx-border-color: -gray-light;
+    -fx-border-color: -wa-gray-light;
 }
 
 .source-content__not-available {
@@ -30,7 +30,7 @@
 }
 
 .source-content__not-available .label {
-    -fx-text-fill: -gray-dark;
+    -fx-text-fill: -wa-gray-dark;
 }
 
 .source-content__audio-slider {
@@ -50,20 +50,20 @@
 }
 
 .source-content__play-btn.btn--primary .ikonli-font-icon {
-    -fx-fill: -white;
+    -fx-fill: -wa-white;
 }
 
 .source-content__play-btn.btn--secondary {
-    -fx-fill: -primary;
+    -fx-fill: -wa-primary;
 }
 
 .source-content__play-btn.btn--secondary .ikonli-font-icon {
-    -fx-fill: -primary;
+    -fx-fill: -wa-primary;
 }
 
 .source-content__text-container {
-    -fx-background: -white;
-    -fx-background-color: -white;
+    -fx-background: -wa-white;
+    -fx-background-color: -wa-white;
 }
 
 .source-content__audio_container {
@@ -76,7 +76,7 @@
     -fx-font-size: 1.5em;
     -fx-alignment: center;
     -fx-text-alignment: justify;
-    -fx-fill: -gray-darker;
+    -fx-fill: -wa-gray-darker;
 }
 
 .source-content__title {
