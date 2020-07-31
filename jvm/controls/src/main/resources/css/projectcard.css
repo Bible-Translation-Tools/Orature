@@ -1,16 +1,16 @@
 @import "root.css"
 
 .project-card {
-    -fx-background-color: -white;
-    -fx-effect: -level2;
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level2;
 }
 
 .project-card:hover {
-    -fx-effect: -level4
+    -fx-effect: -wa-level4
 }
 
 .project-card__popup-list {
-    -fx-selection-bar: -white;
+    -fx-selection-bar: -wa-white;
 }
 
 .project-card__popup-list .list-cell {
@@ -18,6 +18,6 @@
 }
 
 .project-card__popup-list .label {
-    -fx-text-fill: -gray-darker;
+    -fx-text-fill: -wa-gray-darker;
     -fx-max-width: infinity;
 }
