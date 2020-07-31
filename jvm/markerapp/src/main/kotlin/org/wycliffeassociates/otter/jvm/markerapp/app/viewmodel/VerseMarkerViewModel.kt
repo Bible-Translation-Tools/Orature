@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
+import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
@@ -51,5 +52,11 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun seekPrevious() {
         audioController?.seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+    }
+
+    fun writeMarkers(): Completable {
+        if (isPlayingProperty.value) audioController?.toggle()
+        audioPlayer.close()
+        return markers.writeMarkers()
     }
 }

@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.model
 
+import io.reactivex.Completable
+import io.reactivex.Single
 import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.audio.wav.WavCue
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
@@ -10,6 +12,8 @@ class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
     private val cues = audio.metadata.getCues()
     val markerCountProperty = SimpleIntegerProperty(0)
     val audioEnd = audio.totalFrames
+    var changesSaved = true
+        private set
 
     init {
         cues as MutableList
@@ -18,6 +22,7 @@ class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
     }
 
     fun addMarker(location: Int) {
+        changesSaved = false
         if (cues.size >= markerTotal) {
             return
         }
@@ -53,8 +58,10 @@ class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
         return 0
     }
 
-    fun writeMarkers() {
-        audio.metadata.replaceCues(cues)
-        audio.update()
+    fun writeMarkers(): Completable {
+        return Single.fromCallable {
+            audio.update()
+            changesSaved = true
+        }.ignoreElement()
     }
 }

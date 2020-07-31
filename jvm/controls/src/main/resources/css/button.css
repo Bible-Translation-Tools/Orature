@@ -33,7 +33,6 @@
 .btn--primary:hover {
     -fx-background-color: -primary-dark;
     -fx-effect: -level1;
-
 }
 
 .btn--primary:disabled {

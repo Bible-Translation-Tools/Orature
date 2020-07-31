@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
@@ -46,6 +47,17 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekPrevious() }
     }
 
+    private val closeBtn = button {
+        text = "Continue"
+        setOnAction {
+            (scope as ParameterizedScope).let {
+                viewModel.writeMarkers().subscribe {
+                    it.navigateBack()
+                }
+            }
+        }
+    }
+
     init {
         viewModel.isPlayingProperty.onChange { playing ->
             if (playing) {
@@ -62,5 +74,9 @@ class PlaybackControlsFragment : Fragment() {
         add(previousBtn)
         add(playBtn)
         add(nextBtn)
+        hbox {
+            alignment = Pos.CENTER_RIGHT
+            add(closeBtn)
+        }
     }
 }

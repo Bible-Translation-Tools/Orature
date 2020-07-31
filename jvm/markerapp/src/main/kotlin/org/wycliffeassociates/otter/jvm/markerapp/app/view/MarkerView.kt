@@ -19,6 +19,7 @@ class MarkerView : View() {
     
     init {
         FX.stylesheets.setAll(userAgentStylesheet)
+        FX.stylesheets.add(javaClass.getResource("/css/button.css").toExternalForm())
         viewModel.initializeAudioController(minimap.slider)
     }
 
