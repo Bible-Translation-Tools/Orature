@@ -29,7 +29,7 @@ class VerseMarkerViewModel : ViewModel() {
         val wav = WavFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
-            scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
+            scope.parameters.named["marker_total"]?.toInt() ?: 10
         markers = VerseMarkers(wav, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("${it}/$totalMarkers")
@@ -58,5 +58,9 @@ class VerseMarkerViewModel : ViewModel() {
         if (isPlayingProperty.value) audioController?.toggle()
         audioPlayer.close()
         return markers.writeMarkers()
+    }
+    
+    fun placeMarker() {
+        markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
     }
 }

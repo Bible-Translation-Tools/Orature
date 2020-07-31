@@ -23,11 +23,11 @@
 
 /* -------------- Primary Button -------------- */
 .btn--primary {
-    -fx-background-color: -primary;
-    -fx-effect: -level2;
-    -fx-text-fill: -white;
+    -fx-background-color: -wa-primary;
+    -fx-effect: -wa-level2;
+    -fx-text-fill: -wa-white;
     -fx-border-width: 0px;
-    -fx-icon-color: -white;
+    -fx-icon-color: -wa-white;
 }
 
 .btn--primary:hover {
@@ -36,10 +36,10 @@
 }
 
 .btn--primary:disabled {
-    -fx-background-color: -gray-lighter;
-    -fx-text-fill: -gray-dark;
-    -fx-icon-color: -gray-dark;
-    -fx-effect: -level0;
+    -fx-background-color: -wa-gray-lighter;
+    -fx-text-fill: -wa-gray-dark;
+    -fx-icon-color: -wa-gray-dark;
+    -fx-effect: -wa-level0;
     -fx-cursor: disappear;
 
 }
@@ -49,23 +49,23 @@
 /*  highlight the most desireable action the user would take. 
 /*  Only 1 CTA button should be used on a page. */
 .btn--cta {
-    -fx-background-color: -cta-gradient;
-    -fx-effect: -level3;
-    -fx-border-color: -white-30;
+    -fx-background-color: -wa-cta-gradient;
+    -fx-effect: -wa-level3;
+    -fx-border-color: -wa-white-30;
     -fx-border-width: 2px;  
-    -fx-icon-color: -gray-darker;
-    -fx-text-fill: -gray-darker;
+    -fx-icon-color: -wa-gray-darker;
+    -fx-text-fill: -wa-gray-darker;
 }
 .btn--cta:hover {
-    -fx-background-color: -accent;
-    -fx-effect: -level1;
+    -fx-background-color: -wa-accent;
+    -fx-effect: -wa-level1;
 
 }
 .btn--cta:disabled {
-    -fx-background-color: -gray-lighter;
-    -fx-text-fill: -gray;
-    -fx-icon-color: -gray;
-    -fx-effect: -level0;
+    -fx-background-color: -wa-gray-lighter;
+    -fx-text-fill: -wa-gray;
+    -fx-icon-color: -wa-gray;
+    -fx-effect: -wa-level0;
     -fx-cursor: disappear;
     -fx-opacity: 1;
 }
@@ -74,20 +74,20 @@
 .btn--secondary {
     -fx-background-color: transparent;
     -fx-border-width: 2px;
-    -fx-border-color: -primary;
-    -fx-text-fill: -primary;
-    -fx-icon-color: -primary;
+    -fx-border-color: -wa-primary;
+    -fx-text-fill: -wa-primary;
+    -fx-icon-color: -wa-primary;
 }
 .btn--secondary:hover {
-    -fx-background-color: -primary-light;
-    -fx-text-fill: -primary-dark;
-    -fx-icon-color: -primary-dark;
+    -fx-background-color: -wa-primary-light;
+    -fx-text-fill: -wa-primary-dark;
+    -fx-icon-color: -wa-primary-dark;
 }
 .btn--secondary:disabled {
     -fx-cursor: disappear;
-    -fx-text-fill: -gray;
-    -fx-icon-color: -gray;
-    -fx-border-color: -gray-light;
+    -fx-text-fill: -wa-gray;
+    -fx-icon-color: -wa-gray;
+    -fx-border-color: -wa-gray-light;
     -fx-border-width: 2px;
 }
 
@@ -97,18 +97,18 @@
 .btn--tertiary {
     -fx-background-color: transparent;
     -fx-border-width: 0px;
-    -fx-text-fill: -primary;
-    -fx-icon-color: -primary;
+    -fx-text-fill: -wa-primary;
+    -fx-icon-color: -wa-primary;
 }
 .btn--tertiary:hover {
-    -fx-background-color: -primary-light;
-    -fx-text-fill: -primary-dark;
-    -fx-icon-color: -primary-dark;
+    -fx-background-color: -wa-primary-light;
+    -fx-text-fill: -wa-primary-dark;
+    -fx-icon-color: -wa-primary-dark;
 }
 .btn--tertiary:disabled {
     -fx-cursor: disappear;
-    -fx-text-fill: -gray;
-    -fx-icon-color: -gray;
+    -fx-text-fill: -wa-gray;
+    -fx-icon-color: -wa-gray;
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }
