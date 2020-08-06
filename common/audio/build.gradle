@@ -3,10 +3,8 @@ apply plugin: 'maven'
 group = 'org.wycliffeassociates.otter.common'
 version = '0.0.1'
 
-repositories {
-    maven {
-        url "${waNexusUrl}/repository/maven-public"
-    }
+dependencies {
+    testImplementation "junit:junit:$junitVer"
 }
 
 uploadArchives {
@@ -35,8 +33,4 @@ uploadArchives {
             }
         }
     }
-}
-
-dependencies {
-    testImplementation "junit:junit:$junitVer"
 }
