@@ -139,6 +139,7 @@ dependencies {
     //WA Libraries
     implementation project(':assets')
     implementation project(':common')
+    implementation project(':common:audio')
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
     implementation project(':jvm:utils')

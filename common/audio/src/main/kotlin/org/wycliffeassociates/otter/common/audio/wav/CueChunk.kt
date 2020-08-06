@@ -230,7 +230,9 @@ class CueChunk : RiffChunk {
         chunk.order(ByteOrder.LITTLE_ENDIAN)
 
         // Skip List Chunks that are not subtype "adtl"
-        if (chunk.remaining() < CHUNK_LABEL_SIZE || ADTL_LABEL != chunk.getText(CHUNK_LABEL_SIZE)) {
+        if (chunk.remaining() < CHUNK_LABEL_SIZE || ADTL_LABEL != chunk.getText(
+                CHUNK_LABEL_SIZE
+            )) {
             return
         }
 
@@ -263,13 +265,17 @@ private class CueListBuilder {
     fun addLocation(id: Int, location: Int?) {
         map[id]?.let {
             it.location = location
-        } ?: map.put(id, TempCue(location, null))
+        } ?: map.put(id,
+            TempCue(location, null)
+        )
     }
 
     fun addLabel(id: Int, label: String) {
         map[id]?.let {
             it.label = label
-        } ?: map.put(id, TempCue(null, label))
+        } ?: map.put(id,
+            TempCue(null, label)
+        )
     }
 
     fun build(): List<WavCue> {

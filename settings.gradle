@@ -9,7 +9,8 @@
 
 rootProject.name = 'otter'
 
-include ':common', 
+include ':common',
+        ':common:audio',
         ':jvm:utils', 
         ':jvm:device', 
         ':jvm:controls',
@@ -19,3 +20,5 @@ include ':common',
         ':jvm:recorderapp', 
         ':jvm',
         ':assets'
+include 'audio'
+
