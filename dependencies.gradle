@@ -1,4 +1,7 @@
 ext {
+    // Repository
+    waNexusUrl = "https://nexus-registry.walink.org"
+
     // Plugins
     javafxPluginVer = '0.0.8'
     jooqPluginVer = '3.0.3'

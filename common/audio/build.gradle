@@ -1,3 +1,33 @@
+apply plugin: 'maven'
+
+group = 'org.wycliffeassociates.otter.audio'
+version = '0.0.1'
+
+repositories {
+    maven {
+        url "${waNexusUrl}/repository/maven-public"
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "${waNexusUrl}/repository/maven-releases") {
+                authentication(
+                        userName: System.getenv("WA_NEXUS_USER"),
+                        password: System.getenv("WA_NEXUS_PASSWORD")
+                )
+            }
+            snapshotRepository(url: "${waNexusUrl}/repository/maven-snapshots") {
+                authentication(
+                        userName: System.getenv("WA_NEXUS_USER"),
+                        password: System.getenv("WA_NEXUS_PASSWORD")
+                )
+            }
+        }
+    }
+}
+
 dependencies {
     testImplementation "junit:junit:$junitVer"
 }
