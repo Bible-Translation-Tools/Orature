@@ -31,6 +31,7 @@ dependencies {
 
     //WA Libraries
     implementation project(':common')
+    implementation project(':common:audio')
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
     implementation project(':jvm:workbookplugin')

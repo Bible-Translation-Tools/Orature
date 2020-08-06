@@ -48,7 +48,8 @@ class WavFile private constructor() {
     val totalFrames: Int
         get() = totalAudioLength / frameSizeInBytes
 
-    internal var totalAudioLength = 0
+    var totalAudioLength = 0
+        internal set
     internal var totalDataLength = 0
 
     val metadata = WavMetadata()
@@ -202,6 +203,10 @@ class WavFile private constructor() {
         // the use block will write nothing, but will call .close()
         // which will truncate the file at the end of the audio section,
         // write out metadata, and update the header
-        WavOutputStream(this, append = true, buffered = true).use {}
+        WavOutputStream(
+            this,
+            append = true,
+            buffered = true
+        ).use {}
     }
 }

@@ -4,4 +4,5 @@ dependencies {
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
 
     implementation project(':common')
+    implementation project(':common:audio')
 }
