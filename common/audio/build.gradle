@@ -10,16 +10,16 @@ dependencies {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "${waNexusUrl}/repository/maven-releases") {
+            repository(url: "${System.getenv("NEXUS_URL")}/repository/maven-releases") {
                 authentication(
-                        userName: System.getenv("WA_NEXUS_USER"),
-                        password: System.getenv("WA_NEXUS_PASSWORD")
+                        userName: System.getenv("NEXUS_USER"),
+                        password: System.getenv("NEXUS_PASSWORD")
                 )
             }
-            snapshotRepository(url: "${waNexusUrl}/repository/maven-snapshots") {
+            snapshotRepository(url: "${System.getenv("NEXUS_URL")}/repository/maven-snapshots") {
                 authentication(
-                        userName: System.getenv("WA_NEXUS_USER"),
-                        password: System.getenv("WA_NEXUS_PASSWORD")
+                        userName: System.getenv("NEXUS_USER"),
+                        password: System.getenv("NEXUS_PASSWORD")
                 )
             }
             pom.project {
