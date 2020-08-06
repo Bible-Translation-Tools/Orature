@@ -20,5 +20,3 @@ include ':common',
         ':jvm:recorderapp', 
         ':jvm',
         ':assets'
-include 'audio'
-
