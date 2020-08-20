@@ -90,11 +90,11 @@ class AudioPlayerController(
 
     private fun startProgressUpdate(): Disposable {
         return Observable
-            .interval(200, TimeUnit.MILLISECONDS)
+            .interval(8, TimeUnit.MILLISECONDS)
             .observeOnFx()
             .subscribe {
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
-                    audioSlider.value = playbackPosition()
+                    audioSlider.value = playbackPosition().toDouble()
                 }
             }
     }
@@ -118,8 +118,8 @@ class AudioPlayerController(
         player?.let {
             it.seek(location)
             val total = it.getAbsoluteDurationInFrames()
-            val sliderPos = (location / total.toDouble()).times(100)
-            audioSlider.value = sliderPos
+            // val sliderPos = (location / total.toDouble()) * it.getAbsoluteDurationInFrames()
+            audioSlider.value = location.toDouble()
             if(!it.isPlaying()) {
                 startAtLocation = location
             }
@@ -137,11 +137,9 @@ class AudioPlayerController(
         }
     }
 
-    private fun playbackPosition(): Double {
+    private fun playbackPosition(): Int {
         return player?.let {
-            val position = it.getAbsoluteLocationInFrames()
-            val total = it.getAbsoluteDurationInFrames()
-            (position / total.toDouble()).times(100)
-        } ?: 0.0
+            it.getAbsoluteLocationInFrames()
+        } ?: 0
     }
 }
