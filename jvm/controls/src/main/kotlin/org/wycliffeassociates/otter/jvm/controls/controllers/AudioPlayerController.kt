@@ -118,7 +118,6 @@ class AudioPlayerController(
         player?.let {
             it.seek(location)
             val total = it.getAbsoluteDurationInFrames()
-            // val sliderPos = (location / total.toDouble()) * it.getAbsoluteDurationInFrames()
             audioSlider.value = location.toDouble()
             if(!it.isPlaying()) {
                 startAtLocation = location
