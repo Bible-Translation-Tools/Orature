@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
+import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
@@ -25,18 +26,19 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     init {
         children.clear()
-        val region = StackPane()
+        val region = Region()
+        region.prefWidth = 500.0
+        region.prefHeight = 500.0
         waveformImage.build(
             control.file,
             0,
             Color.GRAY,
             Color.WHITE
         ).subscribe { image ->
-            region.clear()
             region.add(
                 ImageView(image).apply {
-                    fitHeightProperty().bind(region.prefHeightProperty())
-                    fitWidthProperty().bind(region.prefWidthProperty())
+                    fitHeightProperty().bind(region.heightProperty())
+                    fitWidthProperty().bind(region.widthProperty())
                 }
             )
             region.add(thumb)
@@ -46,7 +48,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         thumb.width = resizeThumbWidth()
         thumb.layoutY = 5.0
 
-        thumb.heightProperty().bind(control.prefHeightProperty() - 10)
+        thumb.heightProperty().bind(region.heightProperty() - 10)
         control.valueProperty().onChange { moveThumb() }
         control.widthProperty().onChange {
             moveThumb()
@@ -56,10 +58,10 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     private fun moveThumb() {
         val xFinal = min(
-            (control.valueProperty().value / control.max) * control.prefWidthProperty().value,
-            control.prefWidthProperty().value - thumb.widthProperty().value
+            (control.valueProperty().value / control.max) * control.widthProperty().value,
+            control.widthProperty().value - thumb.widthProperty().value
         )
-        println("controlWidth ${control.prefWidthProperty().value} rectWidth ${thumb.widthProperty().value}")
+        println("controlWidth ${control.widthProperty().value} rectWidth ${thumb.widthProperty().value}")
         println("xfin is $xFinal")
         val xCurrent = thumb.layoutX
         thumb.translateX = xFinal - xCurrent

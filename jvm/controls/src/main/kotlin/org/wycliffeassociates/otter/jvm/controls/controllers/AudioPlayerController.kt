@@ -117,7 +117,6 @@ class AudioPlayerController(
     fun seek(location: Int) {
         player?.let {
             it.seek(location)
-            val total = it.getAbsoluteDurationInFrames()
             audioSlider.value = location.toDouble()
             if(!it.isPlaying()) {
                 startAtLocation = location
