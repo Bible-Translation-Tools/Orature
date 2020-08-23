@@ -26,8 +26,6 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     init {
         children.clear()
         val region = Region()
-        region.prefWidth = 500.0
-        region.prefHeight = 500.0
         waveformImage.build(
             control.file,
             0,
