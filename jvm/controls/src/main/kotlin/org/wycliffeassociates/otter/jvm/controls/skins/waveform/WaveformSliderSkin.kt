@@ -4,7 +4,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
-import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
@@ -61,8 +60,6 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             (control.valueProperty().value / control.max) * control.widthProperty().value,
             control.widthProperty().value - thumb.widthProperty().value
         )
-        println("controlWidth ${control.widthProperty().value} rectWidth ${thumb.widthProperty().value}")
-        println("xfin is $xFinal")
         val xCurrent = thumb.layoutX
         thumb.translateX = xFinal - xCurrent
     }
@@ -72,7 +69,6 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         val framesInHighlight = control.file.sampleRate * samplesOnScreen
         val framesPerPixel = control.file.totalFrames / max(control.widthProperty().value, 1.0)
         val pixelsInHighlight = max(framesInHighlight / framesPerPixel, 1.0)
-        println("pix $pixelsInHighlight")
         thumb.width = pixelsInHighlight
         return pixelsInHighlight
     }
