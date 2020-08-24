@@ -1,7 +1,7 @@
 apply plugin: 'maven'
 
 group = 'org.wycliffeassociates.otter.common'
-version = '0.0.1'
+version = '0.0.2-SNAPSHOT'
 
 dependencies {
     testImplementation "junit:junit:$junitVer"
