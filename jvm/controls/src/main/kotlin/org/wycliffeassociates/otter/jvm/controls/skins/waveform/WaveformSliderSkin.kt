@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
+import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -9,6 +10,7 @@ import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import kotlin.math.max
 import kotlin.math.min
@@ -22,30 +24,35 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         arcHeight = 10.0
         arcWidth = 10.0
     }
+    val root = Region()
 
     init {
         children.clear()
-        val region = Region()
-        waveformImage.build(
-            control.file,
-            0,
-            Color.GRAY,
-            Color.WHITE
-        ).subscribe { image ->
-            region.add(
-                ImageView(image).apply {
-                    fitHeightProperty().bind(region.heightProperty())
-                    fitWidthProperty().bind(region.widthProperty())
+
+        control.player.onChangeAndDoNow { _player ->
+            _player?.let { player ->
+                player.getAudioReader()?.let { reader ->
+                    reader.seek(0)
+                    waveformImage.build(
+                        reader,0, Color.RED, Color.WHITE
+                    ).subscribe { image: Image ->
+                        val imageView = ImageView(image).apply {
+                            fitHeightProperty().bind(root.heightProperty())
+                            fitWidthProperty().bind(root.widthProperty())
+                        }
+                        root.getChildList()?.clear()
+                        root.add(imageView)
+                        root.add(thumb)
+                    }
                 }
-            )
-            region.add(thumb)
+            }
         }
-        children.add(region)
+
+        children.add(root)
         thumb.fill = Paint.valueOf("#00000015")
         thumb.width = resizeThumbWidth()
         thumb.layoutY = 5.0
-
-        thumb.heightProperty().bind(region.heightProperty() - 10)
+        thumb.heightProperty().bind(root.heightProperty() - 10)
         control.valueProperty().onChange { moveThumb() }
         control.widthProperty().onChange {
             moveThumb()
@@ -63,11 +70,15 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     }
 
     private fun resizeThumbWidth(): Double {
-        val samplesOnScreen = 10
-        val framesInHighlight = control.file.sampleRate * samplesOnScreen
-        val framesPerPixel = control.file.totalFrames / max(control.widthProperty().value, 1.0)
-        val pixelsInHighlight = max(framesInHighlight / framesPerPixel, 1.0)
-        thumb.width = pixelsInHighlight
-        return pixelsInHighlight
+        return control.player.value?.getAudioReader()?.let { reader ->
+            reader?.let {
+                val secondsToHighlight = 0
+                val framesInHighlight = it.sampleRate * secondsToHighlight
+                val framesPerPixel = it.totalFrames / max(control.widthProperty().value, 1.0)
+                val pixelsInHighlight = max(framesInHighlight / framesPerPixel, 1.0)
+                thumb.width = pixelsInHighlight
+                return pixelsInHighlight
+            }
+        } ?: 0.0
     }
 }

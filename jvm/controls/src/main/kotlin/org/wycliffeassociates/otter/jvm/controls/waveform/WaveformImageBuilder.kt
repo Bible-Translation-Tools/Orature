@@ -7,6 +7,7 @@ import io.reactivex.schedulers.Schedulers
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import java.nio.ByteBuffer
@@ -20,7 +21,7 @@ class WaveformImageBuilder {
     private val height = 65537
 
     fun build(
-        audio: WavFile,
+        reader: AudioFileReader,
         padding: Int,
         wavColor: Color = Color.BLACK,
         background: Color = Color.TRANSPARENT
@@ -29,7 +30,6 @@ class WaveformImageBuilder {
             val width = Screen.getMainScreen().platformWidth
             if (width > 0) {
                 val img = WritableImage(width + (2 * padding), height)
-                val reader = WavFileReader(audio)
                 val (globalMin, globalMax) = drawWaveform(img, reader, width, background, wavColor)
                 val newHeight = globalMax - globalMin
                 val image2 = WritableImage(
@@ -49,7 +49,7 @@ class WaveformImageBuilder {
 
     fun drawWaveform(
         img: WritableImage,
-        reader: WavFileReader,
+        reader: AudioFileReader,
         width: Int,
         background: Color,
         wavColor: Color
