@@ -15,4 +15,5 @@ dependencies {
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated
     // to Jackson 2.9.8+.
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVer"
+    implementation project(':common:audio')
 }
