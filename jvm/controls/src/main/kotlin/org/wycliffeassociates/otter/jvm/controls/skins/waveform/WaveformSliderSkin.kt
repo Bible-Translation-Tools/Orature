@@ -48,12 +48,15 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         }
 
         children.add(root)
-        thumb.fill = Paint.valueOf("#00000015")
-        thumb.width = resizeThumbWidth()
-        thumb.layoutY = 5.0
-        thumb.heightProperty().bind(root.heightProperty() - 10)
+        
+        control.thumbFillProperty.onChangeAndDoNow { if(it != null) {thumb.fill = it} }
+        control.secondsToHighlightProperty.onChange { resizeThumbWidth() }
+        control.thumbLineColorProperty.onChangeAndDoNow { if(it != null) { thumb.fill = it } }
+
+        thumb.layoutY = control.padding.top
+        thumb.heightProperty().bind(root.heightProperty() - control.padding.top - control.padding.bottom)
         control.valueProperty().onChange { moveThumb() }
-        control.widthProperty().onChange {
+        control.widthProperty().onChangeAndDoNow {
             moveThumb()
             resizeThumbWidth()
         }
@@ -71,7 +74,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     private fun resizeThumbWidth(): Double {
         return control.player.value?.getAudioReader()?.let { reader ->
             reader?.let {
-                val secondsToHighlight = 0
+                val secondsToHighlight = control.secondsToHighlightProperty.value
                 val framesInHighlight = it.sampleRate * secondsToHighlight
                 val framesPerPixel = it.totalFrames / max(control.widthProperty().value, 1.0)
                 val pixelsInHighlight = max(framesInHighlight / framesPerPixel, 1.0)
