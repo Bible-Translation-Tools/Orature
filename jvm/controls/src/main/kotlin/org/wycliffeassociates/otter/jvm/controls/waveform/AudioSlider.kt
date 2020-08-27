@@ -23,6 +23,10 @@ class AudioSlider(
     val player = SimpleObjectProperty<IAudioPlayer>()
 
     init {
+        // initial height/width to prevent the control from otherwise growing indefinitely
+        prefHeight = 10.0
+        prefWidth = 50.0
+
         player.onChangeAndDoNow { player ->
             player?.let {
                 setMax(it.getAbsoluteDurationInFrames().toDouble())
