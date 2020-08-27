@@ -31,10 +31,15 @@ class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
         var index = 0
         for ((i, c) in cues.withIndex()) {
             if (c.location < location) {
-                index = i
+                index = i + 1
             }
         }
-        cues.add(index, WavCue(location, "${index+1}"))
+        cues.add(index, WavCue(location, "${index + 1}"))
+        cues.replaceAll {
+            if (it.location > location) {
+                WavCue(it.location, "${it.label.toInt() + 1}")
+            } else it
+        }
         markerCountProperty.value = cues.size
     }
 
@@ -52,7 +57,7 @@ class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
         cues.sortBy { it.location }
         for ((i, cue) in cues.reversed().withIndex()) {
             if (location > cue.location) {
-                return cues.reversed().get(min(cues.size-1, i+1)).location
+                return cues.reversed().get(min(cues.size - 1, i + 1)).location
             }
         }
         return 0
