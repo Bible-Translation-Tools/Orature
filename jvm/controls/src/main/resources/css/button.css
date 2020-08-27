@@ -31,8 +31,8 @@
 }
 
 .btn--primary:hover {
-    -fx-background-color: -primary-dark;
-    -fx-effect: -level1;
+    -fx-background-color: -wa-primary-dark;
+    -fx-effect: -wa-level1;
 }
 
 .btn--primary:disabled {
