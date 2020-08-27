@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
+private const val ANIMATION_REFRESH_MS = 16
+
 class AudioPlayerController(
     private var player: IAudioPlayer?,
     private val audioSlider: Slider
@@ -90,7 +92,7 @@ class AudioPlayerController(
 
     private fun startProgressUpdate(): Disposable {
         return Observable
-            .interval(8, TimeUnit.MILLISECONDS)
+            .interval(ANIMATION_REFRESH_MS, TimeUnit.MILLISECONDS)
             .observeOnFx()
             .subscribe {
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
