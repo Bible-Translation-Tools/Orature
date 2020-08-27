@@ -12,6 +12,8 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
+private const val ANIMATION_REFRESH_MS = 16L
+
 class AudioPlayerController(
     private var player: IAudioPlayer?,
     private val audioSlider: Slider
@@ -47,6 +49,7 @@ class AudioPlayerController(
                             isPlayingProperty.set(false)
                             if (it == AudioPlayerEvent.COMPLETE) {
                                 audioSlider.value = 0.0
+                                _player.getAudioReader()?.seek(0)
                             }
                         }
                     }
@@ -90,11 +93,11 @@ class AudioPlayerController(
 
     private fun startProgressUpdate(): Disposable {
         return Observable
-            .interval(200, TimeUnit.MILLISECONDS)
+            .interval(ANIMATION_REFRESH_MS, TimeUnit.MILLISECONDS)
             .observeOnFx()
             .subscribe {
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
-                    audioSlider.value = playbackPosition()
+                    audioSlider.value = playbackPosition().toDouble()
                 }
             }
     }
@@ -117,9 +120,7 @@ class AudioPlayerController(
     fun seek(location: Int) {
         player?.let {
             it.seek(location)
-            val total = it.getAbsoluteDurationInFrames()
-            val sliderPos = (location / total.toDouble()).times(100)
-            audioSlider.value = sliderPos
+            audioSlider.value = location.toDouble()
             if(!it.isPlaying()) {
                 startAtLocation = location
             }
@@ -137,11 +138,9 @@ class AudioPlayerController(
         }
     }
 
-    private fun playbackPosition(): Double {
+    private fun playbackPosition(): Int {
         return player?.let {
-            val position = it.getAbsoluteLocationInFrames()
-            val total = it.getAbsoluteDurationInFrames()
-            (position / total.toDouble()).times(100)
-        } ?: 0.0
+            it.getAbsoluteLocationInFrames()
+        } ?: 0
     }
 }
