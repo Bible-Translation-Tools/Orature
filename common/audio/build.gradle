@@ -1,3 +1,36 @@
+apply plugin: 'maven'
+
+group = 'org.wycliffeassociates.otter.common'
+version = '0.0.2-SNAPSHOT'
+
 dependencies {
     testImplementation "junit:junit:$junitVer"
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "${System.getenv("NEXUS_URL")}/repository/maven-releases") {
+                authentication(
+                        userName: System.getenv("NEXUS_USER"),
+                        password: System.getenv("NEXUS_PASSWORD")
+                )
+            }
+            snapshotRepository(url: "${System.getenv("NEXUS_URL")}/repository/maven-snapshots") {
+                authentication(
+                        userName: System.getenv("NEXUS_USER"),
+                        password: System.getenv("NEXUS_PASSWORD")
+                )
+            }
+            pom.project {
+                licenses {
+                    license {
+                        name 'GNU General Public License, Version 3'
+                        url 'https://www.gnu.org/licenses/gpl-3.0.txt'
+                        distribution 'repo'
+                    }
+                }
+            }
+        }
+    }
 }

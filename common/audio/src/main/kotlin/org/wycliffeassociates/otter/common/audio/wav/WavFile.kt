@@ -50,9 +50,11 @@ class WavFile private constructor() {
 
     var totalAudioLength = 0
         internal set
+
     internal var totalDataLength = 0
 
-    val metadata = WavMetadata()
+    var metadata = WavMetadata()
+        private set
 
     val hasMetadata
         get() = metadata.totalSize > 0
@@ -67,8 +69,9 @@ class WavFile private constructor() {
      * information suggesting the file is not a wav file.
      */
     @Throws(InvalidWavFileException::class)
-    constructor(file: File) : this() {
+    constructor(file: File, wavMetadata: WavMetadata = WavMetadata()) : this() {
         this.file = file
+        this.metadata = wavMetadata
         parseHeader()
         parseMetadata()
     }
@@ -86,9 +89,11 @@ class WavFile private constructor() {
         file: File,
         channels: Int = DEFAULT_CHANNELS,
         sampleRate: Int = DEFAULT_SAMPLE_RATE,
-        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE
+        bitsPerSample: Int = DEFAULT_BITS_PER_SAMPLE,
+        wavMetadata: WavMetadata = WavMetadata()
     ) : this() {
         this.file = file
+        this.metadata = wavMetadata
         this.channels = channels
         this.sampleRate = sampleRate
         this.bitsPerSample = bitsPerSample
