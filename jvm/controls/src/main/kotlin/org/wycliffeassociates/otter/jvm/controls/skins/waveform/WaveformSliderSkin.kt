@@ -48,10 +48,10 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         }
 
         children.add(root)
-        
+
         control.thumbFillProperty.onChangeAndDoNow { if(it != null) {thumb.fill = it} }
         control.secondsToHighlightProperty.onChange { resizeThumbWidth() }
-        control.thumbLineColorProperty.onChangeAndDoNow { if(it != null) { thumb.fill = it } }
+        control.thumbLineColorProperty.onChangeAndDoNow { if(it != null) { thumb.stroke = it } }
 
         thumb.layoutY = control.padding.top
         thumb.heightProperty().bind(root.heightProperty() - control.padding.top - control.padding.bottom)
