@@ -49,6 +49,7 @@ class AudioPlayerController(
                             isPlayingProperty.set(false)
                             if (it == AudioPlayerEvent.COMPLETE) {
                                 audioSlider.value = 0.0
+                                _player.getAudioReader()?.seek(0)
                             }
                         }
                     }

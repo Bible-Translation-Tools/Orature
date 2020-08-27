@@ -73,6 +73,10 @@ class AudioBufferPlayer : IAudioPlayer {
         listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
     }
 
+    override fun getAudioReader(): AudioFileReader? {
+        return reader
+    }
+
     override fun play() {
         if (!player.isActive) {
             listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }

@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.device
 
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 
 interface IAudioPlayer {
@@ -7,6 +8,7 @@ interface IAudioPlayer {
     fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit)
     fun load(file: File)
     fun loadSection(file: File, frameStart: Int, frameEnd: Int)
+    fun getAudioReader(): AudioFileReader?
     fun play()
     fun pause()
     fun stop()

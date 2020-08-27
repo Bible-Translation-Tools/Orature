@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
@@ -10,7 +11,7 @@ class MinimapFragment : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    val slider = slider { }
+    val slider = AudioSlider().apply { player.set(viewModel.audioPlayer) }
 
     override val root = hbox {
         alignment = Pos.CENTER_LEFT
