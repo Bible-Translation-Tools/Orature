@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
-private const val ANIMATION_REFRESH_MS = 16
+private const val ANIMATION_REFRESH_MS = 16L
 
 class AudioPlayerController(
     private var player: IAudioPlayer?,
