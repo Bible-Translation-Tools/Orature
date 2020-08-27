@@ -18,7 +18,10 @@ class MarkerView : View() {
     val playbackControls = PlaybackControlsFragment()
     
     init {
-        FX.stylesheets.setAll(userAgentStylesheet)
+        FX.stylesheets.setAll(
+            javaClass.getResource("/css/button.css").toExternalForm(),
+            userAgentStylesheet
+        )
         viewModel.initializeAudioController(minimap.slider)
     }
 
