@@ -28,7 +28,9 @@ class VerseMarkerViewModel : ViewModel() {
         val audioFile = File(scope.parameters.named["wav"])
         val wav = WavFile(audioFile)
         val totalMarkers: Int =
-            scope.parameters.named["marker_total"]?.toInt() ?: 0
+            scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
+        headerTitle.set(scope.parameters.named["action_title"])
+        headerSubtitle.set(scope.parameters.named["content_title"])
         markers = VerseMarkers(wav, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("${it}/$totalMarkers")
