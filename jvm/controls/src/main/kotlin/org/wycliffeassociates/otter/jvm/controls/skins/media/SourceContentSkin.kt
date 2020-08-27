@@ -14,6 +14,7 @@ import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -35,7 +36,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var playBtn: Button
 
     @FXML
-    lateinit var audioSlider: Slider
+    lateinit var audioSlider: AudioSlider
 
     @FXML
     lateinit var sourceAudioNotAvailable: HBox
@@ -79,6 +80,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initAudioControls() {
+        audioSlider.apply {
+            player.bind(sourceContent.audioPlayerProperty)
+        }
+
         sourceAudioContainer.apply {
             visibleWhen(sourceContent.sourceAudioAvailableProperty)
             managedWhen(visibleProperty())
