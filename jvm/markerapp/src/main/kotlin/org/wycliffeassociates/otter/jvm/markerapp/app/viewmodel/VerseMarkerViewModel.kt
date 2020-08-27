@@ -27,7 +27,6 @@ class VerseMarkerViewModel : ViewModel() {
         val scope = scope as ParameterizedScope
         val audioFile = File(scope.parameters.named["wav"])
         val wav = WavFile(audioFile)
-        val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
             scope.parameters.named["marker_total"]?.toInt() ?: 10
         markers = VerseMarkers(wav, totalMarkers)

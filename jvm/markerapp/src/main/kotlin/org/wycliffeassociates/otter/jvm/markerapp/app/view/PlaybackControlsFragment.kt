@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.geometry.Pos
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
@@ -68,13 +69,21 @@ class PlaybackControlsFragment : Fragment() {
         }
     }
 
-    override val root = hbox {
-        alignment = Pos.CENTER
+    override val root = borderpane {
         styleClass.add(rootStyles)
-        add(previousBtn)
-        add(playBtn)
-        add(nextBtn)
-        hbox {
+        left = region {
+            prefWidthProperty().bind(closeBtn.widthProperty())
+        }
+        center = hbox {
+            hgrow = Priority.ALWAYS
+
+            styleClass.add(rootStyles)
+            alignment = Pos.CENTER
+            add(previousBtn)
+            add(playBtn)
+            add(nextBtn)
+        }
+        right = hbox {
             alignment = Pos.CENTER_RIGHT
             add(closeBtn)
         }
