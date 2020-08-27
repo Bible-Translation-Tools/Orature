@@ -10,6 +10,7 @@ import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -25,7 +26,7 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
     @FXML
     lateinit var audioPlayer: HBox
     @FXML
-    lateinit var audioSlider: Slider
+    lateinit var audioSlider: AudioSlider
 
     lateinit var audioController: AudioPlayerController
 
@@ -35,6 +36,7 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
     }
 
     private fun initializeControl() {
+        audioSlider.player.bind(playerNode.audioPlayerProperty)
         audioController = AudioPlayerController(playerNode.audioPlayerProperty.value, audioSlider)
         playBtn.setOnMouseClicked {
             audioController.toggle()

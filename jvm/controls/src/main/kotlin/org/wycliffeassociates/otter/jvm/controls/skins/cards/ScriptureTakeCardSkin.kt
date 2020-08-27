@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -32,7 +33,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     @FXML
     lateinit var deleteBtn: Button
     @FXML
-    lateinit var slider: Slider
+    lateinit var slider: AudioSlider
     @FXML
     lateinit var takeLabel: Label
     @FXML
@@ -64,6 +65,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     }
 
     fun initController() {
+        slider.player.bind(card.audioPlayerProperty())
         audioPlayerController = AudioPlayerController(card.audioPlayerProperty().value, slider)
         audioPlayerController.isPlayingProperty.onChangeAndDoNow { isPlaying ->
             if (isPlaying != null && isPlaying != true) {
