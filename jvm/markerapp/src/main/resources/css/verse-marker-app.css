@@ -71,5 +71,35 @@
 
 .vm-play-controls__seek-btn .ikonli-font-icon {
     -fx-icon-size: 18px;
-    -fx-icon-color: "#FFFFFF"
+    -fx-icon-color: "#FFFFFF";
+}
+
+.vm-play-controls__add-marker-btn {
+    -fx-pref-width: 60px;
+    -fx-pref-height: 60px;
+}
+
+.vm-play-controls__add-marker-btn .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-icon-color: black;
+}
+
+.vm-play-controls__add-marker-container {
+    -fx-padding: 0 0 28px 0;
+}
+
+.vm-continue-button {
+    -fx-min-height: 30px;
+    -fx-min-width: 160px;
+    -fx-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-font-size: 14px;
+}
+
+.vm-continue-button * {
+    -fx-fill: #282CBD;
+}
+
+.vm-continue-button > .ikonli-font-icon {
+    -fx-icon-size: 28px;
 }

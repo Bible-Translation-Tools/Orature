@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
+import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
@@ -29,6 +30,8 @@ class VerseMarkerViewModel : ViewModel() {
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
             scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
+        headerTitle.set(scope.parameters.named["action_title"])
+        headerSubtitle.set(scope.parameters.named["content_title"])
         markers = VerseMarkers(wav, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("${it}/$totalMarkers")
@@ -51,5 +54,15 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun seekPrevious() {
         audioController?.seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+    }
+
+    fun writeMarkers(): Completable {
+        if (isPlayingProperty.value) audioController?.toggle()
+        audioPlayer.close()
+        return markers.writeMarkers()
+    }
+    
+    fun placeMarker() {
+        markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
     }
 }
