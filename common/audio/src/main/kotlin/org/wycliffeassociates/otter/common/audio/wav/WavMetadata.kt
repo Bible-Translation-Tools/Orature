@@ -3,10 +3,24 @@ package org.wycliffeassociates.otter.common.audio.wav
 import java.io.OutputStream
 import java.nio.ByteBuffer
 
-class WavMetadata {
+class WavMetadata(parsableChunks: List<RiffChunk>? = null) {
 
-    private val cueChunk = CueChunk()
-    private val chunks = setOf<RiffChunk>(cueChunk)
+    private val cueChunk: CueChunk
+    private val chunks: Set<RiffChunk>
+
+    init {
+        chunks = mutableSetOf()
+        if (parsableChunks != null) {
+            chunks.addAll(parsableChunks)
+        }
+        val cue = chunks.find { it is CueChunk }
+        if (cue != null) {
+            cueChunk = cue as CueChunk
+        } else {
+            cueChunk = CueChunk()
+            chunks.add(cueChunk)
+        }
+    }
 
     val totalSize
         get() = chunks.sumBy { it.totalSize }
