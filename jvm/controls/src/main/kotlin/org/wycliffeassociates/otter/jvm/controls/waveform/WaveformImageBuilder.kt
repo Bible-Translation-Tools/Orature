@@ -17,7 +17,7 @@ import kotlin.math.max
 const val SIGNED_SHORT_MAX = 32767
 
 class WaveformImageBuilder {
-    private val height = 65537
+    private val height = SIGNED_SHORT_MAX * 2
 
     fun build(
         audio: WavFile,
@@ -35,8 +35,8 @@ class WaveformImageBuilder {
                 val image2 = WritableImage(
                     img.pixelReader,
                     0,
-                    globalMin - newHeight - 1000,
-                    width, (newHeight + 1000) * 2
+                    globalMin - newHeight,
+                    width, (newHeight) * 2
                 )
                 image2 as Image
             } else {
