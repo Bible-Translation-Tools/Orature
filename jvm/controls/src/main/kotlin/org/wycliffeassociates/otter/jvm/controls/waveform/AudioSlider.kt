@@ -19,6 +19,7 @@ class AudioSlider(
         player.onChangeAndDoNow { player ->
             player?.let {
                 setMax(it.getAbsoluteDurationInFrames().toDouble())
+                it.seek(0)
             }
         }
     }

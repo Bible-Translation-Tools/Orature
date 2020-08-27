@@ -33,13 +33,12 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             _player?.let { player ->
                 player.getAudioReader()?.let { reader ->
                     reader.seek(0)
-                    waveformImage.build(
-                        reader,0, Color.RED, Color.WHITE
-                    ).subscribe { image: Image ->
+                    waveformImage.build(reader,0).subscribe { image: Image ->
                         val imageView = ImageView(image).apply {
                             fitHeightProperty().bind(root.heightProperty())
                             fitWidthProperty().bind(root.widthProperty())
                         }
+                        reader.seek(0)
                         root.getChildList()?.clear()
                         root.add(imageView)
                         root.add(thumb)
