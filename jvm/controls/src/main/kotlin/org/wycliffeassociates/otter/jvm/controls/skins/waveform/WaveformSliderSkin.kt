@@ -33,7 +33,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             _player?.let { player ->
                 player.getAudioReader()?.let { reader ->
                     reader.seek(0)
-                    waveformImage.build(reader,0).subscribe { image: Image ->
+                    waveformImage.build(reader, 0).subscribe { image: Image ->
                         val imageView = ImageView(image).apply {
                             fitHeightProperty().bind(root.heightProperty())
                             fitWidthProperty().bind(root.widthProperty())
@@ -49,10 +49,17 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
         children.add(root)
 
-        control.thumbFillProperty.onChangeAndDoNow { if(it != null) {thumb.fill = it} }
+        control.thumbFillProperty.onChangeAndDoNow {
+            if (it != null) {
+                thumb.fill = it
+            }
+        }
+        control.thumbLineColorProperty.onChangeAndDoNow {
+            if (it != null) {
+                thumb.stroke = it
+            }
+        }
         control.secondsToHighlightProperty.onChange { resizeThumbWidth() }
-        control.thumbLineColorProperty.onChangeAndDoNow { if(it != null) { thumb.stroke = it } }
-
         thumb.layoutY = control.padding.top
         thumb.heightProperty().bind(root.heightProperty() - control.padding.top - control.padding.bottom)
         control.valueProperty().onChange { moveThumb() }
