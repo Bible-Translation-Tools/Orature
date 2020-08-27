@@ -15,11 +15,13 @@ class PlaybackControlsFragment : Fragment() {
     private val playButtonStyle = "vm-play-controls__play-btn"
     private val roundedButtonStyle = "vm-play-controls__btn--rounded"
     private val seekButtonStyle = "vm-play-controls__seek-btn"
+    private val continueButtonStyle = "vm-continue-button"
 
     private val playIcon = FontIcon("fa-play")
     private val pauseIcon = FontIcon("fa-pause")
     private val nextIcon = FontIcon("gmi-skip-next")
     private val previousIcon = FontIcon("gmi-skip-previous")
+    private val continueIcon = FontIcon("fas-check")
 
     private val playBtn = button {
         styleClass.addAll(
@@ -49,7 +51,9 @@ class PlaybackControlsFragment : Fragment() {
     }
 
     private val closeBtn = button {
-        text = "Continue"
+        text = messages["continue"]
+        graphic = continueIcon
+        styleClass.add("vm-continue-button")
         setOnAction {
             (scope as ParameterizedScope).let {
                 viewModel.writeMarkers().subscribe {

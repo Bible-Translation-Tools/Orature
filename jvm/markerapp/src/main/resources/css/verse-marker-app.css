@@ -87,3 +87,19 @@
 .vm-play-controls__add-marker-container {
     -fx-padding: 0 0 28px 0;
 }
+
+.vm-continue-button {
+    -fx-min-height: 30px;
+    -fx-min-width: 160px;
+    -fx-background-color: white;
+    -fx-background-radius: 5px;
+    -fx-font-size: 14px;
+}
+
+.vm-continue-button * {
+    -fx-fill: #282CBD;
+}
+
+.vm-continue-button > .ikonli-font-icon {
+    -fx-icon-size: 28px;
+}
