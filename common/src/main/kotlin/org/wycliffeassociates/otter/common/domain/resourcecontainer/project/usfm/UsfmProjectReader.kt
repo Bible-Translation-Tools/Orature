@@ -112,7 +112,7 @@ private fun parseFromReader(
 
 private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<OtterTree<CollectionOrContent>> {
     val usfmText = reader.readText()
-    val parser = USFMParser()
+    val parser = USFMParser(arrayListOf("s5"))
     val doc = parser.ParseFromString(usfmText)
     val chapters = doc.GetChildMarkers(CMarker::class.java)
     return chapters.map { chapter ->
