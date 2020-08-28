@@ -1,3 +1,7 @@
+repositories {
+    maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
+}
+
 dependencies {
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
@@ -10,6 +14,9 @@ dependencies {
 
     // Resource Container
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
+
+    // USFM Tools
+    implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
 
     // Explicitly mention reflection lib so Gradle and kotlin-resource-container's Jackson
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated
