@@ -6,7 +6,6 @@ import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.model.ContainerType
-import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
@@ -204,16 +203,6 @@ class ImportResourceContainer(
             }
         }
         return destinationFile
-    }
-
-    private fun makeExpandedContainer(container: ResourceContainer): ImportResult {
-        val dublinCore = container.manifest.dublinCore
-        val containerType = ContainerType.of(dublinCore.type)
-        val mimeType = MimeType.of(dublinCore.format)
-        if (containerType == ContainerType.Bundle && mimeType == MimeType.USFM) {
-            return if (container.expandUSFMBundle()) ImportResult.SUCCESS else ImportResult.INVALID_CONTENT
-        }
-        return ImportResult.SUCCESS
     }
 
     /** @throws ImportException */

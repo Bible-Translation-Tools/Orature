@@ -11,6 +11,9 @@ dependencies {
     // Resource Container
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
 
+    // USFM Tools
+    implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
+
     // Explicitly mention reflection lib so Gradle and kotlin-resource-container's Jackson
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated
     // to Jackson 2.9.8+.
