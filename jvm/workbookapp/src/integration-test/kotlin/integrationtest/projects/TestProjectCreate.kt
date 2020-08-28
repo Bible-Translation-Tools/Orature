@@ -5,7 +5,7 @@ import org.junit.Test
 class TestProjectCreate {
     private val numberOfChaptersInHebrews: Int = 13
     private val numberOfVersesInHebrews: Int = 303
-    private val numberOfResourcesInTn: Int = 157573
+    private val numberOfResourcesInTn: Int = 157581
     private val numberOfResourcesInTnHebrews: Int = 33758
 
     @Test

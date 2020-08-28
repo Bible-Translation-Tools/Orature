@@ -67,12 +67,12 @@ class TestRcImport {
                 expected = RowCount(
                     contents = mapOf(
                         META to 1189,
-                        TEXT to 31103,
+                        TEXT to 31104,
                         TITLE to 98520,
                         BODY to 95805
                     ),
                     collections = 1256,
-                    links = 194315
+                    links = 194325
                 )
             )
     }
