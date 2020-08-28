@@ -58,7 +58,7 @@ class TestRcImport {
                         BODY to 77433
                     ),
                     collections = 1256,
-                    links = 157573
+                    links = 157581
                 )
             )
             .import("en_tq-v19-10.zip")
