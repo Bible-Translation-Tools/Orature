@@ -65,10 +65,12 @@ class AudioPlayerController(
             oldPlayer.close()
         }
         audioSlider.value = 0.0
+        audioSlider.max = player.getAbsoluteDurationInFrames().toDouble()
         this.player = player
     }
 
     private fun initializeSliderActions() {
+        seek(0)
         audioSlider.value = 0.0
         audioSlider.setOnDragDetected {
             if (player?.isPlaying() == true) {
