@@ -44,7 +44,7 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
 
     @Throws(ArrayIndexOutOfBoundsException::class)
     override fun seek(sample: Int) {
-        val index = wav.sampleIndex(sample)
+        val index = min(wav.sampleIndex(sample), mappedFile.limit())
         mappedFile.position(index)
     }
 
