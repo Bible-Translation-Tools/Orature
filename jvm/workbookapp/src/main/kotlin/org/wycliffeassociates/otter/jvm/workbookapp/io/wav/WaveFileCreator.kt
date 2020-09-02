@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.io.wav
 
-import org.wycliffeassociates.otter.common.io.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import java.io.ByteArrayInputStream
 import java.io.File
 import javax.sound.sampled.AudioFileFormat

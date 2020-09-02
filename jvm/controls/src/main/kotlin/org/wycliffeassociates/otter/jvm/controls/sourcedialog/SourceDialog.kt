@@ -15,20 +15,11 @@ import tornadofx.*
 class SourceDialog : Fragment() {
 
     val dialogTitleProperty = SimpleStringProperty()
-    var dialogTitle by dialogTitleProperty
-
     val dialogTextProperty = SimpleStringProperty()
-    var dialogText by dialogTextProperty
-
     val playerProperty = SimpleObjectProperty<IAudioPlayer>()
-    var player by playerProperty
-
     val audioAvailableProperty = SimpleBooleanProperty(false)
-    var audioAvailable by audioAvailableProperty
-
     val sourceTextProperty = SimpleStringProperty()
-    var sourceText by sourceTextProperty
-
+    val sourceContentTitleProperty = SimpleStringProperty()
     val showDialogProperty = SimpleBooleanProperty()
 
     init {
@@ -63,26 +54,21 @@ class SourceDialog : Fragment() {
                     addClass("source-dialog__label", "source-dialog__label--message")
                     visibleWhen(textProperty().isNotEmpty)
                     managedWhen(visibleProperty())
-
-                    maxWidthProperty().bind(this@borderpane.widthProperty().divide(1.5))
                 }
             }
         }
         bottom {
             add(
                 SourceContent().apply {
-                    visibleWhen(audioAvailableProperty)
-                    managedWhen(visibleProperty())
-
-                    sourceAudioLabelProperty.set(messages["sourceAudio"])
-                    sourceTextLabelProperty.set(messages["sourceText"])
-
                     sourceTextProperty.bind(this@SourceDialog.sourceTextProperty)
                     audioPlayerProperty.bind(playerProperty)
 
-                    activeSourceFormatProperty.onChange {
-                        currentWindow?.sizeToScene()
-                    }
+                    audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
+                    textNotAvailableTextProperty.set(messages["textNotAvailable"])
+                    playLabelProperty.set(messages["playSource"])
+                    pauseLabelProperty.set(messages["pauseSource"])
+
+                    contentTitleProperty.bind(sourceContentTitleProperty)
                 }
             )
         }
@@ -93,7 +79,7 @@ class SourceDialog : Fragment() {
     }
 
     override fun onUndock() {
-        player?.stop()
+        playerProperty.value?.stop()
         super.onUndock()
     }
 }

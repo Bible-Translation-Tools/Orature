@@ -45,6 +45,7 @@ tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
 subprojects {
     repositories {
         jcenter()
+        maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
     }
 
     apply plugin: 'kotlin'
@@ -66,12 +67,10 @@ subprojects {
 
     compileKotlin {
         kotlinOptions.jvmTarget = "11"
-        kotlinOptions.allWarningsAsErrors = true
     }
 
     compileTestKotlin {
         kotlinOptions.jvmTarget = "11"
-        kotlinOptions.allWarningsAsErrors = true
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']

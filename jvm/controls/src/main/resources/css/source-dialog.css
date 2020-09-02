@@ -6,7 +6,7 @@
 
 .source-dialog__label {
     -fx-font-weight: bold;
-    -fx-font-size: 16px;
+    -fx-font-size: 1.4em;
     -fx-padding: 20px;
     -fx-alignment: center;
     -fx-text-alignment: center;
@@ -16,16 +16,17 @@
 
 .source-dialog__label--message {
     -fx-font-weight: normal;
-    -fx-padding: 0 0 30px 0;
+    -fx-padding: 0 20px 20px 20px;
     -fx-text-alignment: justify;
-    -fx-text-fill: -gray-darker;
+    -fx-text-fill: -wa-gray-darker;
+    -fx-font-size: 1.5em;
 }
 
 .source-dialog__close-button {
     -fx-min-height: 40px;
     -fx-min-width: 185px;
-    -fx-background-color: -white;
-    -fx-border-color: -primary;
+    -fx-background-color: -wa-white;
+    -fx-border-color: -wa-primary;
     -fx-border-width: 2px;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
@@ -34,5 +35,5 @@
 }
 
 .source-dialog__close-button * {
-    -fx-fill: -primary;
+    -fx-fill: -wa-primary;
 }

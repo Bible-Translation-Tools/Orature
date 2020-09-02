@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.common.recorder
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.io.wav.WavFile
-import org.wycliffeassociates.otter.common.io.wav.WavOutputStream
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 
 class WavFileWriter(
     private val wav: WavFile,

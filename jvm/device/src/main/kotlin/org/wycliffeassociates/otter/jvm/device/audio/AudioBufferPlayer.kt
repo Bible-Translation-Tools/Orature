@@ -3,9 +3,9 @@ package org.wycliffeassociates.otter.jvm.device.audio
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import org.wycliffeassociates.otter.common.io.AudioFileReader
-import org.wycliffeassociates.otter.common.io.wav.WavFile
-import org.wycliffeassociates.otter.common.io.wav.WavFileReader
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import java.io.File
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
@@ -71,6 +71,10 @@ class AudioBufferPlayer : IAudioPlayer {
             )
         )
         listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+    }
+
+    override fun getAudioReader(): AudioFileReader? {
+        return reader
     }
 
     override fun play() {

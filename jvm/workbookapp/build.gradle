@@ -144,6 +144,7 @@ dependencies {
     //WA Libraries
     implementation project(':assets')
     implementation project(':common')
+    implementation project(':common:audio')
     implementation project(':jvm:controls')
     implementation project(':jvm:device')
     implementation project(':jvm:utils')
@@ -151,6 +152,7 @@ dependencies {
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
     implementation "org.wycliffeassociates:chromeabletabpane:$chromeabletabpaneVer"
     implementation "org.wycliffeassociates:jdenticon-kotlin:$jdenticonKoltinVer"
+    implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
 
     // Atlassian commonmark (for rendering markdown)
     implementation "com.atlassian.commonmark:commonmark:$commonmarkVer"
@@ -162,6 +164,9 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "org.apache.logging.log4j:log4j-core:$log4j2Ver"
     implementation "org.apache.logging.log4j:log4j-slf4j18-impl:$log4j2Ver"
+
+    // Sentry
+    implementation "io.sentry:sentry:$sentryVer"
 }
 
 // tell gradle what to put in the jar
@@ -187,27 +192,14 @@ configure(integrationTest) {
 }
 
 //////////////////////////////////// Custom Tasks ///////////////////////////////////////////
-def getVersionName = { ->
-    def stdout = new ByteArrayOutputStream()
-    exec {
-        commandLine 'git', 'describe', '--tags'
-        standardOutput = stdout
-    }
-    return stdout.toString().trim()
-}
-
-task printVersionName {
-    doLast {
-        println getVersionName()
-    }
-}
-
 task createVersionProperties(dependsOn: processResources) {
     doLast {
-        new File("$buildDir/resources/main/version.properties").withWriter { w ->
-            Properties p = new Properties()
-            p['version'] = getVersionName().toString()
-            p.store w, null
+        if (project.hasProperty('gradlewCommandVersionProp')) {
+            new File("$buildDir/resources/main/version.properties").withWriter { w ->
+                Properties p = new Properties()
+                p['version'] = gradlewCommandVersionProp
+                p.store w, null
+            }
         }
     }
 }
@@ -219,6 +211,18 @@ task createGithubProperties(dependsOn: processResources) {
                 Properties p = new Properties()
                 p['repo-url'] = githubRepoUrl
                 p['oauth-token'] = githubOauthToken
+                p.store w, null
+            }
+        }
+    }
+}
+
+task createSentryProperties(dependsOn: processResources) {
+    doLast {
+        if(project.hasProperty('sentryDsn')) {
+            new File("$buildDir/resources/main/sentry.properties").withWriter { w ->
+                Properties p = new Properties()
+                p['dsn'] = sentryDsn
                 p.store w, null
             }
         }
@@ -274,6 +278,7 @@ idea {
 compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
 compileJava.dependsOn createVersionProperties
 compileJava.dependsOn createGithubProperties
+compileJava.dependsOn createSentryProperties
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

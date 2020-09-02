@@ -26,11 +26,12 @@ before_install:
 - wget --no-verbose -P $HOME/.install4j8/jres "https://download.ej-technologies.com/bundles/java9/macosx-amd64-11.0.3.tar.gz"
 - wget --no-verbose -P $HOME/.install4j8/jres "https://otter-build-nightly.s3.amazonaws.com/linux-amd64-11.0.4.tar.gz"
 - if [ -f VERSION ]; then export VERSIONVAR="$(cat VERSION).$TRAVIS_BUILD_NUMBER"; fi
+install: skip
 jobs:
   include:
   - stage: build
     script:
-    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN detekt :jvm:workbookapp:install4jdeploy"
+    - "./gradlew -PgradlewCommandLicenseProp=$INSTALL4JLICENSE -PgradlewInstall4jDirectory=$INSTALL4JDIR -PgradlewCommandVersionProp=$VERSIONVAR -PgradlewwinKeystorePassword=$SIGNINGPW -PgithubRepoUrl=$APIURL -PgithubOauthToken=$CRASHTOKEN -PsentryDsn=$SENTRY_DSN detekt :jvm:workbookapp:install4jdeploy"
     - sonar-scanner
 stages:
 - build

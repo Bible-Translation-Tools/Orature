@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
 import javafx.scene.control.Dialog
@@ -20,6 +21,7 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.*
 
+
 class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
@@ -28,6 +30,10 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
         fun consume() {
             consumed = true
         }
+    }
+
+    init {
+        Sentry.init()
     }
 
     companion object {
@@ -103,19 +109,38 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
 
 private fun sendReport(error: Throwable): Completable {
     return Completable.fromAction {
-        val props = githubProperties()
-        if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
-            val githubReporter = GithubReporter(
-                props.getProperty("repo-url"),
-                props.getProperty("oauth-token")
-            )
-            githubReporter.reportCrash(
-                getEnvironment(),
-                stringFromError(error),
-                getLog()
-            )
-        }
+        sendGithubReport(error)
+        sendSentryReport(error)
     }
+}
+
+private fun sendGithubReport(error: Throwable) {
+    val props = githubProperties()
+    if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
+        val githubReporter = GithubReporter(
+            props.getProperty("repo-url"),
+            props.getProperty("oauth-token")
+        )
+        githubReporter.reportCrash(
+            getEnvironment(),
+            stringFromError(error),
+            getLog(),
+            error.message
+        )
+    }
+}
+
+private fun sendSentryReport(error: Throwable) {
+    val environment = getEnvironment()
+    val sentryContext = Sentry.getContext()
+
+    sentryContext.addTag("app version", environment.getVersion())
+    environment.getSystemData().forEach {
+        sentryContext.addTag(it.first, it.second)
+    }
+
+    Sentry.capture(error)
+    Sentry.clearContext()
 }
 
 private fun getEnvironment(): AppInfo {

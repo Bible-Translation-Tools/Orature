@@ -5,8 +5,8 @@ import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
-import org.wycliffeassociates.otter.common.io.wav.EMPTY_WAVE_FILE_SIZE
-import org.wycliffeassociates.otter.common.io.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
+import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import java.io.File
 import java.time.LocalDate
 
