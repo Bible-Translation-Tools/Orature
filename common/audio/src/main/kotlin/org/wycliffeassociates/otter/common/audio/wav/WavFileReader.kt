@@ -19,7 +19,7 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
     private val mappedFile: MappedByteBuffer
 
     init {
-        val totalFrames = wav.totalAudioLength / wav.frameSizeInBytes
+        val totalFrames = wav.totalFrames
         var begin = if (start != null) min(max(0, start), totalFrames) else 0
         var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
         begin *= wav.frameSizeInBytes
@@ -44,7 +44,7 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
 
     @Throws(ArrayIndexOutOfBoundsException::class)
     override fun seek(sample: Int) {
-        val index = wav.sampleIndex(sample)
+        val index = min(wav.sampleIndex(sample), mappedFile.limit())
         mappedFile.position(index)
     }
 
