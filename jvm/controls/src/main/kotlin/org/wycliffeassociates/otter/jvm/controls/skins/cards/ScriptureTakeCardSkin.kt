@@ -99,7 +99,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                 }
             )
         }
-        card.audioPlayerProperty().onChange { player ->
+        card.audioPlayerProperty().onChangeAndDoNow { player ->
             player?.let {
                 audioPlayerController.load(it)
             }
