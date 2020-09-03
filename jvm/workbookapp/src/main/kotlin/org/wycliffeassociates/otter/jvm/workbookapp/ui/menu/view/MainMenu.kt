@@ -83,7 +83,7 @@ class MainMenu : MenuBar() {
                         }
                     }
                 separator()
-                item(messages["appVersionItem"]) {
+                item(messages["version"]) {
                     setOnAction {
                         find<AppVersionView>().openModal()
                     }
