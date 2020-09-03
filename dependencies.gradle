@@ -42,5 +42,5 @@ ext {
     ikonliVer = '11.3.4'
     controlsfxVer = '11.0.1'
     sentryVer = '1.7.30'
-    usfmToolsVer = "1.0-20200828.140559-2"
+    usfmToolsVer = "1.5.0"
 }

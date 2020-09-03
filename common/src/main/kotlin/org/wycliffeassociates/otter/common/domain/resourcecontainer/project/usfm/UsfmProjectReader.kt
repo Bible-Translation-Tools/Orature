@@ -113,18 +113,18 @@ private fun parseFromReader(
 private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<OtterTree<CollectionOrContent>> {
     val usfmText = reader.readText()
     val parser = USFMParser(arrayListOf("s5"))
-    val doc = parser.ParseFromString(usfmText)
-    val chapters = doc.GetChildMarkers(CMarker::class.java)
+    val doc = parser.parseFromString(usfmText)
+    val chapters = doc.getChildMarkers(CMarker::class.java)
     return chapters.map { chapter ->
-        val verses = chapter.GetChildMarkers(VMarker::class.java)
-        val startVerse = verses.minBy { it.StartingVerse }?.StartingVerse ?: 1
-        val endVerse = verses.maxBy { it.EndingVerse }?.EndingVerse ?: 1
-        val chapterSlug = "${projectSlug}_${chapter.Number}"
+        val verses = chapter.getChildMarkers(VMarker::class.java)
+        val startVerse = verses.minBy { it.startingVerse }?.startingVerse ?: 1
+        val endVerse = verses.maxBy { it.endingVerse }?.endingVerse ?: 1
+        val chapterSlug = "${projectSlug}_${chapter.number}"
         val chapterCollection = Collection(
-            sort = chapter.Number,
+            sort = chapter.number,
             slug = chapterSlug,
             labelKey = ContentLabel.CHAPTER.value,
-            titleKey = chapter.Number.toString(),
+            titleKey = chapter.number.toString(),
             resourceContainer = null
         )
         val chapterTree = OtterTree<CollectionOrContent>(chapterCollection)
@@ -144,10 +144,10 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
         // Create content for each verse
         for (verse in verses) {
             val content = Content(
-                sort = verse.StartingVerse,
+                sort = verse.startingVerse,
                 labelKey = ContentLabel.VERSE.value,
-                start = verse.StartingVerse,
-                end = verse.EndingVerse,
+                start = verse.startingVerse,
+                end = verse.endingVerse,
                 selectedTake = null,
                 text = verse.getText(),
                 format = FORMAT,
@@ -160,10 +160,10 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
 }
 
 fun VMarker.getText(): String {
-    val text = this.GetChildMarkers(TextBlock::class.java)
+    val text = this.getChildMarkers(TextBlock::class.java)
     val sb = StringBuilder()
     for (txt in text) {
-        sb.append(txt.Text)
+        sb.append(txt.text)
     }
     return sb.toString()
 }
