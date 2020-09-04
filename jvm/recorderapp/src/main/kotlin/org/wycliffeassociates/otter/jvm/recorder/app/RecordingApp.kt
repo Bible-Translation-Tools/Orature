@@ -10,7 +10,6 @@ class RecordingApp : App() {
     override val primaryView = RecorderView::class
 
     init {
-        println("yeye")
         val args =
             if (!parameters?.raw.isNullOrEmpty()) parameters.raw.toTypedArray() else arrayOf("--wav=recording.wav")
         this.scope = ParameterizedScope(ParametersImpl(args)) {}
