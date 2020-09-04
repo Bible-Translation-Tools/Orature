@@ -19,7 +19,7 @@ class InitializeRecorder(
 ) : Installable {
 
     override val name = "RECORDER"
-    override val version = 1
+    override val version = 2
 
     val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
 
@@ -54,7 +54,7 @@ class InitializeRecorder(
             AudioPluginData(
                 0,
                 "OratureRecorder",
-                "1.0.0",
+                "$version.0.0",
                 canEdit = false,
                 canRecord = true,
                 executable = jar.absolutePath,
