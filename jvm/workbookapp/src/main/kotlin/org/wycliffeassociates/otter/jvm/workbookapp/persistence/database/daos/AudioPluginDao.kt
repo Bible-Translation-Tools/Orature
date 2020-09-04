@@ -15,17 +15,17 @@ class AudioPluginDao(
     fun insert(entity: AudioPluginEntity, dsl: DSLContext = instanceDsl): Int {
         if (entity.id != 0) throw InsertionException("Entity ID is not 0")
 
-        val record = dsl.select(AUDIO_PLUGIN_ENTITY.ID)
+        // find an existing plugin matching the name, in which we'll update
+        val existing = dsl.select(AUDIO_PLUGIN_ENTITY.ID)
             .from(AUDIO_PLUGIN_ENTITY)
-            .where(
-                AUDIO_PLUGIN_ENTITY.NAME.eq(entity.name)
-                    .and(AUDIO_PLUGIN_ENTITY.VERSION.eq(entity.version)))
+            .where(AUDIO_PLUGIN_ENTITY.NAME.eq(entity.name))
             .fetchOne()
 
-        if(record != null) {
-            val id = record.value1()
+        if(existing != null) {
+            val id = existing.getValue(AUDIO_PLUGIN_ENTITY.ID)
             dsl
                 .update(AUDIO_PLUGIN_ENTITY)
+                .set(AUDIO_PLUGIN_ENTITY.VERSION, entity.version)
                 .set(AUDIO_PLUGIN_ENTITY.BIN, entity.bin)
                 .set(AUDIO_PLUGIN_ENTITY.ARGS, entity.args)
                 .set(AUDIO_PLUGIN_ENTITY.EDIT, entity.edit)
