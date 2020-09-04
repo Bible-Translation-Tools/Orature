@@ -21,7 +21,7 @@ class AudioPluginDao(
             .where(AUDIO_PLUGIN_ENTITY.NAME.eq(entity.name))
             .fetchOne()
 
-        if(existing != null) {
+        if (existing != null) {
             val id = existing.getValue(AUDIO_PLUGIN_ENTITY.ID)
             dsl
                 .update(AUDIO_PLUGIN_ENTITY)
