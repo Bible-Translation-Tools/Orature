@@ -26,7 +26,6 @@ class RecorderViewModel : ViewModel() {
     val parameters = (scope as ParameterizedScope).parameters
     val wav = WavFile(File(parameters.named["wav"]), 1, 44100, 16)
     val recorder = AudioRecorder()
-    var volumeTest: AudioRecorder? = AudioRecorder()
 
     val writer = WavFileWriter(wav, recorder.getAudioStream()) {
         (scope as ParameterizedScope).navigateBack()
@@ -37,7 +36,7 @@ class RecorderViewModel : ViewModel() {
 
     val fps = FramerateView()
 
-    val volumeBar = VolumeBar(recorder.getAudioStream().mergeWith(volumeTest!!.getAudioStream()))
+    val volumeBar = VolumeBar(recorder.getAudioStream())
 
     val timer = RecordingTimer()
     val timerTextProperty = SimpleStringProperty("00:00:00")
@@ -68,6 +67,7 @@ class RecorderViewModel : ViewModel() {
     fun onViewReady(width: Int) {
         val renderer = ActiveRecordingRenderer(
             recorder.getAudioStream(),
+            writer.isWriting,
             width,
             secondsOnScreen = 10
         )
@@ -75,7 +75,7 @@ class RecorderViewModel : ViewModel() {
         waveformView.addDrawable(waveformLayer)
 
         at.start()
-        volumeTest?.start()
+        recorder.start()
     }
 
     @Volatile
@@ -88,24 +88,19 @@ class RecorderViewModel : ViewModel() {
     var canSaveProperty: BooleanBinding = (recordingProperty.not()).and(hasWrittenProperty)
 
     fun toggle() {
-        volumeTest?.let {
-            it.stop()
-            volumeTest = null
-        }
         if (isRecording) {
+            writer.pause()
             hasWritten = true
-            recorder.pause()
-            at.stop()
             timer.pause()
         } else {
-            recorder.start()
-            at.start()
+            writer.start()
             timer.start()
         }
         isRecording = !isRecording
     }
 
     fun save() {
+        at.stop()
         recorder.stop()
     }
 }

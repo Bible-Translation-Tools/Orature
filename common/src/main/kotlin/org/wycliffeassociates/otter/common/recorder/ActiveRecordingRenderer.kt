@@ -6,14 +6,18 @@ import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 
 class ActiveRecordingRenderer(
     stream: Observable<ByteArray>,
+    recordingActive: Observable<Boolean>,
     width: Int,
     secondsOnScreen: Int
 ) {
+
+    private var isActive = AtomicBoolean(false)
 
     // double the width as for each pixel there will be a min and max value
     val floatBuffer = FloatRingBuffer(width * 2)
@@ -21,6 +25,7 @@ class ActiveRecordingRenderer(
     val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
 
     init {
+        recordingActive.subscribe { isActive.set(it) }
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
@@ -31,7 +36,9 @@ class ActiveRecordingRenderer(
             bb.position(0)
             while (bb.hasRemaining()) {
                 val short = bb.short
-                pcmCompressor.add(short.toFloat())
+                if (isActive.get()) {
+                    pcmCompressor.add(short.toFloat())
+                }
             }
             bb.clear()
         }
