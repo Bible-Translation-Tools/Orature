@@ -4,7 +4,7 @@ import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
 
-class AppVersionView() : View() {
+class AppVersionView : View() {
     override val root = vbox {
         prefHeight = 100.0
         prefWidth = 200.0
