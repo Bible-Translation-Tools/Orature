@@ -19,7 +19,7 @@ class InitializeRecorder(
 ) : Installable {
 
     override val name = "RECORDER"
-    override val version = 2
+    override val version = 3
 
     val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
 
