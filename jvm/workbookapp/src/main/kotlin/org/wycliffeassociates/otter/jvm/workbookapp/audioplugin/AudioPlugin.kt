@@ -7,6 +7,7 @@ import javafx.application.Application.Parameters
 import javafx.application.Platform
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
@@ -20,6 +21,8 @@ import kotlin.reflect.KClass
 import java.net.URL
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
+
+    private val logger = LoggerFactory.getLogger(AudioPlugin::class.java)
 
     private val monitor = Object()
 
@@ -52,7 +55,11 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                         )
                     )
                 }
-            }.subscribeOn(Schedulers.io())
+            }
+            .doOnError { e ->
+                logger.error("Error in launch jar for file: $audioFile with params: $pluginParameters", e)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     private fun launchBin(audioFile: File): Completable {
@@ -65,6 +72,9 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                         *args
                     )
                 )
+            }
+            .doOnError { e ->
+                logger.error("Error in launch bin for file: $audioFile", e)
             }
             .subscribeOn(Schedulers.io())
     }
