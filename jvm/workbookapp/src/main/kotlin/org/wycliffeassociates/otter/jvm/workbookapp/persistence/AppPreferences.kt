@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
@@ -12,24 +13,40 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
     companion object {
         val NO_ID = -1
     }
+
+    private val logger = LoggerFactory.getLogger(AppPreferences::class.java)
+
     private val preferenceDao = database.preferenceDao
     private val CURRENT_USER_ID_KEY = "currentUserId"
     private val APP_INIT_KEY = "appInitialized"
     private val EDITOR_PLUGIN_ID_KEY = "editorPluginId"
     private val RECORDER_PLUGIN_ID_KEY = "recorderPluginId"
 
-    private fun putInt(key: String, value: Int): Completable =
-            Completable.fromAction {
+    private fun putInt(key: String, value: Int): Completable {
+        return Completable
+            .fromAction {
                 preferenceDao.upsert(PreferenceEntity(key, value.toString()))
-            }.subscribeOn(Schedulers.io())
+            }
+            .doOnError { e ->
+                logger.error("Error in putInt for key: $key, value: $value", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
 
-    private fun putBoolean(key: String, value: Boolean): Completable =
-            Completable.fromAction {
+    private fun putBoolean(key: String, value: Boolean): Completable {
+        return Completable
+            .fromAction {
                 preferenceDao.upsert(PreferenceEntity(key, value.toString()))
-            }.subscribeOn(Schedulers.io())
+            }
+            .doOnError { e ->
+                logger.error("Error in putBoolean for key: $key, value: $value", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
 
-    private fun getInt(key: String, def: Int): Single<Int> =
-            Single.fromCallable {
+    private fun getInt(key: String, def: Int): Single<Int> {
+        return Single
+            .fromCallable {
                 var value = def
                 try {
                     value = preferenceDao.fetchByKey(key).value.toInt()
@@ -37,10 +54,16 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
                     // do nothing
                 }
                 return@fromCallable value
-            }.subscribeOn(Schedulers.io())
+            }
+            .doOnError { e ->
+                logger.error("Error in getInt for $key, default: $def", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
 
-    private fun getBoolean(key: String, def: Boolean): Single<Boolean> =
-            Single.fromCallable {
+    private fun getBoolean(key: String, def: Boolean): Single<Boolean> {
+        return Single
+            .fromCallable {
                 var value = def
                 try {
                     value = preferenceDao.fetchByKey(key).value.toBoolean()
@@ -48,7 +71,12 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
                     // do nothing
                 }
                 return@fromCallable value
-            }.subscribeOn(Schedulers.io())
+            }
+            .doOnError { e ->
+                logger.error("Error in getBoolean for key: $key, default: $def", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
 
     override fun currentUserId(): Single<Int> = getInt(CURRENT_USER_ID_KEY, -1)
 
