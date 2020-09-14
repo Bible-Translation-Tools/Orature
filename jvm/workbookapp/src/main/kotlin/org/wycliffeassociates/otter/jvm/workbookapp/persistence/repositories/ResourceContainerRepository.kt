@@ -7,6 +7,7 @@ import org.jooq.DSLContext
 import org.jooq.Record3
 import org.jooq.Select
 import org.jooq.impl.DSL
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
 import org.wycliffeassociates.otter.common.data.model.*
@@ -24,12 +25,15 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import kotlin.math.log
 
 class ResourceContainerRepository(
     private val database: AppDatabase,
     private val collectionRepository: ICollectionRepository,
     private val resourceRepository: IResourceRepository
 ) : IResourceContainerRepository {
+    private val logger = LoggerFactory.getLogger(ResourceContainerRepository::class.java)
+
     private val collectionDao = database.collectionDao
     private val contentDao = database.contentDao
     private val contentTypeDao = database.contentTypeDao
@@ -44,33 +48,38 @@ class ResourceContainerRepository(
         languageSlug: String
     ): Single<ImportResult> {
         val dublinCore = rc.manifest.dublinCore
-        return Completable.fromAction {
-            database.transaction { dsl ->
-                val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
-                val metadata = dublinCore.mapToMetadata(rc.file, language)
-                    .let {
-                        insertMetadataOrThrow(dsl, it)
-                    }
+        return Completable
+            .fromAction {
+                database.transaction { dsl ->
+                    val language = LanguageMapper().mapFromEntity(languageDao.fetchBySlug(languageSlug, dsl))
+                    val metadata = dublinCore.mapToMetadata(rc.file, language)
+                        .let {
+                            insertMetadataOrThrow(dsl, it)
+                        }
 
-                val relatedDublinCoreIds: List<Int> =
-                    linkRelatedResourceContainers(metadata, dublinCore.relation, dublinCore.creator, dsl)
+                    val relatedDublinCoreIds: List<Int> =
+                        linkRelatedResourceContainers(metadata, dublinCore.relation, dublinCore.creator, dsl)
 
-                if (ContainerType.of(rc.type()) == ContainerType.Help) {
-                    if (relatedDublinCoreIds.isEmpty()) {
-                        throw ImportException(ImportResult.UNMATCHED_HELP)
-                    }
-                    relatedDublinCoreIds.forEach { relatedId ->
-                        val ih = ImportHelper(metadata, relatedId, dsl)
+                    if (ContainerType.of(rc.type()) == ContainerType.Help) {
+                        if (relatedDublinCoreIds.isEmpty()) {
+                            logger.error("Unmatched help for ${rc.manifest.dublinCore.identifier}")
+                            throw ImportException(ImportResult.UNMATCHED_HELP)
+                        }
+                        relatedDublinCoreIds.forEach { relatedId ->
+                            val ih = ImportHelper(metadata, relatedId, dsl)
+                            ih.import(rcTree)
+                        }
+                    } else {
+                        val ih = ImportHelper(metadata, null, dsl)
                         ih.import(rcTree)
                     }
-                } else {
-                    val ih = ImportHelper(metadata, null, dsl)
-                    ih.import(rcTree)
                 }
             }
-        }
             .toSingleDefault(ImportResult.SUCCESS)
-            .onErrorReturn { e -> e.castOrFindImportException()?.result ?: ImportResult.LOAD_RC_ERROR }
+            .onErrorReturn { e ->
+                logger.error("Error in importResourceContainer for rc: $rc, language: $languageSlug", e)
+                e.castOrFindImportException()?.result ?: ImportResult.LOAD_RC_ERROR
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -84,6 +93,7 @@ class ResourceContainerRepository(
     ): ResourceMetadata {
         val existingRow = resourceMetadataDao.fetchLatestVersion(metadata.language.slug, metadata.identifier)
         if (existingRow != null) {
+            logger.error("Error in inserting metadata, row already exists!: $existingRow")
             throw ImportException(ImportResult.ALREADY_EXISTS)
         }
         val entity = ResourceMetadataMapper().mapToEntity(metadata)
