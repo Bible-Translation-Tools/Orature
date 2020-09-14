@@ -93,9 +93,14 @@ class ProjectExporter(
         zipWriter.bufferedWriter(RcConstants.SELECTED_TAKES_FILE).use { fileWriter ->
             fetchSelectedTakes()
                 .map(::relativeTakePath)
-                .blockingSubscribe {
-                    fileWriter.appendln(it)
-                }
+                .blockingSubscribe(
+                    {
+                        fileWriter.appendln(it)
+                    },
+                    { e ->
+                        log.error("Error in writeSelectedTakesFile", e)
+                    }
+                )
         }
     }
 

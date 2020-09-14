@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.sun.org.slf4j.internal.LoggerFactory
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
@@ -18,6 +19,7 @@ class AudioPlayerController(
     private var player: IAudioPlayer?,
     private val audioSlider: Slider
 ) {
+    private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
 
     private var startAtLocation = 0
     private var disposable: Disposable? = null
@@ -97,11 +99,16 @@ class AudioPlayerController(
         return Observable
             .interval(ANIMATION_REFRESH_MS, TimeUnit.MILLISECONDS)
             .observeOnFx()
-            .subscribe {
-                if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
-                    audioSlider.value = playbackPosition().toDouble()
+            .subscribe(
+                {
+                    if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
+                        audioSlider.value = playbackPosition().toDouble()
+                    }
+                } ,
+                { e ->
+                    logger.error("Error in startProgressUpdate", e)
                 }
-            }
+            )
     }
 
     private fun play() {
@@ -123,7 +130,7 @@ class AudioPlayerController(
         player?.let {
             it.seek(location)
             audioSlider.value = location.toDouble()
-            if(!it.isPlaying()) {
+            if (!it.isPlaying()) {
                 startAtLocation = location
             }
         } ?: run {
@@ -133,7 +140,7 @@ class AudioPlayerController(
 
     private fun percentageToLocation(percent: Double): Int {
         var _percent = if (percent > 1.00) percent / 100F else percent
-        player?.let{
+        player?.let {
             return (_percent * it.getAbsoluteDurationInFrames()).toInt()
         } ?: run {
             return 0
