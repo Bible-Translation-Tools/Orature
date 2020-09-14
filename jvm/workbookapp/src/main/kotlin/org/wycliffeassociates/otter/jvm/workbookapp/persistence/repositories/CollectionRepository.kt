@@ -53,6 +53,9 @@ class CollectionRepository(
             .fromAction {
                 collectionDao.delete(collectionMapper.mapToEntity(obj))
             }
+            .doOnError { e ->
+                log.error("Error in delete for collection $obj", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -87,97 +90,105 @@ class CollectionRepository(
                     }
                 }
             }
+            .doOnError { e ->
+                log.error("Error in delete project, collection: $project, deleteAudio: $deleteAudio", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
     override fun deleteResources(project: Collection, deleteAudio: Boolean): Completable {
-        return Completable.fromAction {
-            val files = arrayListOf<File>()
-            database.transaction { dsl ->
+        return Completable
+            .fromAction {
+                val files = arrayListOf<File>()
+                database.transaction { dsl ->
 
-                // Get resource content entries related to the project (content of tn/tq)
-                val resourceContent = dsl.select(RESOURCE_LINK.RESOURCE_CONTENT_FK)
-                    .from(RESOURCE_LINK)
-                    .where(
-                        RESOURCE_LINK.DUBLIN_CORE_FK.`in`(
-                            // get resources linked to source dublin core
-                            dsl.select(RC_LINK_ENTITY.RC2_FK)
-                                .from(RC_LINK_ENTITY)
-                                .where(
-                                    RC_LINK_ENTITY.RC1_FK.`in`(
-                                        // get source dublin core of derived project
-                                        dsl.select(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
-                                            .from(DUBLIN_CORE_ENTITY)
-                                            .where(
-                                                DUBLIN_CORE_ENTITY.ID.`in`(
-                                                    // get dublin core of project
-                                                    dsl.select(COLLECTION_ENTITY.DUBLIN_CORE_FK)
-                                                        .from(COLLECTION_ENTITY)
-                                                        .where(
-                                                            COLLECTION_ENTITY.ID.eq(
-                                                                project.id
-                                                            )
-                                                        )
-                                                )
-                                            )
-                                    )
-                                )
-                        ).and(
-                            // Filter Resource Content to just what's in the project being deleted
-                            RESOURCE_LINK.RESOURCE_CONTENT_FK.`in`(
-                                dsl.select(CONTENT_ENTITY.ID)
-                                    .from(CONTENT_ENTITY)
+                    // Get resource content entries related to the project (content of tn/tq)
+                    val resourceContent = dsl.select(RESOURCE_LINK.RESOURCE_CONTENT_FK)
+                        .from(RESOURCE_LINK)
+                        .where(
+                            RESOURCE_LINK.DUBLIN_CORE_FK.`in`(
+                                // get resources linked to source dublin core
+                                dsl.select(RC_LINK_ENTITY.RC2_FK)
+                                    .from(RC_LINK_ENTITY)
                                     .where(
-                                        CONTENT_ENTITY.COLLECTION_FK.`in`(
-                                            // Look up the chapter collection the resource content belongs to
-                                            dsl.select(COLLECTION_ENTITY.ID)
-                                                .from(COLLECTION_ENTITY)
+                                        RC_LINK_ENTITY.RC1_FK.`in`(
+                                            // get source dublin core of derived project
+                                            dsl.select(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK)
+                                                .from(DUBLIN_CORE_ENTITY)
                                                 .where(
-                                                    COLLECTION_ENTITY.PARENT_FK.`in`(
-                                                        // Look up the project the chapter collection belongs to
-                                                        dsl.select(COLLECTION_ENTITY.ID)
+                                                    DUBLIN_CORE_ENTITY.ID.`in`(
+                                                        // get dublin core of project
+                                                        dsl.select(COLLECTION_ENTITY.DUBLIN_CORE_FK)
                                                             .from(COLLECTION_ENTITY)
                                                             .where(
-                                                                // We need the source, not the derived,
-                                                                // just use the slug. It will result in derived results
-                                                                // in addition to source, but resources aren't attached
-                                                                // to the derived anyway
-                                                                COLLECTION_ENTITY.SLUG.eq(project.slug)
+                                                                COLLECTION_ENTITY.ID.eq(
+                                                                    project.id
+                                                                )
                                                             )
                                                     )
                                                 )
                                         )
                                     )
+                            ).and(
+                                // Filter Resource Content to just what's in the project being deleted
+                                RESOURCE_LINK.RESOURCE_CONTENT_FK.`in`(
+                                    dsl.select(CONTENT_ENTITY.ID)
+                                        .from(CONTENT_ENTITY)
+                                        .where(
+                                            CONTENT_ENTITY.COLLECTION_FK.`in`(
+                                                // Look up the chapter collection the resource content belongs to
+                                                dsl.select(COLLECTION_ENTITY.ID)
+                                                    .from(COLLECTION_ENTITY)
+                                                    .where(
+                                                        COLLECTION_ENTITY.PARENT_FK.`in`(
+                                                            // Look up the project the chapter collection belongs to
+                                                            dsl.select(COLLECTION_ENTITY.ID)
+                                                                .from(COLLECTION_ENTITY)
+                                                                .where(
+                                                                    // We need the source, not the derived,
+                                                                    // just use the slug. It will result in derived results
+                                                                    // in addition to source, but resources aren't attached
+                                                                    // to the derived anyway
+                                                                    COLLECTION_ENTITY.SLUG.eq(project.slug)
+                                                                )
+                                                        )
+                                                    )
+                                            )
+                                        )
+                                )
                             )
                         )
-                    )
 
-                // get all files associated with the resource content
-                // to delete outside of the db transaction
-                val paths = dsl.select(TAKE_ENTITY.PATH)
-                    .from(TAKE_ENTITY)
-                    .where(
-                        TAKE_ENTITY.CONTENT_FK.`in`(
-                            resourceContent
-                        )
-                    ).fetch { it.value1() }
-                files.addAll(paths.map { File(it) })
+                    // get all files associated with the resource content
+                    // to delete outside of the db transaction
+                    val paths = dsl.select(TAKE_ENTITY.PATH)
+                        .from(TAKE_ENTITY)
+                        .where(
+                            TAKE_ENTITY.CONTENT_FK.`in`(
+                                resourceContent
+                            )
+                        ).fetch { it.value1() }
+                    files.addAll(paths.map { File(it) })
 
-                // delete the take entries of resource content from the database
-                dsl.deleteFrom(TAKE_ENTITY)
-                    .where(TAKE_ENTITY.CONTENT_FK.`in`(resourceContent))
-                    .execute()
-            }
+                    // delete the take entries of resource content from the database
+                    dsl.deleteFrom(TAKE_ENTITY)
+                        .where(TAKE_ENTITY.CONTENT_FK.`in`(resourceContent))
+                        .execute()
+                }
 
-            // actually delete the resource recordings
-            files.forEach {
-                try {
-                    it.delete()
-                } catch (e: FileNotFoundException) {
-                    log.error("File not found when deleting resources of project: $project.", e)
+                // actually delete the resource recordings
+                files.forEach {
+                    try {
+                        it.delete()
+                    } catch (e: FileNotFoundException) {
+                        log.error("File not found when deleting resources of project: $project.", e)
+                    }
                 }
             }
-        }.subscribeOn(Schedulers.io())
+            .doOnError { e ->
+                log.error("Error in deleteResources for collection: $project, deleteAudio: $deleteAudio", e)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun getAll(): Single<List<Collection>> {
@@ -186,6 +197,9 @@ class CollectionRepository(
                 collectionDao
                     .fetchAll()
                     .map(this::buildCollection)
+            }
+            .doOnError { e ->
+                log.error("Error in getAll", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -198,6 +212,9 @@ class CollectionRepository(
                     .filter { it.sourceFk != null }
                     .map(this::buildCollection)
             }
+            .doOnError { e ->
+                log.error("Error in getDerivedProjects", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -208,6 +225,9 @@ class CollectionRepository(
                     .fetchByLabel("project")
                     .filter { it.sourceFk == null }
                     .map(this::buildCollection)
+            }
+            .doOnError { e ->
+                log.error("Error in getSourceProjects", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -220,6 +240,9 @@ class CollectionRepository(
                     .filter { it.parentFk == null && it.sourceFk == null }
                     .map(this::buildCollection)
             }
+            .doOnError { e ->
+                log.error("Error in getRootSources", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -229,6 +252,9 @@ class CollectionRepository(
                 buildCollection(
                     collectionDao.fetchSource(collectionDao.fetchById(project.id))
                 )
+            }
+            .doOnError { e ->
+                log.error("Error in getSource for collection: $project", e)
             }
             .onErrorComplete()
             .subscribeOn(Schedulers.io())
@@ -241,6 +267,9 @@ class CollectionRepository(
                     .fetchChildren(collectionMapper.mapToEntity(collection))
                     .map(this::buildCollection)
             }
+            .doOnError {e ->
+                log.error("Error in getChildren for collection: $collection", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -252,7 +281,10 @@ class CollectionRepository(
                 } ?: throw NullPointerException(
                     "A collection matching slug: $slug and metadata: [$metadata] was not found."
                 )
-            }.subscribeOn(Schedulers.io())
+            }.doOnError { e ->
+                log.error("Error in getProjectBySlugAndMetadata for slug: $slug and metadata $metadata", e)
+            }
+            .subscribeOn(Schedulers.io())
     }
 
     override fun updateSource(collection: Collection, newSource: Collection): Completable {
@@ -261,6 +293,8 @@ class CollectionRepository(
                 val entity = collectionDao.fetchById(collection.id)
                 entity.sourceFk = newSource.id
                 collectionDao.update(entity)
+            }.doOnError { e ->
+                log.error("Error in update source for collection: $collection, new source: $newSource", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -272,6 +306,9 @@ class CollectionRepository(
                 entity.parentFk = newParent.id
                 collectionDao.update(entity)
             }
+            .doOnError { e ->
+                log.error("Error in updateParent for collection: $collection, new parent: $collection", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -279,6 +316,8 @@ class CollectionRepository(
         return Single
             .fromCallable {
                 collectionDao.insert(collectionMapper.mapToEntity(collection))
+            }.doOnError { e ->
+                log.error("Error in insert for collection: $collection", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -289,6 +328,8 @@ class CollectionRepository(
                 val entity = collectionDao.fetchById(obj.id)
                 val newEntity = collectionMapper.mapToEntity(obj, entity.parentFk, entity.sourceFk)
                 collectionDao.update(newEntity)
+            }.doOnError { e ->
+                log.error("Error in update for collection: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -357,6 +398,13 @@ class CollectionRepository(
                         metadataMapper.mapFromEntity(mainDerivedMetadata, language)
                     )
                 }
+            }.doOnError { e ->
+                log.error("Error in deriveProject for source collection: $sourceCollection, language: $language")
+                log.error("With:")
+                sourceMetadatas.forEach {
+                    log.error("Metadata: $it")
+                }
+                log.error("End Metadata", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -369,7 +417,8 @@ class CollectionRepository(
         return collectionDao.fetch(
             slug = sourceEntity.slug,
             containerId = derivedMetadata.id,
-            dsl = dsl)
+            dsl = dsl
+        )
     }
 
     private fun deriveProjectCollection(
