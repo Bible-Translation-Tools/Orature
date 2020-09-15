@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
-
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.Take
@@ -22,6 +22,9 @@ class TakeRepository(
     private val markerMapper: MarkerMapper = MarkerMapper(),
     private val collectionMapper: CollectionMapper = CollectionMapper()
 ) : ITakeRepository {
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     private val takeDao = database.takeDao
     private val markerDao = database.markerDao
     private val contentDao = database.contentDao
@@ -130,6 +133,26 @@ class TakeRepository(
             .fromCallable {
                 takeDao.fetchSoftDeletedTakes(collectionMapper.mapToEntity(project))
                     .map(this::buildTake)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun deleteExpiredTakes(expiry: Int): Completable {
+        return Completable
+            .fromAction {
+                val takes = takeDao.fetchSoftDeletedTakes()
+                val expired = LocalDate.now().minusDays(expiry.toLong())
+                logger.info("Deleting soft deleted takes on or before: $expired")
+                takes.forEach { take ->
+                    take.deletedTs?.let { timestamp ->
+                        val parsed = LocalDate.parse(timestamp)
+                        if (parsed.isBefore(expired) || parsed.isEqual(expired)) {
+                            logger.info("Deleting: ${take.filename}, soft delete date is: ${take.deletedTs}")
+                            File(take.filepath).delete()
+                            takeDao.delete(take)
+                        }
+                    }
+                }
             }
             .subscribeOn(Schedulers.io())
     }

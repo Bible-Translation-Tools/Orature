@@ -134,4 +134,20 @@ class TakeDao(
                 RecordMappers.mapToTakeEntity(it)
             }
     }
+
+    /**
+     * Fetches all takes listed for soft delete (but presumably haven't been deleted yet)
+     *
+     */
+    fun fetchSoftDeletedTakes(
+        dsl: DSLContext = instanceDsl
+    ): List<TakeEntity> {
+        return dsl
+            .select()
+            .from(TAKE_ENTITY)
+            .where(TAKE_ENTITY.DELETED_TS.isNotNull)
+            .fetch {
+                RecordMappers.mapToTakeEntity(it)
+            }
+    }
 }

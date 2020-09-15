@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
@@ -15,11 +16,13 @@ class InitializeTakeRepository(
         log.info("Initializing take repository...")
         return takeRepository
             .removeNonExistentTakes()
+            .andThen(takeRepository.deleteExpiredTakes())
             .doOnError { e ->
                 log.error("Error initializing take repository", e)
             }
             .doOnComplete {
                 log.info("Take repository initialized!")
             }
+            .subscribeOn(Schedulers.io())
     }
 }
