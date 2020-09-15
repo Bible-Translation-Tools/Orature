@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
-
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
@@ -156,6 +155,26 @@ class TakeRepository(
             }
             .doOnError { e ->
                 logger.error("Error in getSoftDeletedTakes for collection: $project", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun deleteExpiredTakes(expiry: Int): Completable {
+        return Completable
+            .fromAction {
+                val takes = takeDao.fetchSoftDeletedTakes()
+                val expired = LocalDate.now().minusDays(expiry.toLong())
+                logger.info("Deleting soft deleted takes on or before: $expired")
+                takes.forEach { take ->
+                    take.deletedTs?.let { timestamp ->
+                        val parsed = LocalDate.parse(timestamp)
+                        if (parsed.isBefore(expired) || parsed.isEqual(expired)) {
+                            logger.info("Deleting: ${take.filename}, soft delete date is: ${take.deletedTs}")
+                            File(take.filepath).delete()
+                            takeDao.delete(take)
+                        }
+                    }
+                }
             }
             .subscribeOn(Schedulers.io())
     }
