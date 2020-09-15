@@ -16,6 +16,8 @@ class AppDatabase(
     val dsl: DSLContext
 
     init {
+        System.setProperty("org.jooq.no-logo", "true")
+
         // Load the SQLite JDBC drivers
         Class
             .forName("org.sqlite.JDBC")
