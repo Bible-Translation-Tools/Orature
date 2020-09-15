@@ -133,7 +133,7 @@ abstract class RecordableFragment(
                     )
                 )
             }, { e ->
-                logger.err
+                logger.error("Error in creating no plugin snackbar", e)
             }
         )
     }
