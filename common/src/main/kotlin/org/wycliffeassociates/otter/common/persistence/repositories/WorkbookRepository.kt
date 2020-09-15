@@ -350,7 +350,10 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .subscribe(
                 { (_, modelTake) ->
                     db.insertTakeForContent(modelTake, content)
-                        .subscribe { insertionId -> modelTake.id = insertionId }
+                        .subscribe(
+                            { insertionId -> modelTake.id = insertionId },
+                            { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
+                        )
                 }, { e ->
                     logger.error("Error constructing associated audio for content: $content", e)
                 }

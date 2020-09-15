@@ -3,14 +3,17 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
 
+    private val logger = LoggerFactory.getLogger(PlaybackControlsFragment::class.java)
+
     val viewModel: VerseMarkerViewModel by inject()
-    
+
     private val rootStyles = "vm-play-controls"
     private val playButtonStyle = "vm-play-controls__play-btn"
     private val roundedButtonStyle = "vm-play-controls__btn--rounded"
@@ -56,9 +59,13 @@ class PlaybackControlsFragment : Fragment() {
         styleClass.add("vm-continue-button")
         setOnAction {
             (scope as ParameterizedScope).let {
-                viewModel.writeMarkers().subscribe {
-                    it.navigateBack()
-                }
+                viewModel.writeMarkers().subscribe(
+                    {
+                        it.navigateBack()
+                    }, { e ->
+                        logger.error("Error in closing the maker app", e)
+                    }
+                )
             }
         }
     }

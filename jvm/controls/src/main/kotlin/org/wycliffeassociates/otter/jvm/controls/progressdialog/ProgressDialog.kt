@@ -8,9 +8,12 @@ import javafx.scene.Node
 import javafx.scene.layout.*
 import javafx.stage.Modality
 import javafx.stage.StageStyle
+import org.slf4j.LoggerFactory
 import tornadofx.*
 
 class ProgressDialog : Fragment() {
+
+    private val logger = LoggerFactory.getLogger(ProgressDialog::class.java)
 
     val graphicProperty = SimpleObjectProperty<Node>(VBox())
     var graphic by graphicProperty
@@ -29,11 +32,15 @@ class ProgressDialog : Fragment() {
                 progressindicator()
                 hbox {
                     alignment = Pos.CENTER
-                    graphicProperty.toObservable().subscribe {
-                        clear()
-                        it.addClass(ProgressDialogStyles.progressGraphic)
-                        add(it)
-                    }
+                    graphicProperty.toObservable().subscribe(
+                        {
+                            clear()
+                            it.addClass(ProgressDialogStyles.progressGraphic)
+                            add(it)
+                        }, { e ->
+                            logger.error("Error in ProgressDialog", e)
+                        }
+                    )
                 }
             }
         }

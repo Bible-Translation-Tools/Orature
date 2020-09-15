@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.fragments
 
 import javafx.beans.property.Property
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.jvm.controls.searchablelist.SearchableList
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizardStyles
@@ -9,6 +10,9 @@ import org.wycliffeassociates.otter.jvm.controls.searchablelist.searchablelist
 import tornadofx.*
 
 class SelectLanguage : Fragment() {
+
+    private val logger = LoggerFactory.getLogger(SelectLanguage::class.java)
+
     private val viewModel: ProjectWizardViewModel by inject()
 
     private val sourceList = buildSearchableLanguageList(
@@ -54,10 +58,14 @@ class SelectLanguage : Fragment() {
             }
             searchField.promptText = messages["languageSearchPrompt"]
             autoSelect = true
-            viewModel.clearLanguages.subscribe {
-                searchField.clear()
-                listView.selectionModel.clearSelection()
-            }
+            viewModel.clearLanguages.subscribe(
+                {
+                    searchField.clear()
+                    listView.selectionModel.clearSelection()
+                }, { e ->
+                    logger.error("Error in clear languages", e)
+                }
+            )
             selectedLanguage.addValidator(searchField) {
                 if (it == null) error(errorMessage) else null
             }

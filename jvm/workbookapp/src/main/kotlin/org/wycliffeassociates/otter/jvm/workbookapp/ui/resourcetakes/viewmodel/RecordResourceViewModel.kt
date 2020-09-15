@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import java.util.EnumMap
 import javafx.collections.ListChangeListener
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -24,6 +25,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel.Resou
 import tornadofx.*
 
 class RecordResourceViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(RecordResourceViewModel::class.java)
+
     private enum class StepDirection {
         FORWARD,
         BACKWARD
@@ -165,9 +169,13 @@ class RecordResourceViewModel : ViewModel() {
                     resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
                 } ?: run {
                     nextGroupCardItem()?.let { nextItem ->
-                        nextItem.resources.firstElement().subscribe {
-                            resourceListViewModel.setActiveChunkAndRecordables(nextItem.bookElement, it.resource)
-                        }
+                        nextItem.resources.firstElement().subscribe(
+                            {
+                                resourceListViewModel.setActiveChunkAndRecordables(nextItem.bookElement, it.resource)
+                            }, { e ->
+                                logger.error("Error in step to chunk, direction: $direction", e)
+                            }
+                        )
                     }
                 }
             }
@@ -176,9 +184,16 @@ class RecordResourceViewModel : ViewModel() {
                     resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
                 } ?: run {
                     previousGroupCardItem()?.let { previousItem ->
-                        previousItem.resources.lastElement().subscribe {
-                            resourceListViewModel.setActiveChunkAndRecordables(previousItem.bookElement, it.resource)
-                        }
+                        previousItem.resources.lastElement().subscribe(
+                            {
+                                resourceListViewModel.setActiveChunkAndRecordables(
+                                    previousItem.bookElement,
+                                    it.resource
+                                )
+                            }, { e ->
+                                logger.error("Error in step to chunk, direction, $direction", e)
+                            }
+                        )
                     }
                 }
             }
@@ -196,11 +211,15 @@ class RecordResourceViewModel : ViewModel() {
         activeResourceSubscription = resources
             .toList()
             .observeOnFx()
-            .subscribe { list ->
-                list.forEach {
-                    resourceList.add(it.resource)
+            .subscribe(
+                { list ->
+                    list.forEach {
+                        resourceList.add(it.resource)
+                    }
+                }, { e ->
+                    logger.error("Error in get resource list", e)
                 }
-            }
+            )
     }
 
     private fun nextResource(): Resource? {

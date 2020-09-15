@@ -7,6 +7,7 @@ import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterBanner
@@ -20,6 +21,9 @@ import org.wycliffeassociates.otter.jvm.controls.card.card
 import tornadofx.*
 
 class CardGridFragment : Fragment() {
+
+    private val logger = LoggerFactory.getLogger(CardGridFragment::class.java)
+
     private val navigator: ChromeableStage by inject()
     private val viewModel: CardGridViewModel by inject()
 
@@ -58,11 +62,15 @@ class CardGridFragment : Fragment() {
                                 it.contentType == ContentType.TEXT
                             }
                             .count()
-                            .subscribe { count ->
-                                Platform.runLater {
-                                    chapterBanner.chunkCount.text = count.toString()
+                            .subscribe(
+                                { count ->
+                                    Platform.runLater {
+                                        chapterBanner.chunkCount.text = count.toString()
+                                    }
+                                }, { e ->
+                                    logger.error("Error in setting chapter banner chunk count", e)
                                 }
-                            }
+                            )
                         openButton.setOnMouseClicked {
                             viewModel.onCardSelection(CardData(chapter))
                             navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)

@@ -10,6 +10,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -29,6 +30,9 @@ import java.util.concurrent.Callable
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
 ) : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(RecordableViewModel::class.java)
+
     val injector: Injector by inject()
     val workbookViewModel: WorkbookViewModel by inject()
 
@@ -104,14 +108,18 @@ open class RecordableViewModel(
                     audioPluginViewModel.record(rec)
                 }
                 .observeOnFx()
-                .subscribe { result: RecordTake.Result ->
-                    showPluginActive = false
-                    when (result) {
-                        RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
-                        RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {
+                .subscribe(
+                    { result: RecordTake.Result ->
+                        showPluginActive = false
+                        when (result) {
+                            RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
+                            RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {
+                            }
                         }
+                    }, { e ->
+                        logger.error("Error in recording a new take", e)
                     }
-                }
+                )
         } ?: throw IllegalStateException("Recordable is null")
     }
 
@@ -125,14 +133,18 @@ open class RecordableViewModel(
                 audioPluginViewModel.edit(editTakeEvent.take)
             }
             .observeOnFx()
-            .subscribe { result: EditTake.Result ->
-                showPluginActive = false
-                currentTakeNumberProperty.set(null)
-                when (result) {
-                    EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
-                    EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
+            .subscribe(
+                { result: EditTake.Result ->
+                    showPluginActive = false
+                    currentTakeNumberProperty.set(null)
+                    when (result) {
+                        EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                        EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
+                    }
+                }, { e ->
+                    logger.error("Error in editing take", e)
                 }
-            }
+            )
     }
 
     fun selectTake(take: Take?) {
@@ -221,26 +233,38 @@ open class RecordableViewModel(
 
         audio.takes
             .filter { it.isNotDeleted() }
-            .subscribe {
-                if (it != selected && !alternateTakes.contains(it)) {
-                    addToAlternateTakes(it)
+            .subscribe(
+                {
+                    if (it != selected && !alternateTakes.contains(it)) {
+                        addToAlternateTakes(it)
+                    }
+                    removeOnDeleted(it)
+                }, { e ->
+                    logger.error("Error in loading audio takes for audio: $audio", e)
                 }
-                removeOnDeleted(it)
-            }.let { disposables.add(it) }
+            ).let { disposables.add(it) }
     }
 
     private fun removeOnDeleted(take: Take) {
         take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
-            .subscribe {
-                removeFromAlternateTakes(take)
-            }.let { disposables.add(it) }
+            .subscribe(
+                {
+                    removeFromAlternateTakes(take)
+                }, { e ->
+                    logger.error("Error in removing deleted take: $take", e)
+                }
+            ).let { disposables.add(it) }
     }
 
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
-        audio.selected.subscribe {
-            selectedTakeProperty.set(it.value)
-        }.let { disposables.add(it) }
+        audio.selected.subscribe(
+            {
+                selectedTakeProperty.set(it.value)
+            }, { e ->
+                logger.error("Error in subscribing take to relay for audio: $audio", e)
+            }
+        ).let { disposables.add(it) }
     }
 
     private fun updateAlternateTakes(oldSelectedTake: Take?, newSelectedTake: Take?) {

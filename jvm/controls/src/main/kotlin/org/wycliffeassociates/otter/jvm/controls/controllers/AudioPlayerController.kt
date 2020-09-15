@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.sun.org.slf4j.internal.LoggerFactory
+import org.slf4j.LoggerFactory
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform

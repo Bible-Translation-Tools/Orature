@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.transformation.FilteredList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
@@ -16,6 +17,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.
 import tornadofx.*
 
 class ResourceListViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(ResourceListViewModel::class.java)
+
     internal val recordResourceViewModel: RecordResourceViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
@@ -50,9 +54,13 @@ class ResourceListViewModel : ViewModel() {
             groupCardItem.resources
                 .filter { it.resource == resource }
                 .singleElement()
-                .subscribe {
-                    selectedGroupCardItem.set(groupCardItem)
-                }
+                .subscribe(
+                    {
+                        selectedGroupCardItem.set(groupCardItem)
+                    }, { e ->
+                        logger.error("Error in setting selected resource group card item for: $resource", e)
+                    }
+                )
         }
     }
 
@@ -73,9 +81,13 @@ class ResourceListViewModel : ViewModel() {
             .doFinally {
                 calculateCompletionProgress()
             }
-            .subscribe {
-                resourceGroupCardItemList.addAll(it)
-            }
+            .subscribe(
+                {
+                    resourceGroupCardItemList.addAll(it)
+                }, { e ->
+                    logger.error("Error in loading resource groups for $chapter", e)
+                }
+            )
     }
 
     internal fun setActiveChunkAndRecordables(bookElement: BookElement?, resource: Resource) {
@@ -94,21 +106,25 @@ class ResourceListViewModel : ViewModel() {
         resourceGroupCardItemList.forEach { item ->
             item.resources
                 .toList()
-                .subscribe { list ->
-                    list.forEach {
-                        it.titleProgressProperty.get().let { progress ->
-                            completed += progress
-                            totalItems++
+                .subscribe(
+                    { list ->
+                        list.forEach {
+                            it.titleProgressProperty.get().let { progress ->
+                                completed += progress
+                                totalItems++
+                            }
+                            it.bodyProgressProperty?.get()?.let { progress ->
+                                completed += progress
+                                totalItems++
+                            }
+                            if (totalItems > 0) {
+                                runLater { completionProgressProperty.set(completed / totalItems) }
+                            }
                         }
-                        it.bodyProgressProperty?.get()?.let { progress ->
-                            completed += progress
-                            totalItems++
-                        }
-                        if (totalItems > 0) {
-                            runLater { completionProgressProperty.set(completed / totalItems) }
-                        }
+                    }, { e ->
+                        logger.error("Error in calculating resource completion progress", e)
                     }
-                }
+                )
         }
     }
 }

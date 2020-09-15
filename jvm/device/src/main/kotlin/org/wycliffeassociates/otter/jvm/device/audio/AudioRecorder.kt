@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import org.slf4j.LoggerFactory
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -9,6 +10,9 @@ import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioRecorder : IAudioRecorder {
+
+    private val logger = LoggerFactory.getLogger(AudioRecorder::class.java)
+
     override fun pause() {
         line.stop()
         line.close()
@@ -40,16 +44,19 @@ class AudioRecorder : IAudioRecorder {
     override fun start() {
         line.open(FORMAT)
         line.start()
-        Observable.fromCallable {
-            val byteArray = ByteArray(BUFFER_SIZE)
-            var totalRead = 0
-            while (line.isOpen) {
-                totalRead += line.read(byteArray, 0, byteArray.size)
-                audioByteObservable.onNext(byteArray)
+        Observable
+            .fromCallable {
+                val byteArray = ByteArray(BUFFER_SIZE)
+                var totalRead = 0
+                while (line.isOpen) {
+                    totalRead += line.read(byteArray, 0, byteArray.size)
+                    audioByteObservable.onNext(byteArray)
+                }
             }
-        }
             .subscribeOn(Schedulers.io())
-            .subscribe()
+            .subscribe({}, { e ->
+                logger.error("Error while recording audio", e)
+            })
     }
 
     override fun stop() {

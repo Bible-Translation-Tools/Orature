@@ -5,6 +5,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Paint
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue
@@ -13,6 +14,8 @@ import kotlin.math.max
 const val RANGE = 32767.0
 
 class VolumeBar(stream: Observable<ByteArray>) : Drawable {
+
+    private val logger = LoggerFactory.getLogger(VolumeBar::class.java)
 
     companion object {
         var decibleAtom = 0
@@ -37,17 +40,21 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
         val bb = ByteBuffer.allocate(20480)
         bb.order(ByteOrder.LITTLE_ENDIAN)
         stream.subscribeOn(Schedulers.io())
-            .subscribe {
-                bb.put(it)
-                bb.position(0)
-                var max = 0
-                while (bb.hasRemaining()) {
-                    val db = bb.short.toInt().absoluteValue
-                    max = max(db, max)
+            .subscribe(
+                {
+                    bb.put(it)
+                    bb.position(0)
+                    var max = 0
+                    while (bb.hasRemaining()) {
+                        val db = bb.short.toInt().absoluteValue
+                        max = max(db, max)
+                    }
+                    decibleAtom = max
+                    bb.clear()
+                }, { e ->
+                    logger.error("Error in the volume bar", e)
                 }
-                decibleAtom = max
-                bb.clear()
-            }
+            )
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {

@@ -12,6 +12,7 @@ import javafx.scene.Parent
 import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.util.Duration
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
@@ -33,6 +34,8 @@ abstract class RecordableFragment(
     protected val recordableViewModel: RecordableViewModel,
     dragTargetBuilder: DragTargetBuilder
 ) : Fragment() {
+
+    private val logger = LoggerFactory.getLogger(RecordableFragment::class.java)
 
     abstract fun createTakeCard(take: Take): TakeCard
 
@@ -114,21 +117,25 @@ abstract class RecordableFragment(
         // TODO: This doesn't actually handle anything correctly. Need to know whether the user
         // TODO... hasn't selected an editor or recorder and respond appropriately.
         val snackBar = JFXSnackbar(pane)
-        recordableViewModel.snackBarObservable.subscribe {
-            snackBar.enqueue(
-                JFXSnackbar.SnackbarEvent(
-                    JFXSnackbarLayout(
-                        messages["noRecorder"],
-                        messages["addPlugin"].toUpperCase(),
-                        EventHandler {
-                            audioPluginViewModel.addPlugin(true, false)
-                        }
-                    ),
-                    Duration.millis(5000.0),
-                    null
+        recordableViewModel.snackBarObservable.subscribe(
+            {
+                snackBar.enqueue(
+                    JFXSnackbar.SnackbarEvent(
+                        JFXSnackbarLayout(
+                            messages["noRecorder"],
+                            messages["addPlugin"].toUpperCase(),
+                            EventHandler {
+                                audioPluginViewModel.addPlugin(true, false)
+                            }
+                        ),
+                        Duration.millis(5000.0),
+                        null
+                    )
                 )
-            )
-        }
+            }, { e ->
+                logger.err
+            }
+        )
     }
 
     private fun createAudioPluginProgressDialog() {
