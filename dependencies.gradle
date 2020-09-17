@@ -20,6 +20,7 @@ ext {
     sqliteJdbcVer = '3.28.0'
     jooqVer = '3.12.0'
     franzXaverVer = '0.1' // SVG Loader
+    franzXaverSvgVer = 'unspecified'
     retrofitVer = '2.0.0'
     retrofitMoshiVer = '2.0.0'
     retrofitRxJava2Ver = '2.3.0'
