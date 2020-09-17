@@ -191,11 +191,11 @@ class RecordResourceViewModel : ViewModel() {
                                 logger.error("Error in step to chunk, direction, $direction", e)
                             }
                             .subscribe {
-                            resourceListViewModel.setActiveChunkAndRecordables(
-                                previousItem.bookElement,
-                                it.resource
-                            )
-                        }
+                                resourceListViewModel.setActiveChunkAndRecordables(
+                                    previousItem.bookElement,
+                                    it.resource
+                                )
+                            }
                     }
                 }
             }
