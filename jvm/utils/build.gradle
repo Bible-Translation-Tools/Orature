@@ -22,5 +22,5 @@ dependencies {
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
     // SVG Loader
-    implementation 'com.github.jsarabia:FranzXaverSVG:develop-SNAPSHOT'
+    implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
 }
