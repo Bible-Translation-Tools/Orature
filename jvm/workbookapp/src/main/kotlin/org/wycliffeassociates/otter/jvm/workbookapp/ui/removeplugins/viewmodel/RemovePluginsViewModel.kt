@@ -30,13 +30,12 @@ class RemovePluginsViewModel : ViewModel() {
         pluginRepository
             .getAll()
             .observeOnFx()
-            .subscribe(
-                { pluginData ->
-                    plugins.addAll(pluginData)
-                }, { e ->
-                    logger.error("Error in refreshing plugins", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in refreshing plugins", e)
+            }
+            .subscribe { pluginData ->
+                plugins.addAll(pluginData)
+            }
     }
 
     fun remove(plugin: AudioPluginData) {

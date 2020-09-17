@@ -36,11 +36,15 @@ class CardGridViewModel : ViewModel() {
     private val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 
     init {
-        Observable.merge(
-            chapterModeEnabledProperty.toObservable(),
-            allContent.changes()
-        ).subscribe(
-            {
+        Observable
+            .merge(
+                chapterModeEnabledProperty.toObservable(),
+                allContent.changes()
+            )
+            .doOnError { e ->
+                logger.error("Error in setting up content cards", e)
+            }
+            .subscribe {
                 filteredContent.setAll(
                     if (chapterModeEnabledProperty.value == true) {
                         allContent.filtered { cardData ->
@@ -50,10 +54,7 @@ class CardGridViewModel : ViewModel() {
                         allContent
                     }
                 )
-            }, { e ->
-                logger.error("Error in setting up content cards", e)
             }
-        )
 
         workbookViewModel.activeWorkbookProperty.onChangeAndDoNow {
             it?.let { wb -> loadChapters(wb) }
@@ -89,13 +90,12 @@ class CardGridViewModel : ViewModel() {
             }
             .observeOnFx()
             .toList()
-            .subscribe(
-                { list: List<CardData> ->
-                    allContent.setAll(list.filter { it.item != ContentLabel.CHAPTER.value })
-                }, { e ->
-                    logger.error("Error in loading chapter contents for chapter: $chapter", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in loading chapter contents for chapter: $chapter", e)
+            }
+            .subscribe { list: List<CardData> ->
+                allContent.setAll(list.filter { it.item != ContentLabel.CHAPTER.value })
+            }
     }
 
     fun onCardSelection(cardData: CardData) {
@@ -117,15 +117,14 @@ class CardGridViewModel : ViewModel() {
             }
             .observeOnFx()
             .toList()
-            .subscribe(
-                { list: List<CardData> ->
-                    // TODO
-                    // setAll is causing the UI to hang, probably because node structure is complex. If "loading" is
-                    // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
-                    allContent.setAll(list)
-                }, { e ->
-                    logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
+            }
+            .subscribe { list: List<CardData> ->
+                // TODO
+                // setAll is causing the UI to hang, probably because node structure is complex. If "loading" is
+                // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
+                allContent.setAll(list)
+            }
     }
 }

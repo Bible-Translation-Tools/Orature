@@ -62,15 +62,14 @@ class CardGridFragment : Fragment() {
                                 it.contentType == ContentType.TEXT
                             }
                             .count()
-                            .subscribe(
-                                { count ->
-                                    Platform.runLater {
-                                        chapterBanner.chunkCount.text = count.toString()
-                                    }
-                                }, { e ->
-                                    logger.error("Error in setting chapter banner chunk count", e)
+                            .doOnError { e ->
+                                logger.error("Error in setting chapter banner chunk count", e)
+                            }
+                            .subscribe { count ->
+                                Platform.runLater {
+                                    chapterBanner.chunkCount.text = count.toString()
                                 }
-                            )
+                            }
                         openButton.setOnMouseClicked {
                             viewModel.onCardSelection(CardData(chapter))
                             navigator.navigateTo(TabGroupType.RECORD_SCRIPTURE)

@@ -55,27 +55,27 @@ class ProjectWizardViewModel : ViewModel() {
         initializeTargetLanguages()
         initializeSourceLanguages()
         loadProjects()
-        selectedTargetLanguage.toObservable().subscribe(
-            { language ->
-                existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
-                languageCompletedText.set(language?.anglicizedName)
-            }, { e ->
+        selectedTargetLanguage
+            .toObservable()
+            .doOnError { e ->
                 logger.error("Error in loading projects for selected language", e)
             }
-        )
+            .subscribe { language ->
+                existingProjects.setAll(projects.filter { it.resourceContainer?.language == language })
+                languageCompletedText.set(language?.anglicizedName)
+            }
     }
 
     private fun initializeTargetLanguages() {
         languageRepo
             .getAll()
             .observeOnFx()
-            .subscribe(
-                { retrieved ->
-                    targetLanguages.addAll(retrieved)
-                }, { e ->
-                    logger.error("Error initializing target languages", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error initializing target languages", e)
+            }
+            .subscribe { retrieved ->
+                targetLanguages.addAll(retrieved)
+            }
     }
 
     private fun initializeSourceLanguages() {
@@ -84,45 +84,44 @@ class ProjectWizardViewModel : ViewModel() {
             .observeOnFx()
             .map { collections ->
                 collections.mapNotNull { collection -> collection.resourceContainer?.language }
-            }.map { languages ->
+            }
+            .map { languages ->
                 languages.distinct()
-            }.subscribe(
-                { uniqueLanguages ->
-                    sourceLanguages.addAll(uniqueLanguages)
-                }, { e ->
-                    logger.error("Error in initializing source languages", e)
-                }
-            )
+            }
+            .doOnError { e ->
+                logger.error("Error in initializing source languages", e)
+            }
+            .subscribe { uniqueLanguages ->
+                sourceLanguages.addAll(uniqueLanguages)
+            }
     }
 
     private fun loadProjects() {
         collectionRepo
             .getDerivedProjects()
-            .subscribe(
-                { retrieved ->
-                    projects.addAll(retrieved)
-                }, { e ->
-                    logger.error("Error in loading projects", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in loading projects", e)
+            }
+            .subscribe { retrieved ->
+                projects.addAll(retrieved)
+            }
     }
 
     fun getRootSources() {
         collectionRepo
             .getRootSources()
             .observeOnFx()
-            .subscribe(
-                { retrieved ->
-                    collectionHierarchy.add(
-                        retrieved.filter {
-                            it.resourceContainer?.language == selectedSourceLanguage.value
-                        }
-                    )
-                    collections.setAll(collectionHierarchy.last())
-                }, { e ->
-                    logger.error("Error in getting root resources", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in getting root resources", e)
+            }
+            .subscribe { retrieved ->
+                collectionHierarchy.add(
+                    retrieved.filter {
+                        it.resourceContainer?.language == selectedSourceLanguage.value
+                    }
+                )
+                collections.setAll(collectionHierarchy.last())
+            }
     }
 
     fun doOnUserSelection(selectedCollection: Collection) {
@@ -144,7 +143,8 @@ class ProjectWizardViewModel : ViewModel() {
                 collectionHierarchy.add(subcollections)
                 collections.setAll(collectionHierarchy.last().sortedBy { it.sort })
             }
-            .subscribe({}, { e -> logger.error("Error in show sub collections", e) })
+            .doOnError { e -> logger.error("Error in show sub collections", e) }
+            .subscribe()
     }
 
     private fun createProject(selectedCollection: Collection) {
@@ -152,15 +152,14 @@ class ProjectWizardViewModel : ViewModel() {
             showOverlayProperty.value = true
             creationUseCase
                 .create(selectedCollection, language)
-                .subscribe(
-                    { _ ->
-                        find(ProjectGridViewModel::class).loadProjects()
-                        showOverlayProperty.value = false
-                        creationCompletedProperty.value = true
-                    }, { e ->
-                        logger.error("Error in creating a project for collection: $selectedCollection", e)
-                    }
-                )
+                .doOnError { e ->
+                    logger.error("Error in creating a project for collection: $selectedCollection", e)
+                }
+                .subscribe { _ ->
+                    find(ProjectGridViewModel::class).loadProjects()
+                    showOverlayProperty.value = false
+                    creationCompletedProperty.value = true
+                }
         }
     }
 

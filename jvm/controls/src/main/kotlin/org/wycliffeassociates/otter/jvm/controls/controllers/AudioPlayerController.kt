@@ -99,16 +99,14 @@ class AudioPlayerController(
         return Observable
             .interval(ANIMATION_REFRESH_MS, TimeUnit.MILLISECONDS)
             .observeOnFx()
-            .subscribe(
-                {
-                    if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
-                        audioSlider.value = playbackPosition().toDouble()
-                    }
-                } ,
-                { e ->
-                    logger.error("Error in startProgressUpdate", e)
+            .doOnError { e ->
+                logger.error("Error in startProgressUpdate", e)
+            }
+            .subscribe {
+                if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
+                    audioSlider.value = playbackPosition().toDouble()
                 }
-            )
+            }
     }
 
     private fun play() {

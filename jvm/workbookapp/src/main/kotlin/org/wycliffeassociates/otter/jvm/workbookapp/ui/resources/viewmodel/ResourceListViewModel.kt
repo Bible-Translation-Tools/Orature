@@ -54,13 +54,12 @@ class ResourceListViewModel : ViewModel() {
             groupCardItem.resources
                 .filter { it.resource == resource }
                 .singleElement()
-                .subscribe(
-                    {
-                        selectedGroupCardItem.set(groupCardItem)
-                    }, { e ->
-                        logger.error("Error in setting selected resource group card item for: $resource", e)
-                    }
-                )
+                .doOnError { e ->
+                    logger.error("Error in setting selected resource group card item for: $resource", e)
+                }
+                .subscribe {
+                    selectedGroupCardItem.set(groupCardItem)
+                }
         }
     }
 
@@ -81,13 +80,12 @@ class ResourceListViewModel : ViewModel() {
             .doFinally {
                 calculateCompletionProgress()
             }
-            .subscribe(
-                {
-                    resourceGroupCardItemList.addAll(it)
-                }, { e ->
-                    logger.error("Error in loading resource groups for $chapter", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in loading resource groups for $chapter", e)
+            }
+            .subscribe {
+                resourceGroupCardItemList.addAll(it)
+            }
     }
 
     internal fun setActiveChunkAndRecordables(bookElement: BookElement?, resource: Resource) {
@@ -106,25 +104,24 @@ class ResourceListViewModel : ViewModel() {
         resourceGroupCardItemList.forEach { item ->
             item.resources
                 .toList()
-                .subscribe(
-                    { list ->
-                        list.forEach {
-                            it.titleProgressProperty.get().let { progress ->
-                                completed += progress
-                                totalItems++
-                            }
-                            it.bodyProgressProperty?.get()?.let { progress ->
-                                completed += progress
-                                totalItems++
-                            }
-                            if (totalItems > 0) {
-                                runLater { completionProgressProperty.set(completed / totalItems) }
-                            }
+                .doOnError { e ->
+                    logger.error("Error in calculating resource completion progress", e)
+                }
+                .subscribe { list ->
+                    list.forEach {
+                        it.titleProgressProperty.get().let { progress ->
+                            completed += progress
+                            totalItems++
                         }
-                    }, { e ->
-                        logger.error("Error in calculating resource completion progress", e)
+                        it.bodyProgressProperty?.get()?.let { progress ->
+                            completed += progress
+                            totalItems++
+                        }
+                        if (totalItems > 0) {
+                            runLater { completionProgressProperty.set(completed / totalItems) }
+                        }
                     }
-                )
+                }
         }
     }
 }

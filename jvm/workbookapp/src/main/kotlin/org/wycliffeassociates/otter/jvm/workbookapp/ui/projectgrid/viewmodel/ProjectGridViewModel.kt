@@ -45,14 +45,13 @@ class ProjectGridViewModel : ViewModel() {
                 getWorkbook(it)
             }
             .collectInto(mutableListOf<Maybe<Workbook>>(), { list, item -> list.add(item) })
-            .subscribe(
-                { derivedProjects ->
-                    val bookProjects = derivedProjects.mapNotNull { it.blockingGet() }
-                    projects.setAll(bookProjects)
-                }, { e ->
-                    logger.error("Error in loading projects", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in loading projects", e)
+            }
+            .subscribe { derivedProjects ->
+                val bookProjects = derivedProjects.mapNotNull { it.blockingGet() }
+                projects.setAll(bookProjects)
+            }
     }
 
     fun clearSelectedProject() {
@@ -69,14 +68,13 @@ class ProjectGridViewModel : ViewModel() {
         DeleteProject(collectionRepo, directoryProvider)
             .delete(project.target.toCollection(), true)
             .observeOnFx()
-            .subscribe(
-                {
-                    showDeleteDialogProperty.set(false)
-                    Platform.runLater { loadProjects() }
-                }, { e ->
-                    logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
+            }
+            .subscribe {
+                showDeleteDialogProperty.set(false)
+                Platform.runLater { loadProjects() }
+            }
     }
 
     fun selectProject(workbook: Workbook) {

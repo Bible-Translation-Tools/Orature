@@ -32,15 +32,16 @@ class ProgressDialog : Fragment() {
                 progressindicator()
                 hbox {
                     alignment = Pos.CENTER
-                    graphicProperty.toObservable().subscribe(
-                        {
+                    graphicProperty
+                        .toObservable()
+                        .doOnError { e ->
+                            logger.error("Error in ProgressDialog", e)
+                        }
+                        .subscribe {
                             clear()
                             it.addClass(ProgressDialogStyles.progressGraphic)
                             add(it)
-                        }, { e ->
-                            logger.error("Error in ProgressDialog", e)
                         }
-                    )
                 }
             }
         }

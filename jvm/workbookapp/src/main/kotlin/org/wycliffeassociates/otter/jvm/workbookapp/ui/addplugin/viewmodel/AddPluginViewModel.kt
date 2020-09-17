@@ -36,13 +36,12 @@ class AddPluginViewModel : ViewModel() {
         pluginRepository
             .getAll()
             .observeOnFx()
-            .subscribe(
-                { retrieved ->
-                    plugins.addAll(retrieved)
-                }, { e ->
-                    logger.error("Error in getting all plugins", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in getting all plugins", e)
+            }
+            .subscribe { retrieved ->
+                plugins.addAll(retrieved)
+            }
     }
 
     fun validateName(): ValidationMessage? {
@@ -89,13 +88,12 @@ class AddPluginViewModel : ViewModel() {
                     mainMenuViewModel.selectEditor(pluginData)
                     mainMenuViewModel.refreshPlugins()
                 }
+                .doOnError { e ->
+                    logger.error("Error creating a plugin:")
+                    logger.error("Plugin name: $name, path: $path, record: $canRecord, edit: $canEdit", e)
+                }
                 .onErrorComplete()
-                .subscribe(
-                    {}, { e ->
-                        logger.error("Error creating a plugin:")
-                        logger.error("Plugin name: $name, path: $path, record: $canRecord, edit: $canEdit", e)
-                    }
-                )
+                .subscribe()
         }
     }
 }

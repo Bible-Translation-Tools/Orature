@@ -169,13 +169,14 @@ class RecordResourceViewModel : ViewModel() {
                     resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
                 } ?: run {
                     nextGroupCardItem()?.let { nextItem ->
-                        nextItem.resources.firstElement().subscribe(
-                            {
-                                resourceListViewModel.setActiveChunkAndRecordables(nextItem.bookElement, it.resource)
-                            }, { e ->
+                        nextItem.resources
+                            .firstElement()
+                            .doOnError { e ->
                                 logger.error("Error in step to chunk, direction: $direction", e)
                             }
-                        )
+                            .subscribe {
+                                resourceListViewModel.setActiveChunkAndRecordables(nextItem.bookElement, it.resource)
+                            }
                     }
                 }
             }
@@ -184,16 +185,17 @@ class RecordResourceViewModel : ViewModel() {
                     resourceListViewModel.setActiveChunkAndRecordables(activeChunk, it)
                 } ?: run {
                     previousGroupCardItem()?.let { previousItem ->
-                        previousItem.resources.lastElement().subscribe(
-                            {
-                                resourceListViewModel.setActiveChunkAndRecordables(
-                                    previousItem.bookElement,
-                                    it.resource
-                                )
-                            }, { e ->
+                        previousItem.resources
+                            .lastElement()
+                            .doOnError { e ->
                                 logger.error("Error in step to chunk, direction, $direction", e)
                             }
-                        )
+                            .subscribe {
+                            resourceListViewModel.setActiveChunkAndRecordables(
+                                previousItem.bookElement,
+                                it.resource
+                            )
+                        }
                     }
                 }
             }
@@ -211,15 +213,14 @@ class RecordResourceViewModel : ViewModel() {
         activeResourceSubscription = resources
             .toList()
             .observeOnFx()
-            .subscribe(
-                { list ->
-                    list.forEach {
-                        resourceList.add(it.resource)
-                    }
-                }, { e ->
-                    logger.error("Error in get resource list", e)
+            .doOnError { e ->
+                logger.error("Error in get resource list", e)
+            }
+            .subscribe { list ->
+                list.forEach {
+                    resourceList.add(it.resource)
                 }
-            )
+            }
     }
 
     private fun nextResource(): Resource? {

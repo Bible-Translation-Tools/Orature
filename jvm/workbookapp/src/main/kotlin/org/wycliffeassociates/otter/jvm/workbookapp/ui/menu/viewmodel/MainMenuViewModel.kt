@@ -57,18 +57,17 @@ class MainMenuViewModel : ViewModel() {
             workbookRepository
         ).export(directory)
             .observeOnFx()
-            .subscribe(
-                { result: ExportResult ->
-                    showExportDialogProperty.value = false
+            .doOnError { e ->
+                logger.error("Error in exporting project for project: ${workbookVM.workbook.target.slug}")
+                logger.error("Project language: ${workbookVM.workbook.target.language.slug}, file: $directory", e)
+            }
+            .subscribe { result: ExportResult ->
+                showExportDialogProperty.value = false
 
-                    result.errorMessage?.let {
-                        error(messages["exportError"], it)
-                    }
-                }, { e ->
-                    logger.error("Error in exporting project for project: ${workbookVM.workbook.target.slug}")
-                    logger.error("Project language: ${workbookVM.workbook.target.language.slug}, file: $directory", e)
+                result.errorMessage?.let {
+                    error(messages["exportError"], it)
                 }
-            )
+            }
     }
 
     fun importResourceContainer(fileOrDir: File) {
@@ -86,21 +85,20 @@ class MainMenuViewModel : ViewModel() {
         ).import(fileOrDir)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
-            .subscribe(
-                { result: ImportResult ->
-                    if (result == ImportResult.SUCCESS) {
-                        find<ProjectGridViewModel>().loadProjects()
-                    }
-
-                    showImportDialogProperty.value = false
-
-                    result.errorMessage?.let {
-                        error(messages["importError"], it)
-                    }
-                }, { e ->
-                    logger.error("Error in importing resource container $fileOrDir", e)
+            .doOnError { e ->
+                logger.error("Error in importing resource container $fileOrDir", e)
+            }
+            .subscribe { result: ImportResult ->
+                if (result == ImportResult.SUCCESS) {
+                    find<ProjectGridViewModel>().loadProjects()
                 }
-            )
+
+                showImportDialogProperty.value = false
+
+                result.errorMessage?.let {
+                    error(messages["importError"], it)
+                }
+            }
     }
 
     fun refreshPlugins() {
@@ -127,7 +125,8 @@ class MainMenuViewModel : ViewModel() {
             .doOnSuccess {
                 selectedEditorProperty.set(it)
             }
-            .subscribe({}, { e -> logger.error("Error in refreshPlugins", e)})
+            .doOnError { e -> logger.error("Error in refreshPlugins", e) }
+            .subscribe()
     }
 
     fun selectEditor(editorData: AudioPluginData) {

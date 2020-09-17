@@ -89,16 +89,15 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
         return Observable
             .interval(16, TimeUnit.MILLISECONDS)
             .observeOnFx()
-            .subscribe(
-                {
-                    val location = player
-                        .getAbsoluteLocationInFrames()
-                        .toDouble()
-                    progressBar.progress = location / player.getAbsoluteDurationInFrames()
-                }, { e ->
-                    logger.error("Error in starting progress update", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in starting progress update", e)
+            }
+            .subscribe {
+                val location = player
+                    .getAbsoluteLocationInFrames()
+                    .toDouble()
+                progressBar.progress = location / player.getAbsoluteDurationInFrames()
+            }
     }
 }
 

@@ -40,21 +40,20 @@ class VolumeBar(stream: Observable<ByteArray>) : Drawable {
         val bb = ByteBuffer.allocate(20480)
         bb.order(ByteOrder.LITTLE_ENDIAN)
         stream.subscribeOn(Schedulers.io())
-            .subscribe(
-                {
-                    bb.put(it)
-                    bb.position(0)
-                    var max = 0
-                    while (bb.hasRemaining()) {
-                        val db = bb.short.toInt().absoluteValue
-                        max = max(db, max)
-                    }
-                    decibleAtom = max
-                    bb.clear()
-                }, { e ->
-                    logger.error("Error in the volume bar", e)
+            .doOnError { e ->
+                logger.error("Error in the volume bar", e)
+            }
+            .subscribe {
+                bb.put(it)
+                bb.position(0)
+                var max = 0
+                while (bb.hasRemaining()) {
+                    val db = bb.short.toInt().absoluteValue
+                    max = max(db, max)
                 }
-            )
+                decibleAtom = max
+                bb.clear()
+            }
     }
 
     override fun draw(context: GraphicsContext, canvas: Canvas) {

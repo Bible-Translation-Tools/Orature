@@ -24,8 +24,12 @@ class ResourceGroupCard(
         addClass(ResourceGroupCardStyles.resourceGroupCard)
         label(group.title)
 
-        group.resources.buffer(RENDER_BATCH_SIZE).subscribe(
-            { items ->
+        group.resources
+            .buffer(RENDER_BATCH_SIZE)
+            .doOnError { e ->
+                logger.error("Error in rendering resource groups", e)
+            }
+            .subscribe { items ->
                 Platform.runLater {
                     items.forEach {
                         add(
@@ -33,10 +37,7 @@ class ResourceGroupCard(
                         )
                     }
                 }
-            }, { e ->
-                logger.error("Error in rendering resource groups", e)
             }
-        )
     }
 }
 
