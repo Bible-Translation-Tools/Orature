@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.tree.OtterTree
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
@@ -35,8 +36,10 @@ class ImportResourceContainer(
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
+    private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
     fun import(file: File): Single<ImportResult> {
+        logger.info("Importing resource contianer: $file")
         val projectImporter = ProjectImporter(
             this,
             directoryProvider,
@@ -49,15 +52,18 @@ class ImportResourceContainer(
 
         val valid = validateRc(file)
         if (!valid) {
+            logger.error("Import failed, $file is an invalid RC")
             return Single.just(ImportResult.INVALID_RC)
         }
 
         val resumable = projectImporter.isResumableProject(file)
         return if (resumable) {
+            logger.info("Importing rc as a resumable project")
             projectImporter.importResumableProject(file)
         } else {
             val exists = isAlreadyImported(file)
             if (exists) {
+                logger.info("RC already imported, merging media")
                 Single.fromCallable {
                     val existingRC = getExistingMetadata(file)
                     MediaMerge(
@@ -68,6 +74,7 @@ class ImportResourceContainer(
                     ImportResult.SUCCESS
                 }
             } else {
+                logger.info("RC not already imported, importing...")
                 importContainer(file)
             }
         }
@@ -82,6 +89,9 @@ class ImportResourceContainer(
             .flatMap {
                 import(tempFile)
             }
+            .doOnError { e ->
+                logger.error("Error in import, filename: $filename", e)
+            }
             .doFinally {
                 tempFile.delete()
             }
@@ -92,6 +102,7 @@ class ImportResourceContainer(
         return try {
             ResourceContainer.load(rc, true).use { true }
         } catch (e: Exception) {
+            logger.error("Error in validateRc: $rc", e)
             false
         }
     }
@@ -123,6 +134,7 @@ class ImportResourceContainer(
             val copiedRc = copyToInternalDirectory(file, internalDir)
             importFromInternalDir(copiedRc).blockingGet()
         }.onErrorReturn { e ->
+            logger.error("Error in importContainer, file: $file", e)
             e.castOrFindImportException()?.result ?: throw e
         }.subscribeOn(Schedulers.io())
     }
@@ -140,7 +152,7 @@ class ImportResourceContainer(
             ResourceContainer.load(file, OtterResourceContainerConfig())
         } catch (e: Exception) {
             // Could be checked or unchecked exception from RC library
-            e.printStackTrace()
+            logger.error("Error in getInternalDirectory, file: $file", e)
             return null
         }
         return directoryProvider.getSourceContainerDirectory(extContainer)
@@ -151,18 +163,23 @@ class ImportResourceContainer(
         val container = try {
             ResourceContainer.load(fileToLoad, OtterResourceContainerConfig())
         } catch (e: Exception) {
+            logger.error("Error loading rc in importFromInternalDir, file: $fileToLoad", e)
             return cleanUp(fileToLoad, ImportResult.LOAD_RC_ERROR)
         }
 
         val tree = try {
             constructContainerTree(container)
         } catch (e: ImportException) {
+            logger.error("Error constructing container tree, file: $fileToLoad", e)
             return cleanUp(fileToLoad, e.result)
         }
 
         return resourceContainerRepository
             .importResourceContainer(container, tree, container.manifest.dublinCore.language.identifier)
             .doOnEvent { result, err ->
+                if (err != null) {
+                    logger.error("Error in importFromInternalDirectory importing rc, file: $fileToLoad", err)
+                }
                 if (result != ImportResult.SUCCESS || err != null) fileToLoad.deleteRecursively()
             }
             .subscribeOn(Schedulers.io())

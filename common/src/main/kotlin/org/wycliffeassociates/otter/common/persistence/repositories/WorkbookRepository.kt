@@ -7,6 +7,8 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
@@ -17,6 +19,8 @@ private typealias ModelTake = org.wycliffeassociates.otter.common.data.model.Tak
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
 class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookRepository {
+    private val logger = LoggerFactory.getLogger(WorkbookRepository::class.java)
+
     constructor(
         collectionRepository: ICollectionRepository,
         contentRepository: IContentRepository,
@@ -232,16 +236,26 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .filter { dateHolder -> dateHolder.value != null }
             .filter { take == selectedTakeRelay.value?.value }
             .map { TakeHolder(null) }
-            .subscribe(selectedTakeRelay)
+            .subscribe(
+                selectedTakeRelay,
+                Consumer { e ->
+                    logger.error("Error in deselectUponDelete, take: $take", e)
+                }
+            )
     }
 
     private fun deleteFromDbUponDelete(take: WorkbookTake, modelTake: ModelTake): Disposable {
         return take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
-            .subscribe {
-                db.deleteTake(modelTake, it)
-                    .subscribe()
-            }
+            .subscribe(
+                {
+                    db.deleteTake(modelTake, it)
+                        .subscribe({}, { e -> logger.error("Error in deleteTake: wb take: $take, model take: $modelTake", e)})
+                },
+                { e ->
+                    logger.error("Error in deleteFromDbUponDelete, wb take: $take, model take: $modelTake", e)
+                }
+            )
     }
 
     private fun workbookTake(modelTake: ModelTake): WorkbookTake {
@@ -284,11 +298,15 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         val selectedTakeRelaySubscription = selectedTakeRelay
             .distinctUntilChanged() // Don't write unless changed
             .skip(1) // Don't write the value we just loaded from the DB
-            .subscribe {
-                content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
-                db.updateContent(content)
-                    .subscribe()
-            }
+            .subscribe(
+                {
+                    content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
+                    db.updateContent(content)
+                        .subscribe({}, { e -> logger.error("Error in updating content for content: $content", e)})
+                }, { e ->
+                    logger.error("Error in selectedTakesRelay, content: $content", e)
+                }
+            )
 
         /** Initial Takes read from the DB. */
         val takesFromDb = db.getTakeByContent(content)
@@ -308,7 +326,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .doOnNext { (wbTake, modelTake) -> takeMap[wbTake] = modelTake }
             // Feed the initial list to takesRelay
             .map { (wbTake, _) -> wbTake }
-            .subscribe(takesRelay)
+            .subscribe(takesRelay, Consumer { e -> logger.error("Error in takesRelay, content: $content", e) })
 
         val takesRelaySubscription = takesRelay
             .filter { it.deletedTimestamp.value?.value == null }
@@ -329,10 +347,17 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             }
 
             // Insert the new take into the DB. (We already filtered existing takes out.)
-            .subscribe { (_, modelTake) ->
-                db.insertTakeForContent(modelTake, content)
-                    .subscribe { insertionId -> modelTake.id = insertionId }
-            }
+            .subscribe(
+                { (_, modelTake) ->
+                    db.insertTakeForContent(modelTake, content)
+                        .subscribe(
+                            { insertionId -> modelTake.id = insertionId },
+                            { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
+                        )
+                }, { e ->
+                    logger.error("Error constructing associated audio for content: $content", e)
+                }
+            )
 
         synchronized(disposables) {
             disposables.add(takesRelaySubscription)

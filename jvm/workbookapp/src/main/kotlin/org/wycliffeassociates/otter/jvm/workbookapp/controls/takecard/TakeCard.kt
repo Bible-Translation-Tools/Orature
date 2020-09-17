@@ -5,6 +5,7 @@ import io.reactivex.disposables.CompositeDisposable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.simpleaudioplayer
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -19,6 +20,9 @@ class TakeCard(
     private val player: IAudioPlayer,
     playOrPauseEventObservable: Observable<PlayOrPauseEvent>
 ) : Control() {
+
+    private val logger = LoggerFactory.getLogger(TakeCard::class.java)
+
     val isAudioPlayingProperty = SimpleBooleanProperty()
     val simpleAudioPlayer = simpleaudioplayer(take.file, player) {
         isAudioPlayingProperty.bind(isPlaying)
@@ -70,9 +74,13 @@ class TakeCard(
         val sub = playOrPauseEventObservable
             .filter { it is PlayEvent }
             .filter { it.target != this }
-            .subscribe {
-                firePauseEvent()
-            }
+            .subscribe(
+                {
+                    firePauseEvent()
+                }, { e ->
+                    logger.error("Error in take card playback event listener", e)
+                }
+            )
         disposables.add(sub)
     }
 

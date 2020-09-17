@@ -9,6 +9,7 @@ import jooq.Tables.*
 import org.jooq.SelectConditionStep
 import org.jooq.Record
 import org.jooq.DSLContext
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.multimap.MultiMap
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
@@ -24,6 +25,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Resourc
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.*
 
 class ResourceRepository(private val database: AppDatabase) : IResourceRepository {
+    private val logger = LoggerFactory.getLogger(ResourceRepository::class.java)
+
     private val contentDao = database.contentDao
     private val contentTypeDao = database.contentTypeDao
     private val collectionDao = database.collectionDao
@@ -43,6 +46,9 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
             .fromAction {
                 contentDao.delete(contentMapper.mapToEntity(obj))
             }
+            .doOnError { e ->
+                logger.error("Error in delete with content: $obj", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -52,6 +58,9 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
                 contentDao
                     .fetchAll()
                     .map(this::buildResource)
+            }
+            .doOnError { e ->
+                logger.error("Error in getAll", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -132,6 +141,9 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
 
         return contentStreamObservable
             .flatMap { it.iterator().toObservable() }
+            .doOnError { e ->
+                logger.error("Error in getResources for resource: $help, with select: $selectStatement", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -139,6 +151,9 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
         return Completable
             .fromAction {
                 resourceLinkDao.insertNoReturn(entity)
+            }
+            .doOnError { e ->
+                logger.error("Error in insert for link: $entity", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -171,6 +186,9 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
                 // Make sure we don't over write the collection relationship
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
+            }
+            .doOnError { e ->
+                logger.error("Error in update for content: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -223,12 +241,12 @@ class ResourceRepository(private val database: AppDatabase) : IResourceRepositor
         val contentEnd = sources.map { it.start }.max() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
-            // Retrieve the markers
-            val markers = markerDao
-                .fetchByTakeId(selectedTakeFk)
-                .map(markerMapper::mapFromEntity)
-            takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
-        }
+                // Retrieve the markers
+                val markers = markerDao
+                    .fetchByTakeId(selectedTakeFk)
+                    .map(markerMapper::mapFromEntity)
+                takeMapper.mapFromEntity(takeDao.fetchById(selectedTakeFk), markers)
+            }
         return contentMapper.mapFromEntity(entity, selectedTake, contentEnd)
     }
 

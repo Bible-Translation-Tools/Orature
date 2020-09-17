@@ -6,6 +6,7 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -18,6 +19,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.Workbo
 import tornadofx.*
 
 class ProjectGridViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(ProjectGridViewModel::class.java)
+
     private val injector: Injector by inject()
     private val collectionRepo = injector.collectionRepo
     private val workbookRepo = injector.workbookRepository
@@ -41,10 +45,14 @@ class ProjectGridViewModel : ViewModel() {
                 getWorkbook(it)
             }
             .collectInto(mutableListOf<Maybe<Workbook>>(), { list, item -> list.add(item) })
-            .subscribe { derivedProjects ->
-                val bookProjects = derivedProjects.mapNotNull { it.blockingGet() }
-                projects.setAll(bookProjects)
-            }
+            .subscribe(
+                { derivedProjects ->
+                    val bookProjects = derivedProjects.mapNotNull { it.blockingGet() }
+                    projects.setAll(bookProjects)
+                }, { e ->
+                    logger.error("Error in loading projects", e)
+                }
+            )
     }
 
     fun clearSelectedProject() {
@@ -61,10 +69,14 @@ class ProjectGridViewModel : ViewModel() {
         DeleteProject(collectionRepo, directoryProvider)
             .delete(project.target.toCollection(), true)
             .observeOnFx()
-            .subscribe {
-                showDeleteDialogProperty.set(false)
-                Platform.runLater { loadProjects() }
-            }
+            .subscribe(
+                {
+                    showDeleteDialogProperty.set(false)
+                    Platform.runLater { loadProjects() }
+                }, { e ->
+                    logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
+                }
+            )
     }
 
     fun selectProject(workbook: Workbook) {

@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -19,6 +20,9 @@ import tornadofx.*
 import java.io.File
 
 class MainMenuViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(MainMenuViewModel::class.java)
+
     private val injector: Injector by inject()
     private val directoryProvider = injector.directoryProvider
     private val pluginRepository = injector.pluginRepository
@@ -53,13 +57,18 @@ class MainMenuViewModel : ViewModel() {
             workbookRepository
         ).export(directory)
             .observeOnFx()
-            .subscribe { result: ExportResult ->
-                showExportDialogProperty.value = false
+            .subscribe(
+                { result: ExportResult ->
+                    showExportDialogProperty.value = false
 
-                result.errorMessage?.let {
-                    error(messages["exportError"], it)
+                    result.errorMessage?.let {
+                        error(messages["exportError"], it)
+                    }
+                }, { e ->
+                    logger.error("Error in exporting project for project: ${workbookVM.workbook.target.slug}")
+                    logger.error("Project language: ${workbookVM.workbook.target.language.slug}, file: $directory", e)
                 }
-            }
+            )
     }
 
     fun importResourceContainer(fileOrDir: File) {
@@ -77,17 +86,21 @@ class MainMenuViewModel : ViewModel() {
         ).import(fileOrDir)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
-            .subscribe { result: ImportResult ->
-                if (result == ImportResult.SUCCESS) {
-                    find<ProjectGridViewModel>().loadProjects()
-                }
+            .subscribe(
+                { result: ImportResult ->
+                    if (result == ImportResult.SUCCESS) {
+                        find<ProjectGridViewModel>().loadProjects()
+                    }
 
-                showImportDialogProperty.value = false
+                    showImportDialogProperty.value = false
 
-                result.errorMessage?.let {
-                    error(messages["importError"], it)
+                    result.errorMessage?.let {
+                        error(messages["importError"], it)
+                    }
+                }, { e ->
+                    logger.error("Error in importing resource container $fileOrDir", e)
                 }
-            }
+            )
     }
 
     fun refreshPlugins() {
@@ -114,7 +127,7 @@ class MainMenuViewModel : ViewModel() {
             .doOnSuccess {
                 selectedEditorProperty.set(it)
             }
-            .subscribe()
+            .subscribe({}, { e -> logger.error("Error in refreshPlugins", e)})
     }
 
     fun selectEditor(editorData: AudioPluginData) {

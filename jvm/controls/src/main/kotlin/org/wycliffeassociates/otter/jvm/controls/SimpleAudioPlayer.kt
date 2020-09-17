@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import tornadofx.*
@@ -18,6 +19,8 @@ import java.util.concurrent.TimeUnit
 // Named "Simple" since just displays a progress bar and play/pause button
 // No waveform view
 class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioPlayer) : HBox() {
+
+    private val logger = LoggerFactory.getLogger(SimpleAudioPlayer::class.java)
 
     val progressBar = JFXProgressBar()
     val isPlaying = SimpleBooleanProperty(false)
@@ -86,12 +89,16 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
         return Observable
             .interval(16, TimeUnit.MILLISECONDS)
             .observeOnFx()
-            .subscribe {
-                val location = player
-                    .getAbsoluteLocationInFrames()
-                    .toDouble()
-                progressBar.progress = location / player.getAbsoluteDurationInFrames()
-            }
+            .subscribe(
+                {
+                    val location = player
+                        .getAbsoluteLocationInFrames()
+                        .toDouble()
+                    progressBar.progress = location / player.getAbsoluteDurationInFrames()
+                }, { e ->
+                    logger.error("Error in starting progress update", e)
+                }
+            )
     }
 }
 

@@ -9,9 +9,13 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
+import org.slf4j.LoggerFactory
 import java.util.concurrent.Callable
 
 data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
+
+    private val logger = LoggerFactory.getLogger(ResourceCardItem::class.java)
+
     val title: String = renderTitleAsPlainText()
     private val disposables = CompositeDisposable()
     val titleProgressProperty: DoubleProperty = resource.title.audio.progressProperty()
@@ -29,9 +33,14 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
 
     private fun AssociatedAudio.progressProperty(): DoubleProperty {
         val progressProperty = SimpleDoubleProperty(0.0)
-        val sub = this.selected.subscribe {
-            progressProperty.set(if (it.value != null) 1.0 else 0.0)
-        }
+        val sub = this.selected
+            .subscribe(
+                {
+                    progressProperty.set(if (it.value != null) 1.0 else 0.0)
+                }, { e ->
+                    logger.error("Error in updating resource card progress", e)
+                }
+            )
         disposables.add(sub)
         return progressProperty
     }

@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
@@ -22,6 +23,8 @@ class InitializeApp(
     val installedEntityRepo: IInstalledEntityRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
+
+    private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
 
     fun initApp(): Observable<Double> {
         return Observable
@@ -66,6 +69,10 @@ class InitializeApp(
                     it.exec().blockingAwait()
                 }
                 progress.onComplete()
-            }.subscribeOn(Schedulers.io())
+            }
+            .doOnError { e ->
+                logger.error("Error in initApp", e)
+            }
+            .subscribeOn(Schedulers.io())
     }
 }

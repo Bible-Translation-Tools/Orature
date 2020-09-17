@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.recorder
 
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
 import java.nio.ByteBuffer
@@ -16,6 +17,7 @@ class ActiveRecordingRenderer(
     width: Int,
     secondsOnScreen: Int
 ) {
+    private val logger = LoggerFactory.getLogger(ActiveRecordingRenderer::class.java)
 
     private var isActive = AtomicBoolean(false)
 
@@ -25,23 +27,33 @@ class ActiveRecordingRenderer(
     val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
 
     init {
-        recordingActive.subscribe { isActive.set(it) }
+        recordingActive.subscribe(
+            { isActive.set(it) },
+            { e ->
+                logger.error("Error in active recording listener", e)
+            }
+        )
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
     val activeRenderer = stream
         .subscribeOn(Schedulers.io())
-        .subscribe {
-            bb.put(it)
-            bb.position(0)
-            while (bb.hasRemaining()) {
-                val short = bb.short
-                if (isActive.get()) {
-                    pcmCompressor.add(short.toFloat())
+        .subscribe(
+            {
+                bb.put(it)
+                bb.position(0)
+                while (bb.hasRemaining()) {
+                    val short = bb.short
+                    if (isActive.get()) {
+                        pcmCompressor.add(short.toFloat())
+                    }
                 }
+                bb.clear()
+            },
+            { e ->
+                logger.error("Error in active renderer stream", e)
             }
-            bb.clear()
-        }
+        )
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
         // TODO: get samplerate from wav file, don't assume 44.1khz

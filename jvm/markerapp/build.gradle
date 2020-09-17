@@ -14,6 +14,8 @@ repositories {
 dependencies {
     testImplementation "junit:junit:$junitVer"
 
+    implementation "org.slf4j:slf4j-api:$slf4jApiVer"
+
     // ReactiveX
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"

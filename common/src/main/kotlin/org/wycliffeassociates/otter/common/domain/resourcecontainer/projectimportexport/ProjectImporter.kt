@@ -133,9 +133,16 @@ class ProjectImporter(
             .flatMap { audioDirInRc ->
                 zipFileReader.copyDirectory(audioDirInRc, audioDir, this::isAudioFile)
             }
-            .subscribe { newTakeFile ->
-                insertTake(newTakeFile, audioDir, collectionForTakes, selectedTakes)
-            }
+            .subscribe(
+                { newTakeFile ->
+                    insertTake(newTakeFile, audioDir, collectionForTakes, selectedTakes)
+                },
+                { e ->
+                    log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
+                    log.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
+                    log.error("sourceCollection: $sourceCollection", e)
+                }
+            )
     }
 
     private fun insertTake(

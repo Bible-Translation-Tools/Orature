@@ -27,6 +27,8 @@ dependencies {
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
+    implementation "org.slf4j:slf4j-api:$slf4jApiVer"
+
     // FontAwesomeFX
     implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"
     implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"

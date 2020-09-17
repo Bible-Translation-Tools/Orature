@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -14,6 +15,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
 class RecordScriptureViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(RecordScriptureViewModel::class.java)
+
     private enum class StepDirection {
         FORWARD,
         BACKWARD
@@ -105,9 +109,13 @@ class RecordScriptureViewModel : ViewModel() {
             .toList()
             .map { it.sortedBy { chunk -> chunk.start } }
             .observeOnFx()
-            .subscribe { list ->
-                chunkList.setAll(list)
-            }
+            .subscribe(
+                { list ->
+                    chunkList.setAll(list)
+                }, { e ->
+                    logger.error("Error in getting the chunk list", e)
+                }
+            )
     }
 
     private fun stepToChunk(direction: StepDirection) {

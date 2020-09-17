@@ -4,6 +4,7 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
@@ -18,12 +19,17 @@ class AudioPluginRepository(
     private val preferences: IAppPreferences,
     private val mapper: AudioPluginDataMapper = AudioPluginDataMapper()
 ) : IAudioPluginRepository {
+    private val logger = LoggerFactory.getLogger(AudioPluginRepository::class.java)
+
     private val audioPluginDao = database.audioPluginDao
 
     override fun insert(data: AudioPluginData): Single<Int> {
         return Single
             .fromCallable {
                 audioPluginDao.insert(mapper.mapToEntity(data))
+            }
+            .doOnError { e ->
+                logger.error("Error in insert with plugin data: $data", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -34,6 +40,9 @@ class AudioPluginRepository(
                 audioPluginDao
                     .fetchAll()
                     .map { mapper.mapFromEntity(it) }
+            }
+            .doOnError { e ->
+                logger.error("Error in getAll", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -49,6 +58,9 @@ class AudioPluginRepository(
         return Completable
             .fromAction {
                 audioPluginDao.update(mapper.mapToEntity(obj))
+            }
+            .doOnError { e ->
+                logger.error("Error in update for plugin data: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -73,6 +85,9 @@ class AudioPluginRepository(
                     return@flatMapCompletable preferences.setEditorPluginId(-1)
                 else
                     return@flatMapCompletable Completable.complete()
+            }
+            .doOnError { e ->
+                logger.error("Error in delete for plugin data: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -106,6 +121,9 @@ class AudioPluginRepository(
                         }
                 }
             }
+            .doOnError { e ->
+                logger.error("Error in initSelected", e)
+            }
             .subscribeOn(Schedulers.io())
 
     override fun getEditorData(): Maybe<AudioPluginData> =
@@ -120,6 +138,9 @@ class AudioPluginRepository(
                         .onErrorComplete()
                         .subscribeOn(Schedulers.io())
                 }
+            }
+            .doOnError { e ->
+                logger.error("Error in getEditorData", e)
             }
 
     override fun getEditor(): Maybe<IAudioPlugin> = getEditorData().map { AudioPlugin(it) }
@@ -139,6 +160,9 @@ class AudioPluginRepository(
                         .onErrorComplete()
                         .subscribeOn(Schedulers.io())
                 }
+            }
+            .doOnError { e ->
+                logger.error("Error in getRecorderData", e)
             }
 
     override fun getRecorder(): Maybe<IAudioPlugin> = getRecorderData().map { AudioPlugin(it) }

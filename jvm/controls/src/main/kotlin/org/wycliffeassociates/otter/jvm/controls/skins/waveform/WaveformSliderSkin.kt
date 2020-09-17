@@ -8,6 +8,7 @@ import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -16,6 +17,8 @@ import kotlin.math.max
 import kotlin.math.min
 
 class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
+
+    private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
 
     val waveformImage = WaveformImageBuilder()
     val thumb = Rectangle(1.0, 1.0).apply {
@@ -33,16 +36,21 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             _player?.let { player ->
                 player.getAudioReader()?.let { reader ->
                     reader.seek(0)
-                    waveformImage.build(reader, 0).subscribe { image: Image ->
-                        val imageView = ImageView(image).apply {
-                            fitHeightProperty().bind(root.heightProperty())
-                            fitWidthProperty().bind(root.widthProperty())
+                    waveformImage.build(reader, 0).subscribe(
+                        { image: Image ->
+                            val imageView = ImageView(image).apply {
+                                fitHeightProperty().bind(root.heightProperty())
+                                fitWidthProperty().bind(root.widthProperty())
+                            }
+                            reader.seek(0)
+                            root.getChildList()?.clear()
+                            root.add(imageView)
+                            root.add(thumb)
+                        },
+                        { e ->
+                            logger.error("Error in building waveform image", e)
                         }
-                        reader.seek(0)
-                        root.getChildList()?.clear()
-                        root.add(imageView)
-                        root.add(thumb)
-                    }
+                    )
                 }
             }
         }

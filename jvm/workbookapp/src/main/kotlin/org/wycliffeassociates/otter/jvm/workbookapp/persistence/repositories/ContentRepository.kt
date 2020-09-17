@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Content
 import org.wycliffeassociates.otter.common.data.model.ContentType
@@ -17,6 +18,8 @@ import java.lang.IllegalStateException
 class ContentRepository(
     database: AppDatabase
 ) : IContentRepository {
+    private val logger = LoggerFactory.getLogger(ContentRepository::class.java)
+
     private val contentDao = database.contentDao
     private val takeDao = database.takeDao
     private val markerDao = database.markerDao
@@ -32,6 +35,9 @@ class ContentRepository(
                     .fetchByCollectionId(collection.id)
                     .map(this::buildContent)
             }
+            .doOnError { e ->
+                logger.error("Error in getByCollection for collection: $collection", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -44,6 +50,9 @@ class ContentRepository(
                     .minBy { it.start }
                     ?: throw IllegalStateException("Missing meta info for chapter.")
             }
+            .doOnError { e ->
+                logger.error("Error in getByCollectionMetaContent for collection: $collection", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -53,6 +62,9 @@ class ContentRepository(
                 contentDao
                     .fetchSources(contentMapper.mapToEntity(content))
                     .map(this::buildContent)
+            }
+            .doOnError { e ->
+                logger.error("Error in getSources for content: $content", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -65,6 +77,14 @@ class ContentRepository(
                     sourceContents.map { contentMapper.mapToEntity(it) }
                 )
             }
+            .doOnError { e ->
+                logger.error("Error in updateSources for content: $content")
+                logger.error("Source Content, Begin:")
+                sourceContents.forEach {
+                    logger.error("$it")
+                }
+                logger.error("End source content", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -72,6 +92,9 @@ class ContentRepository(
         return Completable
             .fromAction {
                 contentDao.delete(contentMapper.mapToEntity(obj))
+            }
+            .doOnError { e ->
+                logger.error("Error in delete for content: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -83,6 +106,9 @@ class ContentRepository(
                     .fetchAll()
                     .map(this::buildContent)
             }
+            .doOnError { e ->
+                logger.error("Error in getAll", e)
+            }
             .subscribeOn(Schedulers.io())
     }
 
@@ -90,6 +116,9 @@ class ContentRepository(
         return Single
             .fromCallable {
                 contentDao.insert(contentMapper.mapToEntity(content).apply { collectionFk = collection.id })
+            }
+            .doOnError { e ->
+                logger.error("Error in insertForCollection for content: $content, collection: $collection", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -102,6 +131,9 @@ class ContentRepository(
                 // Make sure we don't over write the collection relationship
                 entity.collectionFk = existing.collectionFk
                 contentDao.update(entity)
+            }
+            .doOnError { e ->
+                logger.error("Error in update for content: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }

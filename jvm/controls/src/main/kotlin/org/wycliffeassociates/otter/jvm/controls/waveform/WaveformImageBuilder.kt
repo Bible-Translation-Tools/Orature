@@ -7,9 +7,8 @@ import io.reactivex.schedulers.Schedulers
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue
@@ -18,6 +17,8 @@ import kotlin.math.max
 const val SIGNED_SHORT_MAX = 32767
 
 class WaveformImageBuilder {
+    private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
+
     private val height = SIGNED_SHORT_MAX * 2
 
     fun build(
@@ -26,23 +27,27 @@ class WaveformImageBuilder {
         wavColor: Color = Color.BLACK,
         background: Color = Color.TRANSPARENT
     ): Single<Image> {
-        return Single.fromCallable {
-            val width = Screen.getMainScreen().platformWidth
-            if (width > 0) {
-                val img = WritableImage(width + (2 * padding), height)
-                val (globalMin, globalMax) = drawWaveform(img, reader, width, background, wavColor)
-                val newHeight = globalMax - globalMin
-                val image2 = WritableImage(
-                    img.pixelReader,
-                    0,
-                    globalMin - newHeight,
-                    width, (newHeight) * 2
-                )
-                image2 as Image
-            } else {
-                WritableImage(1, 1) as Image
+        return Single
+            .fromCallable {
+                val width = Screen.getMainScreen().platformWidth
+                if (width > 0) {
+                    val img = WritableImage(width + (2 * padding), height)
+                    val (globalMin, globalMax) = drawWaveform(img, reader, width, background, wavColor)
+                    val newHeight = globalMax - globalMin
+                    val image2 = WritableImage(
+                        img.pixelReader,
+                        0,
+                        globalMin - newHeight,
+                        width, (newHeight) * 2
+                    )
+                    image2 as Image
+                } else {
+                    WritableImage(1, 1) as Image
+                }
             }
-        }
+            .doOnError { e ->
+                logger.error("Error in building WaveformImage", e)
+            }
             .subscribeOn(Schedulers.computation())
             .observeOnFx()
     }
