@@ -250,7 +250,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .subscribe(
                 {
                     db.deleteTake(modelTake, it)
-                        .subscribe()
+                        .subscribe({}, { e -> logger.error("Error in deleteTake: wb take: $take, model take: $modelTake", e)})
                 },
                 { e ->
                     logger.error("Error in deleteFromDbUponDelete, wb take: $take, model take: $modelTake", e)
@@ -302,7 +302,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                 {
                     content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
                     db.updateContent(content)
-                        .subscribe()
+                        .subscribe({}, { e -> logger.error("Error in updating content for content: $content", e)})
                 }, { e ->
                     logger.error("Error in selectedTakesRelay, content: $content", e)
                 }
