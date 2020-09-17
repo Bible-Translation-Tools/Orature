@@ -22,6 +22,7 @@ apply plugin: 'io.gitlab.arturbosch.detekt'
 
 repositories {
     jcenter()
+    maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
 }
 
 buildScan {
