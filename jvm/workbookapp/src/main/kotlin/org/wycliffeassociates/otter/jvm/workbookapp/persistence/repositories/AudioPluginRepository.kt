@@ -160,7 +160,8 @@ class AudioPluginRepository(
                         .onErrorComplete()
                         .subscribeOn(Schedulers.io())
                 }
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 logger.error("Error in getRecorderData", e)
             }
 

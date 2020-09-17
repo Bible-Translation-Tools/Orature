@@ -32,7 +32,8 @@ class LanguageRepository(
         return Single
             .fromCallable {
                 languageDao.insertAll(languages.map(mapper::mapToEntity))
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 logger.error("Error in insertAll", e)
             }
             .subscribeOn(Schedulers.io())

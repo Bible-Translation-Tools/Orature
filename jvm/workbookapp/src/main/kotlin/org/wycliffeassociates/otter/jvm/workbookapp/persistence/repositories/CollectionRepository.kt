@@ -281,7 +281,8 @@ class CollectionRepository(
                 } ?: throw NullPointerException(
                     "A collection matching slug: $slug and metadata: [$metadata] was not found."
                 )
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 log.error("Error in getProjectBySlugAndMetadata for slug: $slug and metadata $metadata", e)
             }
             .subscribeOn(Schedulers.io())
@@ -293,7 +294,8 @@ class CollectionRepository(
                 val entity = collectionDao.fetchById(collection.id)
                 entity.sourceFk = newSource.id
                 collectionDao.update(entity)
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 log.error("Error in update source for collection: $collection, new source: $newSource", e)
             }
             .subscribeOn(Schedulers.io())
@@ -316,7 +318,8 @@ class CollectionRepository(
         return Single
             .fromCallable {
                 collectionDao.insert(collectionMapper.mapToEntity(collection))
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 log.error("Error in insert for collection: $collection", e)
             }
             .subscribeOn(Schedulers.io())
@@ -328,7 +331,8 @@ class CollectionRepository(
                 val entity = collectionDao.fetchById(obj.id)
                 val newEntity = collectionMapper.mapToEntity(obj, entity.parentFk, entity.sourceFk)
                 collectionDao.update(newEntity)
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 log.error("Error in update for collection: $obj", e)
             }
             .subscribeOn(Schedulers.io())
@@ -398,7 +402,8 @@ class CollectionRepository(
                         metadataMapper.mapFromEntity(mainDerivedMetadata, language)
                     )
                 }
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 log.error("Error in deriveProject for source collection: $sourceCollection, language: $language")
                 log.error("With:")
                 sourceMetadatas.forEach {

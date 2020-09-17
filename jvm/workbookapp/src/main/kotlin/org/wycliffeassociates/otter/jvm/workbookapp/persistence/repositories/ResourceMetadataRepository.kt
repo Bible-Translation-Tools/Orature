@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppData
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
-import kotlin.math.log
 
 class ResourceMetadataRepository(
     database: AppDatabase,

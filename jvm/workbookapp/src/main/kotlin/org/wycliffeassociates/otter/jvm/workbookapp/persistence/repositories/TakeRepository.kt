@@ -74,7 +74,8 @@ class TakeRepository(
                 takeDao
                     .fetchByContentId(content.id, includeDeleted)
                     .map(this::buildTake)
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 logger.error("Error in getByContent for content: $content, includeDeleted: $includeDeleted", e)
             }
             .subscribeOn(Schedulers.io())
@@ -117,7 +118,8 @@ class TakeRepository(
                     markerEntity.id = 0
                     markerDao.insert(markerEntity)
                 }
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 logger.error("Error in update for take: $obj", e)
             }
             .subscribeOn(Schedulers.io())
@@ -141,7 +143,8 @@ class TakeRepository(
                         }
                     }
                 }
-            }.doOnError { e ->
+            }
+            .doOnError { e ->
                 logger.error("Error in removeNonExistentTakes", e)
             }
             .subscribeOn(Schedulers.io())
