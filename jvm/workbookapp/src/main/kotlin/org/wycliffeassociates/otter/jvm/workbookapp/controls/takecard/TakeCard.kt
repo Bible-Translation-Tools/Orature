@@ -74,13 +74,12 @@ class TakeCard(
         val sub = playOrPauseEventObservable
             .filter { it is PlayEvent }
             .filter { it.target != this }
-            .subscribe(
-                {
-                    firePauseEvent()
-                }, { e ->
-                    logger.error("Error in take card playback event listener", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in take card playback event listener", e)
+            }
+            .subscribe {
+                firePauseEvent()
+            }
         disposables.add(sub)
     }
 

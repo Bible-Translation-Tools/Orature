@@ -83,7 +83,8 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
                                 Platform.exit()
                             }
                             .subscribeOn(Schedulers.computation())
-                            .subscribe({}, { e -> log.error("Error in showErrorDialog", e)})
+                            .doOnError { e -> log.error("Error in showErrorDialog", e)}
+                            .subscribe()
                     } else {
                         Platform.exit()
                     }

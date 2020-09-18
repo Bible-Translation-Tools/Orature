@@ -109,13 +109,12 @@ class RecordScriptureViewModel : ViewModel() {
             .toList()
             .map { it.sortedBy { chunk -> chunk.start } }
             .observeOnFx()
-            .subscribe(
-                { list ->
-                    chunkList.setAll(list)
-                }, { e ->
-                    logger.error("Error in getting the chunk list", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in getting the chunk list", e)
+            }
+            .subscribe { list ->
+                chunkList.setAll(list)
+            }
     }
 
     private fun stepToChunk(direction: StepDirection) {

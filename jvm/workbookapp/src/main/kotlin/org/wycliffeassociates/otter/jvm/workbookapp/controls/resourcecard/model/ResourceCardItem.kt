@@ -34,13 +34,12 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
     private fun AssociatedAudio.progressProperty(): DoubleProperty {
         val progressProperty = SimpleDoubleProperty(0.0)
         val sub = this.selected
-            .subscribe(
-                {
-                    progressProperty.set(if (it.value != null) 1.0 else 0.0)
-                }, { e ->
-                    logger.error("Error in updating resource card progress", e)
-                }
-            )
+            .doOnError { e ->
+                logger.error("Error in updating resource card progress", e)
+            }
+            .subscribe {
+                progressProperty.set(if (it.value != null) 1.0 else 0.0)
+            }
         disposables.add(sub)
         return progressProperty
     }

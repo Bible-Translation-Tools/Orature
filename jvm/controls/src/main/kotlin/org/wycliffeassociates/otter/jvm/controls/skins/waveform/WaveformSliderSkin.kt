@@ -36,8 +36,12 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             _player?.let { player ->
                 player.getAudioReader()?.let { reader ->
                     reader.seek(0)
-                    waveformImage.build(reader, 0).subscribe(
-                        { image: Image ->
+                    waveformImage
+                        .build(reader, 0)
+                        .doOnError { e ->
+                            logger.error("Error in building waveform image", e)
+                        }
+                        .subscribe { image: Image ->
                             val imageView = ImageView(image).apply {
                                 fitHeightProperty().bind(root.heightProperty())
                                 fitWidthProperty().bind(root.widthProperty())
@@ -46,11 +50,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                             root.getChildList()?.clear()
                             root.add(imageView)
                             root.add(thumb)
-                        },
-                        { e ->
-                            logger.error("Error in building waveform image", e)
                         }
-                    )
                 }
             }
         }

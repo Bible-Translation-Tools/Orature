@@ -48,5 +48,6 @@ class WavFileWriter(
             }
         )
         .subscribeOn(Schedulers.io())
-        .subscribe({}, { e -> logger.error("Error in WavFileWriter", e) })
+        .doOnError { e -> logger.error("Error in WavFileWriter", e) }
+        .subscribe()
 }

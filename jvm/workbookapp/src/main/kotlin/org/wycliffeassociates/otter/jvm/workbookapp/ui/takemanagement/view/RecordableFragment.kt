@@ -117,8 +117,12 @@ abstract class RecordableFragment(
         // TODO: This doesn't actually handle anything correctly. Need to know whether the user
         // TODO... hasn't selected an editor or recorder and respond appropriately.
         val snackBar = JFXSnackbar(pane)
-        recordableViewModel.snackBarObservable.subscribe(
-            {
+        recordableViewModel
+            .snackBarObservable
+            .doOnError { e ->
+                logger.error("Error in creating no plugin snackbar", e)
+            }
+            .subscribe {
                 snackBar.enqueue(
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
@@ -132,10 +136,7 @@ abstract class RecordableFragment(
                         null
                     )
                 )
-            }, { e ->
-                logger.error("Error in creating no plugin snackbar", e)
             }
-        )
     }
 
     private fun createAudioPluginProgressDialog() {

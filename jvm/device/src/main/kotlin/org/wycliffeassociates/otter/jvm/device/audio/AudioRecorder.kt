@@ -54,9 +54,10 @@ class AudioRecorder : IAudioRecorder {
                 }
             }
             .subscribeOn(Schedulers.io())
-            .subscribe({}, { e ->
+            .doOnError { e ->
                 logger.error("Error while recording audio", e)
-            })
+            }
+            .subscribe()
     }
 
     override fun stop() {

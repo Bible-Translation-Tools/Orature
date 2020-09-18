@@ -51,19 +51,17 @@ class InitializeUlb(
                         ClassLoader.getSystemResourceAsStream(EN_ULB_PATH)
                     )
                         .toObservable()
-                        .blockingSubscribe(
-                            { result ->
-                                if (result == ImportResult.SUCCESS) {
-                                    installedEntityRepo.install(this)
-                                    log.info("$name version: $version installed!")
-                                } else {
-                                    throw ImportException(result)
-                                }
-                            },
-                            { e ->
-                                log.error("Error importing $EN_ULB_FILENAME.", e)
+                        .doOnError { e ->
+                            log.error("Error importing $EN_ULB_FILENAME.", e)
+                        }
+                        .blockingSubscribe { result ->
+                            if (result == ImportResult.SUCCESS) {
+                                installedEntityRepo.install(this)
+                                log.info("$name version: $version installed!")
+                            } else {
+                                throw ImportException(result)
                             }
-                        )
+                        }
                 } else {
                     log.info("$name up to date with version: $version")
                 }

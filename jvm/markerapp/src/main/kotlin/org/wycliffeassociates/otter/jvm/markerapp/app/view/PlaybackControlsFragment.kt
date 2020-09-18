@@ -59,13 +59,14 @@ class PlaybackControlsFragment : Fragment() {
         styleClass.add("vm-continue-button")
         setOnAction {
             (scope as ParameterizedScope).let {
-                viewModel.writeMarkers().subscribe(
-                    {
-                        it.navigateBack()
-                    }, { e ->
+                viewModel
+                    .writeMarkers()
+                    .doOnError { e ->
                         logger.error("Error in closing the maker app", e)
                     }
-                )
+                    .subscribe {
+                        it.navigateBack()
+                    }
             }
         }
     }

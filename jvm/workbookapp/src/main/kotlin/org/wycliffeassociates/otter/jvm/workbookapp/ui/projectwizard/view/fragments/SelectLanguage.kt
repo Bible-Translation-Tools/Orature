@@ -58,14 +58,15 @@ class SelectLanguage : Fragment() {
             }
             searchField.promptText = messages["languageSearchPrompt"]
             autoSelect = true
-            viewModel.clearLanguages.subscribe(
-                {
-                    searchField.clear()
-                    listView.selectionModel.clearSelection()
-                }, { e ->
+            viewModel
+                .clearLanguages
+                .doOnError { e ->
                     logger.error("Error in clear languages", e)
                 }
-            )
+                .subscribe {
+                    searchField.clear()
+                    listView.selectionModel.clearSelection()
+                }
             selectedLanguage.addValidator(searchField) {
                 if (it == null) error(errorMessage) else null
             }

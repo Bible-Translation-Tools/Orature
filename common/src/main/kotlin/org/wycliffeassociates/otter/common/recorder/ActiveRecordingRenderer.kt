@@ -27,33 +27,30 @@ class ActiveRecordingRenderer(
     val bb = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE)
 
     init {
-        recordingActive.subscribe(
-            { isActive.set(it) },
-            { e ->
+        recordingActive
+            .doOnError { e ->
                 logger.error("Error in active recording listener", e)
             }
-        )
+            .subscribe { isActive.set(it) }
         bb.order(ByteOrder.LITTLE_ENDIAN)
     }
 
     val activeRenderer = stream
         .subscribeOn(Schedulers.io())
-        .subscribe(
-            {
-                bb.put(it)
-                bb.position(0)
-                while (bb.hasRemaining()) {
-                    val short = bb.short
-                    if (isActive.get()) {
-                        pcmCompressor.add(short.toFloat())
-                    }
+        .doOnError { e ->
+            logger.error("Error in active renderer stream", e)
+        }
+        .subscribe {
+            bb.put(it)
+            bb.position(0)
+            while (bb.hasRemaining()) {
+                val short = bb.short
+                if (isActive.get()) {
+                    pcmCompressor.add(short.toFloat())
                 }
-                bb.clear()
-            },
-            { e ->
-                logger.error("Error in active renderer stream", e)
             }
-        )
+            bb.clear()
+        }
 
     private fun samplesToCompress(width: Int, secondsOnScreen: Int): Int {
         // TODO: get samplerate from wav file, don't assume 44.1khz
