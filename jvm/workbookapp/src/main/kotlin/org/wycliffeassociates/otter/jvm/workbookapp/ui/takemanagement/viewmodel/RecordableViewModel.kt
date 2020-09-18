@@ -111,6 +111,7 @@ open class RecordableViewModel(
                 .doOnError { e ->
                     logger.error("Error in recording a new take", e)
                 }
+                .onErrorReturn { RecordTake.Result.NO_RECORDER }
                 .subscribe { result: RecordTake.Result ->
                     showPluginActive = false
                     when (result) {
@@ -135,6 +136,7 @@ open class RecordableViewModel(
             .doOnError { e ->
                 logger.error("Error in editing take", e)
             }
+            .onErrorReturn { EditTake.Result.NO_EDITOR }
             .subscribe { result: EditTake.Result ->
                 showPluginActive = false
                 currentTakeNumberProperty.set(null)
