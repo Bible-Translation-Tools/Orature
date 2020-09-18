@@ -16,7 +16,7 @@ class AudioBufferPlayer : IAudioPlayer {
     private var pause = false
     private var startPosition: Int = 0
 
-    private lateinit var reader: AudioFileReader
+    private var reader: AudioFileReader? = null
     private lateinit var player: SourceDataLine
     private lateinit var bytes: ByteArray
     private lateinit var playbackThread: Thread
@@ -40,37 +40,42 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun load(file: File) {
-        reader = WavFileReader(WavFile(file))
-        begin = 0
-        end = reader.totalFrames
-        bytes = ByteArray(reader.sampleRate * reader.channels)
-        player = AudioSystem.getSourceDataLine(
-            AudioFormat(
-                reader.sampleRate.toFloat(),
-                reader.sampleSize,
-                reader.channels,
-                true,
-                false
+        reader = WavFileReader(WavFile(file)).let { reader ->
+            begin = 0
+            end = reader.totalFrames
+            bytes = ByteArray(reader.sampleRate * reader.channels)
+            player = AudioSystem.getSourceDataLine(
+                AudioFormat(
+                    reader.sampleRate.toFloat(),
+                    reader.sampleSize,
+                    reader.channels,
+                    true,
+                    false
+                )
             )
-        )
-        listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            reader.open()
+            reader
+        }
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
-        begin = frameStart
-        end = frameEnd
-        reader = WavFileReader(WavFile(file), frameStart, frameEnd)
-        bytes = ByteArray(reader.sampleRate * reader.channels)
-        player = AudioSystem.getSourceDataLine(
-            AudioFormat(
-                reader.sampleRate.toFloat(),
-                reader.sampleSize,
-                reader.channels,
-                true,
-                false
+        reader?.let { reader ->
+            begin = frameStart
+            end = frameEnd
+            this.reader = WavFileReader(WavFile(file), frameStart, frameEnd)
+            bytes = ByteArray(reader.sampleRate * reader.channels)
+            player = AudioSystem.getSourceDataLine(
+                AudioFormat(
+                    reader.sampleRate.toFloat(),
+                    reader.sampleSize,
+                    reader.channels,
+                    true,
+                    false
+                )
             )
-        )
-        listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+        }
     }
 
     override fun getAudioReader(): AudioFileReader? {
@@ -78,36 +83,40 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun play() {
-        if (!player.isActive) {
-            listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
-            pause = false
-            startPosition = reader.framePosition
-            playbackThread = Thread {
-                player.open()
-                player.start()
-                while (reader.hasRemaining() && !pause && !playbackThread.isInterrupted) {
-                    val written = reader.getPcmBuffer(bytes)
-                    player.write(bytes, 0, written)
+        reader?.let { reader ->
+            if (!player.isActive) {
+                listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
+                pause = false
+                startPosition = reader.framePosition
+                playbackThread = Thread {
+                    player.open()
+                    player.start()
+                    while (reader.hasRemaining() && !pause && !playbackThread.isInterrupted) {
+                        val written = reader.getPcmBuffer(bytes)
+                        player.write(bytes, 0, written)
+                    }
+                    player.drain()
+                    if (!pause) {
+                        listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
+                        player.close()
+                    }
                 }
-                player.drain()
-                if (!pause) {
-                    listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
-                    player.close()
-                }
+                playbackThread.start()
             }
-            playbackThread.start()
         }
     }
 
     override fun pause() {
-        if (::player.isInitialized) {
-            val stoppedAt = getAbsoluteLocationInFrames()
-            pause = true
-            player.stop()
-            player.flush()
-            player.close()
-            listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
-            reader.seek(stoppedAt)
+        reader?.let { reader ->
+            if (::player.isInitialized) {
+                val stoppedAt = getAbsoluteLocationInFrames()
+                pause = true
+                player.stop()
+                player.flush()
+                player.close()
+                listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
+                reader.seek(stoppedAt)
+            }
         }
     }
 
@@ -119,6 +128,8 @@ class AudioBufferPlayer : IAudioPlayer {
     override fun close() {
         if (::player.isInitialized) {
             player.close()
+            reader?.release()
+            reader = null
         }
     }
 
@@ -130,7 +141,7 @@ class AudioBufferPlayer : IAudioPlayer {
         }
         player.flush()
         startPosition = position
-        reader.seek(position)
+        reader?.seek(position)
         if (resume) {
             play()
         }
