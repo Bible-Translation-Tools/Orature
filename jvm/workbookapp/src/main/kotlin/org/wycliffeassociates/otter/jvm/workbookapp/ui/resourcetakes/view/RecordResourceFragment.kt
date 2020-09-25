@@ -176,4 +176,6 @@ class RecordResourceFragment(
             (it as? TakeCard)?.simpleAudioPlayer?.close()
         }
     }
+
+    override fun openPlayers() {}
 }

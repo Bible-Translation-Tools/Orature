@@ -73,6 +73,8 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
     override fun release() {
         if (mappedFile != null) {
             try {
+                // https://stackoverflow.com/questions/25238110/how-to-properly-close-mappedbytebuffer/25239834#25239834
+                // TODO: Replace with https://docs.oracle.com/en/java/javase/14/docs/api/jdk.incubator.foreign/jdk/incubator/foreign/MemorySegment.html#ofByteBuffer(java.nio.ByteBuffer)
                 val unsafeClass = Class.forName("sun.misc.Unsafe")
                 val unsafeField = unsafeClass.getDeclaredField("theUnsafe")
                 unsafeField.isAccessible = true

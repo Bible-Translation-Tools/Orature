@@ -60,7 +60,7 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
-        reader?.let { reader ->
+        reader = reader?.let { reader ->
             begin = frameStart
             end = frameEnd
             this.reader = WavFileReader(WavFile(file), frameStart, frameEnd)
@@ -75,6 +75,8 @@ class AudioBufferPlayer : IAudioPlayer {
                 )
             )
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
+            reader.open()
+            reader
         }
     }
 

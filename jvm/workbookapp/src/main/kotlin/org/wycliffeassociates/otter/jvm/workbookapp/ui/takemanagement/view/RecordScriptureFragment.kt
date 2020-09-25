@@ -138,6 +138,10 @@ class RecordScriptureFragment : RecordableFragment(
         takesGrid.closePlayers()
     }
 
+    override fun openPlayers() {
+        takesGrid.reloadPlayers()
+    }
+
     override fun createTakeCard(take: Take): TakeCard {
         return scripturetakecard(
             take,

@@ -75,7 +75,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initControllers() {
-        audioController = AudioPlayerController(sourceContent.audioPlayerProperty.value, audioSlider)
+        audioController = AudioPlayerController(audioSlider)
     }
 
     private fun initAudioControls() {

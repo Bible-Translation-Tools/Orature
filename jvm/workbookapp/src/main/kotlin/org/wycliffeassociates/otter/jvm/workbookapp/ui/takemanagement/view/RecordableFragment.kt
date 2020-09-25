@@ -23,6 +23,7 @@ import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragE
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.controls.sourcedialog.sourcedialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
@@ -71,6 +72,9 @@ abstract class RecordableFragment(
     init {
         importStylesheet<AppStyles>()
         createAudioPluginProgressDialog()
+        subscribe<PluginClosedEvent> {
+            openPlayers()
+        }
     }
 
     final override val root: Parent = anchorpane {
@@ -112,6 +116,8 @@ abstract class RecordableFragment(
     }
 
     abstract fun closePlayers()
+
+    abstract fun openPlayers()
 
     private fun createSnackBar(pane: Pane) {
         // TODO: This doesn't actually handle anything correctly. Need to know whether the user
