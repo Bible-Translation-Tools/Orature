@@ -45,8 +45,9 @@ class ScriptureTakesGridView(
 
     fun reloadPlayers() {
         gridItems.forEach {
-            it.audioPlayer.getAudioReader()?.open()
+            it.audioPlayer.load(it.take.file)
         }
+        updateItems()
     }
 
     private fun updateItems() {

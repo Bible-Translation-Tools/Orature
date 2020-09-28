@@ -85,6 +85,11 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
         loaded = false
     }
 
+    fun refresh() {
+        player.load(audioFile)
+        loaded = true
+    }
+
     private fun startProgressUpdate(): Disposable {
         return Observable
             .interval(16, TimeUnit.MILLISECONDS)

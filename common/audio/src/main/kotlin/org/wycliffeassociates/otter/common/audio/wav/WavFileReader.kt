@@ -26,6 +26,7 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
     private var channel: FileChannel? = null
 
     override fun open() {
+        mappedFile?.let { release() }
         val totalFrames = wav.totalFrames
         var begin = if (start != null) min(max(0, start), totalFrames) else 0
         var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames

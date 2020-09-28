@@ -62,11 +62,6 @@ class AudioPlayerController(
     }
 
     fun load(player: IAudioPlayer) {
-        this.player?.let { oldPlayer ->
-            oldPlayer.pause()
-            oldPlayer.close()
-        }
-        player.getAudioReader()?.open()
         audioSlider.value = 0.0
         audioSlider.max = player.getAbsoluteDurationInFrames().toDouble()
         this.player = player

@@ -36,6 +36,11 @@ abstract class RecordableFragment(
     dragTargetBuilder: DragTargetBuilder
 ) : Fragment() {
 
+    override fun onUndock() {
+        super.onUndock()
+        closePlayers()
+    }
+
     private val logger = LoggerFactory.getLogger(RecordableFragment::class.java)
 
     abstract fun createTakeCard(take: Take): TakeCard

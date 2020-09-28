@@ -172,10 +172,16 @@ class RecordResourceFragment(
     }
 
     override fun closePlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
         alternateTakesList.getChildList()?.forEach {
             (it as? TakeCard)?.simpleAudioPlayer?.close()
         }
     }
 
-    override fun openPlayers() {}
+    override fun openPlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.refresh()
+        alternateTakesList.getChildList()?.forEach {
+            (it as? TakeCard)?.simpleAudioPlayer?.refresh()
+        }
+    }
 }

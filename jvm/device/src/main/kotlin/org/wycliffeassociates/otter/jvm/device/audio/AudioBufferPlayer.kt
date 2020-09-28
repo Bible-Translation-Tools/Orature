@@ -40,6 +40,7 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun load(file: File) {
+        reader?.let { close() }
         reader = WavFileReader(WavFile(file)).let { reader ->
             begin = 0
             end = reader.totalFrames
@@ -130,6 +131,8 @@ class AudioBufferPlayer : IAudioPlayer {
     override fun close() {
         if (::player.isInitialized) {
             player.close()
+        }
+        if (reader != null) {
             reader?.release()
             reader = null
         }
