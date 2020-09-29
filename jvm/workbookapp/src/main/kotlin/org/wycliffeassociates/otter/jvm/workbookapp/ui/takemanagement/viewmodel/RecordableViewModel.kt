@@ -33,16 +33,13 @@ open class RecordableViewModel(
 ) : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordableViewModel::class.java)
+    private val injector: Injector by inject()
 
-    val injector: Injector by inject()
     val workbookViewModel: WorkbookViewModel by inject()
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
-    private val disposables = CompositeDisposable()
-
-    val selectedTakeProperty = SimpleObjectProperty<Take?>()
     val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
@@ -51,37 +48,25 @@ open class RecordableViewModel(
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
-    val alternateTakes: ObservableList<Take> = FXCollections.observableList(mutableListOf())
     val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
+    val selectedTakeProperty = SimpleObjectProperty<TakeCardModel?>()
 
     val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
+    private val disposables = CompositeDisposable()
+
     init {
+        selectedTakeProperty.onChangeAndDoNow {
+            sortTakes()
+        }
+
         recordableProperty.onChange {
             clearDisposables()
             it?.audio?.let { audio ->
                 subscribeSelectedTakePropertyToRelay(audio)
                 loadTakes(audio)
             }
-        }
-
-        alternateTakes.onChange {
-            takeCardModels.forEach { it.audioPlayer.close() }
-            takeCardModels.setAll(
-                it.list.map { take ->
-                    val ap = injector.audioPlayer
-                    ap.load(take.file)
-                    TakeCardModel(
-                        take,
-                        ap,
-                        messages["edit"].capitalize(),
-                        messages["delete"].capitalize(),
-                        messages["play"].capitalize(),
-                        messages["pause"].capitalize()
-                    )
-                }
-            )
         }
 
         workbookViewModel.sourceAudioProperty.onChangeAndDoNow { source ->
@@ -151,14 +136,24 @@ open class RecordableViewModel(
     }
 
     fun selectTake(take: Take?) {
-        // selectedTakeProperty will be updated when the relay emits the item that it accepts
-        updateAlternateTakes(selectedTakeProperty.value, take)
-        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+        if (take != null) {
+            // selectedTakeProperty will be updated when the relay emits the item that it accepts
+            val found = takeCardModels.find {
+                take.equals(it.take)
+            }
+            found?.let {
+                it.selected = true
+                recordable?.audio?.selectTake(it.take) ?: throw IllegalStateException("Recordable is null")
+                selectedTakeProperty.set(it)
+            }
+        } else {
+            selectedTakeProperty.set(null)
+        }
     }
 
     fun selectTake(filename: String) {
-        val take = alternateTakes.find { it.name == filename }
-        selectTake(take)
+        val take = takeCardModels.find { it.take.name == filename }
+        selectTake(take?.take)
     }
 
     fun deleteTake(take: Take) {
@@ -228,23 +223,51 @@ open class RecordableViewModel(
         // selectedTakeProperty may not have been updated yet so ask for the current selected take
         val selected = audio.selected.value?.value
 
-        val loadedAlternateTakes =
+        val takes =
             audio.getAllTakes()
                 .filter { it.isNotDeleted() }
-                .filter { it != selected }
-        alternateTakes.setAll(loadedAlternateTakes)
+                .map { take ->
+                    val ap = injector.audioPlayer
+                    ap.load(take.file)
+                    TakeCardModel(
+                        take,
+                        take.equals(selected),
+                        ap,
+                        messages["edit"].capitalize(),
+                        messages["delete"].capitalize(),
+                        messages["play"].capitalize(),
+                        messages["pause"].capitalize()
+                    )
+                }
+
+        closePlayers()
+        takeCardModels.setAll(takes)
+        sortTakes()
 
         audio.takes
             .filter { it.isNotDeleted() }
             .doOnError { e ->
                 logger.error("Error in loading audio takes for audio: $audio", e)
             }
-            .subscribe {
-                if (it != selected && !alternateTakes.contains(it)) {
-                    addToAlternateTakes(it)
+            .subscribe { take ->
+                if (takeCardModels.find { it.take.equals(take) } == null) {
+                    val ap = injector.audioPlayer
+                    ap.load(take.file)
+                    addToAlternateTakes(
+                        TakeCardModel(
+                            take,
+                            take.equals(selected),
+                            ap,
+                            messages["edit"].capitalize(),
+                            messages["delete"].capitalize(),
+                            messages["play"].capitalize(),
+                            messages["pause"].capitalize()
+                        )
+                    )
                 }
-                removeOnDeleted(it)
-            }.let { disposables.add(it) }
+                removeOnDeleted(take)
+            }
+            .let { disposables.add(it) }
     }
 
     private fun removeOnDeleted(take: Take) {
@@ -265,33 +288,46 @@ open class RecordableViewModel(
             .doOnError { e ->
                 logger.error("Error in subscribing take to relay for audio: $audio", e)
             }
-            .subscribe {
-                selectedTakeProperty.set(it.value)
+            .subscribe { takeHolder ->
+                takeCardModels.forEach { it.selected = false }
+                val takeModel = takeCardModels.find { it.take == takeHolder.value }
+                takeModel?.selected = true
+                selectedTakeProperty.set(takeModel)
             }
             .let { disposables.add(it) }
     }
 
-    private fun updateAlternateTakes(oldSelectedTake: Take?, newSelectedTake: Take?) {
-        oldSelectedTake?.let {
-            if (it.isNotDeleted()) {
-                addToAlternateTakes(it)
-            }
-        }
-        newSelectedTake?.let {
-            removeFromAlternateTakes(it)
+    private fun addToAlternateTakes(take: TakeCardModel) {
+        Platform.runLater {
+            takeCardModels.add(take)
+            sortTakes()
         }
     }
 
-    private fun addToAlternateTakes(take: Take) {
-        Platform.runLater {
-            alternateTakes.add(take)
-            alternateTakes.sortBy { it.number }
-        }
+    private fun sortTakes() {
+        FXCollections.sort(
+            takeCardModels,
+            object : Comparator<TakeCardModel> {
+                override fun compare(o1: TakeCardModel, o2: TakeCardModel): Int {
+                    if (o1.selected == o2.selected) {
+                        return o1.take.number.compareTo(o2.take.number)
+                    } else if (o1.selected) {
+                        return 1
+                    } else {
+                        return -1
+                    }
+                }
+            }
+        )
     }
 
     private fun removeFromAlternateTakes(take: Take) {
         Platform.runLater {
-            alternateTakes.remove(take)
+            takeCardModels.removeAll { it.take.equals(take) }
         }
+    }
+
+    fun closePlayers() {
+        takeCardModels.forEach { it.audioPlayer.close() }
     }
 }

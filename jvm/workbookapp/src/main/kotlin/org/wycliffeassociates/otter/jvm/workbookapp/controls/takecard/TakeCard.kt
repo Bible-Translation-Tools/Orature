@@ -14,17 +14,17 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PlayEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 
 class TakeCard(
-    val take: Take,
-    private val player: IAudioPlayer,
+    val model: TakeCardModel,
     playOrPauseEventObservable: Observable<PlayOrPauseEvent>
 ) : Control() {
 
     private val logger = LoggerFactory.getLogger(TakeCard::class.java)
 
     val isAudioPlayingProperty = SimpleBooleanProperty()
-    val simpleAudioPlayer = simpleaudioplayer(take.file, player) {
+    val simpleAudioPlayer = simpleaudioplayer(model.take.file, model.audioPlayer) {
         isAudioPlayingProperty.bind(isPlaying)
     }
     private val disposables = CompositeDisposable()
@@ -42,14 +42,14 @@ class TakeCard(
 
     fun fireEditTakeEvent() {
         fireEvent(
-            EditTakeEvent(take) {
-                player.load(take.file)
+            EditTakeEvent(model.take) {
+                model.audioPlayer.load(model.take.file)
             }
         )
     }
 
     fun fireDeleteTakeEvent() {
-        fireEvent(DeleteTakeEvent(take))
+        fireEvent(DeleteTakeEvent(model.take))
     }
 
     private fun clearDisposables() {
@@ -89,32 +89,29 @@ class TakeCard(
 }
 
 private fun createTakeCard(
-    take: Take,
-    player: IAudioPlayer,
+    take: TakeCardModel,
     playOrPauseEventObservable: Observable<PlayOrPauseEvent>,
     skinFactory: (TakeCard) -> Skin<TakeCard>,
     init: TakeCard.() -> Unit = {}
 ): TakeCard {
-    val tc = TakeCard(take, player, playOrPauseEventObservable)
+    val tc = TakeCard(take, playOrPauseEventObservable)
     tc.skin = skinFactory(tc)
     tc.init()
     return tc
 }
 
 fun scripturetakecard(
-    take: Take,
-    player: IAudioPlayer,
+    take: TakeCardModel,
     playOrPauseEventObservable: Observable<PlayOrPauseEvent>,
     init: TakeCard.() -> Unit = {}
 ): TakeCard {
-    return createTakeCard(take, player, playOrPauseEventObservable, { ScriptureTakeCardSkin(it) }, init)
+    return createTakeCard(take, playOrPauseEventObservable, { ScriptureTakeCardSkin(it) }, init)
 }
 
 fun resourcetakecard(
-    take: Take,
-    player: IAudioPlayer,
+    take: TakeCardModel,
     playOrPauseEventObservable: Observable<PlayOrPauseEvent>,
     init: TakeCard.() -> Unit = {}
 ): TakeCard {
-    return createTakeCard(take, player, playOrPauseEventObservable, { ResourceTakeCardSkin(it) }, init)
+    return createTakeCard(take, playOrPauseEventObservable, { ResourceTakeCardSkin(it) }, init)
 }

@@ -11,6 +11,7 @@ enum class TakeCardType {
 
 data class TakeCardModel(
     val take: Take,
+    var selected: Boolean,
     val audioPlayer: IAudioPlayer,
     val editText: String,
     val deleteText: String,

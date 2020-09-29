@@ -8,7 +8,6 @@ import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
@@ -17,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
@@ -135,8 +135,7 @@ class RecordScriptureFragment : RecordableFragment(
     }
 
     override fun closePlayers() {
-        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
-        takesGrid.closePlayers()
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.close() }
     }
 
     override fun openPlayers() {
@@ -144,10 +143,9 @@ class RecordScriptureFragment : RecordableFragment(
         takesGrid.reloadPlayers()
     }
 
-    override fun createTakeCard(take: Take): TakeCard {
+    override fun createTakeCard(take: TakeCardModel): TakeCard {
         return scripturetakecard(
             take,
-            audioPluginViewModel.audioPlayer(),
             lastPlayOrPauseEvent.toObservable()
         )
     }

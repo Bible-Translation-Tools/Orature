@@ -22,7 +22,7 @@ class ResourceTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                 addClass(TakeCardStyles.topHalf)
                 alignment = Pos.CENTER_LEFT
 
-                label("%02d.".format(control.take.number), TakeCardStyles.draggingIcon()) {
+                label("%02d.".format(control.model.take.number), TakeCardStyles.draggingIcon()) {
                     addClass(TakeCardStyles.takeNumberLabel)
                 }
                 add(control.simpleAudioPlayer

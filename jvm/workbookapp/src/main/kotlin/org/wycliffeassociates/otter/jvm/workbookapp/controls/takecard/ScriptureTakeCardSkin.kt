@@ -28,12 +28,12 @@ class ScriptureTakeCardSkin(control: TakeCard) : TakeCardSkin(control) {
                             hgrow = Priority.ALWAYS
                             alignment = Pos.CENTER_LEFT
                             label(
-                                "${messages["take"]} %02d".format(control.take.number),
+                                "${messages["take"]} %02d".format(control.model.take.number),
                                 TakeCardStyles.draggingIcon()
                             ) {
                                 addClass(TakeCardStyles.takeNumberLabel)
                             }
-                            label(control.take.createdTimestamp.toString()) {
+                            label(control.model.take.createdTimestamp.toString()) {
                                 addClass(TakeCardStyles.timestampLabel)
                             }
                         }
