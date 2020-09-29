@@ -67,6 +67,7 @@ open class RecordableViewModel(
         }
 
         alternateTakes.onChange {
+            takeCardModels.forEach { it.audioPlayer.close() }
             takeCardModels.setAll(
                 it.list.map { take ->
                     val ap = injector.audioPlayer

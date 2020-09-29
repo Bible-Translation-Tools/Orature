@@ -69,6 +69,7 @@ abstract class RecordableFragment(
     private val dragContainer = VBox().apply {
         this.prefWidthProperty().bind(dragTarget.widthProperty())
         draggingNodeProperty.onChange { draggingNode ->
+            (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
             clear()
             draggingNode?.let { add(draggingNode) }
         }
