@@ -224,11 +224,15 @@ class ImportResourceContainer(
 
     /** @throws ImportException */
     private fun constructContainerTree(container: ResourceContainer): OtterTree<CollectionOrContent> {
-        val projectReader = IProjectReader.build(
-            format = container.manifest.dublinCore.format,
-            isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help
-        )
-            ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
+        val projectReader = try {
+            IProjectReader.build(
+                format = container.manifest.dublinCore.format,
+                isHelp = ContainerType.of(container.manifest.dublinCore.type) == ContainerType.Help
+            )
+        } catch (e: IllegalArgumentException) {
+            logger.error("Error Importing project of type: ${container.manifest.dublinCore.format}", e)
+            null
+        } ?: throw ImportException(ImportResult.UNSUPPORTED_CONTENT)
 
         val root = OtterTree<CollectionOrContent>(container.toCollection())
         val categoryInfo = container.otterConfigCategories()
