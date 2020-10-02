@@ -40,7 +40,7 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun initializeAudioController(slider: Slider) {
-        audioController = AudioPlayerController(audioPlayer, slider)
+        audioController = AudioPlayerController(slider)
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 

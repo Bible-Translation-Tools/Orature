@@ -12,6 +12,7 @@ import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
@@ -20,8 +21,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourceta
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import tornadofx.*
 
+private class RecordableViewModelProvider : Component() {
+    private val resourceViewModel: RecordResourceViewModel by inject()
+    fun get() = resourceViewModel.recordableViewModel
+}
+
 class RecordResourceFragment(
-    recordableViewModel: RecordableViewModel
+    recordableViewModel: RecordableViewModel = RecordableViewModelProvider().get()
 ) : RecordableFragment(
     recordableViewModel,
     DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
@@ -172,8 +178,17 @@ class RecordResourceFragment(
     }
 
     override fun closePlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
         alternateTakesList.getChildList()?.forEach {
             (it as? TakeCard)?.simpleAudioPlayer?.close()
+        }
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.close() }
+    }
+
+    override fun openPlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.refresh()
+        alternateTakesList.getChildList()?.forEach {
+            (it as? TakeCard)?.simpleAudioPlayer?.refresh()
         }
     }
 }

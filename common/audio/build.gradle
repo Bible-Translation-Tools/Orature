@@ -5,6 +5,8 @@ version = '0.0.2-SNAPSHOT'
 
 dependencies {
     testImplementation "junit:junit:$junitVer"
+
+    implementation "org.slf4j:slf4j-api:$slf4jApiVer"
 }
 
 uploadArchives {

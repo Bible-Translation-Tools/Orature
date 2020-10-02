@@ -64,7 +64,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     }
 
     fun initController() {
-        audioPlayerController = AudioPlayerController(card.audioPlayerProperty().value, slider)
+        audioPlayerController = AudioPlayerController(slider)
         audioPlayerController.isPlayingProperty.onChangeAndDoNow { isPlaying ->
             if (isPlaying != null && isPlaying != true) {
                 playBtn.textProperty().set(card.playTextProperty().value)

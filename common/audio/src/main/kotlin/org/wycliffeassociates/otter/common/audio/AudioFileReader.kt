@@ -9,4 +9,6 @@ interface AudioFileReader {
     fun hasRemaining(): Boolean
     fun getPcmBuffer(bytes: ByteArray): Int
     fun seek(sample: Int)
+    fun open()
+    fun release()
 }

@@ -22,6 +22,7 @@ class RecordableTab(
             progressProperty.bind(viewModel.getProgressBinding())
         }
 
+        val recordResourceFragment: RecordResourceFragment = find()
         RecordResourceFragment(viewModel).apply {
             formattedTextProperty.bind(viewModel.getFormattedTextBinding())
             this@RecordableTab.content = this.root

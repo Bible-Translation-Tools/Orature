@@ -135,7 +135,13 @@ class RecordScriptureFragment : RecordableFragment(
     }
 
     override fun closePlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
         takesGrid.closePlayers()
+    }
+
+    override fun openPlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.refresh()
+        takesGrid.reloadPlayers()
     }
 
     override fun createTakeCard(take: Take): TakeCard {

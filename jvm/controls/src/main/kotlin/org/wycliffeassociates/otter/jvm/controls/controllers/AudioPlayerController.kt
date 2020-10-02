@@ -16,8 +16,8 @@ import kotlin.math.min
 private const val ANIMATION_REFRESH_MS = 16L
 
 class AudioPlayerController(
-    private var player: IAudioPlayer?,
-    private val audioSlider: Slider
+    private val audioSlider: Slider,
+    private var player: IAudioPlayer? = null
 ) {
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
 
@@ -62,10 +62,6 @@ class AudioPlayerController(
     }
 
     fun load(player: IAudioPlayer) {
-        this.player?.let { oldPlayer ->
-            oldPlayer.pause()
-            oldPlayer.close()
-        }
         audioSlider.value = 0.0
         audioSlider.max = player.getAbsoluteDurationInFrames().toDouble()
         this.player = player

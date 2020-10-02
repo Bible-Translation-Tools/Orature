@@ -21,6 +21,7 @@ import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
@@ -66,6 +67,7 @@ open class RecordableViewModel(
         }
 
         alternateTakes.onChange {
+            takeCardModels.forEach { it.audioPlayer.close() }
             takeCardModels.setAll(
                 it.list.map { take ->
                     val ap = injector.audioPlayer
@@ -97,7 +99,6 @@ open class RecordableViewModel(
     fun recordNewTake() {
         recordable?.let { rec ->
             contextProperty.set(TakeContext.RECORD)
-
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     currentTakeNumberProperty.set(takeNumber)
@@ -114,6 +115,7 @@ open class RecordableViewModel(
                 .onErrorReturn { RecordTake.Result.NO_RECORDER }
                 .subscribe { result: RecordTake.Result ->
                     showPluginActive = false
+                    fire(PluginClosedEvent)
                     when (result) {
                         RecordTake.Result.NO_RECORDER -> snackBarObservable.onNext(messages["noRecorder"])
                         RecordTake.Result.SUCCESS, RecordTake.Result.NO_AUDIO -> {
@@ -140,6 +142,7 @@ open class RecordableViewModel(
             .subscribe { result: EditTake.Result ->
                 showPluginActive = false
                 currentTakeNumberProperty.set(null)
+                fire(PluginClosedEvent)
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     EditTake.Result.SUCCESS -> editTakeEvent.onComplete()

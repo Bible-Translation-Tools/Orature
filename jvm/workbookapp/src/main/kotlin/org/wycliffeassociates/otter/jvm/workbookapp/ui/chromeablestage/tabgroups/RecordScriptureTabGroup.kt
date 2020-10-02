@@ -5,11 +5,20 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.Recor
 import tornadofx.*
 
 class RecordScriptureTabGroup : TabGroup() {
+
+    var fragment: RecordScriptureFragment? = null
+
     private val tab = Tab().apply {
-        add(RecordScriptureFragment().root)
+        fragment = find()
+        add(fragment!!.root)
     }
 
     override fun activate() {
+        fragment?.onDock()
         tabPane.tabs.add(tab)
+    }
+
+    override fun deactivate() {
+        fragment?.onUndock()
     }
 }

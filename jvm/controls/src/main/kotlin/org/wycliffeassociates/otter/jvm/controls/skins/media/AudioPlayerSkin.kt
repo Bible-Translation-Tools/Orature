@@ -35,7 +35,7 @@ class AudioPlayerSkin(private val playerNode: AudioPlayerNode) : SkinBase<AudioP
     }
 
     private fun initializeControl() {
-        audioController = AudioPlayerController(playerNode.audioPlayerProperty.value, audioSlider)
+        audioController = AudioPlayerController(audioSlider)
         playBtn.setOnMouseClicked {
             audioController.toggle()
         }
