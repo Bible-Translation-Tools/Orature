@@ -222,6 +222,21 @@ open class RecordableViewModel(
     private fun loadTakes(audio: AssociatedAudio) {
         // selectedTakeProperty may not have been updated yet so ask for the current selected take
         val selected = audio.selected.value?.value
+        if (selected != null) {
+            val ap = injector.audioPlayer
+            ap.load(selected.file)
+            selectedTakeProperty.set(
+                TakeCardModel(
+                    selected,
+                    true,
+                    ap,
+                    messages["edit"].capitalize(),
+                    messages["delete"].capitalize(),
+                    messages["play"].capitalize(),
+                    messages["pause"].capitalize()
+                )
+            )
+        }
 
         val takes =
             audio.getAllTakes()

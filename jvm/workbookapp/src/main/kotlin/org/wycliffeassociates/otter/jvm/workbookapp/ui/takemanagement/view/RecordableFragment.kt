@@ -9,6 +9,7 @@ import javafx.geometry.Bounds
 import javafx.geometry.Point2D
 import javafx.scene.Node
 import javafx.scene.Parent
+import javafx.scene.control.Control
 import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.util.Duration
@@ -44,7 +45,7 @@ abstract class RecordableFragment(
 
     private val logger = LoggerFactory.getLogger(RecordableFragment::class.java)
 
-    abstract fun createTakeCard(take: TakeCardModel): TakeCard
+    abstract fun createTakeCard(take: TakeCardModel): Control
 
     protected val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()

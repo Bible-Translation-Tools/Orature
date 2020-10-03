@@ -7,13 +7,14 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 
 class AudioBufferPlayer : IAudioPlayer {
 
-    private var pause = false
+    private var pause = AtomicBoolean(false)
     private var startPosition: Int = 0
 
     private var reader: AudioFileReader? = null
@@ -89,17 +90,17 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { reader ->
             if (!player.isActive) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
-                pause = false
+                pause.set(false)
                 startPosition = reader.framePosition
                 playbackThread = Thread {
                     player.open()
                     player.start()
-                    while (reader.hasRemaining() && !pause && !playbackThread.isInterrupted) {
+                    while (reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                         val written = reader.getPcmBuffer(bytes)
                         player.write(bytes, 0, written)
                     }
                     player.drain()
-                    if (!pause) {
+                    if (!pause.get()) {
                         listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                         player.close()
                     }
@@ -113,7 +114,7 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { reader ->
             if (::player.isInitialized) {
                 val stoppedAt = getAbsoluteLocationInFrames()
-                pause = true
+                pause.set(true)
                 player.stop()
                 player.flush()
                 player.close()
