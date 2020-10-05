@@ -322,7 +322,7 @@ open class RecordableViewModel(
         ap.load(this.file)
         return TakeCardModel(
             this,
-            this.equals(selected),
+            selected,
             ap,
             FX.messages["edit"].capitalize(),
             FX.messages["delete"].capitalize(),
