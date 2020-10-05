@@ -90,17 +90,17 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { _reader ->
             if (!player.isActive) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
-                pause = false
+                pause.set(false)
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     player.open()
                     player.start()
-                    while (_reader.hasRemaining() && !pause && !playbackThread.isInterrupted) {
+                    while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                         val written = _reader.getPcmBuffer(bytes)
                         player.write(bytes, 0, written)
                     }
                     player.drain()
-                    if (!pause) {
+                    if (!pause.get()) {
                         listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                         player.close()
                     }
@@ -114,7 +114,7 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { _reader ->
             if (::player.isInitialized) {
                 val stoppedAt = getAbsoluteLocationInFrames()
-                pause = true
+                pause.set(true)
                 player.stop()
                 player.flush()
                 player.close()
