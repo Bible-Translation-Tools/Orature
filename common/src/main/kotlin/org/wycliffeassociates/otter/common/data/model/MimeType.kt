@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.data.model
 import java.lang.IllegalArgumentException
 
 enum class MimeType(vararg types: String) {
-    USFM("text/usfm", "text/x-usfm", "usfm"),
+    USFM("text/usfm", "text/x-usfm", "text/usfm3", "usfm"),
     MARKDOWN("text/markdown", "text/x-markdown", "markdown"),
     WAV("audio/wav", "audio/wave", "audio/x-wave", "audio/vnd.wave");
 

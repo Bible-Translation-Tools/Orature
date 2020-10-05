@@ -42,43 +42,43 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun load(file: File) {
         reader?.let { close() }
-        reader = WavFileReader(WavFile(file)).let { reader ->
+        reader = WavFileReader(WavFile(file)).let { _reader ->
             begin = 0
-            end = reader.totalFrames
-            bytes = ByteArray(reader.sampleRate * reader.channels)
+            end = _reader.totalFrames
+            bytes = ByteArray(_reader.sampleRate * _reader.channels)
             player = AudioSystem.getSourceDataLine(
                 AudioFormat(
-                    reader.sampleRate.toFloat(),
-                    reader.sampleSize,
-                    reader.channels,
+                    _reader.sampleRate.toFloat(),
+                    _reader.sampleSize,
+                    _reader.channels,
                     true,
                     false
                 )
             )
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            reader.open()
-            reader
+            _reader.open()
+            _reader
         }
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
-        reader = reader?.let { reader ->
-            begin = frameStart
-            end = frameEnd
-            this.reader = WavFileReader(WavFile(file), frameStart, frameEnd)
-            bytes = ByteArray(reader.sampleRate * reader.channels)
+        reader?.let { close() }
+        begin = frameStart
+        end = frameEnd
+        reader = WavFileReader(WavFile(file), frameStart, frameEnd).let { _reader ->
+            bytes = ByteArray(_reader.sampleRate * _reader.channels)
             player = AudioSystem.getSourceDataLine(
                 AudioFormat(
-                    reader.sampleRate.toFloat(),
-                    reader.sampleSize,
-                    reader.channels,
+                    _reader.sampleRate.toFloat(),
+                    _reader.sampleSize,
+                    _reader.channels,
                     true,
                     false
                 )
             )
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
-            reader.open()
-            reader
+            _reader.open()
+            _reader
         }
     }
 
@@ -87,20 +87,20 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun play() {
-        reader?.let { reader ->
+        reader?.let { _reader ->
             if (!player.isActive) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
-                pause.set(false)
-                startPosition = reader.framePosition
+                pause = false
+                startPosition = _reader.framePosition
                 playbackThread = Thread {
                     player.open()
                     player.start()
-                    while (reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
-                        val written = reader.getPcmBuffer(bytes)
+                    while (_reader.hasRemaining() && !pause && !playbackThread.isInterrupted) {
+                        val written = _reader.getPcmBuffer(bytes)
                         player.write(bytes, 0, written)
                     }
                     player.drain()
-                    if (!pause.get()) {
+                    if (!pause) {
                         listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                         player.close()
                     }
@@ -111,15 +111,15 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun pause() {
-        reader?.let { reader ->
+        reader?.let { _reader ->
             if (::player.isInitialized) {
                 val stoppedAt = getAbsoluteLocationInFrames()
-                pause.set(true)
+                pause = true
                 player.stop()
                 player.flush()
                 player.close()
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
-                reader.seek(stoppedAt)
+                _reader.seek(stoppedAt)
             }
         }
     }
