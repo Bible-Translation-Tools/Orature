@@ -321,19 +321,14 @@ open class RecordableViewModel(
 
     private fun sortTakes() {
         FXCollections.sort(
-            takeCardModels,
-            object : Comparator<TakeCardModel> {
-                override fun compare(o1: TakeCardModel, o2: TakeCardModel): Int {
-                    if (o1.selected == o2.selected) {
-                        return o1.take.number.compareTo(o2.take.number)
-                    } else if (o1.selected) {
-                        return 1
-                    } else {
-                        return -1
-                    }
-                }
+            takeCardModels
+        ) { take1, take2 ->
+            when {
+                take1.selected == take2.selected -> take1.take.number.compareTo(take2.take.number)
+                take1.selected -> 1
+                else -> -1
             }
-        )
+        }
     }
 
     private fun removeFromAlternateTakes(take: Take) {

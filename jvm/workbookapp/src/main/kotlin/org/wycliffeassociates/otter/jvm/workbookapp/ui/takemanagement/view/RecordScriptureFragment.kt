@@ -73,7 +73,7 @@ class RecordScriptureFragment : RecordableFragment(
         }
 
         recordableViewModel.selectedTakeProperty.onChangeAndDoNow {
-            if(it != null) {
+            if (it != null) {
                 dragTarget.selectedNodeProperty.set(createTakeCard(it))
             }
         }
