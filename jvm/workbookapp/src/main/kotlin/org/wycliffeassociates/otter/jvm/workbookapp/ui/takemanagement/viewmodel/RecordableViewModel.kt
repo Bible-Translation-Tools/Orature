@@ -226,15 +226,7 @@ open class RecordableViewModel(
             val ap = injector.audioPlayer
             ap.load(selected.file)
             selectedTakeProperty.set(
-                TakeCardModel(
-                    selected,
-                    true,
-                    ap,
-                    messages["edit"].capitalize(),
-                    messages["delete"].capitalize(),
-                    messages["play"].capitalize(),
-                    messages["pause"].capitalize()
-                )
+                selected.mapToCardModel(true)
             )
         }
 
@@ -244,15 +236,7 @@ open class RecordableViewModel(
                 .map { take ->
                     val ap = injector.audioPlayer
                     ap.load(take.file)
-                    TakeCardModel(
-                        take,
-                        take.equals(selected),
-                        ap,
-                        messages["edit"].capitalize(),
-                        messages["delete"].capitalize(),
-                        messages["play"].capitalize(),
-                        messages["pause"].capitalize()
-                    )
+                    take.mapToCardModel(take.equals(selected))
                 }
 
         closePlayers()
@@ -269,15 +253,7 @@ open class RecordableViewModel(
                     val ap = injector.audioPlayer
                     ap.load(take.file)
                     addToAlternateTakes(
-                        TakeCardModel(
-                            take,
-                            take.equals(selected),
-                            ap,
-                            messages["edit"].capitalize(),
-                            messages["delete"].capitalize(),
-                            messages["play"].capitalize(),
-                            messages["pause"].capitalize()
-                        )
+                        take.mapToCardModel(take.equals(selected))
                     )
                 }
                 removeOnDeleted(take)
@@ -340,4 +316,19 @@ open class RecordableViewModel(
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
     }
+
+    fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
+        val ap = injector.audioPlayer
+        ap.load(this.file)
+        return TakeCardModel(
+            this,
+            this.equals(selected),
+            ap,
+            FX.messages["edit"].capitalize(),
+            FX.messages["delete"].capitalize(),
+            FX.messages["play"].capitalize(),
+            FX.messages["pause"].capitalize()
+        )
+    }
 }
+
