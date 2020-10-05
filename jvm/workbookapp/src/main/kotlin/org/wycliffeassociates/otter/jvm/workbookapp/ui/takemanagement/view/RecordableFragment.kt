@@ -43,6 +43,11 @@ abstract class RecordableFragment(
         closePlayers()
     }
 
+    override fun onDock() {
+        super.onDock()
+        openPlayers()
+    }
+
     private val logger = LoggerFactory.getLogger(RecordableFragment::class.java)
 
     abstract fun createTakeCard(take: TakeCardModel): Control
