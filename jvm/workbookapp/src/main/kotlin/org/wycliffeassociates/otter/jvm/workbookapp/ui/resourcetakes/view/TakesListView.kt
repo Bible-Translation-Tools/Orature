@@ -5,12 +5,13 @@ import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import tornadofx.*
 
 class TakesListView(
-    items: ObservableList<Take>,
-    createTakeNode: (Take) -> Node
-) : ListView<Take>(items) {
+    items: ObservableList<TakeCardModel>,
+    createTakeNode: (TakeCardModel) -> Node
+) : ListView<TakeCardModel>(items) {
     init {
         cellFormat {
             /* Don't use cell caching, because we remove the front node of the take card when it is dragged

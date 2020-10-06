@@ -4,11 +4,11 @@ import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.control.ContentDisplay
+import javafx.scene.control.Control
 import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
@@ -17,6 +17,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
@@ -69,6 +70,12 @@ class RecordScriptureFragment : RecordableFragment(
 
         recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)
+        }
+
+        recordableViewModel.selectedTakeProperty.onChangeAndDoNow {
+            if (it != null) {
+                dragTarget.selectedNodeProperty.set(createTakeCard(it))
+            }
         }
 
         scriptureDragTarget.setOnDragDropped {
@@ -135,8 +142,7 @@ class RecordScriptureFragment : RecordableFragment(
     }
 
     override fun closePlayers() {
-        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
-        takesGrid.closePlayers()
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.close() }
     }
 
     override fun openPlayers() {
@@ -144,11 +150,16 @@ class RecordScriptureFragment : RecordableFragment(
         takesGrid.reloadPlayers()
     }
 
-    override fun createTakeCard(take: Take): TakeCard {
-        return scripturetakecard(
-            take,
-            audioPluginViewModel.audioPlayer(),
-            lastPlayOrPauseEvent.toObservable()
-        )
+    override fun createTakeCard(take: TakeCardModel): Control {
+        val card = ScriptureTakeCard().apply {
+            audioPlayerProperty().set(take.audioPlayer)
+            this.deleteTextProperty().set(take.deleteText)
+            this.editTextProperty().set(take.editText)
+            this.pauseTextProperty().set(take.playText)
+            this.playTextProperty().set(take.playText)
+            this.takeProperty().set(take.take)
+            this.takeNumberProperty().set(take.take.number.toString())
+        }
+        return card
     }
 }

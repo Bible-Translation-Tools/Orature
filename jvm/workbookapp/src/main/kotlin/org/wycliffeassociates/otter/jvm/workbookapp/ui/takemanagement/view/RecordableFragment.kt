@@ -9,6 +9,7 @@ import javafx.geometry.Bounds
 import javafx.geometry.Point2D
 import javafx.scene.Node
 import javafx.scene.Parent
+import javafx.scene.control.Control
 import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.util.Duration
@@ -26,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
@@ -41,9 +43,14 @@ abstract class RecordableFragment(
         closePlayers()
     }
 
+    override fun onDock() {
+        super.onDock()
+        openPlayers()
+    }
+
     private val logger = LoggerFactory.getLogger(RecordableFragment::class.java)
 
-    abstract fun createTakeCard(take: Take): TakeCard
+    abstract fun createTakeCard(take: TakeCardModel): Control
 
     protected val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
@@ -195,7 +202,7 @@ abstract class RecordableFragment(
     }
 
     private fun startDrag(event: StartDragEvent) {
-        if (event.take != recordableViewModel.selectedTakeProperty.value) {
+        if (event.take != recordableViewModel.selectedTakeProperty.value?.take) {
             val draggingNode = event.draggingNode
             val mouseEvent = event.mouseEvent
             dragStartDelta = Point2D(mouseEvent.x, mouseEvent.y)

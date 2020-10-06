@@ -56,7 +56,7 @@ abstract class TakeCardSkin(val control: TakeCard) : SkinBase<TakeCard>(control)
             StartDragEvent(
                 evt,
                 front,
-                skinnable.take
+                skinnable.model.take
             )
         )
     }
@@ -73,7 +73,7 @@ abstract class TakeCardSkin(val control: TakeCard) : SkinBase<TakeCard>(control)
     private fun completeDrag(evt: MouseEvent) {
         skinnable.fireEvent(
             CompleteDragEvent(
-                skinnable.take,
+                skinnable.model.take,
                 ::onCancelDrag
             )
         )

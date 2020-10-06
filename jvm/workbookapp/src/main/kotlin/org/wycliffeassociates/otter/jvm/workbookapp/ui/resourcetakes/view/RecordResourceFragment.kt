@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourcetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import tornadofx.*
 
 private class RecordableViewModelProvider : Component() {
@@ -36,7 +37,7 @@ class RecordResourceFragment(
     val formattedTextProperty = SimpleStringProperty()
 
     val alternateTakesList = TakesListView(
-        items = recordableViewModel.alternateTakes,
+        items = recordableViewModel.takeCardModels,
         createTakeNode = ::createTakeCard
     )
 
@@ -163,10 +164,9 @@ class RecordResourceFragment(
         }
     }
 
-    override fun createTakeCard(take: Take): TakeCard {
+    override fun createTakeCard(take: TakeCardModel): TakeCard {
         return resourcetakecard(
             take,
-            audioPluginViewModel.audioPlayer(),
             lastPlayOrPauseEvent.toObservable()
         )
     }

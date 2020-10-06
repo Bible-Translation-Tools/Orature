@@ -20,7 +20,10 @@ class ScriptureTakesGridCell(
         if (!empty && item != null) {
             if (item.first == TakeCardType.NEW) {
                 graphic = newRecording
-            } else if (item.first == TakeCardType.TAKE && item.second != null) {
+            } else if (
+                item.first == TakeCardType.TAKE &&
+                item.second != null && !item.second!!.selected
+            ) {
                 val model = item.second!!
                 takeCard.takeProperty().set(model.take)
                 takeCard.editTextProperty().set(model.editText)
