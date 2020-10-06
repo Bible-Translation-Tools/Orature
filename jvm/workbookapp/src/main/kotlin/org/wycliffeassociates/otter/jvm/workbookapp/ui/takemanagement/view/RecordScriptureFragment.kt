@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
-import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.control.ContentDisplay
@@ -15,7 +14,6 @@ import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.scripturetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordScriptureViewModel
