@@ -178,17 +178,10 @@ class RecordResourceFragment(
     }
 
     override fun closePlayers() {
-        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
-        alternateTakesList.getChildList()?.forEach {
-            (it as? TakeCard)?.simpleAudioPlayer?.close()
-        }
         recordableViewModel.takeCardModels.forEach { it.audioPlayer.close() }
     }
 
     override fun openPlayers() {
-        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.refresh()
-        alternateTakesList.getChildList()?.forEach {
-            (it as? TakeCard)?.simpleAudioPlayer?.refresh()
-        }
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.load(it.take.file) }
     }
 }

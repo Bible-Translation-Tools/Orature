@@ -18,7 +18,9 @@ class TakesListView(
                 and we don't ever add it back if it was made the selected take. (This is because we create a
                 new take card if it was selected.)
              */
-            graphic = createTakeNode(it)
+            if (!it.selected) {
+                graphic = createTakeNode(it)
+            }
         }
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
