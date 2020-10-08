@@ -9,6 +9,8 @@ import javafx.scene.image.ImageView
 import javafx.scene.image.WritableImage
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
@@ -16,48 +18,23 @@ import tornadofx.*
 class WaveformContainer : Fragment() {
 
     val verseMarkerViewModel: VerseMarkerViewModel by inject()
-    var imageView = ImageView()
+    var imageView = ImageView().apply { style {backgroundColor += Paint.valueOf("#0a337333")} }
 
     init {
-        Observable.fromCallable {
-            val width = Screen.getMainScreen().platformWidth
-            val height = Screen.getMainScreen().platformHeight
-            val img = WritableImage(width * 10 + (width), height * 3)
-            for (x in 0 until (width / 2)) {
-                for (y in 0 until height) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGREEN)
-                }
-                for (y in height until (height * 2)) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGRAY)
-                }
-                for (y in (height * 2) until (height * 3)) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGREEN)
-                }
-            }
-            for (x in (width / 2) until ((width / 2) + width * 10)) {
-                for (y in 0 until height) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGREEN)
-                }
-                for (y in height until (height * 2)) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTBLUE)
-                }
-                for (y in (height * 2) until (height * 3)) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGREEN)
-                }
-            }
-            for (x in ((width / 2) + width * 10) until (((width / 2) + width * 10) + width / 2)) {
-                for (y in 0 until height) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGREEN)
-                }
-                for (y in height until (height * 2)) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGRAY)
-                }
-                for (y in (height * 2) until (height * 3)) {
-                    img.pixelWriter.setColor(x, y, Color.LIGHTGREEN)
-                }
-            }
-            img as Image
-        }.subscribe { image ->
+        val width = Screen.getMainScreen().platformWidth
+        val height = Screen.getMainScreen().platformHeight
+
+        val imageWidth = (44100 * 10 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
+
+        WaveformImageBuilder().build(
+            verseMarkerViewModel.audioPlayer.getAudioReader()!!,
+            (width / 2),
+            imageWidth.toInt() + (width),
+            height,
+            paddingColor = Color.web("#0a337333"),
+            wavColor =  Color.web("#0A337360"),
+            background = Color.web("#F7FAFF")
+        ).subscribe { image ->
             imageView.imageProperty().set(image)
         }
     }
@@ -72,16 +49,16 @@ class WaveformContainer : Fragment() {
         val ht = Screen.getMainScreen().platformHeight
         val wd = Screen.getMainScreen().platformWidth
 
-        imageView.viewport = Rectangle2D(360.0, ht.toDouble(), wd.toDouble(), ht.toDouble())
-
         val at = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
-                val player = verseMarkerViewModel.audioPlayer
-                val padding = Screen.getMainScreen().platformWidth / 2.0
-                val width = imageView.image.width - (padding * 2)
-                val pos =
-                    (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
-                imageView.viewport = Rectangle2D(pos, ht.toDouble(), wd.toDouble(), ht.toDouble())
+                if (imageView != null && imageView.image != null) {
+                    val player = verseMarkerViewModel.audioPlayer
+                    val padding = Screen.getMainScreen().platformWidth / 2.0
+                    val width = imageView.image.width - (padding * 2)
+                    val pos =
+                        (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
+                    imageView.viewport = Rectangle2D(pos, 0.0, wd.toDouble(), ht.toDouble())
+                }
             }
         }.start()
 
@@ -90,6 +67,10 @@ class WaveformContainer : Fragment() {
             fitToParentHeight()
             add(imageView)
             add(PlaceMarkerLayer())
+
+            style {
+                backgroundColor += Paint.valueOf("#0a337333")
+            }
         }
     }
 }
