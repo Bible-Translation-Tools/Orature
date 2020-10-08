@@ -18,22 +18,25 @@ import tornadofx.*
 class WaveformContainer : Fragment() {
 
     val verseMarkerViewModel: VerseMarkerViewModel by inject()
-    var imageView = ImageView().apply { style {backgroundColor += Paint.valueOf("#0a337333")} }
+    var imageView = ImageView().apply { style { backgroundColor += Paint.valueOf("#0a337333") } }
 
     init {
         val width = Screen.getMainScreen().platformWidth
         val height = Screen.getMainScreen().platformHeight
 
-        val imageWidth = (44100 * 10 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
+        val imageWidth =
+            (44100 * 10 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
-        WaveformImageBuilder().build(
-            verseMarkerViewModel.audioPlayer.getAudioReader()!!,
-            (width / 2),
-            imageWidth.toInt() + (width),
-            height,
+        WaveformImageBuilder(
             paddingColor = Color.web("#0a337333"),
-            wavColor =  Color.web("#0A337360"),
+            wavColor = Color.web("#0A337360"),
             background = Color.web("#F7FAFF")
+        ).build(
+            verseMarkerViewModel.audioPlayer.getAudioReader()!!,
+            padding = (width / 2),
+            fitToAudioMax = false,
+            width = imageWidth.toInt() + (width),
+            height = height
         ).subscribe { image ->
             imageView.imageProperty().set(image)
         }
