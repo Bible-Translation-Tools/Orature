@@ -2,11 +2,15 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.sun.glass.ui.Screen
 import javafx.animation.AnimationTimer
+import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -16,8 +20,11 @@ class WaveformContainer : Fragment() {
 
     val verseMarkerViewModel: VerseMarkerViewModel by inject()
     var imageView = ImageView().apply { style { backgroundColor += Paint.valueOf("#0a337333") } }
+    val playedOverlay = Rectangle()
+    val positionProperty = SimpleDoubleProperty(0.0)
 
     init {
+
         val width = Screen.getMainScreen().platformWidth
         val height = Screen.getMainScreen().platformHeight
 
@@ -26,7 +33,7 @@ class WaveformContainer : Fragment() {
 
         WaveformImageBuilder(
             paddingColor = Color.web("#0a337333"),
-            wavColor = Color.web("#0A337360"),
+            wavColor = Color.web("#0A337390"),
             background = Color.web("#F7FAFF")
         ).build(
             verseMarkerViewModel.audioPlayer.getAudioReader()!!,
@@ -38,7 +45,7 @@ class WaveformContainer : Fragment() {
         }
     }
 
-    override val root = pane {
+    override val root = region {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
@@ -57,17 +64,29 @@ class WaveformContainer : Fragment() {
                     val width = imageView.image.width
                     val pos =
                         (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
+                    positionProperty.set(pos)
                     imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
                 }
             }
         }.start()
 
         stackpane {
+            alignment = Pos.CENTER
+
             fitToParentWidth()
             fitToParentHeight()
             add(imageView)
+            add(
+                 playedOverlay.apply {
+                    heightProperty().bind(this@region.heightProperty())
+                    widthProperty().bind(Bindings.min(positionProperty.times(this@region.widthProperty()/Screen.getMainScreen().width), this@region.widthProperty().divide(2)))
+                    translateXProperty().bind(-widthProperty()/2)
+                    style {
+                        fillProperty().set(Paint.valueOf("#015ad966"))
+                    }
+                }
+            )
             add(PlaceMarkerLayer())
-
             style {
                 backgroundColor += Paint.valueOf("#0a337333")
             }
