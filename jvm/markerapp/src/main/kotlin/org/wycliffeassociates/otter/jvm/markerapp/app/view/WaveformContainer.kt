@@ -1,12 +1,9 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.sun.glass.ui.Screen
-import io.reactivex.Observable
 import javafx.animation.AnimationTimer
 import javafx.geometry.Rectangle2D
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import javafx.scene.image.WritableImage
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
@@ -33,21 +30,21 @@ class WaveformContainer : Fragment() {
             background = Color.web("#F7FAFF")
         ).build(
             verseMarkerViewModel.audioPlayer.getAudioReader()!!,
-            padding = (width / 2),
             fitToAudioMax = false,
-            width = imageWidth.toInt() + (width),
+            width = imageWidth.toInt() + width,
             height = height
         ).subscribe { image ->
             imageView.imageProperty().set(image)
         }
     }
 
-    override val root = region {
+    override val root = pane {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
-
         imageView.fitHeightProperty().bind(this.heightProperty())
+        imageView.fitWidthProperty().bind(this.widthProperty())
+
 
         val ht = Screen.getMainScreen().platformHeight
         val wd = Screen.getMainScreen().platformWidth
@@ -56,11 +53,11 @@ class WaveformContainer : Fragment() {
             override fun handle(currentNanoTime: Long) {
                 if (imageView != null && imageView.image != null) {
                     val player = verseMarkerViewModel.audioPlayer
-                    val padding = Screen.getMainScreen().platformWidth / 2.0
-                    val width = imageView.image.width - (padding * 2)
+                    val padding = Screen.getMainScreen().platformWidth / 2
+                    val width = imageView.image.width
                     val pos =
                         (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
-                    imageView.viewport = Rectangle2D(pos, 0.0, wd.toDouble(), ht.toDouble())
+                    imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
                 }
             }
         }.start()
