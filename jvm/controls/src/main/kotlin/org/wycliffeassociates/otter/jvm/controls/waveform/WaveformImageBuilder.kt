@@ -26,6 +26,7 @@ class WaveformImageBuilder(
     fun build(
         reader: AudioFileReader,
         padding: Int = 0,
+        fitToAudioMax: Boolean = true,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
     ): Single<Image> {
@@ -35,13 +36,15 @@ class WaveformImageBuilder(
                     val img = WritableImage(width + (2 * padding), height)
                     val (globalMin, globalMax) = drawWaveform(img, reader, width, height, padding)
                     val newHeight = globalMax - globalMin
-                    val image2 = WritableImage(
-                        img.pixelReader,
-                        0,
-                        globalMin - newHeight,
-                        width + (padding * 2), (newHeight) * 2
-                    )
-                    image2 as Image
+                    if (fitToAudioMax) {
+                        val image2 = WritableImage(
+                            img.pixelReader,
+                            0,
+                            globalMin - newHeight,
+                            width + (padding * 2), (newHeight) * 2
+                        )
+                        image2 as Image
+                    } else img as Image
                 } else {
                     WritableImage(1, 1) as Image
                 }
