@@ -19,20 +19,19 @@ const val SIGNED_SHORT_MAX = 32767
 class WaveformImageBuilder {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
 
-    private val height = SIGNED_SHORT_MAX * 2
-
     fun build(
         reader: AudioFileReader,
         padding: Int,
+        width: Int = Screen.getMainScreen().platformWidth,
+        height: Int = Screen.getMainScreen().platformHeight,
         wavColor: Color = Color.BLACK,
         background: Color = Color.TRANSPARENT
     ): Single<Image> {
         return Single
             .fromCallable {
-                val width = Screen.getMainScreen().platformWidth
                 if (width > 0) {
                     val img = WritableImage(width + (2 * padding), height)
-                    val (globalMin, globalMax) = drawWaveform(img, reader, width, background, wavColor)
+                    val (globalMin, globalMax) = drawWaveform(img, reader, width, height, background, wavColor)
                     val newHeight = globalMax - globalMin
                     val image2 = WritableImage(
                         img.pixelReader,
@@ -56,6 +55,7 @@ class WaveformImageBuilder {
         img: WritableImage,
         reader: AudioFileReader,
         width: Int,
+        height: Int,
         background: Color,
         wavColor: Color
     ): Pair<Int, Int> {
@@ -79,7 +79,7 @@ class WaveformImageBuilder {
             val max = ((shortsArray.max()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
             globalMax = max(globalMax, min)
             globalMin = max(globalMin, max)
-            val range = max until min
+            val range = scaleToHeight(max, height) until scaleToHeight(min, height)
             for (j in 0 until height) {
                 img.pixelWriter.setColor(i, j, background)
                 if (j in range) {
@@ -87,6 +87,10 @@ class WaveformImageBuilder {
                 }
             }
         }
-        return Pair(globalMin, globalMax)
+        return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
+    }
+
+    private fun scaleToHeight(value: Int, height: Int): Int {
+        return ((value) / (SIGNED_SHORT_MAX * 2).toDouble() * height).toInt()
     }
 }
