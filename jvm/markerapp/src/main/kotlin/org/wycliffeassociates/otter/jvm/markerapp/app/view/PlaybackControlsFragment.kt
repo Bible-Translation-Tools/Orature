@@ -57,7 +57,7 @@ class PlaybackControlsFragment : Fragment() {
     private val closeBtn = JFXButton().apply {
         text = messages["continue"]
         graphic = continueIcon
-        styleClass.add("vm-continue-button")
+        styleClass.add(continueButtonStyle)
         setOnAction {
             (scope as ParameterizedScope).let {
                 viewModel
