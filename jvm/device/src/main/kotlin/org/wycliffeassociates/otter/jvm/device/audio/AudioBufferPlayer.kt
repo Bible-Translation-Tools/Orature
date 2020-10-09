@@ -100,6 +100,7 @@ class AudioBufferPlayer : IAudioPlayer {
                         player.write(bytes, 0, written)
                     }
                     player.drain()
+                    startPosition = 0
                     if (!pause.get()) {
                         listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                         player.close()
