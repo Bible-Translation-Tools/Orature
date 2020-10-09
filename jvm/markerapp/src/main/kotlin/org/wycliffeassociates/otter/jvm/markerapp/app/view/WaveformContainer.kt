@@ -12,6 +12,7 @@ import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
@@ -119,6 +120,15 @@ class WaveformContainer : Fragment() {
                 }
             )
 
+            add(
+                Line(0.0, 0.0, 0.0, 0.0).apply {
+                    endYProperty().bind(this@region.heightProperty())
+
+                    style {
+                        stroke = Paint.valueOf("#ffb100")
+                    }
+                }
+            )
             add(PlaceMarkerLayer())
         }
     }
