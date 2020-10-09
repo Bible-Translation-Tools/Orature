@@ -8,6 +8,7 @@ import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
 import javafx.scene.control.ScrollPane
 import javafx.scene.image.ImageView
+import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
@@ -41,7 +42,7 @@ class WaveformContainer : Fragment() {
 
         timeRegion = TimecodeRegion(imageWidth.toInt(), 50)
         timecode = Timecode(floor(imageWidth), 50.0)
-        timecodeImageView.image = timecode.drawTimecode()
+        timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
 
 
         WaveformImageBuilder(
@@ -80,7 +81,8 @@ class WaveformContainer : Fragment() {
                         (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
                     positionProperty.set(pos)
                     imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
-                    timecodeImageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
+                    timecodeImageView.viewport =
+                        Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
                     timecodeScroll.hvalueProperty().set(pos)
                 }
             }
@@ -110,9 +112,12 @@ class WaveformContainer : Fragment() {
             style {
                 backgroundColor += Paint.valueOf("#0a337333")
             }
-            add(timecodeImageView.apply {
-                translateYProperty().bind(this@region.heightProperty()/2 - timecodeImageView.image.height / 2)
-            })
+            add(
+                timecodeImageView.apply {
+                    translateYProperty()
+                        .bind(this@region.heightProperty() / 2 - timecodeImageView.image.height / 2)
+                }
+            )
 
             add(PlaceMarkerLayer())
         }
