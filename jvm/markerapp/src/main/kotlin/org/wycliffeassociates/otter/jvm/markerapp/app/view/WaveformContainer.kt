@@ -6,6 +6,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
+import javafx.scene.control.ScrollPane
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
@@ -13,8 +14,11 @@ import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.Timecode
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeRegion
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
+import java.lang.Math.floor
 
 class WaveformContainer : Fragment() {
 
@@ -22,6 +26,10 @@ class WaveformContainer : Fragment() {
     var imageView = ImageView().apply { style { backgroundColor += Paint.valueOf("#0a337333") } }
     val playedOverlay = Rectangle()
     val positionProperty = SimpleDoubleProperty(0.0)
+    val timecode: Timecode
+    val timeRegion: TimecodeRegion
+    val timecodeImageView = ImageView()
+    val timecodeScroll = ScrollPane()
 
     init {
 
@@ -31,6 +39,11 @@ class WaveformContainer : Fragment() {
         val imageWidth =
             (44100 * 10 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
+        timeRegion = TimecodeRegion(imageWidth.toInt(), 50)
+        timecode = Timecode(floor(imageWidth), 50.0)
+        timecodeImageView.image = timecode.drawTimecode()
+
+
         WaveformImageBuilder(
             paddingColor = Color.web("#0a337333"),
             wavColor = Color.web("#0A337390"),
@@ -38,7 +51,7 @@ class WaveformContainer : Fragment() {
         ).build(
             verseMarkerViewModel.audioPlayer.getAudioReader()!!,
             fitToAudioMax = false,
-            width = imageWidth.toInt() + width,
+            width = imageWidth.toInt(),
             height = height
         ).subscribe { image ->
             imageView.imageProperty().set(image)
@@ -49,6 +62,7 @@ class WaveformContainer : Fragment() {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
+        timecodeImageView.fitWidthProperty().bind(this.widthProperty())
         imageView.fitHeightProperty().bind(this.heightProperty())
         imageView.fitWidthProperty().bind(this.widthProperty())
 
@@ -66,6 +80,8 @@ class WaveformContainer : Fragment() {
                         (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
                     positionProperty.set(pos)
                     imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
+                    timecodeImageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
+                    timecodeScroll.hvalueProperty().set(pos)
                 }
             }
         }.start()
@@ -77,19 +93,28 @@ class WaveformContainer : Fragment() {
             fitToParentHeight()
             add(imageView)
             add(
-                 playedOverlay.apply {
+                playedOverlay.apply {
                     heightProperty().bind(this@region.heightProperty())
-                    widthProperty().bind(Bindings.min(positionProperty.times(this@region.widthProperty()/Screen.getMainScreen().width), this@region.widthProperty().divide(2)))
-                    translateXProperty().bind(-widthProperty()/2)
+                    widthProperty().bind(
+                        Bindings.min(
+                            positionProperty.times(this@region.widthProperty() / Screen.getMainScreen().width),
+                            this@region.widthProperty().divide(2)
+                        )
+                    )
+                    translateXProperty().bind(-widthProperty() / 2)
                     style {
                         fillProperty().set(Paint.valueOf("#015ad966"))
                     }
                 }
             )
-            add(PlaceMarkerLayer())
             style {
                 backgroundColor += Paint.valueOf("#0a337333")
             }
+            add(timecodeImageView.apply {
+                translateYProperty().bind(this@region.heightProperty()/2 - timecodeImageView.image.height / 2)
+            })
+
+            add(PlaceMarkerLayer())
         }
     }
 }
