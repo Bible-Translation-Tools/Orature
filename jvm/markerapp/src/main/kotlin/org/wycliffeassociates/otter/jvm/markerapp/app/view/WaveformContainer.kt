@@ -38,7 +38,7 @@ class WaveformContainer : Fragment() {
         val height = Screen.getMainScreen().platformHeight
 
         val imageWidth =
-            (44100 * 10 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
+            (44100 * 5 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
         timeRegion = TimecodeRegion(imageWidth.toInt(), 50)
         timecode = Timecode(floor(imageWidth), 50.0)
