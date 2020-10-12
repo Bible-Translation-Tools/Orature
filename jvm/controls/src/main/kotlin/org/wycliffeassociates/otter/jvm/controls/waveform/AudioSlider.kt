@@ -18,7 +18,7 @@ class AudioSlider(
 
     val thumbFillProperty = SimpleObjectProperty<Paint>(Paint.valueOf("#00000015"))
     val thumbLineColorProperty = SimpleObjectProperty<Paint>(Color.BLACK)
-    val secondsToHighlightProperty = SimpleIntegerProperty(1)
+    val secondsToHighlightProperty = SimpleIntegerProperty(10)
 
     val player = SimpleObjectProperty<IAudioPlayer>()
 

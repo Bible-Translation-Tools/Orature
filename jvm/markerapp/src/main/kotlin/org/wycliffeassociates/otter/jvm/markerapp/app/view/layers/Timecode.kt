@@ -58,16 +58,39 @@ class Timecode(width: Double, height: Double) : Canvas(width, height) {
     }
 }
 
-class TimecodeRegion(width: Int, height: Int) : Region() {
+class TimecodeRegion(durationMs: Int, width: Int, height: Int) : Region() {
     init {
         prefHeightProperty().set(height.toDouble())
         prefWidthProperty().set(width.toDouble())
 
-        for (i in 1 until width.toInt() step 500) {
+        style {
+            backgroundColor += Color.WHITE
+        }
+
+        for (i in 1 until width.toInt() step pixelsInSecond(width.toDouble(), durationMs)) {
             add(Line(i.toDouble(), height / 2.0, i.toDouble(), height - 1.0))
             if (i + 10 < width) {
-                add(Text(i.toDouble(), height - 10.0, i.toString()))
+                val text = msToDisplayString(positionToMs((i - 1), width.toDouble(), durationMs))
+
+                add(Text(i.toDouble(), height - 10.0, text))
             }
         }
+    }
+
+    fun pixelsInSecond(width: Double, durationMs: Int): Int {
+        val msinPixels = durationMs / width
+        return (1000 / msinPixels + 10).toInt()
+    }
+
+    fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
+        val msinPixels = durationMs / width
+        return (x * msinPixels).toInt()
+    }
+
+    fun msToDisplayString(ms: Int): String {
+        val minute = TimeUnit.MILLISECONDS.toMinutes(ms.toLong())
+        val second = TimeUnit.MILLISECONDS.toSeconds(ms.toLong() - TimeUnit.MINUTES.toMillis(minute))
+
+        return String.format("%02d:%02d", minute, second)
     }
 }

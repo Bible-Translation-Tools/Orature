@@ -8,8 +8,8 @@ import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
 import javafx.scene.control.ScrollPane
 import javafx.scene.image.ImageView
-import javafx.scene.layout.BorderStrokeStyle
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Line
@@ -29,7 +29,7 @@ class WaveformContainer : Fragment() {
     val playedOverlay = Rectangle()
     val positionProperty = SimpleDoubleProperty(0.0)
     val timecode: Timecode
-    val timeRegion: TimecodeRegion
+    val timeRegion: Region
     val timecodeImageView = ImageView()
     val timecodeScroll = ScrollPane()
 
@@ -41,7 +41,7 @@ class WaveformContainer : Fragment() {
         val imageWidth =
             (44100 * 5 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
-        timeRegion = TimecodeRegion(imageWidth.toInt(), 50)
+        timeRegion = Region()//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
         timecode = Timecode(floor(imageWidth), 50.0)
         timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
 
@@ -60,14 +60,10 @@ class WaveformContainer : Fragment() {
         }
     }
 
-    override val root = region {
+    override val root = borderpane {
+        fitToParentSize()
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
-
-        timecodeImageView.fitWidthProperty().bind(this.widthProperty())
-        imageView.fitHeightProperty().bind(this.heightProperty())
-        imageView.fitWidthProperty().bind(this.widthProperty())
-
 
         val ht = Screen.getMainScreen().platformHeight
         val wd = Screen.getMainScreen().platformWidth
@@ -84,52 +80,98 @@ class WaveformContainer : Fragment() {
                     imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
                     timecodeImageView.viewport =
                         Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
-                    timecodeScroll.hvalueProperty().set(pos)
+                    timeRegion.translateXProperty().set(-pos + this@borderpane.width / 2)
                 }
             }
         }.start()
 
-        stackpane {
-            alignment = Pos.CENTER
-
-            fitToParentWidth()
-            fitToParentHeight()
-            add(imageView)
-            add(
-                playedOverlay.apply {
-                    heightProperty().bind(this@region.heightProperty())
-                    widthProperty().bind(
-                        Bindings.min(
-                            positionProperty.times(this@region.widthProperty() / Screen.getMainScreen().width),
-                            this@region.widthProperty().divide(2)
-                        )
-                    )
-                    translateXProperty().bind(-widthProperty() / 2)
-                    style {
-                        fillProperty().set(Paint.valueOf("#015ad966"))
-                    }
+        top {
+            region {
+                prefHeight = 40.0
+                style {
+                    backgroundColor += Paint.valueOf("#a2b2cd")
                 }
-            )
-            style {
-                backgroundColor += Paint.valueOf("#0a337333")
+
+                stackpane {
+                    add(timeRegion.apply {add(Marker())})
+                }
             }
-            add(
-                timecodeImageView.apply {
-                    translateYProperty()
-                        .bind(this@region.heightProperty() / 2 - timecodeImageView.image.height / 2)
-                }
-            )
+        }
 
-            add(
-                Line(0.0, 0.0, 0.0, 0.0).apply {
-                    endYProperty().bind(this@region.heightProperty())
+        center {
+            region {
 
+                timecodeImageView.fitWidthProperty().bind(this.widthProperty())
+                imageView.fitHeightProperty().bind(this.heightProperty())
+                imageView.fitWidthProperty().bind(this.widthProperty())
+
+                stackpane {
+                    alignment = Pos.CENTER
+
+                    fitToParentWidth()
+                    fitToParentHeight()
+                    add(imageView)
+                    add(
+                        playedOverlay.apply {
+                            heightProperty().bind(this@region.heightProperty())
+                            widthProperty().bind(
+                                Bindings.min(
+                                    positionProperty.times(this@region.widthProperty() / Screen.getMainScreen().width),
+                                    this@region.widthProperty().divide(2)
+                                )
+                            )
+                            translateXProperty().bind(-widthProperty() / 2)
+                            style {
+                                fillProperty().set(Paint.valueOf("#015ad966"))
+                            }
+                        }
+                    )
                     style {
-                        stroke = Paint.valueOf("#ffb100")
+                        backgroundColor += Paint.valueOf("#c8d2e3")
                     }
+
+                    add(
+                        Line(0.0, 0.0, 0.0, 0.0).apply {
+                            endYProperty().bind(this@region.heightProperty())
+
+                            style {
+                                stroke = Paint.valueOf("#ffb100")
+                            }
+                        }
+                    )
+                    add(PlaceMarkerLayer())
                 }
-            )
-            add(PlaceMarkerLayer())
+            }
+        }
+
+        bottom {
+            region {
+
+                prefHeight = 50.0
+
+                style {
+                    borderWidth += box(1.px)
+                    borderColor += box(null, null, Paint.valueOf("#a7b6cf"), null)
+                    backgroundColor += Paint.valueOf("#ced6e3")
+                }
+                stackpane {
+                    add(
+                        timecodeImageView.apply {
+                            translateYProperty()
+                                .bind(this@region.heightProperty() / 2 - timecodeImageView.image.height / 2)
+                        }
+                    )
+                    add(
+                        Line(0.0, 0.0, 0.0, 0.0).apply {
+                            endYProperty().bind(this@region.heightProperty())
+
+                            style {
+                                stroke = Paint.valueOf("#ffb100")
+                            }
+                        }
+                    )
+                }
+            }
         }
     }
 }
