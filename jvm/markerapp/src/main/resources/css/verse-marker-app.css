@@ -37,8 +37,9 @@
 }
 
 .vm-play-controls {
+    -fx-pref-height: 88px;
     -fx-background-color: "#00377C";
-    -fx-padding: 16px;
+    -fx-padding: 0px 16px 0px 16px;
     -fx-spacing: 22px;
 }
 
