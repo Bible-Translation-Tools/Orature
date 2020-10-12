@@ -10,7 +10,7 @@ import javafx.scene.paint.Paint
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 
-class Marker : HBox() {
+class Marker(number: String) : HBox() {
     init {
         prefHeight = 40.0
         prefWidth = 60.0
@@ -30,7 +30,7 @@ class Marker : HBox() {
         icon.iconColor = Color.WHITE
         icon.iconSize = 22
         add(icon)
-        text("1") {
+        text(number) {
             fill = Color.WHITE
             style {
                 fontSize = 16.px

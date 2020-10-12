@@ -41,7 +41,7 @@ class WaveformContainer : Fragment() {
         val imageWidth =
             (44100 * 5 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
-        timeRegion = Region()//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
+        timeRegion = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
         timecode = Timecode(floor(imageWidth), 50.0)
         timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
 
@@ -93,7 +93,7 @@ class WaveformContainer : Fragment() {
                 }
 
                 stackpane {
-                    add(timeRegion.apply {add(Marker())})
+                    add(timeRegion)
                 }
             }
         }
