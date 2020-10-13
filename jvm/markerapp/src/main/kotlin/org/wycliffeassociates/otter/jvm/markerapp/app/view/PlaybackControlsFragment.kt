@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.jfoenix.controls.JFXButton
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -26,7 +27,7 @@ class PlaybackControlsFragment : Fragment() {
     private val previousIcon = FontIcon("gmi-skip-previous")
     private val continueIcon = FontIcon("fas-check")
 
-    private val playBtn = button {
+    private val playBtn = JFXButton().apply {
         styleClass.addAll(
             playButtonStyle,
             roundedButtonStyle
@@ -35,7 +36,7 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.mediaToggle() }
     }
 
-    private val nextBtn = button {
+    private val nextBtn = JFXButton().apply {
         styleClass.addAll(
             seekButtonStyle,
             roundedButtonStyle
@@ -44,7 +45,7 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekNext() }
     }
 
-    private val previousBtn = button {
+    private val previousBtn = JFXButton().apply {
         styleClass.addAll(
             seekButtonStyle,
             roundedButtonStyle
@@ -53,7 +54,7 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekPrevious() }
     }
 
-    private val closeBtn = button {
+    private val closeBtn = JFXButton().apply {
         text = messages["continue"]
         graphic = continueIcon
         styleClass.add("vm-continue-button")
