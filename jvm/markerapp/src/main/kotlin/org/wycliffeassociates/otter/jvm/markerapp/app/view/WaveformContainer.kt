@@ -80,7 +80,7 @@ class WaveformContainer : Fragment() {
                     imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
                     timecodeImageView.viewport =
                         Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
-                    timeRegion.translateXProperty().set(-pos + this@borderpane.width / 2)
+                    timeRegion.translateXProperty().set(-pos + this@borderpane.widthProperty().get() / 2)
                 }
             }
         }.start()
