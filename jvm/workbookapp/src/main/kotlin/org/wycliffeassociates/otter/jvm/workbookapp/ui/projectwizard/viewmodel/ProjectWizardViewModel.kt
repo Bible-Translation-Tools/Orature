@@ -51,9 +51,9 @@ class ProjectWizardViewModel : ViewModel() {
     val resourceCompletedText = SimpleStringProperty()
     val bookCompletedText = SimpleStringProperty()
 
-    init {
-        initializeTargetLanguages()
-        initializeSourceLanguages()
+    fun loadLanguages() {
+        loadTargetLanguages()
+        loadSourceLanguages()
         loadProjects()
         selectedTargetLanguage
             .toObservable()
@@ -66,7 +66,8 @@ class ProjectWizardViewModel : ViewModel() {
             }
     }
 
-    private fun initializeTargetLanguages() {
+    private fun loadTargetLanguages() {
+        targetLanguages.clear()
         languageRepo
             .getAll()
             .observeOnFx()
@@ -78,7 +79,8 @@ class ProjectWizardViewModel : ViewModel() {
             }
     }
 
-    private fun initializeSourceLanguages() {
+    private fun loadSourceLanguages() {
+        sourceLanguages.clear()
         collectionRepo
             .getRootSources()
             .observeOnFx()
@@ -97,6 +99,7 @@ class ProjectWizardViewModel : ViewModel() {
     }
 
     private fun loadProjects() {
+        projects.clear()
         collectionRepo
             .getDerivedProjects()
             .doOnError { e ->
@@ -207,9 +210,9 @@ class ProjectWizardViewModel : ViewModel() {
         collectionHierarchy.clear()
         existingProjects.clear()
         creationCompletedProperty.value = false
-        loadProjects()
         languageCompletedText.set(null)
         resourceCompletedText.set(null)
+        loadLanguages()
     }
 
     fun filterLanguages(query: String?, language: Language): Boolean {
