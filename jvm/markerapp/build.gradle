@@ -24,6 +24,9 @@ dependencies {
     // TornadoFX
     implementation "no.tornado:tornadofx:$tornadofxVer"
 
+    // JFoenix
+    implementation "com.jfoenix:jfoenix:$jfoenixVer"
+
     // Ikonli
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
