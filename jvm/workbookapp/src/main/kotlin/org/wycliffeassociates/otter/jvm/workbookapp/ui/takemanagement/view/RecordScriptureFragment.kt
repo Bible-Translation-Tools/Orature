@@ -83,7 +83,7 @@ class RecordScriptureFragment : RecordableFragment(
                 recordableViewModel.selectTake(db.string)
                 success = true
             }
-            (it.source as? ScriptureTakeCard)?.let {
+            (it.gestureSource as? ScriptureTakeCard)?.let {
                 it.isDraggingProperty().value = false
             }
             it.setDropCompleted(success)
@@ -98,9 +98,18 @@ class RecordScriptureFragment : RecordableFragment(
         }
 
         mainContainer.apply {
-
-            addEventHandler(DragEvent.DRAG_ENTERED, { isDraggingProperty.value = true })
-            addEventHandler(DragEvent.DRAG_EXITED, { isDraggingProperty.value = false })
+            addEventHandler(DragEvent.DRAG_ENTERED) {
+                (it.gestureSource as? ScriptureTakeCard)?.let { card ->
+                    card.isDraggingProperty().value = true
+                }
+                isDraggingProperty.value = true
+            }
+            addEventHandler(DragEvent.DRAG_EXITED) {
+                (it.gestureSource as? ScriptureTakeCard)?.let { card ->
+                    card.isDraggingProperty().value = false
+                }
+                isDraggingProperty.value = false
+            }
 
             addClass(RecordScriptureStyles.background)
 
