@@ -101,6 +101,7 @@ class AudioBufferPlayer : IAudioPlayer {
                     }
                     player.drain()
                     if (!pause.get()) {
+                        startPosition = 0
                         listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                         player.close()
                     }
@@ -114,6 +115,7 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { _reader ->
             if (::player.isInitialized) {
                 val stoppedAt = getAbsoluteLocationInFrames()
+                startPosition = stoppedAt
                 pause.set(true)
                 player.stop()
                 player.flush()
