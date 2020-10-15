@@ -89,21 +89,21 @@ class SourceDialog : Fragment() {
 
     private fun setOnDrag(node: Node) {
         node.onHover {
-            node.cursor = if (it) Cursor.HAND else Cursor.DEFAULT
+            node.cursor = if (it) Cursor.OPEN_HAND else Cursor.DEFAULT
         }
 
         node.setOnMousePressed { pressEvent ->
-            node.cursor = Cursor.MOVE
+            node.cursor = Cursor.CLOSED_HAND
             node.setOnMouseDragged { dragEvent ->
                 dialogStage?.let {
-                    it.x = dragEvent.getScreenX() - pressEvent.getSceneX()
-                    it.y = dragEvent.getScreenY() - pressEvent.getSceneY()
+                    it.x = dragEvent.screenX - pressEvent.sceneX
+                    it.y = dragEvent.screenY - pressEvent.sceneY
                 }
             }
         }
 
         node.setOnMouseReleased {
-            node.cursor = Cursor.HAND
+            node.cursor = Cursor.OPEN_HAND
         }
     }
 
