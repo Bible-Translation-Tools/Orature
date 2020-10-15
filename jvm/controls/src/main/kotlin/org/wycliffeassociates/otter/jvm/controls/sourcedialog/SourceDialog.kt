@@ -5,7 +5,11 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
+import javafx.scene.Cursor
+import javafx.scene.Node
+import javafx.scene.layout.Priority
 import javafx.stage.Modality
+import javafx.stage.Stage
 import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
@@ -21,6 +25,8 @@ class SourceDialog : Fragment() {
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
     val showDialogProperty = SimpleBooleanProperty()
+
+    var dialogStage: Stage? = null
 
     init {
         importStylesheet(javaClass.getResource("/css/source-dialog.css").toExternalForm())
@@ -39,12 +45,15 @@ class SourceDialog : Fragment() {
 
         top {
             vbox {
-                alignment = Pos.CENTER
+                addClass("source-dialog__title")
+
                 label(dialogTitleProperty) {
                     addClass("source-dialog__label")
                     visibleWhen(textProperty().isNotEmpty)
                     managedProperty().bind(visibleProperty())
                 }
+
+                setOnDrag(this)
             }
         }
         center {
@@ -75,7 +84,27 @@ class SourceDialog : Fragment() {
     }
 
     fun open() {
-        openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
+        dialogStage = openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
+    }
+
+    private fun setOnDrag(node: Node) {
+        node.onHover {
+            node.cursor = if (it) Cursor.HAND else Cursor.DEFAULT
+        }
+
+        node.setOnMousePressed { pressEvent ->
+            node.cursor = Cursor.MOVE
+            node.setOnMouseDragged { dragEvent ->
+                dialogStage?.let {
+                    it.x = dragEvent.getScreenX() - pressEvent.getSceneX()
+                    it.y = dragEvent.getScreenY() - pressEvent.getSceneY()
+                }
+            }
+        }
+
+        node.setOnMouseReleased {
+            node.cursor = Cursor.HAND
+        }
     }
 
     override fun onUndock() {
