@@ -5,6 +5,7 @@ import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -20,7 +21,7 @@ class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double
         prefWidthProperty().set(width)
         prefHeightProperty().set(height)
 
-        val markers = FXCollections.observableArrayList<Marker>()
+        val markers = FXCollections.observableArrayList<ChunkMarker>()
         val rectangles = FXCollections.observableArrayList<Rectangle>()
 
         viewModel.markers.markerCountProperty.onChangeAndDoNow {
@@ -40,7 +41,8 @@ class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double
                             fill = if(index % 2 == 0) { Paint.valueOf("#1edd7633") } else { Paint.valueOf("#015ad933")}
                         })
                     }
-                    Marker(cue.label).apply {
+                    ChunkMarker().apply {
+                        markerNumberProperty.set(cue.label)
                         val x = cue.location / scale.toDouble()
                         translateXProperty().set(x)
                     }
@@ -50,8 +52,8 @@ class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double
 
         markers.onChangeAndDoNow {
             children.clear()
-            children.addAll(markers)
             children.addAll(rectangles)
+            children.addAll(markers)
         }
     }
 }
