@@ -28,9 +28,17 @@ data class Chapter(
         val text = chunks
             .reduce("") { acc, elm ->
                 if (format == null) format = elm.textItem.format
-                acc + "${elm.textItem.text}\n"
+                acc + "${verseLabel(elm.start, elm.end)}. ${elm.textItem.text}\n"
             }
             .blockingGet()
         return TextItem(text, format!!)
+    }
+
+    private fun verseLabel(start: Int, end: Int): String {
+        return if (start != end) {
+            "$start-$end"
+        } else {
+            "$start"
+        }
     }
 }

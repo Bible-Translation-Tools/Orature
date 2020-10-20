@@ -4,7 +4,11 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.SnapshotParameters
-import javafx.scene.control.*
+import javafx.scene.control.Button
+import javafx.scene.control.ButtonType
+import javafx.scene.control.Label
+import javafx.scene.control.SkinBase
+import javafx.scene.control.Slider
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.TransferMode
@@ -114,10 +118,6 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                 card.isDraggingProperty().value = false
                 it.consume()
             }
-            setOnDragExited {
-                card.isDraggingProperty().value = false
-                it.consume()
-            }
             setOnMouseReleased {
                 card.isDraggingProperty().value = false
                 it.consume()
@@ -127,13 +127,13 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     }
 
     private fun startDrag(evt: MouseEvent) {
-        val db = skinnable.startDragAndDrop(*TransferMode.ANY)
+        val db = cardNode.startDragAndDrop(*TransferMode.ANY)
         val content = ClipboardContent()
         content.putString(card.takeProperty().value.name)
         db.setContent(content)
         val sp = SnapshotParameters()
-        sp.setFill(Color.TRANSPARENT)
-        db.setDragView(skinnable.snapshot(sp, null))
+        sp.fill = Color.TRANSPARENT
+        db.dragView = skinnable.snapshot(sp, null)
         evt.consume()
     }
 

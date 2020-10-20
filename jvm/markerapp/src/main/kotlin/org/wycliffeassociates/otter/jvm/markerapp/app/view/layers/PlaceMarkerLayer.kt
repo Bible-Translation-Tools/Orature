@@ -8,7 +8,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
-class PlaceMarkerLayer: Fragment() {
+class PlaceMarkerLayer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
@@ -19,7 +19,7 @@ class PlaceMarkerLayer: Fragment() {
         alignment = Pos.BOTTOM_CENTER
 
         add(
-            JFXButton("",FontIcon("mdi-bookmark-plus-outline")).apply {
+            JFXButton("", FontIcon("mdi-bookmark-plus-outline")).apply {
                 styleClass.addAll(
                     "btn--cta",
                     "vm-play-controls__btn--rounded",
