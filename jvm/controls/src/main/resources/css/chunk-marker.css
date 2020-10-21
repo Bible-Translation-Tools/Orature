@@ -3,13 +3,15 @@
     -fx-pref-width: 60px;
     -fx-spacing: 2px;
     -fx-padding: 8px;
-    -fx-font-size: 16px;
-    -fx-text-base-color: white;
-    -fx-text-fill: white;
     -fx-background-color: #06429b;
     -fx-border-color: #0a3373;
     -fx-background-radius: 0px 4px 4px 0px;
     -fx-border-radius: 0px 4px 4px 0px;
+}
+
+.chunk-marker__text {
+    -fx-font-size: 16px;
+    -fx-fill: white;
 }
 
 .chunk-marker .ikonli-font-icon {

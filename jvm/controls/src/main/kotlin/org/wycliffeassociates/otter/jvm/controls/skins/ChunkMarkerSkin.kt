@@ -30,6 +30,7 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
                 add(addBookmarkIcon)
                 add(
                     text {
+                        styleClass.add("chunk-marker__text")
                         textProperty().bind(control.markerNumberProperty)
                     }
                 )
