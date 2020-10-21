@@ -6,8 +6,8 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
-import javafx.scene.control.ScrollPane
 import javafx.scene.image.ImageView
+import javafx.scene.layout.Background
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -17,7 +17,6 @@ import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.Timecode
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeRegion
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 import java.lang.Math.floor
@@ -29,9 +28,8 @@ class WaveformContainer : Fragment() {
     val playedOverlay = Rectangle()
     val positionProperty = SimpleDoubleProperty(0.0)
     val timecode: Timecode
-    val timeRegion: Region
+    val markerTrack: Region
     val timecodeImageView = ImageView()
-    val timecodeScroll = ScrollPane()
 
     init {
 
@@ -41,7 +39,7 @@ class WaveformContainer : Fragment() {
         val imageWidth =
             (44100 * 5 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
-        timeRegion = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
+        markerTrack = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
         timecode = Timecode(floor(imageWidth), 50.0)
         timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
 
@@ -80,7 +78,7 @@ class WaveformContainer : Fragment() {
                     imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
                     timecodeImageView.viewport =
                         Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
-                    timeRegion.translateXProperty().set(-pos + this@borderpane.widthProperty().get() / 2)
+                    markerTrack.translateXProperty().set(-pos + this@borderpane.widthProperty().get() / 2)
                 }
             }
         }.start()
@@ -93,7 +91,7 @@ class WaveformContainer : Fragment() {
                 }
 
                 stackpane {
-                    add(timeRegion)
+                    add(markerTrack)
                 }
             }
         }
