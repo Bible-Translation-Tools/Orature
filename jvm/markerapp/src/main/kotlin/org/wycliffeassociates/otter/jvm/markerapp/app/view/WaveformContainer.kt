@@ -42,10 +42,8 @@ class WaveformContainer : Fragment() {
         markerTrack = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
         timecode = Timecode(floor(imageWidth), 50.0)
         timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
-
-
+        
         WaveformImageBuilder(
-            paddingColor = Color.web("#0a337333"),
             wavColor = Color.web("#0A337390"),
             background = Color.web("#F7FAFF")
         ).build(
