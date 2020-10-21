@@ -14,6 +14,7 @@ import javafx.scene.paint.Paint
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.Timecode
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -23,7 +24,7 @@ import java.lang.Math.floor
 class WaveformContainer : Fragment() {
 
     val verseMarkerViewModel: VerseMarkerViewModel by inject()
-    var imageView = ImageView().apply { style { backgroundColor += Paint.valueOf("#0a337333") } }
+    val mainWaveform: MainWaveform
     val playedOverlay = Rectangle()
     val positionProperty = SimpleDoubleProperty(0.0)
     val timecode: Timecode
@@ -38,25 +39,14 @@ class WaveformContainer : Fragment() {
         val imageWidth =
             (44100 * 5 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
 
-        markerTrack = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
+        markerTrack = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)
         timecode = Timecode(floor(imageWidth), 50.0)
         timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
 
-        WaveformImageBuilder(
-            wavColor = Color.web("#0A337390"),
-            background = Color.web("#F7FAFF")
-        ).build(
-            verseMarkerViewModel.audioPlayer.getAudioReader()!!,
-            fitToAudioMax = false,
-            width = imageWidth.toInt(),
-            height = height
-        ).subscribe { image ->
-            imageView.imageProperty().set(image)
-        }
+        mainWaveform = MainWaveform(verseMarkerViewModel.audioPlayer.getAudioReader()!!, imageWidth.toInt(), height)
     }
 
     override val root = borderpane {
-        fitToParentSize()
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
@@ -65,14 +55,14 @@ class WaveformContainer : Fragment() {
 
         val at = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
-                if (imageView != null && imageView.image != null) {
+                if (mainWaveform.image != null) {
                     val player = verseMarkerViewModel.audioPlayer
                     val padding = Screen.getMainScreen().platformWidth / 2
-                    val width = imageView.image.width
+                    val width = mainWaveform.image.width
                     val pos =
                         (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
                     positionProperty.set(pos)
-                    imageView.viewport = Rectangle2D(pos - padding, 0.0, wd.toDouble(), ht.toDouble())
+                    mainWaveform.scrollTo(pos - padding)
                     timecodeImageView.viewport =
                         Rectangle2D(pos - padding, 0.0, wd.toDouble(), timecodeImageView.image.height)
                     markerTrack.translateXProperty().set(-pos + this@borderpane.widthProperty().get() / 2)
@@ -96,14 +86,14 @@ class WaveformContainer : Fragment() {
         center {
             region {
                 timecodeImageView.fitToWidth(this@region)
-                imageView.fitToSize(this@region)
+                mainWaveform.fitToSize(this@region)
 
                 stackpane {
                     alignment = Pos.CENTER
 
                     fitToParentWidth()
                     fitToParentHeight()
-                    add(imageView)
+                    add(mainWaveform)
                     add(
                         playedOverlay.apply {
                             heightProperty().bind(this@region.heightProperty())
