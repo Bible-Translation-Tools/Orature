@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
 import javafx.scene.image.ImageView
-import javafx.scene.layout.Background
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -42,7 +41,7 @@ class WaveformContainer : Fragment() {
         markerTrack = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)//TimecodeRegion(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs(), imageWidth.toInt(), 40)
         timecode = Timecode(floor(imageWidth), 50.0)
         timecodeImageView.image = timecode.drawTimecode(verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
-        
+
         WaveformImageBuilder(
             wavColor = Color.web("#0A337390"),
             background = Color.web("#F7FAFF")
@@ -96,10 +95,8 @@ class WaveformContainer : Fragment() {
 
         center {
             region {
-
-                timecodeImageView.fitWidthProperty().bind(this.widthProperty())
-                imageView.fitHeightProperty().bind(this.heightProperty())
-                imageView.fitWidthProperty().bind(this.widthProperty())
+                timecodeImageView.fitToWidth(this@region)
+                imageView.fitToSize(this@region)
 
                 stackpane {
                     alignment = Pos.CENTER
