@@ -13,7 +13,6 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
     val addBookmarkIcon = FontIcon("mdi-bookmark-plus-outline")
 
     init {
-
         dragIcon.visibleProperty().bind(control.canBeMovedProperty)
         dragIcon.managedProperty().bind(control.canBeMovedProperty)
         placedBookmarkIcon.visibleProperty().bind(control.isPlacedProperty)

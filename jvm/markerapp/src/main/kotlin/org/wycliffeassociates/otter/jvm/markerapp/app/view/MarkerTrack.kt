@@ -28,18 +28,30 @@ class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double
             markers.clear()
             markers.setAll(
                 viewModel.markers.cues.mapIndexed { index, cue ->
-                    if(index > 0) {
-                        val rectWidth = (cue.location - viewModel.markers.cues[index-1].location) / scale
-                        rectangles.add(Rectangle(rectWidth, height).apply {
-                            xProperty().set(viewModel.markers.cues[index-1].location / scale.toDouble())
-                            fill = if(index % 2 == 0) { Paint.valueOf("#1edd7633") } else { Paint.valueOf("#015ad933")}
-                        })
+                    if (index > 0) {
+                        val rectWidth = (cue.location - viewModel.markers.cues[index - 1].location) / scale
+                        rectangles.add(
+                            Rectangle(rectWidth, height).apply {
+                                xProperty().set(viewModel.markers.cues[index - 1].location / scale.toDouble())
+                                fill = if (index % 2 == 0) {
+                                    Paint.valueOf("#1edd7633")
+                                } else {
+                                    Paint.valueOf("#015ad933")
+                                }
+                            }
+                        )
                     } else {
                         val rectWidth = (viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location) / scale
-                        rectangles.add(Rectangle(rectWidth, height).apply {
-                            xProperty().set(viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble())
-                            fill = if(index % 2 == 0) { Paint.valueOf("#1edd7633") } else { Paint.valueOf("#015ad933")}
-                        })
+                        rectangles.add(
+                            Rectangle(rectWidth, height).apply {
+                                xProperty().set(viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble())
+                                fill = if (index % 2 == 0) {
+                                    Paint.valueOf("#1edd7633")
+                                } else {
+                                    Paint.valueOf("#015ad933")
+                                }
+                            }
+                        )
                     }
                     ChunkMarker().apply {
                         markerNumberProperty.set(cue.label)
