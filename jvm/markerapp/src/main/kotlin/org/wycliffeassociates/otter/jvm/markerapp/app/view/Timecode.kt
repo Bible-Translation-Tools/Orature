@@ -1,17 +1,10 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.scene.SnapshotParameters
 import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
-import javafx.scene.layout.BorderStrokeStyle
-import javafx.scene.layout.Region
 import javafx.scene.paint.Color
-import javafx.scene.shape.Line
-import javafx.scene.shape.StrokeType
-import javafx.scene.text.Text
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsInSecond
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.positionToMs
 import tornadofx.*
 import java.lang.Math.floor
 import java.util.concurrent.TimeUnit
