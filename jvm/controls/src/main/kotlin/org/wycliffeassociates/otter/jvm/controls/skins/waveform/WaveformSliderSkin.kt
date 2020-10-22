@@ -37,7 +37,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 player.getAudioReader()?.let { reader ->
                     reader.seek(0)
                     waveformImage
-                        .build(reader, 0)
+                        .build(reader, fitToAudioMax = true)
                         .doOnError { e ->
                             logger.error("Error in building waveform image", e)
                         }
