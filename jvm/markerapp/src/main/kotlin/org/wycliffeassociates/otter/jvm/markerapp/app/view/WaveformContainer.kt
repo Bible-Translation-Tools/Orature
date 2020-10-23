@@ -5,8 +5,6 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
-import javafx.geometry.Rectangle2D
-import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.paint.Paint
@@ -17,7 +15,6 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLay
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
-import java.lang.Math.floor
 
 class WaveformContainer : Fragment() {
 
@@ -60,7 +57,10 @@ class WaveformContainer : Fragment() {
                     positionProperty.set(pos)
                     mainWaveform.scrollTo(pos - padding)
                     timecodeHolder.scrollTo(pos - padding)
-                    markerTrack.translateXProperty().set(-pos + this@borderpane.widthProperty().get() / 2)
+                    val scaleFactor = widthProperty().get() / Screen.getMainScreen().platformWidth.toDouble()
+                    val trackOffset = (widthProperty().get() * 1.355) - 1231
+                    markerTrack.scaleXProperty().set(scaleFactor)
+                    markerTrack.translateXProperty().set(trackOffset - pos * scaleFactor)
                 }
             }
         }.start()
@@ -87,6 +87,7 @@ class WaveformContainer : Fragment() {
 
                     fitToParentWidth()
                     fitToParentHeight()
+
                     add(mainWaveform)
                     add(
                         playedOverlay.apply {
