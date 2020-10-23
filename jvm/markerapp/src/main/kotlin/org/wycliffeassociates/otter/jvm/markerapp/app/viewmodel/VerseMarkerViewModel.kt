@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
+import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
@@ -22,6 +24,12 @@ class VerseMarkerViewModel : ViewModel() {
     val markerRatioProperty = SimpleStringProperty()
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
+    val positionProperty = SimpleDoubleProperty(0.0)
+
+    val width = Screen.getMainScreen().platformWidth
+    val height = Screen.getMainScreen().platformHeight
+    val padding = Screen.getMainScreen().platformWidth / 2
+    val imageWidth: Double
 
     init {
         val scope = scope as ParameterizedScope
@@ -37,6 +45,7 @@ class VerseMarkerViewModel : ViewModel() {
             markerRatioProperty.set("${it}/$totalMarkers")
         }
         audioPlayer.load(audioFile)
+        imageWidth = (audioPlayer.getAudioReader()!!.sampleRate * 5 / width.toDouble()) * (audioPlayer.getAbsoluteDurationMs() / 1000.0)
     }
 
     fun initializeAudioController(slider: Slider) {
@@ -65,5 +74,11 @@ class VerseMarkerViewModel : ViewModel() {
     
     fun placeMarker() {
         markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
+    }
+
+    fun calculatePosition() {
+        val pos =
+            (audioPlayer.getAbsoluteLocationInFrames() / audioPlayer.getAbsoluteDurationInFrames().toDouble()) * imageWidth
+        positionProperty.set(pos)
     }
 }

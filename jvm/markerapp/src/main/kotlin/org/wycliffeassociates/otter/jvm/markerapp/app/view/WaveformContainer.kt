@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.sun.glass.ui.Screen
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
@@ -18,25 +17,16 @@ import tornadofx.*
 
 class WaveformContainer : Fragment() {
 
-    val verseMarkerViewModel: VerseMarkerViewModel by inject()
+    val viewModel: VerseMarkerViewModel by inject()
     val mainWaveform: MainWaveform
     val playedOverlay = Rectangle()
-    val positionProperty = SimpleDoubleProperty(0.0)
     val markerTrack: Region
     val timecodeHolder: TimecodeHolder
 
     init {
-
-        val width = Screen.getMainScreen().platformWidth
-        val height = Screen.getMainScreen().platformHeight
-
-        val imageWidth =
-            (44100 * 5 / width.toDouble()) * (verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs() / 1000.0)
-
-        markerTrack = MarkerTrack(verseMarkerViewModel, imageWidth, 50.0)
-        timecodeHolder = TimecodeHolder(imageWidth, 50.0, verseMarkerViewModel.audioPlayer.getAbsoluteDurationMs())
-
-        mainWaveform = MainWaveform(verseMarkerViewModel.audioPlayer.getAudioReader()!!, imageWidth.toInt(), height)
+        markerTrack = MarkerTrack(viewModel, viewModel.imageWidth, 50.0)
+        timecodeHolder = TimecodeHolder(viewModel, viewModel.imageWidth, 50.0, viewModel.audioPlayer.getAbsoluteDurationMs())
+        mainWaveform = MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!, viewModel.imageWidth.toInt(), viewModel.height)
     }
 
     override val root = borderpane {
@@ -49,18 +39,7 @@ class WaveformContainer : Fragment() {
         val at = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 if (mainWaveform.image != null) {
-                    val player = verseMarkerViewModel.audioPlayer
-                    val padding = Screen.getMainScreen().platformWidth / 2
-                    val width = mainWaveform.image.width
-                    val pos =
-                        (player.getAbsoluteLocationInFrames() / player.getAbsoluteDurationInFrames().toDouble()) * width
-                    positionProperty.set(pos)
-                    mainWaveform.scrollTo(pos - padding)
-                    timecodeHolder.scrollTo(pos - padding)
-                    val scaleFactor = widthProperty().get() / Screen.getMainScreen().platformWidth.toDouble()
-                    val trackOffset = (widthProperty().get() * 1.355) - 1231
-                    markerTrack.scaleXProperty().set(scaleFactor)
-                    markerTrack.translateXProperty().set(trackOffset - pos * scaleFactor)
+                    viewModel.calculatePosition()
                 }
             }
         }.start()
@@ -71,10 +50,7 @@ class WaveformContainer : Fragment() {
                 style {
                     backgroundColor += Paint.valueOf("#a2b2cd")
                 }
-
-                stackpane {
-                    add(markerTrack)
-                }
+                add(markerTrack)
             }
         }
 
@@ -94,7 +70,7 @@ class WaveformContainer : Fragment() {
                             heightProperty().bind(this@region.heightProperty())
                             widthProperty().bind(
                                 Bindings.min(
-                                    positionProperty.times(this@region.widthProperty() / Screen.getMainScreen().width),
+                                    viewModel.positionProperty.times(this@region.widthProperty() / Screen.getMainScreen().width),
                                     this@region.widthProperty().divide(2)
                                 )
                             )

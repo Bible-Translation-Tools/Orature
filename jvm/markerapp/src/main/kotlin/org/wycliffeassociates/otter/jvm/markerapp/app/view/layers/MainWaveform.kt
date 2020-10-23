@@ -7,6 +7,9 @@ import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.onChange
 import tornadofx.style
 
 interface ViewPortScrollable {
@@ -14,8 +17,9 @@ interface ViewPortScrollable {
 }
 
 class MainWaveform(
+    verseMarkerViewModel: VerseMarkerViewModel,
     reader: AudioFileReader, val width: Int, val height: Int
-): ImageView(), ViewPortScrollable {
+) : ImageView(), ViewPortScrollable {
 
     init {
         WaveformImageBuilder(
@@ -32,6 +36,11 @@ class MainWaveform(
 
         style {
             backgroundColor += Paint.valueOf("#0a337333")
+        }
+
+        verseMarkerViewModel.positionProperty.onChangeAndDoNow {
+            val x = it?.toDouble() ?: 0.0
+            scrollTo(x - verseMarkerViewModel.padding)
         }
     }
 
