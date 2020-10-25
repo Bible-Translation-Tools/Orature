@@ -10,6 +10,7 @@ import javafx.scene.paint.Paint
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrack
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -87,10 +88,7 @@ class WaveformContainer : Fragment() {
                     add(
                         Line(0.0, 0.0, 0.0, 0.0).apply {
                             endYProperty().bind(this@region.heightProperty())
-
-                            style {
-                                stroke = Paint.valueOf("#ffb100")
-                            }
+                            styleClass.add("vm-playback-line")
                         }
                     )
                     add(PlaceMarkerLayer())
@@ -112,10 +110,8 @@ class WaveformContainer : Fragment() {
                     add(timecodeHolder)
                     add(
                         Line(0.0, 0.0, 0.0, 0.0).apply {
+                            styleClass.add("vm-playback-line")
                             endYProperty().bind(this@region.heightProperty())
-                            style {
-                                stroke = Paint.valueOf("#ffb100")
-                            }
                         }
                     )
                 }

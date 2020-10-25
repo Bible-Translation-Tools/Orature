@@ -9,8 +9,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.onChange
-import tornadofx.style
 
 interface ViewPortScrollable {
     fun scrollTo(x: Double)
@@ -22,6 +20,8 @@ class MainWaveform(
 ) : ImageView(), ViewPortScrollable {
 
     init {
+        styleClass.add("vm-waveform-holder")
+
         WaveformImageBuilder(
             wavColor = Color.web("#0A337390"),
             background = Color.web("#F7FAFF")
@@ -32,10 +32,6 @@ class MainWaveform(
             height = height
         ).subscribe { image ->
             imageProperty().set(image)
-        }
-
-        style {
-            backgroundColor += Paint.valueOf("#0a337333")
         }
 
         verseMarkerViewModel.positionProperty.onChangeAndDoNow {

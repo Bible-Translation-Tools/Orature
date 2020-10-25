@@ -104,3 +104,15 @@
 .vm-continue-button > .ikonli-font-icon {
     -fx-icon-size: 28px;
 }
+
+.vm-marker-track {
+    -fx-background-color: #c8d2e3;
+}
+
+.vm-waveform-holder {
+    -fx-background-color: #0a337333;
+}
+
+.vm-playback-line {
+    -fx-stroke: #ffb100;
+}

@@ -1,9 +1,8 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.sun.glass.ui.Screen
 import javafx.collections.FXCollections
 import javafx.scene.layout.Region
-import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
@@ -13,9 +12,7 @@ import tornadofx.*
 
 class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double) : Region() {
     init {
-        style {
-            backgroundColor += Paint.valueOf("#c8d2e3")
-        }
+        styleClass.add("vm-marker-track")
 
         val scale = viewModel.audioPlayer.getAbsoluteDurationInFrames() / width
 
