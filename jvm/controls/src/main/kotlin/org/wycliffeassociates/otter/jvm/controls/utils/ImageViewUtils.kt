@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.utils
 
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region

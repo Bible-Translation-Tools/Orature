@@ -9,6 +9,8 @@ import javafx.scene.layout.Region
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.jvm.controls.utils.fitToSize
+import org.wycliffeassociates.otter.jvm.controls.utils.fitToWidth
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrack
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
