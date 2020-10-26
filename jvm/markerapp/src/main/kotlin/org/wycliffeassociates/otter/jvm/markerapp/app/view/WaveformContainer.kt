@@ -36,10 +36,7 @@ class WaveformContainer : Fragment() {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
-        val ht = Screen.getMainScreen().platformHeight
-        val wd = Screen.getMainScreen().platformWidth
-
-        val at = object : AnimationTimer() {
+        object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 if (mainWaveform.image != null) {
                     viewModel.calculatePosition()
