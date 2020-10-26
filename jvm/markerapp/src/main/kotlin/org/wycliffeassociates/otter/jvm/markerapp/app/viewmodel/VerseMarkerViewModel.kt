@@ -45,7 +45,9 @@ class VerseMarkerViewModel : ViewModel() {
             markerRatioProperty.set("${it}/$totalMarkers")
         }
         audioPlayer.load(audioFile)
-        imageWidth = (audioPlayer.getAudioReader()!!.sampleRate * 5 / width.toDouble()) * (audioPlayer.getAbsoluteDurationMs() / 1000.0)
+        imageWidth =
+            (audioPlayer.getAudioReader()!!.sampleRate * 5 / width.toDouble()) *
+                    (audioPlayer.getAbsoluteDurationMs() / 1000.0)
     }
 
     fun initializeAudioController(slider: Slider) {
@@ -71,14 +73,15 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.close()
         return markers.writeMarkers()
     }
-    
+
     fun placeMarker() {
         markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
     }
 
     fun calculatePosition() {
         val pos =
-            (audioPlayer.getAbsoluteLocationInFrames() / audioPlayer.getAbsoluteDurationInFrames().toDouble()) * imageWidth
+            (audioPlayer.getAbsoluteLocationInFrames() /
+                    audioPlayer.getAbsoluteDurationInFrames().toDouble()) * imageWidth
         positionProperty.set(pos)
     }
 }
