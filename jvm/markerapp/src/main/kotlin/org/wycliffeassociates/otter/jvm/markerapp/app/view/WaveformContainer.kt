@@ -27,7 +27,7 @@ class WaveformContainer : Fragment() {
     val timecodeHolder: TimecodeHolder
 
     init {
-        markerTrack = MarkerTrack(viewModel, viewModel.imageWidth, 50.0)
+        markerTrack = MarkerTrack(viewModel).apply{ prefWidth = viewModel.imageWidth }
         timecodeHolder = TimecodeHolder(viewModel, viewModel.imageWidth, 50.0, viewModel.audioPlayer.getAbsoluteDurationMs())
         mainWaveform =  MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!)
     }

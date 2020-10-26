@@ -10,54 +10,22 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewM
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double) : Region() {
+class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
+
+    var scale: Double = 1.0
+    val markers = FXCollections.observableArrayList<ChunkMarker>()
+    val rectangles = FXCollections.observableArrayList<Rectangle>()
+
     init {
         styleClass.add("vm-marker-track")
 
-        val scale = viewModel.audioPlayer.getAbsoluteDurationInFrames() / width
-
-        prefWidthProperty().set(width)
-        prefHeightProperty().set(height)
-
-        val markers = FXCollections.observableArrayList<ChunkMarker>()
-        val rectangles = FXCollections.observableArrayList<Rectangle>()
+        widthProperty().onChange {
+            scale = viewModel.audioPlayer.getAbsoluteDurationInFrames() / it
+            resetMakers()
+        }
 
         viewModel.markers.markerCountProperty.onChangeAndDoNow {
-            markers.clear()
-            markers.setAll(
-                viewModel.markers.cues.mapIndexed { index, cue ->
-                    if (index > 0) {
-                        val rectWidth = (cue.location - viewModel.markers.cues[index - 1].location) / scale
-                        rectangles.add(
-                            Rectangle(rectWidth, height).apply {
-                                xProperty().set(viewModel.markers.cues[index - 1].location / scale.toDouble())
-                                fill = if (index % 2 == 0) {
-                                    Paint.valueOf("#1edd7633")
-                                } else {
-                                    Paint.valueOf("#015ad933")
-                                }
-                            }
-                        )
-                    } else {
-                        val rectWidth = (viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location) / scale
-                        rectangles.add(
-                            Rectangle(rectWidth, height).apply {
-                                xProperty().set(viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble())
-                                fill = if (index % 2 == 0) {
-                                    Paint.valueOf("#1edd7633")
-                                } else {
-                                    Paint.valueOf("#015ad933")
-                                }
-                            }
-                        )
-                    }
-                    ChunkMarker().apply {
-                        markerNumberProperty.set(cue.label)
-                        val x = cue.location / scale.toDouble()
-                        translateXProperty().set(x)
-                    }
-                }
-            )
+            resetMakers()
         }
 
         markers.onChangeAndDoNow {
@@ -81,6 +49,43 @@ class MarkerTrack(viewModel: VerseMarkerViewModel, width: Double, height: Double
                 }
             }
         }
+    }
+    private fun resetMakers() {
+        markers.clear()
+        markers.setAll(
+            viewModel.markers.cues.mapIndexed { index, cue ->
+                if (index > 0) {
+                    val rectWidth = (cue.location - viewModel.markers.cues[index - 1].location) / scale
+                    rectangles.add(
+                        Rectangle(rectWidth, height).apply {
+                            xProperty().set(viewModel.markers.cues[index - 1].location / scale.toDouble())
+                            fill = if (index % 2 == 0) {
+                                Paint.valueOf("#1edd7633")
+                            } else {
+                                Paint.valueOf("#015ad933")
+                            }
+                        }
+                    )
+                } else {
+                    val rectWidth = (viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location) / scale
+                    rectangles.add(
+                        Rectangle(rectWidth, height).apply {
+                            xProperty().set(viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble())
+                            fill = if (index % 2 == 0) {
+                                Paint.valueOf("#1edd7633")
+                            } else {
+                                Paint.valueOf("#015ad933")
+                            }
+                        }
+                    )
+                }
+                ChunkMarker().apply {
+                    markerNumberProperty.set(cue.label)
+                    val x = cue.location / scale.toDouble()
+                    translateXProperty().set(x)
+                }
+            }
+        )
     }
 
     fun scrollTo(x: Double) {

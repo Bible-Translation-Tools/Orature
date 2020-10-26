@@ -16,9 +16,7 @@ class Timecode(width: Double, height: Double) : Canvas(width, height) {
     val ctx = graphicsContext2D
 
     init {
-        style {
-            backgroundColor += Color.WHITE
-        }
+        styleClass.add("vm-timecode")
     }
 
     fun drawTimecode(durationMs: Int): Image {

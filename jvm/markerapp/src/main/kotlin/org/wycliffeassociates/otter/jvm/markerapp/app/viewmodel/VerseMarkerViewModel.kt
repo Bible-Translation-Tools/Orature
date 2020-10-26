@@ -28,7 +28,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     val width = Screen.getMainScreen().platformWidth
     val height = Screen.getMainScreen().platformHeight
-    val padding = Screen.getMainScreen().platformWidth / 2
+    val padding = width / 2
     val imageWidth: Double
 
     init {
