@@ -29,7 +29,7 @@ class WaveformContainer : Fragment() {
     init {
         markerTrack = MarkerTrack(viewModel, viewModel.imageWidth, 50.0)
         timecodeHolder = TimecodeHolder(viewModel, viewModel.imageWidth, 50.0, viewModel.audioPlayer.getAbsoluteDurationMs())
-        mainWaveform = MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!, viewModel.imageWidth.toInt(), viewModel.height)
+        mainWaveform =  MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!)
     }
 
     override val root = borderpane {

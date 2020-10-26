@@ -16,8 +16,11 @@ interface ViewPortScrollable {
 
 class MainWaveform(
     verseMarkerViewModel: VerseMarkerViewModel,
-    reader: AudioFileReader, val width: Int, val height: Int
+    reader: AudioFileReader
 ) : ImageView(), ViewPortScrollable {
+
+    val ht = Screen.getMainScreen().platformHeight
+    val wd = Screen.getMainScreen().platformWidth
 
     init {
         styleClass.add("vm-waveform-holder")
@@ -28,8 +31,8 @@ class MainWaveform(
         ).build(
             reader,
             fitToAudioMax = false,
-            width = width,
-            height = height
+            width = wd,
+            height = ht
         ).subscribe { image ->
             imageProperty().set(image)
         }
@@ -41,8 +44,6 @@ class MainWaveform(
     }
 
     override fun scrollTo(x: Double) {
-        val ht = Screen.getMainScreen().platformHeight
-        val wd = Screen.getMainScreen().platformWidth
         viewport = Rectangle2D(x, 0.0, wd.toDouble(), ht.toDouble())
     }
 }
