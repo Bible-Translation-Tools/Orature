@@ -8,9 +8,9 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 
 class TimecodeHolder(
     viewModel: VerseMarkerViewModel,
-    val imageWidth: Double,
     val height: Double,
-    durationMs: Int
+    val imageWidth: Double = viewModel.imageWidth,
+    durationMs: Int = viewModel.audioPlayer.getAbsoluteDurationMs()
 ) :
     ImageView(),
     ViewPortScrollable {

@@ -18,7 +18,7 @@ class WaveformContainer : Fragment() {
 
     init {
         markerTrack = MarkerTrack(viewModel).apply{ prefWidth = viewModel.imageWidth }
-        timecodeHolder = TimecodeHolder(viewModel, viewModel.imageWidth, 50.0, viewModel.audioPlayer.getAbsoluteDurationMs())
+        timecodeHolder = TimecodeHolder(viewModel, 50.0)
         mainWaveform =  MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!)
 
         object : AnimationTimer() {
@@ -30,5 +30,11 @@ class WaveformContainer : Fragment() {
         }.start()
     }
 
-    override val root = WaveformFrame(markerTrack, mainWaveform, playedOverlay, timecodeHolder, viewModel)
+    override val root = WaveformFrame(
+        markerTrack,
+        mainWaveform,
+        playedOverlay,
+        timecodeHolder,
+        viewModel
+    )
 }

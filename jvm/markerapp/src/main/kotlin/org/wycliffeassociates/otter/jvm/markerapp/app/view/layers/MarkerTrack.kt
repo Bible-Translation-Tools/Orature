@@ -70,7 +70,9 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
                     val rectWidth = (viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location) / scale
                     rectangles.add(
                         Rectangle(rectWidth, height).apply {
-                            xProperty().set(viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble())
+                            xProperty().set(
+                                viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble()
+                            )
                             fill = if (index % 2 == 0) {
                                 Paint.valueOf("#1edd7633")
                             } else {

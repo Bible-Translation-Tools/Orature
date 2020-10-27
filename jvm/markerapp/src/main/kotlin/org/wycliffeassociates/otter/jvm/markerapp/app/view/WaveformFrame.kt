@@ -59,9 +59,11 @@ class WaveformFrame(
                             playedOverlay.apply {
                                 styleClass.add("vm-waveform-holder--played")
                                 heightProperty().bind(this@region.heightProperty())
+
+                                val widthScale = this@region.widthProperty() / Screen.getMainScreen().width
                                 widthProperty().bind(
                                     Bindings.min(
-                                        viewModel.positionProperty.times(this@region.widthProperty() / Screen.getMainScreen().width),
+                                        viewModel.positionProperty.times(widthScale),
                                         this@region.widthProperty().divide(2)
                                     )
                                 )
