@@ -7,7 +7,6 @@ import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsInSecond
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.positionToMs
-import tornadofx.*
 import java.lang.Math.floor
 import java.util.concurrent.TimeUnit
 
