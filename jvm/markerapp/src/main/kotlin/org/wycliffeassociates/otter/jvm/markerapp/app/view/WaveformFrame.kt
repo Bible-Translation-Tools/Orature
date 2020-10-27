@@ -57,6 +57,7 @@ class WaveformFrame(
                         add(mainWaveform)
                         add(
                             playedOverlay.apply {
+                                styleClass.add("vm-waveform-holder--played")
                                 heightProperty().bind(this@region.heightProperty())
                                 widthProperty().bind(
                                     Bindings.min(
@@ -65,9 +66,6 @@ class WaveformFrame(
                                     )
                                 )
                                 translateXProperty().bind(-widthProperty() / 2)
-                                style {
-                                    fillProperty().set(Paint.valueOf("#015ad966"))
-                                }
                             }
                         )
                         add(

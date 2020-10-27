@@ -114,6 +114,11 @@
     -fx-background-color: #0a337333;
 }
 
+.vm-waveform-holder--played {
+    -fx-fill: #015ad966;
+}
+
+
 .vm-playback-line {
     -fx-stroke: #ffb100;
 }
