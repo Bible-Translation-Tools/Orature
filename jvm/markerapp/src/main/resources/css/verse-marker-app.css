@@ -121,3 +121,19 @@
 .vm-timecode {
     -fx-background-color: white;
 }
+
+.vm-waveform-frame__top-track {
+    -fx-pref-height: 40px;
+    -fx-background-color: #a2b2cd;
+}
+
+.vm-waveform-frame__center {
+    -fx-background-color: #c8d2e3;
+}
+
+.vm-waveform-frame__bottom-track {
+    -fx-pref-height: 50px;
+    -fx-background-color: #ced6e3;
+    -fx-border-width: 1px;
+    -fx-border-color: null null #a7b6cf null;
+}

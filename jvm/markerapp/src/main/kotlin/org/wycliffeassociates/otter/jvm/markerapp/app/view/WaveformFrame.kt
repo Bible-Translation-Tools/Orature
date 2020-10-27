@@ -38,10 +38,7 @@ class WaveformFrame(
 
             top {
                 region {
-                    prefHeight = 40.0
-                    style {
-                        backgroundColor += Paint.valueOf("#a2b2cd")
-                    }
+                    styleClass.add("vm-waveform-frame__top-track")
                     add(markerTrack)
                 }
             }
@@ -51,6 +48,7 @@ class WaveformFrame(
                     mainWaveform.fitToSize(this@region)
 
                     stackpane {
+                        styleClass.add("vm-waveform-frame__center")
                         alignment = Pos.CENTER
 
                         fitToParentWidth()
@@ -72,10 +70,6 @@ class WaveformFrame(
                                 }
                             }
                         )
-                        style {
-                            backgroundColor += Paint.valueOf("#c8d2e3")
-                        }
-
                         add(
                             Line(0.0, 0.0, 0.0, 0.0).apply {
                                 endYProperty().bind(this@region.heightProperty())
@@ -89,13 +83,7 @@ class WaveformFrame(
 
             bottom {
                 region {
-                    prefHeight = 50.0
-
-                    style {
-                        borderWidth += box(1.px)
-                        borderColor += box(null, null, Paint.valueOf("#a7b6cf"), null)
-                        backgroundColor += Paint.valueOf("#ced6e3")
-                    }
+                    styleClass.add("vm-waveform-frame__bottom-track")
                     stackpane {
                         timecodeHolder.fitToWidth(this@region)
                         add(timecodeHolder)
