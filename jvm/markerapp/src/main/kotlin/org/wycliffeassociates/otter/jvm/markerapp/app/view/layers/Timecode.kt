@@ -12,7 +12,14 @@ import java.util.concurrent.TimeUnit
 
 class Timecode(width: Double, height: Double) : Canvas(width, height) {
 
-    val ctx = graphicsContext2D
+    private val ctx = graphicsContext2D
+
+    // an epsilon offset so the tick marks don't accidentally fall inside the same second
+    // ie: 0:00 0:00 0:02 instead of 0:00 0:01 0:02
+    private val epsilon = 10
+
+    private val spacing = 5.0
+    private val padding = 10.0
 
     init {
         styleClass.add("vm-timecode")
@@ -24,9 +31,9 @@ class Timecode(width: Double, height: Double) : Canvas(width, height) {
         ctx.fill = Color.BLACK
         for (i in 0 until width.toInt() step pixelsInSecond(width, durationMs)) {
             ctx.strokeLine(i.toDouble(), floor(height / 2), i.toDouble(), floor(height - 1.0))
-            if (i + 10 < width) {
+            if (i + epsilon < width) {
                 val text = msToDisplayString(positionToMs((i - 1), width, durationMs))
-                ctx.fillText(text, i + 5.0, floor(height - 10.0))
+                ctx.fillText(text, i + spacing, floor(height - padding))
             }
         }
         val img = WritableImage(width.toInt(), height.toInt())
