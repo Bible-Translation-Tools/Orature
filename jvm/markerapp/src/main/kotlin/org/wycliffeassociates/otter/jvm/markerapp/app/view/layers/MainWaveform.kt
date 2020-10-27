@@ -8,6 +8,9 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 
+private const val WAV_COLOR = "#0A337390"
+private const val BACKGROUND_COLOR = "#F7FAFF"
+
 class MainWaveform(
     val viewModel: VerseMarkerViewModel,
     val reader: AudioFileReader
@@ -26,8 +29,8 @@ class MainWaveform(
 
     private fun computeImage() {
         WaveformImageBuilder(
-            wavColor = Color.web("#0A337390"),
-            background = Color.web("#F7FAFF")
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
         ).build(
             reader,
             fitToAudioMax = false,
