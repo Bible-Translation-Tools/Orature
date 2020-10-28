@@ -13,8 +13,7 @@ import tornadofx.*
 class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
 
     var scale: Double = 1.0
-    val markers = FXCollections.observableArrayList<ChunkMarker>()
-    val rectangles = FXCollections.observableArrayList<Rectangle>()
+    private val markers = FXCollections.observableArrayList<ChunkMarker>()
 
     init {
         styleClass.add("vm-marker-track")
@@ -30,7 +29,6 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
 
         markers.onChangeAndDoNow {
             children.clear()
-            children.addAll(rectangles)
             children.addAll(markers)
         }
 
@@ -50,37 +48,11 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
             }
         }
     }
+
     private fun resetMakers() {
         markers.clear()
         markers.setAll(
             viewModel.markers.cues.mapIndexed { index, cue ->
-                if (index > 0) {
-                    val rectWidth = (cue.location - viewModel.markers.cues[index - 1].location) / scale
-                    rectangles.add(
-                        Rectangle(rectWidth, height).apply {
-                            xProperty().set(viewModel.markers.cues[index - 1].location / scale.toDouble())
-                            fill = if (index % 2 == 0) {
-                                Paint.valueOf("#1edd7633")
-                            } else {
-                                Paint.valueOf("#015ad933")
-                            }
-                        }
-                    )
-                } else {
-                    val rectWidth = (viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location) / scale
-                    rectangles.add(
-                        Rectangle(rectWidth, height).apply {
-                            xProperty().set(
-                                viewModel.audioPlayer.getAbsoluteDurationInFrames() - cue.location / scale.toDouble()
-                            )
-                            fill = if (index % 2 == 0) {
-                                Paint.valueOf("#1edd7633")
-                            } else {
-                                Paint.valueOf("#015ad933")
-                            }
-                        }
-                    )
-                }
                 ChunkMarker().apply {
                     markerNumberProperty.set(cue.label)
                     val x = cue.location / scale.toDouble()
