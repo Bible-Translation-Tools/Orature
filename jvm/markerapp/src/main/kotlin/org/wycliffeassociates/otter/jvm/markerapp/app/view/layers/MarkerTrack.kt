@@ -67,7 +67,7 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
         val scaleFactor = parentWidth / Screen.getMainScreen().platformWidth.toDouble()
 
         // this formula was computed by plotting points of (parent width, offset)
-        val trackOffset = (parentWidth * 1.355) - 1231
+        val trackOffset = (parentWidth * 1.3) - 1152
         scaleXProperty().set(scaleFactor)
         translateXProperty().set(trackOffset - x * scaleFactor)
     }
