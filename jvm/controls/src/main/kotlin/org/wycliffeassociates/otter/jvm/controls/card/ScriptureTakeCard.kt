@@ -13,11 +13,13 @@ class ScriptureTakeCard : Control() {
     private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     private val deleteTextProperty = SimpleStringProperty("delete")
     private val editTextProperty = SimpleStringProperty("edit")
+    private val markerTextProperty = SimpleStringProperty("marker")
     private val playTextProperty = SimpleStringProperty("play")
     private val pauseTextProperty = SimpleStringProperty("pause")
     private val takeNumberProperty = SimpleStringProperty("Take 01")
     private val timestampProperty = SimpleStringProperty("")
     private val isDraggingProperty = SimpleBooleanProperty(false)
+    private val allowMarkerProperty = SimpleBooleanProperty(false)
 
     fun takeProperty(): ObjectProperty<Take> {
         return takeProperty
@@ -33,6 +35,10 @@ class ScriptureTakeCard : Control() {
 
     fun editTextProperty(): StringProperty {
         return editTextProperty
+    }
+
+    fun markerTextProperty(): StringProperty {
+        return markerTextProperty
     }
 
     fun playTextProperty(): StringProperty {
@@ -53,6 +59,10 @@ class ScriptureTakeCard : Control() {
 
     fun isDraggingProperty(): BooleanProperty {
         return isDraggingProperty
+    }
+
+    fun allowMarkerProperty(): BooleanProperty {
+        return allowMarkerProperty
     }
 
     override fun createDefaultSkin(): Skin<*> {

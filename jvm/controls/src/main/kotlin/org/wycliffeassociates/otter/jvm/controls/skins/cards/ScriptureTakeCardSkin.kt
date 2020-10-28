@@ -34,6 +34,8 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     @FXML
     lateinit var editBtn: Button
     @FXML
+    lateinit var markerBtn: Button
+    @FXML
     lateinit var deleteBtn: Button
     @FXML
     lateinit var slider: Slider
@@ -57,11 +59,15 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         initController()
         back.widthProperty().bind(skinnable.widthProperty())
         back.heightProperty().bind(skinnable.heightProperty())
+
+        markerBtn.visibleProperty().bind(card.allowMarkerProperty())
+        markerBtn.managedProperty().bind(markerBtn.visibleProperty())
     }
 
     fun bindText() {
         deleteBtn.textProperty().bind(card.deleteTextProperty())
         editBtn.textProperty().bind(card.editTextProperty())
+        markerBtn.textProperty().bind(card.markerTextProperty())
         playBtn.textProperty().set(card.playTextProperty().value)
         takeLabel.textProperty().bind(card.takeNumberProperty())
         timestampLabel.textProperty().bind(card.timestampProperty())
