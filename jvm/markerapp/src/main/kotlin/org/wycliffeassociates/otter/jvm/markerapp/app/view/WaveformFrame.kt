@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import com.sun.glass.ui.Screen
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
@@ -57,7 +56,7 @@ class WaveformFrame(
                                 styleClass.add("vm-waveform-holder--played")
                                 heightProperty().bind(this@region.heightProperty())
 
-                                val widthScale = this@region.widthProperty() / Screen.getMainScreen().width
+                                val widthScale = this@region.widthProperty() / viewModel.width
                                 widthProperty().bind(
                                     Bindings.min(
                                         viewModel.positionProperty.times(widthScale),
