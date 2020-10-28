@@ -8,30 +8,29 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
-class PlaceMarkerLayer : Fragment() {
+class PlaceMarkerLayer(viewModel: VerseMarkerViewModel) : VBox() {
+    init {
+        with(this) {
+            hgrow = Priority.ALWAYS
+            vgrow = Priority.ALWAYS
 
-    val viewModel: VerseMarkerViewModel by inject()
+            alignment = Pos.BOTTOM_CENTER
 
-    override val root = vbox {
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
-        alignment = Pos.BOTTOM_CENTER
-
-        add(
-            JFXButton("", FontIcon("mdi-bookmark-plus-outline")).apply {
-                styleClass.addAll(
-                    "btn--cta",
-                    "vm-play-controls__btn--rounded",
-                    "vm-play-controls__add-marker-btn"
-                )
-                setOnAction {
-                    viewModel.placeMarker()
+            add(
+                JFXButton("", FontIcon("mdi-bookmark-plus-outline")).apply {
+                    styleClass.addAll(
+                        "btn--cta",
+                        "vm-play-controls__btn--rounded",
+                        "vm-play-controls__add-marker-btn"
+                    )
+                    setOnAction {
+                        viewModel.placeMarker()
+                    }
                 }
+            )
+            style {
+                styleClass.addAll("vm-play-controls__add-marker-container")
             }
-        )
-        style {
-            styleClass.addAll("vm-play-controls__add-marker-container")
         }
     }
 }

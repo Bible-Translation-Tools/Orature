@@ -9,7 +9,7 @@ import java.lang.Integer.min
 
 class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
 
-    private val cues = audio.metadata.getCues()
+    val cues = audio.metadata.getCues()
     val markerCountProperty = SimpleIntegerProperty(0)
     val audioEnd = audio.totalFrames
     var changesSaved = true

@@ -37,8 +37,9 @@
 }
 
 .vm-play-controls {
+    -fx-pref-height: 88px;
     -fx-background-color: "#00377C";
-    -fx-padding: 16px;
+    -fx-padding: 0px 16px 0px 16px;
     -fx-spacing: 22px;
 }
 
@@ -102,4 +103,42 @@
 
 .vm-continue-button > .ikonli-font-icon {
     -fx-icon-size: 28px;
+}
+
+.vm-marker-track {
+    -fx-background-color: #c8d2e3;
+    -fx-pref-height: 50px;
+}
+
+.vm-waveform-holder {
+    -fx-background-color: #0a337333;
+}
+
+.vm-waveform-holder--played {
+    -fx-fill: #015ad966;
+}
+
+
+.vm-playback-line {
+    -fx-stroke: #ffb100;
+}
+
+.vm-timecode {
+    -fx-background-color: white;
+}
+
+.vm-waveform-frame__top-track {
+    -fx-pref-height: 40px;
+    -fx-background-color: #a2b2cd;
+}
+
+.vm-waveform-frame__center {
+    -fx-background-color: #c8d2e3;
+}
+
+.vm-waveform-frame__bottom-track {
+    -fx-pref-height: 50px;
+    -fx-background-color: #ced6e3;
+    -fx-border-width: 1px;
+    -fx-border-color: null null #a7b6cf null;
 }

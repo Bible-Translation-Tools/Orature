@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app
 
 import com.sun.javafx.application.ParametersImpl
-import javafx.application.Application
 import javafx.application.Platform
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.FX
