@@ -20,6 +20,7 @@ import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.MarkerTakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -131,6 +132,31 @@ open class RecordableViewModel(
                 when (result) {
                     EditTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
                     EditTake.Result.SUCCESS -> editTakeEvent.onComplete()
+                }
+            }
+    }
+
+    fun markTake(markTakeEvent: MarkerTakeEvent) {
+        // contextProperty.set(TakeContext.EDIT_TAKES)
+        currentTakeNumberProperty.set(markTakeEvent.take.number)
+        audioPluginViewModel
+            .getMarker()
+            .flatMapSingle { plugin ->
+                showPluginActive = !plugin.isNativePlugin()
+                audioPluginViewModel.mark(markTakeEvent.take)
+            }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in editing take", e)
+            }
+            .onErrorReturn { MarkTake.Result.NO_EDITOR }
+            .subscribe { result: MarkTake.Result ->
+                showPluginActive = false
+                currentTakeNumberProperty.set(null)
+                fire(PluginClosedEvent)
+                when (result) {
+                    MarkTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                    MarkTake.Result.SUCCESS -> markTakeEvent.onComplete()
                 }
             }
     }

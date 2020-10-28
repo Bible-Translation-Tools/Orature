@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.MarkerTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -105,6 +106,13 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         editBtn.setOnAction {
             skinnable.fireEvent(
                 EditTakeEvent(card.takeProperty().value) {
+                    card.audioPlayerProperty().value.load(card.takeProperty().value.file)
+                }
+            )
+        }
+        markerBtn.setOnAction {
+            skinnable.fireEvent(
+                MarkerTakeEvent(card.takeProperty().value) {
                     card.audioPlayerProperty().value.load(card.takeProperty().value.file)
                 }
             )

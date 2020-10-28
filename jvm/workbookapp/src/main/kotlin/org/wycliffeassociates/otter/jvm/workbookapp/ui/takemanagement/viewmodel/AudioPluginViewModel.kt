@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
+import MarkTake
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -25,9 +26,11 @@ class AudioPluginViewModel : ViewModel() {
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
+    private val markTake = MarkTake(launchPlugin)
 
     fun getRecorder() = pluginRepository.getRecorder()
     fun getEditor() = pluginRepository.getEditor()
+    fun getMarker() = pluginRepository.getMarker()
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
@@ -86,6 +89,11 @@ class AudioPluginViewModel : ViewModel() {
     fun edit(take: Take): Single<EditTake.Result> {
         val params = constructPluginParameters()
         return editTake.edit(take, params)
+    }
+
+    fun mark(take: Take): Single<MarkTake.Result> {
+        val params = constructPluginParameters()
+        return markTake.mark(take, params)
     }
 
     fun audioPlayer(): IAudioPlayer = injector.audioPlayer
