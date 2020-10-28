@@ -15,7 +15,7 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 
-const val SECONDS_ON_SCREEN = 10;
+const val SECONDS_ON_SCREEN = 10
 
 class VerseMarkerViewModel : ViewModel() {
 
@@ -44,7 +44,7 @@ class VerseMarkerViewModel : ViewModel() {
         headerSubtitle.set(scope.parameters.named["content_title"])
         markers = VerseMarkers(wav, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
-            markerRatioProperty.set("${it}/$totalMarkers")
+            markerRatioProperty.set("$it/$totalMarkers")
         }
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
@@ -53,7 +53,7 @@ class VerseMarkerViewModel : ViewModel() {
     fun computeImageWidth(secondsOnScreen: Int): Double {
         val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
-        val pixelsInDuration =  audioPlayer.getAbsoluteDurationInFrames() / samplesPerPixel
+        val pixelsInDuration = audioPlayer.getAbsoluteDurationInFrames() / samplesPerPixel
         return pixelsInDuration
     }
 
@@ -88,7 +88,7 @@ class VerseMarkerViewModel : ViewModel() {
     fun calculatePosition() {
         val current = audioPlayer.getAbsoluteLocationInFrames()
         val duration = audioPlayer.getAbsoluteDurationInFrames().toDouble()
-        val percentPlayed =  current / duration
+        val percentPlayed = current / duration
         val pos = percentPlayed * imageWidth
         positionProperty.set(pos)
     }

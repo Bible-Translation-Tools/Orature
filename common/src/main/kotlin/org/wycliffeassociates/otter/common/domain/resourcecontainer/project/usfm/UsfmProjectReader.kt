@@ -167,4 +167,3 @@ fun VMarker.getText(): String {
     }
     return sb.toString()
 }
-

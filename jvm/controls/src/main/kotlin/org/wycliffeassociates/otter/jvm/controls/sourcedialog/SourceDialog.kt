@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.Node
-import javafx.scene.layout.Priority
 import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.StageStyle

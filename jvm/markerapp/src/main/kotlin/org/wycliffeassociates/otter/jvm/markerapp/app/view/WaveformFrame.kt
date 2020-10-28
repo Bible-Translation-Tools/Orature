@@ -1,13 +1,10 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.sun.glass.ui.Screen
-import javafx.animation.AnimationTimer
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.StackPane
-import javafx.scene.paint.Paint
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToSize
@@ -99,4 +96,3 @@ class WaveformFrame(
         }
     }
 }
-

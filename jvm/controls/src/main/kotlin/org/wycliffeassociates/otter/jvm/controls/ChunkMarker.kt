@@ -7,7 +7,7 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.ChunkMarkerSkin
 
-class ChunkMarker: Control() {
+class ChunkMarker : Control() {
 
     val draggedProperty = SimpleDoubleProperty(0.0)
     val markerNumberProperty = SimpleStringProperty("1")

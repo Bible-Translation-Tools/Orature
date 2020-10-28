@@ -21,7 +21,6 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.*
 
-
 class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
@@ -83,7 +82,7 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
                                 Platform.exit()
                             }
                             .subscribeOn(Schedulers.computation())
-                            .doOnError { e -> log.error("Error in showErrorDialog", e)}
+                            .doOnError { e -> log.error("Error in showErrorDialog", e) }
                             .subscribe()
                     } else {
                         Platform.exit()

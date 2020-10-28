@@ -3,8 +3,6 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 import com.sun.glass.ui.Screen
 import javafx.collections.FXCollections
 import javafx.scene.layout.Region
-import javafx.scene.paint.Paint
-import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow

@@ -7,8 +7,6 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.simpleaudioplayer
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent

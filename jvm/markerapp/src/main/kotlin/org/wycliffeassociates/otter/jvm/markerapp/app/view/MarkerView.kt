@@ -16,7 +16,7 @@ class MarkerView : View() {
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
     val playbackControls = PlaybackControlsFragment()
-    
+
     init {
         FX.stylesheets.setAll(
             javaClass.getResource("/css/button.css").toExternalForm(),
