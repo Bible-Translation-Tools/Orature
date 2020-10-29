@@ -300,6 +300,12 @@ return console.askYesNo(message, true);
                   </property>
                 </serializedBean>
               </formComponent>
+              <formComponent id="492" beanClass="com.install4j.runtime.beans.formcomponents.CheckboxComponent">
+                <serializedBean>
+                  <property name="checkboxText" type="string">Delete application data</property>
+                  <property name="variableName" type="string">deleteData</property>
+                </serializedBean>
+              </formComponent>
             </formComponents>
           </screen>
           <screen id="27" beanClass="com.install4j.runtime.beans.screens.UninstallationScreen" rollbackBarrierExitCode="0">
@@ -316,6 +322,7 @@ return console.askYesNo(message, true);
                   </property>
                   <property name="recursive" type="boolean" value="true" />
                 </serializedBean>
+                <condition>context.getBooleanVariable("deleteData")</condition>
               </action>
             </actions>
             <formComponents>
