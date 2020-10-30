@@ -557,9 +557,17 @@ return console.askYesNo(message, true);
       </excludedBeans>
       <jreBundle jreBundleSource="preCreated" includedJre="windows-amd64-11.0.3.tar.gz" manualJreEntry="true" />
     </windows>
-    <linuxDeb name="Linux Deb Archive" id="158">
+    <linuxDeb name="Linux Deb Archive" id="158" description="Orature is a modular suite of Oral Translation libraries and distributable software." maintainerEmail="wycliffeassociates.org">
       <jreBundle jreBundleSource="preCreated" includedJre="linux-amd64-11.0.4.tar.gz" manualJreEntry="true" />
-      <postUninstallScript>for i in $(ls -d -1 /home/**); do rm -rf $i/.config/Orature; done</postUninstallScript>
+      <postInstallScript>for desktop in /home/*/Desktop; do
+    USER=$(stat -c "%U" "$desktop")
+    sudo -u $USER cp /opt/${compiler:sys.shortName}/orature.desktop "$desktop"
+done</postInstallScript>
+      <postUninstallScript>for i in $(ls -d -1 /home/**); do rm -rf $i/.config/Orature; done
+
+for desktop in /home/*/Desktop; do
+    rm "$desktop/orature.desktop" || true
+done</postUninstallScript>
     </linuxDeb>
     <macosFolder name="macOS Folder" id="166">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
