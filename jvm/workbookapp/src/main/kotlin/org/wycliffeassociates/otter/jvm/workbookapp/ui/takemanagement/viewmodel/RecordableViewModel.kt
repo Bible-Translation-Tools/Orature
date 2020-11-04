@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.EditTake
+import org.wycliffeassociates.otter.common.domain.content.MarkTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext

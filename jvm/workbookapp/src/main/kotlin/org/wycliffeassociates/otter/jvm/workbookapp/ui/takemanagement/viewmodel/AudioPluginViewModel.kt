@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
-import MarkTake
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
