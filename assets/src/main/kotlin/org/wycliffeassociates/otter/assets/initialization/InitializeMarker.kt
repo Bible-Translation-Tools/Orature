@@ -19,7 +19,7 @@ class InitializeMarker(
 ) : Installable {
 
     override val name = "MARKER"
-    override val version = 3
+    override val version = 1
 
     val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
@@ -63,7 +63,7 @@ class InitializeMarker(
                 pluginFile = null
             )
         ).doAfterSuccess { id: Int ->
-            preferences.setMarkerPluginId(id)
+            preferences.setMarkerPluginId(id).blockingGet()
         }.ignoreElement()
     }
 }
