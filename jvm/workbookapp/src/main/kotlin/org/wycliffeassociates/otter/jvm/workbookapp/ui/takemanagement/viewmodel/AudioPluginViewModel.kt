@@ -34,6 +34,8 @@ class AudioPluginViewModel : ViewModel() {
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
+    val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
+
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
         val params = constructPluginParameters()

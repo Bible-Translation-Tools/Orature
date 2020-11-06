@@ -2,13 +2,14 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
 const val WINDOW_OFFSET = 50.0
 
-class MarkerView : View() {
+class MarkerView : PluginEntrypoint() {
 
-    private val userAgentStylesheet = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
+    // private val userAgentStylesheet = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
 
     val viewModel: VerseMarkerViewModel by inject()
 
@@ -18,10 +19,18 @@ class MarkerView : View() {
     val playbackControls = PlaybackControlsFragment()
     
     init {
-        FX.stylesheets.setAll(
-            javaClass.getResource("/css/button.css").toExternalForm(),
-            userAgentStylesheet
-        )
+        runLater {
+            val css = this@MarkerView.javaClass.getResource("/css/verse-marker-app.css")
+                .toExternalForm()
+                .replace(" ", "%20")
+            importStylesheet(css)
+
+            FX.stylesheets.setAll(
+                javaClass.getResource("/css/button.css").toExternalForm(),
+                css
+            )
+        }
+
         viewModel.initializeAudioController(minimap.slider)
     }
 

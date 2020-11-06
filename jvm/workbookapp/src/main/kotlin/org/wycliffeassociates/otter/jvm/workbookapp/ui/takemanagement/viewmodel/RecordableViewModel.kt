@@ -138,7 +138,7 @@ open class RecordableViewModel(
     }
 
     fun markTake(markTakeEvent: MarkerTakeEvent) {
-        // contextProperty.set(TakeContext.EDIT_TAKES)
+        contextProperty.set(TakeContext.MARK_TAKES)
         currentTakeNumberProperty.set(markTakeEvent.take.number)
         audioPluginViewModel
             .getMarker()
@@ -148,7 +148,7 @@ open class RecordableViewModel(
             }
             .observeOnFx()
             .doOnError { e ->
-                logger.error("Error in editing take", e)
+                logger.error("Error in marking take", e)
             }
             .onErrorReturn { MarkTake.Result.NO_EDITOR }
             .subscribe { result: MarkTake.Result ->
@@ -226,12 +226,16 @@ open class RecordableViewModel(
                     TakeContext.EDIT_TAKES -> {
                         audioPluginViewModel.selectedEditorProperty.get().name
                     }
+                    TakeContext.MARK_TAKES -> {
+                        audioPluginViewModel.selectedMarkerProperty.get().name
+                    }
                     null -> throw IllegalStateException("Action is not supported!")
                 }
             },
             contextProperty,
             audioPluginViewModel.selectedRecorderProperty,
-            audioPluginViewModel.selectedEditorProperty
+            audioPluginViewModel.selectedEditorProperty,
+            audioPluginViewModel.selectedMarkerProperty
         )
     }
 

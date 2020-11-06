@@ -19,7 +19,7 @@ class ScriptureTakeCard : Control() {
     private val takeNumberProperty = SimpleStringProperty("Take 01")
     private val timestampProperty = SimpleStringProperty("")
     private val isDraggingProperty = SimpleBooleanProperty(false)
-    private val allowMarkerProperty = SimpleBooleanProperty(false)
+    private val allowMarkerProperty = SimpleBooleanProperty(true)
 
     fun takeProperty(): ObjectProperty<Take> {
         return takeProperty

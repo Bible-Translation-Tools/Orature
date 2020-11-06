@@ -36,6 +36,7 @@ class MainMenuViewModel : ViewModel() {
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
+    val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
     val showExportDialogProperty = SimpleBooleanProperty(false)
     val showImportDialogProperty = SimpleBooleanProperty(false)
@@ -43,6 +44,7 @@ class MainMenuViewModel : ViewModel() {
     init {
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
+        audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
         refreshPlugins()
     }
 
@@ -124,6 +126,14 @@ class MainMenuViewModel : ViewModel() {
             .observeOnFx()
             .doOnSuccess {
                 selectedEditorProperty.set(it)
+            }
+            .observeOn(Schedulers.io())
+            .flatMap {
+                pluginRepository.getMarkerData()
+            }
+            .observeOnFx()
+            .doOnSuccess {
+                selectedMarkerProperty.set(it)
             }
             .doOnError { e -> logger.error("Error in refreshPlugins", e) }
             .subscribe()

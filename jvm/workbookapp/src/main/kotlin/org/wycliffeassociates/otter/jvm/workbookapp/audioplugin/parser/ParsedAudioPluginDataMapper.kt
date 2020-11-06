@@ -22,6 +22,7 @@ class ParsedAudioPluginDataMapper(osName: String? = null) {
             parsedAudioPlugin.version,
             parsedAudioPlugin.canEdit,
             parsedAudioPlugin.canRecord,
+            parsedAudioPlugin.canMark,
             executable ?: throw UnsupportedPlatformException(),
             parsedAudioPlugin.args,
             sourceFile

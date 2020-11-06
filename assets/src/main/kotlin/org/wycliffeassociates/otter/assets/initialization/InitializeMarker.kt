@@ -11,17 +11,17 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import java.io.File
 import java.io.FileOutputStream
 
-class InitializeRecorder(
+class InitializeMarker(
     val directoryProvider: IDirectoryProvider,
     val pluginRepository: IAudioPluginRepository,
     val installedEntityRepo: IInstalledEntityRepository,
     val preferences: IAppPreferences
 ) : Installable {
 
-    override val name = "RECORDER"
+    override val name = "MARKER"
     override val version = 3
 
-    val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
+    val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
     override fun exec(): Completable {
         return Completable
@@ -29,14 +29,14 @@ class InitializeRecorder(
                 var installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     log.info("Initializing $name version: $version...")
-                    importOtterRecorder()
+                    importOtterMarker()
                         .doOnComplete {
                             installedEntityRepo.install(this)
-                            log.info("Recorder imported!")
+                            log.info("Marker imported!")
                             log.info("$name version: $version installed!")
                         }
                         .doOnError { e ->
-                            log.error("Error importing recorder.", e)
+                            log.error("Error importing marker.", e)
                         }
                         .blockingAwait()
                 } else {
@@ -45,25 +45,25 @@ class InitializeRecorder(
             }
     }
 
-    private fun importOtterRecorder(): Completable {
+    private fun importOtterMarker(): Completable {
         val pluginsDir = directoryProvider.audioPluginDirectory
-        val jar = File(pluginsDir, "OratureRecorder.jar")
-        ClassLoader.getSystemResourceAsStream("plugins/jars/recorderapp")
+        val jar = File(pluginsDir, "OratureMarker.jar")
+        ClassLoader.getSystemResourceAsStream("plugins/jars/markerapp")
             ?.transferTo(FileOutputStream(jar))
         return pluginRepository.insert(
             AudioPluginData(
                 0,
-                "OratureRecorder",
+                "OratureMarker",
                 "$version.0.0",
                 canEdit = false,
-                canRecord = true,
-                canMark = false,
+                canRecord = false,
+                canMark = true,
                 executable = jar.absolutePath,
                 args = listOf(),
                 pluginFile = null
             )
         ).doAfterSuccess { id: Int ->
-            preferences.setRecorderPluginId(id)
+            preferences.setMarkerPluginId(id)
         }.ignoreElement()
     }
 }
