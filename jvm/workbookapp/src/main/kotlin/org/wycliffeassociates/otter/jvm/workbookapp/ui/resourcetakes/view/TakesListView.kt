@@ -4,7 +4,6 @@ import javafx.collections.ObservableList
 import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import tornadofx.*
 

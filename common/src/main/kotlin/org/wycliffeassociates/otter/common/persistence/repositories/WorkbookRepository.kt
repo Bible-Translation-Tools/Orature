@@ -7,7 +7,6 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -350,7 +349,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             // Insert the new take into the DB. (We already filtered existing takes out.)
             .subscribe { (_, modelTake) ->
                 db.insertTakeForContent(modelTake, content)
-                    .doOnError  { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
+                    .doOnError { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
                     .subscribe { insertionId -> modelTake.id = insertionId }
             }
 

@@ -267,7 +267,7 @@ class CollectionRepository(
                     .fetchChildren(collectionMapper.mapToEntity(collection))
                     .map(this::buildCollection)
             }
-            .doOnError {e ->
+            .doOnError { e ->
                 log.error("Error in getChildren for collection: $collection", e)
             }
             .subscribeOn(Schedulers.io())

@@ -17,7 +17,7 @@ class MarkerView : PluginEntrypoint() {
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
     val playbackControls = PlaybackControlsFragment()
-    
+
     init {
         runLater {
             val css = this@MarkerView.javaClass.getResource("/css/verse-marker-app.css")

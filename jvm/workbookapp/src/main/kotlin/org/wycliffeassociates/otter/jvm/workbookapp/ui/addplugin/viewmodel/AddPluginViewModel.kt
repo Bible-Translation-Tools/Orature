@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 import java.io.File
-import java.util.function.Consumer
 
 class AddPluginViewModel : ViewModel() {
 

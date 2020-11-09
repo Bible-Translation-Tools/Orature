@@ -11,8 +11,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow
 import javafx.scene.layout.*
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordableFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.RecordableViewModel
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder

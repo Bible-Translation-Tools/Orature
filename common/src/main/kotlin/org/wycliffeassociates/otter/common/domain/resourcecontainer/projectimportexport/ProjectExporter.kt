@@ -96,7 +96,7 @@ class ProjectExporter(
                 .doOnError { e ->
                     log.error("Error in writeSelectedTakesFile", e)
                 }
-                .blockingSubscribe{
+                .blockingSubscribe {
                         fileWriter.appendln(it)
                 }
         }

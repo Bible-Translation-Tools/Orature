@@ -15,7 +15,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
 import java.time.LocalDate
-import kotlin.math.log
 
 class TakeRepository(
     private val database: AppDatabase,

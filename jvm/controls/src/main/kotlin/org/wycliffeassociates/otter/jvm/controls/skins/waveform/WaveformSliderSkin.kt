@@ -6,7 +6,6 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
