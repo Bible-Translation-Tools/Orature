@@ -162,8 +162,8 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                 appWorkspace.navigateBack()
             }
         }
-        val plugin = find(pluginClass, scope)
         Platform.runLater {
+            val plugin = find(pluginClass, scope)
             appWorkspace.dock(plugin)
         }
         synchronized(monitor) {

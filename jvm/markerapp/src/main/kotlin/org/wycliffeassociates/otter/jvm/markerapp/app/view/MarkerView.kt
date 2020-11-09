@@ -25,7 +25,7 @@ class MarkerView : PluginEntrypoint() {
                 .replace(" ", "%20")
             importStylesheet(css)
 
-            FX.stylesheets.setAll(
+            FX.stylesheets.addAll(
                 javaClass.getResource("/css/button.css").toExternalForm(),
                 css
             )
