@@ -101,6 +101,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     "--book=${pluginParameters.bookTitle}",
                     "--chapter=${pluginParameters.chapterLabel}",
                     "--chapter_number=${pluginParameters.chapterNumber}",
+                    "--marker_total=${pluginParameters.verseTotal}",
                     (if (pluginParameters.chunkLabel != null) "--unit=${pluginParameters.chunkLabel}" else ""),
                     (if (pluginParameters.chunkNumber != null) "--unit_number=${pluginParameters.chunkNumber}" else ""),
                     (if (pluginParameters.resourceLabel != null)"--resource=${pluginParameters.resourceLabel}" else ""),

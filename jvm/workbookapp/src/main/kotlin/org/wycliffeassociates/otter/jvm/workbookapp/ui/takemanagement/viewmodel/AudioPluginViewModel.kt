@@ -54,6 +54,7 @@ class AudioPluginViewModel : ViewModel() {
 
         val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
         val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
+        val verseTotal = workbookViewModel.activeChapterProperty.value.chunks.blockingLast().end
         val chunkLabel = workbookViewModel.activeChunkProperty.value?.let {
             messages[workbookViewModel.activeChunkProperty.value.label]
         }
@@ -67,6 +68,7 @@ class AudioPluginViewModel : ViewModel() {
             bookTitle = workbook.target.title,
             chapterLabel = chapterLabel,
             chapterNumber = chapterNumber,
+            verseTotal = verseTotal,
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
             resourceLabel = resourceLabel,
