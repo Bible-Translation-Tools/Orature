@@ -19,7 +19,7 @@ class WaveformContainer : Fragment() {
     init {
         markerTrack = MarkerTrack(viewModel).apply { prefWidth = viewModel.imageWidth }
         timecodeHolder = TimecodeHolder(viewModel, 50.0)
-        mainWaveform = MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!)
+        mainWaveform = MainWaveform(viewModel)
 
         object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {

@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
+import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
@@ -20,6 +21,8 @@ import tornadofx.*
 import java.io.File
 
 const val SECONDS_ON_SCREEN = 10
+private const val WAV_COLOR = "#0A337390"
+private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
 
@@ -54,16 +57,20 @@ class VerseMarkerViewModel : ViewModel() {
             markerRatioProperty.set("$it/$totalMarkers")
         }
         audioPlayer.load(audioFile)
-        WaveformImageBuilder()
-            .build(audioPlayer.getAudioReader()!!, fitToAudioMax = true)
-            .doOnError { e ->
-                logger.error("Error in building waveform image", e)
-            }
-            .subscribe { image: Image ->
-                audioPlayer.getAudioReader()?.seek(0)
-                waveformImageProperty.set(image)
-            }
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
+
+        WaveformImageBuilder(
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
+        ).build(
+            audioPlayer.getAudioReader()!!,
+            fitToAudioMax = false,
+            width = imageWidth.toInt(),
+            height = height
+        ).subscribe { image ->
+            waveformImageProperty.set(image)
+            audioPlayer.getAudioReader()?.seek(0)
+        }
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
