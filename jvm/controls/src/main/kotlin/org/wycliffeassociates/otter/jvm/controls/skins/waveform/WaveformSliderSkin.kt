@@ -2,25 +2,18 @@ package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
-import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import kotlin.math.max
 import kotlin.math.min
 
 class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
-
-    private val logger = LoggerFactory.getLogger(WaveformSliderSkin::class.java)
-
-    val waveformImage = WaveformImageBuilder()
 
     val thumb = Rectangle(1.0, 1.0).apply {
         stroke = Color.BLACK
@@ -38,26 +31,23 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     init {
         children.clear()
 
+        control.waveformImageProperty.onChangeAndDoNow {
+            it?.let { image ->
+                val imageView = ImageView(image).apply {
+                    fitHeightProperty().bind(root.heightProperty())
+                    fitWidthProperty().bind(root.widthProperty())
+                }
+                root.getChildList()?.clear()
+                root.add(imageView)
+                root.add(thumb)
+                root.add(playbackLine)
+            }
+        }
+
         control.player.onChangeAndDoNow { _player ->
             _player?.let { player ->
                 player.getAudioReader()?.let { reader ->
                     reader.seek(0)
-                    waveformImage
-                        .build(reader, fitToAudioMax = true)
-                        .doOnError { e ->
-                            logger.error("Error in building waveform image", e)
-                        }
-                        .subscribe { image: Image ->
-                            val imageView = ImageView(image).apply {
-                                fitHeightProperty().bind(root.heightProperty())
-                                fitWidthProperty().bind(root.widthProperty())
-                            }
-                            reader.seek(0)
-                            root.getChildList()?.clear()
-                            root.add(imageView)
-                            root.add(thumb)
-                            root.add(playbackLine)
-                        }
                 }
             }
         }

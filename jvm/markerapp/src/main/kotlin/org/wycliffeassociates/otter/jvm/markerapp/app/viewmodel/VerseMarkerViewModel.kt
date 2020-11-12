@@ -4,10 +4,14 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
+import javafx.scene.image.Image
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkers
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -19,6 +23,8 @@ const val SECONDS_ON_SCREEN = 10
 
 class VerseMarkerViewModel : ViewModel() {
 
+    val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
+
     val markers: VerseMarkers
     val audioPlayer = AudioBufferPlayer()
     var audioController: AudioPlayerController? = null
@@ -27,6 +33,7 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
+    val waveformImageProperty = SimpleObjectProperty<Image>()
 
     val width = Screen.getMainScreen().platformWidth
     val height = Screen.getMainScreen().platformHeight
@@ -47,6 +54,15 @@ class VerseMarkerViewModel : ViewModel() {
             markerRatioProperty.set("$it/$totalMarkers")
         }
         audioPlayer.load(audioFile)
+        WaveformImageBuilder()
+            .build(audioPlayer.getAudioReader()!!, fitToAudioMax = true)
+            .doOnError { e ->
+                logger.error("Error in building waveform image", e)
+            }
+            .subscribe { image: Image ->
+                audioPlayer.getAudioReader()?.seek(0)
+                waveformImageProperty.set(image)
+            }
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
     }
 
