@@ -44,6 +44,7 @@ class ParsedAudioPluginDataMapperTest {
             "1.0.1",
             true,
             false,
+            false,
             ParsedExecutable(
                 listOf(mac.absolutePath),
                 listOf(win.absolutePath),
@@ -64,6 +65,7 @@ class ParsedAudioPluginDataMapperTest {
                 inputParsedPlugin.version,
                 inputParsedPlugin.canEdit,
                 inputParsedPlugin.canRecord,
+                inputParsedPlugin.canMark,
                 testCase["expectedExecutable"] ?: "",
                 inputParsedPlugin.args,
                 inputPluginFile
@@ -86,6 +88,7 @@ class ParsedAudioPluginDataMapperTest {
             "Audacity",
             "1.0.1",
             true,
+            false,
             false,
             ParsedExecutable(
                 null,
@@ -120,6 +123,7 @@ class ParsedAudioPluginDataMapperTest {
             "1.0.1",
             true,
             false,
+            false,
             ParsedExecutable(
                 listOf(mac.absolutePath),
                 listOf(win.absolutePath),
@@ -138,6 +142,7 @@ class ParsedAudioPluginDataMapperTest {
             inputPluginData.version,
             inputPluginData.canEdit,
             inputPluginData.canRecord,
+            inputPluginData.canMark,
             linux.absolutePath,
             inputPluginData.args,
             inputPluginFile
