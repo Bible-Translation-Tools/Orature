@@ -18,7 +18,7 @@ import kotlin.math.min
 
 class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
-    private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
+    private val logger = LoggerFactory.getLogger(WaveformSliderSkin::class.java)
 
     val waveformImage = WaveformImageBuilder()
 
