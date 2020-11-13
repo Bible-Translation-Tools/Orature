@@ -53,7 +53,6 @@ class AppDatabase(
 
         // Execute each SQL statement
         sqlStatements.forEach {
-            println(it)
             dsl.fetch(it)
         }
     }

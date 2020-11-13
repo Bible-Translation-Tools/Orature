@@ -4,8 +4,10 @@ import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToSize
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToWidth
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
@@ -13,12 +15,12 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrack
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
     markerTrack: MarkerTrack,
     mainWaveform: MainWaveform,
-    playedOverlay: Rectangle,
     timecodeHolder: TimecodeHolder,
     viewModel: VerseMarkerViewModel
 ) : BorderPane() {
@@ -29,6 +31,15 @@ class WaveformFrame(
         vgrow = Priority.ALWAYS
 
         with(this) {
+            translateXProperty().bind(
+                viewModel
+                    .positionProperty
+                    .negate()
+                    .plus(
+                        this@WaveformFrame.widthProperty().divide(2.0)
+                    )
+            )
+
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
@@ -41,38 +52,14 @@ class WaveformFrame(
 
             center {
                 region {
-                    mainWaveform.fitToSize(this@region)
+                    mainWaveform.fitToHeight(this@region)
 
                     stackpane {
                         styleClass.add("vm-waveform-frame__center")
                         alignment = Pos.CENTER
 
-                        fitToParentWidth()
                         fitToParentHeight()
-
                         add(mainWaveform)
-                        add(
-                            playedOverlay.apply {
-                                styleClass.add("vm-waveform-holder--played")
-                                heightProperty().bind(this@region.heightProperty())
-
-                                val widthScale = this@region.widthProperty() / viewModel.width
-                                widthProperty().bind(
-                                    Bindings.min(
-                                        viewModel.positionProperty.times(widthScale),
-                                        this@region.widthProperty().divide(2)
-                                    )
-                                )
-                                translateXProperty().bind(-widthProperty() / 2)
-                            }
-                        )
-                        add(
-                            Line(0.0, 0.0, 0.0, 0.0).apply {
-                                endYProperty().bind(this@region.heightProperty())
-                                styleClass.add("vm-playback-line")
-                            }
-                        )
-                        add(PlaceMarkerLayer(viewModel))
                     }
                 }
             }
@@ -81,14 +68,10 @@ class WaveformFrame(
                 region {
                     styleClass.add("vm-waveform-frame__bottom-track")
                     stackpane {
-                        timecodeHolder.fitToWidth(this@region)
+                        fitToParentWidth()
+                        fitToParentHeight()
+
                         add(timecodeHolder)
-                        add(
-                            Line(0.0, 0.0, 0.0, 0.0).apply {
-                                styleClass.add("vm-playback-line")
-                                endYProperty().bind(this@region.heightProperty())
-                            }
-                        )
                     }
                 }
             }

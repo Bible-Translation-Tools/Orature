@@ -1,6 +1,10 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.scene.layout.Priority
+import javafx.scene.layout.RowConstraints
 import javafx.stage.Screen
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -8,8 +12,6 @@ import tornadofx.*
 const val WINDOW_OFFSET = 50.0
 
 class MarkerView : PluginEntrypoint() {
-
-    // private val userAgentStylesheet = javaClass.getResource("/css/verse-marker-app.css").toExternalForm()
 
     val viewModel: VerseMarkerViewModel by inject()
 
@@ -30,17 +32,29 @@ class MarkerView : PluginEntrypoint() {
                 css
             )
         }
-
         viewModel.initializeAudioController(minimap.slider)
     }
 
-    override val root = vbox {
+    override val root = gridpane {
         prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
-        add(titleFragment)
-        add(minimap)
-        add(waveformContainer)
-        add(playbackControls)
+        val emptyConstraint = RowConstraints()
+        val growConstraint = RowConstraints()
+        growConstraint.vgrow = Priority.ALWAYS
+
+        rowConstraints.setAll(
+            emptyConstraint,
+            emptyConstraint,
+            growConstraint,
+            emptyConstraint
+        )
+
+        add(titleFragment.root, 0, 0)
+        add(minimap.root, 0, 1)
+        add(waveformContainer.root, 0, 2)
+        add(WaveformOverlay(viewModel), 0, 2)
+        add(PlaceMarkerLayer(viewModel), 0, 2)
+        add(playbackControls.root, 0, 3)
     }
 }
