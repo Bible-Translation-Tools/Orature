@@ -39,7 +39,10 @@ class NioDirectoryFileReader(
             .asSequence()
     }
 
-    override fun close() {}
+    override fun close() {
+        // No need to close this file system
+        // Default file system cannot be closed
+    }
 
     private fun getAbsolutePath(path: String): Path {
         return fileSystem.getPath(dir.absolutePath, path)

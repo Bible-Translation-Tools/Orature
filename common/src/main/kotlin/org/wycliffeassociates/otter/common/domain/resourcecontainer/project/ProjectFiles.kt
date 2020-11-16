@@ -217,16 +217,18 @@ class ProjectFiles(
         bookElement: BookElement,
         isBook: Boolean
     ): Observable<AssociatedAudio> {
-        if (isBook) {
-            return Observable.just(bookElement.audio)
-        }
+        return when(isBook) {
+            true -> Observable.just(bookElement.audio)
+            false -> {
+                val resourceGroup = bookElement.resources
+                    .firstOrNull { it.metadata.identifier == targetMetadata.identifier }
 
-        val resourceGroup = bookElement.resources
-            .firstOrNull { it.metadata.identifier == targetMetadata.identifier }
-            ?: return Observable.empty()
-
-        return resourceGroup.resources.flatMapIterable { resource ->
-            listOfNotNull(resource.title.audio, resource.body?.audio)
+                resourceGroup?.let { _resourceGroup ->
+                    _resourceGroup.resources.flatMapIterable { resource ->
+                        listOfNotNull(resource.title.audio, resource.body?.audio)
+                    }
+                } ?: Observable.empty()
+            }
         }
     }
 
