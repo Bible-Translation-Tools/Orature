@@ -145,6 +145,7 @@ open class RecordableViewModel(
                 it.selected = true
                 recordable?.audio?.selectTake(it.take) ?: throw IllegalStateException("Recordable is null")
                 selectedTakeProperty.set(it)
+                workbookViewModel.updateSelectedTakesFile()
             }
         } else {
             selectedTakeProperty.set(null)

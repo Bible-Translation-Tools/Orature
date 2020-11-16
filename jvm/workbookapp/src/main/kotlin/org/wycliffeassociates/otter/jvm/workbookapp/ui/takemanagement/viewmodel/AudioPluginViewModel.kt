@@ -37,7 +37,7 @@ class AudioPluginViewModel : ViewModel() {
         val params = constructPluginParameters()
         return recordTake.record(
             audio = recordable.audio,
-            projectAudioDir = workbookViewModel.activeProjectAudioDirectory,
+            projectAudioDir = workbookViewModel.activeProjectFiles.audioDir,
             namer = createFileNamer(recordable),
             pluginParameters = params
         )

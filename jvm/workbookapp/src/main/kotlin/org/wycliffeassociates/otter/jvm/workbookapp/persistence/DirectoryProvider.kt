@@ -3,11 +3,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.io.file.NioDirectoryFileReader
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileReader
 import org.wycliffeassociates.otter.jvm.workbookapp.io.zip.NioZipFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.nio.file.FileSystems
 
 class DirectoryProvider(
@@ -62,13 +65,13 @@ class DirectoryProvider(
         return file
     }
 
-    override fun getProjectAudioDirectory(
+    override fun getProjectDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
         book: Collection
-    ) = getProjectAudioDirectory(source = source, target = target, bookSlug = book.slug)
+    ) = getProjectDirectory(source, target, book.slug)
 
-    override fun getProjectAudioDirectory(
+    override fun getProjectDirectory(
         source: ResourceMetadata,
         target: ResourceMetadata?,
         bookSlug: String
@@ -88,6 +91,44 @@ class DirectoryProvider(
             bookSlug
         ).joinToString(pathSeparator)
         val path = getUserDataDirectory(appendedPath)
+        path.mkdirs()
+        return path
+    }
+
+    override fun getProjectAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        book: Collection
+    ) = getProjectAudioDirectory(source, target, book.slug)
+
+    override fun getProjectAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        bookSlug: String
+    ): File {
+        val path = getProjectDirectory(source, target, bookSlug)
+            .resolve(".apps")
+            .resolve("orature")
+            .resolve("takes")
+        path.mkdirs()
+        return path
+    }
+
+    override fun getProjectSourceDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        book: Collection
+    ) = getProjectSourceDirectory(source, target, book.slug)
+
+    override fun getProjectSourceDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        bookSlug: String
+    ): File {
+        val path = getProjectDirectory(source, target, bookSlug)
+            .resolve(".apps")
+            .resolve("orature")
+            .resolve("source")
         path.mkdirs()
         return path
     }
@@ -130,9 +171,15 @@ class DirectoryProvider(
         return path
     }
 
-    override fun newZipFileReader(zip: File) = NioZipFileReader(zip)
+    override fun newFileWriter(file: File) = NioZipFileWriter(file)
 
-    override fun newZipFileWriter(zip: File) = NioZipFileWriter(zip)
+    override fun newFileReader(file: File): IFileReader {
+        return when {
+            file.isDirectory -> NioDirectoryFileReader(file)
+            file.isFile && file.extension == "zip" -> NioZipFileReader(file)
+            else -> throw IllegalArgumentException("File type not supported")
+        }
+    }
 
     override val resourceContainerDirectory: File
         get() = getAppDataDirectory("rc")

@@ -5,7 +5,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.InputStream
 
-interface IZipFileReader : AutoCloseable {
+interface IFileReader : AutoCloseable {
     fun bufferedReader(filepath: String): BufferedReader
 
     fun stream(filepath: String): InputStream

@@ -22,9 +22,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMet
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.nio.file.Files
 
 class ImportResourceContainer(
     private val resourceMetadataRepository: IResourceMetadataRepository,
@@ -39,7 +39,7 @@ class ImportResourceContainer(
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
     fun import(file: File): Single<ImportResult> {
-        logger.info("Importing resource contianer: $file")
+        logger.info("Importing resource container: $file")
         val projectImporter = ProjectImporter(
             this,
             directoryProvider,
@@ -81,19 +81,22 @@ class ImportResourceContainer(
     }
 
     fun import(filename: String, stream: InputStream): Single<ImportResult> {
-        val tempFile = File.createTempFile(filename, ".zip")
+        val tempDir = Files.createTempDirectory("")
+        val outPath = tempDir.resolve("$filename.zip")
+        val outFile = outPath.toFile()
+
         return Single
             .fromCallable {
-                stream.transferTo(FileOutputStream(tempFile))
+                stream.transferTo(outFile.outputStream())
             }
             .flatMap {
-                import(tempFile)
+                import(outFile)
             }
             .doOnError { e ->
                 logger.error("Error in import, filename: $filename", e)
             }
             .doFinally {
-                tempFile.delete()
+                tempDir.toFile().deleteRecursively()
             }
             .subscribeOn(Schedulers.io())
     }

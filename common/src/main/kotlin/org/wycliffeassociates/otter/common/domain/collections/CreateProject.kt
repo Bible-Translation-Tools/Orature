@@ -35,12 +35,10 @@ class CreateProject(
         }
 
         // Create derived projects for each of the sources
-        val derived = matchingRcs
+        return matchingRcs
             .toList()
             .flatMap {
                 collectionRepo.deriveProject(it, sourceProject, targetLanguage)
             }
-
-        return derived
     }
 }

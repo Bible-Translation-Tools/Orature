@@ -52,7 +52,7 @@ class MainMenuViewModel : ViewModel() {
         ProjectExporter(
             workbookVM.activeResourceMetadata,
             workbookVM.workbook,
-            workbookVM.activeProjectAudioDirectory,
+            workbookVM.activeProjectFiles,
             directoryProvider,
             workbookRepository
         ).export(directory)

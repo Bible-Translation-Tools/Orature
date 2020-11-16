@@ -99,9 +99,7 @@ class CollectionRepository(
     override fun deleteResources(project: Collection, deleteAudio: Boolean): Completable {
         return Completable
             .fromAction {
-                val files = arrayListOf<File>()
                 database.transaction { dsl ->
-
                     // Get resource content entries related to the project (content of tn/tq)
                     val resourceContent = dsl.select(RESOURCE_LINK.RESOURCE_CONTENT_FK)
                         .from(RESOURCE_LINK)
@@ -168,21 +166,11 @@ class CollectionRepository(
                                 resourceContent
                             )
                         ).fetch { it.value1() }
-                    files.addAll(paths.map { File(it) })
 
                     // delete the take entries of resource content from the database
                     dsl.deleteFrom(TAKE_ENTITY)
                         .where(TAKE_ENTITY.CONTENT_FK.`in`(resourceContent))
                         .execute()
-                }
-
-                // actually delete the resource recordings
-                files.forEach {
-                    try {
-                        it.delete()
-                    } catch (e: FileNotFoundException) {
-                        log.error("File not found when deleting resources of project: $project.", e)
-                    }
                 }
             }
             .doOnError { e ->
