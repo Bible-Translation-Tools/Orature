@@ -31,6 +31,7 @@ class AudioPluginDao(
                 .set(AUDIO_PLUGIN_ENTITY.PATH, entity.path)
                 .where(AUDIO_PLUGIN_ENTITY.ID.eq(id))
                 .execute()
+            return id
         } else {
             // Insert the plugin entity
             dsl
