@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFiles
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
@@ -101,15 +101,15 @@ class ProjectImporter(
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
-        val projectFiles = ProjectFiles(
+        val projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
             sourceMetadata,
             metadata,
             derivedProject
         )
 
-        projectFiles.initializeResourceContainerInDir()
-        projectFiles.copySourceFiles(fileReader)
+        projectFilesAccessor.initializeResourceContainerInDir()
+        projectFilesAccessor.copySourceFiles(fileReader)
 
         importTakes(
             fileReader,
@@ -118,7 +118,7 @@ class ProjectImporter(
             metadata,
             sourceMetadata,
             sourceCollection,
-            projectFiles
+            projectFilesAccessor
         )
     }
 
@@ -129,7 +129,7 @@ class ProjectImporter(
         metadata: ResourceMetadata,
         sourceMetadata: ResourceMetadata,
         sourceCollection: Collection,
-        projectFiles: ProjectFiles
+        projectFilesAccessor: ProjectFilesAccessor
     ) {
         val collectionForTakes = when (metadata.type) {
             // Work around the quirk that resource takes are attached to source, not target project
@@ -141,16 +141,16 @@ class ProjectImporter(
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
             .useLines { it.toSet() }
 
-        projectFiles.copySelectedTakesFile(fileReader)
+        projectFilesAccessor.copySelectedTakesFile(fileReader)
 
-        projectFiles.copyTakeFiles(fileReader, manifestProject)
+        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject)
             .doOnError { e ->
                 log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
                 log.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
                 log.error("sourceCollection: $sourceCollection", e)
             }
             .subscribe { newTakeFile ->
-                insertTake(newTakeFile, projectFiles.audioDir, collectionForTakes, selectedTakes)
+                insertTake(newTakeFile, projectFilesAccessor.audioDir, collectionForTakes, selectedTakes)
             }
     }
 

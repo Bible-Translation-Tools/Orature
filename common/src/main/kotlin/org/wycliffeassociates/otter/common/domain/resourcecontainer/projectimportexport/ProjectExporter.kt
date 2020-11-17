@@ -5,7 +5,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFiles
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import java.io.File
@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter
 class ProjectExporter(
     private val projectMetadataToExport: ResourceMetadata,
     private val workbook: Workbook,
-    private val projectFiles: ProjectFiles,
+    private val projectFilesAccessor: ProjectFilesAccessor,
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: WorkbookRepository
 ) {
@@ -34,10 +34,10 @@ class ProjectExporter(
                 val zipFilename = makeExportFilename()
                 val zipFile = directory.resolve(zipFilename)
 
-                projectFiles.initializeResourceContainerInFile(workbook, zipFile)
+                projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
-                    projectFiles.copyTakeFiles(
+                    projectFilesAccessor.copyTakeFiles(
                         fileWriter,
                         workbook,
                         workbookRepository,
@@ -46,8 +46,8 @@ class ProjectExporter(
 
                     val linkedResource = workbook.source.linkedResources
                         .firstOrNull { it.identifier ==  projectMetadataToExport.identifier}
-                    projectFiles.copySourceFiles(fileWriter, linkedResource)
-                    projectFiles.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
+                    projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
+                    projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                 }
 
                 return@fromCallable ExportResult.SUCCESS

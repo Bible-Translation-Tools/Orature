@@ -20,13 +20,13 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 
-class ProjectFiles(
+class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
     private val sourceMetadata: ResourceMetadata,
     private val targetMetadata: ResourceMetadata,
     private val project: Collection
 ) {
-    private val log = LoggerFactory.getLogger(ProjectFiles::class.java)
+    private val log = LoggerFactory.getLogger(ProjectFilesAccessor::class.java)
 
     val projectDir = directoryProvider.getProjectDirectory(
         sourceMetadata,

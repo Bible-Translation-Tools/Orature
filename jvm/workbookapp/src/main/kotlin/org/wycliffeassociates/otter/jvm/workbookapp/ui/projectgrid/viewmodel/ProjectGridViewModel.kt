@@ -79,7 +79,7 @@ class ProjectGridViewModel : ViewModel() {
 
     fun selectProject(workbook: Workbook) {
         workbookViewModel.activeWorkbookProperty.set(workbook)
-        workbook.target.resourceMetadata.let(workbookViewModel::setProjectFiles)
+        workbook.target.resourceMetadata.let(workbookViewModel::setProjectFilesAccessor)
         navigator.navigateTo(TabGroupType.CHAPTER)
     }
 

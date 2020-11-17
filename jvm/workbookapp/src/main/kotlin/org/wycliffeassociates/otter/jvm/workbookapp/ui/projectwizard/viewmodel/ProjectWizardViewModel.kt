@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFiles
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
@@ -161,16 +161,16 @@ class ProjectWizardViewModel : ViewModel() {
                     logger.error("Error in creating a project for collection: $selectedCollection", e)
                 }
                 .subscribe { derivedProject ->
-                    val projectFiles = ProjectFiles(
+                    val projectFilesAccessor = ProjectFilesAccessor(
                         directoryProvider,
                         selectedCollection.resourceContainer!!,
                         derivedProject.resourceContainer!!,
                         derivedProject
                     )
 
-                    projectFiles.initializeResourceContainerInDir()
-                    projectFiles.copySourceFiles()
-                    projectFiles.createSelectedTakesFile()
+                    projectFilesAccessor.initializeResourceContainerInDir()
+                    projectFilesAccessor.copySourceFiles()
+                    projectFilesAccessor.createSelectedTakesFile()
 
                     find(ProjectGridViewModel::class).loadProjects()
                     showOverlayProperty.value = false

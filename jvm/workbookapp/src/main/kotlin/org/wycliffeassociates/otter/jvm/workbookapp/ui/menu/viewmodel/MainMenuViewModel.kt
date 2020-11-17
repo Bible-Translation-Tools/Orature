@@ -52,7 +52,7 @@ class MainMenuViewModel : ViewModel() {
         ProjectExporter(
             workbookVM.activeResourceMetadata,
             workbookVM.workbook,
-            workbookVM.activeProjectFiles,
+            workbookVM.activeProjectFilesAccessor,
             directoryProvider,
             workbookRepository
         ).export(directory)

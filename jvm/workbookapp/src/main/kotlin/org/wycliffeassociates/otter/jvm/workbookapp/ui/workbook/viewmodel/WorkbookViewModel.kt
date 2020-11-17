@@ -6,14 +6,13 @@ import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
-import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFiles
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
@@ -44,9 +43,9 @@ class WorkbookViewModel : ViewModel() {
     val activeResourceMetadata
         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
-    val activeProjectFilesProperty = SimpleObjectProperty<ProjectFiles>()
-    val activeProjectFiles: ProjectFiles
-        get() = activeProjectFilesProperty.value
+    val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
+    val activeProjectFilesAccessor: ProjectFilesAccessor
+        get() = activeProjectFilesAccessorProperty.value
             ?: throw IllegalStateException("Project files is null")
 
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
@@ -57,27 +56,27 @@ class WorkbookViewModel : ViewModel() {
         activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
     }
 
-    fun setProjectFiles(resourceMetadata: ResourceMetadata) {
-        val projectFiles = ProjectFiles(
+    fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {
+        val projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
             workbook.source.resourceMetadata,
             resourceMetadata,
             workbook.target.toCollection()
         )
-        activeProjectFilesProperty.set(projectFiles)
+        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
 
         val linkedResource = workbook.source.linkedResources
             .firstOrNull { it.identifier ==  resourceMetadata.identifier}
 
-        activeProjectFiles.initializeResourceContainerInDir()
-        activeProjectFiles.copySourceFiles(linkedResource)
-        activeProjectFiles.createSelectedTakesFile()
+        activeProjectFilesAccessor.initializeResourceContainerInDir()
+        activeProjectFilesAccessor.copySourceFiles(linkedResource)
+        activeProjectFilesAccessor.createSelectedTakesFile()
     }
 
     fun updateSelectedTakesFile() {
         Completable.fromCallable {
             val projectIsBook = activeResourceMetadata.identifier == workbook.target.resourceMetadata.identifier
-            activeProjectFiles.writeSelectedTakesFile(workbook, projectIsBook)
+            activeProjectFilesAccessor.writeSelectedTakesFile(workbook, projectIsBook)
         }
             .subscribeOn(Schedulers.io())
             .subscribe()

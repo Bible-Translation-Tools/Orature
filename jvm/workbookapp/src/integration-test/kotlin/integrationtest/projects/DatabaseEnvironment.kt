@@ -14,6 +14,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import java.io.File
+import java.nio.charset.Charset
+import java.util.zip.ZipFile
 
 class DatabaseEnvironment {
     private val persistenceComponent: TestPersistenceComponent =
@@ -42,11 +44,16 @@ class DatabaseEnvironment {
             injector.zipEntryTreeBuilder
         )
 
-    fun import(rcFile: String, importAsStream: Boolean = false): DatabaseEnvironment {
+    fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {
         val result = if (importAsStream) {
             importer.import(rcFile, rcResourceStream(rcFile)).blockingGet()
         } else {
-            importer.import(rcResourceFile(rcFile)).blockingGet()
+            val resourceFile = if (unzip) {
+                unzipProject(rcFile)
+            } else {
+                rcResourceFile(rcFile)
+            }
+            importer.import(resourceFile).blockingGet()
         }
         Assert.assertEquals(
             ImportResult.SUCCESS,
@@ -59,6 +66,11 @@ class DatabaseEnvironment {
         CreateProject(injector.collectionRepo, injector.resourceMetadataRepository)
             .create(sourceProject, targetLanguage)
             .blockingGet()
+
+    fun unzipProject(rcFile: String, dir: File? = null): File {
+        val targetDir = dir ?: createTempDir("target")
+        return unzip(rcResourceFile(rcFile), targetDir)
+    }
 
     fun assertRowCounts(expected: RowCount, message: String? = null): DatabaseEnvironment {
         val actual = RowCount(
@@ -121,6 +133,23 @@ class DatabaseEnvironment {
             .groupBy { it.type_fk }
             .mapValues { it.value.count() }
             .mapKeys { db.contentTypeDao.fetchForId(it.key)!! }
+
+    private fun unzip(zip: File, targetDir: File): File {
+        val zipFile = ZipFile(zip, Charset.defaultCharset())
+        zipFile.entries().asSequence().forEach { entry ->
+            zipFile.getInputStream(entry).use { input ->
+                val file = File(targetDir, entry.name)
+                file.parentFile.mkdirs()
+
+                if (!entry.isDirectory) {
+                    file.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            }
+        }
+        return targetDir
+    }
 }
 
 data class CollectionDescriptor(

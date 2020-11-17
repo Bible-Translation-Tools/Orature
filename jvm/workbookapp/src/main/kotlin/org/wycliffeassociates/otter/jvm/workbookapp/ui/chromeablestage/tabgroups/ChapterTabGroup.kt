@@ -57,7 +57,7 @@ class ChapterTabGroup : TabGroup() {
             add(CardGridFragment().root)
             onSelected {
                 workbookViewModel.activeResourceMetadataProperty.set(resourceMetadata)
-                workbookViewModel.setProjectFiles(resourceMetadata)
+                workbookViewModel.setProjectFilesAccessor(resourceMetadata)
             }
         }
 
