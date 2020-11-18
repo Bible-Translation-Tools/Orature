@@ -20,6 +20,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import org.wycliffeassociates.otter.common.utils.ZipUtils
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -40,6 +41,9 @@ class ImportResourceContainer(
 
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")
+
+        val rcFile = if (file.isDirectory) ZipUtils.zip(file) else file
+
         val projectImporter = ProjectImporter(
             this,
             directoryProvider,
@@ -50,38 +54,38 @@ class ImportResourceContainer(
             languageRepository
         )
 
-        val valid = validateRc(file)
+        val valid = validateRc(rcFile)
         if (!valid) {
-            logger.error("Import failed, $file is an invalid RC")
+            logger.error("Import failed, $rcFile is an invalid RC")
             return Single.just(ImportResult.INVALID_RC)
         }
 
-        val resumable = projectImporter.isResumableProject(file)
+        val resumable = projectImporter.isResumableProject(rcFile)
         return if (resumable) {
             logger.info("Importing rc as a resumable project")
-            projectImporter.importResumableProject(file)
+            projectImporter.importResumableProject(rcFile)
         } else {
-            val exists = isAlreadyImported(file)
+            val exists = isAlreadyImported(rcFile)
             if (exists) {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
-                    val existingRC = getExistingMetadata(file)
+                    val existingRC = getExistingMetadata(rcFile)
                     MediaMerge(
                         directoryProvider,
-                        ResourceContainer.load(file),
+                        ResourceContainer.load(rcFile),
                         ResourceContainer.load(existingRC.path)
                     ).merge()
                     ImportResult.SUCCESS
                 }
             } else {
                 logger.info("RC not already imported, importing...")
-                importContainer(file)
+                importContainer(rcFile)
             }
         }
     }
 
     fun import(filename: String, stream: InputStream): Single<ImportResult> {
-        val tempDir = Files.createTempDirectory("")
+        val tempDir = Files.createTempDirectory("import")
         val outPath = tempDir.resolve("$filename.zip")
         val outFile = outPath.toFile()
 
