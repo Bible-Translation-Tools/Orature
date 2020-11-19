@@ -1,13 +1,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
 import dev.jbs.gridview.control.GridCell
+import javafx.beans.binding.BooleanBinding
+import javafx.beans.property.BooleanProperty
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 
 class ScriptureTakesGridCell(
-    newRecordingAction: () -> Unit
+    newRecordingAction: () -> Unit,
+    val contentIsMarkable: BooleanBinding
 ) : GridCell<Pair<TakeCardType, TakeCardModel?>>() {
 
     private var rect = EmptyCardCell()
@@ -33,6 +36,7 @@ class ScriptureTakesGridCell(
                 takeCard.pauseTextProperty().set(model.pauseText)
                 takeCard.timestampProperty().set(model.take.createdTimestamp.toString())
                 takeCard.takeNumberProperty().set(model.take.number.toString())
+                takeCard.allowMarkerProperty().set(contentIsMarkable.value)
                 this.graphic = takeCard
             } else {
                 rect.heightProperty().bind(heightProperty())
