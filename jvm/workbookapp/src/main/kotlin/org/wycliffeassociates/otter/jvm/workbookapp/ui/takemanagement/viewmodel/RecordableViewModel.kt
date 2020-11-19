@@ -353,6 +353,7 @@ open class RecordableViewModel(
             ap,
             FX.messages["edit"].capitalize(),
             FX.messages["delete"].capitalize(),
+            FX.messages["marker"].capitalize(),
             FX.messages["play"].capitalize(),
             FX.messages["pause"].capitalize()
         )

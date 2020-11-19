@@ -32,6 +32,7 @@ class ScriptureTakesGridCell(
                 takeCard.editTextProperty().set(model.editText)
                 takeCard.audioPlayerProperty().set(model.audioPlayer)
                 takeCard.deleteTextProperty().set(model.deleteText)
+                takeCard.markerTextProperty().set(model.markerText)
                 takeCard.playTextProperty().set(model.playText)
                 takeCard.pauseTextProperty().set(model.pauseText)
                 takeCard.timestampProperty().set(model.take.createdTimestamp.toString())
