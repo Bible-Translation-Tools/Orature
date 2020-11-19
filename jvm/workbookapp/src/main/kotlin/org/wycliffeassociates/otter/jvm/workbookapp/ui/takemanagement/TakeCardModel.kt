@@ -15,6 +15,7 @@ data class TakeCardModel(
     val audioPlayer: IAudioPlayer,
     val editText: String,
     val deleteText: String,
+    val markerText: String,
     val playText: String,
     val pauseText: String
 )
