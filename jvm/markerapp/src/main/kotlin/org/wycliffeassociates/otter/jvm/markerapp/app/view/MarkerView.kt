@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.RowConstraints
 import javafx.stage.Screen
@@ -41,6 +42,9 @@ class MarkerView : PluginEntrypoint() {
 
         val emptyConstraint = RowConstraints()
         val growConstraint = RowConstraints()
+        val columnConstraint = ColumnConstraints()
+
+        columnConstraint.hgrow = Priority.ALWAYS
         growConstraint.vgrow = Priority.ALWAYS
 
         rowConstraints.setAll(
@@ -48,6 +52,9 @@ class MarkerView : PluginEntrypoint() {
             emptyConstraint,
             growConstraint,
             emptyConstraint
+        )
+        columnConstraints.setAll(
+            columnConstraint
         )
 
         add(titleFragment.root, 0, 0)

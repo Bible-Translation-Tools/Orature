@@ -67,12 +67,7 @@ class WaveformFrame(
             bottom {
                 region {
                     styleClass.add("vm-waveform-frame__bottom-track")
-                    stackpane {
-                        fitToParentWidth()
-                        fitToParentHeight()
-
-                        add(timecodeHolder)
-                    }
+                    add(timecodeHolder)
                 }
             }
         }
