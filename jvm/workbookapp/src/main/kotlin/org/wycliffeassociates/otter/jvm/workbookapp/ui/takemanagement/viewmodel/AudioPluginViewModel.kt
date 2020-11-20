@@ -47,7 +47,7 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    private fun constructPluginParameters(): PluginParameters {
+    private fun constructPluginParameters(action: String = ""): PluginParameters {
         val workbook = workbookViewModel.workbook
         val sourceAudio = workbookViewModel.getSourceAudio()
         val sourceText = workbookViewModel.getSourceText().blockingGet()
@@ -75,7 +75,8 @@ class AudioPluginViewModel : ViewModel() {
             sourceChapterAudio = sourceAudio?.file,
             sourceChunkStart = sourceAudio?.start,
             sourceChunkEnd = sourceAudio?.end,
-            sourceText = sourceText
+            sourceText = sourceText,
+            actionText = action
         )
     }
 
@@ -95,7 +96,7 @@ class AudioPluginViewModel : ViewModel() {
     }
 
     fun mark(take: Take): Single<MarkTake.Result> {
-        val params = constructPluginParameters()
+        val params = constructPluginParameters(messages["markAction"])
         return markTake.mark(take, params)
     }
 
