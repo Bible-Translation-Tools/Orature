@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.utils.ZipUtils
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import java.io.File
@@ -67,7 +66,11 @@ class DatabaseEnvironment {
             .blockingGet()
 
     fun unzipProject(rcFile: String, dir: File? = null): File {
-        return ZipUtils.unzip(rcResourceFile(rcFile), dir)
+        val targetDir = dir ?: createTempDir("orature_unzip")
+        injector.directoryProvider.newFileReader(rcResourceFile(rcFile)).use { fileReader ->
+            fileReader.copyDirectory("/", targetDir)
+        }
+        return targetDir
     }
 
     fun assertRowCounts(expected: RowCount, message: String? = null): DatabaseEnvironment {

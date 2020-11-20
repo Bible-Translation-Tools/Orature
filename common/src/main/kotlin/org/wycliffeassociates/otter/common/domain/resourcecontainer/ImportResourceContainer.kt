@@ -20,7 +20,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
-import org.wycliffeassociates.otter.common.utils.ZipUtils
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -42,7 +41,15 @@ class ImportResourceContainer(
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")
 
-        val rcFile = if (file.isDirectory) ZipUtils.zip(file) else file
+        val rcFile = if (file.isDirectory) {
+            val zip = createTempFile(file.name, "zip")
+            directoryProvider.newFileWriter(zip).use { fileWriter ->
+                fileWriter.copyDirectory(file, "/")
+            }
+            zip
+        } else {
+            file
+        }
 
         val projectImporter = ProjectImporter(
             this,
@@ -85,9 +92,7 @@ class ImportResourceContainer(
     }
 
     fun import(filename: String, stream: InputStream): Single<ImportResult> {
-        val tempDir = Files.createTempDirectory("import")
-        val outPath = tempDir.resolve("$filename.zip")
-        val outFile = outPath.toFile()
+        val outFile = createTempFile(filename, "zip")
 
         return Single
             .fromCallable {
@@ -100,7 +105,7 @@ class ImportResourceContainer(
                 logger.error("Error in import, filename: $filename", e)
             }
             .doFinally {
-                tempDir.toFile().deleteRecursively()
+                outFile.parentFile.deleteRecursively()
             }
             .subscribeOn(Schedulers.io())
     }
@@ -266,5 +271,13 @@ class ImportResourceContainer(
             parent.addChild(projectTree)
         }
         return root
+    }
+
+    private fun createTempFile(name: String, extension: String): File {
+        val tempDir = Files.createTempDirectory("orature_temp")
+        val tempPath = tempDir.resolve("$name.$extension")
+        val tempFile = tempPath.toFile()
+        tempFile.deleteOnExit()
+        return tempFile
     }
 }
