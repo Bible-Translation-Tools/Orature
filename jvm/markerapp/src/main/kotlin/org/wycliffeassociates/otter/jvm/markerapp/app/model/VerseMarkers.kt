@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.audio.wav.WavCue
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import java.lang.Integer.min
 
-class VerseMarkers(private val audio: WavFile, private val markerTotal: Int) {
+class VerseMarkers(private val audio: WavFile, val markerTotal: Int) {
 
     val cues = audio.metadata.getCues()
     val markerCountProperty = SimpleIntegerProperty(0)
