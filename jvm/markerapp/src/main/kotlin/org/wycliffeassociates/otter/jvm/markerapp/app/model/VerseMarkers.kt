@@ -10,13 +10,14 @@ import java.lang.Integer.min
 class VerseMarkers(private val audio: WavFile, val markerTotal: Int) {
 
     val cues = audio.metadata.getCues()
-    val markerCountProperty = SimpleIntegerProperty(0)
+    val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
     var changesSaved = true
         private set
 
     init {
         cues as MutableList
+        if (cues.isEmpty()) cues.add(WavCue(0, "1"))
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
     }
