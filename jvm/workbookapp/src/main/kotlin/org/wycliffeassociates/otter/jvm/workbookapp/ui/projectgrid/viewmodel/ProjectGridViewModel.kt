@@ -66,7 +66,7 @@ class ProjectGridViewModel : ViewModel() {
         showDeleteDialogProperty.set(true)
         workbookRepo.closeWorkbook(project)
         DeleteProject(collectionRepo, directoryProvider)
-            .delete(project.target.toCollection(), true)
+            .delete(project, true)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
@@ -79,7 +79,7 @@ class ProjectGridViewModel : ViewModel() {
 
     fun selectProject(workbook: Workbook) {
         workbookViewModel.activeWorkbookProperty.set(workbook)
-        workbook.target.resourceMetadata.let(workbookViewModel::setProjectAudioDirectory)
+        workbook.target.resourceMetadata.let(workbookViewModel::setProjectFilesAccessor)
         navigator.navigateTo(TabGroupType.CHAPTER)
     }
 

@@ -58,6 +58,16 @@ class InitializeApp(
                     ),
                     InitializeTakeRepository(
                         takeRepo
+                    ),
+                    InitializeProjects(
+                        resourceMetadataRepo,
+                        resourceContainerRepo,
+                        collectionRepo,
+                        contentRepo,
+                        takeRepo,
+                        languageRepo,
+                        directoryProvider,
+                        zipEntryTreeBuilder
                     )
                 )
 

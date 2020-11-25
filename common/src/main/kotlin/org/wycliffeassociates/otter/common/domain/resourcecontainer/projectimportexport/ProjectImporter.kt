@@ -11,7 +11,8 @@ import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -47,7 +48,7 @@ class ProjectImporter(
 
     fun isResumableProject(resourceContainer: File): Boolean {
         return try {
-            resourceContainer.isFile && resourceContainer.extension == "zip" && hasInProgressMarker(resourceContainer)
+            hasInProgressMarker(resourceContainer)
         } catch (e: IOException) {
             false
         }
@@ -74,8 +75,8 @@ class ProjectImporter(
                     throw ImportException(ImportResult.INVALID_RC)
                 }
 
-                directoryProvider.newZipFileReader(resourceContainer).use { zipFileReader ->
-                    importResumableProject(zipFileReader, metadata, manifestProject, manifestSources)
+                directoryProvider.newFileReader(resourceContainer).use { fileReader ->
+                    importResumableProject(fileReader, metadata, manifestProject, manifestSources)
                 }
 
                 ImportResult.SUCCESS
@@ -89,28 +90,46 @@ class ProjectImporter(
     }
 
     private fun importResumableProject(
-        zipFileReader: IZipFileReader,
+        fileReader: IFileReader,
         metadata: ResourceMetadata,
         manifestProject: Project,
         manifestSources: Set<Source>
     ) {
-        importSources(zipFileReader)
+        importSources(fileReader)
 
         val sourceCollection = findSourceCollection(manifestSources, manifestProject)
         val sourceMetadata = sourceCollection.resourceContainer!!
-
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
-        importTakes(zipFileReader, derivedProject, manifestProject, metadata, sourceMetadata, sourceCollection)
+        val projectFilesAccessor = ProjectFilesAccessor(
+            directoryProvider,
+            sourceMetadata,
+            metadata,
+            derivedProject
+        )
+
+        projectFilesAccessor.initializeResourceContainerInDir()
+        projectFilesAccessor.copySourceFiles(fileReader)
+
+        importTakes(
+            fileReader,
+            derivedProject,
+            manifestProject,
+            metadata,
+            sourceMetadata,
+            sourceCollection,
+            projectFilesAccessor
+        )
     }
 
     private fun importTakes(
-        zipFileReader: IZipFileReader,
+        fileReader: IFileReader,
         project: Collection,
         manifestProject: Project,
         metadata: ResourceMetadata,
         sourceMetadata: ResourceMetadata,
-        sourceCollection: Collection
+        sourceCollection: Collection,
+        projectFilesAccessor: ProjectFilesAccessor
     ) {
         val collectionForTakes = when (metadata.type) {
             // Work around the quirk that resource takes are attached to source, not target project
@@ -118,28 +137,20 @@ class ProjectImporter(
             else -> project
         }
 
-        val audioDir = directoryProvider.getProjectAudioDirectory(
-            source = sourceMetadata,
-            target = metadata,
-            book = project
-        )
-
-        val selectedTakes = zipFileReader
+        val selectedTakes = fileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
             .useLines { it.toSet() }
 
-        Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
-            .filter(zipFileReader::exists)
-            .flatMap { audioDirInRc ->
-                zipFileReader.copyDirectory(audioDirInRc, audioDir, this::isAudioFile)
-            }
+        projectFilesAccessor.copySelectedTakesFile(fileReader)
+
+        projectFilesAccessor.copyTakeFiles(fileReader, manifestProject)
             .doOnError { e ->
                 log.error("Error in importTakes, project: $project, manifestProject: $manifestProject")
                 log.error("metadata: $metadata, sourceMetadata: $sourceMetadata")
                 log.error("sourceCollection: $sourceCollection", e)
             }
             .subscribe { newTakeFile ->
-                insertTake(newTakeFile, audioDir, collectionForTakes, selectedTakes)
+                insertTake(newTakeFile, projectFilesAccessor.audioDir, collectionForTakes, selectedTakes)
             }
     }
 
@@ -195,47 +206,45 @@ class ProjectImporter(
     }
 
     private fun hasInProgressMarker(resourceContainer: File): Boolean {
-        return directoryProvider.newZipFileReader(resourceContainer).use {
+        return directoryProvider.newFileReader(resourceContainer).use {
             it.exists(RcConstants.SELECTED_TAKES_FILE)
         }
     }
 
-    private fun importSources(zipFileReader: IZipFileReader) {
-        val sourceFiles: Sequence<String> = zipFileReader
+    private fun importSources(fileReader: IFileReader) {
+        val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
             .filter { it.endsWith(".zip", ignoreCase = true) }
 
         val firstTry: Map<String, ImportResult> = sourceFiles
-            .map { importSource(it, zipFileReader) }
+            .map { importSource(it, fileReader) }
             .toMap()
 
         // If our first try results contain both an UNMATCHED_HELP and a SUCCESS, then a retry might help.
         if (firstTry.containsValue(ImportResult.SUCCESS)) {
             firstTry
                 .filter { (_, result) -> result == ImportResult.UNMATCHED_HELP }
-                .forEach { (file, _) -> importSource(file, zipFileReader) }
+                .forEach { (file, _) -> importSource(file, fileReader) }
         }
     }
 
-    private fun importSource(fileInZip: String, zipFileReader: IZipFileReader): Pair<String, ImportResult> {
+    private fun importSource(fileInZip: String, fileReader: IFileReader): Pair<String, ImportResult> {
         val name = File(fileInZip).nameWithoutExtension
         val result = resourceContainerImporter
-            .import(name, zipFileReader.stream(fileInZip))
+            .import(name, fileReader.stream(fileInZip))
             .blockingGet()
         log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
     }
-
-    private fun isAudioFile(file: String) = isAudioFile(File(file))
-
-    private fun isAudioFile(file: File) = file.extension.toLowerCase().let { it == "wav" || it == "mp3" }
 
     private fun getContent(sig: ContentSignature, project: Collection): Content? {
         return contentCache.computeIfAbsent(sig) { (chapter, verse, sort, type) ->
             val collection: Observable<Collection> = collectionRepository
                 .getChildren(project)
                 .flattenAsObservable { it }
-                .filter { chapterCollection -> chapterCollection.slug.endsWith("_$chapter") }
+                .filter { chapterCollection ->
+                    chapterCollection.slug.endsWith("_$chapter")
+                }
 
             val content: Maybe<Content> = collection
                 .flatMap {

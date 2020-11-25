@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
@@ -26,6 +27,7 @@ class ProjectWizardViewModel : ViewModel() {
     private val languageRepo = injector.languageRepo
     private val collectionRepo = injector.collectionRepo
     private val resourceMetadataRepo = injector.resourceMetadataRepository
+    private val directoryProvider = injector.directoryProvider
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
@@ -158,7 +160,18 @@ class ProjectWizardViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in creating a project for collection: $selectedCollection", e)
                 }
-                .subscribe { _ ->
+                .subscribe { derivedProject ->
+                    val projectFilesAccessor = ProjectFilesAccessor(
+                        directoryProvider,
+                        selectedCollection.resourceContainer!!,
+                        derivedProject.resourceContainer!!,
+                        derivedProject
+                    )
+
+                    projectFilesAccessor.initializeResourceContainerInDir()
+                    projectFilesAccessor.copySourceFiles()
+                    projectFilesAccessor.createSelectedTakesFile()
+
                     find(ProjectGridViewModel::class).loadProjects()
                     showOverlayProperty.value = false
                     creationCompletedProperty.value = true
