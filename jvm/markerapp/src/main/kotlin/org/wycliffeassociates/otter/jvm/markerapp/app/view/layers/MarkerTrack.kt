@@ -29,22 +29,6 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
             children.clear()
             children.addAll(markers)
         }
-
-        viewModel.positionProperty.onChangeAndDoNow {
-            val x = it?.toDouble() ?: 0.0
-            scrollTo(x)
-        }
-
-        // This allows for aligning the track when it first sets up
-        // as the viewmodel position onchange event will fire before
-        // this node is assigned a parent, whose width is needed
-        parentProperty().onChange {
-            (it as? Region)?.let {
-                it.widthProperty().onChange {
-                    scrollTo(viewModel.positionProperty.value)
-                }
-            }
-        }
     }
 
     private fun resetMakers() {
@@ -58,15 +42,5 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
                 }
             }
         )
-    }
-
-    fun scrollTo(x: Double) {
-        val parentWidth = (parent as? Region)?.widthProperty()?.get() ?: width
-        val scaleFactor = parentWidth / Screen.getMainScreen().platformWidth.toDouble()
-
-        // this formula was computed by plotting points of (parent width, offset)
-        val trackOffset = (parentWidth * 1.3) - 1152
-        scaleXProperty().set(scaleFactor)
-        translateXProperty().set(trackOffset - x * scaleFactor)
     }
 }

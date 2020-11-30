@@ -32,7 +32,10 @@ class RecordScriptureFragment : RecordableFragment(
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
-    private val takesGrid = ScriptureTakesGridView(recordableViewModel::recordNewTake)
+    private val takesGrid = ScriptureTakesGridView(
+        workbookViewModel.activeChunkProperty.isNull,
+        recordableViewModel::recordNewTake
+    )
 
     private val isDraggingProperty = SimpleBooleanProperty(false)
 

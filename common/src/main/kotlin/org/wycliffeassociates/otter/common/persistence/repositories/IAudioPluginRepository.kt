@@ -15,5 +15,8 @@ interface IAudioPluginRepository : IRepository<AudioPluginData> {
     fun setRecorderData(default: AudioPluginData): Completable
     fun getRecorderData(): Maybe<AudioPluginData>
     fun getRecorder(): Maybe<IAudioPlugin>
+    fun setMarkerData(default: AudioPluginData): Completable
+    fun getMarkerData(): Maybe<AudioPluginData>
+    fun getMarker(): Maybe<IAudioPlugin>
     fun initSelected(): Completable
 }

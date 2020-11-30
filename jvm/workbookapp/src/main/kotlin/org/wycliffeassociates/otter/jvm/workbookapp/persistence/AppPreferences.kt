@@ -21,6 +21,7 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
     private val APP_INIT_KEY = "appInitialized"
     private val EDITOR_PLUGIN_ID_KEY = "editorPluginId"
     private val RECORDER_PLUGIN_ID_KEY = "recorderPluginId"
+    private val MARKER_PLUGIN_ID_KEY = "markerPluginId"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -93,4 +94,8 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
     override fun recorderPluginId(): Single<Int> = getInt(RECORDER_PLUGIN_ID_KEY, -1)
 
     override fun setRecorderPluginId(id: Int): Completable = putInt(RECORDER_PLUGIN_ID_KEY, id)
+
+    override fun markerPluginId(): Single<Int> = getInt(MARKER_PLUGIN_ID_KEY, -1)
+
+    override fun setMarkerPluginId(id: Int): Completable = putInt(MARKER_PLUGIN_ID_KEY, id)
 }

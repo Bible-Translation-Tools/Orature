@@ -271,6 +271,7 @@ idea {
 }
 
 compileJava.dependsOn ':jvm:recorderapp:copyJarToWorkbookAppResources'
+compileJava.dependsOn ':jvm:markerapp:copyJarToWorkbookAppResources'
 compileJava.dependsOn createVersionProperties
 compileJava.dependsOn createGithubProperties
 compileJava.dependsOn createSentryProperties

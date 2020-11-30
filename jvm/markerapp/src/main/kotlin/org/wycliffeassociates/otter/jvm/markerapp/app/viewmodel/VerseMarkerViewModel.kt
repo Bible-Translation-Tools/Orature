@@ -4,10 +4,15 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Slider
+import javafx.scene.image.Image
+import javafx.scene.paint.Color
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkers
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -16,8 +21,12 @@ import tornadofx.*
 import java.io.File
 
 const val SECONDS_ON_SCREEN = 10
+private const val WAV_COLOR = "#0A337390"
+private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
+
+    val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     val markers: VerseMarkers
     val audioPlayer = AudioBufferPlayer()
@@ -27,6 +36,7 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
+    val waveformImageProperty = SimpleObjectProperty<Image>()
 
     val width = Screen.getMainScreen().platformWidth
     val height = Screen.getMainScreen().platformHeight
@@ -48,6 +58,19 @@ class VerseMarkerViewModel : ViewModel() {
         }
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
+
+        WaveformImageBuilder(
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
+        ).build(
+            audioPlayer.getAudioReader()!!,
+            fitToAudioMax = false,
+            width = imageWidth.toInt(),
+            height = height
+        ).subscribe { image ->
+            waveformImageProperty.set(image)
+            audioPlayer.getAudioReader()?.seek(0)
+        }
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {

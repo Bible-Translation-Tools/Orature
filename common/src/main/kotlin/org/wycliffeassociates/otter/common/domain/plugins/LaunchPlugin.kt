@@ -27,4 +27,11 @@ class LaunchPlugin(
             it.launch(file, pluginParameters).andThen(Maybe.just(Result.SUCCESS))
         }
         .toSingle(Result.NO_PLUGIN)
+
+    fun launchMarker(file: File, pluginParameters: PluginParameters): Single<Result> = pluginRepository
+        .getMarker()
+        .flatMap {
+            it.launch(file, pluginParameters).andThen(Maybe.just(Result.SUCCESS))
+        }
+        .toSingle(Result.NO_PLUGIN)
 }
