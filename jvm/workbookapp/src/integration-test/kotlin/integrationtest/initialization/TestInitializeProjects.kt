@@ -62,7 +62,8 @@ class TestInitializeProjects {
             inj.takeRepository,
             inj.languageRepo,
             inj.directoryProvider,
-            inj.zipEntryTreeBuilder
+            inj.zipEntryTreeBuilder,
+            inj.installedEntityRepository
         )
         init
             .exec()

@@ -5,9 +5,10 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.config.Initializable
+import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
@@ -24,6 +25,7 @@ class InitializeProjects(
     private val languageRepo: ILanguageRepository,
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
+    private val installedEntityRepo: IInstalledEntityRepository,
     private val rcImporter: ImportResourceContainer = ImportResourceContainer(
         resourceMetadataRepo,
         resourceContainerRepo,
@@ -34,19 +36,42 @@ class InitializeProjects(
         directoryProvider,
         zipEntryTreeBuilder
     )
-): Initializable {
+): Installable {
+    override val name = "PROJECTS"
+    override val version = 1
+
     private val log = LoggerFactory.getLogger(InitializeProjects::class.java)
 
     override fun exec(): Completable {
         return Completable.fromCallable {
+            var installedVersion = installedEntityRepo.getInstalledVersion(this)
+            if (installedVersion != version) {
+                log.info("Initializing $name version: $version...")
+
+                migrate()
+
+                installedEntityRepo.install(this)
+                log.info("$name version: $version installed!")
+            } else {
+                log.info("$name up to date with version: $version")
+            }
+
             val projects = collectionRepo.getDerivedProjects().blockingGet()
             if (projects.isEmpty()) {
-                log.info("Initializing projects...")
+                log.info("Importing projects...")
 
                 val dir = directoryProvider.getUserDataDirectory("/")
                 importProjects(dir)
             }
         }
+    }
+
+    private fun migrate() {
+        `migrate to version 1`()
+    }
+
+    private fun `migrate to version 1`() {
+
     }
 
     private fun importProjects(dir: File) {
