@@ -73,7 +73,8 @@ class InitializeApp(
                         takeRepo,
                         languageRepo,
                         directoryProvider,
-                        zipEntryTreeBuilder
+                        zipEntryTreeBuilder,
+                        installedEntityRepo
                     )
                 )
 
