@@ -4,6 +4,7 @@ import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import io.reactivex.Completable
 import io.reactivex.observers.TestObserver
+import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeProjects
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -63,7 +64,8 @@ class TestInitializeProjects {
             inj.languageRepo,
             inj.directoryProvider,
             inj.zipEntryTreeBuilder,
-            inj.installedEntityRepository
+            inj.installedEntityRepository,
+            inj.workbookRepository
         )
         init
             .exec()
@@ -71,6 +73,8 @@ class TestInitializeProjects {
 
         testSub.assertComplete()
         testSub.assertNoErrors()
+
+        Assert.assertEquals(init.version, env.db.installedEntityDao.fetchVersion(init))
 
         env.assertRowCounts(
             RowCount(

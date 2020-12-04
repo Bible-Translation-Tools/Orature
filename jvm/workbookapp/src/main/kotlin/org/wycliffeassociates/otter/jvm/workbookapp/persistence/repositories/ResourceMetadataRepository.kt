@@ -76,6 +76,20 @@ class ResourceMetadataRepository(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getAllSources(): Single<List<ResourceMetadata>> {
+        return Single
+            .fromCallable {
+                resourceMetadataDao
+                    .fetchAll()
+                    .filter { it.derivedFromFk == null }
+                    .map(this::buildMetadata)
+            }
+            .doOnError { e ->
+                logger.error("Error in getAll", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata> {
         return Maybe
             .fromCallable {
