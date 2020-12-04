@@ -4,7 +4,6 @@ import com.jakewharton.rxrelay2.BehaviorRelay
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import java.io.File
 import java.time.LocalDate
-import java.util.*
 
 data class Take(
     val name: String,
