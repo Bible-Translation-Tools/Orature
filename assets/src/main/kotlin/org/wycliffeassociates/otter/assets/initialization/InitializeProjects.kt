@@ -65,8 +65,7 @@ class InitializeProjects(
                 log.info("$name up to date with version: $version")
             }
 
-            val projects = collectionRepo.getDerivedProjects().blockingGet()
-            if (projects.isEmpty()) {
+            if (fetchProjects().isEmpty()) {
                 log.info("Importing projects...")
 
                 val dir = directoryProvider.getUserDataDirectory("/")
