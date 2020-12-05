@@ -87,7 +87,6 @@ class InitializeProjects(
     }
 
     private fun `migrate projects to version 1`(workbooks: List<Workbook>) {
-        // val tempDir = Files.createTempDirectory("orature_temp")
         workbooks.forEach { workbook ->
             // Migrate main rc
             `migrate project to version 1`(workbook.target.resourceMetadata, workbook)
