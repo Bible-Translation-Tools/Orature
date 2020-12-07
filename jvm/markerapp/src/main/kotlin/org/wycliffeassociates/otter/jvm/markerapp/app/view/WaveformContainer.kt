@@ -42,5 +42,7 @@ class WaveformContainer : Fragment() {
                     viewModel
                 )
             )
+            add(WaveformOverlay(viewModel))
+            add(PlaceMarkerLayer(viewModel))
         }
 }

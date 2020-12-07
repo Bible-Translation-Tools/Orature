@@ -4,8 +4,6 @@ import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.RowConstraints
 import javafx.stage.Screen
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -41,17 +39,20 @@ class MarkerView : PluginEntrypoint() {
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
         val emptyConstraint = RowConstraints()
+        val fixedConstraint = RowConstraints()
         val growConstraint = RowConstraints()
         val columnConstraint = ColumnConstraints()
 
         columnConstraint.hgrow = Priority.ALWAYS
-        growConstraint.vgrow = Priority.ALWAYS
+        growConstraint.vgrow = Priority.SOMETIMES
+        fixedConstraint.prefHeight = 88.0
+        fixedConstraint.minHeight = 88.0
 
         rowConstraints.setAll(
-            emptyConstraint,
-            emptyConstraint,
+            fixedConstraint,
+            fixedConstraint,
             growConstraint,
-            emptyConstraint
+            fixedConstraint
         )
         columnConstraints.setAll(
             columnConstraint
@@ -60,8 +61,6 @@ class MarkerView : PluginEntrypoint() {
         add(titleFragment.root, 0, 0)
         add(minimap.root, 0, 1)
         add(waveformContainer.root, 0, 2)
-        add(WaveformOverlay(viewModel), 0, 2)
-        add(PlaceMarkerLayer(viewModel), 0, 2)
         add(playbackControls.root, 0, 3)
     }
 }
