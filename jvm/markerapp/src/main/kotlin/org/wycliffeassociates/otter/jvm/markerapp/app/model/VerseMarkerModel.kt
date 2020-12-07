@@ -5,11 +5,14 @@ import io.reactivex.Single
 import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.audio.wav.WavCue
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import tornadofx.isInt
 import java.lang.Integer.min
 
-class VerseMarkers(private val audio: WavFile, val markerTotal: Int) {
+class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
-    val cues = audio.metadata.getCues()
+    val cues = sanitizeCues(audio)
+    val markers: List<ChunkMarker>
+
     val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
     var changesSaved = true
@@ -20,6 +23,12 @@ class VerseMarkers(private val audio: WavFile, val markerTotal: Int) {
         if (cues.isEmpty()) cues.add(WavCue(0, "1"))
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
+
+        markers = initializeMarkers(markerTotal, cues)
+    }
+
+    fun findMarkerById(id: Int): ChunkMarker {
+        return markers.find { id == id }!!
     }
 
     fun addMarker(location: Int) {
@@ -69,5 +78,48 @@ class VerseMarkers(private val audio: WavFile, val markerTotal: Int) {
             audio.update()
             changesSaved = true
         }.ignoreElement()
+    }
+
+    private fun sanitizeCues(audio: WavFile): List<WavCue> {
+        return audio.metadata.getCues().filter { it.label.isInt() }
+    }
+
+    private fun initializeMarkers(markerTotal: Int, cues: List<WavCue>): List<ChunkMarker> {
+        cues as MutableList
+        cues.sortBy { it.location }
+
+        val markers = mutableListOf<ChunkMarker>()
+        for (i in 1..markerTotal) {
+            var marker = ChunkMarker(0, i.toString(), false)
+            if (cues.size >= markerTotal) {
+                marker.frame = cues[i - 1].location
+                marker.placed = true
+            }
+            markers.add(marker)
+        }
+        return markers
+    }
+}
+
+data class ChunkMarker(
+    var frame: Int,
+    var label: String,
+    var placed: Boolean
+) {
+
+    val id = allocateId()
+
+    constructor(wavCue: WavCue) : this(wavCue.location, wavCue.label, true)
+
+    fun toWavCue(): WavCue {
+        return WavCue(frame, label)
+    }
+
+    private companion object {
+        var counter = 0
+
+        fun allocateId(): Int {
+            return counter++
+        }
     }
 }

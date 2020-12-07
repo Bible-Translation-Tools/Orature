@@ -12,3 +12,11 @@ internal fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
     val msInPixels = durationMs / width
     return (x * msInPixels).toInt()
 }
+
+internal fun pixelsToFrames(pixels: Double, width: Int, secondsOnScreen: Int): Int {
+    return (pixels * (width / secondsOnScreen.toDouble())).toInt()
+}
+
+internal fun pixelsToFrames(pixels: Double, scale: Double): Int {
+    return (pixels * scale).toInt()
+}

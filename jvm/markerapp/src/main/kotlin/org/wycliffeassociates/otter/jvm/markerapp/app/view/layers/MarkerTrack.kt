@@ -3,6 +3,8 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 import javafx.collections.FXCollections
 import javafx.scene.layout.Region
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -10,13 +12,13 @@ import tornadofx.*
 class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
 
     var scale: Double = 1.0
-    private val markers = FXCollections.observableArrayList<ChunkMarker>()
+    private val markerViewList = FXCollections.observableArrayList<ChunkMarker>()
 
     init {
         styleClass.add("vm-marker-track")
 
         for (i in 1 until viewModel.markers.markerTotal + 1) {
-            markers.add(
+            markerViewList.add(
                 ChunkMarker().apply {
                     markerNumberProperty.set((i).toString())
                     if (i == 1) {
@@ -37,16 +39,29 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
             resetMakers()
         }
 
-        children.addAll(markers)
+        setOnMouseDragExited {
+            markerViewList.forEachIndexed { i, marker ->
+                if(marker.visibleProperty().value) {
+                    val dragged = marker.draggedProperty.value
+                    viewModel.markers.findMarkerById(marker.markerIdProperty.value).frame += pixelsToFrames(dragged, scale)
+                }
+                marker.draggedProperty.set(0.0)
+            }
+            resetMakers()
+        }
+
+        children.addAll(markerViewList)
     }
 
     private fun resetMakers() {
-        viewModel.markers.cues.mapIndexed { index, cue ->
-            val marker = markers.get(index)
-            marker.markerNumberProperty.set(cue.label)
-            val x = cue.location / scale.toDouble()
-            marker.translateXProperty().set(x)
-            marker.visibleProperty().set(true)
+        viewModel.markers.markers.map { cue ->
+            markerViewList.find { it.markerIdProperty.value == cue.id }?.let { marker ->
+                marker.markerNumberProperty.set(cue.label)
+                val x = cue.frame / scale.toDouble()
+                marker.translateXProperty().set(x)
+                marker.markerPositionProperty.set(x)
+                marker.visibleProperty().set(true)
+            }
         }
     }
 }
