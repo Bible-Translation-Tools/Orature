@@ -11,6 +11,8 @@ import tornadofx.*
 class PlaceMarkerLayer(viewModel: VerseMarkerViewModel) : VBox() {
     init {
         with(this) {
+            isPickOnBounds = false
+
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
