@@ -88,7 +88,6 @@ class ProjectFilesAccessor(
         linkedResource?.let { sources.add(it) }
 
         sources
-            .asSequence()
             .map { it.path }
             .distinct()
             .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }

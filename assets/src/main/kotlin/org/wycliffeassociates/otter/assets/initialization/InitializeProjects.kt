@@ -1,10 +1,7 @@
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
-import io.reactivex.Maybe
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
@@ -191,28 +188,11 @@ class InitializeProjects(
     }
 
     private fun fetchProjects(): List<Workbook> {
-        val derivedProjects = collectionRepo.getDerivedProjects()
-            .toObservable()
-            .map { derivedProjects ->
-                derivedProjects.filter { it.resourceContainer?.type == ContainerType.Book }
-            }
-            .flatMapIterable { it }
-            .map {
-                getWorkbook(it)
-            }
-            .collectInto(mutableListOf<Maybe<Workbook>>(), { list, item -> list.add(item) })
+        return workbookRepository.getProjects()
             .doOnError { e ->
                 log.error("Error in loading projects", e)
-            }.blockingGet()
-
-        return derivedProjects.mapNotNull { it.blockingGet() }
-    }
-
-    private fun getWorkbook(targetProject: Collection): Maybe<Workbook> {
-        return collectionRepo.getSource(targetProject)
-            .map { sourceProject ->
-                workbookRepository.get(sourceProject, targetProject)
             }
+            .blockingGet()
     }
 
     private fun createTempFile(name: String, extension: String): File {
