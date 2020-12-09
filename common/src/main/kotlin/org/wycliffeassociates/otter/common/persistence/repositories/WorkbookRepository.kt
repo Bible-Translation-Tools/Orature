@@ -65,8 +65,8 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .map { projects ->
                 projects.filter { it.resourceContainer?.type == ContainerType.Book }
             }
-            .flattenAsFlowable { it }
-            .concatMapMaybe(::getWorkbook)
+            .flattenAsObservable { it }
+            .flatMapMaybe(::getWorkbook)
             .toList()
     }
 
