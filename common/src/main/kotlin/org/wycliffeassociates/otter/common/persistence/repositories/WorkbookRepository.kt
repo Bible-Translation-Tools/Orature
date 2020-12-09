@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.utils.mapNotNull
 import java.util.*
 import java.util.Collections.synchronizedMap
 
@@ -63,22 +62,19 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
     override fun getProjects(): Single<List<Workbook>> {
         return db.getDerivedProjects()
-            .toObservable()
-            .map { derivedProjects ->
-                derivedProjects.filter { it.resourceContainer?.type == ContainerType.Book }
+            .map { projects ->
+                projects.filter { it.resourceContainer?.type == ContainerType.Book }
             }
-            .flatMapIterable { it }
-            .mapNotNull(::getWorkbook)
-            .collectInto(mutableListOf<Workbook>(), { list, item -> list.add(item) })
-            .map { it.toList() }
+            .flattenAsFlowable { it }
+            .concatMapMaybe(::getWorkbook)
+            .toList()
     }
 
-    private fun getWorkbook(project: Collection): Workbook {
+    private fun getWorkbook(project: Collection): Maybe<Workbook> {
         return db.getSourceProject(project)
             .map { sourceProject ->
                 get(sourceProject, project)
             }
-            .blockingGet()
     }
 
     private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
