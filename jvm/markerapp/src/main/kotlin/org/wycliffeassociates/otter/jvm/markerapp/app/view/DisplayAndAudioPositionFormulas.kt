@@ -17,6 +17,10 @@ internal fun pixelsToFrames(pixels: Double, width: Int, secondsOnScreen: Int): I
     return (pixels * (width / secondsOnScreen.toDouble())).toInt()
 }
 
+internal fun framesToPixels(frames: Int, width: Int, secondsOnScreen: Int): Int {
+    return (frames * (secondsOnScreen.toDouble() / width.toDouble())).toInt()
+}
+
 internal fun pixelsToFrames(pixels: Double, scale: Double): Int {
     return (pixels * scale).toInt()
 }

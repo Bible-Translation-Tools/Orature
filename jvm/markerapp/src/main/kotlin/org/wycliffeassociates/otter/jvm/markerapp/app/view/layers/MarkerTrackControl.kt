@@ -8,11 +8,15 @@ import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.framesToPixels
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
 import tornadofx.onChange
 
-class MarkerTrackControl(val markerCount: Int, val viewModel: VerseMarkerViewModel) : Control() {
+class MarkerTrackControl(val markers: List<org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarker>) : Control() {
     private val markerViewList = FXCollections.observableArrayList<ChunkMarker>()
 
     override fun createDefaultSkin(): Skin<*> {
@@ -24,14 +28,23 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
     val track: Region
     val markers = mutableListOf<ChunkMarker>()
-    private val preDragThumbPos = DoubleArray(control.markerCount)
-    var dragStart: Array<Point2D?> = Array<Point2D?>(control.markerCount) { null }
+    private val preDragThumbPos = DoubleArray(control.markers.size)
+    var dragStart: Array<Point2D?> = Array<Point2D?>(control.markers.size) { null }
 
     init {
-        for (i in 0 until control.markerCount) {
+        control.markers.forEachIndexed { i, mk ->
             val marker = ChunkMarker().apply {
-                markerNumberProperty.set((i).toString())
-                canBeMovedProperty.set(true)
+                val pixel = framesToPixels(
+                    mk.frame,
+                    this@MarkerTrackControlSkin.skinnable.prefWidth.toInt(),
+                    SECONDS_ON_SCREEN
+                ).toDouble()
+                println("frame: ${mk.frame}, pixel: ${pixel}")
+                markerNumberProperty.set(mk.label)
+                canBeMovedProperty.set(mk.placed)
+                markerPositionProperty.set(
+                    pixel
+                )
                 setOnMouseClicked { me ->
                     val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                     println("skinnableWidth on click: ${trackWidth}")
@@ -64,8 +77,10 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                     }
                 }
 
-                markerPositionProperty.onChange {
-                    translateX = it
+                markerPositionProperty.onChangeAndDoNow {
+                    it?.let {
+                        translateX = it.toDouble()
+                    }
                 }
             }
             markers.add(marker)
