@@ -10,16 +10,13 @@ import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToSize
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToWidth
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrack
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
-    markerTrack: MarkerTrack,
+    markerTrack: MarkerTrackControl,
     mainWaveform: MainWaveform,
     timecodeHolder: TimecodeHolder,
     viewModel: VerseMarkerViewModel

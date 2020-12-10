@@ -4,7 +4,6 @@ import javafx.collections.FXCollections
 import javafx.scene.layout.Region
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -39,16 +38,16 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
             resetMakers()
         }
 
-        setOnMouseDragExited {
-            markerViewList.forEachIndexed { i, marker ->
-                if(marker.visibleProperty().value) {
-                    val dragged = marker.draggedProperty.value
-                    viewModel.markers.findMarkerById(marker.markerIdProperty.value).frame += pixelsToFrames(dragged, scale)
-                }
-                marker.draggedProperty.set(0.0)
-            }
-            resetMakers()
-        }
+//        setOnMouseDragExited {
+//            markerViewList.forEachIndexed { i, marker ->
+//                if(marker.visibleProperty().value) {
+//                    val dragged = marker.draggedProperty.value
+//                    viewModel.markers.findMarkerById(marker.markerIdProperty.value).frame += pixelsToFrames(dragged, scale)
+//                }
+//                marker.draggedProperty.set(0.0)
+//            }
+//            resetMakers()
+//        }
 
         children.addAll(markerViewList)
     }
