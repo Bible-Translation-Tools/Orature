@@ -12,7 +12,7 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewM
 import tornadofx.add
 import tornadofx.onChange
 
-class MarkerTrackControl(val viewModel: VerseMarkerViewModel) : Control() {
+class MarkerTrackControl(val markerCount: Int, val viewModel: VerseMarkerViewModel) : Control() {
     private val markerViewList = FXCollections.observableArrayList<ChunkMarker>()
 
     override fun createDefaultSkin(): Skin<*> {
@@ -23,68 +23,69 @@ class MarkerTrackControl(val viewModel: VerseMarkerViewModel) : Control() {
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 
     val track: Region
-    val marker: ChunkMarker
-    val markers = FXCollections.observableArrayList<ChunkMarker>()
-    private var preDragThumbPos = 0.0
-    var dragStart: Point2D? = null
+    val markers = mutableListOf<ChunkMarker>()
+    private val preDragThumbPos = DoubleArray(control.markerCount)
+    var dragStart: Array<Point2D?> = Array<Point2D?>(control.markerCount) { null }
 
     init {
-        marker = ChunkMarker().apply {
-            markerNumberProperty.set((1).toString())
-            canBeMovedProperty.set(true)
-            setOnMouseClicked { me ->
-                val trackWidth = this@MarkerTrackControlSkin.skinnable.width
-                println("skinnableWidth on click: ${trackWidth}")
+        for (i in 0 until control.markerCount) {
+            val marker = ChunkMarker().apply {
+                markerNumberProperty.set((i).toString())
+                canBeMovedProperty.set(true)
+                setOnMouseClicked { me ->
+                    val trackWidth = this@MarkerTrackControlSkin.skinnable.width
+                    println("skinnableWidth on click: ${trackWidth}")
 
-                if (trackWidth > 0) {
-                    dragStart = localToParent(me.x, me.y)
-                    val clampedValue: Double = Utils.clamp(
-                        0.0,
-                        markerPositionProperty.value,
-                        trackWidth
-                    )
-                    preDragThumbPos = clampedValue / trackWidth
-                    me.consume()
-                }
-            }
-
-            setOnMouseDragged { me ->
-                val trackWidth = this@MarkerTrackControlSkin.skinnable.width
-                if (trackWidth > 0.0) {
-                    if (trackWidth > this.width) {
-                        val cur: Point2D = localToParent(me.x, me.y)
-                        if (dragStart == null) {
-                            // we're getting dragged without getting a mouse press
-                            dragStart = localToParent(me.x, me.y)
-                        }
-                        val dragPos = cur.x - dragStart!!.x
-                        updateValue(preDragThumbPos + dragPos / (trackWidth - this.width))
+                    if (trackWidth > 0) {
+                        dragStart[i] = localToParent(me.x, me.y)
+                        val clampedValue: Double = Utils.clamp(
+                            0.0,
+                            markerPositionProperty.value,
+                            trackWidth
+                        )
+                        preDragThumbPos[i] = clampedValue / trackWidth
+                        me.consume()
                     }
-                    me.consume()
+                }
+
+                setOnMouseDragged { me ->
+                    val trackWidth = this@MarkerTrackControlSkin.skinnable.width
+                    if (trackWidth > 0.0) {
+                        if (trackWidth > this.width) {
+                            val cur: Point2D = localToParent(me.x, me.y)
+                            if (dragStart[i] == null) {
+                                // we're getting dragged without getting a mouse press
+                                dragStart[i] = localToParent(me.x, me.y)
+                            }
+                            val dragPos = cur.x - dragStart[i]!!.x
+                            updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
+                        }
+                        me.consume()
+                    }
+                }
+
+                markerPositionProperty.onChange {
+                    translateX = it
                 }
             }
-
-            markerPositionProperty.onChange {
-                translateX = it
-            }
+            markers.add(marker)
         }
-        markers.add(marker)
 
         track = Region().apply {
             styleClass.add("vm-marker-track")
         }
 
-        markers.forEach { track.add(marker) }
+        markers.forEach { track.add(it) }
 
         children.clear()
         children.addAll(track)
     }
 
-    fun updateValue(position: Double) {
+    fun updateValue(id: Int, position: Double) {
         val newValue: Double = position * skinnable.width
         if (!java.lang.Double.isNaN(newValue)) {
             println("value is $position")
-            markers.get(0).markerPositionProperty.set(Utils.clamp(0.0, newValue, skinnable.width))
+            markers.get(id).markerPositionProperty.set(Utils.clamp(0.0, newValue, skinnable.width))
         }
     }
 }
