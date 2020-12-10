@@ -100,7 +100,31 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         val newValue: Double = position * skinnable.width
         if (!java.lang.Double.isNaN(newValue)) {
             println("value is $position")
-            markers.get(id).markerPositionProperty.set(Utils.clamp(0.0, newValue, skinnable.width))
+            val min = getMin(id, position)
+            val max = getMax(id, position)
+            markers.get(id).markerPositionProperty.set(Utils.clamp(min, newValue, max))
         }
+    }
+
+    fun getMin(id: Int, position: Double): Double {
+        val previousMaker = if (id > 0) {
+            markers.get(id - 1)
+        } else {
+            null
+        }
+        return previousMaker?.let {
+            it.markerPositionProperty.value.toInt() + it.width
+        } ?: 0.0
+    }
+
+    fun getMax(id: Int, position: Double): Double {
+        val previousMaker = if (id < markers.size - 1) {
+            markers.get(id + 1)
+        } else {
+            null
+        }
+        return previousMaker?.let {
+            it.markerPositionProperty.value - it.width
+        } ?: skinnable.width
     }
 }
