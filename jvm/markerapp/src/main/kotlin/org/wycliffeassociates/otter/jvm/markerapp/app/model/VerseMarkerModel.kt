@@ -8,6 +8,8 @@ import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import tornadofx.isInt
 import java.lang.Integer.min
 
+private const val SEEK_EPSILON = 100
+
 class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
     val cues = sanitizeCues(audio)
@@ -54,20 +56,30 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
     }
 
     fun seekNext(location: Int): Int {
-        for (cue in cues) {
-            if (location < cue.location) {
-                return cue.location
+        for (marker in markers.filter { it.placed }) {
+            if (location < marker.frame) {
+                return marker.frame
             }
         }
         return audioEnd
     }
 
     fun seekPrevious(location: Int): Int {
-        cues as MutableList
-        cues.sortBy { it.location }
-        for ((i, cue) in cues.reversed().withIndex()) {
-            if (location > cue.location) {
-                return cues.reversed().get(min(cues.size - 1, i + 1)).location
+        val filtered = markers.filter { it.placed }
+        filtered.forEachIndexed { idx, marker ->
+            if (location < marker.frame) {
+                return if (idx - 2 >= 0) {
+                    filtered[idx - 2].frame
+                } else {
+                    0
+                }
+            } else if (idx == filtered.size - 1 && idx - 1 >= 0) {
+                // allows for seeking back and not getting stuck on the last marker
+                return if (location > filtered[idx].frame + SEEK_EPSILON) {
+                    filtered[idx].frame
+                } else {
+                    filtered[idx - 1].frame
+                }
             }
         }
         return 0
