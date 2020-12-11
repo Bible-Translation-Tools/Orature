@@ -75,6 +75,16 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
     fun writeMarkers(): Completable {
         return Single.fromCallable {
+            cues as MutableList
+            cues.clear()
+            markers.forEach {
+                if (it.placed) {
+                    cues.add(it.toWavCue())
+                }
+            }
+            val audioFileCues = audio.metadata.getCues() as MutableList
+            audioFileCues.clear()
+            audioFileCues.addAll(cues)
             audio.update()
             changesSaved = true
         }.ignoreElement()

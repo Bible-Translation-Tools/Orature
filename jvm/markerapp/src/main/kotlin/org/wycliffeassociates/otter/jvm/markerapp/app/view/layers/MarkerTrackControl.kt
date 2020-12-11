@@ -8,6 +8,7 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.framesToPixels
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -39,6 +40,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 markerNumberProperty.set(mk.label)
                 canBeMovedProperty.set(mk.placed)
                 markerPositionProperty.set(pixel)
+
                 setOnMouseClicked { me ->
                     val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                     if (trackWidth > 0) {
@@ -77,7 +79,15 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
                 markerPositionProperty.onChangeAndDoNow {
                     it?.let {
+                        val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                         translateX = it.toDouble()
+                        if (trackWidth > 0) {
+                            control.markers.get(i).frame = pixelsToFrames(
+                                it.toDouble(),
+                                trackWidth.toInt(),
+                                SECONDS_ON_SCREEN
+                            )
+                        }
                     }
                 }
             }
