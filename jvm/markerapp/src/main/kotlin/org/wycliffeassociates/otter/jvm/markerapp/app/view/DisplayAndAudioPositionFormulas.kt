@@ -1,5 +1,8 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.sun.glass.ui.Screen
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
+
 private const val EPSILON = 10
 private const val MS_IN_SECOND = 1000
 
@@ -14,11 +17,17 @@ internal fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
 }
 
 internal fun pixelsToFrames(pixels: Double, width: Int, secondsOnScreen: Int): Int {
-    return (pixels * (width / secondsOnScreen.toDouble())).toInt()
+    val framerate = 44100
+    val framesOnScreen = SECONDS_ON_SCREEN * framerate
+    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()
+    return (pixels * framesInPixel).toInt()
 }
 
 internal fun framesToPixels(frames: Int, width: Int, secondsOnScreen: Int): Int {
-    return (frames * (secondsOnScreen.toDouble() / width.toDouble())).toInt()
+    val framerate = 44100
+    val framesOnScreen = SECONDS_ON_SCREEN * framerate
+    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()
+    return (frames / framesInPixel).toInt()
 }
 
 internal fun pixelsToFrames(pixels: Double, scale: Double): Int {
