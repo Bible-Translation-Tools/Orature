@@ -42,6 +42,9 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
                 break
             }
         }
+        markers as MutableList
+        markers.sortWith(compareBy({ !it.placed }, { it.frame }))
+        markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
         markerCountProperty.value = markers.filter { it.placed == true }.size
     }
 
@@ -107,7 +110,7 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
             }
         }
         for (i in markers.size until markerTotal) {
-            markers.add(ChunkMarker(0, (i+1).toString(), false))
+            markers.add(ChunkMarker(0, (i + 1).toString(), false))
         }
         return markers
     }

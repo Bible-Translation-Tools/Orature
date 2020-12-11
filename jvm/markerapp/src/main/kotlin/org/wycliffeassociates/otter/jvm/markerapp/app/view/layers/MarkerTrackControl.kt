@@ -16,6 +16,10 @@ import tornadofx.*
 class MarkerTrackControl(val markers: List<org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarker>) :
     Control() {
 
+    fun refreshMarkers() {
+        (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }
+    }
+
     override fun createDefaultSkin(): Skin<*> {
         return MarkerTrackControlSkin(this)
     }
@@ -27,6 +31,23 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     val markers = mutableListOf<ChunkMarker>()
     private val preDragThumbPos = DoubleArray(control.markers.size)
     var dragStart: Array<Point2D?> = Array(control.markers.size) { null }
+
+    fun refreshMarkers() {
+        if(skinnable.width > 0) {
+            skinnable.markers.forEachIndexed { index, chunkMarker ->
+                val marker = markers[index]
+                marker.isPlacedProperty.set(chunkMarker.placed)
+                marker.markerPositionProperty.set(
+                    framesToPixels(
+                        chunkMarker.frame,
+                        skinnable.width.toInt(),
+                        SECONDS_ON_SCREEN
+                    ).toDouble()
+                )
+                marker.markerNumberProperty.set(chunkMarker.label)
+            }
+        }
+    }
 
     init {
         control.markers.forEachIndexed { i, mk ->

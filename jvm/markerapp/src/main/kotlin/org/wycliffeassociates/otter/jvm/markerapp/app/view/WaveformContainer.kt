@@ -17,7 +17,12 @@ class WaveformContainer : Fragment() {
 
     init {
         // markerTrack = MarkerTrack(viewModel).apply { prefWidth = viewModel.imageWidth }
-        markerTrack2 = MarkerTrackControl(viewModel.markers.markers).apply { prefWidth = viewModel.imageWidth }
+        markerTrack2 = MarkerTrackControl(viewModel.markers.markers).apply {
+            prefWidth = viewModel.imageWidth
+            viewModel.markers.markerCountProperty.onChange {
+                refreshMarkers()
+            }
+        }
         timecodeHolder = TimecodeHolder(viewModel, 50.0)
         mainWaveform = MainWaveform(viewModel)
 
