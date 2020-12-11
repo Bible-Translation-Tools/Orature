@@ -39,9 +39,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
                 markerNumberProperty.set(mk.label)
                 canBeMovedProperty.set(mk.placed)
-                markerPositionProperty.set(
-                    pixel
-                )
+                markerPositionProperty.set(pixel)
                 setOnMouseClicked { me ->
                     val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                     if (trackWidth > 0) {
