@@ -35,24 +35,14 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
     fun addMarker(location: Int) {
         changesSaved = false
-        if (cues.size >= markerTotal) {
-            return
-        }
-        cues as MutableList
-        cues.sortBy { it.location }
-        var index = 0
-        for ((i, c) in cues.withIndex()) {
-            if (c.location < location) {
-                index = i + 1
+        for (marker in markers) {
+            if (!marker.placed) {
+                marker.frame = location
+                marker.placed = true
+                break
             }
         }
-        cues.add(index, WavCue(location, "${index + 1}"))
-        cues.replaceAll {
-            if (it.location > location) {
-                WavCue(it.location, "${it.label.toInt() + 1}")
-            } else it
-        }
-        markerCountProperty.value = cues.size
+        markerCountProperty.value = markers.filter { it.placed == true }.size
     }
 
     fun seekNext(location: Int): Int {
@@ -111,13 +101,13 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         cues.sortBy { it.location }
 
         val markers = mutableListOf<ChunkMarker>()
-        for (i in 1..markerTotal) {
-            var marker = ChunkMarker(0, i.toString(), false)
-            if (cues.size >= markerTotal) {
-                marker.frame = cues[i - 1].location
-                marker.placed = true
+        for ((idx, cue) in cues.withIndex()) {
+            if (idx < markerTotal) {
+                markers.add(ChunkMarker(cue))
             }
-            markers.add(marker)
+        }
+        for (i in markers.size until markerTotal) {
+            markers.add(ChunkMarker(0, (i+1).toString(), false))
         }
         return markers
     }

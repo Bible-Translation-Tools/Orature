@@ -37,8 +37,9 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                     SECONDS_ON_SCREEN
                 ).toDouble()
 
+                isPlacedProperty.set(mk.placed)
                 markerNumberProperty.set(mk.label)
-                canBeMovedProperty.set(mk.placed)
+                canBeMovedProperty.set(i != 0)
                 markerPositionProperty.set(pixel)
 
                 setOnMouseClicked { me ->
@@ -56,6 +57,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 }
 
                 setOnMouseDragged { me ->
+                    if (!canBeMovedProperty.value) return@setOnMouseDragged
                     val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                     if (trackWidth > 0.0) {
                         if (trackWidth > this.width) {
@@ -115,8 +117,9 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     }
 
     fun getMin(id: Int, position: Double): Double {
+        val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id > 0) {
-            markers.get(id - 1)
+            placedMarkers.get(id - 1)
         } else {
             null
         }
@@ -126,8 +129,9 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     }
 
     fun getMax(id: Int, position: Double): Double {
-        val previousMaker = if (id < markers.size - 1) {
-            markers.get(id + 1)
+        val placedMarkers = markers.filter { it.isPlacedProperty.value }
+        val previousMaker = if (id < placedMarkers.size - 1) {
+            placedMarkers.get(id + 1)
         } else {
             null
         }

@@ -22,6 +22,10 @@ class ChunkMarker : Control() {
     val isPlacedProperty = SimpleBooleanProperty(true)
     val canBeMovedProperty = SimpleBooleanProperty(true)
 
+    init {
+        visibleProperty().bind(isPlacedProperty)
+    }
+
     override fun createDefaultSkin(): Skin<*> {
         return ChunkMarkerSkin(this)
     }
