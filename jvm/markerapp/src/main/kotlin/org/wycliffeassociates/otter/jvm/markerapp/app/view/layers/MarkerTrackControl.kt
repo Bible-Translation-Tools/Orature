@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.sun.javafx.util.Utils
-import javafx.collections.FXCollections
 import javafx.geometry.Point2D
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
