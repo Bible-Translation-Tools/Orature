@@ -21,7 +21,8 @@ class InitializeApp(
     val collectionRepo: ICollectionRepository,
     val contentRepo: IContentRepository,
     val installedEntityRepo: IInstalledEntityRepository,
-    val zipEntryTreeBuilder: IZipEntryTreeBuilder
+    val zipEntryTreeBuilder: IZipEntryTreeBuilder,
+    val workbookRepository: IWorkbookRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
@@ -73,7 +74,9 @@ class InitializeApp(
                         takeRepo,
                         languageRepo,
                         directoryProvider,
-                        zipEntryTreeBuilder
+                        zipEntryTreeBuilder,
+                        installedEntityRepo,
+                        workbookRepository
                     )
                 )
 

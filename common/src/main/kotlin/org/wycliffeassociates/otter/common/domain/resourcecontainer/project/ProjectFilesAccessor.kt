@@ -14,7 +14,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
@@ -45,6 +45,12 @@ class ProjectFilesAccessor(
         targetMetadata,
         project
     )
+
+    companion object {
+        fun getTakesDirPath(): String {
+            return RcConstants.TAKE_DIR
+        }
+    }
 
     fun copySourceFiles(linkedResource: ResourceMetadata? = null) {
         val target = sourceDir.resolve(sourceMetadata.path.name)
@@ -78,8 +84,8 @@ class ProjectFilesAccessor(
     }
 
     fun copySourceFiles(fileWriter: IFileWriter, linkedResource: ResourceMetadata? = null) {
-        val sources = sequenceOf(sourceMetadata)
-        linkedResource?.let { sources.plus(it) }
+        val sources = mutableListOf(sourceMetadata)
+        linkedResource?.let { sources.add(it) }
 
         sources
             .map { it.path }
@@ -159,7 +165,7 @@ class ProjectFilesAccessor(
     fun copyTakeFiles(
         fileWriter: IFileWriter,
         workbook: Workbook,
-        workbookRepository: WorkbookRepository,
+        workbookRepository: IWorkbookRepository,
         isBook: Boolean
     ) {
         val selectedChapters = selectedChapterFilePaths(workbook, isBook)
@@ -200,7 +206,7 @@ class ProjectFilesAccessor(
             .mapNotNull { audio -> audio.selected.value?.value }
     }
 
-    private fun deletedTakeFilePaths(workbook: Workbook, workbookRepository: WorkbookRepository): List<String> {
+    private fun deletedTakeFilePaths(workbook: Workbook, workbookRepository: IWorkbookRepository): List<String> {
         val deletedTakes = workbookRepository
             .getSoftDeletedTakes(workbook.source)
             .blockingGet()

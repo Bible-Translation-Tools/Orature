@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -17,7 +17,7 @@ class ProjectExporter(
     private val workbook: Workbook,
     private val projectFilesAccessor: ProjectFilesAccessor,
     private val directoryProvider: IDirectoryProvider,
-    private val workbookRepository: WorkbookRepository
+    private val workbookRepository: IWorkbookRepository
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 

@@ -9,4 +9,5 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 interface IWorkbookRepository {
     fun get(source: Collection, target: Collection): Workbook
     fun getSoftDeletedTakes(book: Book): Single<List<Take>>
+    fun getProjects(): Single<List<Workbook>>
 }

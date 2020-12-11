@@ -11,6 +11,7 @@ interface IResourceMetadataRepository : IRepository<ResourceMetadata> {
     fun insert(metadata: ResourceMetadata): Single<Int>
     fun updateSource(metadata: ResourceMetadata, source: ResourceMetadata?): Completable
     fun getSource(metadata: ResourceMetadata): Maybe<ResourceMetadata>
+    fun getAllSources(): Single<List<ResourceMetadata>>
     // These functions are commutative
     fun addLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable
     fun removeLink(firstMetadata: ResourceMetadata, secondMetadata: ResourceMetadata): Completable
