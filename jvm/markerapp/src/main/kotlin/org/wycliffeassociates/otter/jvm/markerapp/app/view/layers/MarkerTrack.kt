@@ -38,17 +38,6 @@ class MarkerTrack(val viewModel: VerseMarkerViewModel) : Region() {
             resetMakers()
         }
 
-//        setOnMouseDragExited {
-//            markerViewList.forEachIndexed { i, marker ->
-//                if(marker.visibleProperty().value) {
-//                    val dragged = marker.draggedProperty.value
-//                    viewModel.markers.findMarkerById(marker.markerIdProperty.value).frame += pixelsToFrames(dragged, scale)
-//                }
-//                marker.draggedProperty.set(0.0)
-//            }
-//            resetMakers()
-//        }
-
         children.addAll(markerViewList)
     }
 

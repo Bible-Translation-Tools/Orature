@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -57,6 +58,23 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
 
     override fun getSoftDeletedTakes(book: Book): Single<List<ModelTake>> {
         return db.getSoftDeletedTakes(book.resourceMetadata, book.slug)
+    }
+
+    override fun getProjects(): Single<List<Workbook>> {
+        return db.getDerivedProjects()
+            .map { projects ->
+                projects.filter { it.resourceContainer?.type == ContainerType.Book }
+            }
+            .flattenAsObservable { it }
+            .flatMapMaybe(::getWorkbook)
+            .toList()
+    }
+
+    private fun getWorkbook(project: Collection): Maybe<Workbook> {
+        return db.getSourceProject(project)
+            .map { sourceProject ->
+                get(sourceProject, project)
+            }
     }
 
     private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
@@ -396,6 +414,8 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getTakeByContent(content: Content): Single<List<ModelTake>>
         fun deleteTake(take: ModelTake, date: DateHolder): Completable
         fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
+        fun getDerivedProjects(): Single<List<Collection>>
+        fun getSourceProject(targetProject: Collection): Maybe<Collection>
     }
 }
 
@@ -433,4 +453,9 @@ private class DefaultDatabaseAccessors(
 
     override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =
         takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
+
+    override fun getDerivedProjects(): Single<List<Collection>> = collectionRepo.getDerivedProjects()
+
+    override fun getSourceProject(targetProject: Collection): Maybe<Collection> =
+        collectionRepo.getSource(targetProject)
 }

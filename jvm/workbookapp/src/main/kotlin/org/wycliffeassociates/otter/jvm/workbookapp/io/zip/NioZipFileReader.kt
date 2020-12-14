@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
 import io.reactivex.Observable
-import org.wycliffeassociates.otter.common.io.zip.IZipFileReader
+import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import java.io.File
 import java.io.InputStream
 import java.nio.file.FileSystem
@@ -11,7 +11,7 @@ import kotlin.streams.asSequence
 
 class NioZipFileReader(
     zipFile: File
-) : IZipFileReader {
+) : IFileReader {
     private val fileSystem: FileSystem = FileSystems.newFileSystem(zipFile.jarUri(), mapOf("create" to "false"))
 
     override fun close() = fileSystem.close()

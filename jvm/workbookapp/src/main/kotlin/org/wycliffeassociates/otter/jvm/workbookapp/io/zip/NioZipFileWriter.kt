@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.io.zip
 
-import org.wycliffeassociates.otter.common.io.zip.IZipFileWriter
+import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import java.io.BufferedWriter
 import java.io.File
 import java.nio.file.FileSystem
@@ -9,7 +9,7 @@ import java.nio.file.Files
 
 class NioZipFileWriter(
     zipFile: File
-) : IZipFileWriter {
+) : IFileWriter {
 
     // useTempFile set to true to reduce memory usage when writing large zip files
     private val fileSystem: FileSystem = FileSystems.newFileSystem(

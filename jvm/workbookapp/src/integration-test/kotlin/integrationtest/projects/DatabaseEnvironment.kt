@@ -42,11 +42,16 @@ class DatabaseEnvironment {
             injector.zipEntryTreeBuilder
         )
 
-    fun import(rcFile: String, importAsStream: Boolean = false): DatabaseEnvironment {
+    fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {
         val result = if (importAsStream) {
             importer.import(rcFile, rcResourceStream(rcFile)).blockingGet()
         } else {
-            importer.import(rcResourceFile(rcFile)).blockingGet()
+            val resourceFile = if (unzip) {
+                unzipProject(rcFile)
+            } else {
+                rcResourceFile(rcFile)
+            }
+            importer.import(resourceFile).blockingGet()
         }
         Assert.assertEquals(
             ImportResult.SUCCESS,
@@ -59,6 +64,14 @@ class DatabaseEnvironment {
         CreateProject(injector.collectionRepo, injector.resourceMetadataRepository)
             .create(sourceProject, targetLanguage)
             .blockingGet()
+
+    fun unzipProject(rcFile: String, dir: File? = null): File {
+        val targetDir = dir ?: createTempDir("orature_unzip")
+        injector.directoryProvider.newFileReader(rcResourceFile(rcFile)).use { fileReader ->
+            fileReader.copyDirectory("/", targetDir)
+        }
+        return targetDir
+    }
 
     fun assertRowCounts(expected: RowCount, message: String? = null): DatabaseEnvironment {
         val actual = RowCount(

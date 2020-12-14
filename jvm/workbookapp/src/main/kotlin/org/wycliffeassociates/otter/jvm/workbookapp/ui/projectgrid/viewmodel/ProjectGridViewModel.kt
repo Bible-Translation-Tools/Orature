@@ -34,23 +34,13 @@ class ProjectGridViewModel : ViewModel() {
     val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
 
     fun loadProjects() {
-        collectionRepo.getDerivedProjects()
-            .toObservable()
+        workbookRepo.getProjects()
             .observeOnFx()
-            .map { derivedProjects ->
-                derivedProjects.filter { it.resourceContainer?.type == ContainerType.Book }
-            }
-            .flatMapIterable { it }
-            .map {
-                getWorkbook(it)
-            }
-            .collectInto(mutableListOf<Maybe<Workbook>>(), { list, item -> list.add(item) })
             .doOnError { e ->
                 logger.error("Error in loading projects", e)
             }
-            .subscribe { derivedProjects ->
-                val bookProjects = derivedProjects.mapNotNull { it.blockingGet() }
-                projects.setAll(bookProjects)
+            .subscribe { _projects ->
+                projects.setAll(_projects)
             }
     }
 
@@ -66,7 +56,7 @@ class ProjectGridViewModel : ViewModel() {
         showDeleteDialogProperty.set(true)
         workbookRepo.closeWorkbook(project)
         DeleteProject(collectionRepo, directoryProvider)
-            .delete(project.target.toCollection(), true)
+            .delete(project, true)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
@@ -79,14 +69,7 @@ class ProjectGridViewModel : ViewModel() {
 
     fun selectProject(workbook: Workbook) {
         workbookViewModel.activeWorkbookProperty.set(workbook)
-        workbook.target.resourceMetadata.let(workbookViewModel::setProjectAudioDirectory)
+        workbook.target.resourceMetadata.let(workbookViewModel::setProjectFilesAccessor)
         navigator.navigateTo(TabGroupType.CHAPTER)
-    }
-
-    private fun getWorkbook(targetProject: Collection): Maybe<Workbook> {
-        return collectionRepo.getSource(targetProject)
-            .map { sourceProject ->
-                workbookRepo.get(sourceProject, targetProject)
-            }
     }
 }

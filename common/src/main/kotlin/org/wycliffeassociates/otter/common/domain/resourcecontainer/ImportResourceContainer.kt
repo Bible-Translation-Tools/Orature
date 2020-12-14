@@ -22,9 +22,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMet
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.nio.file.Files
 
 class ImportResourceContainer(
     private val resourceMetadataRepository: IResourceMetadataRepository,
@@ -39,7 +39,18 @@ class ImportResourceContainer(
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
     fun import(file: File): Single<ImportResult> {
-        logger.info("Importing resource contianer: $file")
+        logger.info("Importing resource container: $file")
+
+        val rcFile = if (file.isDirectory) {
+            val zip = createTempFile(file.name, "zip")
+            directoryProvider.newFileWriter(zip).use { fileWriter ->
+                fileWriter.copyDirectory(file, "/")
+            }
+            zip
+        } else {
+            file
+        }
+
         val projectImporter = ProjectImporter(
             this,
             directoryProvider,
@@ -50,50 +61,51 @@ class ImportResourceContainer(
             languageRepository
         )
 
-        val valid = validateRc(file)
+        val valid = validateRc(rcFile)
         if (!valid) {
-            logger.error("Import failed, $file is an invalid RC")
+            logger.error("Import failed, $rcFile is an invalid RC")
             return Single.just(ImportResult.INVALID_RC)
         }
 
-        val resumable = projectImporter.isResumableProject(file)
+        val resumable = projectImporter.isResumableProject(rcFile)
         return if (resumable) {
             logger.info("Importing rc as a resumable project")
-            projectImporter.importResumableProject(file)
+            projectImporter.importResumableProject(rcFile)
         } else {
-            val exists = isAlreadyImported(file)
+            val exists = isAlreadyImported(rcFile)
             if (exists) {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
-                    val existingRC = getExistingMetadata(file)
+                    val existingRC = getExistingMetadata(rcFile)
                     MediaMerge(
                         directoryProvider,
-                        ResourceContainer.load(file),
+                        ResourceContainer.load(rcFile),
                         ResourceContainer.load(existingRC.path)
                     ).merge()
                     ImportResult.SUCCESS
                 }
             } else {
                 logger.info("RC not already imported, importing...")
-                importContainer(file)
+                importContainer(rcFile)
             }
         }
     }
 
     fun import(filename: String, stream: InputStream): Single<ImportResult> {
-        val tempFile = File.createTempFile(filename, ".zip")
+        val outFile = createTempFile(filename, "zip")
+
         return Single
             .fromCallable {
-                stream.transferTo(FileOutputStream(tempFile))
+                stream.transferTo(outFile.outputStream())
             }
             .flatMap {
-                import(tempFile)
+                import(outFile)
             }
             .doOnError { e ->
                 logger.error("Error in import, filename: $filename", e)
             }
             .doFinally {
-                tempFile.delete()
+                outFile.parentFile.deleteRecursively()
             }
             .subscribeOn(Schedulers.io())
     }
@@ -259,5 +271,13 @@ class ImportResourceContainer(
             parent.addChild(projectTree)
         }
         return root
+    }
+
+    private fun createTempFile(name: String, extension: String): File {
+        val tempDir = Files.createTempDirectory("orature_temp")
+        val tempPath = tempDir.resolve("$name.$extension")
+        val tempFile = tempPath.toFile()
+        tempFile.deleteOnExit()
+        return tempFile
     }
 }

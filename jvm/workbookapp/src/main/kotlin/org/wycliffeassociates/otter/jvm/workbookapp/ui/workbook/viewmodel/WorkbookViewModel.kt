@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
 
+import io.reactivex.Completable
 import io.reactivex.Maybe
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
@@ -10,16 +12,17 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.Callable
 
 class WorkbookViewModel : ViewModel() {
     private val injector: Injector by inject()
     private val directoryProvider = injector.directoryProvider
+    private val workbookRepository = injector.workbookRepository
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -40,10 +43,10 @@ class WorkbookViewModel : ViewModel() {
     val activeResourceMetadata
         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
-    val activeProjectAudioDirectoryProperty = SimpleObjectProperty<File>()
-    val activeProjectAudioDirectory: File
-        get() = activeProjectAudioDirectoryProperty.value
-            ?: throw IllegalStateException("Project audio directory is null")
+    val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
+    val activeProjectFilesAccessor: ProjectFilesAccessor
+        get() = activeProjectFilesAccessorProperty.value
+            ?: throw IllegalStateException("Project files is null")
 
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
@@ -53,13 +56,30 @@ class WorkbookViewModel : ViewModel() {
         activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
     }
 
-    fun setProjectAudioDirectory(resourceMetadata: ResourceMetadata) {
-        val projectAudioDir = directoryProvider.getProjectAudioDirectory(
-            source = workbook.source.resourceMetadata,
-            target = resourceMetadata,
-            bookSlug = workbook.target.slug
+    fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {
+        val projectFilesAccessor = ProjectFilesAccessor(
+            directoryProvider,
+            workbook.source.resourceMetadata,
+            resourceMetadata,
+            workbook.target.toCollection()
         )
-        activeProjectAudioDirectoryProperty.set(projectAudioDir)
+        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
+
+        val linkedResource = workbook.source.linkedResources
+            .firstOrNull { it.identifier ==  resourceMetadata.identifier}
+
+        activeProjectFilesAccessor.initializeResourceContainerInDir()
+        activeProjectFilesAccessor.copySourceFiles(linkedResource)
+        activeProjectFilesAccessor.createSelectedTakesFile()
+    }
+
+    fun updateSelectedTakesFile() {
+        Completable.fromCallable {
+            val projectIsBook = activeResourceMetadata.identifier == workbook.target.resourceMetadata.identifier
+            activeProjectFilesAccessor.writeSelectedTakesFile(workbook, projectIsBook)
+        }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     fun updateSourceAudio() {
