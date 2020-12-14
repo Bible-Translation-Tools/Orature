@@ -28,10 +28,6 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         markers = initializeMarkers(markerTotal, cues)
     }
 
-    fun findMarkerById(id: Int): ChunkMarkerModel {
-        return markers.find { id == id }!!
-    }
-
     fun addMarker(location: Int) {
         changesSaved = false
         for (marker in markers) {
@@ -120,20 +116,9 @@ data class ChunkMarkerModel(
     var label: String,
     var placed: Boolean
 ) {
-
-    val id = allocateId()
-
     constructor(wavCue: WavCue) : this(wavCue.location, wavCue.label, true)
 
     fun toWavCue(): WavCue {
         return WavCue(frame, label)
-    }
-
-    private companion object {
-        var counter = 0
-
-        fun allocateId(): Int {
-            return counter++
-        }
     }
 }
