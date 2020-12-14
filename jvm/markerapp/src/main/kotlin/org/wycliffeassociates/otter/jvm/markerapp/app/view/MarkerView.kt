@@ -40,7 +40,6 @@ class MarkerView : PluginEntrypoint() {
         prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
-        val emptyConstraint = RowConstraints()
         val fixedConstraint = RowConstraints()
         val growConstraint = RowConstraints()
         val columnConstraint = ColumnConstraints()
