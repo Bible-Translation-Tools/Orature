@@ -44,14 +44,6 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             }
         }
 
-        control.player.onChangeAndDoNow { _player ->
-            _player?.let { player ->
-                player.getAudioReader()?.let { reader ->
-                    reader.seek(0)
-                }
-            }
-        }
-
         children.add(root)
 
         control.thumbFillProperty.onChangeAndDoNow {
