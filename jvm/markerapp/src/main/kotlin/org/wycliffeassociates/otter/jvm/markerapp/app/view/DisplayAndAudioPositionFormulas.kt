@@ -16,14 +16,14 @@ internal fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
     return (x * msInPixels).toInt()
 }
 
-internal fun pixelsToFrames(pixels: Double, width: Int, secondsOnScreen: Int): Int {
+internal fun pixelsToFrames(pixels: Double): Int {
     val framerate = 44100
     val framesOnScreen = SECONDS_ON_SCREEN * framerate
     val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()
     return (pixels * framesInPixel).toInt()
 }
 
-internal fun framesToPixels(frames: Int, width: Int, secondsOnScreen: Int): Int {
+internal fun framesToPixels(frames: Int): Int {
     val framerate = 44100
     val framesOnScreen = SECONDS_ON_SCREEN * framerate
     val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()

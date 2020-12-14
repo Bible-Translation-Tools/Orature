@@ -40,9 +40,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 marker.isPlacedProperty.set(chunkMarker.placed)
                 marker.markerPositionProperty.set(
                     framesToPixels(
-                        chunkMarker.frame,
-                        skinnable.width.toInt(),
-                        SECONDS_ON_SCREEN
+                        chunkMarker.frame
                     ).toDouble()
                 )
                 marker.markerNumberProperty.set(chunkMarker.label)
@@ -54,9 +52,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         control.markers.forEachIndexed { i, mk ->
             val marker = ChunkMarker().apply {
                 val pixel = framesToPixels(
-                    mk.frame,
-                    this@MarkerTrackControlSkin.skinnable.prefWidth.toInt(),
-                    SECONDS_ON_SCREEN
+                    mk.frame
                 ).toDouble()
 
                 isPlacedProperty.set(mk.placed)
@@ -107,9 +103,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                         translateX = it.toDouble()
                         if (trackWidth > 0) {
                             control.markers.get(i).frame = pixelsToFrames(
-                                it.toDouble(),
-                                trackWidth.toInt(),
-                                SECONDS_ON_SCREEN
+                                it.toDouble()
                             )
                         }
                     }
