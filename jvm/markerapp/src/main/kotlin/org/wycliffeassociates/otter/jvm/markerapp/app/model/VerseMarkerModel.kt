@@ -6,14 +6,13 @@ import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.audio.wav.WavCue
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import tornadofx.isInt
-import java.lang.Integer.min
 
 private const val SEEK_EPSILON = 100
 
 class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
     val cues = sanitizeCues(audio)
-    val markers: List<ChunkMarker>
+    val markers: List<ChunkMarkerModel>
 
     val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
@@ -29,7 +28,7 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         markers = initializeMarkers(markerTotal, cues)
     }
 
-    fun findMarkerById(id: Int): ChunkMarker {
+    fun findMarkerById(id: Int): ChunkMarkerModel {
         return markers.find { id == id }!!
     }
 
@@ -99,24 +98,24 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         return audio.metadata.getCues().filter { it.label.isInt() }
     }
 
-    private fun initializeMarkers(markerTotal: Int, cues: List<WavCue>): List<ChunkMarker> {
+    private fun initializeMarkers(markerTotal: Int, cues: List<WavCue>): List<ChunkMarkerModel> {
         cues as MutableList
         cues.sortBy { it.location }
 
-        val markers = mutableListOf<ChunkMarker>()
+        val markers = mutableListOf<ChunkMarkerModel>()
         for ((idx, cue) in cues.withIndex()) {
             if (idx < markerTotal) {
-                markers.add(ChunkMarker(cue))
+                markers.add(ChunkMarkerModel(cue))
             }
         }
         for (i in markers.size until markerTotal) {
-            markers.add(ChunkMarker(0, (i + 1).toString(), false))
+            markers.add(ChunkMarkerModel(0, (i + 1).toString(), false))
         }
         return markers
     }
 }
 
-data class ChunkMarker(
+data class ChunkMarkerModel(
     var frame: Int,
     var label: String,
     var placed: Boolean

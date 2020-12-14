@@ -14,9 +14,7 @@ import org.wycliffeassociates.otter.jvm.controls.skins.ChunkMarkerSkin
 
 class ChunkMarker : Control() {
 
-    val dragStartedX = SimpleDoubleProperty(0.0)
     val markerIdProperty = SimpleIntegerProperty(0)
-    val value = SimpleDoubleProperty(0.0)
     val markerPositionProperty = SimpleDoubleProperty(0.0)
     val markerNumberProperty = SimpleStringProperty("1")
     val isPlacedProperty = SimpleBooleanProperty(true)

@@ -7,13 +7,14 @@ import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.framesToPixels
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class MarkerTrackControl(val markers: List<org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarker>) :
+class MarkerTrackControl(val markers: List<ChunkMarkerModel>) :
     Control() {
 
     fun refreshMarkers() {
