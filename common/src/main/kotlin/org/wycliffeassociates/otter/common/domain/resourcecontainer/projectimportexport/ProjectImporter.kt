@@ -246,15 +246,21 @@ class ProjectImporter(
                     chapterCollection.slug.endsWith("_$chapter")
                 }
 
+            val metaOrHelpStartVerse = when(type) {
+                ContentType.META -> 1
+                else -> 0
+            }
+
             val content: Maybe<Content> = collection
                 .flatMap {
                     contentRepository.getByCollection(it).flattenAsObservable { it }
                 }
                 // If type isn't specified in filename, match on TEXT.
                 .filter { content -> content.type == (type ?: ContentType.TEXT) }
-                // If verse number isn't specified in filename, assume chapter helps (verse 0).
-                .filter { content -> content.start == (verse ?: 0) }
-                // If sort isn't specified in filename, DON'T filter on it, because we only need it for helps.
+                // If verse number isn't specified in filename, assume chapter helps or meta.
+                .filter { content -> content.start == (verse ?: metaOrHelpStartVerse) }
+                // If sort isn't specified in filename,
+                // DON'T filter on it, because we only need it for helps and meta.
                 .filter { content -> sort?.let { content.sort == sort } ?: true }
                 .firstElement()
 
