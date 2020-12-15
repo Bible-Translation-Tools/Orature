@@ -65,7 +65,8 @@ class TestInitializeProjects {
             inj.directoryProvider,
             inj.zipEntryTreeBuilder,
             inj.installedEntityRepository,
-            inj.workbookRepository
+            inj.workbookRepository,
+            inj.resourceRepository
         )
         init
             .exec()
