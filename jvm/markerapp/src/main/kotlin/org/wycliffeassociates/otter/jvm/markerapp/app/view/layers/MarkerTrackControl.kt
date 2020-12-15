@@ -10,7 +10,6 @@ import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.framesToPixels
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -124,15 +123,15 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
     fun updateValue(id: Int, position: Double) {
         val newValue: Double = position * skinnable.width
-        if (!java.lang.Double.isNaN(newValue)) {
-            val min = getMin(id, position)
-            val max = getMax(id, position)
+        if (!newValue.isNaN()) {
+            val min = getMin(id)
+            val max = getMax(id)
             val clamped = Utils.clamp(min, newValue, max)
             markers.get(id).markerPositionProperty.set(clamped)
         }
     }
 
-    fun getMin(id: Int, position: Double): Double {
+    fun getMin(id: Int): Double {
         val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id > 0) {
             placedMarkers.get(id - 1)
@@ -144,7 +143,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         } ?: 0.0
     }
 
-    fun getMax(id: Int, position: Double): Double {
+    fun getMax(id: Int): Double {
         val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id < placedMarkers.size - 1) {
             placedMarkers.get(id + 1)

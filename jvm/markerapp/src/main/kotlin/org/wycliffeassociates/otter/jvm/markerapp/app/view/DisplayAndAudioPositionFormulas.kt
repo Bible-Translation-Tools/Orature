@@ -30,7 +30,3 @@ internal fun framesToPixels(frames: Int): Int {
     val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()
     return (frames / framesInPixel).toInt()
 }
-
-internal fun pixelsToFrames(pixels: Double, scale: Double): Int {
-    return (pixels * scale).toInt()
-}
