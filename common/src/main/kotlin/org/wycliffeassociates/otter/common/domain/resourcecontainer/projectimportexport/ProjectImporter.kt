@@ -268,7 +268,10 @@ class ProjectImporter(
                 .flatMap {
                     contentRepository.getByCollection(it).flattenAsObservable { it }
                 }
+                // If we have help resource chunks, filter to linked TEXT chunks
                 .filter { if (isHelpVerse) it.type == ContentType.TEXT else true }
+                // If we have help resource chunks, fetch resources by linked TEXT chunk
+                // and related resource container
                 .flatMap { if (isHelpVerse) resourceRepository.getResources(it, metadata) else Observable.just(it) }
                 // If type isn't specified in filename, match on TEXT.
                 .filter { content -> content.type == (type ?: ContentType.TEXT) }
