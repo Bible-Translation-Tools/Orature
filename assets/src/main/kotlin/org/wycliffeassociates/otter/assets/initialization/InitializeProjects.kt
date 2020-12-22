@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
@@ -32,6 +33,7 @@ class InitializeProjects(
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
     private val installedEntityRepo: IInstalledEntityRepository,
     private val workbookRepository: IWorkbookRepository,
+    private val resourceRepository: IResourceRepository,
     private val rcImporter: ImportResourceContainer = ImportResourceContainer(
         resourceMetadataRepo,
         resourceContainerRepo,
@@ -40,7 +42,8 @@ class InitializeProjects(
         takeRepo,
         languageRepo,
         directoryProvider,
-        zipEntryTreeBuilder
+        zipEntryTreeBuilder,
+        resourceRepository
     )
 ): Installable {
     override val name = "PROJECTS"

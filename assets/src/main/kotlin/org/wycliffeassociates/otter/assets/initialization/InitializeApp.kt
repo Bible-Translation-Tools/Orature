@@ -7,7 +7,16 @@ import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.*
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 
 class InitializeApp(
     val preferences: IAppPreferences,
@@ -22,7 +31,8 @@ class InitializeApp(
     val contentRepo: IContentRepository,
     val installedEntityRepo: IInstalledEntityRepository,
     val zipEntryTreeBuilder: IZipEntryTreeBuilder,
-    val workbookRepository: IWorkbookRepository
+    val workbookRepository: IWorkbookRepository,
+    val resourceRepository: IResourceRepository
 ) {
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
@@ -44,7 +54,8 @@ class InitializeApp(
                         takeRepo,
                         languageRepo,
                         directoryProvider,
-                        zipEntryTreeBuilder
+                        zipEntryTreeBuilder,
+                        resourceRepository
                     ),
                     InitializeRecorder(
                         directoryProvider,
@@ -70,7 +81,8 @@ class InitializeApp(
                         directoryProvider,
                         zipEntryTreeBuilder,
                         installedEntityRepo,
-                        workbookRepository
+                        workbookRepository,
+                        resourceRepository
                     )
                 )
 

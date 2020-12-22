@@ -29,7 +29,8 @@ class SplashScreenViewModel : ViewModel() {
         injector.contentRepository,
         injector.installedEntityRepository,
         injector.zipEntryTreeBuilder,
-        injector.workbookRepository
+        injector.workbookRepository,
+        injector.resourceRepository
     )
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)
