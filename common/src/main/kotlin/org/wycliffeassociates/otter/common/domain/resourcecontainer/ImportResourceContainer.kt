@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepo
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -34,7 +35,8 @@ class ImportResourceContainer(
     private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val directoryProvider: IDirectoryProvider,
-    private val zipEntryTreeBuilder: IZipEntryTreeBuilder
+    private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
+    private val resourceRepository: IResourceRepository
 ) {
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
@@ -58,7 +60,8 @@ class ImportResourceContainer(
             collectionRepository,
             contentRepository,
             takeRepository,
-            languageRepository
+            languageRepository,
+            resourceRepository
         )
 
         val valid = validateRc(rcFile)

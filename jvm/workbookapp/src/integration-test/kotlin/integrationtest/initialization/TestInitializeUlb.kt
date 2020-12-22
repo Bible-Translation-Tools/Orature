@@ -23,7 +23,8 @@ class TestInitializeUlb {
             inj.takeRepository,
             inj.languageRepo,
             inj.directoryProvider,
-            inj.zipEntryTreeBuilder
+            inj.zipEntryTreeBuilder,
+            inj.resourceRepository
         )
         init
             .exec()
