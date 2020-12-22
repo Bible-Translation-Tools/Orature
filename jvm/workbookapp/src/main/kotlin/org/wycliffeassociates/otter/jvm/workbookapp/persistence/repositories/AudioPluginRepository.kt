@@ -166,7 +166,29 @@ class AudioPluginRepository(
             }
 
     override fun getRecorder(): Maybe<IAudioPlugin> = getRecorderData().map { AudioPlugin(it) }
-
     override fun setRecorderData(default: AudioPluginData): Completable =
         if (default.canRecord) preferences.setRecorderPluginId(default.id) else Completable.complete()
+
+    override fun setMarkerData(default: AudioPluginData): Completable {
+        return if (default.canMark) preferences.setMarkerPluginId(default.id) else Completable.complete()
+    }
+
+    override fun getMarkerData(): Maybe<AudioPluginData> =
+        preferences.markerPluginId()
+            .flatMapMaybe { markerId ->
+                if (markerId == AppPreferences.NO_ID)
+                    Maybe.empty()
+                else {
+                    Maybe.fromCallable {
+                        mapper.mapFromEntity(audioPluginDao.fetchById(markerId))
+                    }
+                        .onErrorComplete()
+                        .subscribeOn(Schedulers.io())
+                }
+            }
+            .doOnError { e ->
+                logger.error("Error in getMarkerData", e)
+            }
+
+    override fun getMarker(): Maybe<IAudioPlugin> = getMarkerData().map { AudioPlugin(it) }
 }

@@ -13,6 +13,7 @@ class MinimapFragment : Fragment() {
     val viewModel: VerseMarkerViewModel by inject()
 
     val slider = AudioSlider().apply {
+        waveformImageProperty.bind(viewModel.waveformImageProperty)
         player.set(viewModel.audioPlayer)
         secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
     }

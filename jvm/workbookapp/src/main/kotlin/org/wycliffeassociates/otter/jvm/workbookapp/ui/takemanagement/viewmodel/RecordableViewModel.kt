@@ -16,10 +16,12 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.EditTake
+import org.wycliffeassociates.otter.common.domain.content.MarkTake
 import org.wycliffeassociates.otter.common.domain.content.RecordTake
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.MarkerTakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -135,6 +137,31 @@ open class RecordableViewModel(
             }
     }
 
+    fun markTake(markTakeEvent: MarkerTakeEvent) {
+        contextProperty.set(TakeContext.MARK_TAKES)
+        currentTakeNumberProperty.set(markTakeEvent.take.number)
+        audioPluginViewModel
+            .getMarker()
+            .flatMapSingle { plugin ->
+                showPluginActive = !plugin.isNativePlugin()
+                audioPluginViewModel.mark(markTakeEvent.take)
+            }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in marking take", e)
+            }
+            .onErrorReturn { MarkTake.Result.NO_EDITOR }
+            .subscribe { result: MarkTake.Result ->
+                showPluginActive = false
+                currentTakeNumberProperty.set(null)
+                fire(PluginClosedEvent)
+                when (result) {
+                    MarkTake.Result.NO_EDITOR -> snackBarObservable.onNext(messages["noEditor"])
+                    MarkTake.Result.SUCCESS -> markTakeEvent.onComplete()
+                }
+            }
+    }
+
     fun selectTake(take: Take?) {
         if (take != null) {
             // selectedTakeProperty will be updated when the relay emits the item that it accepts
@@ -200,12 +227,16 @@ open class RecordableViewModel(
                     TakeContext.EDIT_TAKES -> {
                         audioPluginViewModel.selectedEditorProperty.get().name
                     }
+                    TakeContext.MARK_TAKES -> {
+                        audioPluginViewModel.selectedMarkerProperty.get().name
+                    }
                     null -> throw IllegalStateException("Action is not supported!")
                 }
             },
             contextProperty,
             audioPluginViewModel.selectedRecorderProperty,
-            audioPluginViewModel.selectedEditorProperty
+            audioPluginViewModel.selectedEditorProperty,
+            audioPluginViewModel.selectedMarkerProperty
         )
     }
 
@@ -324,6 +355,7 @@ open class RecordableViewModel(
             ap,
             FX.messages["edit"].capitalize(),
             FX.messages["delete"].capitalize(),
+            FX.messages["marker"].capitalize(),
             FX.messages["play"].capitalize(),
             FX.messages["pause"].capitalize()
         )

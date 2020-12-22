@@ -1,3 +1,5 @@
+branches:
+  only: dev
 language: java
 dist: bionic
 jdk:

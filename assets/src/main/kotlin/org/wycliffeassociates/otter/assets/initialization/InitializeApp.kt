@@ -54,6 +54,12 @@ class InitializeApp(
                         installedEntityRepo,
                         preferences
                     ),
+                    InitializeMarker(
+                        directoryProvider,
+                        pluginRepository,
+                        installedEntityRepo,
+                        preferences
+                    ),
                     InitializePlugins(
                         directoryProvider,
                         audioPluginRegistrar,
