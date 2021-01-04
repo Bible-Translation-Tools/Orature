@@ -14,7 +14,7 @@ import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkers
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -28,7 +28,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
-    val markers: VerseMarkers
+    val markers: VerseMarkerModel
     val audioPlayer = AudioBufferPlayer()
     var audioController: AudioPlayerController? = null
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -52,7 +52,7 @@ class VerseMarkerViewModel : ViewModel() {
             scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
         headerTitle.set(scope.parameters.named["action_title"])
         headerSubtitle.set(scope.parameters.named["content_title"])
-        markers = VerseMarkers(wav, totalMarkers)
+        markers = VerseMarkerModel(wav, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("$it/$totalMarkers")
         }

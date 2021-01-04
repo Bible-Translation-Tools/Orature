@@ -11,11 +11,16 @@ class WaveformContainer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
     val mainWaveform: MainWaveform
-    val markerTrack: MarkerTrack
+    val markerTrack: MarkerTrackControl
     val timecodeHolder: TimecodeHolder
 
     init {
-        markerTrack = MarkerTrack(viewModel).apply { prefWidth = viewModel.imageWidth }
+        markerTrack = MarkerTrackControl(viewModel.markers.markers).apply {
+            prefWidth = viewModel.imageWidth
+            viewModel.markers.markerCountProperty.onChange {
+                refreshMarkers()
+            }
+        }
         timecodeHolder = TimecodeHolder(viewModel, 50.0)
         mainWaveform = MainWaveform(viewModel)
 
@@ -42,5 +47,7 @@ class WaveformContainer : Fragment() {
                     viewModel
                 )
             )
+            add(WaveformOverlay(viewModel))
+            add(PlaceMarkerLayer(viewModel))
         }
 }

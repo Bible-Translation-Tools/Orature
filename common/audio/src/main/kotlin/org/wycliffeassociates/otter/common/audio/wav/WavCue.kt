@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.audio.wav
 
 data class WavCue(
-    val location: Int,
-    val label: String
+    var location: Int,
+    var label: String
 )
