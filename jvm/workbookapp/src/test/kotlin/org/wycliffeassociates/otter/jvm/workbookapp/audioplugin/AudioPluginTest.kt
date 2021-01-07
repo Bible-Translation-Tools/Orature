@@ -22,6 +22,7 @@ class AudioPluginTest {
         "3.4.2",
         true,
         false,
+        false,
         "bash",
         listOf("-c", "echo hello"),
         exe
@@ -31,6 +32,7 @@ class AudioPluginTest {
         "Beethoven",
         "3.4.2",
         true,
+        false,
         false,
         "./my-missing-executable",
         listOf("hello"),

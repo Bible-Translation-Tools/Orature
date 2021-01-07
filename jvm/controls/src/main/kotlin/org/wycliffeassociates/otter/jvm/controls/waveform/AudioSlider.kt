@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Skin
 import javafx.scene.control.Slider
+import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -16,6 +17,7 @@ class AudioSlider(
     value: Double = 0.0
 ) : Slider(min, max, value) {
 
+    val waveformImageProperty = SimpleObjectProperty<Image>()
     val thumbFillProperty = SimpleObjectProperty<Paint>(Paint.valueOf("#00000015"))
     val thumbLineColorProperty = SimpleObjectProperty<Paint>(Color.BLACK)
     val secondsToHighlightProperty = SimpleIntegerProperty(1)

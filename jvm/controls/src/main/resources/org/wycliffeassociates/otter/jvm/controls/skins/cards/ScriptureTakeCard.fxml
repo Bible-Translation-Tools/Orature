@@ -67,6 +67,17 @@
                   <String fx:value="card--scripture-take__btn--edit" />
                </styleClass>
             </JFXButton>
+            <JFXButton fx:id="markerBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Marker" HBox.hgrow="ALWAYS">
+               <graphic>
+                  <FontIcon iconLiteral="gmi-bookmark" styleClass="card--scripture-take__btn" />
+               </graphic>
+               <font>
+                  <Font name="System Bold" />
+               </font>
+               <styleClass>
+                  <String fx:value="card--scripture-take__btn" />
+               </styleClass>
+            </JFXButton>
          </children>
       </HBox>
    </children>

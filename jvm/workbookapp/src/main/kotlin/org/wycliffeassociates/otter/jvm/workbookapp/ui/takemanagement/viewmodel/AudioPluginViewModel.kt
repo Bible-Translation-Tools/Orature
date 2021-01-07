@@ -25,13 +25,17 @@ class AudioPluginViewModel : ViewModel() {
     private val launchPlugin = LaunchPlugin(pluginRepository)
     private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
     private val editTake = EditTake(launchPlugin)
+    private val markTake = MarkTake(launchPlugin)
 
     fun getRecorder() = pluginRepository.getRecorder()
     fun getEditor() = pluginRepository.getEditor()
+    fun getMarker() = pluginRepository.getMarker()
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
+    val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
+
 
     fun record(recordable: Recordable): Single<RecordTake.Result> {
         val params = constructPluginParameters()
@@ -43,13 +47,14 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    private fun constructPluginParameters(): PluginParameters {
+    private fun constructPluginParameters(action: String = ""): PluginParameters {
         val workbook = workbookViewModel.workbook
         val sourceAudio = workbookViewModel.getSourceAudio()
         val sourceText = workbookViewModel.getSourceText().blockingGet()
 
         val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
         val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
+        val verseTotal = workbookViewModel.activeChapterProperty.value.chunks.blockingLast().end
         val chunkLabel = workbookViewModel.activeChunkProperty.value?.let {
             messages[workbookViewModel.activeChunkProperty.value.label]
         }
@@ -63,13 +68,15 @@ class AudioPluginViewModel : ViewModel() {
             bookTitle = workbook.target.title,
             chapterLabel = chapterLabel,
             chapterNumber = chapterNumber,
+            verseTotal = verseTotal,
             chunkLabel = chunkLabel,
             chunkNumber = chunkNumber,
             resourceLabel = resourceLabel,
             sourceChapterAudio = sourceAudio?.file,
             sourceChunkStart = sourceAudio?.start,
             sourceChunkEnd = sourceAudio?.end,
-            sourceText = sourceText
+            sourceText = sourceText,
+            actionText = action
         )
     }
 
@@ -86,6 +93,11 @@ class AudioPluginViewModel : ViewModel() {
     fun edit(take: Take): Single<EditTake.Result> {
         val params = constructPluginParameters()
         return editTake.edit(take, params)
+    }
+
+    fun mark(take: Take): Single<MarkTake.Result> {
+        val params = constructPluginParameters(messages["markAction"])
+        return markTake.mark(take, params)
     }
 
     fun audioPlayer(): IAudioPlayer = injector.audioPlayer

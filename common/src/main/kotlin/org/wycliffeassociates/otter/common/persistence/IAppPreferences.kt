@@ -13,4 +13,6 @@ interface IAppPreferences {
     fun setEditorPluginId(id: Int): Completable
     fun recorderPluginId(): Single<Int>
     fun setRecorderPluginId(id: Int): Completable
+    fun markerPluginId(): Single<Int>
+    fun setMarkerPluginId(id: Int): Completable
 }

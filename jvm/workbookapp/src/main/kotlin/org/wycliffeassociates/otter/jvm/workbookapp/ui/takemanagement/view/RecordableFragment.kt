@@ -16,6 +16,7 @@ import javafx.util.Duration
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.MarkerTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
@@ -124,6 +125,10 @@ abstract class RecordableFragment(
         addEventHandler(EditTakeEvent.EDIT_TAKE) {
             closePlayers()
             recordableViewModel.editTake(it)
+        }
+        addEventHandler(MarkerTakeEvent.MARK_TAKE) {
+            closePlayers()
+            recordableViewModel.markTake(it)
         }
     }
 

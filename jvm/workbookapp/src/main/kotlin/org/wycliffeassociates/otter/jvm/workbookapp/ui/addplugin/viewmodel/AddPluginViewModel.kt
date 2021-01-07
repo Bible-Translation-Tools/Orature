@@ -75,6 +75,7 @@ class AddPluginViewModel : ViewModel() {
                 "1.0.0",
                 canEdit,
                 canRecord,
+                false,
                 path,
                 listOf(),
                 null

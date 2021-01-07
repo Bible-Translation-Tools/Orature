@@ -3,6 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 import javafx.collections.FXCollections
 import dev.jbs.gridview.control.GridView
 import impl.dev.jbs.gridview.skin.GridViewSkin
+import javafx.beans.binding.BooleanBinding
+import javafx.beans.property.BooleanProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
@@ -11,13 +13,14 @@ import tornadofx.*
 import kotlin.math.pow
 
 class ScriptureTakesGridView(
+    val contentIsMarkable: BooleanBinding,
     val recordNewTake: () -> Unit
 ) : GridView<Pair<TakeCardType, TakeCardModel?>>() {
 
     val gridItems = FXCollections.observableArrayList<TakeCardModel>()
 
     init {
-        setCellFactory { ScriptureTakesGridCell(recordNewTake) }
+        setCellFactory { ScriptureTakesGridCell(recordNewTake, contentIsMarkable) }
         cellHeightProperty().set(148.0)
         cellWidthProperty().set(332.0)
 

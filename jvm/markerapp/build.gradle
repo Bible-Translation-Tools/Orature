@@ -42,3 +42,12 @@ dependencies {
     implementation project(':jvm:workbookplugin')
     implementation project(':jvm:utils')
 }
+
+task copyJarToWorkbookAppResources(type: Copy) {
+    dependsOn 'jar'
+    from jar
+    into '../workbookapp/src/main/resources/plugins/jars'
+    rename 'markerapp.jar', 'markerapp'
+}
+
+test.dependsOn 'copyJarToWorkbookAppResources'
