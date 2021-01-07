@@ -15,7 +15,7 @@ class WaveformContainer : Fragment() {
     val timecodeHolder: TimecodeHolder
 
     init {
-        markerTrack = MarkerTrackControl(viewModel.markers.markers).apply {
+        markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
             prefWidth = viewModel.imageWidth
             viewModel.markers.markerCountProperty.onChange {
                 refreshMarkers()

@@ -3,11 +3,14 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Paint
+import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
@@ -52,6 +55,20 @@ class WaveformFrame(
 
                         fitToParentHeight()
                         add(mainWaveform)
+                        viewModel.markers.highlightState.forEach {
+                            add(
+                                Rectangle().apply {
+                                    managedProperty().set(false)
+                                    heightProperty().bind(this@stackpane.heightProperty())
+                                    widthProperty().bind(it.width)
+                                    translateXProperty().bind(it.translate)
+                                    visibleProperty().bind(it.visibility)
+                                    it.color.onChangeAndDoNow {
+                                        fill = Paint.valueOf(it)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }

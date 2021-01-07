@@ -3,9 +3,11 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 import javafx.beans.binding.Bindings
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
+import javafx.scene.paint.Paint
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformOverlay(val viewModel: VerseMarkerViewModel) : StackPane() {
@@ -13,6 +15,7 @@ class WaveformOverlay(val viewModel: VerseMarkerViewModel) : StackPane() {
     init {
         isMouseTransparent = true
         alignment = Pos.BOTTOM_CENTER
+
         add(
             Rectangle().apply {
                 styleClass.add("vm-waveform-holder--played")
