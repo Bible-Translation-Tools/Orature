@@ -19,6 +19,7 @@ import java.net.URLClassLoader
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
 import java.net.URL
+import java.text.MessageFormat
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
@@ -101,13 +102,22 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     "--book=${pluginParameters.bookTitle}",
                     "--chapter=${pluginParameters.chapterLabel}",
                     "--chapter_number=${pluginParameters.chapterNumber}",
+                    "--marker_total=${pluginParameters.verseTotal}",
                     (if (pluginParameters.chunkLabel != null) "--unit=${pluginParameters.chunkLabel}" else ""),
                     (if (pluginParameters.chunkNumber != null) "--unit_number=${pluginParameters.chunkNumber}" else ""),
-                    (if (pluginParameters.resourceLabel != null)"--resource=${pluginParameters.resourceLabel}" else ""),
+                    (if (pluginParameters.resourceLabel != null) "--resource=${pluginParameters.resourceLabel}" else ""),
                     "--chapter_audio=${pluginParameters.sourceChapterAudio?.absolutePath}",
                     "--source_chunk_start=${pluginParameters.sourceChunkStart}",
                     "--source_chunk_end=${pluginParameters.sourceChunkEnd}",
-                    "--source_text=${pluginParameters.sourceText}"
+                    "--source_text=${pluginParameters.sourceText}",
+                    "--action_title=${pluginParameters.actionText}",
+                    "--content_title=${
+                        MessageFormat.format(
+                            FX.messages["bookChapterTitle"],
+                            pluginParameters.bookTitle,
+                            pluginParameters.chapterNumber
+                        )
+                    }"
                 )
             }
         return ParametersImpl(insertedArgs)
@@ -162,8 +172,8 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                 appWorkspace.navigateBack()
             }
         }
-        val plugin = find(pluginClass, scope)
         Platform.runLater {
+            val plugin = find(pluginClass, scope)
             appWorkspace.dock(plugin)
         }
         synchronized(monitor) {

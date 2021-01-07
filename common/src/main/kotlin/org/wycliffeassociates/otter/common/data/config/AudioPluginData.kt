@@ -8,6 +8,7 @@ data class AudioPluginData(
     var version: String,
     var canEdit: Boolean,
     var canRecord: Boolean,
+    var canMark: Boolean,
     var executable: String,
     var args: List<String>,
     var pluginFile: File?

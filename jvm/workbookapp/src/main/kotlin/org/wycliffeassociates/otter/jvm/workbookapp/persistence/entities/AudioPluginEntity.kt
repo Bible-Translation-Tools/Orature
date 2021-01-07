@@ -8,5 +8,6 @@ data class AudioPluginEntity(
     var args: String,
     var edit: Int,
     var record: Int,
+    var mark: Int,
     var path: String?
 )

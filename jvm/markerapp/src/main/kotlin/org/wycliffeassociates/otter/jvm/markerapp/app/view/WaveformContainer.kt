@@ -1,10 +1,9 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.animation.AnimationTimer
+import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrack
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
@@ -12,14 +11,18 @@ class WaveformContainer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
     val mainWaveform: MainWaveform
-    val playedOverlay = Rectangle()
-    val markerTrack: MarkerTrack
+    val markerTrack: MarkerTrackControl
     val timecodeHolder: TimecodeHolder
 
     init {
-        markerTrack = MarkerTrack(viewModel).apply { prefWidth = viewModel.imageWidth }
+        markerTrack = MarkerTrackControl(viewModel.markers.markers).apply {
+            prefWidth = viewModel.imageWidth
+            viewModel.markers.markerCountProperty.onChange {
+                refreshMarkers()
+            }
+        }
         timecodeHolder = TimecodeHolder(viewModel, 50.0)
-        mainWaveform = MainWaveform(viewModel, viewModel.audioPlayer.getAudioReader()!!)
+        mainWaveform = MainWaveform(viewModel)
 
         object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
@@ -30,11 +33,21 @@ class WaveformContainer : Fragment() {
         }.start()
     }
 
-    override val root = WaveformFrame(
-        markerTrack,
-        mainWaveform,
-        playedOverlay,
-        timecodeHolder,
-        viewModel
-    )
+    override val root =
+        stackpane {
+            hgrow = Priority.ALWAYS
+            vgrow = Priority.ALWAYS
+
+            add(MarkerViewBackground())
+            add(
+                WaveformFrame(
+                    markerTrack,
+                    mainWaveform,
+                    timecodeHolder,
+                    viewModel
+                )
+            )
+            add(WaveformOverlay(viewModel))
+            add(PlaceMarkerLayer(viewModel))
+        }
 }

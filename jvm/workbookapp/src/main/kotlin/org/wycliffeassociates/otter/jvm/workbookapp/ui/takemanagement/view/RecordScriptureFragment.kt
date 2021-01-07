@@ -32,7 +32,10 @@ class RecordScriptureFragment : RecordableFragment(
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
-    private val takesGrid = ScriptureTakesGridView(recordableViewModel::recordNewTake)
+    private val takesGrid = ScriptureTakesGridView(
+        workbookViewModel.activeChunkProperty.isNull,
+        recordableViewModel::recordNewTake
+    )
 
     private val isDraggingProperty = SimpleBooleanProperty(false)
 
@@ -155,8 +158,10 @@ class RecordScriptureFragment : RecordableFragment(
             this.editTextProperty().set(take.editText)
             this.pauseTextProperty().set(take.playText)
             this.playTextProperty().set(take.playText)
+            this.markerTextProperty().set(take.markerText)
             this.takeProperty().set(take.take)
             this.takeNumberProperty().set(take.take.number.toString())
+            this.allowMarkerProperty().bind(recordableViewModel.workbookViewModel.activeChunkProperty.isNull)
         }
         return card
     }

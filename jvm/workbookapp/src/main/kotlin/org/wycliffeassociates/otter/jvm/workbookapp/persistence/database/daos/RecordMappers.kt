@@ -116,6 +116,7 @@ class RecordMappers {
                 record.getValue(AUDIO_PLUGIN_ENTITY.ARGS),
                 record.getValue(AUDIO_PLUGIN_ENTITY.EDIT),
                 record.getValue(AUDIO_PLUGIN_ENTITY.RECORD),
+                record.getValue(AUDIO_PLUGIN_ENTITY.MARK),
                 record.getValue(AUDIO_PLUGIN_ENTITY.PATH)
             )
         }
