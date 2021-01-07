@@ -122,9 +122,9 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             val rect = Rectangle(400.0, 0.0).apply {
                 style {
                     if (i % 2 == 0) {
-                        fill = Paint.valueOf("#0000FF30")
+                        fill = Paint.valueOf("#015ad933")
                     } else {
-                        fill = Paint.valueOf("#00FF0030")
+                        fill = Paint.valueOf("#1edd7633")
                     }
                 }
             }
