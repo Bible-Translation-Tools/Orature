@@ -1,19 +1,23 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.sun.javafx.util.Utils
+import javafx.beans.binding.Bindings
 import javafx.geometry.Point2D
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
+import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarkerModel
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.framesToPixels
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
+import java.util.concurrent.Callable
 
-class MarkerTrackControl(val markers: List<ChunkMarkerModel>) :
+class MarkerTrackControl(val markers: List<ChunkMarkerModel>, val highlightState: List<MarkerHighlightState>) :
     Control() {
 
     fun refreshMarkers() {
@@ -29,11 +33,14 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
 
     val track: Region
     val markers = mutableListOf<ChunkMarker>()
+
+    val highlights = mutableListOf<Rectangle>()
+
     private val preDragThumbPos = DoubleArray(control.markers.size)
     var dragStart: Array<Point2D?> = Array(control.markers.size) { null }
 
     fun refreshMarkers() {
-        if(skinnable.width > 0) {
+        if (skinnable.width > 0) {
             skinnable.markers.forEachIndexed { index, chunkMarker ->
                 val marker = markers[index]
                 marker.isPlacedProperty.set(chunkMarker.placed)
@@ -108,14 +115,58 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                     }
                 }
             }
+
+            val rect = Rectangle().apply {
+                skinnable.highlightState[i].styleClass.onChangeAndDoNow {
+                    styleClass.setAll(it)
+                }
+            }
+
+            rect.heightProperty().bind(skinnable.heightProperty())
+            rect.translateXProperty().bind(marker.translateXProperty())
+            rect.visibleProperty().bind(marker.visibleProperty())
+
             markers.add(marker)
+            highlights.add(rect)
         }
 
         track = Region().apply {
             styleClass.add("vm-marker-track")
         }
 
+        highlights.forEach { track.add(it) }
         markers.forEach { track.add(it) }
+
+        highlights.forEachIndexed { i, rect ->
+            val endPos = skinnable.widthProperty()
+
+            if (i + 1 < highlights.size) {
+                highlights[i + 1]?.let { next ->
+                    val nextVis = next.visibleProperty()
+                    val nextPos = next.translateXProperty()
+                    val highlightWidth = Bindings.createDoubleBinding(
+                        Callable {
+                            return@Callable if (nextVis.value) {
+                                nextPos.value - rect.translateXProperty().value
+                            } else {
+                                endPos.value - rect.translateXProperty().value
+                            }
+                        },
+                        nextVis,
+                        nextPos,
+                        endPos,
+                        rect.translateXProperty(),
+                        next.translateXProperty()
+                    )
+                    rect.widthProperty().bind(highlightWidth)
+                }
+            } else {
+                rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
+            }
+            skinnable.highlightState[i].visibility.bind(rect.visibleProperty())
+            skinnable.highlightState[i].translate.bind(rect.translateXProperty())
+            skinnable.highlightState[i].width.bind(rect.widthProperty())
+        }
 
         children.clear()
         children.addAll(track)

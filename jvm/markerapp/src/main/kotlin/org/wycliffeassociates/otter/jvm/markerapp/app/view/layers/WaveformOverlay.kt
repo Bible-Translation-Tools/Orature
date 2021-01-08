@@ -13,6 +13,7 @@ class WaveformOverlay(val viewModel: VerseMarkerViewModel) : StackPane() {
     init {
         isMouseTransparent = true
         alignment = Pos.BOTTOM_CENTER
+
         add(
             Rectangle().apply {
                 styleClass.add("vm-waveform-holder--played")

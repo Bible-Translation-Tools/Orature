@@ -13,6 +13,7 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
     val cues = sanitizeCues(audio)
     val markers: List<ChunkMarkerModel>
+    val highlightState: List<MarkerHighlightState>
 
     val markerCountProperty = SimpleIntegerProperty(1)
     val audioEnd = audio.totalFrames
@@ -26,6 +27,7 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         markerCountProperty.value = cues.size
 
         markers = initializeMarkers(markerTotal, cues)
+        highlightState = initializeHighlights(markers)
     }
 
     fun addMarker(location: Int) {
@@ -108,6 +110,20 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
             markers.add(ChunkMarkerModel(0, (i + 1).toString(), false))
         }
         return markers
+    }
+
+    private fun initializeHighlights(markers: List<ChunkMarkerModel>): List<MarkerHighlightState> {
+        val highlightState = mutableListOf<MarkerHighlightState>()
+        markers.forEachIndexed { i, marker ->
+            val highlight = MarkerHighlightState()
+            if (i % 2 == 0) {
+                highlight.styleClass.bind(highlight.secondaryStyleClass)
+            } else {
+                highlight.styleClass.bind(highlight.primaryStyleClass)
+            }
+            highlightState.add(highlight)
+        }
+        return highlightState
     }
 }
 
