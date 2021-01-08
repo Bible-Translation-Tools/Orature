@@ -158,7 +158,8 @@ class ProjectFilesAccessor(
         return Observable.just(RcConstants.TAKE_DIR, manifestProject.path)
             .filter(fileReader::exists)
             .flatMap { audioDirInRc ->
-                fileReader.copyDirectory(audioDirInRc, audioDir, this::isAudioFile)
+                val normalized = File(audioDirInRc).normalize().path
+                fileReader.copyDirectory(normalized, audioDir, this::isAudioFile)
             }
     }
 
@@ -170,14 +171,14 @@ class ProjectFilesAccessor(
     ) {
         val selectedChapters = selectedChapterFilePaths(workbook, isBook)
         val deletedTakes = deletedTakeFilePaths(workbook, workbookRepository)
-        fileWriter.copyDirectory(
-            audioDir,
-            RcConstants.TAKE_DIR
-        ) {
+        fileWriter.copyDirectory(audioDir, RcConstants.TAKE_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
         }
-        fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) { selectedChapters.contains(it) }
+        fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
+            val normalized = File(it).invariantSeparatorsPath
+            selectedChapters.contains(normalized)
+        }
     }
 
     private fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
