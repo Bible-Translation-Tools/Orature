@@ -72,7 +72,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         val controlWidth = control.widthProperty().value
         val pos = (control.valueProperty().value / control.max) * control.widthProperty().value
         var xFinal = min(pos, controlWidth)
-        var xFinalThumb = min(pos,controlWidth / 2.0)
+        var xFinalThumb = min(pos,controlWidth - thumb.width / 2.0)
         val xCurrent = thumb.layoutX
 
         xFinal = max(xFinal, 0.0)
