@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.skins
 
+import javafx.scene.Cursor
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -24,6 +25,38 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
 
         children.add(
             HBox().apply {
+
+                var priorCursor = Cursor.DEFAULT
+                var dragging = false
+
+                setOnMouseEntered {
+                    if (skinnable.canBeMovedProperty.value) {
+                        priorCursor = Cursor.OPEN_HAND
+                        if (!dragging) {
+                            cursor = Cursor.OPEN_HAND
+                        }
+                    }
+                }
+
+                setOnMouseExited {
+                    priorCursor = Cursor.DEFAULT
+                    if (!dragging) {
+                        cursor = Cursor.DEFAULT
+                    }
+                }
+
+                setOnMousePressed {
+                    if (skinnable.canBeMovedProperty.value) {
+                        dragging = true
+                        cursor = Cursor.CLOSED_HAND
+                    }
+                }
+
+                setOnMouseReleased {
+                    dragging = false
+                    cursor = priorCursor
+                }
+
                 styleClass.add("chunk-marker")
                 add(dragIcon)
                 add(placedBookmarkIcon)
