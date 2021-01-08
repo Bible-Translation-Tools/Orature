@@ -39,7 +39,8 @@ class DatabaseEnvironment {
             injector.takeRepository,
             injector.languageRepo,
             injector.directoryProvider,
-            injector.zipEntryTreeBuilder
+            injector.zipEntryTreeBuilder,
+            injector.resourceRepository
         )
 
     fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {

@@ -268,7 +268,8 @@ open class RecordableViewModel(
         selectedTakeProperty.set(selectedModel)
 
         closePlayers()
-        takeCardModels.setAll(takes)
+        takeCardModels.clear()
+        takeCardModels.addAll(takes)
         sortTakes()
 
         audio.takes

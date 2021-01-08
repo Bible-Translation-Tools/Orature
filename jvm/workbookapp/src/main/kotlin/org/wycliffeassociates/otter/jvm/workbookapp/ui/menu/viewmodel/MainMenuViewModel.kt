@@ -83,7 +83,8 @@ class MainMenuViewModel : ViewModel() {
             injector.takeRepository,
             injector.languageRepo,
             directoryProvider,
-            injector.zipEntryTreeBuilder
+            injector.zipEntryTreeBuilder,
+            injector.resourceRepository
         ).import(fileOrDir)
             .subscribeOn(Schedulers.io())
             .observeOnFx()

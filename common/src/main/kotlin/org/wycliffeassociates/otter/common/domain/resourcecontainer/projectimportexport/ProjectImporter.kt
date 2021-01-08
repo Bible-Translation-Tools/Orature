@@ -31,7 +31,8 @@ class ProjectImporter(
     private val collectionRepository: ICollectionRepository,
     private val contentRepository: IContentRepository,
     private val takeRepository: ITakeRepository,
-    private val languageRepository: ILanguageRepository
+    private val languageRepository: ILanguageRepository,
+    private val resourceRepository: IResourceRepository
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -137,6 +138,11 @@ class ProjectImporter(
             else -> project
         }
 
+        val sourceMetadata = resourceMetadataRepository
+            .get(metadata)
+            .flatMapMaybe(resourceMetadataRepository::getSource)
+            .blockingGet()
+
         val selectedTakes = fileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
             .useLines { it.toSet() }
@@ -150,7 +156,13 @@ class ProjectImporter(
                 log.error("sourceCollection: $sourceCollection", e)
             }
             .subscribe { newTakeFile ->
-                insertTake(newTakeFile, projectFilesAccessor.audioDir, collectionForTakes, selectedTakes)
+                insertTake(
+                    newTakeFile,
+                    projectFilesAccessor.audioDir,
+                    collectionForTakes,
+                    sourceMetadata,
+                    selectedTakes
+                )
             }
     }
 
@@ -158,10 +170,11 @@ class ProjectImporter(
         filepath: String,
         projectAudioDir: File,
         project: Collection,
+        metadata: ResourceMetadata,
         selectedTakes: Set<String>
     ) {
         parseNumbers(filepath)?.let { (sig, takeNumber) ->
-            getContent(sig, project)?.let { chunk ->
+            getContent(sig, project, metadata)?.let { chunk ->
                 val now = LocalDate.now()
                 val file = File(filepath).canonicalFile
                 val relativeFile = file.relativeTo(projectAudioDir.canonicalFile)
@@ -237,7 +250,7 @@ class ProjectImporter(
         return fileInZip to result
     }
 
-    private fun getContent(sig: ContentSignature, project: Collection): Content? {
+    private fun getContent(sig: ContentSignature, project: Collection, metadata: ResourceMetadata): Content? {
         return contentCache.computeIfAbsent(sig) { (chapter, verse, sort, type) ->
             val collection: Observable<Collection> = collectionRepository
                 .getChildren(project)
@@ -251,10 +264,17 @@ class ProjectImporter(
                 else -> 0
             }
 
+            val isHelpVerse = metadata.type == ContainerType.Help && verse != null
+
             val content: Maybe<Content> = collection
                 .flatMap {
                     contentRepository.getByCollection(it).flattenAsObservable { it }
                 }
+                // If we have help resource chunks, filter to linked TEXT chunks
+                .filter { if (isHelpVerse) it.type == ContentType.TEXT else true }
+                // If we have help resource chunks, fetch resources by linked TEXT chunk
+                // and related resource container
+                .flatMap { if (isHelpVerse) resourceRepository.getResources(it, metadata) else Observable.just(it) }
                 // If type isn't specified in filename, match on TEXT.
                 .filter { content -> content.type == (type ?: ContentType.TEXT) }
                 // If verse number isn't specified in filename, assume chapter helps or meta.

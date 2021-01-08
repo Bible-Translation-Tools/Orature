@@ -23,6 +23,7 @@ class InitializeUlb(
     private val languageRepo: ILanguageRepository,
     private val directoryProvider: IDirectoryProvider,
     private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
+    private val resourceRepository: IResourceRepository,
     private val rcImporter: ImportResourceContainer = ImportResourceContainer(
         resourceMetadataRepo,
         resourceContainerRepo,
@@ -31,7 +32,8 @@ class InitializeUlb(
         takeRepo,
         languageRepo,
         directoryProvider,
-        zipEntryTreeBuilder
+        zipEntryTreeBuilder,
+        resourceRepository
     )
 ) : Installable {
 
