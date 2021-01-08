@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.animation.AnimationTimer
 import javafx.scene.layout.Priority
-import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*

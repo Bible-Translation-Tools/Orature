@@ -116,7 +116,11 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         val highlightState = mutableListOf<MarkerHighlightState>()
         markers.forEachIndexed { i, marker ->
             val highlight = MarkerHighlightState()
-            highlight.color.set(if (i % 2 == 0) "#0000FF20" else "#00FF0020")
+            if (i % 2 == 0) {
+                highlight.styleClass.bind(highlight.secondaryStyleClass)
+            } else {
+                highlight.styleClass.bind(highlight.primaryStyleClass)
+            }
             highlightState.add(highlight)
         }
         return highlightState

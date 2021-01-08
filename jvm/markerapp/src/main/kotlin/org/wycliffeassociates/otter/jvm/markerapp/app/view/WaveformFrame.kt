@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.Pos
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
@@ -63,8 +62,8 @@ class WaveformFrame(
                                     widthProperty().bind(it.width)
                                     translateXProperty().bind(it.translate)
                                     visibleProperty().bind(it.visibility)
-                                    it.color.onChangeAndDoNow {
-                                        fill = Paint.valueOf(it)
+                                    it.styleClass.onChangeAndDoNow {
+                                        styleClass.setAll(it)
                                     }
                                 }
                             )

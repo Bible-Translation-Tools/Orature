@@ -2,14 +2,11 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
-import javafx.beans.binding.DoubleBinding
-import javafx.beans.binding.DoubleExpression
 import javafx.geometry.Point2D
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
-import javafx.scene.paint.Paint
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarkerModel
@@ -119,15 +116,12 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 }
             }
 
-            val rect = Rectangle(400.0, 0.0).apply {
-                style {
-                    if (i % 2 == 0) {
-                        fill = Paint.valueOf("#015ad933")
-                    } else {
-                        fill = Paint.valueOf("#1edd7633")
-                    }
+            val rect = Rectangle().apply {
+                skinnable.highlightState[i].styleClass.onChangeAndDoNow {
+                    styleClass.setAll(it)
                 }
             }
+
             rect.heightProperty().bind(skinnable.heightProperty())
             rect.translateXProperty().bind(marker.translateXProperty())
             rect.visibleProperty().bind(marker.visibleProperty())

@@ -4,8 +4,6 @@ import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.RowConstraints
 import javafx.stage.Screen
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*

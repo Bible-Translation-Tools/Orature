@@ -142,3 +142,11 @@
     -fx-border-width: 1px;
     -fx-border-color: null null #a7b6cf null;
 }
+
+.vm-highlight-primary {
+    -fx-fill: #1edd7633;
+}
+
+.vm-highlight-secondary {
+    -fx-fill: #015ad933;
+}
