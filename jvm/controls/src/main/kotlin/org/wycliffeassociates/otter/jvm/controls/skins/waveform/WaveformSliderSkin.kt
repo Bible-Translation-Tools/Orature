@@ -59,8 +59,12 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         control.secondsToHighlightProperty.onChange { resizeThumbWidth() }
         thumb.layoutY = control.padding.top
         playbackLine.layoutY = control.padding.top
-        thumb.heightProperty().bind(root.heightProperty() - control.padding.top - control.padding.bottom)
-        playbackLine.endYProperty().bind(root.heightProperty() - control.padding.top - control.padding.bottom)
+        thumb.heightProperty().bind(
+            root.heightProperty() - control.padding.top - control.padding.bottom
+        )
+        playbackLine.endYProperty().bind(
+            root.heightProperty() - control.padding.top - control.padding.bottom
+        )
         control.valueProperty().onChange { moveThumb() }
         control.widthProperty().onChangeAndDoNow {
             moveThumb()
@@ -72,7 +76,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         val controlWidth = control.widthProperty().value
         val pos = (control.valueProperty().value / control.max) * control.widthProperty().value
         var xFinal = min(pos, controlWidth)
-        var xFinalThumb = min(pos,controlWidth - thumb.width / 2.0)
+        var xFinalThumb = min(pos, controlWidth - thumb.width / 2.0)
         val xCurrent = thumb.layoutX
 
         xFinal = max(xFinal, 0.0)
