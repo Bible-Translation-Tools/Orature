@@ -12,9 +12,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build detekt
-      - name: SonarCloud Scan
-        uses: jsarabia/sonarcloud-github-action@master
+        run: ./gradlew build detekt sonarqube
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

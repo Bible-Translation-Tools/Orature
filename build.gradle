@@ -16,6 +16,7 @@ plugins {
     id 'nebula.lint' version "$nebulaLintPluginVer"
     id 'com.gradle.build-scan' version "$buildscanPluginVer"
     id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
+    id "org.sonarqube" version "$sonarcloudPluginVer"
 }
 
 apply plugin: 'io.gitlab.arturbosch.detekt'
@@ -28,6 +29,12 @@ repositories {
 buildScan {
     termsOfServiceUrl = 'https://gradle.com/terms-of-service'
     termsOfServiceAgree = 'yes'
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
 }
 
 detekt {
@@ -75,4 +82,13 @@ subprojects {
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
+
+    // build.gradle
+    subprojects {
+        sonarqube {
+            properties {
+                property "sonar.sources", "src"
+            }
+        }
+    }
 }
