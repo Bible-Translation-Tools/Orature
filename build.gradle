@@ -31,6 +31,12 @@ sonarqube {
     }
 }
 
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
+
 detekt {
     parallel = true
     input = files(projectDir)
@@ -76,4 +82,13 @@ subprojects {
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
+
+    // build.gradle
+    subprojects {
+        sonarqube {
+            properties {
+                property "sonar.sources", "src"
+            }
+        }
+    }
 }
