@@ -82,13 +82,4 @@ subprojects {
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
-
-    // build.gradle
-    subprojects {
-        sonarqube {
-            properties {
-                property "sonar.sources", "src"
-            }
-        }
-    }
 }
