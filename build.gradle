@@ -31,12 +31,6 @@ sonarqube {
     }
 }
 
-sonarqube {
-    properties {
-        property "sonar.sourceEncoding", "UTF-8"
-    }
-}
-
 detekt {
     parallel = true
     input = files(projectDir)
