@@ -16,7 +16,7 @@ plugins {
     id 'nebula.lint' version "$nebulaLintPluginVer"
     id 'com.gradle.build-scan' version "$buildscanPluginVer"
     id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
-    id "org.sonarqube" version "3.0"
+    id "org.sonarqube" version "$sonarcloudPluginVer"
 }
 
 apply plugin: 'io.gitlab.arturbosch.detekt'

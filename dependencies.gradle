@@ -8,6 +8,7 @@ ext {
     detektPluginVer = '1.10.0-RC1'
     ktlintPluginVer = '8.2.0'
     shadowPluginVer = '5.2.0'
+    sonarcloudPluginVer = '3.0'
 
     // Libraries
     kotlinVer = '1.3.72'
