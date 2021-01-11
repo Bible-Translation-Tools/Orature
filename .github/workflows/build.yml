@@ -12,6 +12,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew build detekt
+        run: ./gradlew build detekt sonarqube
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
