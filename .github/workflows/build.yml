@@ -14,4 +14,5 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build detekt sonarqube
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
