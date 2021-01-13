@@ -61,6 +61,10 @@
     -fx-fill: -wa-primary;
 }
 
+.source-content__minimize-btn .ikonli-font-icon {
+    -fx-icon-size: 20px;
+}
+
 .source-content__text-container {
     -fx-background: -wa-white;
     -fx-background-color: -wa-white;

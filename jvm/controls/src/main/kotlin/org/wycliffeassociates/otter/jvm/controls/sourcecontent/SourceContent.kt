@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.controls.sourcecontent
 
 import javafx.beans.binding.BooleanBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Control
@@ -22,6 +23,10 @@ class SourceContent : Control() {
 
     val playLabelProperty = SimpleStringProperty()
     val pauseLabelProperty = SimpleStringProperty()
+
+    val enableAudioProperty = SimpleBooleanProperty(true)
+    val isMinimizableProperty = SimpleBooleanProperty(true)
+    val isMinimizedProperty = SimpleBooleanProperty(false)
 
     private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 

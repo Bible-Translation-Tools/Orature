@@ -17,6 +17,7 @@ class MarkerView : PluginEntrypoint() {
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
+    val source = SourceAudioFragment()
     val playbackControls = PlaybackControlsFragment()
 
     init {
@@ -39,18 +40,23 @@ class MarkerView : PluginEntrypoint() {
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
         val fixedConstraint = RowConstraints()
-        val growConstraint = RowConstraints()
+        val growConstraintNever = RowConstraints()
+        val growConstraintSometimes = RowConstraints()
         val columnConstraint = ColumnConstraints()
 
         columnConstraint.hgrow = Priority.ALWAYS
-        growConstraint.vgrow = Priority.SOMETIMES
+
+        growConstraintNever.vgrow = Priority.NEVER
+        growConstraintSometimes.vgrow = Priority.SOMETIMES
+
         fixedConstraint.prefHeight = 88.0
         fixedConstraint.minHeight = 88.0
 
         rowConstraints.setAll(
             fixedConstraint,
             fixedConstraint,
-            growConstraint,
+            growConstraintSometimes,
+            growConstraintNever,
             fixedConstraint
         )
         columnConstraints.setAll(
@@ -60,6 +66,7 @@ class MarkerView : PluginEntrypoint() {
         add(titleFragment.root, 0, 0)
         add(minimap.root, 0, 1)
         add(waveformContainer.root, 0, 2)
-        add(playbackControls.root, 0, 3)
+        add(source.root, 0, 3)
+        add(playbackControls.root, 0, 4)
     }
 }
