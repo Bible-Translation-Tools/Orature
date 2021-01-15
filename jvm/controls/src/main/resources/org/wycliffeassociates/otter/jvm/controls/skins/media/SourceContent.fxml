@@ -10,7 +10,7 @@
 
 <VBox maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="source-content" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <HBox>
+        <HBox fx:id="titleContainer">
             <HBox HBox.hgrow="ALWAYS">
                 <Label fx:id="title" styleClass="source-content__title">
                     <VBox.margin>
@@ -24,18 +24,18 @@
                 </graphic>
             </JFXButton>
         </HBox>
-        <VBox fx:id="sourceContentBody">
+        <VBox fx:id="sourceContentBody" styleClass="source-content__body">
             <VBox styleClass="source-content__top">
                 <children>
-                    <HBox fx:id="sourceTextNotAvailable" managed="false" styleClass="source-content__not-available" visible="false" VBox.vgrow="ALWAYS">
+                    <HBox fx:id="sourceTextNotAvailable" managed="false" styleClass="source-content__not-available" visible="false">
                         <children>
                             <Label fx:id="textNotAvailableText" />
                         </children>
                     </HBox>
                     <VBox fx:id="sourceTextContainer" alignment="CENTER" styleClass="source-content__text-container">
-                        <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
+                        <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" styleClass="source-content__text-container" >
                             <content>
-                                <Text fx:id="sourceText" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="source-content__text" />
+                                <Text fx:id="sourceText" strokeWidth="0.0" styleClass="source-content__text" />
                             </content>
                         </ScrollPane>
                     </VBox>

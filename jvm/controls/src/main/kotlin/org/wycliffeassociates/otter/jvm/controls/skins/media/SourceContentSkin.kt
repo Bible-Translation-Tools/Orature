@@ -65,6 +65,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var title: Label
 
     @FXML
+    lateinit var titleContainer: HBox
+
+    @FXML
     lateinit var sourceContentBody: VBox
 
     @FXML
@@ -172,6 +175,19 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
+        }
+
+        titleContainer.apply {
+            sourceContent.isMinimizedProperty.onChangeAndDoNow {
+                if (it == true) {
+                    maxWidthProperty().unbind()
+                    maxWidthProperty().set(Double.MAX_VALUE)
+                } else {
+                    maxWidthProperty().bind(
+                        sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
+                    )
+                }
+            }
         }
 
         minimizeBtn.apply {

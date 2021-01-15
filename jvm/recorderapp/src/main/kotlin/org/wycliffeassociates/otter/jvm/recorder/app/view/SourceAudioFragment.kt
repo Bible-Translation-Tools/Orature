@@ -33,7 +33,7 @@ class SourceAudioFragment : Fragment() {
                     startFrame = null
                     endFrame = null
                 }
-                sourceText = parameters.named["source_text"] ?: ""
+                sourceText = parameters.named["source_text"]
 
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],

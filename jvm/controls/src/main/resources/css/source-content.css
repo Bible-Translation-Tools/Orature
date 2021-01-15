@@ -2,7 +2,8 @@
 
 .source-content {
     -fx-background-color: -wa-white;
-    -fx-padding: 20px;
+    -fx-padding: 10px 20px;
+    -fx-alignment: center;
 }
 
 .source-content__label {
@@ -11,7 +12,6 @@
 }
 
 .source-content__top {
-    -fx-min-height: 160px;
     -fx-alignment: center;
 }
 
@@ -21,12 +21,17 @@
     -fx-border-color: -wa-gray-light;
 }
 
+.source-content__body {
+    -fx-padding: 20 0;
+}
+
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
     -fx-background-color: #e7ecf5;
     -fx-font-weight: bold;
     -fx-background-radius: 10px;
+    -fx-pref-height: 45px;
 }
 
 .source-content__not-available .label {
@@ -40,6 +45,7 @@
 
 .source-content__play-btn {
     -fx-pref-width: 250px;
+    -fx-max-width: 250px;
     -fx-pref-height: 50px;
     -fx-font-size: 1.3em;
     -fx-graphic-text-gap: 20px;
@@ -61,11 +67,18 @@
     -fx-fill: -wa-primary;
 }
 
+.source-content__minimize-btn {
+    -fx-border-color: -wa-gray;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
 .source-content__minimize-btn .ikonli-font-icon {
     -fx-icon-size: 20px;
 }
 
 .source-content__text-container {
+    -fx-min-height: 150px;
     -fx-background: -wa-white;
     -fx-background-color: -wa-white;
 }
