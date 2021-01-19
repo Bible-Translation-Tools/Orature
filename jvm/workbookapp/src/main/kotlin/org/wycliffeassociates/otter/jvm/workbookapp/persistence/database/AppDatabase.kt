@@ -140,6 +140,7 @@ class AppDatabase(
             dsl
                 .alterTable(AudioPluginEntity.AUDIO_PLUGIN_ENTITY)
                 .addColumnIfNotExists(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
+                .execute()
             logger.info("Updated database from version 1 to 2")
             return 2
         } else {
