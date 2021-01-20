@@ -11,8 +11,8 @@ import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.exception.exceptionDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersistenceComponent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
@@ -21,7 +21,7 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.*
 
-class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
+class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.UncaughtExceptionHandler {
     val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
@@ -105,83 +105,82 @@ class OtterExceptionHandler : Thread.UncaughtExceptionHandler {
             show()
         }
     }
-}
 
-private fun sendReport(error: Throwable): Completable {
-    return Completable.fromAction {
-        sendGithubReport(error)
-        sendSentryReport(error)
-    }
-}
-
-private fun sendGithubReport(error: Throwable) {
-    val props = githubProperties()
-    if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
-        val githubReporter = GithubReporter(
-            props.getProperty("repo-url"),
-            props.getProperty("oauth-token")
-        )
-        githubReporter.reportCrash(
-            getEnvironment(),
-            stringFromError(error),
-            getLog(),
-            error.message
-        )
-    }
-}
-
-private fun sendSentryReport(error: Throwable) {
-    val environment = getEnvironment()
-    val sentryContext = Sentry.getContext()
-
-    sentryContext.addTag("app version", environment.getVersion())
-    environment.getSystemData().forEach {
-        sentryContext.addTag(it.first, it.second)
+    private fun sendReport(error: Throwable): Completable {
+        return Completable.fromAction {
+            sendGithubReport(error)
+            sendSentryReport(error)
+        }
     }
 
-    Sentry.capture(error)
-    Sentry.clearContext()
-}
-
-private fun getEnvironment(): AppInfo {
-    return AppInfo()
-}
-
-private fun getLog(): String? {
-    val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
-    val logExt = ".log"
-    val persistenceComponent = DaggerPersistenceComponent.builder().build()
-    val directoryProvider = persistenceComponent.injectDirectoryProvider()
-    val logFile = StringBuilder()
-        .append(directoryProvider.logsDirectory.absolutePath)
-        .append("/")
-        .append(logFileName)
-        .append(logExt)
-        .toString()
-
-    return try {
-        File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
-    } catch (e: Exception) {
-        null
-    }
-}
-
-private fun githubProperties(): Properties? {
-    val prop = Properties()
-    val inputStream = OtterExceptionHandler::class.java.classLoader.getResourceAsStream("github.properties")
-
-    if (inputStream != null) {
-        prop.load(inputStream)
-        return prop
+    private fun sendGithubReport(error: Throwable) {
+        val props = githubProperties()
+        if (props?.getProperty("repo-url") != null && props.getProperty("oauth-token") != null) {
+            val githubReporter = GithubReporter(
+                props.getProperty("repo-url"),
+                props.getProperty("oauth-token")
+            )
+            githubReporter.reportCrash(
+                getEnvironment(),
+                stringFromError(error),
+                getLog(),
+                error.message
+            )
+        }
     }
 
-    return null
-}
+    private fun sendSentryReport(error: Throwable) {
+        val environment = getEnvironment()
+        val sentryContext = Sentry.getContext()
 
-private fun stringFromError(e: Throwable): String {
-    val out = ByteArrayOutputStream()
-    val writer = PrintWriter(out)
-    e.printStackTrace(writer)
-    writer.close()
-    return out.toString()
+        sentryContext.addTag("app version", environment.getVersion())
+        environment.getSystemData().forEach {
+            sentryContext.addTag(it.first, it.second)
+        }
+
+        Sentry.capture(error)
+        Sentry.clearContext()
+    }
+
+    private fun getEnvironment(): AppInfo {
+        return AppInfo()
+    }
+
+    private fun getLog(): String? {
+        val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
+        val logExt = ".log"
+        val logFile = StringBuilder()
+            .append(directoryProvider.logsDirectory.absolutePath)
+            .append("/")
+            .append(logFileName)
+            .append(logExt)
+            .toString()
+
+        return try {
+            File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
+        } catch (e: Exception) {
+            null
+        }
+        return null
+    }
+
+    private fun githubProperties(): Properties? {
+        val prop = Properties()
+        val inputStream = OtterExceptionHandler::class.java.classLoader.getResourceAsStream("github.properties")
+
+        if (inputStream != null) {
+            prop.load(inputStream)
+            return prop
+        }
+
+        return null
+    }
+
+    private fun stringFromError(e: Throwable): String {
+        val out = ByteArrayOutputStream()
+        val writer = PrintWriter(out)
+        e.printStackTrace(writer)
+        writer.close()
+        return out.toString()
+    }
 }

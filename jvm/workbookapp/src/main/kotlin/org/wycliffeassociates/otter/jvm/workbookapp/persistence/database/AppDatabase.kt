@@ -1,11 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
-import jooq.tables.AudioPluginEntity
-import jooq.tables.InstalledEntity
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
-import org.jooq.impl.DSL.exists
 import org.slf4j.LoggerFactory
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
@@ -20,8 +17,6 @@ class AppDatabase(
     val logger = LoggerFactory.getLogger(AppDatabase::class.java)
 
     val dsl: DSLContext
-
-    val version = 2
 
     init {
         System.setProperty("org.jooq.no-logo", "true")
@@ -44,7 +39,7 @@ class AppDatabase(
         // Create the jooq dsl
         dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
         if (dbDoesNotExist) setup()
-        migrate()
+        DatabaseMigrator().migrate(dsl)
     }
 
     private fun setup() {
@@ -93,66 +88,5 @@ class AppDatabase(
             // Create local transaction DSL and pass to block
             block(DSL.using(config))
         }
-    }
-
-    fun migrate() {
-        var currentVersion = getDatabaseVersion()
-        if (currentVersion != version) {
-            currentVersion = `migrate 0 to 1`(currentVersion)
-            currentVersion = `migrate 1 to 2`(currentVersion)
-            updateDatabaseVersion(currentVersion)
-        }
-    }
-
-    private fun getDatabaseVersion(): Int {
-        val databaseVersionExists =
-            dsl
-                .fetchExists(
-                    dsl
-                        .select()
-                        .from(InstalledEntity.INSTALLED_ENTITY)
-                        .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq("database"))
-                )
-        return if (databaseVersionExists) {
-            dsl
-                .selectOne()
-                .from(InstalledEntity.INSTALLED_ENTITY)
-                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq("database")).execute()
-        } else 0
-    }
-
-    private fun `migrate 0 to 1`(current: Int): Int {
-        return if (current < 1) {
-            dsl
-                .insertInto(
-                    InstalledEntity.INSTALLED_ENTITY,
-                    InstalledEntity.INSTALLED_ENTITY.NAME,
-                    InstalledEntity.INSTALLED_ENTITY.VERSION
-                ).values("database", 1)
-                .execute()
-            logger.info("Updated database from version 0 to 1")
-            return 1
-        } else current
-    }
-
-    private fun `migrate 1 to 2`(current: Int): Int {
-        return if (current < 2) {
-            dsl
-                .alterTable(AudioPluginEntity.AUDIO_PLUGIN_ENTITY)
-                .addColumnIfNotExists(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
-                .execute()
-            logger.info("Updated database from version 1 to 2")
-            return 2
-        } else {
-            current
-        }
-    }
-
-    private fun updateDatabaseVersion(version: Int) {
-        dsl
-            .update(InstalledEntity.INSTALLED_ENTITY)
-            .set(InstalledEntity.INSTALLED_ENTITY.VERSION, version)
-            .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq("database"))
-            .execute()
     }
 }
