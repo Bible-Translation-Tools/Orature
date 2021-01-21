@@ -15,8 +15,8 @@ class DatabaseMigrator {
     fun migrate(dsl: DSLContext) {
         var currentVersion = getDatabaseVersion(dsl)
         if (currentVersion != SCHEMA_VERSION) {
-            currentVersion = `migrate 0 to 1`(dsl, currentVersion)
-            currentVersion = `migrate 1 to 2`(dsl, currentVersion)
+            currentVersion = migrate0to1(dsl, currentVersion)
+            currentVersion = migrate1to2(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -53,7 +53,7 @@ class DatabaseMigrator {
      * introduces the database itself as an "installed entity" to store the version number
      * to facilitate future database migrations
      */
-    private fun `migrate 0 to 1`(dsl: DSLContext, current: Int): Int {
+    private fun migrate0to1(dsl: DSLContext, current: Int): Int {
         return if (current < 1) {
             dsl
                 .insertInto(
@@ -73,7 +73,7 @@ class DatabaseMigrator {
      *
      * The DataAccessException is caught in the event that the column already exists.
      */
-    private fun `migrate 1 to 2`(dsl: DSLContext, current: Int): Int {
+    private fun migrate1to2(dsl: DSLContext, current: Int): Int {
         return if (current < 2) {
             try {
                 dsl
