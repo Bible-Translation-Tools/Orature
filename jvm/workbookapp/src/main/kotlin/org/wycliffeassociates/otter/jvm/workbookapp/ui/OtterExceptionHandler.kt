@@ -161,7 +161,6 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
         } catch (e: Exception) {
             null
         }
-        return null
     }
 
     private fun githubProperties(): Properties? {
