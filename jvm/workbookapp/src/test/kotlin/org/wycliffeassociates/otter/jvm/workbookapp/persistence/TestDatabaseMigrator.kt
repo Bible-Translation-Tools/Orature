@@ -8,7 +8,6 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseMigrator
 import java.io.File
 import java.lang.Exception
@@ -85,8 +84,10 @@ class TestDatabaseMigrator {
                 exceptionThrown
             )
 
+            try {
+                DatabaseMigrator().migrate(_dsl)
+            } catch (e: Exception) {}
 
-            DatabaseMigrator().migrate(_dsl)
 
             // Test that database version is version 2
             val databaseVersionRecord = _dsl.select().from(InstalledEntity.INSTALLED_ENTITY).where(InstalledEntity.INSTALLED_ENTITY.NAME.eq("database")).fetchOne()
