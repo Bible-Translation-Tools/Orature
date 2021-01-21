@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
+import jooq.tables.InstalledEntity
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
@@ -59,6 +60,15 @@ class AppDatabase(
         sqlStatements.forEach {
             dsl.fetch(it)
         }
+
+        dsl.insertInto(
+            InstalledEntity.INSTALLED_ENTITY,
+            InstalledEntity.INSTALLED_ENTITY.NAME,
+            InstalledEntity.INSTALLED_ENTITY.VERSION
+        ).values(
+            DATABASE_INSTALLABLE_NAME,
+            SCHEMA_VERSION
+        ).execute()
     }
 
     // Create the DAOs

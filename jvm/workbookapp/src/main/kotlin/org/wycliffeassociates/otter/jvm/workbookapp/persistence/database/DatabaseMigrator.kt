@@ -6,8 +6,8 @@ import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.slf4j.LoggerFactory
 
-private const val SCHEMA_VERSION = 2
-private const val DATABASE_INSTALLABLE_NAME = "database"
+const val SCHEMA_VERSION = 2
+const val DATABASE_INSTALLABLE_NAME = "database"
 
 class DatabaseMigrator {
     val logger = LoggerFactory.getLogger(DatabaseMigrator::class.java)
@@ -82,7 +82,8 @@ class DatabaseMigrator {
                     .execute()
                 logger.info("Updated database from version 1 to 2")
             } catch (e: DataAccessException) {
-                logger.error("Error adding mark column to the Audio Plugin table", e)
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
             }
             return 2
         } else {
