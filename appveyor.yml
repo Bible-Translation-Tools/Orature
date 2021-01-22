@@ -1,0 +1,16 @@
+version: 1.0.{build}
+image: Ubuntu1804
+environment:
+  ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
+  ORG_GRADLE_PROJECT_gradlewCommandLicenseProp:
+    secure: DCPSvM8+CWTTPC0iIUMM5ovXkqheYzbb+p3bTeewZ2cJR3rQ2wGwo0bVwVcWM6MHskJ0Rw7A3d3YubVUnf1cdA==
+  ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: 
+    secure: qgkiHS7cNKbfGFHihcFnFfEPuVgaT5QCQ5kvZkwy7l4fEyzKXaKwtX+gg88mR6rl
+  ORG_GRADLE_PROJECT_githubOauthToken:
+    secure: notarealtoken+changeme
+  ORG_GRADLE_PROJECT_sentryDsn:
+    secure: notarealdsn+changeme
+build_script:
+- sh: |
+    export ORG_GRADLE_PROJECT_gradlewCommandVersionProp="$(cat VERSION).$APPVEYOR_BUILD_NUMBER"
+    docker run -v $(pwd):/repo wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
