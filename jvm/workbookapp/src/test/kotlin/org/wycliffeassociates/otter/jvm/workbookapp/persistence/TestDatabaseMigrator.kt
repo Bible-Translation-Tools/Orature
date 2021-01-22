@@ -8,6 +8,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABASE_INSTALLABLE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseMigrator
 import java.io.File
 import java.lang.Exception
@@ -20,7 +21,9 @@ class TestDatabaseMigrator {
 
     @Before
     fun setup() {
-        ClassLoader.getSystemResourceAsStream("sql/AppDatabaseSchema0.sql").copyTo(schemaFile.outputStream())
+        ClassLoader
+            .getSystemResourceAsStream("sql/AppDatabaseSchema0.sql")
+            .copyTo(schemaFile.outputStream())
         dsl = JooqTestConfiguration.createDatabase(dbFile.absolutePath, schemaFile).dsl()
         // Make sure the database file has the tables we need
         val sqlStatements = schemaFile
@@ -86,18 +89,26 @@ class TestDatabaseMigrator {
 
             try {
                 DatabaseMigrator().migrate(_dsl)
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
 
 
             // Test that database version is version 2
-            val databaseVersionRecord = _dsl.select().from(InstalledEntity.INSTALLED_ENTITY).where(InstalledEntity.INSTALLED_ENTITY.NAME.eq("database")).fetchOne()
+            val databaseVersionRecord = _dsl
+                .select()
+                .from(InstalledEntity.INSTALLED_ENTITY)
+                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                .fetchSingle()
             Assert.assertNotNull(databaseVersionRecord)
             val version = databaseVersionRecord.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION)
             Assert.assertEquals("Assert version is migrated from 0 to 2", 2, version)
 
             // Test that marker exists and the default value is provided after migration
             val pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()
-            Assert.assertEquals(true, pluginRecord.fields().contains(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK))
+            Assert.assertEquals(
+                true,
+                pluginRecord.fields().contains(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
+            )
             val canMark = pluginRecord.getValue(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
             Assert.assertEquals(canMark, 0)
         } ?: Assert.fail()
