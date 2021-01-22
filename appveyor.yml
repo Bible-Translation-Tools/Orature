@@ -12,5 +12,10 @@ environment:
     secure: notarealdsn+changeme
 build_script:
 - sh: |
+    export ORG_GRADLE_PROJECT_githubRepoUrl
+    export ORG_GRADLE_PROJECT_gradlewCommandLicenseProp
+    export ORG_GRADLE_PROJECT_gradlewwinKeystorePassword
+    export ORG_GRADLE_PROJECT_githubOauthToken
+    export ORG_GRADLE_PROJECT_sentryDsn
     export ORG_GRADLE_PROJECT_gradlewCommandVersionProp="$(cat VERSION).$APPVEYOR_BUILD_NUMBER"
     docker run -v $(pwd):/repo wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
