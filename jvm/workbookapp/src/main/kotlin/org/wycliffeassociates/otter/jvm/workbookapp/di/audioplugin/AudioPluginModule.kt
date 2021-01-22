@@ -10,6 +10,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AudioPluginRe
 @Module(includes = [AudioPluginRepositoryModule::class])
 class AudioPluginModule {
     @Provides
-    fun providesRegistrar(audioPluginRepository: IAudioPluginRepository): IAudioPluginRegistrar =
+    fun providesAudioPluginRegistrar(audioPluginRepository: IAudioPluginRepository): IAudioPluginRegistrar =
         AudioPluginRegistrar(audioPluginRepository)
 }

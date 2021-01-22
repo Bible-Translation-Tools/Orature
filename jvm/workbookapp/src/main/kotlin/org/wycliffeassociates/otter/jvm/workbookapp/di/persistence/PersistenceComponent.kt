@@ -1,9 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.di.persistence
 
 import dagger.Component
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.di.audioplugin.AudioPluginModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import javax.inject.Singleton
 
@@ -12,6 +14,7 @@ import javax.inject.Singleton
         AppDatabaseModule::class,
         AppPreferencesModule::class,
         AudioPluginRepositoryModule::class,
+        AudioPluginModule::class,
         DirectoryProviderModule::class
     ]
 )
@@ -22,4 +25,5 @@ interface PersistenceComponent {
     fun injectDirectoryProvider(): IDirectoryProvider
     // Need inject for audio plugin repo so audio plugin registrar can be built
     fun injectAudioPluginRepository(): IAudioPluginRepository
+    fun injectAudioPluginRegistrar(): IAudioPluginRegistrar
 }

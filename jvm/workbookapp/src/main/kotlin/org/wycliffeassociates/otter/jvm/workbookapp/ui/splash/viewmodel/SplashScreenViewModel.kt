@@ -6,6 +6,8 @@ import javafx.beans.property.SimpleDoubleProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
@@ -16,6 +18,7 @@ class SplashScreenViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(SplashScreenViewModel::class.java)
 
     private val injector: Injector = find()
+
     private val initApp = InitializeApp(
         injector.preferences,
         injector.directoryProvider,
@@ -37,6 +40,8 @@ class SplashScreenViewModel : ViewModel() {
     private val chromeableStage: ChromeableStage by inject()
 
     init {
+        Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(injector.directoryProvider))
+        ConfigureLogger(injector.directoryProvider.logsDirectory).configure()
         initApp.initApp()
             .observeOnFx()
             .doOnComplete {
