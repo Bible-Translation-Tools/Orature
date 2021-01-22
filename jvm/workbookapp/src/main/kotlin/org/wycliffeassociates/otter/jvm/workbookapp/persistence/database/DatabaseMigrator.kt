@@ -35,8 +35,7 @@ class DatabaseMigrator {
                 .select()
                 .from(InstalledEntity.INSTALLED_ENTITY)
                 .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
-                .fetch { record -> record.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION) }
-                .first()
+                .fetchSingle { record -> record.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION) }
         } else 0
     }
 
@@ -60,7 +59,8 @@ class DatabaseMigrator {
                     InstalledEntity.INSTALLED_ENTITY,
                     InstalledEntity.INSTALLED_ENTITY.NAME,
                     InstalledEntity.INSTALLED_ENTITY.VERSION
-                ).values(DATABASE_INSTALLABLE_NAME, 1)
+                )
+                .values(DATABASE_INSTALLABLE_NAME, 1)
                 .execute()
             logger.info("Updated database from version 0 to 1")
             return 1
