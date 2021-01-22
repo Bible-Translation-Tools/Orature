@@ -25,5 +25,5 @@ interface PersistenceComponent {
     fun injectDirectoryProvider(): IDirectoryProvider
     // Need inject for audio plugin repo so audio plugin registrar can be built
     fun injectAudioPluginRepository(): IAudioPluginRepository
-    fun injectRegistrar(): IAudioPluginRegistrar
+    fun injectAudioPluginRegistrar(): IAudioPluginRegistrar
 }

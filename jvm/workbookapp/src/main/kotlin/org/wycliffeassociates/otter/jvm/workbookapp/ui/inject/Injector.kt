@@ -40,7 +40,7 @@ class Injector(
     val audioPlayer
         get() = audioComponent.injectPlayer()
 
-    val audioPluginRegistrar = persistenceComponent.injectRegistrar()
+    val audioPluginRegistrar = persistenceComponent.injectAudioPluginRegistrar()
 
     val zipEntryTreeBuilder = ZipEntryTreeBuilder
 }

@@ -7,7 +7,7 @@ import org.jooq.exception.DataAccessException
 import org.slf4j.LoggerFactory
 
 const val SCHEMA_VERSION = 2
-const val DATABASE_INSTALLABLE_NAME = "database"
+const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
     val logger = LoggerFactory.getLogger(DatabaseMigrator::class.java)
