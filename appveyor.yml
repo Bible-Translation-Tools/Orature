@@ -18,4 +18,4 @@ build_script:
     export ORG_GRADLE_PROJECT_githubOauthToken
     export ORG_GRADLE_PROJECT_sentryDsn
     export ORG_GRADLE_PROJECT_gradlewCommandVersionProp="$(cat VERSION).$APPVEYOR_BUILD_NUMBER"
-    docker run -v $(pwd):/repo wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
+    docker run -v $(pwd):/repo -e ORG_GRADLE_PROJECT_githubRepoUrl -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword -e ORG_GRADLE_PROJECT_githubOauthToken -e ORG_GRADLE_PROJECT_sentryDsn -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
