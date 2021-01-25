@@ -81,6 +81,9 @@ install4j {
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
     projectFile = 'otter.install4j'
+    if (project.hasProperty('gradlewInstall4jDirectory')) {
+        println 'gradle sees gradlewInstall4jDirectory'
+    }
     //Pass Travis Build ID to install4j for versioning
     if (project.hasProperty('gradlewCommandVersionProp')) {
         release = gradlewCommandVersionProp
