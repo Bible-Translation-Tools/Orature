@@ -10,6 +10,15 @@ environment:
     secure: notarealtoken+changeme
   ORG_GRADLE_PROJECT_sentryDsn:
     secure: notarealdsn+changeme
+  my_salt:
+    secure: aud8gyOUO+GZK4sqM3NsKLgedEh9drnH6ww0acPVf6EHZTKLWk6/hfvrkQXH88HKSAJlbga0B1Vr72SSyiJD4Q==
+  my_secret:
+    secure: TWVx12XEQ0Pd+NfbrR92R5OnC6XkSrm/E++nECNRFIs=
+
+install:
+  - sh: |
+      ./appveyor-tools/secure-file -decrypt codesigningcert.p12.enc -secret $my_secret -salt $my_salt
+
 build_script:
 - sh: |
     export ORG_GRADLE_PROJECT_githubRepoUrl
@@ -18,4 +27,4 @@ build_script:
     export ORG_GRADLE_PROJECT_githubOauthToken
     export ORG_GRADLE_PROJECT_sentryDsn
     export ORG_GRADLE_PROJECT_gradlewCommandVersionProp="$(cat VERSION).$APPVEYOR_BUILD_NUMBER"
-    docker run -v $(pwd):/repo wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
+    docker run -v $(pwd):/repo -v $(pwd)/codesigningcert.p12:/root/signing.p12 -e ORG_GRADLE_PROJECT_githubRepoUrl -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp -e ORG_GRADLE_PROJECT_gradlewwinKeystorePasswor -e ORG_GRADLE_PROJECT_githubOauthToken -e ORG_GRADLE_PROJECT_sentryDsn -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
