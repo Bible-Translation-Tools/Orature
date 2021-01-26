@@ -16,8 +16,8 @@ environment:
     secure: TWVx12XEQ0Pd+NfbrR92R5OnC6XkSrm/E++nECNRFIs=
 
 install:
-  - sh: |
-      ./appveyor-tools/secure-file -decrypt codesigningcert.p12.enc -secret $my_secret -salt $my_salt
+  - ps: iex ((New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/appveyor/secure-file/master/install.ps1'))
+  - sh: ./appveyor-tools/secure-file -decrypt codesigningcert.p12.enc -secret $my_secret -salt $my_salt
 
 build_script:
 - sh: |
