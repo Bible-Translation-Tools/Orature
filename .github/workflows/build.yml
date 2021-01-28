@@ -18,7 +18,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: install4j build
         shell: bash
-        run: export ORG_GRADLE_PROJECT_gradlewCommandVersionProp="$(cat VERSION).$GITHUB_RUN_NUMBER" && \
+        run: |
+             export ORG_GRADLE_PROJECT_gradlewCommandVersionProp="$(cat VERSION).$GITHUB_RUN_NUMBER"
              docker run -v $(pwd):/repo wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
         env:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE }}
