@@ -9,6 +9,7 @@ import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.AudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
@@ -132,9 +133,10 @@ class AudioPluginRepository(
                 if (editorId == AppPreferences.NO_ID)
                     Maybe.empty()
                 else {
-                    Maybe.fromCallable {
-                        mapper.mapFromEntity(audioPluginDao.fetchById(editorId))
-                    }
+                    Maybe
+                        .fromCallable {
+                            mapper.mapFromEntity(audioPluginDao.fetchById(editorId))
+                        }
                         .onErrorComplete()
                         .subscribeOn(Schedulers.io())
                 }
@@ -143,13 +145,19 @@ class AudioPluginRepository(
                 logger.error("Error in getEditorData", e)
             }
 
-    override fun getEditor(): Maybe<IAudioPlugin> = getEditorData().map { AudioPlugin(it) }
+    override fun getPlugin(type: PluginType): Maybe<IAudioPlugin> {
+        return when (type) {
+            PluginType.MARKER -> getMarkerData().map { AudioPlugin(it) }
+            PluginType.EDITOR -> getEditorData().map { AudioPlugin(it) }
+            PluginType.RECORDER -> getRecorderData().map { AudioPlugin(it) }
+        }
+    }
 
     override fun setEditorData(default: AudioPluginData): Completable =
         if (default.canEdit) preferences.setEditorPluginId(default.id) else Completable.complete()
 
-    override fun getRecorderData(): Maybe<AudioPluginData> =
-        preferences.recorderPluginId()
+    override fun getRecorderData(): Maybe<AudioPluginData> {
+        return preferences.recorderPluginId()
             .flatMapMaybe { recorderId ->
                 if (recorderId == AppPreferences.NO_ID)
                     return@flatMapMaybe Maybe.empty<AudioPluginData>()
@@ -164,8 +172,8 @@ class AudioPluginRepository(
             .doOnError { e ->
                 logger.error("Error in getRecorderData", e)
             }
+    }
 
-    override fun getRecorder(): Maybe<IAudioPlugin> = getRecorderData().map { AudioPlugin(it) }
     override fun setRecorderData(default: AudioPluginData): Completable =
         if (default.canRecord) preferences.setRecorderPluginId(default.id) else Completable.complete()
 
@@ -173,8 +181,8 @@ class AudioPluginRepository(
         return if (default.canMark) preferences.setMarkerPluginId(default.id) else Completable.complete()
     }
 
-    override fun getMarkerData(): Maybe<AudioPluginData> =
-        preferences.markerPluginId()
+    override fun getMarkerData(): Maybe<AudioPluginData> {
+        return preferences.markerPluginId()
             .flatMapMaybe { markerId ->
                 if (markerId == AppPreferences.NO_ID)
                     Maybe.empty()
@@ -189,6 +197,5 @@ class AudioPluginRepository(
             .doOnError { e ->
                 logger.error("Error in getMarkerData", e)
             }
-
-    override fun getMarker(): Maybe<IAudioPlugin> = getMarkerData().map { AudioPlugin(it) }
+    }
 }

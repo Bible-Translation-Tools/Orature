@@ -18,8 +18,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.MarkerTakeEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -32,16 +31,22 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
 
     @FXML
     lateinit var playBtn: Button
+
     @FXML
     lateinit var editBtn: Button
+
     @FXML
     lateinit var markerBtn: Button
+
     @FXML
     lateinit var deleteBtn: Button
+
     @FXML
     lateinit var slider: Slider
+
     @FXML
     lateinit var takeLabel: Label
+
     @FXML
     lateinit var timestampLabel: Label
 
@@ -105,16 +110,24 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         }
         editBtn.setOnAction {
             skinnable.fireEvent(
-                EditTakeEvent(card.takeProperty().value) {
-                    card.audioPlayerProperty().value.load(card.takeProperty().value.file)
-                }
+                TakeEvent(
+                    card.takeProperty().value,
+                    {
+                        card.audioPlayerProperty().value.load(card.takeProperty().value.file)
+                    },
+                    TakeEvent.EDIT_TAKE
+                )
             )
         }
         markerBtn.setOnAction {
             skinnable.fireEvent(
-                MarkerTakeEvent(card.takeProperty().value) {
-                    card.audioPlayerProperty().value.load(card.takeProperty().value.file)
-                }
+                TakeEvent(
+                    card.takeProperty().value,
+                    {
+                        card.audioPlayerProperty().value.load(card.takeProperty().value.file)
+                    },
+                    TakeEvent.MARK_TAKE
+                )
             )
         }
         card.audioPlayerProperty().onChangeAndDoNow { player ->

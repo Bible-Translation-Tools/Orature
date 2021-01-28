@@ -1,24 +1,44 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.PluginParameters
-import org.wycliffeassociates.otter.common.data.model.MimeType
-import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.PluginParameters
+import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import java.time.LocalDate
 
-class RecordTake(
+class TakeActions(
     private val waveFileCreator: IWaveFileCreator,
     private val launchPlugin: LaunchPlugin
 ) {
     enum class Result {
         SUCCESS,
-        NO_RECORDER,
+        NO_PLUGIN,
         NO_AUDIO
     }
+
+    fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> = launchPlugin
+        .launchPlugin(PluginType.EDITOR, take.file, pluginParameters)
+        .map {
+            when (it) {
+                LaunchPlugin.Result.SUCCESS -> Result.SUCCESS
+                LaunchPlugin.Result.NO_PLUGIN -> Result.NO_PLUGIN
+            }
+        }
+
+    fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> = launchPlugin
+        .launchPlugin(PluginType.MARKER, take.file, pluginParameters)
+        .map {
+            when (it) {
+                LaunchPlugin.Result.SUCCESS -> Result.SUCCESS
+                LaunchPlugin.Result.NO_PLUGIN -> Result.NO_PLUGIN
+            }
+        }
 
     fun record(
         audio: AssociatedAudio,
@@ -30,10 +50,10 @@ class RecordTake(
             .map { newTakeNumber ->
                 val filename = namer.generateName(newTakeNumber)
                 val chapterAudioDir = getChapterAudioDirectory(projectAudioDir, namer.formatChapterNumber())
-                create(newTakeNumber, filename, chapterAudioDir)
+                createNewTake(newTakeNumber, filename, chapterAudioDir)
             }
-            .flatMap {
-                doLaunchPlugin(audio::insertTake, it, pluginParameters)
+            .flatMap { take ->
+                doLaunchPlugin(audio::insertTake, take, pluginParameters)
             }
     }
 
@@ -43,7 +63,7 @@ class RecordTake(
         return chapterAudioDir
     }
 
-    private fun create(
+    private fun createNewTake(
         newTakeNumber: Int,
         filename: String,
         audioDir: File
@@ -66,7 +86,7 @@ class RecordTake(
         take: Take,
         pluginParameters: PluginParameters
     ): Single<Result> = launchPlugin
-        .launchRecorder(take.file, pluginParameters)
+        .launchPlugin(PluginType.RECORDER, take.file, pluginParameters)
         .map {
             handlePluginResult(insertTake, take, it)
         }
@@ -84,7 +104,7 @@ class RecordTake(
             }
             LaunchPlugin.Result.NO_PLUGIN -> {
                 take.file.delete()
-                Result.NO_RECORDER
+                Result.NO_PLUGIN
             }
         }
     }

@@ -14,10 +14,8 @@ import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.MarkerTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.card.events.*
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
@@ -122,11 +120,11 @@ abstract class RecordableFragment(
         addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
             recordableViewModel.deleteTake(it.take)
         }
-        addEventHandler(EditTakeEvent.EDIT_TAKE) {
+        addEventHandler(TakeEvent.EDIT_TAKE) {
             closePlayers()
-            recordableViewModel.editTake(it)
+            recordableViewModel.editTake(it, PluginType.EDITOR)
         }
-        addEventHandler(MarkerTakeEvent.MARK_TAKE) {
+        addEventHandler(TakeEvent.MARK_TAKE) {
             closePlayers()
             recordableViewModel.markTake(it)
         }

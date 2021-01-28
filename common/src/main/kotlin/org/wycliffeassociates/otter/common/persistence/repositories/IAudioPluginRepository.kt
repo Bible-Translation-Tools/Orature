@@ -6,17 +6,21 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 
+enum class PluginType {
+    MARKER,
+    RECORDER,
+    EDITOR
+}
+
 interface IAudioPluginRepository : IRepository<AudioPluginData> {
     fun insert(data: AudioPluginData): Single<Int>
     fun getAllPlugins(): Single<List<IAudioPlugin>>
+    fun getPlugin(type: PluginType): Maybe<IAudioPlugin>
     fun setEditorData(default: AudioPluginData): Completable
     fun getEditorData(): Maybe<AudioPluginData>
-    fun getEditor(): Maybe<IAudioPlugin>
     fun setRecorderData(default: AudioPluginData): Completable
     fun getRecorderData(): Maybe<AudioPluginData>
-    fun getRecorder(): Maybe<IAudioPlugin>
     fun setMarkerData(default: AudioPluginData): Completable
     fun getMarkerData(): Maybe<AudioPluginData>
-    fun getMarker(): Maybe<IAudioPlugin>
     fun initSelected(): Completable
 }
