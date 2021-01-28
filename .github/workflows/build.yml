@@ -16,6 +16,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: set version var
+        run: echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=$(cat VERSION).$GITHUB_RUN_NUMBER" >> $GITHUB_ENV        
       - name: install4j build
         shell: bash
         run: docker run -v $(pwd):/repo wycliffeassociates/install4j-docker gradle :jvm:workbookapp:install4jdeploy
@@ -25,6 +27,4 @@ jobs:
           ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: ${{ secrets.WIN_KEYSTORE_PW }}
           ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GITHUB_OAUTH_TOKEN }}
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
-          # TODO: this will not produce a real version number
-          ORG_GRADLE_PROJECT_gradlewCommandVersionProp: ${{ GITHUB_RUN_NUMBER }}
 
