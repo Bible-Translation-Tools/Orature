@@ -34,7 +34,7 @@ jobs:
           ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GH_API_OAUTH_TOKEN }}
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
       - name: set s3 destination_dir
-        run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$CI_REF_SLUG/$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+        run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$CI_REF_NAME_SLUG/$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
       - name: Upload file to bucket
         uses: shallwefootball/s3-upload-action@v1.1.3
         with:
