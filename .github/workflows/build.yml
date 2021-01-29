@@ -30,6 +30,6 @@ jobs:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
           ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: ${{ secrets.WIN_KEYSTORE_PW }}
-          ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GITHUB_OAUTH_TOKEN }}
+          ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GH_API_OAUTH_TOKEN }}
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
-
+          
