@@ -33,6 +33,9 @@ jobs:
           ORG_GRADLE_PROJECT_gradlewwinKeystorePassword: ${{ secrets.WIN_KEYSTORE_PW }}
           ORG_GRADLE_PROJECT_githubOauthToken: ${{ secrets.GH_API_OAUTH_TOKEN }}
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
+      - name: test potentially bad stuff
+        shell: bash
+        run: echo $CI_SHA_SHORT >> ./jvm/workbookapp/.exec/test.txt
       - name: set s3 destination_dir
         run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$CI_REF_NAME_SLUG/$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
       - name: Upload file to bucket
