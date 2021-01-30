@@ -17,7 +17,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeContext
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
@@ -41,7 +40,7 @@ open class RecordableViewModel(
 
     val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
-    val contextProperty = SimpleObjectProperty<TakeContext>(TakeContext.RECORD)
+    val contextProperty = SimpleObjectProperty<PluginType>(PluginType.RECORDER)
     val showPluginActiveProperty = SimpleBooleanProperty(false)
     var showPluginActive by showPluginActiveProperty
 
@@ -82,7 +81,7 @@ open class RecordableViewModel(
 
     fun recordNewTake() {
         recordable?.let { rec ->
-            contextProperty.set(TakeContext.RECORD)
+            contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
                     currentTakeNumberProperty.set(takeNumber)
@@ -109,18 +108,22 @@ open class RecordableViewModel(
         } ?: throw IllegalStateException("Recordable is null")
     }
 
-    fun editTake(takeEvent: TakeEvent, pluginType: PluginType) {
-        contextProperty.set(TakeContext.EDIT_TAKES)
+    fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
+        contextProperty.set(pluginType)
         currentTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
                 showPluginActive = !plugin.isNativePlugin()
-                audioPluginViewModel.edit(takeEvent.take)
+                when (pluginType) {
+                    PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
+                    PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)
+                    else -> null
+                }
             }
             .observeOnFx()
             .doOnError { e ->
-                logger.error("Error in editing take", e)
+                logger.error("Error in processing take with plugin type: $pluginType", e)
             }
             .onErrorReturn { TakeActions.Result.NO_PLUGIN }
             .subscribe { result: TakeActions.Result ->
@@ -130,31 +133,6 @@ open class RecordableViewModel(
                 when (result) {
                     TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                     TakeActions.Result.SUCCESS -> takeEvent.onComplete()
-                }
-            }
-    }
-
-    fun markTake(markTakeEvent: TakeEvent) {
-        contextProperty.set(TakeContext.MARK_TAKES)
-        currentTakeNumberProperty.set(markTakeEvent.take.number)
-        audioPluginViewModel
-            .getPlugin(PluginType.MARKER)
-            .flatMapSingle { plugin ->
-                showPluginActive = !plugin.isNativePlugin()
-                audioPluginViewModel.mark(markTakeEvent.take)
-            }
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in marking take", e)
-            }
-            .onErrorReturn { TakeActions.Result.NO_PLUGIN }
-            .subscribe { result: TakeActions.Result ->
-                showPluginActive = false
-                currentTakeNumberProperty.set(null)
-                fire(PluginClosedEvent)
-                when (result) {
-                    TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
-                    TakeActions.Result.SUCCESS -> markTakeEvent.onComplete()
                 }
             }
     }
@@ -218,13 +196,13 @@ open class RecordableViewModel(
         return Bindings.createStringBinding(
             Callable {
                 when (contextProperty.get()) {
-                    TakeContext.RECORD -> {
+                    PluginType.RECORDER -> {
                         audioPluginViewModel.selectedRecorderProperty.get().name
                     }
-                    TakeContext.EDIT_TAKES -> {
+                    PluginType.EDITOR -> {
                         audioPluginViewModel.selectedEditorProperty.get().name
                     }
-                    TakeContext.MARK_TAKES -> {
+                    PluginType.MARKER -> {
                         audioPluginViewModel.selectedMarkerProperty.get().name
                     }
                     null -> throw IllegalStateException("Action is not supported!")

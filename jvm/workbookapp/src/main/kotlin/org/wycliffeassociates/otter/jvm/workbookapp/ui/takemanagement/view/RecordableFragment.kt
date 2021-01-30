@@ -122,11 +122,11 @@ abstract class RecordableFragment(
         }
         addEventHandler(TakeEvent.EDIT_TAKE) {
             closePlayers()
-            recordableViewModel.editTake(it, PluginType.EDITOR)
+            recordableViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
         }
         addEventHandler(TakeEvent.MARK_TAKE) {
             closePlayers()
-            recordableViewModel.markTake(it)
+            recordableViewModel.processTakeWithPlugin(it, PluginType.MARKER)
         }
     }
 
