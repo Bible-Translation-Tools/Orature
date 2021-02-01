@@ -11,7 +11,7 @@ import java.io.File
 import java.time.LocalDate
 
 class RecordTakeTest {
-    private val recordTake = RecordTake(mock(), mock())
+    private val recordTake = TakeActions(mock(), mock())
     private val insertTake: (Take) -> Unit = mock()
 
     private fun createTakeWithMockFile(): Take = doCreateTakeWithMockFileLength(EMPTY_WAVE_FILE_SIZE + 1)
@@ -33,7 +33,7 @@ class RecordTakeTest {
     fun testHandleEmptyWaveFile() {
         val take = createTakeWithMockEmptyFile()
         val result = recordTake.handlePluginResult(insertTake, take, LaunchPlugin.Result.SUCCESS)
-        doAssertEquals(RecordTake.Result.NO_AUDIO, result)
+        doAssertEquals(TakeActions.Result.NO_AUDIO, result)
         verify(insertTake, times(0)).invoke(any())
         verify(take.file, times(1)).delete()
     }
@@ -42,7 +42,7 @@ class RecordTakeTest {
     fun testHandleSuccess() {
         val take = createTakeWithMockFile()
         val result = recordTake.handlePluginResult(insertTake, take, LaunchPlugin.Result.SUCCESS)
-        doAssertEquals(RecordTake.Result.SUCCESS, result)
+        doAssertEquals(TakeActions.Result.SUCCESS, result)
         verify(insertTake, times(1)).invoke(take)
         verify(take.file, times(0)).delete()
     }
@@ -51,7 +51,7 @@ class RecordTakeTest {
     fun testHandleNoPlugin() {
         val take = createTakeWithMockFile()
         val result = recordTake.handlePluginResult(mock(), take, LaunchPlugin.Result.NO_PLUGIN)
-        doAssertEquals(RecordTake.Result.NO_RECORDER, result)
+        doAssertEquals(TakeActions.Result.NO_PLUGIN, result)
         verify(insertTake, times(0)).invoke(any())
         verify(take.file, times(1)).delete()
     }
