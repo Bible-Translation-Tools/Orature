@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
@@ -114,7 +115,7 @@ class MainMenuViewModel : ViewModel() {
             }
             .observeOn(Schedulers.io())
             .flatMapMaybe {
-                pluginRepository.getRecorderData()
+                pluginRepository.getPluginData(PluginType.RECORDER)
             }
             .observeOnFx()
             .doOnSuccess {
@@ -122,7 +123,7 @@ class MainMenuViewModel : ViewModel() {
             }
             .observeOn(Schedulers.io())
             .flatMap {
-                pluginRepository.getEditorData()
+                pluginRepository.getPluginData(PluginType.EDITOR)
             }
             .observeOnFx()
             .doOnSuccess {
@@ -130,7 +131,7 @@ class MainMenuViewModel : ViewModel() {
             }
             .observeOn(Schedulers.io())
             .flatMap {
-                pluginRepository.getMarkerData()
+                pluginRepository.getPluginData(PluginType.MARKER)
             }
             .observeOnFx()
             .doOnSuccess {
@@ -141,12 +142,12 @@ class MainMenuViewModel : ViewModel() {
     }
 
     fun selectEditor(editorData: AudioPluginData) {
-        pluginRepository.setEditorData(editorData).subscribe()
+        pluginRepository.setPluginData(PluginType.EDITOR, editorData).subscribe()
         selectedEditorProperty.set(editorData)
     }
 
     fun selectRecorder(recorderData: AudioPluginData) {
-        pluginRepository.setRecorderData(recorderData).subscribe()
+        pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
     }
 
