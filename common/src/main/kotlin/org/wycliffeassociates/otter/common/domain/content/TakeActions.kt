@@ -66,7 +66,7 @@ class TakeActions(
                 }
             }
     }
-    
+
     private fun getChapterAudioDirectory(projectAudioDir: File, chapterNum: String): File {
         val chapterAudioDir = projectAudioDir.resolve(chapterNum)
         chapterAudioDir.mkdirs()
