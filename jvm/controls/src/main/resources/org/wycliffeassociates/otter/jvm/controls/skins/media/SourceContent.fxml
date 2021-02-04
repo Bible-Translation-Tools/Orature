@@ -5,10 +5,9 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<VBox maxWidth="1.7976931348623157E308" minWidth="-Infinity" styleClass="source-content" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox styleClass="source-content" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox fx:id="titleContainer">
             <HBox HBox.hgrow="ALWAYS">
@@ -24,25 +23,22 @@
                 </graphic>
             </JFXButton>
         </HBox>
-        <VBox fx:id="sourceContentBody" styleClass="source-content__body">
-            <VBox styleClass="source-content__top">
+        <VBox fx:id="sourceContentBody" styleClass="source-content__body" VBox.vgrow="ALWAYS">
+            <VBox styleClass="source-content__top" VBox.vgrow="ALWAYS">
                 <children>
                     <HBox fx:id="sourceTextNotAvailable" managed="false" styleClass="source-content__not-available" visible="false">
                         <children>
                             <Label fx:id="textNotAvailableText" />
                         </children>
                     </HBox>
-                    <VBox fx:id="sourceTextContainer" alignment="CENTER" styleClass="source-content__text-container">
-                        <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" styleClass="source-content__text-container" >
+                    <VBox fx:id="sourceTextContainer" alignment="CENTER" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
+                        <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                             <content>
-                                <Text fx:id="sourceText" strokeWidth="0.0" styleClass="source-content__text" />
+                                <Label fx:id="sourceText" styleClass="source-content__text" wrapText="true" lineSpacing="5" />
                             </content>
                         </ScrollPane>
                     </VBox>
                 </children>
-                <VBox.margin>
-                    <Insets bottom="30.0" />
-                </VBox.margin>
             </VBox>
             <HBox fx:id="sourceAudioBlock" styleClass="source-content__bottom">
                 <children>
@@ -73,6 +69,9 @@
                         </HBox.margin>
                     </HBox>
                 </children>
+                <VBox.margin>
+                    <Insets bottom="10.0" />
+                </VBox.margin>
             </HBox>
         </VBox>
     </children>

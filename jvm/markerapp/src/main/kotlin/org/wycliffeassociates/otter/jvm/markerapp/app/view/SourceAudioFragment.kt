@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
@@ -45,6 +46,8 @@ class SourceAudioFragment : Fragment() {
         val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
 
         return SourceContent().apply {
+            vgrow = Priority.ALWAYS
+
             audioPlayerProperty.set(player)
             sourceTextProperty.set(sourceText)
 

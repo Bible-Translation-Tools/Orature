@@ -28,7 +28,9 @@ data class Chapter(
         val text = chunks
             .reduce("") { acc, elm ->
                 if (format == null) format = elm.textItem.format
-                acc + "${verseLabel(elm.start, elm.end)}. ${elm.textItem.text}\n"
+                // Clean multiple line breaks to leave only one
+                val text = "${elm.textItem.text.replace("\n", "")}\n"
+                acc + "${verseLabel(elm.start, elm.end)}. $text"
             }
             .blockingGet()
         return TextItem(text, format!!)

@@ -1,13 +1,18 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.geometry.HPos
 import javafx.geometry.Pos
+import javafx.geometry.VPos
 import javafx.scene.control.ContentDisplay
 import javafx.scene.control.Control
 import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.scene.layout.RowConstraints
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
@@ -24,6 +29,8 @@ private class RecordableViewModelProvider : Component() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     fun get() = recordScriptureViewModel.recordableViewModel
 }
+
+private const val TAKES_ROW_HEIGHT = 170.0
 
 class RecordScriptureFragment : RecordableFragment(
     RecordableViewModelProvider().get(),
@@ -52,6 +59,8 @@ class RecordScriptureFragment : RecordableFragment(
 
     private val sourceContent =
         SourceContent().apply {
+            vgrow = Priority.ALWAYS
+
             sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
             audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
@@ -137,8 +146,46 @@ class RecordScriptureFragment : RecordableFragment(
                     enableWhen(recordScriptureViewModel.hasNext)
                 }
             }
-            add(takesGrid)
-            add(sourceContent)
+
+            gridpane {
+                vgrow = Priority.ALWAYS
+                hgrow = Priority.ALWAYS
+
+                add(takesGrid, 0, 0)
+                add(sourceContent, 0, 1)
+
+                columnConstraints.addAll(
+                    ColumnConstraints(
+                        0.0,
+                        0.0,
+                        Double.MAX_VALUE,
+                        Priority.ALWAYS,
+                        HPos.LEFT,
+                        true
+                    )
+                )
+
+                val takesRowConstraints = RowConstraints(
+                    TAKES_ROW_HEIGHT,
+                    TAKES_ROW_HEIGHT,
+                    Double.MAX_VALUE,
+                    Priority.ALWAYS,
+                    VPos.CENTER,
+                    true
+                )
+
+                val sourceContentRowConstraints = RowConstraints(
+                    Region.USE_COMPUTED_SIZE,
+                    Region.USE_COMPUTED_SIZE,
+                    Region.USE_COMPUTED_SIZE,
+                    Priority.NEVER,
+                    VPos.CENTER,
+                    false
+                )
+
+                rowConstraints.add(takesRowConstraints)
+                rowConstraints.add(sourceContentRowConstraints)
+            }
         }
     }
 

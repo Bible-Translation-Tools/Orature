@@ -21,10 +21,6 @@
     -fx-border-color: -wa-gray-light;
 }
 
-.source-content__body {
-    -fx-padding: 20 0;
-}
-
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
@@ -78,9 +74,9 @@
 }
 
 .source-content__text-container {
-    -fx-min-height: 150px;
     -fx-background: -wa-white;
     -fx-background-color: -wa-white;
+    -fx-pref-height: 100px;
 }
 
 .source-content__audio_container {
