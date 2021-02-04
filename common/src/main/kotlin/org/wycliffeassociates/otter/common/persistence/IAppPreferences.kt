@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.persistence
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 
 // interface to getting user-independent workbookapp preferences
 interface IAppPreferences {
@@ -9,10 +10,6 @@ interface IAppPreferences {
     fun setCurrentUserId(userId: Int): Completable
     fun appInitialized(): Single<Boolean>
     fun setAppInitialized(initialized: Boolean): Completable
-    fun editorPluginId(): Single<Int>
-    fun setEditorPluginId(id: Int): Completable
-    fun recorderPluginId(): Single<Int>
-    fun setRecorderPluginId(id: Int): Completable
-    fun markerPluginId(): Single<Int>
-    fun setMarkerPluginId(id: Int): Completable
+    fun pluginId(type: PluginType): Single<Int>
+    fun setPluginId(type: PluginType, id: Int): Completable
 }

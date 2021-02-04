@@ -8,10 +8,10 @@ import javafx.scene.control.Skin
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.EditTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PlayEvent
+import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 
 class TakeCard(
@@ -40,9 +40,13 @@ class TakeCard(
 
     fun fireEditTakeEvent() {
         fireEvent(
-            EditTakeEvent(model.take) {
-                model.audioPlayer.load(model.take.file)
-            }
+            TakeEvent(
+                model.take,
+                {
+                    model.audioPlayer.load(model.take.file)
+                },
+                TakeEvent.EDIT_TAKE
+            )
         )
     }
 

@@ -1,23 +1,33 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.PluginParameters
-import org.wycliffeassociates.otter.common.data.model.MimeType
-import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.data.PluginParameters
+import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import java.time.LocalDate
 
-class RecordTake(
+class TakeActions(
     private val waveFileCreator: IWaveFileCreator,
     private val launchPlugin: LaunchPlugin
 ) {
     enum class Result {
         SUCCESS,
-        NO_RECORDER,
+        NO_PLUGIN,
         NO_AUDIO
+    }
+
+    fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.EDITOR, take, pluginParameters).map { (t,r) -> r }
+    }
+
+    fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.MARKER, take, pluginParameters).map { (t,r) -> r }
     }
 
     fun record(
@@ -29,11 +39,31 @@ class RecordTake(
         return audio.getNewTakeNumber()
             .map { newTakeNumber ->
                 val filename = namer.generateName(newTakeNumber)
-                val chapterAudioDir = getChapterAudioDirectory(projectAudioDir, namer.formatChapterNumber())
-                create(newTakeNumber, filename, chapterAudioDir)
+                val chapterAudioDir = getChapterAudioDirectory(
+                    projectAudioDir,
+                    namer.formatChapterNumber()
+                )
+                createNewTake(newTakeNumber, filename, chapterAudioDir)
             }
-            .flatMap {
-                doLaunchPlugin(audio::insertTake, it, pluginParameters)
+            .flatMap { take ->
+                launchPlugin(PluginType.RECORDER, take, pluginParameters)
+            }.map { (take, result) ->
+                handleRecorderPluginResult(audio::insertTake, take, result)
+            }
+    }
+
+    private fun launchPlugin(
+        pluginType: PluginType,
+        take: Take,
+        pluginParameters: PluginParameters
+    ): Single<Pair<Take, Result>> {
+        return launchPlugin
+            .launchPlugin(pluginType, take.file, pluginParameters)
+            .map {
+                when (it) {
+                    LaunchPlugin.Result.SUCCESS -> Pair(take, Result.SUCCESS)
+                    LaunchPlugin.Result.NO_PLUGIN -> Pair(take, Result.NO_PLUGIN)
+                }
             }
     }
 
@@ -43,7 +73,7 @@ class RecordTake(
         return chapterAudioDir
     }
 
-    private fun create(
+    private fun createNewTake(
         newTakeNumber: Int,
         filename: String,
         audioDir: File
@@ -61,19 +91,13 @@ class RecordTake(
         return newTake
     }
 
-    private fun doLaunchPlugin(
+    internal fun handleRecorderPluginResult(
         insertTake: (Take) -> Unit,
         take: Take,
-        pluginParameters: PluginParameters
-    ): Single<Result> = launchPlugin
-        .launchRecorder(take.file, pluginParameters)
-        .map {
-            handlePluginResult(insertTake, take, it)
-        }
-
-    internal fun handlePluginResult(insertTake: (Take) -> Unit, take: Take, result: LaunchPlugin.Result): Result {
+        result: Result
+    ): Result {
         return when (result) {
-            LaunchPlugin.Result.SUCCESS -> {
+            Result.SUCCESS -> {
                 if (take.file.length() == EMPTY_WAVE_FILE_SIZE) {
                     take.file.delete()
                     Result.NO_AUDIO
@@ -82,9 +106,9 @@ class RecordTake(
                     Result.SUCCESS
                 }
             }
-            LaunchPlugin.Result.NO_PLUGIN -> {
+            Result.NO_PLUGIN, Result.NO_AUDIO -> {
                 take.file.delete()
-                Result.NO_RECORDER
+                Result.NO_PLUGIN
             }
         }
     }
