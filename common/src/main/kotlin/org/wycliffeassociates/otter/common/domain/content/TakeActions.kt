@@ -22,23 +22,13 @@ class TakeActions(
         NO_AUDIO
     }
 
-    fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> = launchPlugin
-        .launchPlugin(PluginType.EDITOR, take.file, pluginParameters)
-        .map {
-            when (it) {
-                LaunchPlugin.Result.SUCCESS -> Result.SUCCESS
-                LaunchPlugin.Result.NO_PLUGIN -> Result.NO_PLUGIN
-            }
-        }
+    fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.EDITOR, take, pluginParameters).map { (t,r) -> r }
+    }
 
-    fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> = launchPlugin
-        .launchPlugin(PluginType.MARKER, take.file, pluginParameters)
-        .map {
-            when (it) {
-                LaunchPlugin.Result.SUCCESS -> Result.SUCCESS
-                LaunchPlugin.Result.NO_PLUGIN -> Result.NO_PLUGIN
-            }
-        }
+    fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.MARKER, take, pluginParameters).map { (t,r) -> r }
+    }
 
     fun record(
         audio: AssociatedAudio,
@@ -49,14 +39,34 @@ class TakeActions(
         return audio.getNewTakeNumber()
             .map { newTakeNumber ->
                 val filename = namer.generateName(newTakeNumber)
-                val chapterAudioDir = getChapterAudioDirectory(projectAudioDir, namer.formatChapterNumber())
+                val chapterAudioDir = getChapterAudioDirectory(
+                    projectAudioDir,
+                    namer.formatChapterNumber()
+                )
                 createNewTake(newTakeNumber, filename, chapterAudioDir)
             }
             .flatMap { take ->
-                doLaunchPlugin(audio::insertTake, take, pluginParameters)
+                launchPlugin(PluginType.RECORDER, take, pluginParameters)
+            }.map { (take, result) ->
+                handleRecorderPluginResult(audio::insertTake, take, result)
             }
     }
 
+    private fun launchPlugin(
+        pluginType: PluginType,
+        take: Take,
+        pluginParameters: PluginParameters
+    ): Single<Pair<Take, Result>> {
+        return launchPlugin
+            .launchPlugin(pluginType, take.file, pluginParameters)
+            .map {
+                when (it) {
+                    LaunchPlugin.Result.SUCCESS -> Pair(take, Result.SUCCESS)
+                    LaunchPlugin.Result.NO_PLUGIN -> Pair(take, Result.NO_PLUGIN)
+                }
+            }
+    }
+    
     private fun getChapterAudioDirectory(projectAudioDir: File, chapterNum: String): File {
         val chapterAudioDir = projectAudioDir.resolve(chapterNum)
         chapterAudioDir.mkdirs()
@@ -81,19 +91,13 @@ class TakeActions(
         return newTake
     }
 
-    private fun doLaunchPlugin(
+    internal fun handleRecorderPluginResult(
         insertTake: (Take) -> Unit,
         take: Take,
-        pluginParameters: PluginParameters
-    ): Single<Result> = launchPlugin
-        .launchPlugin(PluginType.RECORDER, take.file, pluginParameters)
-        .map {
-            handlePluginResult(insertTake, take, it)
-        }
-
-    internal fun handlePluginResult(insertTake: (Take) -> Unit, take: Take, result: LaunchPlugin.Result): Result {
+        result: Result
+    ): Result {
         return when (result) {
-            LaunchPlugin.Result.SUCCESS -> {
+            Result.SUCCESS -> {
                 if (take.file.length() == EMPTY_WAVE_FILE_SIZE) {
                     take.file.delete()
                     Result.NO_AUDIO
@@ -102,7 +106,7 @@ class TakeActions(
                     Result.SUCCESS
                 }
             }
-            LaunchPlugin.Result.NO_PLUGIN -> {
+            Result.NO_PLUGIN, Result.NO_AUDIO -> {
                 take.file.delete()
                 Result.NO_PLUGIN
             }
