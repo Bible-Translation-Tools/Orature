@@ -13,16 +13,16 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
 
 class WorkbookViewModel : ViewModel() {
-    private val injector: Injector by inject()
-    private val directoryProvider = injector.directoryProvider
-    private val workbookRepository = injector.workbookRepository
+    private val directoryProvider: IDirectoryProvider by di()
+    private val workbookRepository: IWorkbookRepository by di()
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook

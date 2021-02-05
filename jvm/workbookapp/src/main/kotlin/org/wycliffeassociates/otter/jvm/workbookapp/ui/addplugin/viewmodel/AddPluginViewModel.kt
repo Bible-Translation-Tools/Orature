@@ -7,7 +7,7 @@ import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 import java.io.File
@@ -16,8 +16,7 @@ class AddPluginViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(AddPluginViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val pluginRepository = injector.pluginRepository
+    private val pluginRepository: IAudioPluginRepository by di()
     private val mainMenuViewModel: MainMenuViewModel by inject()
 
     var name: String by property("")

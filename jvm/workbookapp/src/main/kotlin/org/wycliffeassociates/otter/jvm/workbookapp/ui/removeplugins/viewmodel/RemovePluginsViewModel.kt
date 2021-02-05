@@ -7,15 +7,14 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import tornadofx.ViewModel
 
 class RemovePluginsViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RemovePluginsViewModel::class.java)
 
-    private val injector: Injector by inject()
-    val pluginRepository = injector.pluginRepository
+    val pluginRepository: IAudioPluginRepository by di()
 
     val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
     val noPluginsProperty: ReadOnlyBooleanProperty

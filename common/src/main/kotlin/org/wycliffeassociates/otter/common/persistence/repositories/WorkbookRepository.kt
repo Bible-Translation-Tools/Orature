@@ -49,7 +49,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         return workbook
     }
 
-    fun closeWorkbook(workbook: Workbook) {
+    override fun closeWorkbook(workbook: Workbook) {
         connections[workbook]?.let {
             it.dispose()
             connections.remove(workbook)

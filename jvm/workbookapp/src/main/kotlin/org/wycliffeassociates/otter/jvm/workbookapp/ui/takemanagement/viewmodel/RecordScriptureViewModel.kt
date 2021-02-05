@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import tornadofx.*
 
 class RecordScriptureViewModel : ViewModel() {
@@ -22,8 +21,6 @@ class RecordScriptureViewModel : ViewModel() {
         FORWARD,
         BACKWARD
     }
-
-    private val injector: Injector by inject()
 
     private val workbookViewModel: WorkbookViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()

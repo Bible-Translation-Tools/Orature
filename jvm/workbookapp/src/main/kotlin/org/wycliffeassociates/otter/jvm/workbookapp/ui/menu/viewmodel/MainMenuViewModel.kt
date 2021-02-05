@@ -12,8 +12,11 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
@@ -24,10 +27,9 @@ class MainMenuViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(MainMenuViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val directoryProvider = injector.directoryProvider
-    private val pluginRepository = injector.pluginRepository
-    private val workbookRepository = injector.workbookRepository
+    private val directoryProvider: IDirectoryProvider by di()
+    private val pluginRepository:IAudioPluginRepository by di()
+    private val workbookRepository: IWorkbookRepository by di()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val workbookVM = find<WorkbookViewModel>()

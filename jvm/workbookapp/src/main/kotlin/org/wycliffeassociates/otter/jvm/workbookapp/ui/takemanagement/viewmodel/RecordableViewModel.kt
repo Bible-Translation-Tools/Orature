@@ -19,8 +19,8 @@ import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
@@ -31,7 +31,6 @@ open class RecordableViewModel(
 ) : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordableViewModel::class.java)
-    private val injector: Injector by inject()
 
     val workbookViewModel: WorkbookViewModel by inject()
 
@@ -70,7 +69,7 @@ open class RecordableViewModel(
         workbookViewModel.sourceAudioProperty.onChangeAndDoNow { source ->
             var audioPlayer: IAudioPlayer? = null
             if (source != null) {
-                audioPlayer = injector.audioPlayer
+                audioPlayer = (app as MyApp).audioComponent.injectPlayer()
                 audioPlayer.loadSection(source.file, source.start, source.end)
             }
             sourceAudioPlayerProperty.set(audioPlayer)
@@ -234,7 +233,7 @@ open class RecordableViewModel(
             audio.getAllTakes()
                 .filter { it.isNotDeleted() }
                 .map { take ->
-                    val ap = injector.audioPlayer
+                    val ap: IAudioPlayer = (app as MyApp).audioComponent.injectPlayer()
                     ap.load(take.file)
                     take.mapToCardModel(take.equals(selected))
                 }
@@ -254,7 +253,7 @@ open class RecordableViewModel(
             }
             .subscribe { take ->
                 if (takeCardModels.find { it.take.equals(take) } == null) {
-                    val ap = injector.audioPlayer
+                    val ap: IAudioPlayer = (app as MyApp).audioComponent.injectPlayer()
                     ap.load(take.file)
                     addToAlternateTakes(
                         take.mapToCardModel(take.equals(selected))
@@ -322,7 +321,7 @@ open class RecordableViewModel(
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val ap = injector.audioPlayer
+        val ap: IAudioPlayer = (app as MyApp).audioComponent.injectPlayer()
         ap.load(this.file)
         return TakeCardModel(
             this,

@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.inject
 
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.di.audio.AudioComponent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.audio.DaggerAudioComponent
 import org.wycliffeassociates.otter.jvm.workbookapp.di.audioplugin.AudioPluginComponent
@@ -12,15 +13,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import tornadofx.*
 
-class Injector(
-    private val audioComponent: AudioComponent = DaggerAudioComponent.builder().build(),
-    audioPluginComponent: AudioPluginComponent = DaggerAudioPluginComponent.builder().build(),
-    persistenceComponent: PersistenceComponent = DaggerPersistenceComponent.builder().build()
-) : Component(), ScopedInstance {
+class Injector() : Component(), ScopedInstance {
+    private val persistenceComponent = (app as MyApp).persistenceComponent
+    private val audioPluginComponent = (app as MyApp).audioPluginComponent
+    private val audioComponent = (app as MyApp).audioComponent
+
     private val database = persistenceComponent.injectDatabase()
-
     val directoryProvider = persistenceComponent.injectDirectoryProvider()
-
     val preferences = persistenceComponent.injectPreferences()
 
     val languageRepo = LanguageRepository(database, LanguageMapper())

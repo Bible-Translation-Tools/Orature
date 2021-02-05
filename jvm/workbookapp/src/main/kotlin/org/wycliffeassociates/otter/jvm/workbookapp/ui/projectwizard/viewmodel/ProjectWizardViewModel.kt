@@ -12,7 +12,10 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizard
@@ -23,11 +26,10 @@ class ProjectWizardViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ProjectWizardViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val languageRepo = injector.languageRepo
-    private val collectionRepo = injector.collectionRepo
-    private val resourceMetadataRepo = injector.resourceMetadataRepository
-    private val directoryProvider = injector.directoryProvider
+    private val languageRepo: ILanguageRepository by di()
+    private val collectionRepo: ICollectionRepository by di()
+    private val resourceMetadataRepo: IResourceMetadataRepository by di()
+    private val directoryProvider: IDirectoryProvider by di()
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
