@@ -117,7 +117,6 @@ class ProjectImporter(
             derivedProject,
             manifestProject,
             metadata,
-            sourceMetadata,
             sourceCollection,
             projectFilesAccessor
         )
@@ -128,7 +127,6 @@ class ProjectImporter(
         project: Collection,
         manifestProject: Project,
         metadata: ResourceMetadata,
-        sourceMetadata: ResourceMetadata,
         sourceCollection: Collection,
         projectFilesAccessor: ProjectFilesAccessor
     ) {

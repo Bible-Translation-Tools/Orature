@@ -48,6 +48,10 @@
     -fx-icon-size: 28px;
 }
 
+.waveform-container {
+    -fx-min-height: 150px;
+}
+
 .waveform {
     -fx-background-color: #F7FAFF;
 }

@@ -38,6 +38,7 @@
 
 .vm-play-controls {
     -fx-pref-height: 88px;
+    -fx-min-height: 88px;
     -fx-background-color: "#00377C";
     -fx-padding: 0px 16px 0px 16px;
     -fx-spacing: 22px;
@@ -108,6 +109,10 @@
 .vm-marker-track {
     -fx-background-color: #c8d2e3;
     -fx-pref-height: 40px;
+}
+
+.vm-waveform-container {
+    -fx-min-height: 200px;
 }
 
 .vm-waveform-holder {

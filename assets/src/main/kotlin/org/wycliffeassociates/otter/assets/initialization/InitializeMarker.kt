@@ -20,7 +20,7 @@ class InitializeMarker(
 ) : Installable {
 
     override val name = "MARKER"
-    override val version = 1
+    override val version = 3
 
     val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 

@@ -77,6 +77,7 @@ class SourceDialog : Fragment() {
                     pauseLabelProperty.set(messages["pauseSource"])
 
                     contentTitleProperty.bind(sourceContentTitleProperty)
+                    isMinimizableProperty.set(false)
                 }
             )
         }
