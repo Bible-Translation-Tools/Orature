@@ -242,17 +242,23 @@ class CueChunk : RiffChunk {
         while (chunk.remaining() > CHUNK_HEADER_SIZE) {
             val subchunk = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
+
+            // chunk data must be word aligned but the size might not account for padding
+            // therefore, if odd, the size we read must add one to include the padding
+            // https://sharkysoft.com/jwave/docs/javadocs/lava/riff/wave/doc-files/riffwave-frameset.htm
+            val wordAlignedSubchunkSize = subchunkSize + if (subchunkSize % 2 == 0) 0 else 1
+
             when (subchunk) {
                 LABEL_LABEL -> {
                     val id = chunk.int
-                    val labelBytes = ByteArray(subchunkSize - CHUNK_LABEL_SIZE)
+                    val labelBytes = ByteArray(wordAlignedSubchunkSize - CHUNK_LABEL_SIZE)
                     chunk.get(labelBytes)
                     // trim necessary to strip trailing 0's used to pad to double word align
                     val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
                     cueListBuilder.addLabel(id, label)
                 }
                 else -> {
-                    chunk.seek(subchunkSize)
+                    chunk.seek(wordAlignedSubchunkSize)
                 }
             }
         }
