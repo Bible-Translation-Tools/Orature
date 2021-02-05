@@ -1,14 +1,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
+import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
+import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
@@ -23,23 +26,21 @@ class AudioPluginViewModel : ViewModel() {
     private val workbookViewModel: WorkbookViewModel by inject()
 
     private val launchPlugin = LaunchPlugin(pluginRepository)
-    private val recordTake = RecordTake(WaveFileCreator(), launchPlugin)
-    private val editTake = EditTake(launchPlugin)
-    private val markTake = MarkTake(launchPlugin)
 
-    fun getRecorder() = pluginRepository.getRecorder()
-    fun getEditor() = pluginRepository.getEditor()
-    fun getMarker() = pluginRepository.getMarker()
+    private val takeActions = TakeActions(WaveFileCreator(), launchPlugin)
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
+    fun getPlugin(pluginType: PluginType): Maybe<IAudioPlugin> {
+        return pluginRepository.getPlugin(pluginType)
+    }
 
-    fun record(recordable: Recordable): Single<RecordTake.Result> {
+    fun record(recordable: Recordable): Single<TakeActions.Result> {
         val params = constructPluginParameters()
-        return recordTake.record(
+        return takeActions.record(
             audio = recordable.audio,
             projectAudioDir = workbookViewModel.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
@@ -90,17 +91,15 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    fun edit(take: Take): Single<EditTake.Result> {
+    fun edit(take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters()
-        return editTake.edit(take, params)
+        return takeActions.edit(take, params)
     }
 
-    fun mark(take: Take): Single<MarkTake.Result> {
+    fun mark(take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters(messages["markAction"])
-        return markTake.mark(take, params)
+        return takeActions.mark(take, params)
     }
-
-    fun audioPlayer(): IAudioPlayer = injector.audioPlayer
 
     fun addPlugin(record: Boolean, edit: Boolean) {
         find<AddPluginViewModel>().apply {

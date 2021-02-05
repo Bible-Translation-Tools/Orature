@@ -17,5 +17,5 @@ import javax.inject.Singleton
 )
 @Singleton
 interface AudioPluginComponent {
-    fun injectRegistrar(): IAudioPluginRegistrar
+    fun injectAudioPluginRegistrar(): IAudioPluginRegistrar
 }

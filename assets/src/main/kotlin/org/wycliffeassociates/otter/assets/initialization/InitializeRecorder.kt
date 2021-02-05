@@ -8,6 +8,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import java.io.FileOutputStream
 
@@ -63,7 +64,7 @@ class InitializeRecorder(
                 pluginFile = null
             )
         ).doAfterSuccess { id: Int ->
-            preferences.setRecorderPluginId(id)
+            preferences.setPluginId(PluginType.RECORDER, id)
         }.ignoreElement()
     }
 }

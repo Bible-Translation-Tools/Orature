@@ -1,6 +1,7 @@
 package integrationtest
 
 import dagger.Component
+import org.wycliffeassociates.otter.jvm.workbookapp.di.audioplugin.AudioPluginModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AppPreferencesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AudioPluginRepositoryModule
@@ -11,6 +12,7 @@ import javax.inject.Singleton
     modules = [
         AppDatabaseModule::class,
         AppPreferencesModule::class,
+        AudioPluginModule::class,
         AudioPluginRepositoryModule::class,
         TestDirectoryProviderModule::class
     ]

@@ -5,6 +5,7 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
 
@@ -87,15 +88,19 @@ class AppPreferences(database: AppDatabase) : IAppPreferences {
 
     override fun setAppInitialized(initialized: Boolean): Completable = putBoolean(APP_INIT_KEY, initialized)
 
-    override fun editorPluginId(): Single<Int> = getInt(EDITOR_PLUGIN_ID_KEY, -1)
+    override fun pluginId(type: PluginType): Single<Int> {
+        return getInt(getPluginKeyByType(type), -1)
+    }
 
-    override fun setEditorPluginId(id: Int): Completable = putInt(EDITOR_PLUGIN_ID_KEY, id)
+    override fun setPluginId(type: PluginType, id: Int): Completable {
+        return putInt(getPluginKeyByType(type), id)
+    }
 
-    override fun recorderPluginId(): Single<Int> = getInt(RECORDER_PLUGIN_ID_KEY, -1)
-
-    override fun setRecorderPluginId(id: Int): Completable = putInt(RECORDER_PLUGIN_ID_KEY, id)
-
-    override fun markerPluginId(): Single<Int> = getInt(MARKER_PLUGIN_ID_KEY, -1)
-
-    override fun setMarkerPluginId(id: Int): Completable = putInt(MARKER_PLUGIN_ID_KEY, id)
+    private fun getPluginKeyByType(type: PluginType): String {
+        return when (type) {
+            PluginType.RECORDER -> RECORDER_PLUGIN_ID_KEY
+            PluginType.EDITOR -> EDITOR_PLUGIN_ID_KEY
+            PluginType.MARKER -> MARKER_PLUGIN_ID_KEY
+        }
+    }
 }
