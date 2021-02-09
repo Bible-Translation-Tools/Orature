@@ -12,25 +12,30 @@ import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 import tornadofx.*
+import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
-    private val pluginRepository: IAudioPluginRepository by di()
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
+    @Inject lateinit var launchPlugin: LaunchPlugin
+    private val takeActions: TakeActions
 
     private val workbookViewModel: WorkbookViewModel by inject()
-
-    private val launchPlugin = LaunchPlugin(pluginRepository)
-
-    private val takeActions = TakeActions(WaveFileCreator(), launchPlugin)
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
+
+    init {
+        (app as MyApp).dependencyGraph.inject(this)
+        takeActions = TakeActions(WaveFileCreator(), launchPlugin)
+    }
 
     fun getPlugin(pluginType: PluginType): Maybe<IAudioPlugin> {
         return pluginRepository.getPlugin(pluginType)

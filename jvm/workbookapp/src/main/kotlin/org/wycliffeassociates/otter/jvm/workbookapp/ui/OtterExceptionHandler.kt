@@ -12,7 +12,7 @@ import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.jvm.controls.exception.exceptionDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersistenceComponent
+import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
@@ -150,7 +150,7 @@ private fun getEnvironment(): AppInfo {
 private fun getLog(): String? {
     val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
     val logExt = ".log"
-    val persistenceComponent = DaggerPersistenceComponent.builder().build()
+    val persistenceComponent = DaggerAppDependencyGraph.builder().build()
     val directoryProvider = persistenceComponent.injectDirectoryProvider()
     val logFile = StringBuilder()
         .append(directoryProvider.logsDirectory.absolutePath)

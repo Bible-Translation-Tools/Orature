@@ -8,8 +8,9 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import java.io.File
+import javax.inject.Inject
 
-class InitializePlugins(
+class InitializePlugins @Inject constructor(
     val directoryProvider: IDirectoryProvider,
     val audioPluginRegistrar: IAudioPluginRegistrar,
     val pluginRepository: IAudioPluginRepository

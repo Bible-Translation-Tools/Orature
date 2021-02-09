@@ -5,8 +5,9 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.config.Initializable
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
+import javax.inject.Inject
 
-class InitializeTakeRepository(
+class InitializeTakeRepository @Inject constructor(
     private val takeRepository: ITakeRepository
 ) : Initializable {
 

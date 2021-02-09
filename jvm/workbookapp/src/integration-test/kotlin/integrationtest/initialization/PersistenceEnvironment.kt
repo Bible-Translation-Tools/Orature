@@ -25,7 +25,7 @@ abstract class PersistenceEnvironment {
 
     protected fun initLanguages() {
         val langNames = ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH)!!
-        ImportLanguages(langNames, injector.languageRepo)
+        ImportLanguages(langNames, persistenceComponent.languageRepo)
             .import()
             .onErrorComplete()
             .blockingAwait()

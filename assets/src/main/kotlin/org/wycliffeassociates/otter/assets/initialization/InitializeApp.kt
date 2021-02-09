@@ -3,36 +3,16 @@ package org.wycliffeassociates.otter.assets.initialization
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
-import org.wycliffeassociates.otter.common.persistence.IAppPreferences
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import javax.inject.Inject
 
-class InitializeApp(
-    val preferences: IAppPreferences,
-    val directoryProvider: IDirectoryProvider,
-    val audioPluginRegistrar: IAudioPluginRegistrar,
-    val pluginRepository: IAudioPluginRepository,
-    val languageRepo: ILanguageRepository,
-    val takeRepo: ITakeRepository,
-    val resourceMetadataRepo: IResourceMetadataRepository,
-    val resourceContainerRepo: IResourceContainerRepository,
-    val collectionRepo: ICollectionRepository,
-    val contentRepo: IContentRepository,
-    val installedEntityRepo: IInstalledEntityRepository,
-    val zipEntryTreeBuilder: IZipEntryTreeBuilder,
-    val workbookRepository: IWorkbookRepository,
-    val resourceRepository: IResourceRepository
+class InitializeApp @Inject constructor(
+    private val initializeLanguages: InitializeLanguages,
+    private val initializeUlb: InitializeUlb,
+    private val initializeRecorder: InitializeRecorder,
+    private val initializeMarker: InitializeMarker,
+    private val initializePlugins: InitializePlugins,
+    private val initializeTakeRepository: InitializeTakeRepository,
+    private val initializeProjects: InitializeProjects
 ) {
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
@@ -41,55 +21,13 @@ class InitializeApp(
         return Observable
             .fromPublisher<Double> { progress ->
                 val initializers = listOf(
-                    InitializeLanguages(
-                        installedEntityRepo,
-                        languageRepo
-                    ),
-                    InitializeUlb(
-                        installedEntityRepo,
-                        resourceMetadataRepo,
-                        resourceContainerRepo,
-                        collectionRepo,
-                        contentRepo,
-                        takeRepo,
-                        languageRepo,
-                        directoryProvider,
-                        zipEntryTreeBuilder,
-                        resourceRepository
-                    ),
-                    InitializeRecorder(
-                        directoryProvider,
-                        pluginRepository,
-                        installedEntityRepo,
-                        preferences
-                    ),
-                    InitializeMarker(
-                        directoryProvider,
-                        pluginRepository,
-                        installedEntityRepo,
-                        preferences
-                    ),
-                    InitializePlugins(
-                        directoryProvider,
-                        audioPluginRegistrar,
-                        pluginRepository
-                    ),
-                    InitializeTakeRepository(
-                        takeRepo
-                    ),
-                    InitializeProjects(
-                        resourceMetadataRepo,
-                        resourceContainerRepo,
-                        collectionRepo,
-                        contentRepo,
-                        takeRepo,
-                        languageRepo,
-                        directoryProvider,
-                        zipEntryTreeBuilder,
-                        installedEntityRepo,
-                        workbookRepository,
-                        resourceRepository
-                    )
+                    initializeLanguages,
+                    initializeUlb,
+                    initializeRecorder,
+                    initializeMarker,
+                    initializePlugins,
+                    initializeTakeRepository,
+                    initializeProjects
                 )
 
                 var total = 0.0

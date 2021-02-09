@@ -69,7 +69,7 @@ open class RecordableViewModel(
         workbookViewModel.sourceAudioProperty.onChangeAndDoNow { source ->
             var audioPlayer: IAudioPlayer? = null
             if (source != null) {
-                audioPlayer = (app as MyApp).audioComponent.injectPlayer()
+                audioPlayer = (app as MyApp).dependencyGraph.injectPlayer()
                 audioPlayer.loadSection(source.file, source.start, source.end)
             }
             sourceAudioPlayerProperty.set(audioPlayer)
@@ -233,7 +233,7 @@ open class RecordableViewModel(
             audio.getAllTakes()
                 .filter { it.isNotDeleted() }
                 .map { take ->
-                    val ap: IAudioPlayer = (app as MyApp).audioComponent.injectPlayer()
+                    val ap: IAudioPlayer = (app as MyApp).dependencyGraph.injectPlayer()
                     ap.load(take.file)
                     take.mapToCardModel(take.equals(selected))
                 }
@@ -253,7 +253,7 @@ open class RecordableViewModel(
             }
             .subscribe { take ->
                 if (takeCardModels.find { it.take.equals(take) } == null) {
-                    val ap: IAudioPlayer = (app as MyApp).audioComponent.injectPlayer()
+                    val ap: IAudioPlayer = (app as MyApp).dependencyGraph.injectPlayer()
                     ap.load(take.file)
                     addToAlternateTakes(
                         take.mapToCardModel(take.equals(selected))
@@ -321,7 +321,7 @@ open class RecordableViewModel(
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val ap: IAudioPlayer = (app as MyApp).audioComponent.injectPlayer()
+        val ap: IAudioPlayer = (app as MyApp).dependencyGraph.injectPlayer()
         ap.load(this.file)
         return TakeCardModel(
             this,

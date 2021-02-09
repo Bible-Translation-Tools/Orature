@@ -21,8 +21,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import javax.inject.Inject
 
-class InitializeProjects(
+class InitializeProjects @Inject constructor(
     private val resourceMetadataRepo: IResourceMetadataRepository,
     private val resourceContainerRepo: IResourceContainerRepository,
     private val collectionRepo: ICollectionRepository,
@@ -34,17 +35,7 @@ class InitializeProjects(
     private val installedEntityRepo: IInstalledEntityRepository,
     private val workbookRepository: IWorkbookRepository,
     private val resourceRepository: IResourceRepository,
-    private val rcImporter: ImportResourceContainer = ImportResourceContainer(
-        resourceMetadataRepo,
-        resourceContainerRepo,
-        collectionRepo,
-        contentRepo,
-        takeRepo,
-        languageRepo,
-        directoryProvider,
-        zipEntryTreeBuilder,
-        resourceRepository
-    )
+    private val rcImporter: ImportResourceContainer
 ): Installable {
     override val name = "PROJECTS"
     override val version = 1

@@ -2,21 +2,15 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.inject
 
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
-import org.wycliffeassociates.otter.jvm.workbookapp.di.audio.AudioComponent
-import org.wycliffeassociates.otter.jvm.workbookapp.di.audio.DaggerAudioComponent
-import org.wycliffeassociates.otter.jvm.workbookapp.di.audioplugin.AudioPluginComponent
-import org.wycliffeassociates.otter.jvm.workbookapp.di.audioplugin.DaggerAudioPluginComponent
 import org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project.ZipEntryTreeBuilder
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DaggerPersistenceComponent
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.PersistenceComponent
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import tornadofx.*
 
 class Injector() : Component(), ScopedInstance {
-    private val persistenceComponent = (app as MyApp).persistenceComponent
-    private val audioPluginComponent = (app as MyApp).audioPluginComponent
-    private val audioComponent = (app as MyApp).audioComponent
+    private val persistenceComponent = (app as MyApp).dependencyGraph
+    private val audioPluginComponent = (app as MyApp).dependencyGraph
+    private val audioComponent = (app as MyApp).dependencyGraph
 
     private val database = persistenceComponent.injectDatabase()
     val directoryProvider = persistenceComponent.injectDirectoryProvider()

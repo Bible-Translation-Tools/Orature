@@ -26,8 +26,10 @@ import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.nio.file.Files
+import javax.inject.Inject
+import javax.inject.Provider
 
-class ImportResourceContainer(
+class ImportResourceContainer @Inject constructor(
     private val resourceMetadataRepository: IResourceMetadataRepository,
     private val resourceContainerRepository: IResourceContainerRepository,
     private val collectionRepository: ICollectionRepository,
@@ -39,6 +41,8 @@ class ImportResourceContainer(
     private val resourceRepository: IResourceRepository
 ) {
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
+
+    @Inject lateinit var importProvider: Provider<ProjectImporter>
 
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")
@@ -53,16 +57,7 @@ class ImportResourceContainer(
             file
         }
 
-        val projectImporter = ProjectImporter(
-            this,
-            directoryProvider,
-            resourceMetadataRepository,
-            collectionRepository,
-            contentRepository,
-            takeRepository,
-            languageRepository,
-            resourceRepository
-        )
+        val projectImporter = importProvider.get()
 
         val valid = validateRc(rcFile)
         if (!valid) {

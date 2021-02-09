@@ -7,9 +7,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioPluginRepository
 
-@Module
-class AudioPluginRepositoryModule {
-    @Provides
-    fun providesAudioPluginRepository(database: AppDatabase, preferences: IAppPreferences): IAudioPluginRepository =
-        AudioPluginRepository(database, preferences)
-}
+//@Module
+//class AudioPluginRepositoryModule {
+//    @Provides
+//    fun providesAudioPluginRepository(database: AppDatabase, preferences: IAppPreferences): IAudioPluginRepository =
+//        AudioPluginRepository(database, preferences)
+//}

@@ -2,9 +2,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.persistence
 
 import dagger.Module
 import dagger.Provides
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
+import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.AudioPluginRegistrar
+import org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project.ZipEntryTreeBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.*
@@ -91,7 +95,6 @@ class AppDatabaseModule {
     }
 
     @Provides
-    @Singleton
     fun providesPluginRepository(
         directoryProvider: IDirectoryProvider,
         appPreferences: IAppPreferences
@@ -133,4 +136,13 @@ class AppDatabaseModule {
         val db = providesAppDatabase(directoryProvider)
         return InstalledEntityRepository(db)
     }
+
+    @Provides
+    fun providesZipEntryTreeBuilder(): IZipEntryTreeBuilder {
+        return ZipEntryTreeBuilder
+    }
+
+    @Provides
+    fun providesRegistrar(audioPluginRepository: IAudioPluginRepository): IAudioPluginRegistrar =
+        AudioPluginRegistrar(audioPluginRepository)
 }
