@@ -23,7 +23,7 @@ import javax.inject.Inject
 class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var launchPlugin: LaunchPlugin
-    private val takeActions: TakeActions
+    @Inject lateinit var takeActions: TakeActions
 
     private val workbookViewModel: WorkbookViewModel by inject()
 
@@ -34,7 +34,6 @@ class AudioPluginViewModel : ViewModel() {
 
     init {
         (app as MyApp).dependencyGraph.inject(this)
-        takeActions = TakeActions(WaveFileCreator(), launchPlugin)
     }
 
     fun getPlugin(pluginType: PluginType): Maybe<IAudioPlugin> {
