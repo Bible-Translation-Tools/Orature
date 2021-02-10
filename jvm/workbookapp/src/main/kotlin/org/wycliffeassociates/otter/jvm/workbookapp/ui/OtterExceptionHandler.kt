@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.exception.exceptionDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
@@ -147,22 +146,21 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
         return AppInfo()
     }
 
-private fun getLog(): String? {
-    val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
-    val logExt = ".log"
-    val persistenceComponent = DaggerAppDependencyGraph.builder().build()
-    val directoryProvider = persistenceComponent.injectDirectoryProvider()
-    val logFile = StringBuilder()
-        .append(directoryProvider.logsDirectory.absolutePath)
-        .append("/")
-        .append(logFileName)
-        .append(logExt)
-        .toString()
+    private fun getLog(): String? {
+        val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
+        val logExt = ".log"
+        val logFile = StringBuilder()
+            .append(directoryProvider.logsDirectory.absolutePath)
+            .append("/")
+            .append(logFileName)
+            .append(logExt)
+            .toString()
 
-    return try {
-        File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
-    } catch (e: Exception) {
-        null
+        return try {
+            File(logFile).inputStream().readBytes().toString(Charsets.UTF_8)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun githubProperties(): Properties? {
