@@ -1,33 +1,32 @@
 package integrationtest.initialization
 
+import integrationtest.DaggerTestPersistenceComponent
+import integrationtest.TestDirectoryProviderModule
+import integrationtest.TestPersistenceComponent
 import io.reactivex.Completable
 import io.reactivex.observers.TestObserver
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.assets.initialization.InitializeUlb
+import javax.inject.Inject
+import javax.inject.Provider
 
 class TestInitializeUlb {
+
+    @Inject
+    lateinit var initUlbProvider: Provider<InitializeUlb>
+
+    init {
+        DaggerTestPersistenceComponent.create().inject(this)
+    }
 
     @Test
     fun testImportEnUlb() {
         val testSub = TestObserver<Completable>()
         val env = InitializeUlbEnvironment()
-        val inj = env.injector
 
-        val init = InitializeUlb(
-            inj.installedEntityRepository,
-            inj.resourceMetadataRepository,
-            inj.resourceContainerRepository,
-            inj.collectionRepo,
-            inj.contentRepository,
-            inj.takeRepository,
-            inj.languageRepo,
-            inj.directoryProvider,
-            inj.zipEntryTreeBuilder,
-            inj.resourceRepository
-        )
-        init
-            .exec()
+        val init = initUlbProvider.get()
+        init.exec()
             .subscribe(testSub)
 
         testSub.assertComplete()

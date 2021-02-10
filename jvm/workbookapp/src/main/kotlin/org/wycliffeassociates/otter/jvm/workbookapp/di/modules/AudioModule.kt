@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.di.audio
+package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides

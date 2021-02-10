@@ -1,12 +1,25 @@
 package integrationtest.projects
 
+import integrationtest.DaggerTestPersistenceComponent
 import org.junit.Test
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import javax.inject.Inject
 
 class TestProjectCreate {
     private val numberOfChaptersInHebrews: Int = 13
     private val numberOfVersesInHebrews: Int = 303
     private val numberOfResourcesInTn: Int = 157581
     private val numberOfResourcesInTnHebrews: Int = 33758
+
+    @Inject
+    lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var languageRepo: ILanguageRepository
+
+    init {
+        DaggerTestPersistenceComponent.create().inject(this)
+    }
 
     @Test
     fun derivativeLinksForBook() {
@@ -44,8 +57,8 @@ class TestProjectCreate {
     }
 
     private fun DatabaseEnvironment.getHebrewsSourceBook() =
-        injector.collectionRepo.getSourceProjects().map { it.single { it.slug == "heb" } }.cache()
+        collectionRepo.getSourceProjects().map { it.single { it.slug == "heb" } }.cache()
 
     private fun DatabaseEnvironment.getHebrewLanguage() =
-        injector.languageRepo.getBySlug("hbo").cache()
+        languageRepo.getBySlug("hbo").cache()
 }

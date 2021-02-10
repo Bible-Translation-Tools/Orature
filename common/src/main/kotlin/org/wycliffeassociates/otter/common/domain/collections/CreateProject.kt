@@ -6,8 +6,9 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import javax.inject.Inject
 
-class CreateProject(
+class CreateProject @Inject constructor(
     private val collectionRepo: ICollectionRepository,
     private val resourceMetadataRepo: IResourceMetadataRepository
 ) {

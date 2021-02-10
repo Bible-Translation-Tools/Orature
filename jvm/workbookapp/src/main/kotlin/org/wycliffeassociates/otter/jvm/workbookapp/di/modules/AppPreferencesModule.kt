@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.di.persistence
+package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides

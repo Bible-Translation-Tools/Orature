@@ -6,7 +6,8 @@ import integrationtest.TestPersistenceComponent
 import org.wycliffeassociates.otter.assets.initialization.LANGNAMES_PATH
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import javax.inject.Inject
+import javax.inject.Provider
 
 abstract class PersistenceEnvironment {
     protected val persistenceComponent: TestPersistenceComponent =
@@ -15,9 +16,12 @@ abstract class PersistenceEnvironment {
             .testDirectoryProviderModule(TestDirectoryProviderModule())
             .build()
     val db: AppDatabase = persistenceComponent.injectDatabase()
-    val injector = Injector(persistenceComponent = persistenceComponent)
+
+    @Inject
+    lateinit var importLanguagesProvider: Provider<ImportLanguages>
 
     init {
+        DaggerTestPersistenceComponent.create().inject(this)
         setUpDatabase()
     }
 
@@ -25,8 +29,9 @@ abstract class PersistenceEnvironment {
 
     protected fun initLanguages() {
         val langNames = ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH)!!
-        ImportLanguages(langNames, persistenceComponent.languageRepo)
-            .import()
+        importLanguagesProvider
+            .get()
+            .import(langNames)
             .onErrorComplete()
             .blockingAwait()
     }

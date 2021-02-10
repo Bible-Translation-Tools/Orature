@@ -1,5 +1,6 @@
 package integrationtest.initialization
 
+import integrationtest.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import io.reactivex.Completable
@@ -12,10 +13,23 @@ import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.ContentType
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.time.LocalDate
+import javax.inject.Inject
+import javax.inject.Provider
 
 class TestInitializeProjects {
+
+    @Inject
+    lateinit var initProjectsProvider: Provider<InitializeProjects>
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    init {
+        DaggerTestPersistenceComponent.create().inject(this)
+    }
 
     private val sourceMetadata = ResourceMetadata(
         "rc0.2",
@@ -48,26 +62,13 @@ class TestInitializeProjects {
     )
 
     private val env = DatabaseEnvironment()
-    private val inj = env.injector
 
     @Test
     fun testInitializeProjects() {
         prepareInitialProject()
 
         val testSub = TestObserver<Completable>()
-        val init = InitializeProjects(
-            inj.resourceMetadataRepository,
-            inj.resourceContainerRepository,
-            inj.collectionRepo,
-            inj.contentRepository,
-            inj.takeRepository,
-            inj.languageRepo,
-            inj.directoryProvider,
-            inj.zipEntryTreeBuilder,
-            inj.installedEntityRepository,
-            inj.workbookRepository,
-            inj.resourceRepository
-        )
+        val init = initProjectsProvider.get()
         init
             .exec()
             .subscribe(testSub)
@@ -90,7 +91,7 @@ class TestInitializeProjects {
     }
 
     private fun prepareInitialProject() {
-        val targetDir = inj.directoryProvider.getProjectDirectory(
+        val targetDir = directoryProvider.getProjectDirectory(
             sourceMetadata,
             targetMetadata,
             project

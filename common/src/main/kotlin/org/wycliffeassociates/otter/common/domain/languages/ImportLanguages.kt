@@ -10,11 +10,12 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import java.io.InputStream
+import javax.inject.Inject
 
 // Imports from langnames.json
-class ImportLanguages(val inputStream: InputStream, val languageRepo: ILanguageRepository) {
+class ImportLanguages @Inject constructor(val languageRepo: ILanguageRepository) {
     private val logger = LoggerFactory.getLogger(ImportLanguages::class.java)
-    fun import(): Completable {
+    fun import(inputStream: InputStream): Completable {
         return Completable
             .fromCallable {
                 val mapper = ObjectMapper(JsonFactory())

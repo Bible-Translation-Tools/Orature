@@ -8,10 +8,10 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
-import org.wycliffeassociates.otter.jvm.workbookapp.di.audio.AudioModule
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AppDatabaseModule
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.AppPreferencesModule
-import org.wycliffeassociates.otter.jvm.workbookapp.di.persistence.DirectoryProviderModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProviderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel

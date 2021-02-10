@@ -11,9 +11,11 @@ import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 
 class DatabaseEnvironment {
     private val persistenceComponent: TestPersistenceComponent =
@@ -23,25 +25,23 @@ class DatabaseEnvironment {
             .build()
 
     val db: AppDatabase = persistenceComponent.injectDatabase()
-    val injector =
-        Injector(persistenceComponent = persistenceComponent)
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var importRcProvider: Provider<ImportResourceContainer>
+    @Inject
+    lateinit var createProjectProvider: Provider<CreateProject>
+    @Inject
+    lateinit var importLanguagesProvider: Provider<ImportLanguages>
 
     init {
+        persistenceComponent.inject(this)
         setUpDatabase()
     }
 
     private val importer
-        get() = ImportResourceContainer(
-            injector.resourceMetadataRepository,
-            injector.resourceContainerRepository,
-            injector.collectionRepo,
-            injector.contentRepository,
-            injector.takeRepository,
-            injector.languageRepo,
-            injector.directoryProvider,
-            injector.zipEntryTreeBuilder,
-            injector.resourceRepository
-        )
+        get() = importRcProvider.get()
 
     fun import(rcFile: String, importAsStream: Boolean = false, unzip: Boolean = false): DatabaseEnvironment {
         val result = if (importAsStream) {
@@ -62,15 +62,17 @@ class DatabaseEnvironment {
     }
 
     fun createProject(sourceProject: Collection, targetLanguage: Language): Collection =
-        CreateProject(injector.collectionRepo, injector.resourceMetadataRepository)
+        createProjectProvider.get()
             .create(sourceProject, targetLanguage)
             .blockingGet()
 
     fun unzipProject(rcFile: String, dir: File? = null): File {
         val targetDir = dir ?: createTempDir("orature_unzip")
-        injector.directoryProvider.newFileReader(rcResourceFile(rcFile)).use { fileReader ->
-            fileReader.copyDirectory("/", targetDir)
-        }
+        persistenceComponent.injectDirectoryProvider()
+            .newFileReader(rcResourceFile(rcFile))
+            .use { fileReader ->
+                fileReader.copyDirectory("/", targetDir)
+            }
         return targetDir
     }
 
@@ -103,11 +105,8 @@ class DatabaseEnvironment {
 
     private fun setUpDatabase() {
         val langNames = ClassLoader.getSystemResourceAsStream("content/langnames.json")!!
-        ImportLanguages(
-            langNames,
-            injector.languageRepo
-        )
-            .import()
+        importLanguagesProvider.get()
+            .import(langNames)
             .onErrorComplete()
             .blockingAwait()
     }

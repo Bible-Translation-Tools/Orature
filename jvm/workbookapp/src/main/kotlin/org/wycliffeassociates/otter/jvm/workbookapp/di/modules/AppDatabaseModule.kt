@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.di.persistence
+package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.*
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.AudioPluginRegistrar
 import org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project.ZipEntryTreeBuilder
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.*
 import java.io.File

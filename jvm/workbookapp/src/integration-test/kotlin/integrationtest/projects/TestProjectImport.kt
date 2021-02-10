@@ -56,37 +56,37 @@ class TestProjectImport {
         null
     )
 
-    private val ulbProjectDir = db.injector.directoryProvider.getProjectDirectory(
+    private val ulbProjectDir = db.directoryProvider.getProjectDirectory(
         sourceMetadata,
         ulbTargetMetadata,
         project
     )
 
-    private val ulbSourceDir = db.injector.directoryProvider.getProjectSourceDirectory(
+    private val ulbSourceDir = db.directoryProvider.getProjectSourceDirectory(
         sourceMetadata,
         ulbTargetMetadata,
         project
     )
 
-    private val ulbAudioDir = db.injector.directoryProvider.getProjectAudioDirectory(
+    private val ulbAudioDir = db.directoryProvider.getProjectAudioDirectory(
         sourceMetadata,
         ulbTargetMetadata,
         project
     )
 
-    private val tnProjectDir = db.injector.directoryProvider.getProjectDirectory(
+    private val tnProjectDir = db.directoryProvider.getProjectDirectory(
         sourceMetadata,
         tnTargetMetadata,
         project
     )
 
-    private val tnSourceDir = db.injector.directoryProvider.getProjectSourceDirectory(
+    private val tnSourceDir = db.directoryProvider.getProjectSourceDirectory(
         sourceMetadata,
         tnTargetMetadata,
         project
     )
 
-    private val tnAudioDir = db.injector.directoryProvider.getProjectAudioDirectory(
+    private val tnAudioDir = db.directoryProvider.getProjectAudioDirectory(
         sourceMetadata,
         tnTargetMetadata,
         project

@@ -44,8 +44,7 @@ class InitializeLanguages @Inject constructor(
 
     private fun importLanguages(): Completable {
         return ImportLanguages(
-            ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH),
             languageRepo
-        ).import()
+        ).import(ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH))
     }
 }
