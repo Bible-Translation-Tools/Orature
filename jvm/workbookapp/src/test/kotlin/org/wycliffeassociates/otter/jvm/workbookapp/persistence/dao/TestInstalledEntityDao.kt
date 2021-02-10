@@ -25,7 +25,7 @@ class TestInstalledEntityDao {
         dao.upsert(installableV2)
         Assert.assertEquals(2, dao.fetchVersion(installable))
         val rowCount = database.dsl.fetchCount(INSTALLED_ENTITY)
-        Assert.assertEquals(1, rowCount)
+        Assert.assertEquals(2, rowCount)
     }
 
     @Test

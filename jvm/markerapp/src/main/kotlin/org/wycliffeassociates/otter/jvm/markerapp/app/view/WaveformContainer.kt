@@ -37,6 +37,8 @@ class WaveformContainer : Fragment() {
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
+            styleClass.add("vm-waveform-container")
+
             add(MarkerViewBackground())
             add(
                 WaveformFrame(

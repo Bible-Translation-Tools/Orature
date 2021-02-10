@@ -10,7 +10,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
-import javafx.scene.text.Text
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
@@ -20,13 +19,14 @@ import tornadofx.*
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
 
     companion object {
-        private const val SCROLL_TEXT_MAX_HEIGHT = 150.0
-        private const val SCROLL_TEXT_MARGIN = 20.0
-        private const val SCROLL_TEXT_RESIZE_RATIO = 1.05
+        private const val SCROLL_TEXT_RESIZE_RATIO = 1.5
     }
 
     private val playIcon = FontIcon("fa-play")
     private val pauseIcon = FontIcon("fa-pause")
+
+    private val minimizedIcon = FontIcon("mdi-window-minimize")
+    private val maximizedIcon = FontIcon("mdi-window-maximize")
 
     @FXML
     lateinit var sourceAudioContainer: HBox
@@ -56,10 +56,22 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var sourceTextScroll: ScrollPane
 
     @FXML
-    lateinit var sourceText: Text
+    lateinit var sourceText: Label
 
     @FXML
     lateinit var title: Label
+
+    @FXML
+    lateinit var titleContainer: HBox
+
+    @FXML
+    lateinit var sourceContentBody: VBox
+
+    @FXML
+    lateinit var minimizeBtn: Button
+
+    @FXML
+    lateinit var sourceAudioBlock: HBox
 
     lateinit var audioController: AudioPlayerController
 
@@ -110,6 +122,11 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                 audioController.load(it)
             }
         }
+
+        sourceAudioBlock.apply {
+            visibleWhen(sourceContent.enableAudioProperty)
+            managedWhen(visibleProperty())
+        }
     }
 
     private fun initTextControls() {
@@ -130,32 +147,58 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
 
+            isFitToWidth = true
+
             maxWidthProperty().bind(
                 sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
             )
-            maxHeightProperty().set(SCROLL_TEXT_MAX_HEIGHT)
-
-            sourceText.boundsInParentProperty().onChangeAndDoNow { bounds ->
-                bounds?.let {
-                    if (bounds.height < SCROLL_TEXT_MAX_HEIGHT) {
-                        sourceTextScroll.minHeightProperty().set(bounds.height)
-                    } else {
-                        sourceTextScroll.minHeightProperty().set(SCROLL_TEXT_MAX_HEIGHT)
-                    }
-                }
-            }
         }
 
         sourceText.apply {
             textProperty().bind(sourceContent.sourceTextProperty)
-            wrappingWidthProperty().bind(
-                sourceTextScroll.maxWidthProperty().minus(SCROLL_TEXT_MARGIN)
-            )
         }
 
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
         }
+
+        titleContainer.apply {
+            sourceContent.isMinimizedProperty.onChangeAndDoNow {
+                if (it == true) {
+                    maxWidthProperty().unbind()
+                    maxWidthProperty().set(Double.MAX_VALUE)
+                } else {
+                    maxWidthProperty().bind(
+                        sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
+                    )
+                }
+            }
+        }
+
+        minimizeBtn.apply {
+            visibleWhen(sourceContent.isMinimizableProperty)
+
+            setOnMouseClicked {
+                toggleBody()
+            }
+            sourceContent.isMinimizedProperty.onChange { isMinimized ->
+                minimizeBtn.graphicProperty().value =
+                    if (isMinimized) {
+                        maximizedIcon
+                    } else {
+                        minimizedIcon
+                    }
+            }
+        }
+
+        sourceContentBody.apply {
+            hiddenWhen(sourceContent.isMinimizedProperty)
+            managedWhen(visibleProperty())
+        }
+    }
+
+    private fun toggleBody() {
+        sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
     }
 
     private fun togglePlayButtonIcon(isPlaying: Boolean?) {

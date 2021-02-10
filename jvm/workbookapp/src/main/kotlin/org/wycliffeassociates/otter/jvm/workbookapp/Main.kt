@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.view.SplashScreen
 import tornadofx.*
 import kotlin.reflect.KClass
@@ -46,7 +45,6 @@ class MyApp : App(SplashScreen::class) {
 
         initializeLogger(dependencyGraph.injectDirectoryProvider())
         importStylesheet<AppStyles>()
-        Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler())
     }
 
     fun initializeLogger(directoryProvider: IDirectoryProvider) {

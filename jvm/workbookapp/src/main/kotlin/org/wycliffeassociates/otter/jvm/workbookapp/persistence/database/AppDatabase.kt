@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
+import jooq.tables.InstalledEntity
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
+import org.slf4j.LoggerFactory
 import org.sqlite.SQLiteDataSource
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.*
 import java.io.File
@@ -13,6 +15,8 @@ const val CREATION_SCRIPT = "sql/CreateAppDb.sql"
 class AppDatabase(
     databaseFile: File
 ) {
+    val logger = LoggerFactory.getLogger(AppDatabase::class.java)
+
     val dsl: DSLContext
 
     init {
@@ -36,6 +40,7 @@ class AppDatabase(
         // Create the jooq dsl
         dsl = DSL.using(sqLiteDataSource.connection, SQLDialect.SQLITE)
         if (dbDoesNotExist) setup()
+        DatabaseMigrator().migrate(dsl)
     }
 
     private fun setup() {
@@ -55,6 +60,15 @@ class AppDatabase(
         sqlStatements.forEach {
             dsl.fetch(it)
         }
+
+        dsl.insertInto(
+            InstalledEntity.INSTALLED_ENTITY,
+            InstalledEntity.INSTALLED_ENTITY.NAME,
+            InstalledEntity.INSTALLED_ENTITY.VERSION
+        ).values(
+            DATABASE_INSTALLABLE_NAME,
+            SCHEMA_VERSION
+        ).execute()
     }
 
     // Create the DAOs

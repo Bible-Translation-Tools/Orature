@@ -10,6 +10,7 @@ object JooqTestConfiguration {
     init {
         Class.forName("org.sqlite.JDBC")
     }
+
     private fun getConfig(databasePath: String): Configuration {
         val sqLiteDataSource = SQLiteDataSource()
         sqLiteDataSource.url = "jdbc:sqlite:$databasePath"
@@ -17,12 +18,12 @@ object JooqTestConfiguration {
         val config = DSL.using(sqLiteDataSource, SQLDialect.SQLITE).configuration()
         return config
     }
-    fun createDatabase(databasePath: String): Configuration {
+
+    fun createDatabase(databasePath: String, schemaFile: File): Configuration {
         println("Creating $databasePath")
         val config = getConfig(databasePath)
-        val file = File(listOf("src", "main", "resources", "sql/CreateAppDb.sql").joinToString(File.separator))
         val sql = StringBuffer()
-        file.forEachLine {
+        schemaFile.forEachLine {
             sql.append(it)
             if (it.contains(";")) {
                 config.dsl().fetch(sql.toString())

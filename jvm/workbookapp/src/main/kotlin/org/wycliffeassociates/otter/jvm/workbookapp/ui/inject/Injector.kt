@@ -36,7 +36,7 @@ class Injector() : Component(), ScopedInstance {
     val audioPlayer
         get() = audioComponent.injectPlayer()
 
-    val audioPluginRegistrar = audioPluginComponent.injectRegistrar()
+    val audioPluginRegistrar = persistenceComponent.injectAudioPluginRegistrar()
 
     val zipEntryTreeBuilder = ZipEntryTreeBuilder
 }

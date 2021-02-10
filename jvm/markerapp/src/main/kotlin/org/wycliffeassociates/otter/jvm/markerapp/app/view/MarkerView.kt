@@ -1,8 +1,5 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import javafx.scene.layout.ColumnConstraints
-import javafx.scene.layout.Priority
-import javafx.scene.layout.RowConstraints
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
@@ -17,6 +14,7 @@ class MarkerView : PluginEntrypoint() {
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
+    val source = SourceAudioFragment()
     val playbackControls = PlaybackControlsFragment()
 
     init {
@@ -34,32 +32,14 @@ class MarkerView : PluginEntrypoint() {
         viewModel.initializeAudioController(minimap.slider)
     }
 
-    override val root = gridpane {
+    override val root = vbox {
         prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
-        val fixedConstraint = RowConstraints()
-        val growConstraint = RowConstraints()
-        val columnConstraint = ColumnConstraints()
-
-        columnConstraint.hgrow = Priority.ALWAYS
-        growConstraint.vgrow = Priority.SOMETIMES
-        fixedConstraint.prefHeight = 88.0
-        fixedConstraint.minHeight = 88.0
-
-        rowConstraints.setAll(
-            fixedConstraint,
-            fixedConstraint,
-            growConstraint,
-            fixedConstraint
-        )
-        columnConstraints.setAll(
-            columnConstraint
-        )
-
-        add(titleFragment.root, 0, 0)
-        add(minimap.root, 0, 1)
-        add(waveformContainer.root, 0, 2)
-        add(playbackControls.root, 0, 3)
+        add(titleFragment)
+        add(minimap)
+        add(waveformContainer)
+        add(source)
+        add(playbackControls)
     }
 }

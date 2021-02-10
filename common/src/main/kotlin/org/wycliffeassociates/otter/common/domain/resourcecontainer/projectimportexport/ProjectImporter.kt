@@ -118,7 +118,6 @@ class ProjectImporter @Inject constructor(
             derivedProject,
             manifestProject,
             metadata,
-            sourceMetadata,
             sourceCollection,
             projectFilesAccessor
         )
@@ -129,7 +128,6 @@ class ProjectImporter @Inject constructor(
         project: Collection,
         manifestProject: Project,
         metadata: ResourceMetadata,
-        sourceMetadata: ResourceMetadata,
         sourceCollection: Collection,
         projectFilesAccessor: ProjectFilesAccessor
     ) {

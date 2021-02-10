@@ -21,6 +21,8 @@ class RecordingVisualizerFragment : Fragment() {
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
 
+        styleClass.add("waveform-container")
+
         // you seem to just add things to a column and row index without allocating the number of rows or columns first
         // the classname fragment currently lies- you apparently can only add nodes, not uicomponents? fragment is the latter
         this.add(vm.waveformView, 0, 0)
