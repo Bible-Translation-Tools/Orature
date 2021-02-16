@@ -8,6 +8,7 @@ import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import tornadofx.ViewModel
 import javax.inject.Inject
@@ -22,7 +23,7 @@ class RemovePluginsViewModel : ViewModel() {
     val noPluginsProperty: ReadOnlyBooleanProperty
 
     init {
-        (app as MyApp).dependencyGraph.inject(this)
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
         val listProperty = SimpleListProperty(plugins)
         noPluginsProperty = listProperty.emptyProperty()
     }

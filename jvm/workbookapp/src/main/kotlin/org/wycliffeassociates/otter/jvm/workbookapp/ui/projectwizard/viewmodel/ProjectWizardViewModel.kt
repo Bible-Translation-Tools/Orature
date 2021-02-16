@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
@@ -58,7 +59,7 @@ class ProjectWizardViewModel : ViewModel() {
     val bookCompletedText = SimpleStringProperty()
 
     init {
-        (app as MyApp).dependencyGraph.inject(this)
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun loadLanguages() {

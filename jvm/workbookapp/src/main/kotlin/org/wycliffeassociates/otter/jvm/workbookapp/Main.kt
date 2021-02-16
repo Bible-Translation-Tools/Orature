@@ -2,23 +2,21 @@ package org.wycliffeassociates.otter.jvm.workbookapp
 
 import javafx.stage.Stage
 import javafx.stage.StageStyle
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
-import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.splash.view.SplashScreen
 import tornadofx.*
-import kotlin.reflect.KClass
 
-class MyApp : App(SplashScreen::class) {
-    val dependencyGraph = DaggerAppDependencyGraph.builder().build()
+interface DependencyGraphProvider {
+    val dependencyGraph: AppDependencyGraph
+}
+
+class MyApp : App(SplashScreen::class), DependencyGraphProvider  {
+    override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
 
     init {
         val directoryProvider = dependencyGraph.injectDirectoryProvider()
