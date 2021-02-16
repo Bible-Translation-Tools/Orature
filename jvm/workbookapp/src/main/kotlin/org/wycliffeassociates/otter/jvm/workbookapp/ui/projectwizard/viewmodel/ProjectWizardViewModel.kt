@@ -17,7 +17,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizard
@@ -33,6 +32,8 @@ class ProjectWizardViewModel : ViewModel() {
     @Inject lateinit var collectionRepo: ICollectionRepository
     @Inject lateinit var resourceMetadataRepo: IResourceMetadataRepository
     @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var creationUseCase: CreateProject
+
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
@@ -48,9 +49,6 @@ class ProjectWizardViewModel : ViewModel() {
     private val existingProjects: ObservableList<Collection> = FXCollections.observableArrayList()
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
-
-    private val creationUseCase: CreateProject
-
     val canGoBack: BooleanProperty = SimpleBooleanProperty(false)
     val languageConfirmed: BooleanProperty = SimpleBooleanProperty(false)
 
@@ -60,8 +58,6 @@ class ProjectWizardViewModel : ViewModel() {
 
     init {
         (app as DependencyGraphProvider).dependencyGraph.inject(this)
-
-        creationUseCase = CreateProject(collectionRepo, resourceMetadataRepo)
     }
 
     fun loadLanguages() {
