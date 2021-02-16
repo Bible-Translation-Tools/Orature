@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
@@ -33,7 +34,7 @@ class AudioPluginViewModel : ViewModel() {
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
     init {
-        (app as MyApp).dependencyGraph.inject(this)
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
     }
 
     fun getPlugin(pluginType: PluginType): Maybe<IAudioPlugin> {

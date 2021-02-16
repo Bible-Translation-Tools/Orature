@@ -131,6 +131,8 @@ dependencies {
     testImplementation "junit:junit:$junitVer"
     testImplementation "org.mockito:mockito-core:$mockitoVer"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
+    testImplementation "org.testfx:testfx-core:4.0.16-alpha"
+    testImplementation "org.testfx:testfx-junit:4.0.16-alpha"
     integrationTestCompile group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestCompile "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation sourceSets.main.compileClasspath

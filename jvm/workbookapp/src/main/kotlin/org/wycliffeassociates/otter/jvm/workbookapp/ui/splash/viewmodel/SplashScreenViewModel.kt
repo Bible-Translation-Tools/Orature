@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
@@ -24,7 +25,7 @@ class SplashScreenViewModel : ViewModel() {
     private val chromeableStage: ChromeableStage by inject()
 
     init {
-        (app as MyApp).dependencyGraph.inject(this)
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
 
         initApp.initApp()
             .observeOnFx()
