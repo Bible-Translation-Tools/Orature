@@ -3,8 +3,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.mapping.Mapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
+import javax.inject.Inject
 
-class LanguageMapper : Mapper<LanguageEntity, Language> {
+class LanguageMapper @Inject constructor() : Mapper<LanguageEntity, Language> {
 
     override fun mapFromEntity(type: LanguageEntity) =
         Language(

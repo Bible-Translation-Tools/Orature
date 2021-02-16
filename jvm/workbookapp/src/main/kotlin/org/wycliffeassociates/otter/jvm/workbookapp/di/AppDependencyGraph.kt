@@ -3,15 +3,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di
 import dagger.Component
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
-import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.*
-import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppRepositoriesModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProviderModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
@@ -28,7 +26,9 @@ import javax.inject.Singleton
         AudioModule::class,
         AppDatabaseModule::class,
         AppPreferencesModule::class,
-        DirectoryProviderModule::class
+        DirectoryProviderModule::class,
+        AppRepositoriesModule::class,
+        ZipEntryTreeBuilderModule::class
     ]
 )
 @Singleton
@@ -40,26 +40,12 @@ interface AppDependencyGraph {
     fun inject(viewModel: WorkbookViewModel)
     fun inject(viewModel: AudioPluginViewModel)
     fun inject(viewModel: ProjectWizardViewModel)
+
     fun inject(viewModel: RemovePluginsViewModel)
 
     fun injectDatabase(): AppDatabase
-    fun injectPreferences(): IAppPreferences
     fun injectDirectoryProvider(): IDirectoryProvider
-    // Need inject for audio plugin repo so audio plugin registrar can be built
-    fun injectAudioPluginRepository(): IAudioPluginRepository
-    fun injectLanguageRepo(): ILanguageRepository
-    fun injectCollectionRepo(): ICollectionRepository
-    fun injectContentRepository(): IContentRepository
-    fun injectResourceRepository(): IResourceRepository
-    fun injectResourceContainerRepository(): IResourceContainerRepository
-    fun injectResourceMetadataRepository(): IResourceMetadataRepository
-    fun injectTakeRepository(): ITakeRepository
-    fun injectPluginRepository(): IAudioPluginRepository
-    fun injectWorkbookRepository(): IWorkbookRepository
-    fun injectInstalledEntityRepository(): IInstalledEntityRepository
-    fun injectZipEntryTreeBuilder(): IZipEntryTreeBuilder
 
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer
-    fun injectRegistrar(): IAudioPluginRegistrar
 }

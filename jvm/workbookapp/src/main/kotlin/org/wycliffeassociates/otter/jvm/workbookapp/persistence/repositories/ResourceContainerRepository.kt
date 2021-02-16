@@ -25,8 +25,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import javax.inject.Inject
 
-class ResourceContainerRepository(
+class ResourceContainerRepository @Inject constructor(
     private val database: AppDatabase,
     private val collectionRepository: ICollectionRepository,
     private val resourceRepository: IResourceRepository

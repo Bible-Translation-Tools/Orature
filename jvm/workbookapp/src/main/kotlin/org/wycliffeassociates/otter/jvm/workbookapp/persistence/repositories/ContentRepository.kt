@@ -14,8 +14,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.lang.IllegalStateException
+import javax.inject.Inject
 
-class ContentRepository(
+class ContentRepository @Inject constructor(
     database: AppDatabase
 ) : IContentRepository {
     private val logger = LoggerFactory.getLogger(ContentRepository::class.java)

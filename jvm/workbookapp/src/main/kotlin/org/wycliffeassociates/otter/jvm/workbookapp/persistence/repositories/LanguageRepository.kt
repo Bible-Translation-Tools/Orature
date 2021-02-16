@@ -8,10 +8,11 @@ import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
+import javax.inject.Inject
 
-class LanguageRepository(
+class LanguageRepository @Inject constructor(
     database: AppDatabase,
-    private val mapper: LanguageMapper = LanguageMapper()
+    private val mapper: LanguageMapper
 ) : ILanguageRepository {
     private val logger = LoggerFactory.getLogger(LanguageRepository::class.java)
 

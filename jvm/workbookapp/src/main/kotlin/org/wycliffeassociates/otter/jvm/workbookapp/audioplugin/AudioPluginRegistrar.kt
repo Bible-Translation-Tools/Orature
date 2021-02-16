@@ -13,9 +13,12 @@ import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.parser.ParsedAudioPluginDataMapper
 import java.io.File
+import javax.inject.Inject
 
 // Imports plugin data files into database
-class AudioPluginRegistrar(private val audioPluginRepository: IAudioPluginRepository) : IAudioPluginRegistrar {
+class AudioPluginRegistrar @Inject constructor(
+    private val audioPluginRepository: IAudioPluginRepository
+) : IAudioPluginRegistrar {
     private val logger = LoggerFactory.getLogger(AudioPluginRegistrar::class.java)
 
     // Configure Jackson YAML processor

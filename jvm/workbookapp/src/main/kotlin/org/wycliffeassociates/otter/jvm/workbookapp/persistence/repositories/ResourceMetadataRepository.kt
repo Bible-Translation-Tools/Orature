@@ -11,8 +11,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppData
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
+import javax.inject.Inject
 
-class ResourceMetadataRepository(
+class ResourceMetadataRepository @Inject constructor(
     database: AppDatabase,
     private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
     private val languageMapper: LanguageMapper = LanguageMapper()

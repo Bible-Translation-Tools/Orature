@@ -2,8 +2,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 
 import org.wycliffeassociates.otter.common.data.model.Marker
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.MarkerEntity
+import javax.inject.Inject
 
-class MarkerMapper {
+class MarkerMapper @Inject constructor() {
     fun mapFromEntity(type: MarkerEntity): Marker {
         return Marker(
             type.number,
