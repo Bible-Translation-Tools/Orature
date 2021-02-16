@@ -3,8 +3,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
+import javax.inject.Inject
 
-class CollectionMapper {
+class CollectionMapper @Inject constructor() {
     fun mapFromEntity(entity: CollectionEntity, metadata: ResourceMetadata?): Collection {
         return Collection(
             entity.sort,

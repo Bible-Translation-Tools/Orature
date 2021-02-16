@@ -12,9 +12,11 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL.*
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
-import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -27,25 +29,23 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.*
 import java.io.File
-import java.io.FileNotFoundException
-import java.lang.NullPointerException
 import java.time.LocalDate
+import javax.inject.Inject
 
-class CollectionRepository(
+class CollectionRepository @Inject constructor(
     private val database: AppDatabase,
     private val directoryProvider: IDirectoryProvider,
-    private val collectionMapper: CollectionMapper = CollectionMapper(),
-    private val metadataMapper: ResourceMetadataMapper = ResourceMetadataMapper(),
-    private val languageMapper: LanguageMapper = LanguageMapper(),
-    private val dublinCoreCreator: String = OratureInfo.SUITE_NAME
+    private val collectionMapper: CollectionMapper,
+    private val metadataMapper: ResourceMetadataMapper,
+    private val languageMapper: LanguageMapper
 ) : ICollectionRepository {
 
     val log = LoggerFactory.getLogger(CollectionRepository::class.java)
 
+    private val dublinCoreCreator: String = OratureInfo.SUITE_NAME
     private val collectionDao = database.collectionDao
     private val metadataDao = database.resourceMetadataDao
     private val languageDao = database.languageDao
-    private val contentTypeDao = database.contentTypeDao
     private val resourceMetadataDao = database.resourceMetadataDao
 
     override fun delete(obj: Collection): Completable {

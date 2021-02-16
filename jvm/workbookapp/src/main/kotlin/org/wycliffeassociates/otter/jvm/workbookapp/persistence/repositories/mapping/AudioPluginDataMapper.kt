@@ -4,8 +4,9 @@ import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.mapping.Mapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.AudioPluginEntity
 import java.io.File
+import javax.inject.Inject
 
-class AudioPluginDataMapper : Mapper<AudioPluginEntity, AudioPluginData> {
+class AudioPluginDataMapper @Inject constructor() : Mapper<AudioPluginEntity, AudioPluginData> {
 
     override fun mapFromEntity(type: AudioPluginEntity): AudioPluginData {
         return AudioPluginData(

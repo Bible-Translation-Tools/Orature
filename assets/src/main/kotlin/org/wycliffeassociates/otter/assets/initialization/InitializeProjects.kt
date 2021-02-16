@@ -5,17 +5,11 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
@@ -25,16 +19,10 @@ import javax.inject.Inject
 
 class InitializeProjects @Inject constructor(
     private val resourceMetadataRepo: IResourceMetadataRepository,
-    private val resourceContainerRepo: IResourceContainerRepository,
-    private val collectionRepo: ICollectionRepository,
-    private val contentRepo: IContentRepository,
     private val takeRepo: ITakeRepository,
-    private val languageRepo: ILanguageRepository,
     private val directoryProvider: IDirectoryProvider,
-    private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
     private val installedEntityRepo: IInstalledEntityRepository,
     private val workbookRepository: IWorkbookRepository,
-    private val resourceRepository: IResourceRepository,
     private val rcImporter: ImportResourceContainer
 ): Installable {
     override val name = "PROJECTS"

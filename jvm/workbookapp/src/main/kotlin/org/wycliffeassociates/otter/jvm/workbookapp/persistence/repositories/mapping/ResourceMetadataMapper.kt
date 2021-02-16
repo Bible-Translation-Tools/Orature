@@ -6,8 +6,9 @@ import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import java.io.File
 import java.time.LocalDate
+import javax.inject.Inject
 
-class ResourceMetadataMapper {
+class ResourceMetadataMapper @Inject constructor() {
     fun mapFromEntity(entity: ResourceMetadataEntity, language: Language): ResourceMetadata {
         return ResourceMetadata(
             entity.conformsTo,

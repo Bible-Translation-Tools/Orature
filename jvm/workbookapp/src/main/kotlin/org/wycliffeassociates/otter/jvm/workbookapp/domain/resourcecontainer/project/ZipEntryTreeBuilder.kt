@@ -10,8 +10,9 @@ import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
 import java.util.zip.ZipFile
+import javax.inject.Inject
 
-object ZipEntryTreeBuilder : IZipEntryTreeBuilder {
+class ZipEntryTreeBuilder @Inject constructor(): IZipEntryTreeBuilder {
 
     private fun createZipFileSystem(zipFilename: String): FileSystem {
         val path = Paths.get(zipFilename)

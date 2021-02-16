@@ -48,7 +48,7 @@ class ProjectWizardViewModel : ViewModel() {
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
 
-    private val creationUseCase = CreateProject(collectionRepo, resourceMetadataRepo)
+    private val creationUseCase: CreateProject
 
     val canGoBack: BooleanProperty = SimpleBooleanProperty(false)
     val languageConfirmed: BooleanProperty = SimpleBooleanProperty(false)
@@ -59,6 +59,8 @@ class ProjectWizardViewModel : ViewModel() {
 
     init {
         (app as MyApp).dependencyGraph.inject(this)
+
+        creationUseCase = CreateProject(collectionRepo, resourceMetadataRepo)
     }
 
     fun loadLanguages() {
