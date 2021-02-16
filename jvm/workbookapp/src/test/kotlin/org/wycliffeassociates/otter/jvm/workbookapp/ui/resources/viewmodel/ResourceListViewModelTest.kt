@@ -24,59 +24,25 @@ import tornadofx.*
 import java.io.File
 import java.time.LocalDate
 
-class TestView(override val root: Parent = Region()) : Fragment()
+private class TestView(override val root: Parent = Region()) : Fragment()
 
-class TestApp: App(TestView::class), DependencyGraphProvider {
+private class TestApp: App(TestView::class), DependencyGraphProvider {
     override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
-    val testVm: _ResourceListViewModelTest by inject()
 }
 
-class ResourceListViewModelTest : ApplicationTest() {
+class ResourceListViewModelTest : ViewModel() {
 
-    lateinit var testApp: TestApp
-    lateinit var vm: _ResourceListViewModelTest
+    private val testApp = TestApp()
+    private val resourceListViewModel: ResourceListViewModel
+    private val workbookViewModel: WorkbookViewModel
+    private val recordResourceViewModel: RecordResourceViewModel
 
-    companion object {
-        @BeforeClass
-        fun setup() {
-            System.setProperty("testfx.robot", "glass")
-            System.setProperty("glass.platform", "Monocle")
-            System.setProperty("monocle.platform", "headless")
-            System.setProperty("prism.order", "sw")
-            System.setProperty("prism.text", "t2k")
-            System.setProperty("java.awt.headless", "true")
-        }
-    }
-
-    @Throws(Exception::class)
-    override fun start(stage: Stage) {
-        testApp = TestApp()
+    init {
         FX.setApplication(FX.defaultScope, testApp)
-        vm = testApp.testVm
-        testApp.start(stage)
+        resourceListViewModel = find()
+        workbookViewModel = find()
+        recordResourceViewModel = find()
     }
-
-    @Test
-    fun setActiveChunkAndRecordable_setsBookElement() {
-        vm.setActiveChunkAndRecordable_setsBookElement()
-    }
-
-    @Test
-    fun setActiveChunkAndRecordable_callsSetRecordableListItems() {
-        vm.setActiveChunkAndRecordable_callsSetRecordableListItems()
-    }
-
-    @Test
-    fun testLoadResourceGroups_putsAppropriateGroupsInList() {
-        vm.testLoadResourceGroups_putsAppropriateGroupsInList()
-    }
-}
-
-class _ResourceListViewModelTest : ViewModel() {
-
-    private val resourceListViewModel: ResourceListViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
-    private val recordResourceViewModel: RecordResourceViewModel by inject()
 
     private val english = Language("en", "English", "English", "ltr", isGateway = true)
     private val resourceMetadataTn = ResourceMetadata(
@@ -100,14 +66,14 @@ class _ResourceListViewModelTest : ViewModel() {
         workbookViewModel.activeResourceMetadataProperty.set(resourceMetadataTn)
     }
 
-    // Test
+    @Test
     fun setActiveChunkAndRecordable_setsBookElement() {
         resourceListViewModel.setActiveChunkAndRecordables(chunk1, testResourceNoBody)
 
         Assert.assertEquals(chunk1, workbookViewModel.activeChunkProperty.value)
     }
 
-    // Test
+    @Test
     fun setActiveChunkAndRecordable_callsSetRecordableListItems() {
         val spiedRecordResourceViewModel = spy(recordResourceViewModel)
         val spiedResourcesViewModel = spy(resourceListViewModel)
@@ -130,16 +96,14 @@ class _ResourceListViewModelTest : ViewModel() {
         Assert.assertEquals(2, spiedRecordResourceViewModel.recordableList.size)
     }
 
-    // Test
+    @Test
     fun testLoadResourceGroups_putsAppropriateGroupsInList() {
         resourceListViewModel.loadResourceGroups(testChapter)
-        Platform.runLater {
-            Assert.assertEquals(3, resourceListViewModel.resourceGroupCardItemList.size)
+        Assert.assertEquals(3, resourceListViewModel.resourceGroupCardItemList.size)
 
-            Assert.assertEquals(3, getResourceGroupSize(0))
-            Assert.assertEquals(2, getResourceGroupSize(1))
-            Assert.assertEquals(3, getResourceGroupSize(2))
-        }
+        Assert.assertEquals(3, getResourceGroupSize(0))
+        Assert.assertEquals(2, getResourceGroupSize(1))
+        Assert.assertEquals(3, getResourceGroupSize(2))
     }
 
     /**
