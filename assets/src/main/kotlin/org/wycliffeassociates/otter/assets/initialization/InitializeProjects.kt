@@ -1,3 +1,4 @@
+@file:Suppress("FunctionNaming")
 package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
