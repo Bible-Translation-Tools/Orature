@@ -1,6 +1,6 @@
 package integrationtest.initialization
 
-import integrationtest.DaggerTestPersistenceComponent
+import integrationtest.di.DaggerTestPersistenceComponent
 import integrationtest.projects.DatabaseEnvironment
 import integrationtest.projects.RowCount
 import io.reactivex.Completable
@@ -26,6 +26,9 @@ class TestInitializeProjects {
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var env: DatabaseEnvironment
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
@@ -60,8 +63,6 @@ class TestInitializeProjects {
         "",
         null
     )
-
-    private val env = DatabaseEnvironment()
 
     @Test
     fun testInitializeProjects() {

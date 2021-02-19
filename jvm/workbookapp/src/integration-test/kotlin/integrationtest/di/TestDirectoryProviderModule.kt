@@ -1,4 +1,4 @@
-package integrationtest
+package integrationtest.di
 
 import dagger.Module
 import dagger.Provides

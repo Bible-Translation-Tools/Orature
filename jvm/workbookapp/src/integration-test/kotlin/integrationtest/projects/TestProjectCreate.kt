@@ -1,10 +1,11 @@
 package integrationtest.projects
 
-import integrationtest.DaggerTestPersistenceComponent
+import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Test
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
+import javax.inject.Provider
 
 class TestProjectCreate {
     private val numberOfChaptersInHebrews: Int = 13
@@ -17,13 +18,16 @@ class TestProjectCreate {
     @Inject
     lateinit var languageRepo: ILanguageRepository
 
+    @Inject
+    lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
+
     init {
         DaggerTestPersistenceComponent.create().inject(this)
     }
 
     @Test
     fun derivativeLinksForBook() {
-        val env = DatabaseEnvironment()
+        val env = dbEnvProvider.get()
         env
             .import("en_ulb.zip")
             .assertRowCounts(RowCount(links = 0, derivatives = 0))
@@ -37,7 +41,7 @@ class TestProjectCreate {
 
     @Test
     fun derivativeLinksForHelps() {
-        val env = DatabaseEnvironment()
+        val env = dbEnvProvider.get()
         env
             .import("en_ulb.zip")
             .import("en_tn.zip")

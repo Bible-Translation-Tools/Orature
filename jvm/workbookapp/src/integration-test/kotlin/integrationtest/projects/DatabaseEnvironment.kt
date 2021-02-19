@@ -1,8 +1,5 @@
 package integrationtest.projects
 
-import integrationtest.DaggerTestPersistenceComponent
-import integrationtest.TestDirectoryProviderModule
-import integrationtest.TestPersistenceComponent
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -17,26 +14,14 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
 
-class DatabaseEnvironment {
-    private val persistenceComponent: TestPersistenceComponent =
-        DaggerTestPersistenceComponent
-            .builder()
-            .testDirectoryProviderModule(TestDirectoryProviderModule())
-            .build()
-
-    val db: AppDatabase = persistenceComponent.injectDatabase()
-
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
-    @Inject
-    lateinit var importRcProvider: Provider<ImportResourceContainer>
-    @Inject
-    lateinit var createProjectProvider: Provider<CreateProject>
-    @Inject
-    lateinit var importLanguagesProvider: Provider<ImportLanguages>
-
+class DatabaseEnvironment @Inject constructor(
+    val db: AppDatabase,
+    val directoryProvider: IDirectoryProvider,
+    val importRcProvider: Provider<ImportResourceContainer>,
+    val createProjectProvider: Provider<CreateProject>,
+    val importLanguagesProvider: Provider<ImportLanguages>
+) {
     init {
-        persistenceComponent.inject(this)
         setUpDatabase()
     }
 
@@ -68,7 +53,7 @@ class DatabaseEnvironment {
 
     fun unzipProject(rcFile: String, dir: File? = null): File {
         val targetDir = dir ?: createTempDir("orature_unzip")
-        persistenceComponent.injectDirectoryProvider()
+        directoryProvider
             .newFileReader(rcResourceFile(rcFile))
             .use { fileReader ->
                 fileReader.copyDirectory("/", targetDir)
