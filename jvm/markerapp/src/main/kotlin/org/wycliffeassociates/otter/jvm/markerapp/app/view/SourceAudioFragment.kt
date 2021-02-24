@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls
+package org.wycliffeassociates.otter.jvm.controls.card
 
 import com.jfoenix.controls.JFXButton
 import javafx.beans.property.SimpleObjectProperty

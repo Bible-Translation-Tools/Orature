@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.progressstepper
+package org.wycliffeassociates.otter.jvm.controls.stepper
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty

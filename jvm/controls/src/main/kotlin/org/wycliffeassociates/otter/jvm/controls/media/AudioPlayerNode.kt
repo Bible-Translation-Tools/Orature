@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls
+package org.wycliffeassociates.otter.jvm.controls.media
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Control

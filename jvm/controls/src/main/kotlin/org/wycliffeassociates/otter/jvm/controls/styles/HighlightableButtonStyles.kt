@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.highlightablebutton
+package org.wycliffeassociates.otter.jvm.controls.styles
 
 import javafx.geometry.Pos
 import javafx.scene.Cursor

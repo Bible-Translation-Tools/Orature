@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.exception
+package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import javafx.beans.property.*
 import javafx.event.ActionEvent

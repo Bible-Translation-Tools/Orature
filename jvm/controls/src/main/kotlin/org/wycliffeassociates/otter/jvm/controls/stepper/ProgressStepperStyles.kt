@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.progressstepper
+package org.wycliffeassociates.otter.jvm.controls.stepper
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView

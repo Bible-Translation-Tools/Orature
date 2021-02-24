@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.sourcecontent
+package org.wycliffeassociates.otter.jvm.controls.media
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty

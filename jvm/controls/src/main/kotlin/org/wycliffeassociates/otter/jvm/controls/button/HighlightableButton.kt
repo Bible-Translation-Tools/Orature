@@ -1,10 +1,11 @@
-package org.wycliffeassociates.otter.jvm.controls.highlightablebutton
+package org.wycliffeassociates.otter.jvm.controls.button
 
 import com.jfoenix.controls.JFXButton
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.jvm.controls.styles.HighlightableButtonStyles
 import tornadofx.*
 
 class HighlightableButton : JFXButton() {

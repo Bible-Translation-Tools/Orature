@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.projectnav
+package org.wycliffeassociates.otter.jvm.controls.navigation
 
 import javafx.geometry.Pos
 import javafx.scene.Cursor

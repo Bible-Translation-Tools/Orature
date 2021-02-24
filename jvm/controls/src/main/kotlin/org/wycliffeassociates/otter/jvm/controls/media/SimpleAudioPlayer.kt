@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls
+package org.wycliffeassociates.otter.jvm.controls.media
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXProgressBar

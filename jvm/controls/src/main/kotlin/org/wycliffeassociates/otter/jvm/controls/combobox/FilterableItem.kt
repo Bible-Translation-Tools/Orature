@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.filterablecombobox
+package org.wycliffeassociates.otter.jvm.controls.combobox
 
 /**
  * This data class is used to hold the data that is selected from within the widget.

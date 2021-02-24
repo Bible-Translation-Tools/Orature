@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.searchablelist
+package org.wycliffeassociates.otter.jvm.controls.listview
 
 import com.jfoenix.controls.JFXTextField
 import javafx.beans.property.Property
@@ -7,6 +7,7 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
+import org.wycliffeassociates.otter.jvm.controls.styles.SearchableListStyles
 import tornadofx.*
 
 class SearchableList<T>(listItems: SortedFilteredList<T>, outputValue: Property<T>, auto: Boolean = false) : VBox() {

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.projectnav
+package org.wycliffeassociates.otter.jvm.controls.navigation
 
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.sourceformattoggle
+package org.wycliffeassociates.otter.jvm.controls.toggle
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Control

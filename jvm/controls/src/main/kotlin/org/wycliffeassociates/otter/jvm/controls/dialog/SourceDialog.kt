@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.sourcedialog
+package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
@@ -11,7 +11,7 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 

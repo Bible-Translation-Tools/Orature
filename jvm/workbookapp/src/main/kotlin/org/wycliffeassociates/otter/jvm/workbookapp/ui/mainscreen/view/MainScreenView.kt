@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.NavBoxType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.viewmodel.MainScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
-import org.wycliffeassociates.otter.jvm.controls.projectnav.projectnav
+import org.wycliffeassociates.otter.jvm.controls.navigation.projectnav
 import tornadofx.*
 
 class MainScreenView : View() {

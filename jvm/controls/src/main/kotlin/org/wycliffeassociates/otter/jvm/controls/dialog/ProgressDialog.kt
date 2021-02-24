@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.progressdialog
+package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import com.github.thomasnield.rxkotlinfx.toObservable
 import javafx.beans.property.SimpleObjectProperty
@@ -9,6 +9,7 @@ import javafx.scene.layout.*
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.styles.ProgressDialogStyles
 import tornadofx.*
 
 class ProgressDialog : Fragment() {

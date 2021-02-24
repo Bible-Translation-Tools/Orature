@@ -6,7 +6,7 @@ import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.controls.highlightablebutton.highlightablebutton
+import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.effect.DropShadow

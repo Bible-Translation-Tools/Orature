@@ -6,7 +6,7 @@ import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.controls.progressstepper.stepper
+import org.wycliffeassociates.otter.jvm.controls.stepper.stepper
 import tornadofx.*
 
 class ProjectWizard : View() {

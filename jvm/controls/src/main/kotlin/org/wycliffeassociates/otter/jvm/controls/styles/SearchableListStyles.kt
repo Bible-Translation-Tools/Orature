@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.searchablelist
+package org.wycliffeassociates.otter.jvm.controls.styles
 
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView

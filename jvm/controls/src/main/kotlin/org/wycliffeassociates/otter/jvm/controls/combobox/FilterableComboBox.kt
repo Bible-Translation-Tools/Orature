@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.filterablecombobox
+package org.wycliffeassociates.otter.jvm.controls.combobox
 
 import javafx.beans.property.Property
 import javafx.collections.FXCollections
