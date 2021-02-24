@@ -1,7 +1,6 @@
-package org.wycliffeassociates.otter.common.data.config
+package org.wycliffeassociates.otter.common.domain.plugins
 
 import io.reactivex.Completable
-import org.wycliffeassociates.otter.common.data.PluginParameters
 import java.io.File
 
 interface IAudioPlugin {

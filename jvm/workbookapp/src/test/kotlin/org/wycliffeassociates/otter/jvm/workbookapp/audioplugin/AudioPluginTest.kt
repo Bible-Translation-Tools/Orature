@@ -3,8 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.audioplugin
 import org.junit.Assert
 import org.junit.Test
 import org.mockito.Mockito
-import org.wycliffeassociates.otter.common.data.PluginParameters
-import org.wycliffeassociates.otter.common.data.config.AudioPluginData
+import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import java.io.File
 
 class AudioPluginTest {

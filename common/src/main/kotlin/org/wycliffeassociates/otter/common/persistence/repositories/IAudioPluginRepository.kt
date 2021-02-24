@@ -3,8 +3,8 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.config.AudioPluginData
-import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
+import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 
 enum class PluginType {
     MARKER,

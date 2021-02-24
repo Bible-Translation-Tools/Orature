@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.config
+package org.wycliffeassociates.otter.common.domain.plugins
 
 import java.io.File
 

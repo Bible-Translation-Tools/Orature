@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.plugins
 
 import io.reactivex.Maybe
-import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 
 class CreatePlugin(
