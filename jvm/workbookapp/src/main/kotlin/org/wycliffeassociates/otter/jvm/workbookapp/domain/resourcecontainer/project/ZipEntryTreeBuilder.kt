@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project
 
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
+import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTreeNode
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterZipFile.Companion.otterFileZ

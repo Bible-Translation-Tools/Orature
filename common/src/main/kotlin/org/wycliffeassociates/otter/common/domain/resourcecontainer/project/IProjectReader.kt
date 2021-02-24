@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.model.MimeType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException

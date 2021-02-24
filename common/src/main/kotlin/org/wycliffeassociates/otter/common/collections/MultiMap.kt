@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.collections.multimap
+package org.wycliffeassociates.otter.common.collections
 
 class MultiMap<K, V> : HashMap<K, MutableSet<V>>() {
     operator fun set(k: K, v: V) = put(k, v)

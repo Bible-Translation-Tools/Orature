@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.collections.tree
+package org.wycliffeassociates.otter.common.collections
 
 class OtterTree<T>(value: T) : OtterTreeNode<T>(value) {
 

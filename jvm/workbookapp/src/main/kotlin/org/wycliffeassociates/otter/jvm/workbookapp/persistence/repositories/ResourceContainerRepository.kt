@@ -8,8 +8,8 @@ import org.jooq.Record3
 import org.jooq.Select
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
+import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTreeNode
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata

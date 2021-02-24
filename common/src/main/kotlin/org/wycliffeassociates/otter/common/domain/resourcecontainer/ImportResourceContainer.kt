@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.model.ContainerType
