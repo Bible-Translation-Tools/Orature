@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.di.persistence
+package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
@@ -11,8 +11,13 @@ import javax.inject.Singleton
 class AppDatabaseModule {
     @Provides
     @Singleton
-    fun providesAppDatabase(directoryProvider: IDirectoryProvider): AppDatabase =
-        AppDatabase(
-            directoryProvider.getAppDataDirectory().resolve(File("content.sqlite"))
+    fun providesAppDatabase(
+        directoryProvider: IDirectoryProvider
+    ): AppDatabase {
+        return AppDatabase(
+            directoryProvider
+                .getAppDataDirectory()
+                .resolve(File("content.sqlite"))
         )
+    }
 }

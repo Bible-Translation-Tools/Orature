@@ -8,9 +8,10 @@ import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
+import javax.inject.Inject
 
 // preferences object that stores user-independent preference data
-class AppPreferences(database: AppDatabase) : IAppPreferences {
+class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreferences {
     companion object {
         val NO_ID = -1
     }

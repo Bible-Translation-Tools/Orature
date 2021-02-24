@@ -6,8 +6,9 @@ import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
+import javax.inject.Inject
 
-class LaunchPlugin(
+class LaunchPlugin @Inject constructor(
     private val pluginRepository: IAudioPluginRepository
 ) {
     enum class Result {

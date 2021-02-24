@@ -15,12 +15,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
 import java.time.LocalDate
+import javax.inject.Inject
 
-class TakeRepository(
+class TakeRepository @Inject constructor(
     private val database: AppDatabase,
-    private val takeMapper: TakeMapper = TakeMapper(),
-    private val markerMapper: MarkerMapper = MarkerMapper(),
-    private val collectionMapper: CollectionMapper = CollectionMapper()
+    private val takeMapper: TakeMapper,
+    private val markerMapper: MarkerMapper,
+    private val collectionMapper: CollectionMapper
 ) : ITakeRepository {
 
     private val logger = LoggerFactory.getLogger(TakeRepository::class.java)

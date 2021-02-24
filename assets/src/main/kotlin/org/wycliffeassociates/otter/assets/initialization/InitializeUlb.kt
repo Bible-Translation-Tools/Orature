@@ -5,36 +5,16 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZipEntryTreeBuilder
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.config.Installable
-import org.wycliffeassociates.otter.common.persistence.repositories.*
+import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
+import javax.inject.Inject
 
 private const val EN_ULB_FILENAME = "en_ulb"
 private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
 
-class InitializeUlb(
+class InitializeUlb @Inject constructor(
     private val installedEntityRepo: IInstalledEntityRepository,
-    private val resourceMetadataRepo: IResourceMetadataRepository,
-    private val resourceContainerRepo: IResourceContainerRepository,
-    private val collectionRepo: ICollectionRepository,
-    private val contentRepo: IContentRepository,
-    private val takeRepo: ITakeRepository,
-    private val languageRepo: ILanguageRepository,
-    private val directoryProvider: IDirectoryProvider,
-    private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
-    private val resourceRepository: IResourceRepository,
-    private val rcImporter: ImportResourceContainer = ImportResourceContainer(
-        resourceMetadataRepo,
-        resourceContainerRepo,
-        collectionRepo,
-        contentRepo,
-        takeRepo,
-        languageRepo,
-        directoryProvider,
-        zipEntryTreeBuilder,
-        resourceRepository
-    )
+    private val rcImporter: ImportResourceContainer
 ) : Installable {
 
     override val name = "EN_ULB"

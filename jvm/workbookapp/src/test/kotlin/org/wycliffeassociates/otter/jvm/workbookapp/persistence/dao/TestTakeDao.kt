@@ -10,6 +10,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.Ta
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.TakeRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.MarkerMapper
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.io.File
 import java.time.LocalDate
 
@@ -89,7 +92,7 @@ class TestTakeDao {
                 assertTrue("Take $idx is a soft deleted take", dao.fetchSoftDeletedTakes().contains(dao.fetchById(idx)))
             }
         }
-        TakeRepository(database).deleteExpiredTakes(0).blockingGet()
+        TakeRepository(database, TakeMapper(), MarkerMapper(), CollectionMapper()).deleteExpiredTakes(0).blockingGet()
         assertTrue("Soft Deleted Takes are gone", dao.fetchSoftDeletedTakes().isEmpty())
         for ((idx, f) in files.withIndex()) {
             if (idx % 2 == 0) {

@@ -11,8 +11,9 @@ import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import java.time.LocalDate
+import javax.inject.Inject
 
-class TakeActions(
+class TakeActions @Inject constructor(
     private val waveFileCreator: IWaveFileCreator,
     private val launchPlugin: LaunchPlugin
 ) {

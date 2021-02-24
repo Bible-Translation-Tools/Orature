@@ -23,8 +23,9 @@ import java.io.File
 import java.io.IOException
 import java.time.LocalDate
 import java.util.regex.Pattern
+import javax.inject.Inject
 
-class ProjectImporter(
+class ProjectImporter @Inject constructor(
     private val resourceContainerImporter: ImportResourceContainer,
     private val directoryProvider: IDirectoryProvider,
     private val resourceMetadataRepository: IResourceMetadataRepository,

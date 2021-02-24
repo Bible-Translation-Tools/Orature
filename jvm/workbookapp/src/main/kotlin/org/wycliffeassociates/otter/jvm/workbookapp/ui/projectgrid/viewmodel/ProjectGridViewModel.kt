@@ -7,31 +7,37 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ContainerType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
+import javax.inject.Inject
 
 class ProjectGridViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ProjectGridViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val collectionRepo = injector.collectionRepo
-    private val workbookRepo = injector.workbookRepository
-    private val directoryProvider = injector.directoryProvider
+    @Inject lateinit var collectionRepo: ICollectionRepository
+    @Inject lateinit var workbookRepo: IWorkbookRepository
+    @Inject lateinit var directoryProvider: IDirectoryProvider
 
     private val navigator: ChromeableStage by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
 
     val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
+
+    init {
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     fun loadProjects() {
         workbookRepo.getProjects()

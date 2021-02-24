@@ -8,31 +8,34 @@ import org.wycliffeassociates.otter.common.data.PluginParameters
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.data.config.IAudioPlugin
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.viewmodel.AddPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 import tornadofx.*
+import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
-    private val injector: Injector by inject()
-    private val pluginRepository = injector.pluginRepository
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
+    @Inject lateinit var launchPlugin: LaunchPlugin
+    @Inject lateinit var takeActions: TakeActions
 
     private val workbookViewModel: WorkbookViewModel by inject()
-
-    private val launchPlugin = LaunchPlugin(pluginRepository)
-
-    private val takeActions = TakeActions(WaveFileCreator(), launchPlugin)
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
+
+    init {
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     fun getPlugin(pluginType: PluginType): Maybe<IAudioPlugin> {
         return pluginRepository.getPlugin(pluginType)

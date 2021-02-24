@@ -1,5 +1,6 @@
 package integrationtest.projects
 
+import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.model.Collection
@@ -12,11 +13,20 @@ import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
 import java.io.File
 import java.time.LocalDate
+import javax.inject.Inject
+import javax.inject.Provider
 
 
 class TestProjectImport {
 
-    private val db = DatabaseEnvironment()
+    @Inject
+    lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
+
+    init {
+        DaggerTestPersistenceComponent.create().inject(this)
+    }
+
+    private val db = dbEnvProvider.get()
 
     private val sourceMetadata = ResourceMetadata(
         "rc0.2",
@@ -56,37 +66,37 @@ class TestProjectImport {
         null
     )
 
-    private val ulbProjectDir = db.injector.directoryProvider.getProjectDirectory(
+    private val ulbProjectDir = db.directoryProvider.getProjectDirectory(
         sourceMetadata,
         ulbTargetMetadata,
         project
     )
 
-    private val ulbSourceDir = db.injector.directoryProvider.getProjectSourceDirectory(
+    private val ulbSourceDir = db.directoryProvider.getProjectSourceDirectory(
         sourceMetadata,
         ulbTargetMetadata,
         project
     )
 
-    private val ulbAudioDir = db.injector.directoryProvider.getProjectAudioDirectory(
+    private val ulbAudioDir = db.directoryProvider.getProjectAudioDirectory(
         sourceMetadata,
         ulbTargetMetadata,
         project
     )
 
-    private val tnProjectDir = db.injector.directoryProvider.getProjectDirectory(
+    private val tnProjectDir = db.directoryProvider.getProjectDirectory(
         sourceMetadata,
         tnTargetMetadata,
         project
     )
 
-    private val tnSourceDir = db.injector.directoryProvider.getProjectSourceDirectory(
+    private val tnSourceDir = db.directoryProvider.getProjectSourceDirectory(
         sourceMetadata,
         tnTargetMetadata,
         project
     )
 
-    private val tnAudioDir = db.injector.directoryProvider.getProjectAudioDirectory(
+    private val tnAudioDir = db.directoryProvider.getProjectAudioDirectory(
         sourceMetadata,
         tnTargetMetadata,
         project

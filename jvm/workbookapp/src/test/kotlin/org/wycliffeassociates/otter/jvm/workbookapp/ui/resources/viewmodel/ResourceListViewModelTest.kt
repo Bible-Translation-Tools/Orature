@@ -3,21 +3,46 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Observable
+import javafx.application.Platform
+import javafx.scene.Parent
+import javafx.scene.layout.Region
+import javafx.stage.Stage
 import org.junit.Assert
+import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
+import org.testfx.framework.junit.ApplicationTest
 import org.wycliffeassociates.otter.common.data.model.*
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
+import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
 
+private class TestView(override val root: Parent = Region()) : Fragment()
+
+private class TestApp: App(TestView::class), DependencyGraphProvider {
+    override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
+}
+
 class ResourceListViewModelTest : ViewModel() {
-    private val resourceListViewModel: ResourceListViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
-    private val recordResourceViewModel: RecordResourceViewModel by inject()
+
+    private val testApp = TestApp()
+    private val resourceListViewModel: ResourceListViewModel
+    private val workbookViewModel: WorkbookViewModel
+    private val recordResourceViewModel: RecordResourceViewModel
+
+    init {
+        FX.setApplication(FX.defaultScope, testApp)
+        resourceListViewModel = find()
+        workbookViewModel = find()
+        recordResourceViewModel = find()
+    }
 
     private val english = Language("en", "English", "English", "ltr", isGateway = true)
     private val resourceMetadataTn = ResourceMetadata(
@@ -74,13 +99,18 @@ class ResourceListViewModelTest : ViewModel() {
     @Test
     fun testLoadResourceGroups_putsAppropriateGroupsInList() {
         resourceListViewModel.loadResourceGroups(testChapter)
-
         Assert.assertEquals(3, resourceListViewModel.resourceGroupCardItemList.size)
 
         Assert.assertEquals(3, getResourceGroupSize(0))
         Assert.assertEquals(2, getResourceGroupSize(1))
         Assert.assertEquals(3, getResourceGroupSize(2))
     }
+
+    /**
+     *
+     *      Private Methods
+     *
+     */
 
     private val testResourceNoBody = Resource(
         title = createTitleComponent(1, "gen_1_v1_s1"),

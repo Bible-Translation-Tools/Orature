@@ -14,11 +14,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.AudioPlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.AudioPluginDataMapper
+import javax.inject.Inject
 
-class AudioPluginRepository(
+class AudioPluginRepository @Inject constructor(
     database: AppDatabase,
     private val preferences: IAppPreferences,
-    private val mapper: AudioPluginDataMapper = AudioPluginDataMapper()
+    private val mapper: AudioPluginDataMapper
 ) : IAudioPluginRepository {
     private val logger = LoggerFactory.getLogger(AudioPluginRepository::class.java)
 

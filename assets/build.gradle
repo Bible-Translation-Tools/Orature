@@ -38,6 +38,7 @@ dependencies {
     implementation project(":common")
 
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
+    implementation "com.google.dagger:dagger:$daggerVer"
 }
 
 task copyToResources(type: Copy) {

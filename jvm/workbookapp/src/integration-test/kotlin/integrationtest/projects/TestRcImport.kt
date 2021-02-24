@@ -1,13 +1,23 @@
 package integrationtest.projects
 
+import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.model.ContentType.*
+import javax.inject.Inject
+import javax.inject.Provider
 
 class TestRcImport {
 
+    @Inject
+    lateinit var dbEnvProvider: Provider<DatabaseEnvironment>
+
+    init {
+        DaggerTestPersistenceComponent.create().inject(this)
+    }
+
     @Test
     fun ulb() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("en_ulb.zip")
             .assertRowCounts(
                 RowCount(
@@ -29,7 +39,7 @@ class TestRcImport {
      */
     @Test
     fun ulbFromWacs() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("en_ulb.zip", true)
             .assertRowCounts(
                 RowCount(
@@ -45,7 +55,7 @@ class TestRcImport {
 
     @Test
     fun ulbAndHelps() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("en_ulb.zip")
             .import("en_tn.zip")
             .assertRowCounts(
@@ -79,7 +89,7 @@ class TestRcImport {
 
     @Test
     fun obsV6() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("obs-biel-v6.zip")
             .assertRowCounts(
                 RowCount(
@@ -95,7 +105,7 @@ class TestRcImport {
 
     @Test
     fun obsAndTnV6() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("obs-biel-v6.zip")
             .import("obs-tn-biel-v6.zip")
             .assertRowCounts(
@@ -114,7 +124,7 @@ class TestRcImport {
 
     @Test
     fun obsSlugs() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("obs-biel-v6.zip")
             .assertSlugs(
                 "obs",
@@ -126,7 +136,7 @@ class TestRcImport {
 
     @Test
     fun ulbSlugs() {
-        DatabaseEnvironment()
+        dbEnvProvider.get()
             .import("en_ulb.zip")
             .assertSlugs(
                 "ulb",

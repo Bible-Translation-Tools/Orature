@@ -7,17 +7,20 @@ import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.config.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 import java.io.File
+import javax.inject.Inject
 
 class AddPluginViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(AddPluginViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val pluginRepository = injector.pluginRepository
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
+
     private val mainMenuViewModel: MainMenuViewModel by inject()
 
     var name: String by property("")
@@ -32,6 +35,7 @@ class AddPluginViewModel : ViewModel() {
     val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
 
     init {
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
         pluginRepository
             .getAll()
             .observeOnFx()

@@ -12,22 +12,28 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.model.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.fragments.SelectCollection
 import tornadofx.*
+import javax.inject.Inject
 
 class ProjectWizardViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ProjectWizardViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val languageRepo = injector.languageRepo
-    private val collectionRepo = injector.collectionRepo
-    private val resourceMetadataRepo = injector.resourceMetadataRepository
-    private val directoryProvider = injector.directoryProvider
+    @Inject lateinit var languageRepo: ILanguageRepository
+    @Inject lateinit var collectionRepo: ICollectionRepository
+    @Inject lateinit var resourceMetadataRepo: IResourceMetadataRepository
+    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var creationUseCase: CreateProject
+
 
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
@@ -43,15 +49,16 @@ class ProjectWizardViewModel : ViewModel() {
     private val existingProjects: ObservableList<Collection> = FXCollections.observableArrayList()
     val showOverlayProperty = SimpleBooleanProperty(false)
     val creationCompletedProperty = SimpleBooleanProperty(false)
-
-    private val creationUseCase = CreateProject(collectionRepo, resourceMetadataRepo)
-
     val canGoBack: BooleanProperty = SimpleBooleanProperty(false)
     val languageConfirmed: BooleanProperty = SimpleBooleanProperty(false)
 
     val languageCompletedText = SimpleStringProperty()
     val resourceCompletedText = SimpleStringProperty()
     val bookCompletedText = SimpleStringProperty()
+
+    init {
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     fun loadLanguages() {
         loadTargetLanguages()

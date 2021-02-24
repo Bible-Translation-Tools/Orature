@@ -5,8 +5,9 @@ import org.wycliffeassociates.otter.common.data.model.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 import java.io.File
 import java.time.LocalDate
+import javax.inject.Inject
 
-class TakeMapper {
+class TakeMapper @Inject constructor() {
     fun mapFromEntity(entity: TakeEntity, markers: List<Marker>): Take {
         return Take(
             filename = entity.filename,

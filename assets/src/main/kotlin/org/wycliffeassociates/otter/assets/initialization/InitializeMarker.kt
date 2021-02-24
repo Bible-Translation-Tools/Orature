@@ -11,8 +11,9 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import java.io.FileOutputStream
+import javax.inject.Inject
 
-class InitializeMarker(
+class InitializeMarker @Inject constructor(
     val directoryProvider: IDirectoryProvider,
     val pluginRepository: IAudioPluginRepository,
     val installedEntityRepo: IInstalledEntityRepository,

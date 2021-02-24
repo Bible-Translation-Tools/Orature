@@ -12,22 +12,30 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 
 class MainMenuViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(MainMenuViewModel::class.java)
 
-    private val injector: Injector by inject()
-    private val directoryProvider = injector.directoryProvider
-    private val pluginRepository = injector.pluginRepository
-    private val workbookRepository = injector.workbookRepository
+    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var pluginRepository:IAudioPluginRepository
+    @Inject lateinit var workbookRepository: IWorkbookRepository
+    @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
+
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val workbookVM = find<WorkbookViewModel>()
@@ -43,6 +51,7 @@ class MainMenuViewModel : ViewModel() {
     val showImportDialogProperty = SimpleBooleanProperty(false)
 
     init {
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
@@ -76,17 +85,8 @@ class MainMenuViewModel : ViewModel() {
     fun importResourceContainer(fileOrDir: File) {
         showImportDialogProperty.value = true
 
-        ImportResourceContainer(
-            injector.resourceMetadataRepository,
-            injector.resourceContainerRepository,
-            injector.collectionRepo,
-            injector.contentRepository,
-            injector.takeRepository,
-            injector.languageRepo,
-            directoryProvider,
-            injector.zipEntryTreeBuilder,
-            injector.resourceRepository
-        ).import(fileOrDir)
+        importRcProvider.get()
+            .import(fileOrDir)
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .doOnError { e ->

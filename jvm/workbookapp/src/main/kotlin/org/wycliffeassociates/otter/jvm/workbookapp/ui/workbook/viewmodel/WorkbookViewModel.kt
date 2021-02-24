@@ -13,16 +13,19 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.inject.Injector
+import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.MyApp
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
+import javax.inject.Inject
 
 class WorkbookViewModel : ViewModel() {
-    private val injector: Injector by inject()
-    private val directoryProvider = injector.directoryProvider
-    private val workbookRepository = injector.workbookRepository
+    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var workbookRepository: IWorkbookRepository
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -52,6 +55,7 @@ class WorkbookViewModel : ViewModel() {
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
 
     init {
+        (app as DependencyGraphProvider).dependencyGraph.inject(this)
         activeChapterProperty.onChange { updateSourceAudio() }
         activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
     }

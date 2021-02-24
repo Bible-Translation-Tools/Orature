@@ -23,8 +23,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Content
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceLinkEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.*
+import javax.inject.Inject
 
-class ResourceRepository(private val database: AppDatabase) : IResourceRepository {
+class ResourceRepository @Inject constructor(private val database: AppDatabase) : IResourceRepository {
     private val logger = LoggerFactory.getLogger(ResourceRepository::class.java)
 
     private val contentDao = database.contentDao

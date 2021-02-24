@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.data.model.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
 import java.util.*
 import java.util.Collections.synchronizedMap
+import javax.inject.Inject
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.model.Take
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
@@ -21,6 +22,7 @@ private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbo
 class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookRepository {
     private val logger = LoggerFactory.getLogger(WorkbookRepository::class.java)
 
+    @Inject
     constructor(
         collectionRepository: ICollectionRepository,
         contentRepository: IContentRepository,
@@ -49,7 +51,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         return workbook
     }
 
-    fun closeWorkbook(workbook: Workbook) {
+    override fun closeWorkbook(workbook: Workbook) {
         connections[workbook]?.let {
             it.dispose()
             connections.remove(workbook)
