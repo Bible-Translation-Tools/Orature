@@ -85,7 +85,6 @@ class ResourceListViewModel : ViewModel() {
             }
             .subscribe {
                 resourceGroupCardItemList.addAll(it)
-                println(resourceGroupCardItemList.size)
             }
     }
 
