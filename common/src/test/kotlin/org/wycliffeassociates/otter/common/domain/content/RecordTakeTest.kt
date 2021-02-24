@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import com.nhaarman.mockitokotlin2.*
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.doAssertEquals
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE

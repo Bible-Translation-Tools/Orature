@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.primitives.*
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import java.io.File
 import java.time.LocalDate
 

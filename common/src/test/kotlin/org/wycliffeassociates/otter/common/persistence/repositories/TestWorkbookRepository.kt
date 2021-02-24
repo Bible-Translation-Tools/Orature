@@ -6,8 +6,8 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.primitives.*
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
@@ -257,7 +257,7 @@ class TestWorkbookRepository {
             val content = invocation.getArgument<Content>(0)!!
             val take = if (content.format == "audio/wav" && content.start == 3) {
                 val id = autoincrement
-                org.wycliffeassociates.otter.common.data.model.Take(
+                org.wycliffeassociates.otter.common.data.primitives.Take(
                     number = id,
                     id = id,
                     path = File("."),

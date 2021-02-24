@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.assets.initialization
 
 import io.reactivex.Completable
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor

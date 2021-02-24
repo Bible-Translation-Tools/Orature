@@ -2,16 +2,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel
 
 import com.jakewharton.rxrelay2.ReplayRelay
 import javafx.beans.property.SimpleObjectProperty
-import javafx.scene.Parent
-import javafx.scene.layout.Region
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.ContentType
-import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate

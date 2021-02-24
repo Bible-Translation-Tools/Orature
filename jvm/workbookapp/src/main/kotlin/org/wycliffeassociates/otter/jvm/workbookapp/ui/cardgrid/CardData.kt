@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid
 
-import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 

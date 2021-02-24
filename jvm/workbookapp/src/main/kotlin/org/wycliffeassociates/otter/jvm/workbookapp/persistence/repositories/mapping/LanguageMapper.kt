@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.mapping.Mapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.LanguageEntity
 import javax.inject.Inject

@@ -9,14 +9,14 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.primitives.*
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.*
 import java.util.*
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
 
-private typealias ModelTake = org.wycliffeassociates.otter.common.data.model.Take
+private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
 class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookRepository {

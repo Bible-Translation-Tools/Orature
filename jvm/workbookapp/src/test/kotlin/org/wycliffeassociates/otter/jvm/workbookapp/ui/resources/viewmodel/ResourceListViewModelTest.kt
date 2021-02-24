@@ -3,16 +3,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.resources.viewmodel
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.*
 import io.reactivex.Observable
-import javafx.application.Platform
 import javafx.scene.Parent
 import javafx.scene.layout.Region
-import javafx.stage.Stage
 import org.junit.Assert
-import org.junit.Before
-import org.junit.BeforeClass
 import org.junit.Test
-import org.testfx.framework.junit.ApplicationTest
-import org.wycliffeassociates.otter.common.data.model.*
+import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider

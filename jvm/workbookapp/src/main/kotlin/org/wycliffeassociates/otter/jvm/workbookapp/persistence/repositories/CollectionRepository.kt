@@ -12,11 +12,11 @@ import org.jooq.DSLContext
 import org.jooq.impl.DSL.*
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ContainerType
-import org.wycliffeassociates.otter.common.data.model.Language
-import org.wycliffeassociates.otter.common.data.model.MimeType
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository

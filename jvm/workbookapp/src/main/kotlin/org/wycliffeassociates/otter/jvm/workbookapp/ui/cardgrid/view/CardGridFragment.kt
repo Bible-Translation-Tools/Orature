@@ -8,7 +8,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles

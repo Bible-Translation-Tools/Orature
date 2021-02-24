@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.fragm
 import javafx.application.Platform
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizardStyles

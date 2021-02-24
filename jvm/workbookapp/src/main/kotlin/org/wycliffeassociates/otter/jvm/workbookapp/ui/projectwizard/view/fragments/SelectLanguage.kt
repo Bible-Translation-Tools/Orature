@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.fragm
 
 import javafx.beans.property.Property
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.searchablelist.SearchableList
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.viewmodel.ProjectWizardViewModel

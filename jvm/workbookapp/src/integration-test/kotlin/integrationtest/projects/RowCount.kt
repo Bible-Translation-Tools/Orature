@@ -1,6 +1,6 @@
 package integrationtest.projects
 
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 
 data class RowCount(
     val collections: Int? = null,

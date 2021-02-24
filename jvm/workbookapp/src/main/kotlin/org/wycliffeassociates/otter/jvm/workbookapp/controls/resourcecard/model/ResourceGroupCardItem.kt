@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model
 import io.reactivex.Observable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.BooleanBinding
-import org.wycliffeassociates.otter.common.data.model.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.*
 import tornadofx.*
 import tornadofx.FX.Companion.messages

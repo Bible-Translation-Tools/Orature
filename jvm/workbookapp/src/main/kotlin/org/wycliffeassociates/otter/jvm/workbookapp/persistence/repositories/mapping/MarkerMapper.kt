@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.model.Marker
+import org.wycliffeassociates.otter.common.data.primitives.Marker
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.MarkerEntity
 import javax.inject.Inject
 

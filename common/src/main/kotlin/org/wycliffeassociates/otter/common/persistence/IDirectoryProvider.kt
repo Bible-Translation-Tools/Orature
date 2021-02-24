@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.persistence
 
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.io.zip.IFileReader
 import org.wycliffeassociates.otter.common.io.zip.IFileWriter
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
