@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.model
+package org.wycliffeassociates.otter.common.data.primitives
 
 import java.util.*
 

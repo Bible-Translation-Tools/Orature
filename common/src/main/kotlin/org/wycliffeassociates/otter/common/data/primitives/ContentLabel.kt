@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.data.model
+package org.wycliffeassociates.otter.common.data.primitives
 
 enum class ContentLabel(val value: String, val type: ContentType) {
     CHAPTER("chapter", ContentType.META),
