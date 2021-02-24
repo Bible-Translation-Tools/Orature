@@ -20,7 +20,7 @@ import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
-import org.wycliffeassociates.otter.jvm.controls.sourcedialog.sourcedialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.sourcedialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard

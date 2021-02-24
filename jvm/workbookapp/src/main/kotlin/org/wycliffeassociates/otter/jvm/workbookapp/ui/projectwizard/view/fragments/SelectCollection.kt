@@ -8,8 +8,8 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAcce
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectwizard.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
-import org.wycliffeassociates.otter.jvm.controls.wizardcard
+import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.card.wizardcard
 import tornadofx.*
 
 class SelectCollection : Fragment() {

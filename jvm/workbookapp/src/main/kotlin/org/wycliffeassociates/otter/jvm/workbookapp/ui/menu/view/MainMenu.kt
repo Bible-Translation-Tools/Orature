@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.addplugin.view.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.removeplugins.view.RemovePluginsView
-import org.wycliffeassociates.otter.jvm.controls.progressdialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.dialogs.AppVersionView
 import tornadofx.*
 import tornadofx.FX.Companion.messages

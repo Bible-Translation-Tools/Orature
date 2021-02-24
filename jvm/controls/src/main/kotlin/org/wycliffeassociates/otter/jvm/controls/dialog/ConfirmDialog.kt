@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.confirmdialog
+package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import com.jfoenix.controls.JFXButton
 import javafx.application.Platform

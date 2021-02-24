@@ -6,7 +6,7 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.*
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.exception.ExceptionDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 
 class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<ExceptionDialog>(dialog) {
 
