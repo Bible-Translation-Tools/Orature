@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
-import javafx.scene.layout.*
+import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory

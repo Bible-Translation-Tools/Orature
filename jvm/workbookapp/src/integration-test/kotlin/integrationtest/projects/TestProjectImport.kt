@@ -16,7 +16,6 @@ import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Provider
 
-
 class TestProjectImport {
 
     @Inject

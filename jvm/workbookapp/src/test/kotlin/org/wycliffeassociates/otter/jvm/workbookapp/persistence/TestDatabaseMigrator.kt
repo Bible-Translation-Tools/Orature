@@ -92,7 +92,6 @@ class TestDatabaseMigrator {
             } catch (e: Exception) {
             }
 
-
             // Test that database version is version 2
             val databaseVersionRecord = _dsl
                 .select()

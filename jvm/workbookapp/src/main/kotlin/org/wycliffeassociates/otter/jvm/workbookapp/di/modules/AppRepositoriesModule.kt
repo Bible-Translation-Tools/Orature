@@ -14,7 +14,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.audioplugin.AudioPluginRegistrar
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.AudioPluginRegistrar
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.CollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ContentRepository

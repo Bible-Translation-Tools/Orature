@@ -12,7 +12,7 @@ import java.util.*
 import java.util.zip.ZipFile
 import javax.inject.Inject
 
-class ZipEntryTreeBuilder @Inject constructor(): IZipEntryTreeBuilder {
+class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
 
     private fun createZipFileSystem(zipFilename: String): FileSystem {
         val path = Paths.get(zipFilename)

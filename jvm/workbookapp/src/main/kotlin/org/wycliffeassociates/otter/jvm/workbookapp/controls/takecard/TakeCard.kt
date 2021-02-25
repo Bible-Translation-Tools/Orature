@@ -12,7 +12,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent.PlayEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 
 class TakeCard(
     val model: TakeCardModel,

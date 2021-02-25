@@ -1,9 +1,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
-import org.wycliffeassociates.otter.common.data.primitives.*
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import java.io.File
 import java.time.LocalDate
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.Marker
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Take
 
 object TestDataStore {
     val languages = listOf(

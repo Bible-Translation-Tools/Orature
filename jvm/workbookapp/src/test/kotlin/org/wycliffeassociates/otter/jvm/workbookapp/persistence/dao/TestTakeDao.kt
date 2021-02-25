@@ -65,7 +65,7 @@ class TestTakeDao {
         assertTrue("fetch soft deletes fetches all with deletedTs", dao.fetchSoftDeletedTakes().containsAll(softDeletes))
         assertEquals("fetch soft deletes count matches deleted takes", dao.fetchSoftDeletedTakes().size, softDeletes.size)
         val remaining = dao.fetchAll().minus(dao.fetchSoftDeletedTakes())
-        assertEquals("remaining takes exist", remaining.size, files.size-deletedCount)
+        assertEquals("remaining takes exist", remaining.size, files.size - deletedCount)
     }
 
     @Test
@@ -79,7 +79,6 @@ class TestTakeDao {
         }
         val remaining = dao.fetchAll().minus(deletedTakes).size
         assertTrue("Takes without content fk remain", remaining > 0)
-
     }
 
     @Test

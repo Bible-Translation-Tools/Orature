@@ -25,7 +25,7 @@ class InitializeProjects @Inject constructor(
     private val installedEntityRepo: IInstalledEntityRepository,
     private val workbookRepository: IWorkbookRepository,
     private val rcImporter: ImportResourceContainer
-): Installable {
+) : Installable {
     override val name = "PROJECTS"
     override val version = 1
 
@@ -86,7 +86,7 @@ class InitializeProjects @Inject constructor(
             workbook.target.toCollection()
         )
         val linkedResource = workbook.source.linkedResources
-            .firstOrNull { it.identifier ==  targetMetadata.identifier}
+            .firstOrNull { it.identifier == targetMetadata.identifier }
 
         val projectIsBook = targetMetadata.identifier == workbook.target.resourceMetadata.identifier
 

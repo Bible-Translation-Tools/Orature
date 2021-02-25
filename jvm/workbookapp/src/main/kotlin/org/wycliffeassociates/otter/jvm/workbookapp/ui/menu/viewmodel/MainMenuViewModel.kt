@@ -16,10 +16,10 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.projectgrid.viewmodel.ProjectGridViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
@@ -30,7 +30,7 @@ class MainMenuViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(MainMenuViewModel::class.java)
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var pluginRepository:IAudioPluginRepository
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var workbookRepository: IWorkbookRepository
     @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
 
@@ -49,7 +49,7 @@ class MainMenuViewModel : ViewModel() {
     val showImportDialogProperty = SimpleBooleanProperty(false)
 
     init {
-        (app as DependencyGraphProvider).dependencyGraph.inject(this)
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)

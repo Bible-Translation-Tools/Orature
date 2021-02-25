@@ -9,10 +9,24 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.*
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.workbook.*
-import java.util.*
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Marker
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
+import org.wycliffeassociates.otter.common.data.workbook.Resource
+import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
 

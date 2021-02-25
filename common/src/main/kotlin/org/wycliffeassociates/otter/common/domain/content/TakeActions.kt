@@ -24,11 +24,11 @@ class TakeActions @Inject constructor(
     }
 
     fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(PluginType.EDITOR, take, pluginParameters).map { (t,r) -> r }
+        return launchPlugin(PluginType.EDITOR, take, pluginParameters).map { (t, r) -> r }
     }
 
     fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(PluginType.MARKER, take, pluginParameters).map { (t,r) -> r }
+        return launchPlugin(PluginType.MARKER, take, pluginParameters).map { (t, r) -> r }
     }
 
     fun record(

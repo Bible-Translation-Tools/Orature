@@ -45,7 +45,7 @@ class ProjectExporter(
                     )
 
                     val linkedResource = workbook.source.linkedResources
-                        .firstOrNull { it.identifier ==  projectMetadataToExport.identifier}
+                        .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                 }
