@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.navigation.INavigator
 import org.wycliffeassociates.otter.common.navigation.ITabGroup
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups.TabGroupBuilder
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import tornadofx.*
 import java.util.*
 

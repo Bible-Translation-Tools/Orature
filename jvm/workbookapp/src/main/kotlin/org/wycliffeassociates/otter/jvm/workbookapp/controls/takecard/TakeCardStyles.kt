@@ -6,8 +6,8 @@ import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordResourceStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordScriptureStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordResourceStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
 import tornadofx.*
 
 class TakeCardStyles : Stylesheet() {

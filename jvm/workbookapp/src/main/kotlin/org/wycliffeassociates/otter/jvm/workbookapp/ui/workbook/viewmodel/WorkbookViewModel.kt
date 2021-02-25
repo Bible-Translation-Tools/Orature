@@ -16,7 +16,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.DependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
@@ -54,7 +54,7 @@ class WorkbookViewModel : ViewModel() {
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
 
     init {
-        (app as DependencyGraphProvider).dependencyGraph.inject(this)
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         activeChapterProperty.onChange { updateSourceAudio() }
         activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
     }
