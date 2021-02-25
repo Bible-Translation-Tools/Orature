@@ -224,7 +224,7 @@ class ProjectFilesAccessor(
         bookElement: BookElement,
         isBook: Boolean
     ): Observable<AssociatedAudio> {
-        return when(isBook) {
+        return when (isBook) {
             true -> Observable.just(bookElement.audio)
             false -> {
                 val resourceGroup = bookElement.resources

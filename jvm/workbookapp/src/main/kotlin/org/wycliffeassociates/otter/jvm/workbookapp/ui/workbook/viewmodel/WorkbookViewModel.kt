@@ -69,7 +69,7 @@ class WorkbookViewModel : ViewModel() {
         activeProjectFilesAccessorProperty.set(projectFilesAccessor)
 
         val linkedResource = workbook.source.linkedResources
-            .firstOrNull { it.identifier ==  resourceMetadata.identifier}
+            .firstOrNull { it.identifier == resourceMetadata.identifier }
 
         activeProjectFilesAccessor.initializeResourceContainerInDir()
         activeProjectFilesAccessor.copySourceFiles(linkedResource)

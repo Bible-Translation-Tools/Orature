@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 private class TestView(override val root: Parent = Region()) : Fragment()
 
-private class TestApp: App(TestView::class), IDependencyGraphProvider {
+private class TestApp : App(TestView::class), IDependencyGraphProvider {
     override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
 }
 

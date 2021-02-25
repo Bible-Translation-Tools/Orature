@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.SplashScreen
 import tornadofx.*
 
-class OtterApp : App(SplashScreen::class), IDependencyGraphProvider  {
+class OtterApp : App(SplashScreen::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
 
     init {

@@ -8,7 +8,6 @@ private const val EPSILON = 10
 private const val MS_IN_SECOND = 1000
 private const val SAMPLE_RATE = DEFAULT_SAMPLE_RATE
 
-
 internal fun pixelsInSecond(width: Double, durationMs: Int): Int {
     val msInPixels = durationMs / width
     return (MS_IN_SECOND / msInPixels + EPSILON).toInt()

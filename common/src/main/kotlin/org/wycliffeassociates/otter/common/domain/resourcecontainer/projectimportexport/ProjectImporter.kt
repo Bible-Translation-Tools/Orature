@@ -268,7 +268,7 @@ class ProjectImporter @Inject constructor(
                     chapterCollection.slug.endsWith("_$chapter")
                 }
 
-            val metaOrHelpStartVerse = when(type) {
+            val metaOrHelpStartVerse = when (type) {
                 ContentType.META -> 1
                 else -> 0
             }

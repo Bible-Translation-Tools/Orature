@@ -39,7 +39,6 @@ class ProjectWizardViewModel : ViewModel() {
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var creationUseCase: CreateProject
 
-
     val clearLanguages: PublishSubject<Boolean> = PublishSubject.create()
     val collections: ObservableList<Collection> = FXCollections.observableArrayList()
     val targetLanguages = SortedFilteredList<Language>()

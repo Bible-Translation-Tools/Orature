@@ -26,4 +26,3 @@ class MarkerViewBackground : BorderPane() {
         }
     }
 }
-

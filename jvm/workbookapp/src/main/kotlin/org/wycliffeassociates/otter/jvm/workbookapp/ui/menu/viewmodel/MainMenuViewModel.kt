@@ -30,7 +30,7 @@ class MainMenuViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(MainMenuViewModel::class.java)
 
     @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var pluginRepository:IAudioPluginRepository
+    @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var workbookRepository: IWorkbookRepository
     @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
 
