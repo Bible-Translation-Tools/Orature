@@ -3,16 +3,16 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import javafx.beans.property.Property
 import javafx.geometry.Orientation
 import javafx.scene.Node
-import javafx.scene.layout.*
+import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
+import org.wycliffeassociates.otter.jvm.controls.navigation.projectnav
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NavBoxType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.MainScreenViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
-import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
-import org.wycliffeassociates.otter.jvm.controls.navigation.projectnav
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.MainScreenViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 class MainScreenView : View() {

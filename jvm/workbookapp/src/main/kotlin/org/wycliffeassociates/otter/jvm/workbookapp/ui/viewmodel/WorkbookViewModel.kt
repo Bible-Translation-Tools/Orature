@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import io.reactivex.Completable
 import io.reactivex.Maybe

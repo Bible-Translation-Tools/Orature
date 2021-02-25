@@ -6,7 +6,6 @@ import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.resourcetakes.view.RecordResourceFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableTabViewModel
 import tornadofx.*
 

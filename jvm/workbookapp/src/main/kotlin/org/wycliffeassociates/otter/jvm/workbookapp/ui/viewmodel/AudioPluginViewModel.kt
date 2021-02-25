@@ -18,7 +18,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.AddPluginView
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {

@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroup
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.CardGridFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourceListFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 class RecordableTabGroup : TabGroup() {

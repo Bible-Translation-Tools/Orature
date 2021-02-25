@@ -6,8 +6,8 @@ import impl.dev.jbs.gridview.skin.GridViewSkin
 import javafx.beans.binding.BooleanBinding
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardType
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import kotlin.math.pow
 

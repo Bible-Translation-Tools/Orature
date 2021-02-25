@@ -5,8 +5,8 @@ import javafx.beans.binding.BooleanBinding
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.NewRecordingCard
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardType
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 
 class ScriptureTakesGridCell(
     newRecordingAction: () -> Unit,

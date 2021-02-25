@@ -5,7 +5,7 @@ import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordResourceStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 
 class TakesListView(

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.HPos
@@ -20,15 +20,13 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.TakeCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordableFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ScriptureTakesGridView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
 import tornadofx.*
 
-private class RecordableViewModelProvider : Component() {
+private class RecordScriptureViewModelProvider : Component() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     fun get() = recordScriptureViewModel.recordableViewModel
 }
@@ -36,7 +34,7 @@ private class RecordableViewModelProvider : Component() {
 private const val TAKES_ROW_HEIGHT = 170.0
 
 class RecordScriptureFragment : RecordableFragment(
-    RecordableViewModelProvider().get(),
+    RecordScriptureViewModelProvider().get(),
     DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
