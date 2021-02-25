@@ -4,7 +4,11 @@ import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
-import javafx.scene.control.*
+import javafx.scene.control.Button
+import javafx.scene.control.CheckBox
+import javafx.scene.control.Label
+import javafx.scene.control.ScrollPane
+import javafx.scene.control.SkinBase
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 

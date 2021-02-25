@@ -1,15 +1,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.ReplayRelay
+import java.io.File
+import java.time.LocalDate
 import javafx.beans.property.SimpleObjectProperty
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
-import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
-import java.io.File
-import java.time.LocalDate
 
 class RecordScriptureViewModelTest {
 

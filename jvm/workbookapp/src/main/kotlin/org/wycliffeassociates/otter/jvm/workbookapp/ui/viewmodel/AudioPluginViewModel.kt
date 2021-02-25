@@ -4,19 +4,22 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import javax.inject.Inject
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.domain.content.FileNamer
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.content.*
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
 import tornadofx.*
-import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository

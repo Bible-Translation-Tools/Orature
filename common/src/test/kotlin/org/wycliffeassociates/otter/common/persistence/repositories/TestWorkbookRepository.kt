@@ -1,18 +1,31 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
-import com.nhaarman.mockitokotlin2.*
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.times
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import org.junit.Assert
-import org.junit.Test
-import org.wycliffeassociates.otter.common.data.primitives.*
-import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 import java.io.File
 import java.time.LocalDate
+import org.junit.Assert
+import org.junit.Test
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
+import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
 class TestWorkbookRepository {
     /** When a unique ID is needed, just use this. */

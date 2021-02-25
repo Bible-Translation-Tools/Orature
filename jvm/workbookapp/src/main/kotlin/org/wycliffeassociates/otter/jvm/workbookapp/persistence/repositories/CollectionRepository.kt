@@ -4,12 +4,22 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import jooq.Tables.*
+import java.io.File
+import java.time.LocalDate
+import javax.inject.Inject
+import jooq.Tables.DUBLIN_CORE_ENTITY
+import jooq.Tables.RC_LINK_ENTITY
+import jooq.Tables.RESOURCE_LINK
+import jooq.Tables.TAKE_ENTITY
 import jooq.tables.CollectionEntity.COLLECTION_ENTITY
 import jooq.tables.ContentDerivative.CONTENT_DERIVATIVE
 import jooq.tables.ContentEntity.CONTENT_ENTITY
 import org.jooq.DSLContext
-import org.jooq.impl.DSL.*
+import org.jooq.impl.DSL.`val`
+import org.jooq.impl.DSL.and
+import org.jooq.impl.DSL.field
+import org.jooq.impl.DSL.or
+import org.jooq.impl.DSL.value
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -27,10 +37,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import org.wycliffeassociates.resourcecontainer.entity.*
-import java.io.File
-import java.time.LocalDate
-import javax.inject.Inject
+import org.wycliffeassociates.resourcecontainer.entity.Checking
+import org.wycliffeassociates.resourcecontainer.entity.Manifest
+import org.wycliffeassociates.resourcecontainer.entity.dublincore
+import org.wycliffeassociates.resourcecontainer.entity.project
 
 class CollectionRepository @Inject constructor(
     private val database: AppDatabase,
@@ -484,7 +494,7 @@ class CollectionRepository @Inject constructor(
             identifier = source.identifier
             issued = LocalDate.now().toString()
             modified = LocalDate.now().toString()
-            language = language {
+            language = org.wycliffeassociates.resourcecontainer.entity.language {
                 identifier = targetLanguage.slug
                 direction = targetLanguage.direction
                 title = targetLanguage.name

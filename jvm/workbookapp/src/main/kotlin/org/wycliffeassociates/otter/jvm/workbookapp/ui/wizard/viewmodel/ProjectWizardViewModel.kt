@@ -4,9 +4,13 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.github.thomasnield.rxkotlinfx.toObservable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.BooleanExpression
-import javafx.beans.property.*
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -21,8 +25,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.fragments.SelectCollection
-import tornadofx.*
-import javax.inject.Inject
+import tornadofx.SortedFilteredList
+import tornadofx.ViewModel
+import tornadofx.booleanBinding
 
 class ProjectWizardViewModel : ViewModel() {
 
