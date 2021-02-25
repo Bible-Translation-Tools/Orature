@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
 interface IResourceMetadataRepository : IRepository<ResourceMetadata> {
     fun exists(metadata: ResourceMetadata): Single<Boolean>

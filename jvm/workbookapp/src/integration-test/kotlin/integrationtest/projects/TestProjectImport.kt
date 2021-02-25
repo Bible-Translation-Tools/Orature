@@ -3,19 +3,18 @@ package integrationtest.projects
 import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Assert
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ContainerType
-import org.wycliffeassociates.otter.common.data.model.ContentType.BODY
-import org.wycliffeassociates.otter.common.data.model.ContentType.META
-import org.wycliffeassociates.otter.common.data.model.ContentType.TEXT
-import org.wycliffeassociates.otter.common.data.model.ContentType.TITLE
-import org.wycliffeassociates.otter.common.data.model.Language
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Provider
-
 
 class TestProjectImport {
 

@@ -7,7 +7,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.AudioPlayerNode
+import org.wycliffeassociates.otter.jvm.controls.media.AudioPlayerNode
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*

@@ -2,8 +2,8 @@ package integrationtest.projects
 
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.languages.ImportLanguages
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer

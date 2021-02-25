@@ -3,15 +3,21 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import javax.inject.Inject
 import org.jooq.DSLContext
 import org.jooq.Record3
 import org.jooq.Select
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.helpContentTypes
+import org.wycliffeassociates.otter.common.data.primitives.primaryContentTypes
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -25,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.ResourceMetadataMapper
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
-import javax.inject.Inject
 
 class ResourceContainerRepository @Inject constructor(
     private val database: AppDatabase,

@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
 import javax.inject.Inject
 

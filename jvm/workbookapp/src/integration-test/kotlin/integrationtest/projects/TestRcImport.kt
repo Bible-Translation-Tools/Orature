@@ -2,7 +2,7 @@ package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Test
-import org.wycliffeassociates.otter.common.data.model.ContentType.*
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.*
 import javax.inject.Inject
 import javax.inject.Provider
 

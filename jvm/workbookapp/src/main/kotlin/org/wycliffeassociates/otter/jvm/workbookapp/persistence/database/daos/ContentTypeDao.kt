@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.CONTENT_TYPE
 import org.jooq.DSLContext
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import java.lang.IllegalStateException
 import java.util.*
 

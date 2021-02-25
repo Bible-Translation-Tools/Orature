@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.Language
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import java.io.InputStream
 import javax.inject.Inject

@@ -1,13 +1,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model
 
 import io.reactivex.Observable
+import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.BooleanBinding
-import org.wycliffeassociates.otter.common.data.model.ContentLabel
-import org.wycliffeassociates.otter.common.data.workbook.*
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.workbook.BookElement
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Resource
+import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import tornadofx.*
 import tornadofx.FX.Companion.messages
-import java.util.concurrent.Callable
 
 data class ResourceGroupCardItem(
     val bookElement: BookElement,

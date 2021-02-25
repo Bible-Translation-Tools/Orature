@@ -1,9 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
 import javafx.scene.control.Tab
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.cardgrid.view.CardGridFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.workbook.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.CardGridFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
 import tornadofx.*
 
 class ChapterTabGroup : TabGroup() {

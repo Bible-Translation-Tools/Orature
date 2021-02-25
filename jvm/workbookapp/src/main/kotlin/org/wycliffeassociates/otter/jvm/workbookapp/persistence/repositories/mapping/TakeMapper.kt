@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.model.Marker
-import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.data.primitives.Marker
+import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TakeEntity
 import java.io.File
 import java.time.LocalDate

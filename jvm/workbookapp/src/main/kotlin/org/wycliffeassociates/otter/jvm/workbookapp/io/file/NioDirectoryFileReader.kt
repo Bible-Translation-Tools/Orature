@@ -13,7 +13,7 @@ import kotlin.streams.asSequence
 
 class NioDirectoryFileReader(
     private val dir: File
-): IFileReader {
+) : IFileReader {
     private val fileSystem: FileSystem = FileSystems.getDefault()
 
     override fun bufferedReader(filepath: String) = Files.newBufferedReader(getAbsolutePath(filepath))!!

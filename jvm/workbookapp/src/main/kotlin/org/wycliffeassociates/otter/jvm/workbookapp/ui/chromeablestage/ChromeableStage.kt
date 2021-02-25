@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage
 
+import java.util.Stack
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.Node
 import org.wycliffeassociates.controls.ChromeableTabPane
@@ -7,9 +8,8 @@ import org.wycliffeassociates.otter.common.navigation.INavigator
 import org.wycliffeassociates.otter.common.navigation.ITabGroup
 import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups.TabGroupBuilder
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.mainscreen.view.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import tornadofx.*
-import java.util.*
 
 class ChromeableStage : UIComponent(), ScopedInstance, INavigator {
     val chrome: Node by param()

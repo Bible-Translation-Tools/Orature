@@ -7,7 +7,7 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.Icon
-import org.wycliffeassociates.otter.jvm.controls.sourceformattoggle.SourceFormatToggle
+import org.wycliffeassociates.otter.jvm.controls.toggle.SourceFormatToggle
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 

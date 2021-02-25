@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.mar
 
 import junit.framework.TestCase
 import org.junit.Test
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
+import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTreeNode
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IProjectReader
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.OtterFile
 import java.io.File

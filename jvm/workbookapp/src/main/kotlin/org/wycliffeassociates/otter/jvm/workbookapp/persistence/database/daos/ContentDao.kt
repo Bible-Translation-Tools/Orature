@@ -6,7 +6,7 @@ import org.jooq.Record
 import org.jooq.Select
 import org.jooq.SelectFieldOrAsterisk
 import org.jooq.impl.DSL.max
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.InsertionException
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 

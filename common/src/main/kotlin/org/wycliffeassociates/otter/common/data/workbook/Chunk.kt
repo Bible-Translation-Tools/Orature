@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
 
 data class Chunk(

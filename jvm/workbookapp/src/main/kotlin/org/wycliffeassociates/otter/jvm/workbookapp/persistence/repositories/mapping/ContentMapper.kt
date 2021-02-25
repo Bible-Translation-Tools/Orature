@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping
 
-import org.wycliffeassociates.otter.common.data.model.Content
-import org.wycliffeassociates.otter.common.data.model.Take
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.Take
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos.ContentTypeDao
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 

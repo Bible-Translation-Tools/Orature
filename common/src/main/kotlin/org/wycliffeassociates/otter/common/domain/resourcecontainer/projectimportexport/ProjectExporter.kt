@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -45,7 +45,7 @@ class ProjectExporter(
                     )
 
                     val linkedResource = workbook.source.linkedResources
-                        .firstOrNull { it.identifier ==  projectMetadataToExport.identifier}
+                        .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                 }

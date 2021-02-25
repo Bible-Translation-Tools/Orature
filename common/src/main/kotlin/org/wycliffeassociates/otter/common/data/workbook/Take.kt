@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.BehaviorRelay
-import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import java.io.File
 import java.time.LocalDate
 

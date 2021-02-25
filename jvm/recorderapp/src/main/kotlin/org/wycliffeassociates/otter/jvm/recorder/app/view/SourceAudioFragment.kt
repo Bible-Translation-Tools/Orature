@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.sourcecontent.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*

@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroups
 
 import javafx.scene.control.Tab
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.takemanagement.view.RecordScriptureFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordScriptureFragment
 import tornadofx.*
 
 class RecordScriptureTabGroup : TabGroup() {

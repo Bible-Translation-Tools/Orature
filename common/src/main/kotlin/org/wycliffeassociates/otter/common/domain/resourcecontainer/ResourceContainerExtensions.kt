@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 
