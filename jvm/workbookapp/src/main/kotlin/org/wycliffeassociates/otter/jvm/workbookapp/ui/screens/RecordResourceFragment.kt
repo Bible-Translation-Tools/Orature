@@ -29,7 +29,7 @@ private class RecordableViewModelProvider : Component() {
 }
 
 class RecordResourceFragment(
-    recordableViewModel: RecordableViewModel = RecordScriptureViewModelProvider().get()
+    recordableViewModel: RecordableViewModel = RecordableViewModelProvider().get()
 ) : RecordableFragment(
     recordableViewModel,
     DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
