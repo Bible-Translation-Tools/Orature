@@ -24,6 +24,7 @@ import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEv
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
@@ -165,8 +166,6 @@ abstract class RecordableFragment(
     private fun createAudioPluginProgressDialog() {
         // Plugin active cover
         sourcedialog {
-            root.prefWidthProperty().bind(mainContainer.widthProperty().divide(2))
-
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
 
@@ -177,6 +176,7 @@ abstract class RecordableFragment(
 
             recordableViewModel.showPluginActiveProperty.onChange {
                 showDialogProperty.set(it)
+                (app as OtterApp).shouldBlockWindowCloseRequest = it
             }
 
             sourceContentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())

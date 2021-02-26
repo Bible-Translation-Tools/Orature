@@ -13,7 +13,7 @@ class SplashScreen : View() {
         addStylesheet(SplashScreenStyles::class)
         addClass(SplashScreenStyles.splashRoot)
         alignment = Pos.TOP_CENTER
-        imageview(Image(SplashScreen::class.java.getResourceAsStream("/orature_splash.png")))
+        add(resources.imageview("/orature_splash.png"))
         progressbar(viewModel.progressProperty) {
             addClass(SplashScreenStyles.splashProgress)
             prefWidth = 376.0
@@ -22,13 +22,18 @@ class SplashScreen : View() {
     }
 
     init {
-        viewModel.shouldCloseProperty.onChange {
-            if (it) close()
-        }
+        viewModel
+            .initApp()
+            .subscribe(
+                {},
+                { finish() },
+                { finish() }
+            )
+
     }
 
-    override fun onDock() {
-        super.onDock()
-        FX.primaryStage.scene.fill = Color.TRANSPARENT
+    private fun finish() {
+        close()
+        primaryStage.show()
     }
 }

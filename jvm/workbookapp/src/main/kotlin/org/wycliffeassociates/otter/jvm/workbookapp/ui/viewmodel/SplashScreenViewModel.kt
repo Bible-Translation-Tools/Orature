@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import org.slf4j.LoggerFactory
@@ -21,33 +23,19 @@ class SplashScreenViewModel : ViewModel() {
 
     val progressProperty = SimpleDoubleProperty(0.0)
     val shouldCloseProperty = SimpleBooleanProperty(false)
-    private val chromeableStage: ChromeableStage by inject()
-
     init {
-        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        initApp.initApp()
-            .observeOnFx()
-            .doOnComplete {
-                openApplicationWindow()
-            }
-            .subscribe(
-                {
-                    progressProperty.value = it
-                },
-                {
-                    logger.error("Error initializing app: ", it)
-                    openApplicationWindow()
-                }
-            )
     }
 
-    private fun openApplicationWindow() {
-        workspace.header.removeFromParent()
-        workspace.add(MainMenu())
-        workspace.dock<MainScreenView>()
-        workspace.openWindow(owner = null)
-        chromeableStage.navigateTo(TabGroupType.PROJECT)
-        shouldCloseProperty.value = true
+    fun initApp(): Observable<Double> {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        return initApp.initApp()
+            .observeOnFx()
+            .doOnError { logger.error("Error initializing app: ", it) }
+            .map {
+                progressProperty.value = it
+                it
+            }
     }
 }
