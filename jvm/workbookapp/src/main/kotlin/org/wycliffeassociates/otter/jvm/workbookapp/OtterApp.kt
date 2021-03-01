@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.SplashScreen
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class OtterApp : App(Workspace::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
@@ -39,7 +40,7 @@ class OtterApp : App(Workspace::class), IDependencyGraphProvider {
         stage.scene.window.setOnCloseRequest {
             if (shouldBlockWindowCloseRequest) {
                 it.consume()
-                SnackbarHandler.enqueue("Window could not be closed while plugin is open.")
+                SnackbarHandler.enqueue(messages["applicationCloseBlocked"])
             }
         }
         find<SplashScreen>().openModal(StageStyle.UNDECORATED)
