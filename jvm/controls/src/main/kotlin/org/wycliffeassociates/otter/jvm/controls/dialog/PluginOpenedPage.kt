@@ -5,18 +5,14 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
-import javafx.scene.Cursor
-import javafx.scene.Node
 import javafx.scene.layout.Priority
-import javafx.stage.Modality
+import javafx.scene.layout.VBox
 import javafx.stage.Stage
-import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class SourceDialog : Fragment() {
+class PluginOpenedPage : Fragment() {
 
     val dialogTitleProperty = SimpleStringProperty()
     val dialogTextProperty = SimpleStringProperty()
@@ -24,45 +20,30 @@ class SourceDialog : Fragment() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
-    val showDialogProperty = SimpleBooleanProperty()
-
     var dialogStage: Stage? = null
 
     init {
-        importStylesheet(javaClass.getResource("/css/source-dialog.css").toExternalForm())
-
-        showDialogProperty.onChangeAndDoNow {
-            it?.let {
-                Platform.runLater {
-                    if (it) app.workspace.dock(this) else app.workspace.navigateBack()
-                }
-            }
-        }
+        importStylesheet(resources["/css/plugin-opened-page.css"])
     }
 
     override val root = vbox {
-        addClass("source-dialog")
-        vbox {
-            addClass("source-dialog__title")
-            label(dialogTitleProperty) {
-                addClass("source-dialog__label")
-                visibleWhen(textProperty().isNotEmpty)
-                managedProperty().bind(visibleProperty())
-            }
+        alignment = Pos.CENTER
+        addClass("plugin-opened-page")
+        label(dialogTitleProperty) {
+            addClass("plugin-opened-page__title", "plugin-opened-page__label")
+            visibleWhen(textProperty().isNotEmpty)
+            managedProperty().bind(visibleProperty())
         }
-
-        vbox {
+        label(dialogTextProperty) {
             alignment = Pos.CENTER
-            label(dialogTextProperty) {
-                addClass("source-dialog__label", "source-dialog__label--message")
-                visibleWhen(textProperty().isNotEmpty)
-                managedWhen(visibleProperty())
-            }
+            addClass("plugin-opened-page__label", "plugin-opened-page__label--message")
+            visibleWhen(textProperty().isNotEmpty)
+            managedWhen(visibleProperty())
         }
         add(
             SourceContent().apply {
                 vgrow = Priority.ALWAYS
-                sourceTextProperty.bind(this@SourceDialog.sourceTextProperty)
+                sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
                 audioPlayerProperty.bind(playerProperty)
 
                 audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
@@ -80,10 +61,4 @@ class SourceDialog : Fragment() {
         playerProperty.value?.stop()
         super.onUndock()
     }
-}
-
-fun sourcedialog(setup: SourceDialog.() -> Unit = {}): SourceDialog {
-    val sourceDialog = SourceDialog()
-    sourceDialog.setup()
-    return sourceDialog
 }
