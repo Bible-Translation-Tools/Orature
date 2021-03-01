@@ -20,7 +20,6 @@ class PluginOpenedPage : Fragment() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
-    var dialogStage: Stage? = null
 
     init {
         importStylesheet(resources["/css/plugin-opened-page.css"])
