@@ -94,11 +94,10 @@ class MainScreenView : View() {
                         text = messages["back"]
                         graphic = AppStyles.backIcon()
                         enableWhen(chromeableStage.canNavigateBackProperty)
-                        setOnMouseClicked {
+                        action {
                             if (chromeableStage.canNavigateBackProperty.value) {
                                 chromeableStage.back()
                             }
-                            it.consume()
                         }
                     }
                 }
