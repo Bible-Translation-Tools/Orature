@@ -62,6 +62,7 @@ apply from: './jooq.gradle'
 
 //install4j tasks for building win/nix/mac installers. Executable jar can be built without it
 install4j {
+    vmParameters = ["-Dinstall4j.timestampUrl=http://timestamp.sectigo.com/"]
     //pass in the install4j directory via -P if it's not in the default install location, e.q. for use with travis or arbitrary paths
     if (project.hasProperty('gradlewInstall4jDirectory')) {
         installDir = file(gradlewInstall4jDirectory)
