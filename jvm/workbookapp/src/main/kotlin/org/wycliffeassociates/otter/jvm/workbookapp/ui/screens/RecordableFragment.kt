@@ -91,7 +91,7 @@ abstract class RecordableFragment(
             workspace.dock(pluginOpenedPage)
         }
         subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let{
+            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
             }
             openPlayers()

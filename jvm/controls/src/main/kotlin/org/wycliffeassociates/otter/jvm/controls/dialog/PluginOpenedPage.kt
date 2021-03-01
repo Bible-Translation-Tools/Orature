@@ -1,13 +1,10 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
-import javafx.stage.Stage
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import tornadofx.*

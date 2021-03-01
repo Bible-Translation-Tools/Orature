@@ -95,7 +95,7 @@ class MainScreenView : View() {
                         graphic = AppStyles.backIcon()
                         enableWhen(chromeableStage.canNavigateBackProperty)
                         setOnMouseClicked {
-                            if(chromeableStage.canNavigateBackProperty.value) {
+                            if (chromeableStage.canNavigateBackProperty.value) {
                                 chromeableStage.back()
                             }
                             it.consume()

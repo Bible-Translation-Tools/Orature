@@ -1,8 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.geometry.Pos
-import javafx.scene.image.Image
-import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.SplashScreenStyles
 import tornadofx.*
@@ -29,7 +27,6 @@ class SplashScreen : View() {
                 { finish() },
                 { finish() }
             )
-
     }
 
     private fun finish() {
