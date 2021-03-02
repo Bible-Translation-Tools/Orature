@@ -1,28 +1,24 @@
 @import "root.css"
 
-.source-dialog {
+.plugin-opened-page {
     -fx-background-color: white;
 }
 
-.source-dialog__label {
+.plugin-opened-page__label {
     -fx-font-weight: bold;
     -fx-font-size: 1.4em;
     -fx-padding: 20px;
     -fx-alignment: center;
     -fx-text-alignment: center;
     -fx-wrap-text: true;
-    -fx-fill-width: true;
 }
 
-.source-dialog__title {
+.plugin-opened-page__title {
     -fx-alignment: center;
 }
 
-.source-dialog__title:hover {
-    -fx-background-color: #e7ecf5;
-}
-
-.source-dialog__label--message {
+.plugin-opened-page__label--message {
+    -fx-max-width: 1000.0;
     -fx-font-weight: normal;
     -fx-padding: 0 20px 20px 20px;
     -fx-text-alignment: justify;
@@ -30,7 +26,7 @@
     -fx-font-size: 1.5em;
 }
 
-.source-dialog__close-button {
+.plugin-opened-page__close-button {
     -fx-min-height: 40px;
     -fx-min-width: 185px;
     -fx-background-color: -wa-white;
@@ -42,6 +38,6 @@
     -fx-font-weight: bold;
 }
 
-.source-dialog__close-button * {
+.plugin-opened-page__close-button * {
     -fx-fill: -wa-primary;
 }

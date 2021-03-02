@@ -10,7 +10,6 @@ import javafx.geometry.Point2D
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.Control
-import javafx.scene.layout.Pane
 import javafx.scene.layout.VBox
 import javafx.util.Duration
 import org.slf4j.LoggerFactory
@@ -18,14 +17,16 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
-import org.wycliffeassociates.otter.jvm.controls.dialog.sourcedialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
@@ -52,6 +53,7 @@ abstract class RecordableFragment(
 
     abstract fun createTakeCard(take: TakeCardModel): Control
 
+    private val pluginOpenedPage: PluginOpenedPage
     protected val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookViewModel: WorkbookViewModel by inject()
 
@@ -84,8 +86,14 @@ abstract class RecordableFragment(
 
     init {
         importStylesheet<AppStyles>()
-        createAudioPluginProgressDialog()
+        pluginOpenedPage = createPluginOpenedPage()
+        subscribe<PluginOpenedEvent> {
+            workspace.dock(pluginOpenedPage)
+        }
         subscribe<PluginClosedEvent> {
+            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
+                workspace.navigateBack()
+            }
             openPlayers()
         }
     }
@@ -94,7 +102,7 @@ abstract class RecordableFragment(
         addDragTakeEventHandlers()
         addButtonEventHandlers()
 
-        createSnackBar(this)
+        createSnackBar()
 
         add(mainContainer
             .apply {
@@ -136,20 +144,19 @@ abstract class RecordableFragment(
 
     abstract fun openPlayers()
 
-    private fun createSnackBar(pane: Pane) {
+    private fun createSnackBar() {
         // TODO: This doesn't actually handle anything correctly. Need to know whether the user
         // TODO... hasn't selected an editor or recorder and respond appropriately.
-        val snackBar = JFXSnackbar(pane)
         recordableViewModel
             .snackBarObservable
             .doOnError { e ->
                 logger.error("Error in creating no plugin snackbar", e)
             }
-            .subscribe {
-                snackBar.enqueue(
+            .subscribe { pluginErrorMessage ->
+                SnackbarHandler.enqueue(
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
-                            messages["noRecorder"],
+                            pluginErrorMessage,
                             messages["addPlugin"].toUpperCase(),
                             EventHandler {
                                 audioPluginViewModel.addPlugin(true, false)
@@ -162,23 +169,14 @@ abstract class RecordableFragment(
             }
     }
 
-    private fun createAudioPluginProgressDialog() {
+    private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        sourcedialog {
-            root.prefWidthProperty().bind(mainContainer.widthProperty().divide(2))
-
+        return PluginOpenedPage().apply {
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
-
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-
             sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
-
-            recordableViewModel.showPluginActiveProperty.onChange {
-                showDialogProperty.set(it)
-            }
-
             sourceContentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
         }
     }

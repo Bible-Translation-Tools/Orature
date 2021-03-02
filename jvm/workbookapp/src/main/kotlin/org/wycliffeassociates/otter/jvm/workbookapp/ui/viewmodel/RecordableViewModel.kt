@@ -24,6 +24,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.util.concurrent.Callable
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -87,6 +88,9 @@ open class RecordableViewModel(
                 }
                 .flatMapSingle { plugin ->
                     showPluginActive = !plugin.isNativePlugin()
+                    if (!plugin.isNativePlugin()) {
+                        fire(PluginOpenedEvent(PluginType.RECORDER))
+                    }
                     audioPluginViewModel.record(rec)
                 }
                 .observeOnFx()
@@ -96,7 +100,7 @@ open class RecordableViewModel(
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
                     showPluginActive = false
-                    fire(PluginClosedEvent)
+                    fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
@@ -113,6 +117,9 @@ open class RecordableViewModel(
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
                 showPluginActive = !plugin.isNativePlugin()
+                if (!plugin.isNativePlugin()) {
+                    fire(PluginOpenedEvent(pluginType))
+                }
                 when (pluginType) {
                     PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
                     PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)
@@ -127,7 +134,7 @@ open class RecordableViewModel(
             .subscribe { result: TakeActions.Result ->
                 showPluginActive = false
                 currentTakeNumberProperty.set(null)
-                fire(PluginClosedEvent)
+                fire(PluginClosedEvent(pluginType))
                 when (result) {
                     TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                     TakeActions.Result.SUCCESS -> takeEvent.onComplete()

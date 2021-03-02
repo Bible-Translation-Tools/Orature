@@ -4,6 +4,7 @@ import javafx.beans.property.Property
 import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
 import org.wycliffeassociates.otter.jvm.controls.navigation.projectnav
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
@@ -94,7 +95,9 @@ class MainScreenView : View() {
                         graphic = AppStyles.backIcon()
                         enableWhen(chromeableStage.canNavigateBackProperty)
                         action {
-                            chromeableStage.back()
+                            if (chromeableStage.canNavigateBackProperty.value) {
+                                chromeableStage.back()
+                            }
                         }
                     }
                 }
@@ -104,6 +107,7 @@ class MainScreenView : View() {
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
             }
+            chromeableStage.navigateTo(TabGroupType.PROJECT)
             add(chromeableStage.root)
         }
     }
