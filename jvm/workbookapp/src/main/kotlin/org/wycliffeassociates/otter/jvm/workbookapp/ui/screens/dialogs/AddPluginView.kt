@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXCheckBox

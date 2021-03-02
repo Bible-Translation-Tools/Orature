@@ -23,7 +23,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridView
 import tornadofx.*
 import java.text.MessageFormat
 
-class ProjectGridFragment : Fragment() {
+class ProjectHome : Fragment() {
 
     private val viewModel: ProjectGridViewModel by inject()
     private val noProjectsProperty: ReadOnlyBooleanProperty
@@ -119,10 +119,10 @@ class ProjectGridFragment : Fragment() {
 
     private val confirmDeleteDialog = confirmdialog {
         root.prefWidthProperty().bind(
-            this@ProjectGridFragment.root.widthProperty().divide(2)
+            this@ProjectHome.root.widthProperty().divide(2)
         )
         root.prefHeightProperty().bind(
-            this@ProjectGridFragment.root.heightProperty().divide(2)
+            this@ProjectHome.root.heightProperty().divide(2)
         )
 
         messageTextProperty.set(messages["deleteProjectConfirmation"])

@@ -12,8 +12,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.MainScreenView
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.SplashScreen
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScreen
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -64,7 +64,7 @@ class OtterApp : App(Workspace::class), IDependencyGraphProvider {
         }
         workspace.add(menu)
         workspace.header.removeFromParent()
-        workspace.dock<MainScreenView>()
+        workspace.dock<RootView>()
     }
 
     override fun shouldShowPrimaryStage(): Boolean {

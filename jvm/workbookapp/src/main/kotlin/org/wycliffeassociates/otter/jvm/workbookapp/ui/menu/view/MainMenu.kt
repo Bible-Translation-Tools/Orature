@@ -8,7 +8,7 @@ import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import javafx.stage.FileChooser
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.AddPluginView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RemovePluginsView
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog

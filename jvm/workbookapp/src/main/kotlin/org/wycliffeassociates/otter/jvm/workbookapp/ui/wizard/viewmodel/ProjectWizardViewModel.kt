@@ -21,7 +21,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.MainScreenView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.fragments.SelectCollection
@@ -221,7 +221,7 @@ class ProjectWizardViewModel : ViewModel() {
     fun closeWizard() {
         canGoBack.set(false)
         languageConfirmed.set(false)
-        workspace.dock<MainScreenView>()
+        workspace.dock<RootView>()
     }
 
     fun doesProjectExist(project: Collection): Boolean {

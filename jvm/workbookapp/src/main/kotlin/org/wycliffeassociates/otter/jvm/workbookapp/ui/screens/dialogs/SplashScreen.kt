@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
