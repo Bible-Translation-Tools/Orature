@@ -24,7 +24,7 @@ import tornadofx.*
 import java.text.MessageFormat
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 
-class ProjectHome : Fragment() {
+class HomePage : Fragment() {
 
     private val viewModel: ProjectGridViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -121,10 +121,10 @@ class ProjectHome : Fragment() {
 
     private val confirmDeleteDialog = confirmdialog {
         root.prefWidthProperty().bind(
-            this@ProjectHome.root.widthProperty().divide(2)
+            this@HomePage.root.widthProperty().divide(2)
         )
         root.prefHeightProperty().bind(
-            this@ProjectHome.root.heightProperty().divide(2)
+            this@HomePage.root.heightProperty().divide(2)
         )
 
         messageTextProperty.set(messages["deleteProjectConfirmation"])

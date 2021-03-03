@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import com.jfoenix.controls.JFXButton
 import javafx.scene.layout.Priority
@@ -6,7 +6,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RemovePluginsStyles
 import tornadofx.*
 
-class RemovePluginsView : View() {
+class RemovePluginsDialog : View() {
     private val viewModel: RemovePluginsViewModel by inject()
 
     init {

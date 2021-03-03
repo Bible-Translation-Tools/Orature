@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 
-class ResourceListFragment : Fragment() {
+class ResourcePage : Fragment() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
 

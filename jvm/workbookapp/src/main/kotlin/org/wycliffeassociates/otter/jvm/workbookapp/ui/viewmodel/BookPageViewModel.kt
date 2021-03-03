@@ -11,7 +11,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourceListFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
 
 class BookPageViewModel : ViewModel() {
@@ -80,7 +80,7 @@ class BookPageViewModel : ViewModel() {
         val currentTab = currentTabProperty.value
         when (currentTab.toLowerCase()) {
             "ulb" -> workspace.dock<ChapterPage>()
-            else -> workspace.dock<ResourceListFragment>()
+            else -> workspace.dock<ResourcePage>()
         }
     }
 }

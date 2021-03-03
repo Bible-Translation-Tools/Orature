@@ -26,7 +26,7 @@ class RootView : View() {
         }
         workspace.add(menu)
         workspace.header.removeFromParent()
-        workspace.dock<ProjectHome>()
+        workspace.dock<HomePage>()
     }
 
     override val root = stackpane {

@@ -17,7 +17,7 @@ import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {
@@ -108,6 +108,6 @@ class AudioPluginViewModel : ViewModel() {
             canRecord = record
             canEdit = edit
         }
-        find<AddPluginView>().openModal()
+        find<AddPluginDialog>().openModal()
     }
 }
