@@ -1,16 +1,16 @@
-package org.wycliffeassociates.otter.jvm.workbookapp
+package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterExceptionHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.MainScreenView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.SplashScreen
@@ -70,8 +70,4 @@ class OtterApp : App(Workspace::class), IDependencyGraphProvider {
     override fun shouldShowPrimaryStage(): Boolean {
         return false
     }
-}
-
-fun main(args: Array<String>) {
-    launch<OtterApp>(args)
 }
