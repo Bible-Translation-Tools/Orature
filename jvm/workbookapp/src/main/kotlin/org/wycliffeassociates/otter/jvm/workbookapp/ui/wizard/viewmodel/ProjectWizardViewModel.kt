@@ -221,7 +221,7 @@ class ProjectWizardViewModel : ViewModel() {
     fun closeWizard() {
         canGoBack.set(false)
         languageConfirmed.set(false)
-        workspace.dock<RootView>()
+        workspace.navigateBack()
     }
 
     fun doesProjectExist(project: Collection): Boolean {
