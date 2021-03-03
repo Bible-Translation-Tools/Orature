@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.jfoenix.controls.JFXTabPane
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.event.EventHandler
@@ -8,7 +9,6 @@ import javafx.scene.Node
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.controls.ChromeableTabPane
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
@@ -21,7 +21,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookPageViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
-
 class BookPage : Fragment() {
     private val workbookDataStore: WorkbookDataStore by inject()
 
@@ -29,7 +28,7 @@ class BookPage : Fragment() {
 
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
-    override val root = ChromeableTabPane().apply {
+    override val root = JFXTabPane().apply {
         importStylesheet<MainScreenStyles>()
         addClass(Stylesheet.tabPane)
 
