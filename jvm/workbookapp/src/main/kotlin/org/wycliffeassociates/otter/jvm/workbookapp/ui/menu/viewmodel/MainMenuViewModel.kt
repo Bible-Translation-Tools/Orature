@@ -19,7 +19,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
@@ -36,7 +36,7 @@ class MainMenuViewModel : ViewModel() {
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    private val workbookVM = find<WorkbookViewModel>()
+    private val workbookVM = find<WorkbookDataStore>()
     val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()

@@ -31,7 +31,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 abstract class RecordableFragment(
@@ -55,7 +55,7 @@ abstract class RecordableFragment(
 
     private val pluginOpenedPage: PluginOpenedPage
     protected val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     /** Add custom components to this container, rather than root*/
     protected val mainContainer = VBox()
@@ -176,8 +176,8 @@ abstract class RecordableFragment(
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
+            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
         }
     }
 

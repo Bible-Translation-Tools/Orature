@@ -22,7 +22,7 @@ import java.text.MessageFormat
 import java.util.concurrent.Callable
 import javax.inject.Inject
 
-class WorkbookViewModel : ViewModel() {
+class WorkbookDataStore : Component(), ScopedInstance {
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var workbookRepository: IWorkbookRepository
 
@@ -43,7 +43,7 @@ class WorkbookViewModel : ViewModel() {
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
     val activeResourceMetadata
-        get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
+         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
     val activeProjectFilesAccessor: ProjectFilesAccessor

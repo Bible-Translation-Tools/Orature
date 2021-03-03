@@ -3,18 +3,18 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroup
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.CardGridFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourceListFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class RecordableTabGroup : TabGroup() {
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     override fun activate() {
-        workbookViewModel.activeChunkProperty.set(null)
-        workbookViewModel.activeResourceComponentProperty.set(null)
-        workbookViewModel.activeResourceProperty.set(null)
+        workbookDataStore.activeChunkProperty.set(null)
+        workbookDataStore.activeResourceComponentProperty.set(null)
+        workbookDataStore.activeResourceProperty.set(null)
 
-        when (workbookViewModel.activeResourceMetadata.type) {
+        when (workbookDataStore.activeResourceMetadata.type) {
             ContainerType.Book -> createChunkTab()
             ContainerType.Help -> createResourceTab()
             else -> Unit

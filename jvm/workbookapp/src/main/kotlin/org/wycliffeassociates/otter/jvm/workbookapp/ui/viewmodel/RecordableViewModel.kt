@@ -32,7 +32,7 @@ open class RecordableViewModel(
 
     private val logger = LoggerFactory.getLogger(RecordableViewModel::class.java)
 
-    val workbookViewModel: WorkbookViewModel by inject()
+    val workbookDataStore: WorkbookDataStore by inject()
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
@@ -48,7 +48,7 @@ open class RecordableViewModel(
     val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
     val selectedTakeProperty = SimpleObjectProperty<TakeCardModel?>()
 
-    val sourceAudioAvailableProperty = workbookViewModel.sourceAudioAvailableProperty
+    val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
 
     private val disposables = CompositeDisposable()
@@ -66,7 +66,7 @@ open class RecordableViewModel(
             }
         }
 
-        workbookViewModel.sourceAudioProperty.onChangeAndDoNow { source ->
+        workbookDataStore.sourceAudioProperty.onChangeAndDoNow { source ->
             var audioPlayer: IAudioPlayer? = null
             if (source != null) {
                 audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
@@ -152,7 +152,7 @@ open class RecordableViewModel(
                 it.selected = true
                 recordable?.audio?.selectTake(it.take) ?: throw IllegalStateException("Recordable is null")
                 selectedTakeProperty.set(it)
-                workbookViewModel.updateSelectedTakesFile()
+                workbookDataStore.updateSelectedTakesFile()
             }
         } else {
             selectedTakeProperty.set(null)

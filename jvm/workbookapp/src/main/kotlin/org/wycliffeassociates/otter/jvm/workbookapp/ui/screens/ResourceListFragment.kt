@@ -4,12 +4,12 @@ import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.styles.ResourceListStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ResourceListViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
 class ResourceListFragment : Fragment() {
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
 
     init {
@@ -21,8 +21,8 @@ class ResourceListFragment : Fragment() {
             workbookheader {
                 labelText = MessageFormat.format(
                     messages["chapterResourcesLabel"],
-                    messages[workbookViewModel.chapter.label],
-                    workbookViewModel.chapter.title,
+                    messages[workbookDataStore.chapter.label],
+                    workbookDataStore.chapter.title,
                     messages["resources"]
                 )
                 filterText = messages["hideCompleted"]

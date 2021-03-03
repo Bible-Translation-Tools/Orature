@@ -39,13 +39,13 @@ class ResourceListViewModelTest : ViewModel() {
 
     private val testApp = TestApp()
     private val resourceListViewModel: ResourceListViewModel
-    private val workbookViewModel: WorkbookViewModel
+    private val workbookDataStore: WorkbookDataStore
     private val recordResourceViewModel: RecordResourceViewModel
 
     init {
         FX.setApplication(FX.defaultScope, testApp)
         resourceListViewModel = find()
-        workbookViewModel = find()
+        workbookDataStore = find()
         recordResourceViewModel = find()
     }
 
@@ -68,14 +68,14 @@ class ResourceListViewModelTest : ViewModel() {
     )
 
     init {
-        workbookViewModel.activeResourceMetadataProperty.set(resourceMetadataTn)
+        workbookDataStore.activeResourceMetadataProperty.set(resourceMetadataTn)
     }
 
     @Test
     fun setActiveChunkAndRecordable_setsBookElement() {
         resourceListViewModel.setActiveChunkAndRecordables(chunk1, testResourceNoBody)
 
-        Assert.assertEquals(chunk1, workbookViewModel.activeChunkProperty.value)
+        Assert.assertEquals(chunk1, workbookDataStore.activeChunkProperty.value)
     }
 
     @Test

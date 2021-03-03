@@ -3,16 +3,16 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.tabgroup
 import javafx.scene.control.Tab
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.CardGridFragment
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class ChapterTabGroup : TabGroup() {
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
     override fun activate() {
-        workbookViewModel.activeChapterProperty.set(null)
-        val activeResourceMetadata = workbookViewModel.activeResourceMetadataProperty.value
+        workbookDataStore.activeChapterProperty.set(null)
+        val activeResourceMetadata = workbookDataStore.activeResourceMetadataProperty.value
 
         createTabs()
         tabPane.tabs.addAll(tabMap.values)
@@ -33,11 +33,11 @@ class ChapterTabGroup : TabGroup() {
     }
 
     private fun getTargetBookResourceMetadata(): ResourceMetadata {
-        return workbookViewModel.workbook.target.resourceMetadata
+        return workbookDataStore.workbook.target.resourceMetadata
     }
 
     private fun getAssociatedMetadatas(): Sequence<ResourceMetadata> {
-        return sequenceOf(getTargetBookResourceMetadata()) + workbookViewModel.workbook.target.linkedResources
+        return sequenceOf(getTargetBookResourceMetadata()) + workbookDataStore.workbook.target.linkedResources
     }
 
     private fun createTabs() {
@@ -47,7 +47,7 @@ class ChapterTabGroup : TabGroup() {
     }
 
     private fun restoreActiveResourceMetadata(resourceMetadata: ResourceMetadata) {
-        workbookViewModel.activeResourceMetadataProperty.set(resourceMetadata)
+        workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
         tabMap[resourceMetadata.identifier]?.select()
     }
 
@@ -56,8 +56,8 @@ class ChapterTabGroup : TabGroup() {
             text = resourceMetadata.identifier
             add(CardGridFragment().root)
             onSelected {
-                workbookViewModel.activeResourceMetadataProperty.set(resourceMetadata)
-                workbookViewModel.setProjectFilesAccessor(resourceMetadata)
+                workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
+                workbookDataStore.setProjectFilesAccessor(resourceMetadata)
             }
         }
 

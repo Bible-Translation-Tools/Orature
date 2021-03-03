@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NavBoxType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.MainScreenViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 private class NavBoxItem(
@@ -21,7 +21,7 @@ private class NavBoxItem(
 class DeprecatedNavBar: View() {
 
     private val viewModel: MainScreenViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     init {
         importStylesheet<MainScreenStyles>()
     }
@@ -57,8 +57,8 @@ class DeprecatedNavBar: View() {
                         NavBoxType.PROJECT -> {
                             majorLabelProperty.bind(viewModel.selectedProjectName)
                             minorLabelProperty.bind(viewModel.selectedProjectLanguage)
-                            visibleOnPropertyNotNull(workbookViewModel.activeWorkbookProperty)
-                            workbookViewModel.activeWorkbookProperty.onChange { workbook ->
+                            visibleOnPropertyNotNull(workbookDataStore.activeWorkbookProperty)
+                            workbookDataStore.activeWorkbookProperty.onChange { workbook ->
                                 workbook?.let {
                                     graphicPathProperty.value = workbook.coverArtAccessor.getArtwork()
                                 }
@@ -67,12 +67,12 @@ class DeprecatedNavBar: View() {
                         NavBoxType.CHAPTER -> {
                             titleProperty.bind(viewModel.selectedChapterTitle)
                             bodyTextProperty.bind(viewModel.selectedChapterBody)
-                            visibleOnPropertyNotNull(workbookViewModel.activeChapterProperty)
+                            visibleOnPropertyNotNull(workbookDataStore.activeChapterProperty)
                         }
                         NavBoxType.CHUNK -> {
                             titleProperty.bind(viewModel.selectedChunkTitle)
                             bodyTextProperty.bind(viewModel.selectedChunkBody)
-                            visibleOnPropertyNotNull(workbookViewModel.activeChunkProperty)
+                            visibleOnPropertyNotNull(workbookDataStore.activeChunkProperty)
                         }
                     }
                 }

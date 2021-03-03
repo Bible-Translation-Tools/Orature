@@ -20,7 +20,7 @@ class CardGridViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(CardGridViewModel::class.java)
 
-    val workbookViewModel: WorkbookViewModel by inject()
+    val workbookDataStore: WorkbookDataStore by inject()
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -55,13 +55,13 @@ class CardGridViewModel : ViewModel() {
                 )
             }
 
-        workbookViewModel.activeWorkbookProperty.onChangeAndDoNow {
+        workbookDataStore.activeWorkbookProperty.onChangeAndDoNow {
             it?.let { wb -> loadChapters(wb) }
         }
 
-        workbookViewModel.activeChapterProperty.onChange { chapter ->
+        workbookDataStore.activeChapterProperty.onChange { chapter ->
             when (chapter) {
-                null -> workbookViewModel.activeWorkbookProperty.value?.let { workbook ->
+                null -> workbookDataStore.activeWorkbookProperty.value?.let { workbook ->
                     chapterOpen.set(false)
                     loadChapters(workbook)
                 }
@@ -99,11 +99,11 @@ class CardGridViewModel : ViewModel() {
 
     fun onCardSelection(cardData: CardData) {
         cardData.chapterSource?.let {
-            workbookViewModel.activeChapterProperty.set(it)
+            workbookDataStore.activeChapterProperty.set(it)
         }
         // Chunk will be null if the chapter recording is opened. This needs to happen to update the recordable to
         // use the chapter recordable.
-        workbookViewModel.activeChunkProperty.set(cardData.chunkSource)
+        workbookDataStore.activeChunkProperty.set(cardData.chunkSource)
     }
 
     private fun loadChapters(workbook: Workbook) {

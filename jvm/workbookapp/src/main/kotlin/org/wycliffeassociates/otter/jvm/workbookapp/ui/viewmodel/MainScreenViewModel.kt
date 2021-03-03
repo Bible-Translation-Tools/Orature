@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import tornadofx.*
 
 class MainScreenViewModel : ViewModel() {
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val selectedProjectName = SimpleStringProperty()
     val selectedProjectLanguage = SimpleStringProperty()
@@ -20,15 +20,15 @@ class MainScreenViewModel : ViewModel() {
     val selectedChunkBody = SimpleStringProperty()
 
     init {
-        workbookViewModel.activeWorkbookProperty.onChange { workbook ->
+        workbookDataStore.activeWorkbookProperty.onChange { workbook ->
             workbook?.let { projectSelected(workbook) }
         }
 
-        workbookViewModel.activeChapterProperty.onChange { chapter ->
+        workbookDataStore.activeChapterProperty.onChange { chapter ->
             chapter?.let { chapterSelected(chapter) }
         }
 
-        workbookViewModel.activeChunkProperty.onChange { chunk ->
+        workbookDataStore.activeChunkProperty.onChange { chunk ->
             chunk?.let { chunkSelected(chunk) }
         }
     }

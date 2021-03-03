@@ -23,7 +23,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 private class RecordScriptureViewModelProvider : Component() {
@@ -38,10 +38,10 @@ class RecordScriptureFragment : RecordableFragment(
     DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     private val takesGrid = ScriptureTakesGridView(
-        workbookViewModel.activeChunkProperty.isNull,
+        workbookDataStore.activeChunkProperty.isNull,
         recordableViewModel::recordNewTake
     )
 
@@ -62,7 +62,7 @@ class RecordScriptureFragment : RecordableFragment(
         SourceContent().apply {
             vgrow = Priority.ALWAYS
 
-            sourceTextProperty.bind(workbookViewModel.sourceTextBinding())
+            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
@@ -70,7 +70,7 @@ class RecordScriptureFragment : RecordableFragment(
             playLabelProperty.set(messages["playSource"])
             pauseLabelProperty.set(messages["pauseSource"])
 
-            contentTitleProperty.bind(workbookViewModel.activeChunkTitleBinding())
+            contentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
         }
 
     init {
@@ -209,7 +209,7 @@ class RecordScriptureFragment : RecordableFragment(
             this.markerTextProperty().set(take.markerText)
             this.takeProperty().set(take.take)
             this.takeNumberProperty().set(take.take.number.toString())
-            this.allowMarkerProperty().bind(recordableViewModel.workbookViewModel.activeChunkProperty.isNull)
+            this.allowMarkerProperty().bind(recordableViewModel.workbookDataStore.activeChunkProperty.isNull)
         }
         return card
     }

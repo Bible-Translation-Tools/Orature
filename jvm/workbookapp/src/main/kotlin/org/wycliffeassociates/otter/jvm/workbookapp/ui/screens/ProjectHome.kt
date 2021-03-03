@@ -46,8 +46,7 @@ class ProjectHome : Fragment() {
         importStylesheet(javaClass.getResource("/css/button.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/projectcard.css").toExternalForm())
 
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
+        fitToParentSize()
 
         style {
             unsafe("-fx-background-color", "#F7FAFF")
