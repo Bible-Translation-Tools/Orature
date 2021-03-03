@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.card
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -24,6 +25,7 @@ class ChapterPage : Fragment() {
 
     private val viewModel: ChapterPageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val banner: ChapterBanner
 
     override fun onDock() {
         workbookDataStore.activeChunkProperty.set(null)
@@ -31,41 +33,43 @@ class ChapterPage : Fragment() {
         workbookDataStore.activeResourceProperty.set(null)
     }
 
-    override val root = vbox {
-        add(
-            ChapterBanner().apply {
-                viewModel.chapterCard.onChange {
-                    it?.let {
-                        bookTitle.text = viewModel.workbookDataStore.workbook.target.title
-                        chapterCount.text = viewModel.workbookDataStore.activeChapterProperty.value?.title
-                        openButton.text = messages["open"]
-                        viewModel
-                            .workbookDataStore
-                            .activeChapterProperty
-                            .value
-                            ?.let { chapter ->
-                                chapter.chunks
-                                    .filter {
-                                        it.contentType == ContentType.TEXT
-                                    }
-                                    .count()
-                                    .doOnError { e ->
-                                        logger.error("Error in setting chapter banner chunk count", e)
-                                    }
-                                    .subscribe { count ->
-                                        Platform.runLater {
-                                            chunkCount.text = count.toString()
-                                        }
-                                    }
-                                openButton.setOnMouseClicked {
-                                    viewModel.onCardSelection(CardData(chapter))
-                                    workspace.dock<RecordScriptureFragment>()
+    init {
+        banner = ChapterBanner().apply {
+            viewModel.chapterCard.onChangeAndDoNow {
+                it?.let {
+                    bookTitle.text = viewModel.workbookDataStore.workbook.target.title
+                    chapterCount.text = viewModel.workbookDataStore.activeChapterProperty.value?.title
+                    openButton.text = messages["open"]
+                    viewModel
+                        .workbookDataStore
+                        .activeChapterProperty
+                        .value
+                        ?.let { chapter ->
+                            chapter.chunks
+                                .filter {
+                                    it.contentType == ContentType.TEXT
                                 }
+                                .count()
+                                .doOnError { e ->
+                                    logger.error("Error in setting chapter banner chunk count", e)
+                                }
+                                .subscribe { count ->
+                                    Platform.runLater {
+                                        chunkCount.text = count.toString()
+                                    }
+                                }
+                            openButton.setOnMouseClicked {
+                                viewModel.onCardSelection(CardData(chapter))
+                                workspace.dock<RecordScriptureFragment>()
                             }
-                    }
+                        }
                 }
             }
-        )
+        }
+    }
+
+    override val root = vbox {
+        add(banner)
         datagrid(viewModel.filteredContent) {
             vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS

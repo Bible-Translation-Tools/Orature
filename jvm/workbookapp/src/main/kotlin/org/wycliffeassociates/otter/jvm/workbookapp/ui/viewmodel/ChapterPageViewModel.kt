@@ -27,7 +27,7 @@ class ChapterPageViewModel : ViewModel() {
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(ChapterPageViewModel::loading)
 
-    val chapterCard = SimpleObjectProperty<CardData>()
+    val chapterCard = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
 
     init {
         allContent
@@ -45,15 +45,11 @@ class ChapterPageViewModel : ViewModel() {
 
         workbookDataStore.activeChapterProperty.onChangeAndDoNow { _chapter ->
             _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe {
-                    loadChapterBanner()
-                }
+                loadChapterContents(chapter).subscribe()
+                val chap = CardData(chapter)
+                chapterCard.set(chap)
             }
         }
-    }
-
-    private fun loadChapterBanner() {
-        chapterCard.set(allContent.firstOrNull { it.item == ContentLabel.CHAPTER.value })
     }
 
     private fun loadChapterContents(chapter: Chapter): Completable {

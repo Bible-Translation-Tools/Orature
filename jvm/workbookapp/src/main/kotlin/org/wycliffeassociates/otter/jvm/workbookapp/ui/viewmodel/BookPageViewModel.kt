@@ -16,7 +16,7 @@ import tornadofx.*
 
 class BookPageViewModel : ViewModel() {
 
-    private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
+    private val logger = LoggerFactory.getLogger(BookPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
 
