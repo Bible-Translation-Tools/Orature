@@ -12,7 +12,6 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
@@ -26,7 +25,6 @@ class ProjectGridViewModel : ViewModel() {
     @Inject lateinit var workbookRepo: IWorkbookRepository
     @Inject lateinit var directoryProvider: IDirectoryProvider
 
-    private val navigator: ChromeableStage by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
 
