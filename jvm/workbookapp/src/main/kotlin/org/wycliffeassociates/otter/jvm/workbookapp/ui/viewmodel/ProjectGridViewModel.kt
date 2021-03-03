@@ -17,7 +17,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.BookPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.CardGridFragment
 
 class ProjectGridViewModel : ViewModel() {
 

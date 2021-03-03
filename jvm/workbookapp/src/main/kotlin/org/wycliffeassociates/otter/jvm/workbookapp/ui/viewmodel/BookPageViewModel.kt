@@ -1,60 +1,34 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.github.thomasnield.rxkotlinfx.toObservable
-import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourceListFragment
 import tornadofx.*
 
-class CardGridViewModel : ViewModel() {
+class BookPageViewModel : ViewModel() {
 
-    private val logger = LoggerFactory.getLogger(CardGridViewModel::class.java)
+    private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
 
-    // List of content to display on the screen
-    // Boolean tracks whether the content has takes associated with it
-    private val allContent: ObservableList<CardData> = FXCollections.observableArrayList()
-    val filteredContent: ObservableList<CardData> = FXCollections.observableArrayList()
+    val allContent: ObservableList<CardData> = FXCollections.observableArrayList()
+    val currentTabProperty = SimpleStringProperty("ulb")
 
     private var loading: Boolean by property(false)
-    val loadingProperty = getProperty(CardGridViewModel::loading)
+    val loadingProperty = getProperty(BookPageViewModel::loading)
 
     var chapterOpen = SimpleBooleanProperty(false)
-    var chapterCard = SimpleObjectProperty<CardData?>(null)
-    private val chapterModeEnabledProperty = SimpleBooleanProperty(false)
 
     init {
-        Observable
-            .merge(
-                chapterModeEnabledProperty.toObservable(),
-                allContent.changes()
-            )
-            .doOnError { e ->
-                logger.error("Error in setting up content cards", e)
-            }
-            .subscribe {
-                filteredContent.setAll(
-                    if (chapterModeEnabledProperty.value == true) {
-                        allContent.filtered { cardData ->
-                            cardData.item == ContentLabel.CHAPTER.value
-                        }
-                    } else {
-                        allContent
-                    }
-                )
-            }
-
         workbookDataStore.activeWorkbookProperty.onChangeAndDoNow {
             it?.let { wb -> loadChapters(wb) }
         }
@@ -67,34 +41,9 @@ class CardGridViewModel : ViewModel() {
                 }
                 else -> {
                     chapterOpen.value = true
-                    loadChapterBanner()
-                    loadChapterContents(chapter)
                 }
             }
         }
-    }
-
-    private fun loadChapterBanner() {
-        chapterCard.value = allContent.firstOrNull { it.item == ContentLabel.CHAPTER.value }
-    }
-
-    private fun loadChapterContents(chapter: Chapter) {
-        // Remove existing content so the user knows they are outdated
-        allContent.clear()
-        loading = true
-        chapter.chunks
-            .map { CardData(it) }
-            .doOnComplete {
-                loading = false
-            }
-            .observeOnFx()
-            .toList()
-            .doOnError { e ->
-                logger.error("Error in loading chapter contents for chapter: $chapter", e)
-            }
-            .subscribe { list: List<CardData> ->
-                allContent.setAll(list.filter { it.item != ContentLabel.CHAPTER.value })
-            }
     }
 
     fun onCardSelection(cardData: CardData) {
@@ -125,5 +74,13 @@ class CardGridViewModel : ViewModel() {
                 // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
                 allContent.setAll(list)
             }
+    }
+
+    fun navigate(chapter: Chapter) {
+        val currentTab = currentTabProperty.value
+        when (currentTab.toLowerCase()) {
+            "ulb" -> workspace.dock<ChapterPage>()
+            else -> workspace.dock<ResourceListFragment>()
+        }
     }
 }

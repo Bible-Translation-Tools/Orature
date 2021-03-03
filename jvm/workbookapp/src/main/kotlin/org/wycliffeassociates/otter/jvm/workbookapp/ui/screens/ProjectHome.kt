@@ -22,10 +22,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import tornadofx.*
 import java.text.MessageFormat
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 
 class ProjectHome : Fragment() {
 
     private val viewModel: ProjectGridViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
+
     private val noProjectsProperty: ReadOnlyBooleanProperty
 
     init {
@@ -159,6 +162,7 @@ class ProjectHome : Fragment() {
     override fun onDock() {
         viewModel.loadProjects()
         viewModel.clearSelectedProject()
+        workbookDataStore.activeWorkbookProperty.set(null)
     }
 
     private fun initializeProgressDialogs() {
