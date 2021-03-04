@@ -7,11 +7,14 @@ import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
 import tornadofx.Fragment
+import tornadofx.importStylesheet
 
 class RecordResourcePage: Fragment() {
     private val viewModel: RecordResourceViewModel by inject()
 
-    val tabPane = JFXTabPane()
+    val tabPane = JFXTabPane().apply {
+        importStylesheet(resources.get("/css/tab-pane.css"))
+    }
 
     override val root = tabPane
 

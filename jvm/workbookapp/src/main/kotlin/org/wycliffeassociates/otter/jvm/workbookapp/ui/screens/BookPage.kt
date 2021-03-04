@@ -30,6 +30,7 @@ class BookPage : Fragment() {
 
     override val root = JFXTabPane().apply {
         importStylesheet<MainScreenStyles>()
+        importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
         // Disable builtin tab transition animation
