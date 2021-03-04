@@ -148,7 +148,7 @@ class BookPage : Fragment() {
                                     .apply { fill = AppTheme.colors.appRed }
                                 onMousePressed = EventHandler {
                                     workbookDataStore.activeChapterProperty.set(item.chapterSource)
-                                    viewModel.navigate(item.chapterSource!!)
+                                    viewModel.navigate(workbookDataStore.activeResourceMetadata)
                                 }
                             }
                         }

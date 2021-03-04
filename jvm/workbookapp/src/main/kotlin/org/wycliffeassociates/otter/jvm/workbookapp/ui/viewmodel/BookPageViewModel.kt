@@ -6,7 +6,8 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -46,15 +47,6 @@ class BookPageViewModel : ViewModel() {
         }
     }
 
-    fun onCardSelection(cardData: CardData) {
-        cardData.chapterSource?.let {
-            workbookDataStore.activeChapterProperty.set(it)
-        }
-        // Chunk will be null if the chapter recording is opened. This needs to happen to update the recordable to
-        // use the chapter recordable.
-        workbookDataStore.activeChunkProperty.set(cardData.chunkSource)
-    }
-
     private fun loadChapters(workbook: Workbook) {
         loading = true
         allContent.clear()
@@ -73,11 +65,10 @@ class BookPageViewModel : ViewModel() {
             }
     }
 
-    fun navigate(chapter: Chapter) {
-        val currentTab = currentTabProperty.value
-        when (currentTab.toLowerCase()) {
-            "ulb" -> workspace.dock<ChapterPage>()
-            else -> workspace.dock<ResourcePage>()
+    fun navigate(resourceMetadata: ResourceMetadata) {
+        when (resourceMetadata.type) {
+            ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
+            ContainerType.Help -> workspace.dock<ResourcePage>()
         }
     }
 }
