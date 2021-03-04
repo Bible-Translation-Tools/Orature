@@ -159,14 +159,6 @@ class BookPage : Fragment() {
         }
     }
 
-    private fun navigate(item: CardData) {
-        if (item.chapterSource != null) {
-            workspace.dock<ChapterPage>()
-        } else if (item.chunkSource != null) {
-            workspace.dock<RecordScriptureFragment>()
-        }
-    }
-
     private fun cardGraphic(): Node {
         return AppStyles.chapterGraphic()
     }

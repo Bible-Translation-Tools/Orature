@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourceFragment
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourcePage
 import tornadofx.*
 
 class ResourceCardFragment(
@@ -68,7 +69,7 @@ class ResourceCardFragment(
                     text = messages["viewRecordings"]
                     action {
                         item.onSelect()
-                        workspace.dock<RecordResourceFragment>()
+                        workspace.dock<RecordResourcePage>()
                     }
                 }
             )
