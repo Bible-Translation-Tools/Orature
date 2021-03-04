@@ -69,9 +69,6 @@ class BookPageViewModel : ViewModel() {
                 logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
             }
             .subscribe { list: List<CardData> ->
-                // TODO
-                // setAll is causing the UI to hang, probably because node structure is complex. If "loading" is
-                // set to false after this operation, the spinner will remain but stop spinning while the UI hangs.
                 allContent.setAll(list)
             }
     }
