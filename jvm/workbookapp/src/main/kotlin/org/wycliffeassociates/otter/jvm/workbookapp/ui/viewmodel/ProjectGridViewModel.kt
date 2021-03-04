@@ -15,7 +15,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.BookPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
 
 class ProjectGridViewModel : ViewModel() {
 
@@ -71,6 +71,6 @@ class ProjectGridViewModel : ViewModel() {
     fun selectProject(workbook: Workbook) {
         workbookDataStore.activeWorkbookProperty.set(workbook)
         workbook.target.resourceMetadata.let(workbookDataStore::setProjectFilesAccessor)
-        workspace.dock<BookPage>()
+        workspace.dock<WorkbookPage>()
     }
 }

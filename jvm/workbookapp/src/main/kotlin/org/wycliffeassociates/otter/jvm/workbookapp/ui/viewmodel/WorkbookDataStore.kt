@@ -23,8 +23,11 @@ import java.util.concurrent.Callable
 import javax.inject.Inject
 
 class WorkbookDataStore : Component(), ScopedInstance {
-    @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var workbookRepository: IWorkbookRepository
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -43,7 +46,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
     val activeResourceMetadata
-         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
+        get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
     val activeProjectFilesAccessor: ProjectFilesAccessor
@@ -68,7 +71,9 @@ class WorkbookDataStore : Component(), ScopedInstance {
         )
         activeProjectFilesAccessorProperty.set(projectFilesAccessor)
 
-        val linkedResource = workbook.source.linkedResources
+        val linkedResource = workbook
+            .source
+            .linkedResources
             .firstOrNull { it.identifier == resourceMetadata.identifier }
 
         activeProjectFilesAccessor.initializeResourceContainerInDir()
@@ -77,10 +82,11 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     fun updateSelectedTakesFile() {
-        Completable.fromCallable {
-            val projectIsBook = activeResourceMetadata.identifier == workbook.target.resourceMetadata.identifier
-            activeProjectFilesAccessor.writeSelectedTakesFile(workbook, projectIsBook)
-        }
+        Completable
+            .fromCallable {
+                val projectIsBook = activeResourceMetadata.identifier == workbook.target.resourceMetadata.identifier
+                activeProjectFilesAccessor.writeSelectedTakesFile(workbook, projectIsBook)
+            }
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
@@ -163,18 +169,23 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     fun getSourceChapter(): Maybe<Chapter> {
-        return workbook.source.chapters.filter {
-            it.title == chapter.title
-        }
+        return workbook
+            .source
+            .chapters
+            .filter {
+                it.title == chapter.title
+            }
             .singleElement()
     }
 
     fun getSourceChunk(): Maybe<Chunk> {
         return getSourceChapter()
             .flatMap { _chapter ->
-                _chapter.chunks.filter { _chunk ->
-                    _chunk.start == chunk?.start
-                }
+                _chapter
+                    .chunks
+                    .filter { _chunk ->
+                        _chunk.start == chunk?.start
+                    }
                     .singleElement()
             }
     }

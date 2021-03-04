@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -11,64 +10,59 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
 
-class BookPageViewModel : ViewModel() {
+class WorkbookPageViewModel : ViewModel() {
 
-    private val logger = LoggerFactory.getLogger(BookPageViewModel::class.java)
+    private val logger = LoggerFactory.getLogger(WorkbookPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
 
-    val allContent: ObservableList<CardData> = FXCollections.observableArrayList()
-    val currentTabProperty = SimpleStringProperty("ulb")
+    val chapters: ObservableList<CardData> = FXCollections.observableArrayList()
+    val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
-    val loadingProperty = getProperty(BookPageViewModel::loading)
+    val loadingProperty = getProperty(WorkbookPageViewModel::loading)
 
-    var chapterOpen = SimpleBooleanProperty(false)
-
-    init {
-        workbookDataStore.activeWorkbookProperty.onChangeAndDoNow {
-            it?.let { wb -> loadChapters(wb) }
-        }
-
-        workbookDataStore.activeChapterProperty.onChange { chapter ->
-            when (chapter) {
-                null -> workbookDataStore.activeWorkbookProperty.value?.let { workbook ->
-                    chapterOpen.set(false)
-                    loadChapters(workbook)
-                }
-                else -> {
-                    chapterOpen.value = true
-                }
-            }
-        }
+    /**
+     * Initializes the workbook for use and loads UI representations of the chapters in the workbook.
+     *
+     * As this could happen from the user returning from deeper within the workbook,
+     * we null out the active chapter, as we have returned from being in a chapter.
+     */
+    fun openWorkbook() {
+        workbookDataStore.activeChapterProperty.set(null)
+        loadChapters(workbookDataStore.workbook)
     }
 
+    /**
+     * Sets WorkbookDataStore state to represent the selected workbook tab.
+     */
     fun openTab(resourceMetadata: ResourceMetadata) {
         currentTabProperty.set(resourceMetadata.identifier)
         workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
         workbookDataStore.setProjectFilesAccessor(resourceMetadata)
     }
 
-    fun openBook() {
-        workbookDataStore.activeChapterProperty.set(null)
+    /**
+     * Retrieves the metadata of the book and all related resources making up the Workbook
+     */
+    fun getAllBookResources(): List<ResourceMetadata> {
+        val currentTarget = workbookDataStore.workbook.target
+        return listOf(
+            currentTarget.resourceMetadata,
+            *currentTarget.linkedResources.toTypedArray()
+        )
     }
 
-    private fun getTargetBookResourceMetadata(): ResourceMetadata {
-        return workbookDataStore.workbook.target.resourceMetadata
-    }
-
-    fun getAssociatedMetadata(): List<ResourceMetadata> {
-        return listOf(getTargetBookResourceMetadata(), *workbookDataStore.workbook.target.linkedResources.toTypedArray())
-    }
-
+    /**
+     * Retrieves chapters out of the workbook and maps them to UI representations
+     */
     private fun loadChapters(workbook: Workbook) {
         loading = true
-        allContent.clear()
+        chapters.clear()
         workbook.target.chapters
             .map { CardData(it) }
             .doOnComplete {
@@ -80,10 +74,15 @@ class BookPageViewModel : ViewModel() {
                 logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
             }
             .subscribe { list: List<CardData> ->
-                allContent.setAll(list)
+                chapters.setAll(list)
             }
     }
 
+    /**
+     * Opens the next page of the workbook based on the selected chapter.
+     * This updates the active properties of the WorkbookDataStore and selects
+     * the appropriate page based on which resource the User was in.
+     */
     fun navigate(chapter: Chapter) {
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata

@@ -16,26 +16,46 @@ import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.card
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookPageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
 
-class BookPage : Fragment() {
-    private val viewModel: BookPageViewModel by inject()
+/**
+ * The page for an open Workbook (project).
+ *
+ * A Workbook is the combination of the book being translated/recorded, as well as any supplemental
+ * study resources that can be translated/recorded. For example, a Workbook for the book of Matthew
+ * would contain the book of Matthew (of a particular publication, such as the Unlocked Literal Bible),
+ * as well as (optionally) resources such as translationQuestions and translationNotes for the book of
+ * Matthew.
+ *
+ * This page contains a tab for each resource in the workbook. If the workbook only contains the book
+ * itself, then no tabs will be shown.
+ */
+class WorkbookPage : Fragment() {
+    private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
+    /**
+     * On docking, notify the viewmodel (which may be reused and thus dirty) that we are
+     * opening a workbook (which it will retrieve from the WorkbookDataStore). Tabs are then
+     * created and added to the view.
+     */
     override fun onDock() {
-        viewModel.openBook()
+        viewModel.openWorkbook()
         createTabs()
         root.tabs.setAll(tabMap.values)
     }
 
+    /**
+     * Clear out the tabs so new ones can be created the next time this view is docked.
+     */
     override fun onUndock() {
         tabMap.clear()
     }
 
     private fun createTabs() {
-        viewModel.getAssociatedMetadata().forEach { metadata ->
-            tabMap.putIfAbsent(metadata.identifier, ChapterSelectTab(metadata))
+        viewModel.getAllBookResources().forEach { metadata ->
+            tabMap.putIfAbsent(metadata.identifier, WorkbookResourceTab(metadata))
         }
     }
 
@@ -54,7 +74,11 @@ class BookPage : Fragment() {
         }
     }
 
-    private inner class ChapterSelectTab(val resourceMetadata: ResourceMetadata) : Tab() {
+    /**
+     * The tab for a single resource of the workbook. This will contain top level actions for
+     * the resource, as well as the list of chapters within the resource.
+     */
+    private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
         val tab = buildTab()
 
@@ -79,7 +103,7 @@ class BookPage : Fragment() {
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                datagrid(viewModel.allContent) {
+                datagrid(viewModel.chapters) {
                     vgrow = Priority.ALWAYS
                     hgrow = Priority.ALWAYS
                     isFillWidth = true
@@ -110,9 +134,9 @@ class BookPage : Fragment() {
                 }
             }
         }
-    }
 
-    private fun cardGraphic(): Node {
-        return AppStyles.chapterGraphic()
+        private fun cardGraphic(): Node {
+            return AppStyles.chapterGraphic()
+        }
     }
 }
