@@ -100,7 +100,6 @@ class ChapterPage : Fragment() {
         }
     }
 
-
     private fun cardGraphic(): Node {
         if (viewModel.filteredContent.first().dataType == "content") {
             return AppStyles.chunkGraphic()

@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
-import javafx.scene.Parent
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -9,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceV
 import tornadofx.Fragment
 import tornadofx.importStylesheet
 
-class RecordResourcePage: Fragment() {
+class RecordResourcePage : Fragment() {
     private val viewModel: RecordResourceViewModel by inject()
 
     val tabPane = JFXTabPane().apply {

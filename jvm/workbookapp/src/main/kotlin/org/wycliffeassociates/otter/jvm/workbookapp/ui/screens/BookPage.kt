@@ -12,7 +12,6 @@ import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.card
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
@@ -127,7 +126,6 @@ class BookPage : Fragment() {
                 managedProperty().bind(visibleProperty())
                 addClass(CardGridStyles.contentLoadingProgress)
             }
-
 
             datagrid(viewModel.allContent) {
                 vgrow = Priority.ALWAYS

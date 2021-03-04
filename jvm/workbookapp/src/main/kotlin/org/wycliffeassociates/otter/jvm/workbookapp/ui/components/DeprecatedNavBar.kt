@@ -18,7 +18,7 @@ private class NavBoxItem(
     val type: NavBoxType
 )
 
-class DeprecatedNavBar: View() {
+class DeprecatedNavBar : View() {
 
     private val viewModel: MainScreenViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()

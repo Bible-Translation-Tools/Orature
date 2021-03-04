@@ -13,7 +13,6 @@ import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourceFragment
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourcePage
 import tornadofx.*
 
