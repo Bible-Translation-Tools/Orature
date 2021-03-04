@@ -8,6 +8,7 @@ import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -47,6 +48,24 @@ class BookPageViewModel : ViewModel() {
         }
     }
 
+    fun openTab(resourceMetadata: ResourceMetadata) {
+        currentTabProperty.set(resourceMetadata.identifier)
+        workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
+        workbookDataStore.setProjectFilesAccessor(resourceMetadata)
+    }
+
+    fun openBook() {
+        workbookDataStore.activeChapterProperty.set(null)
+    }
+
+    private fun getTargetBookResourceMetadata(): ResourceMetadata {
+        return workbookDataStore.workbook.target.resourceMetadata
+    }
+
+    fun getAssociatedMetadata(): List<ResourceMetadata> {
+        return listOf(getTargetBookResourceMetadata(), *workbookDataStore.workbook.target.linkedResources.toTypedArray())
+    }
+
     private fun loadChapters(workbook: Workbook) {
         loading = true
         allContent.clear()
@@ -65,7 +84,9 @@ class BookPageViewModel : ViewModel() {
             }
     }
 
-    fun navigate(resourceMetadata: ResourceMetadata) {
+    fun navigate(chapter: Chapter) {
+        workbookDataStore.activeChapterProperty.set(chapter)
+        val resourceMetadata = workbookDataStore.activeResourceMetadata
         when (resourceMetadata.type) {
             ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
             ContainerType.Help -> workspace.dock<ResourcePage>()
