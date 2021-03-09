@@ -1,0 +1,37 @@
+.workbook-banner__overlay {
+    -fx-background-color: linear-gradient(to right, #094687f8, #09468733);
+    -fx-background-radius: 10px;
+}
+
+.workbook-banner__book-title {
+    -fx-text-fill: -wa-white;
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+}
+
+.workbook-banner__resource-title {
+    -fx-text-fill: -wa-white;
+    -fx-font-size: 16px;
+}
+
+.workbook-banner .btn {
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.workbook-banner__btn--delete {
+    -fx-background-color: -wa-gray-light;
+    -fx-border-width: 0px;
+    -fx-text-fill: -wa-white;
+}
+
+.workbook-banner__btn--delete .ikonli-font-icon, .workbook-banner__btn--export .ikonli-font-icon {
+    -fx-icon-size: 18px;
+    -fx-icon-color: -wa-white;
+}
+
+.workbook-banner__btn--delete:hover .ikonli-font-icon {
+    -fx-icon-color: -wa-primary;
+}
+
+
