@@ -8,9 +8,9 @@ import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import javafx.stage.FileChooser
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.AddPluginView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RemovePluginsView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.RemovePluginsDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.dialogs.AppVersionView
 import tornadofx.*
@@ -96,7 +96,7 @@ class MainMenu : MenuBar() {
                 item(messages["new"]) {
                     graphic = MainMenuStyles.addPluginIcon("20px")
                     action {
-                        find<AddPluginView>().apply {
+                        find<AddPluginDialog>().apply {
                             openModal()
                         }
                     }
@@ -104,7 +104,7 @@ class MainMenu : MenuBar() {
                 item(messages["remove"]) {
                     graphic = MainMenuStyles.removePluginIcon("20px")
                     action {
-                        find<RemovePluginsView>().apply {
+                        find<RemovePluginsDialog>().apply {
                             openModal()
                         }
                     }

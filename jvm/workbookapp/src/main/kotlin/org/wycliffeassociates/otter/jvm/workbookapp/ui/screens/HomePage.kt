@@ -22,10 +22,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import tornadofx.*
 import java.text.MessageFormat
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 
-class ProjectGridFragment : Fragment() {
+class HomePage : Fragment() {
 
     private val viewModel: ProjectGridViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
+
     private val noProjectsProperty: ReadOnlyBooleanProperty
 
     init {
@@ -46,8 +49,7 @@ class ProjectGridFragment : Fragment() {
         importStylesheet(javaClass.getResource("/css/button.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/projectcard.css").toExternalForm())
 
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
+        fitToParentSize()
 
         style {
             unsafe("-fx-background-color", "#F7FAFF")
@@ -119,10 +121,10 @@ class ProjectGridFragment : Fragment() {
 
     private val confirmDeleteDialog = confirmdialog {
         root.prefWidthProperty().bind(
-            this@ProjectGridFragment.root.widthProperty().divide(2)
+            this@HomePage.root.widthProperty().divide(2)
         )
         root.prefHeightProperty().bind(
-            this@ProjectGridFragment.root.heightProperty().divide(2)
+            this@HomePage.root.heightProperty().divide(2)
         )
 
         messageTextProperty.set(messages["deleteProjectConfirmation"])
@@ -160,6 +162,7 @@ class ProjectGridFragment : Fragment() {
     override fun onDock() {
         viewModel.loadProjects()
         viewModel.clearSelectedProject()
+        workbookDataStore.activeWorkbookProperty.set(null)
     }
 
     private fun initializeProgressDialogs() {

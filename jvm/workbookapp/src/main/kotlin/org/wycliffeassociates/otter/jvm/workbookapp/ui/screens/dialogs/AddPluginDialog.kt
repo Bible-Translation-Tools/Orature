@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXCheckBox
@@ -8,7 +8,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewMo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.AddPluginStyles
 import tornadofx.*
 
-class AddPluginView : View() {
+class AddPluginDialog : View() {
     private var nameField: JFXTextField by singleAssign()
     private var executableField: JFXTextField by singleAssign()
     private var canEditBox: JFXCheckBox by singleAssign()

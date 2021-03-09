@@ -9,19 +9,17 @@ import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.common.navigation.TabGroupType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourcePage
 import tornadofx.*
 
 class ResourceCardFragment(
     private val item: ResourceCardItem,
     private val filterCompletedCardsProperty: BooleanProperty
 ) : Fragment() {
-    private val navigator: ChromeableStage by inject()
     override val root = HBox()
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
     var primaryColorProperty = SimpleObjectProperty<Color>(Color.ORANGE)
@@ -53,7 +51,7 @@ class ResourceCardFragment(
                     )
                 }
                 text(item.title) {
-                    wrappingWidthProperty().bind(navigator.root.widthProperty().divide(1.5))
+                    wrappingWidthProperty().bind(root.widthProperty().divide(1.5))
                 }
             }
 
@@ -70,7 +68,7 @@ class ResourceCardFragment(
                     text = messages["viewRecordings"]
                     action {
                         item.onSelect()
-                        navigator.navigateTo(TabGroupType.RECORD_RESOURCE)
+                        workspace.dock<RecordResourcePage>()
                     }
                 }
             )

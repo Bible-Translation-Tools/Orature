@@ -21,7 +21,7 @@ class RecordScriptureViewModel : ViewModel() {
         BACKWARD
     }
 
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
@@ -41,9 +41,9 @@ class RecordScriptureViewModel : ViewModel() {
     private var activeChunkSubscription: Disposable? = null
 
     init {
-        activeChunkProperty.bindBidirectional(workbookViewModel.activeChunkProperty)
+        activeChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
 
-        workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
+        workbookDataStore.activeChapterProperty.onChangeAndDoNow { chapter ->
             chapter?.let {
                 getChunkList(chapter.chunks)
                 if (activeChunkProperty.value == null) {
@@ -60,7 +60,7 @@ class RecordScriptureViewModel : ViewModel() {
                 // This will trigger loading takes in the RecordableViewModel
                 recordableViewModel.recordable = chunk
             } else {
-                workbookViewModel.activeChapterProperty.value?.let {
+                workbookDataStore.activeChapterProperty.value?.let {
                     recordableViewModel.recordable = it
                 }
             }

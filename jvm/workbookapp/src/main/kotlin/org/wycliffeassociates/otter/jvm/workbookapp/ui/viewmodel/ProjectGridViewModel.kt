@@ -8,15 +8,14 @@ import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
-import org.wycliffeassociates.otter.common.navigation.TabGroupType
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.chromeablestage.ChromeableStage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.BookPage
 
 class ProjectGridViewModel : ViewModel() {
 
@@ -26,8 +25,7 @@ class ProjectGridViewModel : ViewModel() {
     @Inject lateinit var workbookRepo: IWorkbookRepository
     @Inject lateinit var directoryProvider: IDirectoryProvider
 
-    private val navigator: ChromeableStage by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
 
     val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
@@ -48,7 +46,7 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun clearSelectedProject() {
-        workbookViewModel.activeWorkbookProperty.set(null)
+        workbookDataStore.activeWorkbookProperty.set(null)
     }
 
     fun createProject() {
@@ -71,8 +69,8 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun selectProject(workbook: Workbook) {
-        workbookViewModel.activeWorkbookProperty.set(workbook)
-        workbook.target.resourceMetadata.let(workbookViewModel::setProjectFilesAccessor)
-        navigator.navigateTo(TabGroupType.CHAPTER)
+        workbookDataStore.activeWorkbookProperty.set(workbook)
+        workbook.target.resourceMetadata.let(workbookDataStore::setProjectFilesAccessor)
+        workspace.dock<BookPage>()
     }
 }

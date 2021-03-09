@@ -33,7 +33,6 @@ ext {
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
     kotlinresourcecontainerVer = '0.7.0'
-    chromeabletabpaneVer = '0.1.0'
     jdenticonKoltinVer = '1.0'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'

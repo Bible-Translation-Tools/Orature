@@ -22,7 +22,7 @@ class ResourceListViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(ResourceListViewModel::class.java)
 
     internal val recordResourceViewModel: RecordResourceViewModel by inject()
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     var selectedGroupCardItem = SimpleObjectProperty<ResourceGroupCardItem>()
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
@@ -32,10 +32,10 @@ class ResourceListViewModel : ViewModel() {
     val isFilterOnProperty = SimpleBooleanProperty(false)
 
     init {
-        workbookViewModel.activeChapterProperty.onChangeAndDoNow {
+        workbookDataStore.activeChapterProperty.onChangeAndDoNow {
             it?.let {
                 loadResourceGroups(
-                    workbookViewModel.getSourceChapter().blockingGet()
+                    workbookDataStore.getSourceChapter().blockingGet()
                 )
             }
         }
@@ -72,7 +72,7 @@ class ResourceListViewModel : ViewModel() {
             .mapNotNull { bookElement ->
                 resourceGroupCardItem(
                     element = bookElement,
-                    slug = workbookViewModel.activeResourceMetadata.identifier,
+                    slug = workbookDataStore.activeResourceMetadata.identifier,
                     onSelect = this::setActiveChunkAndRecordables
                 )
             }
@@ -90,8 +90,8 @@ class ResourceListViewModel : ViewModel() {
     }
 
     internal fun setActiveChunkAndRecordables(bookElement: BookElement?, resource: Resource) {
-        workbookViewModel.activeChunkProperty.set(bookElement as? Chunk)
-        workbookViewModel.activeResourceProperty.set(resource)
+        workbookDataStore.activeChunkProperty.set(bookElement as? Chunk)
+        workbookDataStore.activeResourceProperty.set(resource)
         recordResourceViewModel.setRecordableListItems(
             listOfNotNull(resource.title, resource.body)
         )

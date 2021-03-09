@@ -30,7 +30,7 @@ class RecordResourceViewModel : ViewModel() {
         BACKWARD
     }
 
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
@@ -70,11 +70,11 @@ class RecordResourceViewModel : ViewModel() {
             updateRecordables(it)
         }
 
-        workbookViewModel.activeResourceMetadataProperty.onChangeAndDoNow { metadata ->
+        workbookDataStore.activeResourceMetadataProperty.onChangeAndDoNow { metadata ->
             metadata?.let { setTabLabels(metadata.identifier) }
         }
 
-        workbookViewModel.activeChapterProperty.onChangeAndDoNow { chapter ->
+        workbookDataStore.activeChapterProperty.onChangeAndDoNow { chapter ->
             chapter?.let {
                 if (activeChunkProperty.value == null) {
                     setHasNextAndPrevious()
@@ -89,11 +89,11 @@ class RecordResourceViewModel : ViewModel() {
             }
         }
 
-        workbookViewModel.activeChunkProperty.onChangeAndDoNow {
+        workbookDataStore.activeChunkProperty.onChangeAndDoNow {
             activeChunkProperty.set(it)
         }
 
-        workbookViewModel.activeResourceProperty.onChangeAndDoNow {
+        workbookDataStore.activeResourceProperty.onChangeAndDoNow {
             activeResourceProperty.set(it)
             if (it != null) {
                 setHasNextAndPrevious()
@@ -102,7 +102,7 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun onTabSelect(recordable: Recordable) {
-        workbookViewModel.activeResourceComponentProperty.set(recordable as Resource.Component)
+        workbookDataStore.activeResourceComponentProperty.set(recordable as Resource.Component)
     }
 
     fun setRecordableListItems(items: List<Recordable>) {

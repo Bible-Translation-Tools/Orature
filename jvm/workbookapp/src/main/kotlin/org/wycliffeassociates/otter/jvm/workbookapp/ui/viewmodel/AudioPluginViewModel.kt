@@ -17,7 +17,7 @@ import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.AddPluginView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import tornadofx.*
 
 class AudioPluginViewModel : ViewModel() {
@@ -25,7 +25,7 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var launchPlugin: LaunchPlugin
     @Inject lateinit var takeActions: TakeActions
 
-    private val workbookViewModel: WorkbookViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
@@ -44,26 +44,26 @@ class AudioPluginViewModel : ViewModel() {
         val params = constructPluginParameters()
         return takeActions.record(
             audio = recordable.audio,
-            projectAudioDir = workbookViewModel.activeProjectFilesAccessor.audioDir,
+            projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
             pluginParameters = params
         )
     }
 
     private fun constructPluginParameters(action: String = ""): PluginParameters {
-        val workbook = workbookViewModel.workbook
-        val sourceAudio = workbookViewModel.getSourceAudio()
-        val sourceText = workbookViewModel.getSourceText().blockingGet()
+        val workbook = workbookDataStore.workbook
+        val sourceAudio = workbookDataStore.getSourceAudio()
+        val sourceText = workbookDataStore.getSourceText().blockingGet()
 
-        val chapterLabel = messages[workbookViewModel.activeChapterProperty.value.label]
-        val chapterNumber = workbookViewModel.activeChapterProperty.value.sort
-        val verseTotal = workbookViewModel.activeChapterProperty.value.chunks.blockingLast().end
-        val chunkLabel = workbookViewModel.activeChunkProperty.value?.let {
-            messages[workbookViewModel.activeChunkProperty.value.label]
+        val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
+        val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
+        val verseTotal = workbookDataStore.activeChapterProperty.value.chunks.blockingLast().end
+        val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
+            messages[workbookDataStore.activeChunkProperty.value.label]
         }
-        val chunkNumber = workbookViewModel.activeChunkProperty.value?.sort
-        val resourceLabel = workbookViewModel.activeResourceComponentProperty.value?.let {
-            messages[workbookViewModel.activeResourceComponentProperty.value.label]
+        val chunkNumber = workbookDataStore.activeChunkProperty.value?.sort
+        val resourceLabel = workbookDataStore.activeResourceComponentProperty.value?.let {
+            messages[workbookDataStore.activeResourceComponentProperty.value.label]
         }
 
         return PluginParameters(
@@ -85,11 +85,11 @@ class AudioPluginViewModel : ViewModel() {
 
     private fun createFileNamer(recordable: Recordable): FileNamer {
         return WorkbookFileNamerBuilder.createFileNamer(
-            workbook = workbookViewModel.workbook,
-            chapter = workbookViewModel.chapter,
-            chunk = workbookViewModel.chunk,
+            workbook = workbookDataStore.workbook,
+            chapter = workbookDataStore.chapter,
+            chunk = workbookDataStore.chunk,
             recordable = recordable,
-            rcSlug = workbookViewModel.activeResourceMetadata.identifier
+            rcSlug = workbookDataStore.activeResourceMetadata.identifier
         )
     }
 
@@ -108,6 +108,6 @@ class AudioPluginViewModel : ViewModel() {
             canRecord = record
             canEdit = edit
         }
-        find<AddPluginView>().openModal()
+        find<AddPluginDialog>().openModal()
     }
 }
