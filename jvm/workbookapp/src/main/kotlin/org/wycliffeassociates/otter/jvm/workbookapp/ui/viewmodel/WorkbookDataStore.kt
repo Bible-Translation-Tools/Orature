@@ -46,7 +46,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     val activeResourceMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
     val activeResourceMetadata
-        get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
+         get() = activeResourceMetadataProperty.value ?: throw IllegalStateException("Resource Metadata is null")
 
     val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
     val activeProjectFilesAccessor: ProjectFilesAccessor
