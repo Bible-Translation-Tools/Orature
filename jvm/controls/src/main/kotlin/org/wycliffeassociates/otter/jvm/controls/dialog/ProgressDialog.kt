@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import com.github.thomasnield.rxkotlinfx.toObservable
+import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
@@ -22,8 +24,18 @@ class ProgressDialog : Fragment() {
     val textProperty = SimpleStringProperty()
     var text by textProperty
 
+    val showDialogProperty = SimpleBooleanProperty(false)
+
     init {
         importStylesheet<ProgressDialogStyles>()
+
+        showDialogProperty.onChange {
+            it.let {
+                Platform.runLater {
+                    if (it) open() else close()
+                }
+            }
+        }
     }
 
     override val root = borderpane {

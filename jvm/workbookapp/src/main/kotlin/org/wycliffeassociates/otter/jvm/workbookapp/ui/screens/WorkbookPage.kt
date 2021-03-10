@@ -1,23 +1,27 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.beans.binding.Bindings
 import javafx.event.EventHandler
+import javafx.geometry.Insets
 import javafx.geometry.Pos
-import javafx.scene.Node
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
+import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
+import org.wycliffeassociates.otter.jvm.controls.card.ChapterCard
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.controls.card.card
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
+import java.text.MessageFormat
 
 /**
  * The page for an open Workbook (project).
@@ -34,6 +38,10 @@ import tornadofx.*
 class WorkbookPage : Fragment() {
     private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
+
+    init {
+        initializeProgressDialogs()
+    }
 
     /**
      * On docking, notify the viewmodel (which may be reused and thus dirty) that we are
@@ -74,6 +82,63 @@ class WorkbookPage : Fragment() {
         }
     }
 
+    private val confirmDialog = confirmdialog {
+        this.root.prefWidthProperty().bind(
+            this@WorkbookPage.root.widthProperty().divide(2)
+        )
+        this.root.prefHeightProperty().bind(
+            this@WorkbookPage.root.heightProperty().divide(2)
+        )
+
+        messageTextProperty.set(messages["deleteProjectConfirmation"])
+        confirmButtonTextProperty.set(messages["removeProject"])
+        cancelButtonTextProperty.set(messages["keepProject"])
+
+        onCloseAction { showDialogProperty.set(false) }
+        onCancelAction { showDialogProperty.set(false) }
+    }
+
+    private fun showDeleteConfirmDialog() {
+        val workbook = viewModel.workbookDataStore.workbook
+        confirmDialog.apply {
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["remove"],
+                workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+
+            showDialogProperty.set(true)
+
+            onConfirmAction {
+                showDialogProperty.set(false)
+                viewModel.deleteWorkbook()
+            }
+        }
+    }
+
+    private fun initializeProgressDialogs() {
+        val progressDialog = progressdialog {
+            showDialogProperty.bind(Bindings.or(
+                viewModel.showDeleteDialogProperty,
+                viewModel.showExportDialogProperty
+            ))
+            graphic = ProjectGridStyles.deleteIcon("60px")
+            root.addClass(AppStyles.progressDialog)
+        }
+
+        viewModel.showDeleteDialogProperty.onChange {
+            if (it) progressDialog.text = messages["deletingProject"]
+        }
+
+        viewModel.showExportDialogProperty.onChange {
+            if (it) progressDialog.text = messages["exportProject"]
+        }
+    }
+
+
     /**
      * The tab for a single resource of the workbook. This will contain top level actions for
      * the resource, as well as the list of chapters within the resource.
@@ -103,40 +168,59 @@ class WorkbookPage : Fragment() {
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                datagrid(viewModel.chapters) {
+                scrollpane {
                     vgrow = Priority.ALWAYS
-                    hgrow = Priority.ALWAYS
-                    isFillWidth = true
-                    addClass(AppStyles.whiteBackground)
-                    addClass(CardGridStyles.contentContainer)
-                    cellCache { item ->
-                        card {
-                            addClass(DefaultStyles.defaultCard)
-                            cardfront {
-                                innercard(cardGraphic()) {
-                                    title = item.item.toUpperCase()
-                                    bodyText = item.bodyText
+
+                    isFitToWidth = true
+                    isFitToHeight = true
+
+                    vbox {
+                        maxWidth = 800.0
+                        spacing = 10.0
+                        padding = Insets(10.0, 20.0, 10.0, 20.0)
+
+                        add(
+                            WorkbookBanner().apply {
+                                val workbook = viewModel.workbookDataStore.workbook
+
+                                backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+                                bookTitleProperty.set(workbook.target.title)
+                                resourceTitleProperty.set(resourceMetadata.title)
+
+                                deleteTitleProperty.set(messages["delete"])
+                                exportTitleProperty.set(messages["exportProject"])
+
+                                onDeleteAction {
+                                    showDeleteConfirmDialog()
                                 }
-                                cardbutton {
-                                    addClass(DefaultStyles.defaultCardButton)
-                                    text = messages["openProject"]
-                                    graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                        .apply { fill = AppTheme.colors.appRed }
-                                    onMousePressed = EventHandler {
-                                        item.chapterSource?.let { chapter ->
-                                            viewModel.navigate(chapter)
-                                        }
+
+                                onExportAction {
+                                    val directory = chooseDirectory(FX.messages["exportProject"])
+                                    directory?.let {
+                                        viewModel.exportWorkbook(it)
                                     }
                                 }
+                            }
+                        )
+
+                        viewModel.chapters.onChangeAndDoNow {
+                            it.forEach { item ->
+                                add(
+                                    ChapterCard().apply {
+                                        titleProperty.set(item.sort.toString())
+
+                                        onMousePressed = EventHandler {
+                                            item.chapterSource?.let { chapter ->
+                                                viewModel.navigate(chapter)
+                                            }
+                                        }
+                                    }
+                                )
                             }
                         }
                     }
                 }
             }
-        }
-
-        private fun cardGraphic(): Node {
-            return AppStyles.chapterGraphic()
         }
     }
 }

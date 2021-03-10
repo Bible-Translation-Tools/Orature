@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -9,10 +10,14 @@ import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
+import java.io.File
 
 class WorkbookPageViewModel : ViewModel() {
 
@@ -25,6 +30,9 @@ class WorkbookPageViewModel : ViewModel() {
 
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(WorkbookPageViewModel::loading)
+
+    val showDeleteDialogProperty = SimpleBooleanProperty(false)
+    val showExportDialogProperty = SimpleBooleanProperty(false)
 
     /**
      * Initializes the workbook for use and loads UI representations of the chapters in the workbook.
@@ -90,5 +98,42 @@ class WorkbookPageViewModel : ViewModel() {
             ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
             ContainerType.Help -> workspace.dock<ResourcePage>()
         }
+    }
+
+    fun exportWorkbook(directory: File) {
+        showExportDialogProperty.set(true)
+        val workbook = workbookDataStore.workbook
+
+        workbookDataStore
+            .exportWorkbook(directory)
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in exporting project for project: ${workbook.target.slug}")
+                logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
+            }
+            .subscribe { result: ExportResult ->
+                showExportDialogProperty.set(false)
+
+                result.errorMessage?.let {
+                    error(messages["exportError"], it)
+                }
+            }
+    }
+
+    fun deleteWorkbook() {
+        showDeleteDialogProperty.set(true)
+        val workbook = workbookDataStore.workbook
+
+        workbookDataStore
+            .deleteWorkbook()
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
+            }
+            .subscribe {
+                showDeleteDialogProperty.set(false)
+                workspace.viewStack.clear()
+                workspace.dock<HomePage>()
+            }
     }
 }

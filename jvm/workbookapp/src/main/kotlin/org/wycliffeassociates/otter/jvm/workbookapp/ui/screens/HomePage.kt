@@ -191,7 +191,7 @@ class HomePage : Fragment() {
 
             onConfirmAction {
                 showDialogProperty.set(false)
-                viewModel.deleteProject(item)
+                viewModel.deleteWorkbook(item)
             }
         }
     }

@@ -27,7 +27,6 @@ import javafx.scene.paint.Color
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
@@ -49,8 +48,8 @@ class ConfirmDialog : Fragment() {
     init {
         importStylesheet(javaClass.getResource("/css/confirm-dialog.css").toExternalForm())
 
-        showDialogProperty.onChangeAndDoNow {
-            it?.let {
+        showDialogProperty.onChange {
+            it.let {
                 Platform.runLater {
                     if (it) open() else close()
                 }

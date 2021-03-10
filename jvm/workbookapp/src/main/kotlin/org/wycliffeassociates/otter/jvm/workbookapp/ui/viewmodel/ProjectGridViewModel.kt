@@ -53,14 +53,14 @@ class ProjectGridViewModel : ViewModel() {
         workspace.dock<ProjectWizard>()
     }
 
-    fun deleteProject(project: Workbook) {
+    fun deleteWorkbook(workbook: Workbook) {
         showDeleteDialogProperty.set(true)
-        workbookRepo.closeWorkbook(project)
-        DeleteProject(collectionRepo, directoryProvider)
-            .delete(project, true)
+
+        workbookDataStore
+            .deleteWorkbook(workbook)
             .observeOnFx()
             .doOnError { e ->
-                logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
+                logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
             }
             .subscribe {
                 showDeleteDialogProperty.set(false)

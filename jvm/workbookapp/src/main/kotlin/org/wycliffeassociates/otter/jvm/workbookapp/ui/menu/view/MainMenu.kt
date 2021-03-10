@@ -79,7 +79,7 @@ class MainMenu : MenuBar() {
                     .setOnAction {
                         val directory = chooseDirectory(messages["exportProject"])
                         directory?.let {
-                            viewModel.exportProject(it)
+                            viewModel.exportWorkbook(it)
                         }
                     }
                 separator()

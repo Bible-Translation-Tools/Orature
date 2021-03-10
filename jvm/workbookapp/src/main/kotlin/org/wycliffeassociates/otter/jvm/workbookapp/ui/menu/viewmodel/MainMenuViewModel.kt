@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -36,8 +35,8 @@ class MainMenuViewModel : ViewModel() {
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    private val workbookVM = find<WorkbookDataStore>()
-    val disableExportProjectProperty = workbookVM.activeWorkbookProperty.booleanBinding { it == null }
+    private val workbookDataStore = find<WorkbookDataStore>()
+    val disableExportProjectProperty = workbookDataStore.activeWorkbookProperty.booleanBinding { it == null }
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
@@ -56,23 +55,19 @@ class MainMenuViewModel : ViewModel() {
         refreshPlugins()
     }
 
-    fun exportProject(directory: File) {
-        showExportDialogProperty.value = true
+    fun exportWorkbook(directory: File) {
+        showExportDialogProperty.set(true)
+        val workbook = workbookDataStore.workbook
 
-        ProjectExporter(
-            workbookVM.activeResourceMetadata,
-            workbookVM.workbook,
-            workbookVM.activeProjectFilesAccessor,
-            directoryProvider,
-            workbookRepository
-        ).export(directory)
+        workbookDataStore
+            .exportWorkbook(directory)
             .observeOnFx()
             .doOnError { e ->
-                logger.error("Error in exporting project for project: ${workbookVM.workbook.target.slug}")
-                logger.error("Project language: ${workbookVM.workbook.target.language.slug}, file: $directory", e)
+                logger.error("Error in exporting project for project: ${workbook.target.slug}")
+                logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
             }
             .subscribe { result: ExportResult ->
-                showExportDialogProperty.value = false
+                showExportDialogProperty.set(false)
 
                 result.errorMessage?.let {
                     error(messages["exportError"], it)
@@ -81,7 +76,7 @@ class MainMenuViewModel : ViewModel() {
     }
 
     fun importResourceContainer(fileOrDir: File) {
-        showImportDialogProperty.value = true
+        showImportDialogProperty.set(true)
 
         importRcProvider.get()
             .import(fileOrDir)
@@ -148,28 +143,28 @@ class MainMenuViewModel : ViewModel() {
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
     }
-
-    /** Null on success, otherwise localized error text. */
-    private val ImportResult.errorMessage: String?
-        get() {
-            return when (this) {
-                ImportResult.SUCCESS -> null
-                ImportResult.INVALID_RC -> messages["importErrorInvalidRc"]
-                ImportResult.INVALID_CONTENT -> messages["importErrorInvalidContent"]
-                ImportResult.UNSUPPORTED_CONTENT -> messages["importErrorUnsupportedContent"]
-                ImportResult.IMPORT_ERROR -> messages["importErrorImportError"]
-                ImportResult.LOAD_RC_ERROR -> messages["importErrorLoadRcError"]
-                ImportResult.ALREADY_EXISTS -> messages["importErrorAlreadyExists"]
-                ImportResult.UNMATCHED_HELP -> messages["importErrorUnmatchedHelp"]
-            }
-        }
-
-    /** Null on success, otherwise localized error text. */
-    private val ExportResult.errorMessage: String?
-        get() {
-            return when (this) {
-                ExportResult.SUCCESS -> null
-                ExportResult.FAILURE -> messages["exportError"]
-            }
-        }
 }
+
+/** Null on success, otherwise localized error text. */
+val ImportResult.errorMessage: String?
+    get() {
+        return when (this) {
+            ImportResult.SUCCESS -> null
+            ImportResult.INVALID_RC -> FX.messages["importErrorInvalidRc"]
+            ImportResult.INVALID_CONTENT -> FX.messages["importErrorInvalidContent"]
+            ImportResult.UNSUPPORTED_CONTENT -> FX.messages["importErrorUnsupportedContent"]
+            ImportResult.IMPORT_ERROR -> FX.messages["importErrorImportError"]
+            ImportResult.LOAD_RC_ERROR -> FX.messages["importErrorLoadRcError"]
+            ImportResult.ALREADY_EXISTS -> FX.messages["importErrorAlreadyExists"]
+            ImportResult.UNMATCHED_HELP -> FX.messages["importErrorUnmatchedHelp"]
+        }
+    }
+
+/** Null on success, otherwise localized error text. */
+val ExportResult.errorMessage: String?
+    get() {
+        return when (this) {
+            ExportResult.SUCCESS -> null
+            ExportResult.FAILURE -> FX.messages["exportError"]
+        }
+    }
