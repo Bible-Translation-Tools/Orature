@@ -8,6 +8,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.card.ChapterCard
@@ -188,7 +189,14 @@ class WorkbookPage : Fragment() {
                                 resourceTitleProperty.set(resourceMetadata.title)
 
                                 deleteTitleProperty.set(messages["delete"])
-                                exportTitleProperty.set(messages["exportProject"])
+
+                                exportTitleProperty.set(
+                                    when (resourceMetadata.type) {
+                                        ContainerType.Book, ContainerType.Bundle -> messages["exportProject"]
+                                        ContainerType.Help -> messages["exportResource"]
+                                        else -> ""
+                                    }
+                                )
 
                                 onDeleteAction {
                                     showDeleteConfirmDialog()
