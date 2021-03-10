@@ -2,8 +2,8 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.DoubleBinding
-import javafx.beans.binding.IntegerBinding
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -22,6 +22,7 @@ class ChapterCard: Control() {
     val totalChunksProperty = SimpleIntegerProperty(0)
     val recordedChunksProperty = SimpleIntegerProperty(0)
     val selectedChunksProperty = SimpleIntegerProperty(0)
+    val hasChunksProperty = SimpleBooleanProperty(false)
 
     fun titleBinding(): StringBinding {
         return Bindings.createStringBinding(

@@ -8,6 +8,7 @@ import javafx.scene.control.ProgressBar
 import javafx.scene.control.SkinBase
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
+import javafx.scene.layout.VBox
 import org.wycliffeassociates.otter.jvm.controls.card.ChapterCard
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -31,6 +32,12 @@ class ChapterCardSkin(private val card: ChapterCard): SkinBase<ChapterCard>(card
 
     @FXML
     lateinit var selectedChunks: Label
+
+    @FXML
+    lateinit var progressBars: VBox
+
+    @FXML
+    lateinit var notStarted: Label
 
     init {
         loadFXML()
@@ -68,6 +75,16 @@ class ChapterCardSkin(private val card: ChapterCard): SkinBase<ChapterCard>(card
 
         selectedChunks.apply {
             textProperty().bind(card.selectedChunksBinding())
+        }
+
+        progressBars.apply {
+            visibleWhen(card.hasChunksProperty)
+            managedWhen(visibleProperty())
+        }
+
+        notStarted.apply {
+            hiddenWhen(card.hasChunksProperty)
+            managedWhen(visibleProperty())
         }
     }
 
