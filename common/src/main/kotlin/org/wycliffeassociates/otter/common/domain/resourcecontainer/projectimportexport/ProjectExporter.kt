@@ -11,27 +11,30 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class ProjectExporter(
-    private val projectMetadataToExport: ResourceMetadata,
-    private val workbook: Workbook,
-    private val projectFilesAccessor: ProjectFilesAccessor,
+class ProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
-    private val projectSourceMetadata = workbook.source.linkedResources
-        .firstOrNull { it.identifier == projectMetadataToExport.identifier }
-        ?: workbook.source.resourceMetadata
-
-    private val projectToExportIsBook: Boolean =
-        projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
-
-    fun export(directory: File): Single<ExportResult> {
+    fun export(
+        directory: File,
+        projectMetadataToExport: ResourceMetadata,
+        workbook: Workbook,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Single<ExportResult> {
         return Single
             .fromCallable {
-                val zipFilename = makeExportFilename()
+                val projectSourceMetadata = workbook.source.linkedResources
+                    .firstOrNull { it.identifier == projectMetadataToExport.identifier }
+                    ?: workbook.source.resourceMetadata
+
+                val projectToExportIsBook: Boolean =
+                    projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
+
+                val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
                 val zipFile = directory.resolve(zipFilename)
 
                 projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
@@ -59,9 +62,9 @@ class ProjectExporter(
             .subscribeOn(Schedulers.io())
     }
 
-    private fun makeExportFilename(): String {
+    private fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
         val lang = workbook.target.language.slug
-        val resource = projectSourceMetadata.identifier
+        val resource = metadata.identifier
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
         return "$lang-$resource-$project-$timestamp.zip"

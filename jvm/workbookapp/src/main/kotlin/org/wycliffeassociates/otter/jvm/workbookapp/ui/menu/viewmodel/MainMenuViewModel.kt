@@ -11,13 +11,14 @@ import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.io.File
@@ -32,6 +33,7 @@ class MainMenuViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var workbookRepository: IWorkbookRepository
     @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
+    @Inject lateinit var projectExporterProvider: Provider<ProjectExporter>
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -58,9 +60,12 @@ class MainMenuViewModel : ViewModel() {
     fun exportWorkbook(directory: File) {
         showExportDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
+        val projectExporter = projectExporterProvider.get()
+        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
-        workbookDataStore
-            .exportWorkbook(directory)
+        projectExporter
+            .export(directory, resourceMetadata, workbook, projectFileAccessor)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")

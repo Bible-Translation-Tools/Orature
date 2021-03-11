@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import io.reactivex.Completable
 import io.reactivex.Maybe
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
@@ -12,18 +11,14 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.Callable
 import javax.inject.Inject
@@ -197,23 +192,5 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     }
                     .singleElement()
             }
-    }
-
-    fun deleteWorkbook(workbook: Workbook? = null): Completable {
-        val toDelete = workbook ?: this.workbook
-        workbookRepository.closeWorkbook(toDelete)
-
-        return DeleteProject(collectionRepository, directoryProvider)
-            .delete(toDelete, true)
-    }
-
-    fun exportWorkbook(directory: File): Single<ExportResult> {
-        return ProjectExporter(
-            activeResourceMetadata,
-            workbook,
-            activeProjectFilesAccessor,
-            directoryProvider,
-            workbookRepository
-        ).export(directory)
     }
 }

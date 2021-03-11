@@ -19,6 +19,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsVi
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
 
 @Component(
@@ -40,6 +41,7 @@ interface AppDependencyGraph {
     fun inject(dataStore: WorkbookDataStore)
     fun inject(viewModel: AudioPluginViewModel)
     fun inject(viewModel: ProjectWizardViewModel)
+    fun inject(viewModel: WorkbookPageViewModel)
 
     fun inject(viewModel: RemovePluginsViewModel)
 

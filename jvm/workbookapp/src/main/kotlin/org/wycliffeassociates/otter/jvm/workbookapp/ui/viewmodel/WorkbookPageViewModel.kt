@@ -10,18 +10,32 @@ import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 
 class WorkbookPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(WorkbookPageViewModel::class.java)
+
+    @Inject
+    lateinit var deleteProjectProvider: Provider<DeleteProject>
+
+    @Inject
+    lateinit var projectExporterProvider: Provider<ProjectExporter>
+
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
 
     val workbookDataStore: WorkbookDataStore by inject()
 
@@ -33,6 +47,10 @@ class WorkbookPageViewModel : ViewModel() {
 
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
     val showExportDialogProperty = SimpleBooleanProperty(false)
+
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     /**
      * Initializes the workbook for use and loads UI representations of the chapters in the workbook.
@@ -103,9 +121,12 @@ class WorkbookPageViewModel : ViewModel() {
     fun exportWorkbook(directory: File) {
         showExportDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
+        val projectExporter = projectExporterProvider.get()
+        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
-        workbookDataStore
-            .exportWorkbook(directory)
+        projectExporter
+            .export(directory, resourceMetadata, workbook, projectFileAccessor)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
@@ -123,17 +144,18 @@ class WorkbookPageViewModel : ViewModel() {
     fun deleteWorkbook() {
         showDeleteDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
+        val deleteProject = deleteProjectProvider.get()
 
-        workbookDataStore
-            .deleteWorkbook()
+        workbookRepository.closeWorkbook(workbook)
+        deleteProject
+            .delete(workbook, true)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
             }
             .subscribe {
                 showDeleteDialogProperty.set(false)
-                workspace.viewStack.clear()
-                workspace.dock<HomePage>()
+                workspace.navigateBack()
             }
     }
 }

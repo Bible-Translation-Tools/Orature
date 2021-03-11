@@ -32,13 +32,9 @@ import javax.inject.Provider
 class ImportResourceContainer @Inject constructor(
     private val resourceMetadataRepository: IResourceMetadataRepository,
     private val resourceContainerRepository: IResourceContainerRepository,
-    private val collectionRepository: ICollectionRepository,
-    private val contentRepository: IContentRepository,
-    private val takeRepository: ITakeRepository,
     private val languageRepository: ILanguageRepository,
     private val directoryProvider: IDirectoryProvider,
-    private val zipEntryTreeBuilder: IZipEntryTreeBuilder,
-    private val resourceRepository: IResourceRepository
+    private val zipEntryTreeBuilder: IZipEntryTreeBuilder
 ) {
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
