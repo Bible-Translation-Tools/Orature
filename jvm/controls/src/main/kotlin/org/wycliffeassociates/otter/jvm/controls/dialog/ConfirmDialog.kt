@@ -42,7 +42,7 @@ class ConfirmDialog : Fragment() {
     private val onConfirmActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        importStylesheet(javaClass.getResource("/css/confirm-dialog.css").toExternalForm())
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
     }
 
     override val root = vbox {

@@ -22,7 +22,7 @@ class ProgressDialog : Fragment() {
     var text by textProperty
 
     init {
-        importStylesheet(javaClass.getResource("/css/progress-dialog.css").toExternalForm())
+        importStylesheet(resources.get("/css/progress-dialog.css"))
     }
 
     override val root = borderpane {
