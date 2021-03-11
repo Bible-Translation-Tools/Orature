@@ -5,6 +5,7 @@ import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.control.ScrollPane
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -149,6 +150,7 @@ class WorkbookPage : Fragment() {
      */
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
+        lateinit var scrollpane: ScrollPane
         val tab = buildTab()
 
         init {
@@ -157,6 +159,7 @@ class WorkbookPage : Fragment() {
             add(tab)
             setOnSelectionChanged {
                 viewModel.openTab(resourceMetadata)
+                scrollpane.vvalue = viewModel.verticalScrollValueProperty.value
             }
         }
 
@@ -172,7 +175,7 @@ class WorkbookPage : Fragment() {
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                scrollpane {
+                scrollpane = scrollpane {
                     vgrow = Priority.ALWAYS
 
                     isFitToWidth = true
@@ -222,6 +225,7 @@ class WorkbookPage : Fragment() {
 
                                         onMousePressed = EventHandler {
                                             item.chapterSource?.let { chapter ->
+                                                viewModel.verticalScrollValueProperty.set(scrollpane.vvalue)
                                                 viewModel.navigate(chapter)
                                             }
                                         }
