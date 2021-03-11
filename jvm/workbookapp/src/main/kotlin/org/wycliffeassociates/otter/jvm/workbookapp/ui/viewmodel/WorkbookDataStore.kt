@@ -14,8 +14,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
@@ -26,12 +24,6 @@ import javax.inject.Inject
 class WorkbookDataStore : Component(), ScopedInstance {
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
-
-    @Inject
-    lateinit var workbookRepository: IWorkbookRepository
-
-    @Inject
-    lateinit var collectionRepository: ICollectionRepository
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
