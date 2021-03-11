@@ -69,7 +69,6 @@ class SelectCollection : Fragment() {
         }
         val dialog = progressdialog {
             text = messages["pleaseWaitCreatingProject"]
-            root.addClass(AppStyles.progressDialog)
         }
         viewModel.showOverlayProperty.onChange { it: Boolean ->
             Platform.runLater { if (it) dialog.open() else dialog.close() }

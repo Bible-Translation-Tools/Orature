@@ -1,0 +1,29 @@
+.progress-dialog {
+    -fx-pref-width: 500px;
+    -fx-pref-height: 300px;
+    -fx-background-color: -wa-white;
+}
+
+.progress-dialog__progress-indicator {
+    -fx-max-width: 125px;
+    -fx-max-height: 125px;
+    -fx-progress-color: -wa-gray-darker;
+}
+
+.progress-dialog__message {
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-padding: 20px;
+    -fx-text-alignment: center;
+    -fx-fill-width: true;
+    -fx-max-width: infinity;
+    -fx-alignment: center;
+    -fx-wrap-text: true;
+    -fx-text-fill: -wa-gray-darker;
+}
+
+.progress-dialog__graphic {
+    -fx-fill: -wa-gray-darker;
+    -fx-icon-size: 60px;
+    -fx-icon-color: -wa-gray-darker;
+}

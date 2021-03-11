@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
+import javax.inject.Provider
 
 class ProjectGridViewModel : ViewModel() {
 
@@ -24,6 +25,7 @@ class ProjectGridViewModel : ViewModel() {
     @Inject lateinit var collectionRepo: ICollectionRepository
     @Inject lateinit var workbookRepo: IWorkbookRepository
     @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var deleteProjectProvider: Provider<DeleteProject>
 
     private val workbookDataStore: WorkbookDataStore by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
@@ -53,14 +55,16 @@ class ProjectGridViewModel : ViewModel() {
         workspace.dock<ProjectWizard>()
     }
 
-    fun deleteProject(project: Workbook) {
+    fun deleteWorkbook(workbook: Workbook) {
         showDeleteDialogProperty.set(true)
-        workbookRepo.closeWorkbook(project)
-        DeleteProject(collectionRepo, directoryProvider)
-            .delete(project, true)
+        val deleteProject = deleteProjectProvider.get()
+
+        workbookRepo.closeWorkbook(workbook)
+        deleteProject
+            .delete(workbook, true)
             .observeOnFx()
             .doOnError { e ->
-                logger.error("Error in deleting project: ${project.target.slug} ${project.target.language.slug}", e)
+                logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
             }
             .subscribe {
                 showDeleteDialogProperty.set(false)

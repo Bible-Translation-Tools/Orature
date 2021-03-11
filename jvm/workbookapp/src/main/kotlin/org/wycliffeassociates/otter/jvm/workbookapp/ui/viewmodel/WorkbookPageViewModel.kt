@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -9,14 +10,32 @@ import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 
 class WorkbookPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(WorkbookPageViewModel::class.java)
+
+    @Inject
+    lateinit var deleteProjectProvider: Provider<DeleteProject>
+
+    @Inject
+    lateinit var projectExporterProvider: Provider<ProjectExporter>
+
+    @Inject
+    lateinit var workbookRepository: IWorkbookRepository
 
     val workbookDataStore: WorkbookDataStore by inject()
 
@@ -25,6 +44,13 @@ class WorkbookPageViewModel : ViewModel() {
 
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(WorkbookPageViewModel::loading)
+
+    val showDeleteDialogProperty = SimpleBooleanProperty(false)
+    val showExportDialogProperty = SimpleBooleanProperty(false)
+
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     /**
      * Initializes the workbook for use and loads UI representations of the chapters in the workbook.
@@ -90,5 +116,46 @@ class WorkbookPageViewModel : ViewModel() {
             ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
             ContainerType.Help -> workspace.dock<ResourcePage>()
         }
+    }
+
+    fun exportWorkbook(directory: File) {
+        showExportDialogProperty.set(true)
+        val workbook = workbookDataStore.workbook
+        val projectExporter = projectExporterProvider.get()
+        val resourceMetadata = workbookDataStore.activeResourceMetadata
+        val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
+
+        projectExporter
+            .export(directory, resourceMetadata, workbook, projectFileAccessor)
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in exporting project for project: ${workbook.target.slug}")
+                logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
+            }
+            .subscribe { result: ExportResult ->
+                showExportDialogProperty.set(false)
+
+                result.errorMessage?.let {
+                    error(messages["exportError"], it)
+                }
+            }
+    }
+
+    fun deleteWorkbook() {
+        showDeleteDialogProperty.set(true)
+        val workbook = workbookDataStore.workbook
+        val deleteProject = deleteProjectProvider.get()
+
+        workbookRepository.closeWorkbook(workbook)
+        deleteProject
+            .delete(workbook, true)
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
+            }
+            .subscribe {
+                showDeleteDialogProperty.set(false)
+                workspace.navigateBack()
+            }
     }
 }

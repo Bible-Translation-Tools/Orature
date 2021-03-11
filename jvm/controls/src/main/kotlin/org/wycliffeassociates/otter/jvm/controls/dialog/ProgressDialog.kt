@@ -9,7 +9,6 @@ import javafx.scene.layout.VBox
 import javafx.stage.Modality
 import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.styles.ProgressDialogStyles
 import tornadofx.*
 
 class ProgressDialog : Fragment() {
@@ -23,14 +22,16 @@ class ProgressDialog : Fragment() {
     var text by textProperty
 
     init {
-        importStylesheet<ProgressDialogStyles>()
+        importStylesheet(resources.get("/css/progress-dialog.css"))
     }
 
     override val root = borderpane {
-        addClass(ProgressDialogStyles.defaultProgressDialog)
+        addClass("progress-dialog")
         center {
             stackpane {
-                progressindicator()
+                progressindicator {
+                    addClass("progress-dialog__progress-indicator")
+                }
                 hbox {
                     alignment = Pos.CENTER
                     graphicProperty
@@ -40,7 +41,7 @@ class ProgressDialog : Fragment() {
                         }
                         .subscribe {
                             clear()
-                            it.addClass(ProgressDialogStyles.progressGraphic)
+                            it.addClass("progress-dialog__graphic")
                             add(it)
                         }
                 }
@@ -48,6 +49,7 @@ class ProgressDialog : Fragment() {
         }
         bottom {
             label(textProperty) {
+                addClass("progress-dialog__message")
                 visibleProperty().bind(textProperty().isNotEmpty)
                 managedProperty().bind(visibleProperty())
             }

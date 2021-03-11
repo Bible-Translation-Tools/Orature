@@ -7,7 +7,7 @@ import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import javafx.stage.FileChooser
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.RemovePluginsDialog
@@ -36,13 +36,11 @@ class MainMenu : MenuBar() {
     private fun initImportExportProgressDialog() {
         val importDialog = progressdialog {
             text = messages["importResource"]
-            graphic = MainMenuStyles.importIcon("60px")
-            root.addClass(AppStyles.progressDialog)
+            graphic = FontIcon("mdi-import")
         }
         val exportDialog = progressdialog {
             text = messages["exportProject"]
-            graphic = MainMenuStyles.exportIcon("60px")
-            root.addClass(AppStyles.progressDialog)
+            graphic = FontIcon("mdi-share-variant")
         }
         viewModel.showImportDialogProperty.onChange {
             Platform.runLater { if (it) importDialog.open() else importDialog.close() }
@@ -79,7 +77,7 @@ class MainMenu : MenuBar() {
                     .setOnAction {
                         val directory = chooseDirectory(messages["exportProject"])
                         directory?.let {
-                            viewModel.exportProject(it)
+                            viewModel.exportWorkbook(it)
                         }
                     }
                 separator()

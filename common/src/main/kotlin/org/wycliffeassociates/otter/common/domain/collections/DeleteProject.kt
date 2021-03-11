@@ -4,8 +4,9 @@ import io.reactivex.Completable
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import javax.inject.Inject
 
-class DeleteProject(
+class DeleteProject @Inject constructor(
     private val collectionRepository: ICollectionRepository,
     private val directoryProvider: IDirectoryProvider
 ) {
