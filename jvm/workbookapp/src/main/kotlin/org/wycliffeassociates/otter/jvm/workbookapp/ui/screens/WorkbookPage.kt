@@ -2,13 +2,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
 import javafx.application.Platform
-import javafx.beans.binding.Bindings
 import javafx.event.EventHandler
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
@@ -20,7 +20,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
 import java.text.MessageFormat
@@ -96,8 +95,8 @@ class WorkbookPage : Fragment() {
         confirmButtonTextProperty.set(messages["removeProject"])
         cancelButtonTextProperty.set(messages["keepProject"])
 
-        onCloseAction { showDialogProperty.set(false) }
-        onCancelAction { showDialogProperty.set(false) }
+        onCloseAction { close() }
+        onCancelAction { close() }
     }
 
     private fun showDeleteConfirmDialog() {
@@ -112,34 +111,34 @@ class WorkbookPage : Fragment() {
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
 
-            showDialogProperty.set(true)
-
             onConfirmAction {
-                showDialogProperty.set(false)
+                Platform.runLater { close() }
                 viewModel.deleteWorkbook()
             }
-        }
+        }.open()
     }
 
     private fun initializeProgressDialogs() {
-        val progressDialog = progressdialog {
-            graphic = ProjectGridStyles.deleteIcon("60px")
-            root.addClass(AppStyles.progressDialog)
-        }
+        progressdialog {
+            viewModel.showDeleteDialogProperty.onChange {
+                if (it) {
+                    text = messages["deletingProject"]
+                    graphic = FontIcon("mdi-delete")
+                    open()
+                } else {
+                    close()
+                }
+            }
 
-        Bindings.or(
-            viewModel.showDeleteDialogProperty,
-            viewModel.showExportDialogProperty
-        ).onChange {
-            Platform.runLater { if (it) progressDialog.open() else progressDialog.close() }
-        }
-
-        viewModel.showDeleteDialogProperty.onChange {
-            if (it) progressDialog.text = messages["deletingProject"]
-        }
-
-        viewModel.showExportDialogProperty.onChange {
-            if (it) progressDialog.text = messages["exportProject"]
+            viewModel.showExportDialogProperty.onChange {
+                if (it) {
+                    text = messages["exportProject"]
+                    graphic = FontIcon("mdi-share-variant")
+                    open()
+                } else {
+                    close()
+                }
+            }
         }
     }
 

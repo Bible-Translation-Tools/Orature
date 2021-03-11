@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.Action
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
@@ -17,7 +18,6 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import tornadofx.*
@@ -131,8 +131,8 @@ class HomePage : Fragment() {
         confirmButtonTextProperty.set(messages["removeProject"])
         cancelButtonTextProperty.set(messages["keepProject"])
 
-        onCloseAction { showDialogProperty.set(false) }
-        onCancelAction { showDialogProperty.set(false) }
+        onCloseAction { close() }
+        onCancelAction { close() }
     }
 
     init {
@@ -168,8 +168,7 @@ class HomePage : Fragment() {
     private fun initializeProgressDialogs() {
         val deletingProjectDialog = progressdialog {
             text = messages["deletingProject"]
-            graphic = ProjectGridStyles.deleteIcon("60px")
-            root.addClass(AppStyles.progressDialog)
+            graphic = FontIcon("mdi-delete")
         }
         viewModel.showDeleteDialogProperty.onChange {
             Platform.runLater { if (it) deletingProjectDialog.open() else deletingProjectDialog.close() }
@@ -187,12 +186,12 @@ class HomePage : Fragment() {
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(item.coverArtAccessor.getArtwork())
 
-            showDialogProperty.set(true)
+
 
             onConfirmAction {
-                showDialogProperty.set(false)
+                close()
                 viewModel.deleteWorkbook(item)
             }
-        }
+        }.open()
     }
 }

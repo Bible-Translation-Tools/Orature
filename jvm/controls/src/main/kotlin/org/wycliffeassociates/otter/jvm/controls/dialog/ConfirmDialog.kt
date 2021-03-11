@@ -1,12 +1,10 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import com.jfoenix.controls.JFXButton
-import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.ReadOnlyDoubleProperty
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -43,18 +41,8 @@ class ConfirmDialog : Fragment() {
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onConfirmActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    val showDialogProperty = SimpleBooleanProperty()
-
     init {
         importStylesheet(javaClass.getResource("/css/confirm-dialog.css").toExternalForm())
-
-        showDialogProperty.onChange {
-            it.let {
-                Platform.runLater {
-                    if (it) open() else close()
-                }
-            }
-        }
     }
 
     override val root = vbox {

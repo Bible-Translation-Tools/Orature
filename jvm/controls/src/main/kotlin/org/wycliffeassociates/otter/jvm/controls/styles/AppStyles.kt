@@ -18,7 +18,6 @@ class AppStyles : Stylesheet() {
         val backButton by cssclass()
         val appBackground by cssclass()
         val whiteBackground by cssclass()
-        val progressDialog by cssclass()
         val appToggleButton by cssclass()
 
         fun recordIcon(size: String = "1em") = MaterialIconView(MaterialIcon.MIC_NONE, size)
@@ -101,20 +100,6 @@ class AppStyles : Stylesheet() {
 
         whiteBackground {
             backgroundColor += AppTheme.colors.white
-        }
-
-        progressDialog {
-            ProgressDialogStyles.progressGraphic {
-                fill = AppTheme.colors.defaultText
-            }
-            backgroundColor += AppTheme.colors.base
-            progressIndicator {
-                progressColor = AppTheme.colors.defaultText
-            }
-
-            label {
-                textFill = AppTheme.colors.defaultText
-            }
         }
 
         appToggleButton {
