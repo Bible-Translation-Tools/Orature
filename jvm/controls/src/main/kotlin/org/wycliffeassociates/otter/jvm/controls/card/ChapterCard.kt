@@ -22,7 +22,7 @@ class ChapterCard: Control() {
     val totalChunksProperty = SimpleIntegerProperty(0)
     val recordedChunksProperty = SimpleIntegerProperty(0)
     val selectedChunksProperty = SimpleIntegerProperty(0)
-    val hasChunksProperty = SimpleBooleanProperty(false)
+    val userHasChunkedProperty = SimpleBooleanProperty(false)
 
     fun titleBinding(): StringBinding {
         return Bindings.createStringBinding(

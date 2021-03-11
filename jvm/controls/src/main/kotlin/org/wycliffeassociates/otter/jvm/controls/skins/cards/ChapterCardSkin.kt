@@ -78,12 +78,12 @@ class ChapterCardSkin(private val card: ChapterCard): SkinBase<ChapterCard>(card
         }
 
         progressBars.apply {
-            visibleWhen(card.hasChunksProperty)
-            managedWhen(visibleProperty())
+            isVisible = false
+            isManaged = false
         }
 
         notStarted.apply {
-            hiddenWhen(card.hasChunksProperty)
+            hiddenWhen(card.userHasChunkedProperty)
             managedWhen(visibleProperty())
         }
     }
