@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
+import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.event.EventHandler
 import javafx.geometry.Insets
@@ -122,12 +123,15 @@ class WorkbookPage : Fragment() {
 
     private fun initializeProgressDialogs() {
         val progressDialog = progressdialog {
-            showDialogProperty.bind(Bindings.or(
-                viewModel.showDeleteDialogProperty,
-                viewModel.showExportDialogProperty
-            ))
             graphic = ProjectGridStyles.deleteIcon("60px")
             root.addClass(AppStyles.progressDialog)
+        }
+
+        Bindings.or(
+            viewModel.showDeleteDialogProperty,
+            viewModel.showExportDialogProperty
+        ).onChange {
+            Platform.runLater { if (it) progressDialog.open() else progressDialog.close() }
         }
 
         viewModel.showDeleteDialogProperty.onChange {
