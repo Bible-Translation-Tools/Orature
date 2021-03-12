@@ -168,7 +168,7 @@ class WorkbookPage : Fragment() {
 
             chaptersViewList.add(
                 WorkbookBanner().apply {
-                    maxWidth = 800.0
+                    addClass("workbook-page__workbook-banner")
 
                     val workbook = viewModel.workbookDataStore.workbook
 
@@ -203,7 +203,7 @@ class WorkbookPage : Fragment() {
                 it.forEach { item ->
                     chaptersViewList.add(
                         ChapterCard().apply {
-                            maxWidth = 800.0
+                            addClass("workbook-page__chapter-card")
 
                             titleProperty.set(item.sort.toString())
 
@@ -235,7 +235,7 @@ class WorkbookPage : Fragment() {
 
                 listView = listview(chaptersViewList) {
                     vgrow = Priority.ALWAYS
-                    addClass("chapter-list")
+                    addClass("workbook-page__chapter-list")
                 }
             }
         }

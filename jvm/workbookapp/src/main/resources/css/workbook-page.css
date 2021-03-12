@@ -1,14 +1,22 @@
-.chapter-list {
+.workbook-page__workbook-banner {
+    -fx-max-width: 800px;
+}
+
+.workbook-page__chapter-card {
+    -fx-max-width: 800px;
+}
+
+.workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
     -fx-background-color: #f7faff;
 }
 
-.chapter-list .list-cell:selected,
-.chapter-list .list-cell:even,
-.chapter-list .list-cell:odd {
+.workbook-page__chapter-list .list-cell:selected,
+.workbook-page__chapter-list .list-cell:even,
+.workbook-page__chapter-list .list-cell:odd {
     -fx-background-color: #f7faff;
 }
 
-.chapter-list .label {
+.workbook-page__chapter-list .label {
     -fx-text-fill: -wa-gray-darker;
 }
