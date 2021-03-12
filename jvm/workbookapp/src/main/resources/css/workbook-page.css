@@ -1,0 +1,14 @@
+.chapter-list {
+    -fx-padding: 20px 0 0 30px;
+    -fx-background-color: #f7faff;
+}
+
+.chapter-list .list-cell:selected,
+.chapter-list .list-cell:even,
+.chapter-list .list-cell:odd {
+    -fx-background-color: #f7faff;
+}
+
+.chapter-list .label {
+    -fx-text-fill: -wa-gray-darker;
+}
