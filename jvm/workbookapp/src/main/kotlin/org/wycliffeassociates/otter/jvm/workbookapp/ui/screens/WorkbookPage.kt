@@ -3,8 +3,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.jfoenix.controls.JFXTabPane
 import javafx.application.Platform
 import javafx.event.EventHandler
-import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.Node
+import javafx.scene.control.ListView
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -42,6 +43,7 @@ class WorkbookPage : Fragment() {
 
     init {
         initializeProgressDialogs()
+        importStylesheet(resources.get("/css/workbook-page.css"))
     }
 
     /**
@@ -149,6 +151,8 @@ class WorkbookPage : Fragment() {
      */
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
+        val chaptersViewList = observableListOf<Node>()
+        lateinit var listView: ListView<Node>
         val tab = buildTab()
 
         init {
@@ -157,6 +161,63 @@ class WorkbookPage : Fragment() {
             add(tab)
             setOnSelectionChanged {
                 viewModel.openTab(resourceMetadata)
+                viewModel.selectedChapterIndexProperty.value?.let {
+                    listView.scrollTo(it)
+                }
+            }
+
+            chaptersViewList.add(
+                WorkbookBanner().apply {
+                    maxWidth = 800.0
+
+                    val workbook = viewModel.workbookDataStore.workbook
+
+                    backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+                    bookTitleProperty.set(workbook.target.title)
+                    resourceTitleProperty.set(resourceMetadata.title)
+
+                    deleteTitleProperty.set(messages["delete"])
+
+                    exportTitleProperty.set(
+                        when (resourceMetadata.type) {
+                            ContainerType.Book, ContainerType.Bundle -> messages["exportProject"]
+                            ContainerType.Help -> messages["exportResource"]
+                            else -> ""
+                        }
+                    )
+
+                    onDeleteAction {
+                        showDeleteConfirmDialog()
+                    }
+
+                    onExportAction {
+                        val directory = chooseDirectory(FX.messages["exportProject"])
+                        directory?.let {
+                            viewModel.exportWorkbook(it)
+                        }
+                    }
+                }
+            )
+
+            viewModel.chapters.onChangeAndDoNow {
+                it.forEach { item ->
+                    chaptersViewList.add(
+                        ChapterCard().apply {
+                            maxWidth = 800.0
+
+                            titleProperty.set(item.sort.toString())
+
+                            onMousePressed = EventHandler {
+                                item.chapterSource?.let { chapter ->
+                                    viewModel.selectedChapterIndexProperty.set(
+                                        chaptersViewList.indexOf(this)
+                                    )
+                                    viewModel.navigate(chapter)
+                                }
+                            }
+                        }
+                    )
+                }
             }
         }
 
@@ -172,64 +233,9 @@ class WorkbookPage : Fragment() {
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                scrollpane {
+                listView = listview(chaptersViewList) {
                     vgrow = Priority.ALWAYS
-
-                    isFitToWidth = true
-                    isFitToHeight = true
-
-                    vbox {
-                        maxWidth = 800.0
-                        spacing = 10.0
-                        padding = Insets(10.0, 20.0, 10.0, 20.0)
-
-                        add(
-                            WorkbookBanner().apply {
-                                val workbook = viewModel.workbookDataStore.workbook
-
-                                backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
-                                bookTitleProperty.set(workbook.target.title)
-                                resourceTitleProperty.set(resourceMetadata.title)
-
-                                deleteTitleProperty.set(messages["delete"])
-
-                                exportTitleProperty.set(
-                                    when (resourceMetadata.type) {
-                                        ContainerType.Book, ContainerType.Bundle -> messages["exportProject"]
-                                        ContainerType.Help -> messages["exportResource"]
-                                        else -> ""
-                                    }
-                                )
-
-                                onDeleteAction {
-                                    showDeleteConfirmDialog()
-                                }
-
-                                onExportAction {
-                                    val directory = chooseDirectory(FX.messages["exportProject"])
-                                    directory?.let {
-                                        viewModel.exportWorkbook(it)
-                                    }
-                                }
-                            }
-                        )
-
-                        viewModel.chapters.onChangeAndDoNow {
-                            it.forEach { item ->
-                                add(
-                                    ChapterCard().apply {
-                                        titleProperty.set(item.sort.toString())
-
-                                        onMousePressed = EventHandler {
-                                            item.chapterSource?.let { chapter ->
-                                                viewModel.navigate(chapter)
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
+                    addClass("chapter-list")
                 }
             }
         }

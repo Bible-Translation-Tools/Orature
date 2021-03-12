@@ -4,13 +4,13 @@
 }
 
 .workbook-banner__book-title {
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-white !important;
     -fx-font-weight: bold;
     -fx-font-size: 20px;
 }
 
 .workbook-banner__resource-title {
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-white !important;
     -fx-font-size: 16px;
 }
 

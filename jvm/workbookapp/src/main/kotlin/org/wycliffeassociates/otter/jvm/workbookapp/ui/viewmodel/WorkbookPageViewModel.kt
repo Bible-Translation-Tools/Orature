@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -47,6 +48,8 @@ class WorkbookPageViewModel : ViewModel() {
 
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
     val showExportDialogProperty = SimpleBooleanProperty(false)
+
+    val selectedChapterIndexProperty = SimpleIntegerProperty(0)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
