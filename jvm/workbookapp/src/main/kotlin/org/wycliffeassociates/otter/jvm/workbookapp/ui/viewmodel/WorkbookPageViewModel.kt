@@ -40,7 +40,7 @@ class WorkbookPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
 
-    val chapters: ObservableList<CardData> = FXCollections.observableArrayList()
+    val chapters: ObservableList<CardData?> = FXCollections.observableArrayList()
     val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
@@ -102,8 +102,11 @@ class WorkbookPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
             }
-            .subscribe { list: List<CardData> ->
+            .subscribe { list: List<CardData?> ->
                 chapters.setAll(list)
+                // Adding null card at the beginning of the list
+                // to play the role of chapter banner
+                chapters.add(0, null)
             }
     }
 
