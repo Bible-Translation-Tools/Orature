@@ -18,10 +18,12 @@ class RootView : View() {
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = true
+            menu.visibleProperty().set(false)
             menu.managedProperty().set(false)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
+            menu.visibleProperty().set(true)
             menu.managedProperty().set(true)
         }
         workspace.add(menu)
