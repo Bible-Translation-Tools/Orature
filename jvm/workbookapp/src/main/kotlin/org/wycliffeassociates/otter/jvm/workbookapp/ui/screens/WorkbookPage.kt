@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
-import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -15,7 +14,8 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -40,6 +40,7 @@ class WorkbookPage : Fragment() {
 
     init {
         initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
         importStylesheet(resources.get("/css/workbook-page.css"))
     }
 
@@ -82,44 +83,47 @@ class WorkbookPage : Fragment() {
         }
     }
 
-    private val confirmDialog = confirmdialog {
-        this.root.prefWidthProperty().bind(
-            this@WorkbookPage.root.widthProperty().divide(2)
-        )
-        this.root.prefHeightProperty().bind(
-            this@WorkbookPage.root.heightProperty().divide(2)
-        )
+    private fun initializeDeleteConfirmDialog() {
+        confirmdialog {
+            this.root.prefWidthProperty().bind(
+                primaryStage.widthProperty().divide(2)
+            )
+            this.root.prefHeightProperty().bind(
+                primaryStage.heightProperty().divide(2)
+            )
 
-        messageTextProperty.set(messages["deleteProjectConfirmation"])
-        confirmButtonTextProperty.set(messages["removeProject"])
-        cancelButtonTextProperty.set(messages["keepProject"])
+            messageTextProperty.set(messages["deleteProjectConfirmation"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["keepProject"])
 
-        onCloseAction { close() }
-        onCancelAction { close() }
-    }
-
-    private fun showDeleteConfirmDialog() {
-        val workbook = viewModel.workbookDataStore.workbook
-        confirmDialog.apply {
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
                 messages["remove"],
-                workbook.target.title
+                viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
-            backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+            )
 
             onConfirmAction {
-                Platform.runLater { close() }
+                viewModel.showDeleteDialogProperty.set(false)
                 viewModel.deleteWorkbook()
             }
-        }.open()
+
+            viewModel.showDeleteDialogProperty.onChange {
+                if (it) open() else close()
+            }
+
+            onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
+            onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
+        }
     }
 
     private fun initializeProgressDialogs() {
         progressdialog {
-            viewModel.showDeleteDialogProperty.onChange {
+            viewModel.showDeleteProgressDialogProperty.onChange {
                 if (it) {
                     text = messages["deletingProject"]
                     graphic = FontIcon("mdi-delete")
@@ -129,7 +133,7 @@ class WorkbookPage : Fragment() {
                 }
             }
 
-            viewModel.showExportDialogProperty.onChange {
+            viewModel.showExportProgressDialogProperty.onChange {
                 if (it) {
                     text = messages["exportProject"]
                     graphic = FontIcon("mdi-share-variant")
@@ -141,14 +145,13 @@ class WorkbookPage : Fragment() {
         }
     }
 
-
     /**
      * The tab for a single resource of the workbook. This will contain top level actions for
      * the resource, as well as the list of chapters within the resource.
      */
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
-        lateinit var listView: ListView<CardData?>
+        lateinit var listView: ListView<WorkbookItemModel>
         val tab = buildTab()
 
         init {
@@ -157,10 +160,18 @@ class WorkbookPage : Fragment() {
             add(tab)
             setOnSelectionChanged {
                 viewModel.openTab(resourceMetadata)
+                viewModel.selectedResourceMetadata.set(resourceMetadata)
+                listView.refresh()
             }
 
             viewModel.chapters.onChangeAndDoNow {
-                listView.scrollTo(viewModel.selectedChapterIndexProperty.value)
+                val item =
+                    it.singleOrNull { model ->
+                        model is ChapterCardModel &&
+                                model.source == viewModel.selectedChapterProperty.value
+                    }
+                val index = it.indexOf(item)
+                listView.scrollTo(index)
             }
         }
 
@@ -181,9 +192,7 @@ class WorkbookPage : Fragment() {
                     addClass("workbook-page__chapter-list")
 
                     setCellFactory {
-                        ChapterCell(resourceMetadata) {
-                            showDeleteConfirmDialog()
-                        }
+                        ChapterCell()
                     }
                 }
             }

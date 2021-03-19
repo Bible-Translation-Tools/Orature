@@ -1,11 +1,3 @@
-.workbook-page__workbook-banner {
-    -fx-max-width: 800px;
-}
-
-.workbook-page__chapter-card {
-    -fx-max-width: 800px;
-}
-
 .workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
     -fx-background-color: #f7faff;

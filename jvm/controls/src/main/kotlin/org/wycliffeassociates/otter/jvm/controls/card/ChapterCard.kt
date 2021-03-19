@@ -10,31 +10,21 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterCardSkin
-import tornadofx.*
 import java.io.File
-import java.text.MessageFormat
 import java.util.concurrent.Callable
 
 class ChapterCard: Control() {
 
     val coverArtProperty = SimpleObjectProperty<File>()
     val titleProperty = SimpleStringProperty()
+    val notStartedTextProperty = SimpleStringProperty("Not Started")
     val totalChunksProperty = SimpleIntegerProperty(0)
     val recordedChunksProperty = SimpleIntegerProperty(0)
     val selectedChunksProperty = SimpleIntegerProperty(0)
     val userHasChunkedProperty = SimpleBooleanProperty(true)
 
-    fun titleBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                MessageFormat.format(
-                    FX.messages["chapterTitle"],
-                    FX.messages["chapter"],
-                    titleProperty.value
-                )
-            },
-            titleProperty
-        )
+    init {
+        styleClass.setAll("chapter-card")
     }
 
     fun recordedChunksBinding(): StringBinding {

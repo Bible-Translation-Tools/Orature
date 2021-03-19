@@ -4,6 +4,7 @@
     -fx-effect: -wa-level1;
     -fx-cursor: hand;
     -fx-pref-height: 96px;
+    -fx-max-width: 800px;
 }
 
 .chapter-card__graphic {
@@ -49,4 +50,8 @@
 
 .chapter-card__selected-progress .bar {
     -fx-background-color: linear-gradient(to right, #079100, -wa-green);
+}
+
+.chapter-card__not-started {
+    -fx-font-size: 16px;
 }
