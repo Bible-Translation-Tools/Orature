@@ -7,6 +7,7 @@ import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
+import jooq.Tables.CONTENT_TYPE
 import jooq.Tables.DUBLIN_CORE_ENTITY
 import jooq.Tables.RC_LINK_ENTITY
 import jooq.Tables.RESOURCE_LINK
@@ -27,6 +28,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -177,6 +179,22 @@ class CollectionRepository @Inject constructor(
                 log.error("Error in deleteResources for collection: $project, deleteAudio: $deleteAudio", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun deriveContentForCollection(
+        sourceBook: Collection,
+        chapter: Collection,
+        metadata: ResourceMetadata
+    ): Completable {
+        return Completable.fromCallable {
+            database.transactionResult { dsl ->
+                copyContentOfCollection(dsl, sourceBook, chapter, metadata.id)
+            }
+        }
+    }
+
+    override fun deriveContentFromChunkList(chapter: Collection, chunkMarkers: List<Int>): Completable {
+        TODO("Not yet implemented")
     }
 
     override fun getAll(): Single<List<Collection>> {
@@ -349,14 +367,7 @@ class CollectionRepository @Inject constructor(
                         // Copy the chapters
                         copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
 
-                        // Copy the content
-                        copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
-
-                        // Link the derivative content
-                        linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
-
-                        val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
-                        copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
+                        copyChapterMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
 
                         // Add a project to the container if necessary
                         // Load the existing resource container and see if we need to add another project
@@ -400,6 +411,77 @@ class CollectionRepository @Inject constructor(
                 log.error("End Metadata", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    fun deriveContent(chapter: Chapter, metadata: ResourceMetadata) {
+        database.transactionResult { dsl ->
+            dsl.select(COLLECTION_ENTITY.ID)
+
+//            // Copy the content
+//            copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+//
+//            // Link the derivative content
+//            linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+//
+//            val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
+//            copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
+        }
+    }
+
+    private fun copyChapterMetaContent(dsl: DSLContext, sourceId: Int, metadataId: Int) {
+        dsl
+            .insertInto(
+                CONTENT_ENTITY,
+                CONTENT_ENTITY.COLLECTION_FK,
+                CONTENT_ENTITY.LABEL,
+                CONTENT_ENTITY.START,
+                CONTENT_ENTITY.SORT,
+                CONTENT_ENTITY.TYPE_FK
+            )
+            .select(
+                dsl
+                    .select(
+                        COLLECTION_ENTITY.ID,
+                        field("verselabel", String::class.java),
+                        field("versestart", Int::class.java),
+                        field("versesort", Int::class.java),
+                        field("typefk", Int::class.java)
+                    )
+                    .from(
+                        dsl
+                            .select(
+                                CONTENT_ENTITY.ID.`as`("verseid"),
+                                CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid"),
+                                CONTENT_ENTITY.LABEL.`as`("verselabel"),
+                                CONTENT_ENTITY.START.`as`("versestart"),
+                                CONTENT_ENTITY.SORT.`as`("versesort"),
+                                CONTENT_ENTITY.TYPE_FK.`as`("typefk")
+                            )
+                            .from(CONTENT_ENTITY)
+                            .where(
+                                CONTENT_ENTITY.COLLECTION_FK
+                                    .`in`(
+                                        dsl
+                                            .select(COLLECTION_ENTITY.ID)
+                                            .from(COLLECTION_ENTITY)
+                                            .where(COLLECTION_ENTITY.PARENT_FK.eq(sourceId))
+                                    )
+                                    .and(
+                                        CONTENT_ENTITY.TYPE_FK
+                                            .`in`(
+                                                dsl.select(CONTENT_TYPE.ID)
+                                                    .from(CONTENT_TYPE)
+                                                    .where(CONTENT_TYPE.NAME.eq("META"))
+                                            )
+                                    )
+                            )
+                    )
+                    .leftJoin(COLLECTION_ENTITY)
+                    .on(
+                        COLLECTION_ENTITY.SOURCE_FK.eq(field("chapterid", Int::class.java))
+                            .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(metadataId))
+                    )
+            ).execute()
     }
 
     private fun findProjectCollection(
@@ -531,6 +613,7 @@ class CollectionRepository @Inject constructor(
             COLLECTION_ENTITY,
             COLLECTION_ENTITY.PARENT_FK,
             COLLECTION_ENTITY.SOURCE_FK,
+            COLLECTION_ENTITY.CHUNKED,
             COLLECTION_ENTITY.LABEL,
             COLLECTION_ENTITY.TITLE,
             COLLECTION_ENTITY.SLUG,
@@ -540,6 +623,7 @@ class CollectionRepository @Inject constructor(
             dsl.select(
                 value(projectId),
                 COLLECTION_ENTITY.ID,
+                value(0),
                 COLLECTION_ENTITY.LABEL,
                 COLLECTION_ENTITY.TITLE,
                 COLLECTION_ENTITY.SLUG,
@@ -590,6 +674,63 @@ class CollectionRepository @Inject constructor(
                     .leftJoin(COLLECTION_ENTITY)
                     .on(
                         COLLECTION_ENTITY.SOURCE_FK.eq(field("chapterid", Int::class.java))
+                            .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(metadataId))
+                    )
+            ).execute()
+    }
+
+    private fun copyContentOfCollection(dsl: DSLContext, sourceBook: Collection, chapter: Collection, metadataId: Int) {
+        dsl
+            .insertInto( // insert the query result as the derived content of a chapter
+                CONTENT_ENTITY,
+                CONTENT_ENTITY.COLLECTION_FK,
+                CONTENT_ENTITY.LABEL,
+                CONTENT_ENTITY.START,
+                CONTENT_ENTITY.SORT,
+                CONTENT_ENTITY.TYPE_FK
+            )
+            .select(
+                dsl
+                    .select(
+                        COLLECTION_ENTITY.ID,
+                        field("verselabel", String::class.java),
+                        field("versestart", Int::class.java),
+                        field("versesort", Int::class.java),
+                        field("typefk", Int::class.java)
+                    )
+                    .from(
+                        dsl
+                            .select(
+                                CONTENT_ENTITY.ID.`as`("verseid"),
+                                CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid"),
+                                CONTENT_ENTITY.LABEL.`as`("verselabel"),
+                                CONTENT_ENTITY.START.`as`("versestart"),
+                                CONTENT_ENTITY.SORT.`as`("versesort"),
+                                CONTENT_ENTITY.TYPE_FK.`as`("typefk")
+                            )
+                            .from(CONTENT_ENTITY)
+                            .where(
+                                CONTENT_ENTITY.COLLECTION_FK
+                                    .`in`( // chapter which comes from the source book and matches the chapter number
+                                        dsl
+                                            .select(COLLECTION_ENTITY.ID)
+                                            .from(COLLECTION_ENTITY)
+                                            .where(
+                                                COLLECTION_ENTITY.PARENT_FK.eq(sourceBook.id)
+                                                    .and(
+                                                        COLLECTION_ENTITY.SORT.eq(chapter.sort)
+                                                    )
+                                            )
+                                    ) // and the content should be a verse, not meta
+                                    .and(
+                                        CONTENT_ENTITY.LABEL.eq("verse")
+                                    )
+                            )
+                    )
+                    .leftJoin(COLLECTION_ENTITY)
+                    .on( // gets the derived collection
+                        COLLECTION_ENTITY.SOURCE_FK
+                            .eq(field("chapterid", Int::class.java))
                             .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(metadataId))
                     )
             ).execute()

@@ -1,12 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.AudioPluginEntity
+import jooq.tables.CollectionEntity
 import jooq.tables.InstalledEntity
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 2
+const val SCHEMA_VERSION = 3
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -86,6 +87,30 @@ class DatabaseMigrator {
                 // be performed in sqlite.
             }
             return 2
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 2
+     * Adds a column for the marker plugin to the audio plugin table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate2to3(dsl: DSLContext, current: Int): Int {
+        return if (current < 3) {
+            try {
+                dsl
+                    .alterTable(CollectionEntity.COLLECTION_ENTITY)
+                    .addColumn(CollectionEntity.COLLECTION_ENTITY.CHUNKED)
+                    .execute()
+                logger.info("Updated database from version 2 to 3")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+            }
+            return 3
         } else {
             current
         }

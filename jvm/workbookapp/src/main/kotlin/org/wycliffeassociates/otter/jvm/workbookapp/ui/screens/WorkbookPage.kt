@@ -222,7 +222,8 @@ class WorkbookPage : Fragment() {
 
                                         onMousePressed = EventHandler {
                                             item.chapterSource?.let { chapter ->
-                                                viewModel.navigate(chapter)
+                                                val chunked = chapter.chunked?.let { it } ?: false
+                                                viewModel.navigate(chapter, chunked)
                                             }
                                         }
                                     }

@@ -4,6 +4,7 @@ data class CollectionEntity(
     var id: Int,
     var parentFk: Int?,
     var sourceFk: Int?,
+    var chunked: Int?,
     var label: String,
     var title: String,
     var slug: String,

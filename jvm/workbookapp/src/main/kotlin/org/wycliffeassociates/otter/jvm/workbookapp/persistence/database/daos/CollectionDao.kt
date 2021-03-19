@@ -56,6 +56,7 @@ class CollectionDao(
                 COLLECTION_ENTITY,
                 COLLECTION_ENTITY.PARENT_FK,
                 COLLECTION_ENTITY.SOURCE_FK,
+                COLLECTION_ENTITY.CHUNKED,
                 COLLECTION_ENTITY.SLUG,
                 COLLECTION_ENTITY.TITLE,
                 COLLECTION_ENTITY.LABEL,
@@ -65,6 +66,7 @@ class CollectionDao(
             .values(
                 entity.parentFk,
                 entity.sourceFk,
+                entity.chunked,
                 entity.slug,
                 entity.title,
                 entity.label,
@@ -116,6 +118,7 @@ class CollectionDao(
             .update(COLLECTION_ENTITY)
             .set(COLLECTION_ENTITY.PARENT_FK, entity.parentFk)
             .set(COLLECTION_ENTITY.SOURCE_FK, entity.sourceFk)
+            .set(COLLECTION_ENTITY.CHUNKED, entity.chunked)
             .set(COLLECTION_ENTITY.SLUG, entity.slug)
             .set(COLLECTION_ENTITY.TITLE, entity.title)
             .set(COLLECTION_ENTITY.LABEL, entity.label)

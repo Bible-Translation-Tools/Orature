@@ -6,5 +6,6 @@ data class Collection(
     var labelKey: String,
     var titleKey: String,
     var resourceContainer: ResourceMetadata?,
+    var chunked: Boolean? = null,
     var id: Int = 0
 ) : CollectionOrContent

@@ -52,6 +52,7 @@ class RecordMappers {
                 record.getValue(COLLECTION_ENTITY.ID),
                 record.getValue(COLLECTION_ENTITY.PARENT_FK),
                 record.getValue(COLLECTION_ENTITY.SOURCE_FK),
+                record.getValue(COLLECTION_ENTITY.CHUNKED),
                 record.getValue(COLLECTION_ENTITY.LABEL),
                 record.getValue(COLLECTION_ENTITY.TITLE),
                 record.getValue(COLLECTION_ENTITY.SLUG),

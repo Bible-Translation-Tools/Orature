@@ -42,4 +42,8 @@ interface ICollectionRepository : IRepository<Collection> {
      * @param deleteAudio flag for if take files referenced by Take entries should be removed from the filesystem
      */
     fun deleteResources(project: Collection, deleteAudio: Boolean): Completable
+
+    fun deriveContentForCollection(sourceBook: Collection, chapter: Collection, metadata: ResourceMetadata): Completable
+
+    fun deriveContentFromChunkList(chapter: Collection, chunkMarkers: List<Int>): Completable
 }

@@ -24,5 +24,5 @@ data class Book(
 
     override val children: Observable<BookElement> = chapters.cast()
 
-    fun toCollection(): Collection = Collection(sort, slug, label, title, resourceMetadata, collectionId)
+    fun toCollection(): Collection = Collection(sort, slug, label, title, resourceMetadata, null, collectionId)
 }

@@ -14,8 +14,10 @@ data class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    val chunks: Observable<Chunk>
+    val chunks: Observable<Chunk>,
+    var chunked: Boolean? = null
 ) : BookElement, BookElementContainer, Recordable {
+
 
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> = chunks.cast()

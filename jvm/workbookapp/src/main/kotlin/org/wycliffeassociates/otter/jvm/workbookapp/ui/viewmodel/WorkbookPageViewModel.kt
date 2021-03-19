@@ -23,6 +23,7 @@ import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.NotChunkedPage
 
 class WorkbookPageViewModel : ViewModel() {
 
@@ -109,9 +110,13 @@ class WorkbookPageViewModel : ViewModel() {
      * This updates the active properties of the WorkbookDataStore and selects
      * the appropriate page based on which resource the User was in.
      */
-    fun navigate(chapter: Chapter) {
+    fun navigate(chapter: Chapter, chunked: Boolean) {
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
+        if(!chunked) {
+            workspace.dock<NotChunkedPage>()
+            return
+        }
         when (resourceMetadata.type) {
             ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
             ContainerType.Help -> workspace.dock<ResourcePage>()

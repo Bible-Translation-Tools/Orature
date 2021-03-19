@@ -60,7 +60,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
-        val workbook = Workbook(book(source, disposables), book(target, disposables))
+        val workbook = Workbook(source(source, disposables), derivative(source, target, disposables))
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
     }
@@ -93,7 +93,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             }
     }
 
-    private fun book(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
+    private fun source(bookCollection: Collection, disposables: MutableList<Disposable>): Book {
         val resourceMetadata = bookCollection.resourceContainer
             ?: throw IllegalStateException("Book collection with id=${bookCollection.id} has null resource container")
         return Book(
@@ -102,25 +102,76 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             label = bookCollection.labelKey,
             sort = bookCollection.sort,
             slug = bookCollection.slug,
-            chapters = constructBookChapters(bookCollection, disposables),
+            chapters = constructSourceChapters(bookCollection, disposables),
             resourceMetadata = resourceMetadata,
             linkedResources = db.getLinkedResourceMetadata(resourceMetadata),
             subtreeResources = db.getSubtreeResourceMetadata(bookCollection)
         )
     }
 
-    private fun constructBookChapters(
+    private fun derivative(
+        sourceBook: Collection,
+        derivedBook: Collection,
+        disposables: MutableList<Disposable>
+    ): Book {
+        val sourceMetadata = sourceBook.resourceContainer
+            ?: throw IllegalStateException("Book collection with id=${sourceBook.id} has null resource container")
+        val derivedMetadata = derivedBook.resourceContainer
+            ?: throw IllegalStateException("Book collection with id=${derivedBook.id} has null resource container")
+        return Book(
+            collectionId = derivedBook.id,
+            title = derivedBook.titleKey,
+            label = derivedBook.labelKey,
+            sort = derivedBook.sort,
+            slug = derivedBook.slug,
+            chapters = constructDerivativeChapters(
+                sourceBook,
+                derivedBook,
+                sourceMetadata,
+                derivedMetadata,
+                disposables
+            ),
+            resourceMetadata = derivedMetadata,
+            linkedResources = db.getLinkedResourceMetadata(derivedMetadata),
+            subtreeResources = db.getSubtreeResourceMetadata(derivedBook)
+        )
+    }
+
+    private fun constructSourceChapters(
         bookCollection: Collection,
         disposables: MutableList<Disposable>
     ): Observable<Chapter> {
         return Observable.defer {
             db.getChildren(bookCollection)
                 .flattenAsObservable { it }
-                .concatMapEager { constructChapter(it, disposables).toObservable() }
+                .concatMapEager { constructSourceChapter(it, disposables).toObservable() }
         }.cache()
     }
 
-    private fun constructChapter(
+    private fun constructDerivativeChapters(
+        sourceBook: Collection,
+        derivedBook: Collection,
+        sourceMetadata: ResourceMetadata,
+        derivedMetadata: ResourceMetadata,
+        disposables: MutableList<Disposable>
+    ): Observable<Chapter> {
+        return Observable.defer {
+            db.getChildren(derivedBook)
+                .flattenAsObservable { it }
+                .concatMapEager {
+                    constructDerivedChapter(
+                        sourceBook,
+                        derivedBook,
+                        it,
+                        sourceMetadata,
+                        derivedMetadata,
+                        disposables
+                    ).toObservable()
+                }
+        }.cache()
+    }
+
+    private fun constructSourceChapter(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
     ): Single<Chapter> {
@@ -138,6 +189,29 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             }
     }
 
+    private fun constructDerivedChapter(
+        sourceBook: Collection,
+        derivedBook: Collection,
+        chapter: Collection,
+        sourceMetadata: ResourceMetadata,
+        derivedMetadata: ResourceMetadata,
+        disposables: MutableList<Disposable>
+    ): Single<Chapter> {
+        return db.getCollectionMetaContent(chapter)
+            .map { metaContent ->
+                Chapter(
+                    title = chapter.titleKey,
+                    label = chapter.labelKey,
+                    sort = chapter.sort,
+                    resources = constructResourceGroups(chapter, disposables),
+                    audio = constructAssociatedAudio(metaContent, disposables),
+                    chunks = constructChunkBuilder(sourceBook, chapter, derivedMetadata, disposables).invoke(listOf()),
+                    subtreeResources = db.getSubtreeResourceMetadata(chapter),
+                    chunked = chapter.chunked
+                )
+            }
+    }
+
     private fun constructChunks(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
@@ -148,6 +222,37 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                 .filter { it.type == ContentType.TEXT }
                 .map { chunk(it, disposables) }
         }.cache()
+    }
+
+    private fun constructChunkBuilder(
+        sourceBook: Collection,
+        sourceChapter: Collection,
+        derivedMetadata: ResourceMetadata,
+        disposables: MutableList<Disposable>
+    ): (List<Int>) -> Observable<Chunk> {
+        return { list: List<Int> ->
+            Observable.defer {
+                if (!hasBeenChunked(sourceChapter)) {
+                    if (list.isEmpty()) {
+                        db.deriveContentForCollection(sourceBook, sourceChapter, derivedMetadata).subscribe()
+                    } else {
+                        db.chunkCollectionFromList(sourceChapter, list)
+                    }
+                    sourceChapter.chunked = true
+                    db.updateCollection(sourceChapter).blockingGet()
+                }
+                db.getContentByCollection(sourceChapter)
+                    .flattenAsObservable { it }
+                    .filter { it.type == ContentType.TEXT }
+                    .map {
+                        chunk(it, disposables)
+                    }
+            }.cache()
+        }
+    }
+
+    private fun hasBeenChunked(chapter: Collection): Boolean {
+        return chapter.chunked?.let { it } ?: false
     }
 
     private fun chunk(content: Content, disposables: MutableList<Disposable>): Chunk {
@@ -283,7 +388,12 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             }
             .subscribe {
                 db.deleteTake(modelTake, it)
-                    .doOnError { e -> logger.error("Error in deleteTake: wb take: $take, model take: $modelTake", e) }
+                    .doOnError { e ->
+                        logger.error(
+                            "Error in deleteTake: wb take: $take, model take: $modelTake",
+                            e
+                        )
+                    }
                     .subscribe()
             }
     }
@@ -419,6 +529,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getChildren(collection: Collection): Single<List<Collection>>
         fun getCollectionMetaContent(collection: Collection): Single<Content>
         fun getContentByCollection(collection: Collection): Single<List<Content>>
+        fun updateCollection(collection: Collection): Completable
         fun updateContent(content: Content): Completable
         fun getResources(content: Content, metadata: ResourceMetadata): Observable<Content>
         fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
@@ -432,6 +543,15 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
         fun getDerivedProjects(): Single<List<Collection>>
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
+
+
+        fun deriveContentForCollection(
+            sourceBook: Collection,
+            chapter: Collection,
+            metadata: ResourceMetadata
+        ): Completable
+
+        fun chunkCollectionFromList(chapter: Collection, chunkMarkers: List<Int>): Completable
     }
 }
 
@@ -447,6 +567,7 @@ private class DefaultDatabaseAccessors(
     override fun getCollectionMetaContent(collection: Collection) = contentRepo.getCollectionMetaContent(collection)
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
     override fun updateContent(content: Content) = contentRepo.update(content)
+    override fun updateCollection(collection: Collection) = collectionRepo.update(collection)
 
     override fun getResources(content: Content, metadata: ResourceMetadata) =
         resourceRepo.getResources(content, metadata)
@@ -468,10 +589,24 @@ private class DefaultDatabaseAccessors(
     override fun deleteTake(take: ModelTake, date: DateHolder) = takeRepo.update(take.copy(deleted = date.value))
 
     override fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String) =
-        takeRepo.getSoftDeletedTakes(collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet())
+        takeRepo.getSoftDeletedTakes(
+            collectionRepo.getProjectBySlugAndMetadata(projectSlug, metadata).blockingGet()
+        )
 
     override fun getDerivedProjects(): Single<List<Collection>> = collectionRepo.getDerivedProjects()
 
     override fun getSourceProject(targetProject: Collection): Maybe<Collection> =
         collectionRepo.getSource(targetProject)
+
+    override fun deriveContentForCollection(
+        sourceBook: Collection,
+        chapter: Collection,
+        derivedMetadata: ResourceMetadata
+    ): Completable {
+        return collectionRepo.deriveContentForCollection(sourceBook, chapter, derivedMetadata)
+    }
+
+    override fun chunkCollectionFromList(chapter: Collection, chunkMarkers: List<Int>): Completable {
+        return collectionRepo.deriveContentFromChunkList(chapter, chunkMarkers)
+    }
 }
