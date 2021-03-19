@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
+import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay2.Relay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -15,7 +17,8 @@ data class Chapter(
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
     val chunks: Observable<Chunk>,
-    var chunked: Boolean? = null
+    var chunked: Boolean? = null,
+    val userChunkList: Relay<List<Int>>? = null
 ) : BookElement, BookElementContainer, Recordable {
 
 

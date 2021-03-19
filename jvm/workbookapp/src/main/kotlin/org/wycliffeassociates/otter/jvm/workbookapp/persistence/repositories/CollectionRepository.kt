@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -34,6 +35,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ContentEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.ResourceMetadataEntity
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
@@ -194,7 +196,15 @@ class CollectionRepository @Inject constructor(
     }
 
     override fun deriveContentFromChunkList(chapter: Collection, chunkMarkers: List<Int>): Completable {
-        TODO("Not yet implemented")
+        return Completable.fromCallable {
+            database.transactionResult { dsl ->
+                for (chunk in chunkMarkers) {
+                    val entity = ContentEntity(0, chunk, "verse", chunk, chapter.id, null, null, null, 1)
+                    val id = database.contentDao.insert(entity, dsl)
+                    println("inserted $id")
+                }
+            }
+        }
     }
 
     override fun getAll(): Single<List<Collection>> {

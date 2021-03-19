@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.PublishRelay
+import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -199,15 +201,18 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
     ): Single<Chapter> {
         return db.getCollectionMetaContent(chapter)
             .map { metaContent ->
+                val chunkRelay = BehaviorRelay.create<List<Int>>()
+                chunkRelay.accept(listOf())
                 Chapter(
                     title = chapter.titleKey,
                     label = chapter.labelKey,
                     sort = chapter.sort,
                     resources = constructResourceGroups(chapter, disposables),
                     audio = constructAssociatedAudio(metaContent, disposables),
-                    chunks = constructChunkBuilder(sourceBook, chapter, derivedMetadata, disposables).invoke(listOf()),
+                    chunks = constructChunkBuilder(sourceBook, chapter, derivedMetadata, chunkRelay, disposables),
                     subtreeResources = db.getSubtreeResourceMetadata(chapter),
-                    chunked = chapter.chunked
+                    chunked = chapter.chunked,
+                    userChunkList = chunkRelay
                 )
             }
     }
@@ -228,15 +233,16 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         sourceBook: Collection,
         sourceChapter: Collection,
         derivedMetadata: ResourceMetadata,
+        chunkListRelay: Relay<List<Int>>,
         disposables: MutableList<Disposable>
-    ): (List<Int>) -> Observable<Chunk> {
-        return { list: List<Int> ->
-            Observable.defer {
+    ): Observable<Chunk> {
+        return Observable.defer {
                 if (!hasBeenChunked(sourceChapter)) {
+                    val list = chunkListRelay.blockingLatest().first()
                     if (list.isEmpty()) {
                         db.deriveContentForCollection(sourceBook, sourceChapter, derivedMetadata).subscribe()
                     } else {
-                        db.chunkCollectionFromList(sourceChapter, list)
+                        db.chunkCollectionFromList(sourceChapter, list).subscribe()
                     }
                     sourceChapter.chunked = true
                     db.updateCollection(sourceChapter).blockingGet()
@@ -248,7 +254,6 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
                         chunk(it, disposables)
                     }
             }.cache()
-        }
     }
 
     private fun hasBeenChunked(chapter: Collection): Boolean {
