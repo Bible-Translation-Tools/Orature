@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import tornadofx.*
 
-class ChapterCell: ListCell<WorkbookItemModel?>() {
+class ChapterCell: ListCell<WorkbookItemModel>() {
 
     private val chapterCard = ChapterCard()
     private val workbookBanner = WorkbookBanner()
@@ -17,7 +17,7 @@ class ChapterCell: ListCell<WorkbookItemModel?>() {
     override fun updateItem(item: WorkbookItemModel?, empty: Boolean) {
         super.updateItem(item, empty)
 
-        if (empty) {
+        if (empty || item == null) {
             graphic = null
             return
         }
@@ -29,37 +29,37 @@ class ChapterCell: ListCell<WorkbookItemModel?>() {
         }
     }
 
-    private fun prepareChapterCard(item: ChapterCardModel?): ChapterCard {
+    private fun prepareChapterCard(item: ChapterCardModel): ChapterCard {
         return chapterCard.apply {
-            titleProperty.set(item?.title)
+            titleProperty.set(item.title)
             notStartedTextProperty.set(FX.messages["notStarted"])
 
             setOnMouseClicked {
-                item?.source?.let { chapter ->
+                item.source?.let { chapter ->
                     item.onClick(chapter)
                 }
             }
         }
     }
 
-    private fun prepareWorkbookBanner(item: WorkbookBannerModel?): WorkbookBanner {
+    private fun prepareWorkbookBanner(item: WorkbookBannerModel): WorkbookBanner {
         return workbookBanner.apply {
-            backgroundImageFileProperty.set(item?.coverArt)
-            bookTitleProperty.set(item?.title)
-            resourceTitleProperty.set(item?.rcTitle)
+            backgroundImageFileProperty.set(item.coverArt)
+            bookTitleProperty.set(item.title)
+            resourceTitleProperty.set(item.rcTitle)
 
             deleteTitleProperty.set(FX.messages["delete"])
 
             exportTitleProperty.set(
-                when (item?.rcType) {
+                when (item.rcType) {
                     ContainerType.Book, ContainerType.Bundle -> FX.messages["exportProject"]
                     ContainerType.Help -> FX.messages["exportResource"]
                     else -> ""
                 }
             )
 
-            onDeleteAction { item?.onDelete?.invoke() }
-            onExportAction { item?.onExport?.invoke() }
+            onDeleteAction { item.onDelete() }
+            onExportAction { item.onExport() }
         }
     }
 }
