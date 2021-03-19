@@ -1,5 +1,13 @@
 @import "root.css"
 
+.confirm-dialog {
+    -fx-pref-width: 792px;
+}
+
+.confirm-dialog__header {
+    -fx-pref-height: 240px;
+}
+
 .confirm-dialog__title-bar {
     -fx-alignment: center;
     -fx-padding: 0 30px 0 100px;

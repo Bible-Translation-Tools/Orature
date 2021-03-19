@@ -46,11 +46,11 @@ class ConfirmDialog : Fragment() {
     }
 
     override val root = vbox {
+        addClass("confirm-dialog")
+
         stackpane {
             addClass("confirm-dialog__header")
             vgrow = Priority.ALWAYS
-
-            prefHeightProperty().bind(this@vbox.heightProperty().divide(2))
 
             hbox {
                 effectProperty().bind(

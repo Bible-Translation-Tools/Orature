@@ -85,13 +85,6 @@ class WorkbookPage : Fragment() {
 
     private fun initializeDeleteConfirmDialog() {
         confirmdialog {
-            this.root.prefWidthProperty().bind(
-                primaryStage.widthProperty().divide(2)
-            )
-            this.root.prefHeightProperty().bind(
-                primaryStage.heightProperty().divide(2)
-            )
-
             messageTextProperty.set(messages["deleteProjectConfirmation"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["keepProject"])
