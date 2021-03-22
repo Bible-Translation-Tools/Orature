@@ -1,23 +1,21 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
-import javafx.application.Platform
-import javafx.event.EventHandler
-import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.control.ListView
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
-import org.wycliffeassociates.otter.jvm.controls.card.ChapterCard
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
@@ -42,6 +40,8 @@ class WorkbookPage : Fragment() {
 
     init {
         initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
+        importStylesheet(resources.get("/css/workbook-page.css"))
     }
 
     /**
@@ -83,44 +83,40 @@ class WorkbookPage : Fragment() {
         }
     }
 
-    private val confirmDialog = confirmdialog {
-        this.root.prefWidthProperty().bind(
-            this@WorkbookPage.root.widthProperty().divide(2)
-        )
-        this.root.prefHeightProperty().bind(
-            this@WorkbookPage.root.heightProperty().divide(2)
-        )
+    private fun initializeDeleteConfirmDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectConfirmation"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["keepProject"])
 
-        messageTextProperty.set(messages["deleteProjectConfirmation"])
-        confirmButtonTextProperty.set(messages["removeProject"])
-        cancelButtonTextProperty.set(messages["keepProject"])
-
-        onCloseAction { close() }
-        onCancelAction { close() }
-    }
-
-    private fun showDeleteConfirmDialog() {
-        val workbook = viewModel.workbookDataStore.workbook
-        confirmDialog.apply {
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
                 messages["remove"],
-                workbook.target.title
+                viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
-            backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+            )
 
             onConfirmAction {
-                Platform.runLater { close() }
+                viewModel.showDeleteDialogProperty.set(false)
                 viewModel.deleteWorkbook()
             }
-        }.open()
+
+            viewModel.showDeleteDialogProperty.onChange {
+                if (it) open() else close()
+            }
+
+            onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
+            onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
+        }
     }
 
     private fun initializeProgressDialogs() {
         progressdialog {
-            viewModel.showDeleteDialogProperty.onChange {
+            viewModel.showDeleteProgressDialogProperty.onChange {
                 if (it) {
                     text = messages["deletingProject"]
                     graphic = FontIcon("mdi-delete")
@@ -130,7 +126,7 @@ class WorkbookPage : Fragment() {
                 }
             }
 
-            viewModel.showExportDialogProperty.onChange {
+            viewModel.showExportProgressDialogProperty.onChange {
                 if (it) {
                     text = messages["exportProject"]
                     graphic = FontIcon("mdi-share-variant")
@@ -142,13 +138,13 @@ class WorkbookPage : Fragment() {
         }
     }
 
-
     /**
      * The tab for a single resource of the workbook. This will contain top level actions for
      * the resource, as well as the list of chapters within the resource.
      */
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
+        lateinit var listView: ListView<WorkbookItemModel>
         val tab = buildTab()
 
         init {
@@ -157,6 +153,18 @@ class WorkbookPage : Fragment() {
             add(tab)
             setOnSelectionChanged {
                 viewModel.openTab(resourceMetadata)
+                viewModel.selectedResourceMetadata.set(resourceMetadata)
+                listView.refresh()
+            }
+
+            viewModel.chapters.onChangeAndDoNow {
+                val item =
+                    it.singleOrNull { model ->
+                        model is ChapterCardModel &&
+                                model.source == viewModel.selectedChapterProperty.value
+                    }
+                val index = it.indexOf(item)
+                listView.scrollTo(index)
             }
         }
 
@@ -172,64 +180,12 @@ class WorkbookPage : Fragment() {
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                scrollpane {
+                listView = listview(viewModel.chapters) {
                     vgrow = Priority.ALWAYS
+                    addClass("workbook-page__chapter-list")
 
-                    isFitToWidth = true
-                    isFitToHeight = true
-
-                    vbox {
-                        maxWidth = 800.0
-                        spacing = 10.0
-                        padding = Insets(10.0, 20.0, 10.0, 20.0)
-
-                        add(
-                            WorkbookBanner().apply {
-                                val workbook = viewModel.workbookDataStore.workbook
-
-                                backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
-                                bookTitleProperty.set(workbook.target.title)
-                                resourceTitleProperty.set(resourceMetadata.title)
-
-                                deleteTitleProperty.set(messages["delete"])
-
-                                exportTitleProperty.set(
-                                    when (resourceMetadata.type) {
-                                        ContainerType.Book, ContainerType.Bundle -> messages["exportProject"]
-                                        ContainerType.Help -> messages["exportResource"]
-                                        else -> ""
-                                    }
-                                )
-
-                                onDeleteAction {
-                                    showDeleteConfirmDialog()
-                                }
-
-                                onExportAction {
-                                    val directory = chooseDirectory(FX.messages["exportProject"])
-                                    directory?.let {
-                                        viewModel.exportWorkbook(it)
-                                    }
-                                }
-                            }
-                        )
-
-                        viewModel.chapters.onChangeAndDoNow {
-                            it.forEach { item ->
-                                add(
-                                    ChapterCard().apply {
-                                        titleProperty.set(item.sort.toString())
-
-                                        onMousePressed = EventHandler {
-                                            item.chapterSource?.let { chapter ->
-                                                val chunked = chapter.chunked?.let { it } ?: false
-                                                viewModel.navigate(chapter, chunked)
-                                            }
-                                        }
-                                    }
-                                )
-                            }
-                        }
+                    setCellFactory {
+                        ChapterCell()
                     }
                 }
             }

@@ -15,7 +15,7 @@ import tornadofx.*
 class WaveformFrame(
     markerTrack: MarkerTrackControl,
     mainWaveform: MainWaveform,
-    timecodeHolder: TimecodeHolder,
+    // timecodeHolder: TimecodeHolder,
     viewModel: VerseMarkerViewModel
 ) : BorderPane() {
 
@@ -75,7 +75,7 @@ class WaveformFrame(
             bottom {
                 region {
                     styleClass.add("vm-waveform-frame__bottom-track")
-                    add(timecodeHolder)
+    //                add(timecodeHolder)
                 }
             }
         }

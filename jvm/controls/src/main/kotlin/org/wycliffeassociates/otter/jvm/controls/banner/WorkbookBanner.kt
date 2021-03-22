@@ -34,6 +34,10 @@ class WorkbookBanner: Control() {
     val onDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
+    init {
+        styleClass.setAll("workbook-banner")
+    }
+
     fun backgroundBinding(): ObjectBinding<Background> {
         return Bindings.createObjectBinding(
             Callable {

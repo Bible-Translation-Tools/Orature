@@ -4,6 +4,8 @@ import javafx.beans.property.Property
 import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.controls.card.InnerCard
 import org.wycliffeassociates.otter.jvm.controls.navigation.projectnav
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.NavBoxType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
@@ -46,6 +48,15 @@ class DeprecatedNavBar : View() {
     )
 
     override val root = projectnav {
+        subscribe<PluginOpenedEvent> {
+            visibleProperty().set(false)
+            managedProperty().set(false)
+        }
+        subscribe<PluginClosedEvent> {
+            visibleProperty().set(true)
+            managedProperty().set(true)
+        }
+
         style {
             prefWidth = 200.px
             minWidth = 200.px

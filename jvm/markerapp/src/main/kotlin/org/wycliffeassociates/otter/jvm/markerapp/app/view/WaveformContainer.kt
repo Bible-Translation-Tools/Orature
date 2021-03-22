@@ -11,7 +11,7 @@ class WaveformContainer : Fragment() {
     val viewModel: VerseMarkerViewModel by inject()
     val mainWaveform: MainWaveform
     val markerTrack: MarkerTrackControl
-    val timecodeHolder: TimecodeHolder
+    // val timecodeHolder: TimecodeHolder
 
     init {
         markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
@@ -20,7 +20,7 @@ class WaveformContainer : Fragment() {
                 refreshMarkers()
             }
         }
-        timecodeHolder = TimecodeHolder(viewModel, 50.0)
+        // timecodeHolder = TimecodeHolder(viewModel, 50.0)
         mainWaveform = MainWaveform(viewModel)
 
         object : AnimationTimer() {
@@ -44,7 +44,7 @@ class WaveformContainer : Fragment() {
                 WaveformFrame(
                     markerTrack,
                     mainWaveform,
-                    timecodeHolder,
+                  //  timecodeHolder,
                     viewModel
                 )
             )

@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -16,11 +17,14 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
 import java.io.File
+import java.text.MessageFormat
 import javax.inject.Inject
 import javax.inject.Provider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.NotChunkedPage
@@ -40,14 +44,18 @@ class WorkbookPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
 
-    val chapters: ObservableList<CardData> = FXCollections.observableArrayList()
+    val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
     val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(WorkbookPageViewModel::loading)
 
+    val showDeleteProgressDialogProperty = SimpleBooleanProperty(false)
+    val showExportProgressDialogProperty = SimpleBooleanProperty(false)
+
+    val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
-    val showExportDialogProperty = SimpleBooleanProperty(false)
+    val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -91,7 +99,16 @@ class WorkbookPageViewModel : ViewModel() {
         loading = true
         chapters.clear()
         workbook.target.chapters
-            .map { CardData(it) }
+            .map { chapter ->
+                ChapterCardModel(
+                    title = MessageFormat.format(
+                        FX.messages["chapterTitle"],
+                        FX.messages["chapter"], chapter.sort
+                    ),
+                    chapter = chapter,
+                    onClick = { navigate(chapter) }
+                )
+            }
             .doOnComplete {
                 loading = false
             }
@@ -100,9 +117,29 @@ class WorkbookPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
             }
-            .subscribe { list: List<CardData> ->
+            .subscribe { list: List<WorkbookItemModel> ->
                 chapters.setAll(list)
+
+                if (chapters.filterIsInstance<WorkbookBannerModel>().isEmpty()) {
+                    chapters.add(0, createWorkbookBanner())
+                }
             }
+    }
+
+    private fun createWorkbookBanner(): WorkbookBannerModel {
+        return WorkbookBannerModel(
+            title = workbookDataStore.workbook.target.title,
+            coverArt = workbookDataStore.workbook.coverArtAccessor.getArtwork(),
+            onDelete = { showDeleteDialogProperty.set(true) },
+            onExport = {
+                val directory = chooseDirectory(FX.messages["exportProject"])
+                directory?.let {
+                    exportWorkbook(it)
+                }
+            }
+        ).apply {
+            rcMetadataProperty.bind(selectedResourceMetadata)
+        }
     }
 
     /**
@@ -111,6 +148,7 @@ class WorkbookPageViewModel : ViewModel() {
      * the appropriate page based on which resource the User was in.
      */
     fun navigate(chapter: Chapter, chunked: Boolean) {
+        selectedChapterProperty.set(chapter)
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         if(!chunked) {
@@ -124,7 +162,7 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun exportWorkbook(directory: File) {
-        showExportDialogProperty.set(true)
+        showExportProgressDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
         val projectExporter = projectExporterProvider.get()
         val resourceMetadata = workbookDataStore.activeResourceMetadata
@@ -138,7 +176,7 @@ class WorkbookPageViewModel : ViewModel() {
                 logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
             }
             .subscribe { result: ExportResult ->
-                showExportDialogProperty.set(false)
+                showExportProgressDialogProperty.set(false)
 
                 result.errorMessage?.let {
                     error(messages["exportError"], it)
@@ -147,7 +185,7 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun deleteWorkbook() {
-        showDeleteDialogProperty.set(true)
+        showDeleteProgressDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
 
@@ -159,7 +197,7 @@ class WorkbookPageViewModel : ViewModel() {
                 logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
             }
             .subscribe {
-                showDeleteDialogProperty.set(false)
+                showDeleteProgressDialogProperty.set(false)
                 workspace.navigateBack()
             }
     }

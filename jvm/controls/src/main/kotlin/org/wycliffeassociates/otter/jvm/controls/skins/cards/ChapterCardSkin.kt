@@ -58,7 +58,7 @@ class ChapterCardSkin(private val card: ChapterCard): SkinBase<ChapterCard>(card
         title.visibleWhen { card.coverArtProperty.isNull }
 
         title.apply {
-            textProperty().bind(card.titleBinding())
+            textProperty().bind(card.titleProperty)
         }
 
         recordedProgress.apply {
@@ -83,6 +83,7 @@ class ChapterCardSkin(private val card: ChapterCard): SkinBase<ChapterCard>(card
         }
 
         notStarted.apply {
+            textProperty().bind(card.notStartedTextProperty)
             hiddenWhen(card.userHasChunkedProperty)
             managedWhen(visibleProperty())
         }
