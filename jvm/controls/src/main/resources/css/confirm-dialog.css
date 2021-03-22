@@ -1,7 +1,7 @@
 @import "root.css"
 
 .confirm-dialog {
-    -fx-pref-width: 792px;
+    -fx-pref-width: 800px;
 }
 
 .confirm-dialog__header {
