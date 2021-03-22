@@ -7,7 +7,7 @@
 <?import org.kordamp.ikonli.javafx.*?>
 
 <?import javafx.scene.image.ImageView?>
-<HBox fx:id="root" spacing="10.0" styleClass="chapter-card" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<HBox fx:id="root" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <StackPane alignment="CENTER" HBox.hgrow="NEVER" prefWidth="70.0" styleClass="chapter-card__graphic">
             <children>
@@ -25,7 +25,7 @@
         <VBox spacing="10.0" HBox.hgrow="ALWAYS">
             <children>
                 <Label fx:id="title" styleClass="chapter-card__title" text="Chapter" underline="true" VBox.vgrow="ALWAYS" />
-                <Label fx:id="notStarted" text="not started" VBox.vgrow="ALWAYS" />
+                <Label fx:id="notStarted" styleClass="chapter-card__not-started" text="not started" VBox.vgrow="ALWAYS" />
                 <VBox fx:id="progressBars" VBox.vgrow="ALWAYS">
                     <children>
                         <HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="ALWAYS">
