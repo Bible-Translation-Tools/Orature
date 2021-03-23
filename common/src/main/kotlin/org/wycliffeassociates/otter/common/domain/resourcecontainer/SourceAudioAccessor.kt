@@ -9,29 +9,29 @@ import java.io.File
 data class SourceAudio(val file: File, val start: Int, val end: Int)
 
 class SourceAudioAccessor(
-    metadata: ResourceMetadata,
+    val metadata: ResourceMetadata,
     val project: String
 ) {
 
     val cache = mutableMapOf<String, File>()
 
-    private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
-
     fun getChapter(chapter: Int): SourceAudio? {
-        if (rc.media != null) {
-            val mediaProject = rc.media!!.projects.find { it.identifier == project }
-            var media = mediaProject?.media?.find { it.identifier == "mp3" }
-            if (media == null) {
-                media = mediaProject?.media?.find { it.identifier == "wav" }
-            }
-            if (media != null) {
-                return getChapter(media, chapter)
+        ResourceContainer.load(metadata.path).use { rc ->
+            if (rc.media != null) {
+                val mediaProject = rc.media!!.projects.find { it.identifier == project }
+                var media = mediaProject?.media?.find { it.identifier == "mp3" }
+                if (media == null) {
+                    media = mediaProject?.media?.find { it.identifier == "wav" }
+                }
+                if (media != null) {
+                    return getChapter(media, chapter, rc)
+                }
             }
         }
         return null
     }
 
-    private fun getChapter(media: Media, chapter: Int): SourceAudio? {
+    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer): SourceAudio? {
         return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {

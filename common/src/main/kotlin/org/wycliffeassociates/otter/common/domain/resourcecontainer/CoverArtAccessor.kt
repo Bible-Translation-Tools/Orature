@@ -10,28 +10,28 @@ class CoverArtAccessor(val metadata: ResourceMetadata, val project: String) {
         private val cache = mutableMapOf<String, File>()
     }
 
-    private val rc: ResourceContainer by lazy { ResourceContainer.load(metadata.path) }
-
     fun getArtwork(): File? {
         synchronized(cache) {
             cache[cacheKey(metadata, project)]?.let {
                 return it
             }
         }
-        if (rc.media != null) {
-            val mediaProject = rc.media!!.projects.find { it.identifier == project }
-            var media = mediaProject?.media?.find { it.identifier == "jpg" || it.identifier == "jpeg" }
-            if (media == null) {
-                media = mediaProject?.media?.find { it.identifier == "png" }
-            }
-            if (media != null) {
-                return getArtwork(media)
+        ResourceContainer.load(metadata.path).use { rc ->
+            if (rc.media != null) {
+                val mediaProject = rc.media!!.projects.find { it.identifier == project }
+                var media = mediaProject?.media?.find { it.identifier == "jpg" || it.identifier == "jpeg" }
+                if (media == null) {
+                    media = mediaProject?.media?.find { it.identifier == "png" }
+                }
+                if (media != null) {
+                    return getArtwork(media, rc)
+                }
             }
         }
         return null
     }
 
-    private fun getArtwork(media: Media): File? {
+    private fun getArtwork(media: Media, rc: ResourceContainer): File? {
         val paths = arrayListOf<String>()
         paths.add(media.chapterUrl)
         media.quality.forEach { quality ->
