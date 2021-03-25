@@ -17,9 +17,14 @@ class MediaMerge(
 ) {
 
     fun merge() {
-        if (from.media != null) {
-            mergeManifest()
-            mergeMediaFiles()
+        try {
+            if (from.media != null) {
+                mergeManifest()
+                mergeMediaFiles()
+            }
+        } finally {
+            from.close()
+            to.close()
         }
     }
 

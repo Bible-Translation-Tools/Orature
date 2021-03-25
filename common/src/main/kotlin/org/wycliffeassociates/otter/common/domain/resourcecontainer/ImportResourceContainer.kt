@@ -117,6 +117,7 @@ class ImportResourceContainer @Inject constructor(
         val rc = ResourceContainer.load(file, true)
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
         val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
+        rc.close()
         return resourceMetadataRepository.exists(resourceMetadata).blockingGet()
     }
 
@@ -124,6 +125,7 @@ class ImportResourceContainer @Inject constructor(
         val rc = ResourceContainer.load(file, true)
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
         val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
+        rc.close()
         return resourceMetadataRepository.get(resourceMetadata).blockingGet()
     }
 
@@ -177,6 +179,7 @@ class ImportResourceContainer @Inject constructor(
             constructContainerTree(container)
         } catch (e: ImportException) {
             logger.error("Error constructing container tree, file: $fileToLoad", e)
+            container.close()
             return cleanUp(fileToLoad, e.result)
         }
 
