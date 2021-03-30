@@ -18,6 +18,7 @@ class BreadCrumb: HBox() {
     val titleProperty = SimpleStringProperty()
     val activeTitleProperty = SimpleStringProperty()
     val isActiveProperty = SimpleBooleanProperty(false)
+    val tooltipTextProperty = SimpleStringProperty()
     val onClickProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
     init {
@@ -54,6 +55,12 @@ class BreadCrumb: HBox() {
             graphic = FontIcon("mdi-help-circle")
             visibleWhen(isActiveProperty)
             managedWhen(visibleProperty())
+
+            tooltip {
+                textProperty().bind(tooltipTextProperty)
+                prefWidth = 256.0
+                isWrapText = true
+            }
         }
     }
 

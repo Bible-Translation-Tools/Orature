@@ -1,5 +1,5 @@
 .breadcrumb-bar {
-    -fx-padding: 10px;
+    -fx-padding: 15px 40px;
     -fx-spacing: 5px;
 }
 
@@ -20,12 +20,20 @@
     -fx-font-size: 20px;
 }
 
+.breadcrumb__content:hover {
+    -fx-background-color: #E6E9ED;
+}
+
+.breadcrumb__content:pressed {
+    -fx-background-color: #D9DDE4;
+}
+
 .breadcrumb__content .ikonli-font-icon {
     -fx-icon-color: #001533;
     -fx-icon-size: 24px;
 }
 
-.breadcrumb--active {
+.breadcrumb--active, .breadcrumb--active:hover, .breadcrumb--active:pressed {
     -fx-border-width: 0px;
     -fx-background-color: #CDDDF4;
     -fx-background-radius: 6px;
@@ -47,4 +55,10 @@
 .breadcrumb__help .ikonli-font-icon {
     -fx-icon-color: #3B5B8F;
     -fx-icon-size: 24px;
+}
+
+.breadcrumb__help .tooltip {
+    -fx-font-size: 20px;
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: #001533EE;
 }
