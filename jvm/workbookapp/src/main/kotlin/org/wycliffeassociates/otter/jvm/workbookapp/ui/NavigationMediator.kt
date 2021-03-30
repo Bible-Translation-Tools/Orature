@@ -1,10 +1,10 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import tornadofx.*
 
-class Navigator: Component(), ScopedInstance {
+class NavigationMediator: Component(), ScopedInstance {
 
     val breadCrumbsBar = BreadcrumbBar()
 
