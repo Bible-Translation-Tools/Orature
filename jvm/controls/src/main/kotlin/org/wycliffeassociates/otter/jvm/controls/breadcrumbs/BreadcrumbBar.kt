@@ -5,7 +5,7 @@ import tornadofx.*
 
 class BreadcrumbBar: HBox() {
 
-    internal val items = observableListOf<BreadCrumb>()
+    private val items = observableListOf<BreadCrumb>()
 
     init {
         importStylesheet(javaClass.getResource("/css/breadcrumb-bar.css").toExternalForm())
