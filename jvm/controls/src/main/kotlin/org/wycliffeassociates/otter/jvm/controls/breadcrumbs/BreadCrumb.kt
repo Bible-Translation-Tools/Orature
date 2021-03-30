@@ -1,7 +1,6 @@
 package org.wycliffeassociates.otter.jvm.controls.breadcrumbs
 
 import javafx.beans.binding.Bindings
-import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -10,13 +9,11 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
-import java.util.concurrent.Callable
 
 class BreadCrumb: HBox() {
 
     val iconProperty = SimpleObjectProperty<FontIcon>()
     val titleProperty = SimpleStringProperty()
-    val activeTitleProperty = SimpleStringProperty()
     val isActiveProperty = SimpleBooleanProperty(false)
     val tooltipTextProperty = SimpleStringProperty()
     val onClickProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
@@ -26,7 +23,7 @@ class BreadCrumb: HBox() {
 
         label {
             graphicProperty().bind(iconProperty)
-            textProperty().bind(titleBinding())
+            textProperty().bind(titleProperty)
 
             addClass("breadcrumb__content")
 
@@ -63,21 +60,6 @@ class BreadCrumb: HBox() {
                 prefWidth = 256.0
             }
         }
-    }
-
-    fun titleBinding(): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                if (isActiveProperty.value) {
-                    activeTitleProperty.value
-                } else {
-                    titleProperty.value
-                }
-            },
-            titleProperty,
-            activeTitleProperty,
-            isActiveProperty
-        )
     }
 
     fun onClickAction(op: () -> Unit) {
