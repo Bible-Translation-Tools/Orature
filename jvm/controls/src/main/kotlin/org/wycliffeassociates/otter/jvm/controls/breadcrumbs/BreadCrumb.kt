@@ -53,13 +53,14 @@ class BreadCrumb: HBox() {
             addClass("breadcrumb__help")
 
             graphic = FontIcon("mdi-help-circle")
-            visibleWhen(isActiveProperty)
+            visibleWhen(
+                Bindings.and(isActiveProperty, tooltipTextProperty.isNotEmpty)
+            )
             managedWhen(visibleProperty())
 
             tooltip {
                 textProperty().bind(tooltipTextProperty)
                 prefWidth = 256.0
-                isWrapText = true
             }
         }
     }
