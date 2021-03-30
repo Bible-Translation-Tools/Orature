@@ -28,7 +28,7 @@
 .breadcrumb--active {
     -fx-border-width: 0px;
     -fx-background-color: #CDDDF4;
-    -fx-background-radius: 3px;
+    -fx-background-radius: 6px;
     -fx-cursor: default;
     -fx-text-fill: #023E97;
     -fx-font-weight: bold;
