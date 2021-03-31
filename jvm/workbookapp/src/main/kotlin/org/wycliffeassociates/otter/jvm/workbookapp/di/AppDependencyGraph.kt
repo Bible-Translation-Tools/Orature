@@ -21,6 +21,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.NotChunkedPage
 
 @Component(
     modules = [
@@ -42,6 +43,8 @@ interface AppDependencyGraph {
     fun inject(viewModel: AudioPluginViewModel)
     fun inject(viewModel: ProjectWizardViewModel)
     fun inject(viewModel: WorkbookPageViewModel)
+
+    fun inject(fragment: NotChunkedPage)
 
     fun inject(viewModel: RemovePluginsViewModel)
 

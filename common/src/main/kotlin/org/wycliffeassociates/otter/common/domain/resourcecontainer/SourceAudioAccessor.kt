@@ -35,8 +35,12 @@ class SourceAudioAccessor(
         return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
-                if (cache.containsKey(path)) {
-                    cache[path]
+                if (cache.containsKey(path) && cache[path] != null) {
+                    val temp = cache[path]!!
+                    val wav = WavFile(temp)
+                    val size = wav.totalAudioLength / wav.frameSizeInBytes
+                    val sa = SourceAudio(temp, 0, size)
+                    return sa
                 }
                 val inputStream = rc.accessor.getInputStream(path)
                 val extension = File(path).extension
