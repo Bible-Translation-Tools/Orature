@@ -8,6 +8,7 @@ import javafx.event.EventHandler
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
 class BreadCrumb: HBox() {
@@ -41,7 +42,7 @@ class BreadCrumb: HBox() {
         label {
             addClass("breadcrumb__separator")
 
-            graphic = FontIcon("mdi-play")
+            graphic = FontIcon(MaterialDesign.MDI_PLAY)
             hiddenWhen(isActiveProperty)
             managedWhen(visibleProperty())
         }
@@ -49,7 +50,7 @@ class BreadCrumb: HBox() {
         label {
             addClass("breadcrumb__help")
 
-            graphic = FontIcon("mdi-help-circle")
+            graphic = FontIcon(MaterialDesign.MDI_HELP_CIRCLE)
             visibleWhen(
                 Bindings.and(isActiveProperty, tooltipTextProperty.isNotEmpty)
             )

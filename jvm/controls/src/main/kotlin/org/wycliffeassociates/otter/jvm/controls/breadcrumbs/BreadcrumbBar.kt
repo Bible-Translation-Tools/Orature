@@ -1,7 +1,9 @@
 package org.wycliffeassociates.otter.jvm.controls.breadcrumbs
 
+import javafx.beans.binding.Bindings
 import javafx.scene.layout.HBox
 import tornadofx.*
+import java.util.concurrent.Callable
 
 class BreadcrumbBar: HBox() {
 
@@ -11,15 +13,14 @@ class BreadcrumbBar: HBox() {
         importStylesheet(javaClass.getResource("/css/breadcrumb-bar.css").toExternalForm())
         styleClass.setAll("breadcrumb-bar")
 
-        items.onChange {
-            children.clear()
-
-            it.list.forEach { item ->
-                item.isActiveProperty.set(false)
-                children.add(item)
-            }
-
-            it.list.lastOrNull()?.isActiveProperty?.set(true)
+        bindChildren(items) { breadcrumb ->
+            breadcrumb.isActiveProperty.bind(
+                Bindings.createBooleanBinding(
+                    Callable { items.last() == breadcrumb },
+                    items
+                )
+            )
+            breadcrumb
         }
     }
 
