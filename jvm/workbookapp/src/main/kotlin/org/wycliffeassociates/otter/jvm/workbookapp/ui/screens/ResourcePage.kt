@@ -1,8 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.styles.ResourceListStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ResourceListViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -11,6 +16,25 @@ import java.text.MessageFormat
 class ResourcePage : Fragment() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
+    private val navigator: NavigationMediator by inject()
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(
+            workbookDataStore.activeChunkProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["chunkTitle"],
+                        messages[ContentLabel.of(it.contentType).value],
+                        it.start
+                    )
+                } ?: messages["chunk"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK))
+        onClickAction {
+            navigator.dock(this@ResourcePage)
+        }
+    }
 
     init {
         importStylesheet<ResourceListStyles>()
@@ -44,5 +68,13 @@ class ResourcePage : Fragment() {
                 }
             }
         )
+    }
+
+    override fun onDock() {
+        super.onDock()
+        workbookDataStore.activeChunkProperty.set(null)
+        workbookDataStore.activeResourceComponentProperty.set(null)
+        workbookDataStore.activeResourceProperty.set(null)
+        navigator.dock(this, breadCrumb)
     }
 }

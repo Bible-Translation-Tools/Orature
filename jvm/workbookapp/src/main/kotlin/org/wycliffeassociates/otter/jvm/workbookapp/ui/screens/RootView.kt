@@ -1,15 +1,22 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeprecatedNavBar
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
 import tornadofx.*
 
 class RootView : View() {
 
-    val menu = MainMenu()
+    val navigator: NavigationMediator by inject()
+    val pluginOpenedProperty = SimpleBooleanProperty(false)
+    val menu = MainMenu().apply {
+        hiddenWhen(pluginOpenedProperty)
+        managedProperty().bind(visibleProperty())
+    }
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -18,24 +25,30 @@ class RootView : View() {
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = true
-            menu.visibleProperty().set(false)
-            menu.managedProperty().set(false)
+            pluginOpenedProperty.set(true)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
-            menu.visibleProperty().set(true)
-            menu.managedProperty().set(true)
+            pluginOpenedProperty.set(false)
         }
         workspace.add(menu)
         workspace.header.removeFromParent()
+        workspace.root.vgrow = Priority.ALWAYS
         workspace.dock<HomePage>()
     }
 
     override val root = stackpane {
         borderpane {
             top = menu
-            left<DeprecatedNavBar>()
-            center<Workspace>()
+            center = vbox {
+                add(
+                    navigator.breadCrumbsBar.apply {
+                        hiddenWhen(pluginOpenedProperty)
+                        managedWhen(visibleProperty())
+                    }
+                )
+                add(workspace)
+            }
         }
     }
 }

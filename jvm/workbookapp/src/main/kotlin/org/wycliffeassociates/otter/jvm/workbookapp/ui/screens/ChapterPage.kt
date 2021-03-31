@@ -6,8 +6,12 @@ import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterBanner
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
@@ -15,10 +19,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.card
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class ChapterPage : Fragment() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -26,11 +32,31 @@ class ChapterPage : Fragment() {
     private val viewModel: ChapterPageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val banner: ChapterBanner
+    private val navigator: NavigationMediator by inject()
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(
+            workbookDataStore.activeChunkProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["chunkTitle"],
+                        messages[ContentLabel.of(it.contentType).value],
+                        it.start
+                    )
+                } ?: messages["chunk"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK))
+        onClickAction {
+            navigator.dock(this@ChapterPage)
+        }
+    }
 
     override fun onDock() {
         workbookDataStore.activeChunkProperty.set(null)
         workbookDataStore.activeResourceComponentProperty.set(null)
         workbookDataStore.activeResourceProperty.set(null)
+        navigator.dock(this, breadCrumb)
     }
 
     init {
@@ -91,7 +117,7 @@ class ChapterPage : Fragment() {
                                 .apply { fill = AppTheme.colors.appRed }
                             onMousePressed = EventHandler {
                                 viewModel.onCardSelection(item)
-                                workspace.dock<RecordScriptureFragment>()
+                                navigator.dock<RecordScriptureFragment>()
                             }
                         }
                     }

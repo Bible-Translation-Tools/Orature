@@ -13,6 +13,9 @@ import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.RowConstraints
+import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid
+import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
@@ -20,6 +23,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
@@ -39,6 +43,7 @@ class RecordScriptureFragment : RecordableFragment(
 ) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
 
     private val takesGrid = ScriptureTakesGridView(
         workbookDataStore.activeChunkProperty.isNull,
@@ -72,6 +77,14 @@ class RecordScriptureFragment : RecordableFragment(
 
             contentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
         }
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.set(messages["take"])
+        iconProperty.set(FontIcon(FontAwesomeSolid.WAVE_SQUARE))
+        onClickAction {
+            navigator.dock(this@RecordScriptureFragment)
+        }
+    }
 
     init {
         importStylesheet<RecordScriptureStyles>()
@@ -212,5 +225,9 @@ class RecordScriptureFragment : RecordableFragment(
             this.allowMarkerProperty().bind(recordableViewModel.workbookDataStore.activeChunkProperty.isNull)
         }
         return card
+    }
+
+    override fun onDock() {
+        navigator.dock(this, breadCrumb)
     }
 }

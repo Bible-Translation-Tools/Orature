@@ -13,6 +13,7 @@ import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourcePage
 import tornadofx.*
 
@@ -24,6 +25,7 @@ class ResourceCardFragment(
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
     var primaryColorProperty = SimpleObjectProperty<Color>(Color.ORANGE)
     var primaryColor: Color by primaryColorProperty
+    private val navigator: NavigationMediator by inject()
 
     init {
         root.apply {
@@ -68,7 +70,7 @@ class ResourceCardFragment(
                     text = messages["viewRecordings"]
                     action {
                         item.onSelect()
-                        workspace.dock<RecordResourcePage>()
+                        navigator.dock<RecordResourcePage>()
                     }
                 }
             )
