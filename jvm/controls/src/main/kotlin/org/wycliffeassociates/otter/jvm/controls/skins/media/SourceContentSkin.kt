@@ -160,9 +160,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
+            visibleProperty().set(false)
+            managedWhen(visibleProperty())
         }
 
         titleContainer.apply {
+            visibleProperty().set(false)
+            managedWhen(visibleProperty())
             sourceContent.isMinimizedProperty.onChangeAndDoNow {
                 if (it == true) {
                     maxWidthProperty().unbind()
@@ -176,6 +180,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         minimizeBtn.apply {
+            visibleProperty().set(false)
+            managedWhen(visibleProperty())
             visibleWhen(sourceContent.isMinimizableProperty)
 
             setOnMouseClicked {
