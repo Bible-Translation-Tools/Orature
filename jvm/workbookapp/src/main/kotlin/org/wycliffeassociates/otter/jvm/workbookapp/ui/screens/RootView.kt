@@ -10,6 +10,7 @@ import tornadofx.*
 class RootView : View() {
 
     val menu = MainMenu()
+    val nav = DeprecatedNavBar()
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -18,11 +19,15 @@ class RootView : View() {
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = true
+            nav.root.visibleProperty().set(false)
+            nav.root.managedProperty().set(false)
             menu.visibleProperty().set(false)
             menu.managedProperty().set(false)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
+            nav.root.visibleProperty().set(true)
+            nav.root.managedProperty().set(true)
             menu.visibleProperty().set(true)
             menu.managedProperty().set(true)
         }
@@ -34,7 +39,7 @@ class RootView : View() {
     override val root = stackpane {
         borderpane {
             top = menu
-            left<DeprecatedNavBar>()
+            left = nav.root
             center<Workspace>()
         }
     }
