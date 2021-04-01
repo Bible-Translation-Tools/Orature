@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.common.data.primitives
 
 enum class ContentLabel(val value: String, val type: ContentType) {
     CHAPTER("chapter", ContentType.META),
-    VERSE("verse", ContentType.TEXT),
+    VERSE("chunk", ContentType.TEXT),
     HELP_TITLE("title", ContentType.TITLE),
     HELP_BODY("body", ContentType.BODY);
 

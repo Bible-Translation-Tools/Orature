@@ -199,7 +199,7 @@ class CollectionRepository @Inject constructor(
         return Completable.fromCallable {
             database.transactionResult { dsl ->
                 for (chunk in chunkMarkers) {
-                    val entity = ContentEntity(0, chunk, "verse", chunk, chapter.id, null, null, null, 1)
+                    val entity = ContentEntity(0, chunk, "chunk", chunk, chapter.id, null, null, null, 1)
                     val id = database.contentDao.insert(entity, dsl)
                     println("inserted $id")
                 }
