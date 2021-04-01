@@ -140,7 +140,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         sourceTextContainer.apply {
-            visibleWhen(sourceContent.sourceTextAvailableProperty)
+            visibleProperty().set(false)
             managedWhen(visibleProperty())
         }
 

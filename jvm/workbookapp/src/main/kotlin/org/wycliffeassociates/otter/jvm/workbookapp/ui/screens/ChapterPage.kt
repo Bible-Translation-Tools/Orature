@@ -69,7 +69,6 @@ class ChapterPage : Fragment() {
     }
 
     override val root = vbox {
-        add(banner)
         datagrid(viewModel.filteredContent) {
             vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
