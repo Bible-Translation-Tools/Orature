@@ -40,8 +40,6 @@ open class RecordableViewModel(
     val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val contextProperty = SimpleObjectProperty<PluginType>(PluginType.RECORDER)
-    val showPluginActiveProperty = SimpleBooleanProperty(false)
-    var showPluginActive by showPluginActiveProperty
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -87,7 +85,6 @@ open class RecordableViewModel(
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
-                    showPluginActive = !plugin.isNativePlugin()
                     fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
                     audioPluginViewModel.record(rec)
                 }
@@ -97,7 +94,6 @@ open class RecordableViewModel(
                 }
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
-                    showPluginActive = false
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
@@ -114,7 +110,6 @@ open class RecordableViewModel(
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
-                showPluginActive = !plugin.isNativePlugin()
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 when (pluginType) {
                     PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
@@ -128,7 +123,6 @@ open class RecordableViewModel(
             }
             .onErrorReturn { TakeActions.Result.NO_PLUGIN }
             .subscribe { result: TakeActions.Result ->
-                showPluginActive = false
                 currentTakeNumberProperty.set(null)
                 fire(PluginClosedEvent(pluginType))
                 when (result) {

@@ -8,18 +8,19 @@ import javafx.application.Platform
 import org.clapper.util.classutil.ClassFinder
 import org.clapper.util.classutil.ClassInfo
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
+import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 import java.io.File
+import java.net.URL
 import java.net.URLClassLoader
+import java.text.MessageFormat
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
-import java.net.URL
-import java.text.MessageFormat
 
 class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
 
@@ -159,22 +160,31 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         processBuilder.redirectErrorStream(true)
         val process = processBuilder.start()
         process.outputStream.close()
+
+        val navigator: NavigationMediator = find()
+        navigator.subscribe<PluginClosedEvent> {
+            process.destroy()
+        }
+
         while (process.inputStream.read() >= 0) {
         }
         process.waitFor()
     }
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
-        val appWorkspace: Workspace = find()
+        val navigator: NavigationMediator = find()
+
         val scope = ParameterizedScope(parameters) {
             synchronized(monitor) {
                 monitor.notify()
-                appWorkspace.navigateBack()
+                if (navigator.dockedComponent::class == pluginClass) {
+                    navigator.back()
+                }
             }
         }
         Platform.runLater {
             val plugin = find(pluginClass, scope)
-            appWorkspace.dock(plugin)
+            navigator.dock(plugin, plugin.breadCrumb)
         }
         synchronized(monitor) {
             monitor.wait()

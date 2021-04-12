@@ -13,8 +13,8 @@ import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.RowConstraints
-import org.kordamp.ikonli.fontawesome5.FontAwesomeSolid
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
@@ -25,10 +25,11 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardSt
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 private class RecordScriptureViewModelProvider : Component() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
@@ -79,8 +80,18 @@ class RecordScriptureFragment : RecordableFragment(
         }
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["take"])
-        iconProperty.set(FontIcon(FontAwesomeSolid.WAVE_SQUARE))
+        titleProperty.bind(
+            recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.stringBinding {
+                it?.let { take ->
+                    MessageFormat.format(
+                        messages["takeTitle"],
+                        messages["take"],
+                        take
+                    )
+                } ?: messages["take"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
         onClickAction {
             navigator.dock(this@RecordScriptureFragment)
         }
@@ -228,6 +239,7 @@ class RecordScriptureFragment : RecordableFragment(
     }
 
     override fun onDock() {
+        recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
     }
 }

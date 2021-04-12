@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel
@@ -56,6 +57,7 @@ abstract class RecordableFragment(
     private val pluginOpenedPage: PluginOpenedPage
     protected val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
 
     /** Add custom components to this container, rather than root*/
     protected val mainContainer = VBox()
@@ -87,14 +89,14 @@ abstract class RecordableFragment(
     init {
         importStylesheet<AppStyles>()
         pluginOpenedPage = createPluginOpenedPage()
-        subscribe<PluginOpenedEvent> { pluginInfo ->
+        navigator.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
-                workspace.dock(pluginOpenedPage)
+                navigator.dock(pluginOpenedPage)
             }
         }
-        workspace.subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
-                workspace.navigateBack()
+        navigator.subscribe<PluginClosedEvent> {
+            (navigator.dockedComponent as? PluginOpenedPage)?.let {
+                navigator.back()
             }
             openPlayers()
         }

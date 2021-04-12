@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.stage.Screen
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -10,6 +13,11 @@ const val WINDOW_OFFSET = 50.0
 class MarkerView : PluginEntrypoint() {
 
     val viewModel: VerseMarkerViewModel by inject()
+
+    override val breadCrumb = BreadCrumb().apply {
+        titleProperty.set(messages["addMarkers"])
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+    }
 
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
@@ -41,5 +49,10 @@ class MarkerView : PluginEntrypoint() {
         add(waveformContainer)
         add(source)
         add(playbackControls)
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.saveAndQuit()
     }
 }

@@ -6,7 +6,6 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 
 class PlaybackControlsFragment : Fragment() {
@@ -59,16 +58,7 @@ class PlaybackControlsFragment : Fragment() {
         graphic = continueIcon
         styleClass.add(continueButtonStyle)
         setOnAction {
-            (scope as ParameterizedScope).let {
-                viewModel
-                    .writeMarkers()
-                    .doOnError { e ->
-                        logger.error("Error in closing the maker app", e)
-                    }
-                    .subscribe {
-                        it.navigateBack()
-                    }
-            }
+            viewModel.saveAndQuit()
         }
     }
 
