@@ -34,7 +34,7 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
  */
 class WavFile private constructor() {
 
-    internal lateinit var file: File
+    lateinit var file: File
         private set
 
     var sampleRate: Int = DEFAULT_SAMPLE_RATE

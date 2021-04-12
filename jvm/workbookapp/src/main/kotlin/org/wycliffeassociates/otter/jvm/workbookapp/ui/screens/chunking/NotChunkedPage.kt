@@ -1,10 +1,9 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
 import javafx.geometry.Pos
 import javafx.scene.control.TextField
-import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javax.inject.Inject
@@ -17,11 +16,13 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class NotChunkedPage : Fragment() {
 
+    val vm: ChunkingViewModel by inject()
     val workbookDataStore: WorkbookDataStore by inject()
 
     @Inject
@@ -101,23 +102,6 @@ class NotChunkedPage : Fragment() {
         }
     }
 
-
-//    hbox {
-//        alignment = Pos.CENTER
-//        input = textfield {
-//            prefWidth = 50.0
-//            prefHeight = 50.0
-//        }
-//        button("Chunk") {
-//            prefWidth = 300.0
-
-//        }
-//        button("Skip") {
-//            prefWidth = 300.0
-//
-//        }
-//    }
-
     fun launchPlugin() {
         val workbook = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
@@ -134,16 +118,19 @@ class NotChunkedPage : Fragment() {
             sourceChapterAudio = file,
             verseTotal = 30
         )
-        fire(PluginOpenedEvent(PluginType.MARKER, true))
-        launchPluginProvider
-            .get()
-            .launchPlugin(PluginType.MARKER, file, params)
-            .subscribe { _ ->
-                val wav = WavFile(sourceAudio!!.file)
-                wav.update()
-                val chunks = wav.metadata.getCues().size
-                commitChunks(chunks)
-            }
+        vm.sourceAudio.set(wav)
+        workspace.dockedComponent!!.replaceWith<Consume>()
+
+//        fire(PluginOpenedEvent(PluginType.MARKER, true))
+//        launchPluginProvider
+//            .get()
+//            .launchPlugin(PluginType.MARKER, file, params)
+//            .subscribe { _ ->
+//                val wav = WavFile(sourceAudio!!.file)
+//                wav.update()
+//                val chunks = wav.metadata.getCues().size
+//                commitChunks(chunks)
+//            }
     }
 
     fun commitChunks(chunkCount: Int) {

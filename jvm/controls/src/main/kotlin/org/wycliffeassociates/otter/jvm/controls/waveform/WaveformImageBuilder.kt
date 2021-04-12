@@ -70,6 +70,7 @@ class WaveformImageBuilder(
         var globalMax = 1
         var globalMin = 0
         addPadding(img, 0, padding, height)
+        reader.open()
         for (i in padding until width) {
             reader.getPcmBuffer(bytes)
             val bb = ByteBuffer.wrap(bytes)

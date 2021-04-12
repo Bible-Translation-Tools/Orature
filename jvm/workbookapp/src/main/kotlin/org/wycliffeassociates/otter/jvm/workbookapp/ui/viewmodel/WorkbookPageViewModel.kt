@@ -27,7 +27,7 @@ import java.io.File
 import java.text.MessageFormat
 import javax.inject.Inject
 import javax.inject.Provider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.NotChunkedPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.NotChunkedPage
 
 class WorkbookPageViewModel : ViewModel() {
 
