@@ -67,6 +67,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 markerPositionProperty.set(pixel)
 
                 setOnMouseClicked { me ->
+                    println("clicked")
                     val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                     if (trackWidth > 0) {
                         dragStart[i] = localToParent(me.x, me.y)

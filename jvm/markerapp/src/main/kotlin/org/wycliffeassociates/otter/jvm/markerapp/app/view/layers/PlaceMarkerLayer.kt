@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.jfoenix.controls.JFXButton
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -9,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewM
 import tornadofx.*
 
 class PlaceMarkerLayer(viewModel: VerseMarkerViewModel) : VBox() {
+
     init {
         with(this) {
             isPickOnBounds = false

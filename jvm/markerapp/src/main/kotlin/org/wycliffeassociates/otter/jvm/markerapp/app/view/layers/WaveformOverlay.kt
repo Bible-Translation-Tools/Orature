@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
+import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
