@@ -66,18 +66,17 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
     }
 
     fun buttonPressed() {
-        if (!isPlaying.value) {
-            if (!loaded) {
-                player.load(audioFile)
-                Platform.runLater {
+        Platform.runLater {
+            if (!isPlaying.value) {
+                if (!loaded) {
+                    player.load(audioFile)
                     player.play()
                     loaded = true
+                    return@runLater
                 }
-                return
-            }
-            player.seek(0)
-            player.play()
-        } else player.pause()
+                player.play()
+            } else player.pause()
+        }
     }
 
     fun close() {
