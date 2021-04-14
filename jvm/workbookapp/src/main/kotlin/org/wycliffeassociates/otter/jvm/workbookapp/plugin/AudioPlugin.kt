@@ -26,11 +26,15 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     private val logger = LoggerFactory.getLogger(AudioPlugin::class.java)
 
     private val monitor = Object()
-    private val appWorkspace: Workspace = find()
+    private var process: Process? = null
 
     override fun isNativePlugin(): Boolean {
         val pluginClass = findPlugin(File(pluginData.executable))
         return pluginClass != null
+    }
+
+    override fun quit() {
+        process?.destroy()
     }
 
     override fun launch(audioFile: File, pluginParameters: PluginParameters): Completable {
@@ -158,19 +162,15 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     private fun runProcess(processArgs: List<String>) {
         val processBuilder = ProcessBuilder(processArgs)
         processBuilder.redirectErrorStream(true)
-        val process = processBuilder.start()
-        process.outputStream.close()
-
-        appWorkspace.subscribe<PluginClosedEvent> {
-            process.destroy()
+        process = processBuilder.start()
+        process!!.outputStream.close()
+        while (process!!.inputStream.read() >= 0) {
         }
-
-        while (process.inputStream.read() >= 0) {
-        }
-        process.waitFor()
+        process!!.waitFor()
     }
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
+        val appWorkspace: Workspace = find()
         val scope = ParameterizedScope(parameters) {
             synchronized(monitor) {
                 monitor.notify()

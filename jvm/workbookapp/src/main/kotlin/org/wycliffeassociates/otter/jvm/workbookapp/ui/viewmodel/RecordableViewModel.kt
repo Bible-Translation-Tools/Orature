@@ -6,7 +6,6 @@ import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -25,6 +24,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.util.concurrent.Callable
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -48,6 +48,8 @@ open class RecordableViewModel(
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
+    private val navigator: NavigationMediator by inject()
 
     private val disposables = CompositeDisposable()
 
@@ -86,7 +88,10 @@ open class RecordableViewModel(
                 }
                 .flatMapSingle { plugin ->
                     fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
-                    audioPluginViewModel.record(rec)
+                    navigator.subscribe<PluginClosedEvent> {
+                        plugin.quit()
+                    }
+                    audioPluginViewModel.record(plugin, rec)
                 }
                 .observeOnFx()
                 .doOnError { e ->
@@ -110,10 +115,13 @@ open class RecordableViewModel(
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
+                navigator.subscribe<PluginClosedEvent> {
+                    plugin.quit()
+                }
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 when (pluginType) {
-                    PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
-                    PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)
+                    PluginType.EDITOR -> audioPluginViewModel.edit(plugin, takeEvent.take)
+                    PluginType.MARKER -> audioPluginViewModel.mark(plugin, takeEvent.take)
                     else -> null
                 }
             }
