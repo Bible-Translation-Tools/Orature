@@ -21,7 +21,7 @@ class InitializeMarker @Inject constructor(
 ) : Installable {
 
     override val name = "MARKER"
-    override val version = 5
+    override val version = 6
 
     val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 
@@ -29,7 +29,7 @@ class InitializeMarker @Inject constructor(
         return Completable
             .fromCallable {
                 var installedVersion = installedEntityRepo.getInstalledVersion(this)
-                if (true) {
+                if (installedVersion != version) {
                     log.info("Initializing $name version: $version...")
                     importOtterMarker()
                         .doOnComplete {

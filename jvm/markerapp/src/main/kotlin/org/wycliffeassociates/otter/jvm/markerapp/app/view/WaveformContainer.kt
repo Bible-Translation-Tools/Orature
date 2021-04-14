@@ -10,13 +10,12 @@ import tornadofx.*
 
 class WaveformContainer : Fragment() {
 
-    var dragStart: Point2D? = null
-    var posAtTimeOfDrag = 0
-
     val viewModel: VerseMarkerViewModel by inject()
     val mainWaveform: MainWaveform
     val markerTrack: MarkerTrackControl
     // val timecodeHolder: TimecodeHolder
+
+    var dragStart: Point2D? = null
 
     init {
         markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
@@ -39,11 +38,8 @@ class WaveformContainer : Fragment() {
 
     override val root =
         stackpane {
-            slider()
             setOnMousePressed { me ->
-                println("clicked\n\n\n")
                 viewModel.audioPlayer.pause()
-                posAtTimeOfDrag = viewModel.audioPlayer.getAbsoluteLocationInFrames()
                 val trackWidth = this@stackpane.width
                 if (trackWidth > 0) {
                     dragStart = localToParent(me.x, me.y)
@@ -54,30 +50,21 @@ class WaveformContainer : Fragment() {
             setOnMouseDragged { me ->
                 val trackWidth = this@stackpane.width
                 if (trackWidth > 0.0) {
-                    //if (trackWidth > this.width) {
-                        val cur: Point2D = localToParent(me.x, me.y)
-                        if (dragStart == null) {
-                            // we're getting dragged without getting a mouse press
-                            dragStart = localToParent(me.x, me.y)
-
-                        }
-                        val dragPos = cur.x - dragStart!!.x
-                        val frames = viewModel.audioPlayer.getAbsoluteLocationInFrames()
-                        println("current location is ${frames}")
-                        val delta = pixelsToFrames(dragPos)
-                        println("delta is $delta, dragpos is ${dragPos}, dragStart is ${dragStart!!.x}")
-                        val final = Utils.clamp(0,frames - delta, viewModel.audioPlayer.getAbsoluteDurationInFrames())
-                        println("seeking to $final")
-                        viewModel.audioPlayer.seek(final)
+                    val cur: Point2D = localToParent(me.x, me.y)
+                    if (dragStart == null) {
+                        // we're getting dragged without getting a mouse press
                         dragStart = localToParent(me.x, me.y)
-                    //}
+                    }
+                    val deltaPos = cur.x - dragStart!!.x
+                    val deltaFrames = pixelsToFrames(deltaPos)
+
+                    val curFrames = viewModel.audioPlayer.getAbsoluteLocationInFrames()
+                    val duration = viewModel.audioPlayer.getAbsoluteDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    viewModel.audioPlayer.seek(final)
+                    dragStart = localToParent(me.x, me.y)
                     me.consume()
                 }
-            }
-
-            setOnMouseReleased {
-                dragStart = null
-                println("released")
             }
 
             hgrow = Priority.ALWAYS

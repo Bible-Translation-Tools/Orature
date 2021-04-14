@@ -13,7 +13,7 @@ import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterCardSkin
 import java.io.File
 import java.util.concurrent.Callable
 
-class ChapterCard: Control() {
+class ChapterCard : Control() {
 
     val coverArtProperty = SimpleObjectProperty<File>()
     val titleProperty = SimpleStringProperty()
@@ -43,7 +43,7 @@ class ChapterCard: Control() {
                 if (totalChunksProperty.value > 0) {
                     val recorded = recordedChunksProperty.value.toDouble()
                     val total = totalChunksProperty.value.toDouble()
-                    recorded/total
+                    recorded / total
                 } else {
                     0.0
                 }
@@ -69,7 +69,7 @@ class ChapterCard: Control() {
                 if (totalChunksProperty.value > 0) {
                     val selected = selectedChunksProperty.value.toDouble()
                     val total = totalChunksProperty.value.toDouble()
-                    selected/total
+                    selected / total
                 } else {
                     0.0
                 }

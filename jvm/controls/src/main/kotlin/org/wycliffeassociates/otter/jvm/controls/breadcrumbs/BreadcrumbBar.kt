@@ -5,7 +5,7 @@ import javafx.scene.layout.HBox
 import tornadofx.*
 import java.util.concurrent.Callable
 
-class BreadcrumbBar: HBox() {
+class BreadcrumbBar : HBox() {
 
     private val items = observableListOf<BreadCrumb>()
 

@@ -186,8 +186,6 @@ class HomePage : Fragment() {
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(item.coverArtAccessor.getArtwork())
 
-
-
             onConfirmAction {
                 close()
                 viewModel.deleteWorkbook(item)

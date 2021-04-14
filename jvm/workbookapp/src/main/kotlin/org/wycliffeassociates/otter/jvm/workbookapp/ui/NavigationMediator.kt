@@ -4,7 +4,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import tornadofx.*
 
-class NavigationMediator: Component(), ScopedInstance {
+class NavigationMediator : Component(), ScopedInstance {
 
     val breadCrumbsBar = BreadcrumbBar()
 
