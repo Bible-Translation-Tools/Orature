@@ -1,11 +1,8 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.stage.Screen
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
+import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
 
 class RecorderView : PluginEntrypoint() {
@@ -16,11 +13,6 @@ class RecorderView : PluginEntrypoint() {
     private val waveform = RecordingVisualizerFragment()
     private val control = ControlFragment()
     private val source = SourceAudioFragment()
-
-    override val breadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["recording"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_MICROPHONE))
-    }
 
     private val spacer = region().apply {
         prefHeight = 2.0

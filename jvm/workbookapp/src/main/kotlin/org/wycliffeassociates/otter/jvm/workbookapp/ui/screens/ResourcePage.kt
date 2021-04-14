@@ -24,7 +24,7 @@ class ResourcePage : Fragment() {
                 it?.let {
                     MessageFormat.format(
                         messages["chunkTitle"],
-                        messages[ContentLabel.of(it.contentType).value],
+                        messages["chunk"],
                         it.start
                     )
                 } ?: messages["chunk"]

@@ -13,7 +13,6 @@ import tornadofx.*
 class NavigationMediator: Component(), ScopedInstance {
 
     val breadCrumbsBar = BreadcrumbBar()
-    val dockedComponent: UIComponent by workspace.dockedComponentProperty
 
     private val recorderBreadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["recording"])

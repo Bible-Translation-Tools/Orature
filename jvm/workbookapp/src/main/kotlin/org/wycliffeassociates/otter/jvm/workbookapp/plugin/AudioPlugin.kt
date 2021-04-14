@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -27,6 +26,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     private val logger = LoggerFactory.getLogger(AudioPlugin::class.java)
 
     private val monitor = Object()
+    private val appWorkspace: Workspace = find()
 
     override fun isNativePlugin(): Boolean {
         val pluginClass = findPlugin(File(pluginData.executable))
@@ -161,8 +161,7 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
         val process = processBuilder.start()
         process.outputStream.close()
 
-        val navigator: NavigationMediator = find()
-        navigator.subscribe<PluginClosedEvent> {
+        appWorkspace.subscribe<PluginClosedEvent> {
             process.destroy()
         }
 
@@ -172,19 +171,17 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
     }
 
     private fun runInOtterMainWindow(pluginClass: KClass<PluginEntrypoint>, parameters: Parameters) {
-        val navigator: NavigationMediator = find()
-
         val scope = ParameterizedScope(parameters) {
             synchronized(monitor) {
                 monitor.notify()
-                if (navigator.dockedComponent::class == pluginClass) {
-                    navigator.back()
+                (appWorkspace.dockedComponent as? PluginEntrypoint)?.let {
+                    appWorkspace.navigateBack()
                 }
             }
         }
         Platform.runLater {
             val plugin = find(pluginClass, scope)
-            navigator.dock(plugin, plugin.breadCrumb)
+            appWorkspace.dock(plugin)
         }
         synchronized(monitor) {
             monitor.wait()

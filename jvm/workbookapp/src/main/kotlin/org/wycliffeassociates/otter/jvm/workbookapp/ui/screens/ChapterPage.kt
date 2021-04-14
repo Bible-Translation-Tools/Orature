@@ -86,7 +86,7 @@ class ChapterPage : Fragment() {
                                 }
                             openButton.setOnMouseClicked {
                                 viewModel.onCardSelection(CardData(chapter))
-                                workspace.dock<RecordScriptureFragment>()
+                                navigator.dock<RecordScriptureFragment>()
                             }
                         }
                 }

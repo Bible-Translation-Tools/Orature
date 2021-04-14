@@ -34,7 +34,7 @@ class RootView : View() {
         workspace.add(menu)
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
-        workspace.dock<HomePage>()
+        navigator.dock<HomePage>()
     }
 
     override val root = stackpane {

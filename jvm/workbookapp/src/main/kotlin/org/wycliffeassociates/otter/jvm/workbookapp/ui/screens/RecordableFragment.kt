@@ -89,14 +89,14 @@ abstract class RecordableFragment(
     init {
         importStylesheet<AppStyles>()
         pluginOpenedPage = createPluginOpenedPage()
-        navigator.subscribe<PluginOpenedEvent> { pluginInfo ->
+        workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
-                navigator.dock(pluginOpenedPage)
+                workspace.dock(pluginOpenedPage)
             }
         }
-        navigator.subscribe<PluginClosedEvent> {
-            (navigator.dockedComponent as? PluginOpenedPage)?.let {
-                navigator.back()
+        workspace.subscribe<PluginClosedEvent> {
+            (workspace.dockedComponent as? PluginOpenedPage)?.let {
+                workspace.navigateBack()
             }
             openPlayers()
         }
