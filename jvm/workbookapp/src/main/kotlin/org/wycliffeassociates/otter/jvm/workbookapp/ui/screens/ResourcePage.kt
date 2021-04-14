@@ -57,7 +57,8 @@ class ResourcePage : Fragment() {
         add(
             ResourceListView(
                 resourceListViewModel.filteredResourceGroupCardItemList,
-                resourceListViewModel.isFilterOnProperty
+                resourceListViewModel.isFilterOnProperty,
+                navigator
             ).apply {
                 whenDocked {
                     resourceListViewModel.selectedGroupCardItem.get()?.let {
