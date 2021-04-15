@@ -14,5 +14,4 @@ repositories {
 dependencies {
     // TornadoFX
     implementation "no.tornado:tornadofx:$tornadofxVer"
-    implementation project(':jvm:controls')
 }
