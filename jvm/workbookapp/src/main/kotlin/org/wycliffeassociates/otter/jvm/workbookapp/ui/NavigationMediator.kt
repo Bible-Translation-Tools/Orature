@@ -10,7 +10,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import tornadofx.*
 
-class NavigationMediator: Component(), ScopedInstance {
+class NavigationMediator : Component(), ScopedInstance {
 
     val breadCrumbsBar = BreadcrumbBar()
 

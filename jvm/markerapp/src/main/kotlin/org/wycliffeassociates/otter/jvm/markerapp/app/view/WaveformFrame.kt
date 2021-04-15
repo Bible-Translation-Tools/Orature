@@ -7,7 +7,6 @@ import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.TimecodeHolder
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*

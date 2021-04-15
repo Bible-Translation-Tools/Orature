@@ -11,7 +11,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
-class BreadCrumb: HBox() {
+class BreadCrumb : HBox() {
 
     val iconProperty = SimpleObjectProperty<FontIcon>()
     val titleProperty = SimpleStringProperty()

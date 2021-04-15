@@ -237,8 +237,6 @@ open class RecordableViewModel(
             audio.getAllTakes()
                 .filter { it.isNotDeleted() }
                 .map { take ->
-                    val ap: IAudioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                    ap.load(take.file)
                     take.mapToCardModel(take.equals(selected))
                 }
 
