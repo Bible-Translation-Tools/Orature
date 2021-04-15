@@ -39,7 +39,7 @@ class WaveformContainer : Fragment() {
     override val root =
         stackpane {
             setOnMousePressed { me ->
-                viewModel.audioPlayer.pause()
+                viewModel.pause()
                 val trackWidth = this@stackpane.width
                 if (trackWidth > 0) {
                     dragStart = localToParent(me.x, me.y)
@@ -58,10 +58,10 @@ class WaveformContainer : Fragment() {
                     val deltaPos = cur.x - dragStart!!.x
                     val deltaFrames = pixelsToFrames(deltaPos)
 
-                    val curFrames = viewModel.audioPlayer.getAbsoluteLocationInFrames()
-                    val duration = viewModel.audioPlayer.getAbsoluteDurationInFrames()
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    viewModel.audioPlayer.seek(final)
+                    viewModel.seek(final)
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                 }
