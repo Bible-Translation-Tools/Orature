@@ -41,7 +41,6 @@ class HomePage : Fragment() {
                 it?.target?.title ?: messages["project"]
             }
         )
-        tooltipTextProperty.set("Select a project to work with")
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
         onClickAction {
             navigator.dock(this@HomePage)

@@ -3,6 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.layout.Priority
@@ -25,6 +27,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
+import java.util.concurrent.Callable
 
 class ChapterPage : Fragment() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -35,17 +38,7 @@ class ChapterPage : Fragment() {
     private val navigator: NavigationMediator by inject()
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            workbookDataStore.activeChunkProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(
-                        messages["chunkTitle"],
-                        messages[ContentLabel.of(it.contentType).value],
-                        it.start
-                    )
-                } ?: messages["chunk"]
-            }
-        )
+        titleProperty.bind(breadcrumbTitleBinding())
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK))
         onClickAction {
             navigator.dock(this@ChapterPage)
@@ -131,5 +124,26 @@ class ChapterPage : Fragment() {
             return AppStyles.chunkGraphic()
         }
         return AppStyles.chapterGraphic()
+    }
+
+    private fun breadcrumbTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                when {
+                    workbookDataStore.activeChunkProperty.value != null ->
+                        workbookDataStore.activeChunkProperty.value.let { chunk ->
+                            MessageFormat.format(
+                                messages["chunkTitle"],
+                                messages[ContentLabel.of(chunk.contentType).value],
+                                chunk.start
+                            )
+                        }
+                    navigator.workspace.dockedComponentProperty.value == this -> messages["chunk"]
+                    else -> messages["chapter"]
+                }
+            },
+            navigator.workspace.dockedComponentProperty,
+            workbookDataStore.activeChunkProperty
+        )
     }
 }
