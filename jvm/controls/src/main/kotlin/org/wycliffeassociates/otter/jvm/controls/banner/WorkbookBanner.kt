@@ -22,7 +22,7 @@ import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import java.io.File
 import java.util.concurrent.Callable
 
-class WorkbookBanner: Control() {
+class WorkbookBanner : Control() {
 
     val backgroundImageFileProperty = SimpleObjectProperty<File>()
     val bookTitleProperty = SimpleStringProperty()

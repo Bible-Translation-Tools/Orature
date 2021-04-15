@@ -11,7 +11,7 @@ import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import tornadofx.*
 
-class WorkbookBannerSkin(private val banner: WorkbookBanner): SkinBase<WorkbookBanner>(banner) {
+class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<WorkbookBanner>(banner) {
 
     @FXML
     lateinit var bgGraphic: HBox

@@ -13,7 +13,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.ChapterCard
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-class ChapterCardSkin(private val card: ChapterCard): SkinBase<ChapterCard>(card) {
+class ChapterCardSkin(private val card: ChapterCard) : SkinBase<ChapterCard>(card) {
 
     @FXML
     lateinit var coverArt: ImageView

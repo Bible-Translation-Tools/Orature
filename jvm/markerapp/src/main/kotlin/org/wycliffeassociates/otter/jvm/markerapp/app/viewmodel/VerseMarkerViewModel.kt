@@ -86,16 +86,24 @@ class VerseMarkerViewModel : ViewModel() {
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 
+    fun pause() {
+        audioController?.pause()
+    }
+
     fun mediaToggle() {
         audioController?.toggle()
     }
 
+    fun seek(location: Int) {
+        audioController?.seek(location)
+    }
+
     fun seekNext() {
-        audioController?.seek(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
+        seek(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
     }
 
     fun seekPrevious() {
-        audioController?.seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+        seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
     }
 
     fun writeMarkers(): Completable {
@@ -114,5 +122,13 @@ class VerseMarkerViewModel : ViewModel() {
         val percentPlayed = current / duration
         val pos = percentPlayed * imageWidth
         positionProperty.set(pos)
+    }
+
+    fun getLocationInFrames(): Int {
+        return audioPlayer.getAbsoluteLocationInFrames()
+    }
+
+    fun getDurationInFrames(): Int {
+        return audioPlayer.getAbsoluteDurationInFrames()
     }
 }

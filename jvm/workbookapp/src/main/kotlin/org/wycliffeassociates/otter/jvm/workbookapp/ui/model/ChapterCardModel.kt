@@ -12,7 +12,7 @@ class ChapterCardModel(
     val bodyText: String,
     val source: BookElement?,
     val onClick: (chapter: BookElement) -> Unit
-): WorkbookItemModel(sort, title) {
+) : WorkbookItemModel(sort, title) {
     constructor(title: String, chapter: Chapter, onClick: (chapter: BookElement) -> Unit) : this(
         sort = chapter.sort,
         title = title,
