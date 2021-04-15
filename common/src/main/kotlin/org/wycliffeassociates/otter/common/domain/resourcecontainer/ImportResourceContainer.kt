@@ -14,13 +14,9 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.MediaMerge
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.IOException
@@ -117,6 +113,7 @@ class ImportResourceContainer @Inject constructor(
         val rc = ResourceContainer.load(file, true)
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
         val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
+        rc.close()
         return resourceMetadataRepository.exists(resourceMetadata).blockingGet()
     }
 
@@ -124,6 +121,7 @@ class ImportResourceContainer @Inject constructor(
         val rc = ResourceContainer.load(file, true)
         val language = languageRepository.getBySlug(rc.manifest.dublinCore.language.identifier).blockingGet()
         val resourceMetadata = rc.manifest.dublinCore.mapToMetadata(file, language)
+        rc.close()
         return resourceMetadataRepository.get(resourceMetadata).blockingGet()
     }
 
@@ -177,6 +175,7 @@ class ImportResourceContainer @Inject constructor(
             constructContainerTree(container)
         } catch (e: ImportException) {
             logger.error("Error constructing container tree, file: $fileToLoad", e)
+            container.close()
             return cleanUp(fileToLoad, e.result)
         }
 

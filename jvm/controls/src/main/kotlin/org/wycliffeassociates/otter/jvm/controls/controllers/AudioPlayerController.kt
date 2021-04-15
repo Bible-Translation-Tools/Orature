@@ -113,7 +113,7 @@ class AudioPlayerController(
         startAtLocation = 0
     }
 
-    private fun pause() {
+    fun pause() {
         player?.let {
             startAtLocation = it.getAbsoluteLocationInFrames()
             it.pause()

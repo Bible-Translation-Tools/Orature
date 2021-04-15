@@ -135,6 +135,7 @@ class DirectoryProvider(
 
     override fun getSourceContainerDirectory(container: ResourceContainer): File {
         val dublinCore = container.manifest.dublinCore
+        container.close()
         val appendedPath = listOf(
             "src",
             dublinCore.creator,

@@ -11,7 +11,7 @@ class WorkbookBannerModel(
     val coverArt: File?,
     val onDelete: () -> Unit,
     val onExport: () -> Unit
-): WorkbookItemModel(sort = 0, title = title) {
+) : WorkbookItemModel(sort = 0, title = title) {
     val rcMetadataProperty = SimpleObjectProperty<ResourceMetadata>()
 
     var rcTitle: String? = null
