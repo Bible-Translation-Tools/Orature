@@ -9,7 +9,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import tornadofx.*
 
-class ChapterCell: ListCell<WorkbookItemModel>() {
+class ChapterCell : ListCell<WorkbookItemModel>() {
 
     private val chapterCard = ChapterCard()
     private val workbookBanner = WorkbookBanner()

@@ -104,6 +104,7 @@ class AudioBufferPlayer : IAudioPlayer {
                         startPosition = 0
                         listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
                         player.close()
+                        seek(0)
                     }
                 }
                 playbackThread.start()
@@ -133,6 +134,7 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun close() {
         if (::player.isInitialized) {
+            stop()
             player.close()
         }
         if (reader != null) {

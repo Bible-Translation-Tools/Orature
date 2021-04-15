@@ -85,6 +85,7 @@ class ResourceContainerRepository @Inject constructor(
                 logger.error("Error in importResourceContainer for rc: $rc, language: $languageSlug", e)
                 e.castOrFindImportException()?.result ?: ImportResult.LOAD_RC_ERROR
             }
+            .doFinally { rc.close() }
             .subscribeOn(Schedulers.io())
     }
 
