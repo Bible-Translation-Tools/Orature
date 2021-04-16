@@ -40,14 +40,11 @@ class RootView : View() {
     override val root = stackpane {
         borderpane {
             top = menu
-            center = vbox {
-                borderpane {
-                    vgrow = Priority.ALWAYS
-                    top = navigator.breadCrumbsBar.apply {
-                        disableWhen(pluginOpenedProperty)
-                    }
-                    center<Workspace>()
+            center = borderpane {
+                top = navigator.breadCrumbsBar.apply {
+                    disableWhen(pluginOpenedProperty)
                 }
+                center<Workspace>()
             }
         }
     }
