@@ -80,17 +80,7 @@ class RecordScriptureFragment : RecordableFragment(
         }
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.stringBinding {
-                it?.let { take ->
-                    MessageFormat.format(
-                        messages["takeTitle"],
-                        messages["take"],
-                        take
-                    )
-                } ?: messages["take"]
-            }
-        )
+        titleProperty.bind(recordScriptureViewModel.breadcrumbTitleBinding)
         iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
         onClickAction {
             navigator.dock(this@RecordScriptureFragment)

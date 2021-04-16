@@ -14,17 +14,17 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.*
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.util.concurrent.Callable
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -48,8 +48,6 @@ open class RecordableViewModel(
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
-
-    private val navigator: NavigationMediator by inject()
 
     private val disposables = CompositeDisposable()
 
@@ -88,10 +86,7 @@ open class RecordableViewModel(
                 }
                 .flatMapSingle { plugin ->
                     fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
-                    navigator.subscribe<PluginClosedEvent> {
-                        plugin.quit()
-                    }
-                    audioPluginViewModel.record(plugin, rec)
+                    audioPluginViewModel.record(rec)
                 }
                 .observeOnFx()
                 .doOnError { e ->
@@ -115,13 +110,10 @@ open class RecordableViewModel(
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
-                navigator.subscribe<PluginClosedEvent> {
-                    plugin.quit()
-                }
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 when (pluginType) {
-                    PluginType.EDITOR -> audioPluginViewModel.edit(plugin, takeEvent.take)
-                    PluginType.MARKER -> audioPluginViewModel.mark(plugin, takeEvent.take)
+                    PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
+                    PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)
                     else -> null
                 }
             }

@@ -40,10 +40,9 @@ class AudioPluginViewModel : ViewModel() {
         return pluginRepository.getPlugin(pluginType)
     }
 
-    fun record(plugin: IAudioPlugin, recordable: Recordable): Single<TakeActions.Result> {
+    fun record(recordable: Recordable): Single<TakeActions.Result> {
         val params = constructPluginParameters()
         return takeActions.record(
-            plugin = plugin,
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
@@ -94,14 +93,14 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    fun edit(plugin: IAudioPlugin, take: Take): Single<TakeActions.Result> {
+    fun edit(take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters()
-        return takeActions.edit(plugin, take, params)
+        return takeActions.edit(take, params)
     }
 
-    fun mark(plugin: IAudioPlugin, take: Take): Single<TakeActions.Result> {
+    fun mark(take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters(messages["markAction"])
-        return takeActions.mark(plugin, take, params)
+        return takeActions.mark(take, params)
     }
 
     fun addPlugin(record: Boolean, edit: Boolean) {

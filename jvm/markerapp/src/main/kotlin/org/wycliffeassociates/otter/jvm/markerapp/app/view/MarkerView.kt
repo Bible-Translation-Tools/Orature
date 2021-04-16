@@ -42,9 +42,4 @@ class MarkerView : PluginEntrypoint() {
         add(source)
         add(playbackControls)
     }
-
-    override fun onUndock() {
-        super.onUndock()
-        viewModel.saveAndQuit()
-    }
 }

@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
-import javafx.beans.property.SimpleObjectProperty
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -29,12 +28,8 @@ class NavigationMediator : Component(), ScopedInstance {
         iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
     }
 
-    private val pluginEventProperty = SimpleObjectProperty<PluginType?>()
-
     init {
         subscribe<PluginOpenedEvent> {
-            pluginEventProperty.set(it.type)
-
             when(it.type) {
                 PluginType.RECORDER -> breadCrumbsBar.addItem(recorderBreadCrumb)
                 PluginType.EDITOR -> breadCrumbsBar.addItem(editorBreadCrumb)
@@ -42,8 +37,6 @@ class NavigationMediator : Component(), ScopedInstance {
             }
         }
         subscribe<PluginClosedEvent> {
-            pluginEventProperty.set(null)
-
             when(it.type) {
                 PluginType.RECORDER -> breadCrumbsBar.removeItem(recorderBreadCrumb)
                 PluginType.EDITOR -> breadCrumbsBar.removeItem(editorBreadCrumb)
@@ -63,10 +56,6 @@ class NavigationMediator : Component(), ScopedInstance {
         }
         if (workspace.dockedComponent != view) {
             workspace.dock(view)
-        }
-
-        pluginEventProperty.get()?.let {
-            fire(PluginClosedEvent(it))
         }
     }
 

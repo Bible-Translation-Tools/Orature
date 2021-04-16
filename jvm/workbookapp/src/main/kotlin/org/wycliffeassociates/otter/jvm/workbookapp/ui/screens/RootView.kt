@@ -41,8 +41,13 @@ class RootView : View() {
         borderpane {
             top = menu
             center = vbox {
-                add(navigator.breadCrumbsBar)
-                add(workspace)
+                borderpane {
+                    vgrow = Priority.ALWAYS
+                    top = navigator.breadCrumbsBar.apply {
+                        disableWhen(pluginOpenedProperty)
+                    }
+                    center<Workspace>()
+                }
             }
         }
     }

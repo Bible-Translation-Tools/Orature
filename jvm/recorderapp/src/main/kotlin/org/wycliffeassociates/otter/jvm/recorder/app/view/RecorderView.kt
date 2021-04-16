@@ -47,9 +47,4 @@ class RecorderView : PluginEntrypoint() {
             }
         }
     }
-
-    override fun onUndock() {
-        super.onUndock()
-        recorderViewModel.save()
-    }
 }

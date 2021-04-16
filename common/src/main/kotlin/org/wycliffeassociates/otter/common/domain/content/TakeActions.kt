@@ -3,12 +3,12 @@ package org.wycliffeassociates.otter.common.domain.content
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
+import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -23,16 +23,15 @@ class TakeActions @Inject constructor(
         NO_AUDIO
     }
 
-    fun edit(plugin: IAudioPlugin, take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(plugin, take, pluginParameters).map { (t, r) -> r }
+    fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.EDITOR, take, pluginParameters).map { (t, r) -> r }
     }
 
-    fun mark(plugin: IAudioPlugin, take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(plugin, take, pluginParameters).map { (t, r) -> r }
+    fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.MARKER, take, pluginParameters).map { (t, r) -> r }
     }
 
     fun record(
-        plugin: IAudioPlugin,
         audio: AssociatedAudio,
         projectAudioDir: File,
         namer: FileNamer,
@@ -48,19 +47,19 @@ class TakeActions @Inject constructor(
                 createNewTake(newTakeNumber, filename, chapterAudioDir)
             }
             .flatMap { take ->
-                launchPlugin(plugin, take, pluginParameters)
+                launchPlugin(PluginType.RECORDER, take, pluginParameters)
             }.map { (take, result) ->
                 handleRecorderPluginResult(audio::insertTake, take, result)
             }
     }
 
     private fun launchPlugin(
-        plugin: IAudioPlugin,
+        pluginType: PluginType,
         take: Take,
         pluginParameters: PluginParameters
     ): Single<Pair<Take, Result>> {
         return launchPlugin
-            .launchPlugin(plugin, take.file, pluginParameters)
+            .launchPlugin(pluginType, take.file, pluginParameters)
             .map {
                 when (it) {
                     LaunchPlugin.Result.SUCCESS -> Pair(take, Result.SUCCESS)
