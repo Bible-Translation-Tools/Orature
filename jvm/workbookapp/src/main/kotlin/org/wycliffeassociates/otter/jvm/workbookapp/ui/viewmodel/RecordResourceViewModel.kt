@@ -42,7 +42,7 @@ class RecordResourceViewModel : ViewModel() {
         BACKWARD
     }
 
-    val workbookDataStore: WorkbookDataStore by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
