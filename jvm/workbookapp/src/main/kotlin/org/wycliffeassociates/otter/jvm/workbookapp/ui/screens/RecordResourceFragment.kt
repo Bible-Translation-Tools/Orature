@@ -180,6 +180,7 @@ class RecordResourceFragment(
 
     override fun stopPlayers() {
         recordableViewModel.takeCardModels.forEach { it.audioPlayer.stop() }
+        recordableViewModel.selectedTakeProperty.value?.audioPlayer?.stop()
     }
 
     override fun closePlayers() {
