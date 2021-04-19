@@ -1,6 +1,7 @@
 .breadcrumb-bar {
     -fx-padding: 15px 40px;
     -fx-spacing: 5px;
+    -fx-background-color: -wa-white;
 }
 
 .breadcrumb {
@@ -18,6 +19,11 @@
     -fx-text-fill: #001533;
     -fx-underline: true;
     -fx-font-size: 20px;
+}
+
+.breadcrumb__content:disabled {
+    -fx-border-width: 0px;
+    -fx-underline: false;
 }
 
 .breadcrumb__content:hover {
@@ -43,6 +49,10 @@
     -fx-underline: false;
 }
 
+.breadcrumb--active:disabled {
+    -fx-background-color: transparent;
+}
+
 .breadcrumb--active .ikonli-font-icon {
     -fx-icon-color: #023E97;
 }
@@ -59,7 +69,7 @@
 
 .breadcrumb__help .tooltip {
     -fx-font-size: 20px;
-    -fx-text-fill: #FFFFFF;
+    -fx-text-fill: -wa-white;
     -fx-background-color: #001533EE;
     -fx-wrap-text: true;
 }
