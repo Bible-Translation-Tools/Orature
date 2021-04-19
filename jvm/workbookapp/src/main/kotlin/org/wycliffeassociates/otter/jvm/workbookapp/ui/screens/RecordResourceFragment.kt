@@ -178,6 +178,10 @@ class RecordResourceFragment(
         rowConstraints.addAll(rc)
     }
 
+    override fun stopPlayers() {
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.stop() }
+    }
+
     override fun closePlayers() {
         recordableViewModel.takeCardModels.forEach { it.audioPlayer.close() }
     }

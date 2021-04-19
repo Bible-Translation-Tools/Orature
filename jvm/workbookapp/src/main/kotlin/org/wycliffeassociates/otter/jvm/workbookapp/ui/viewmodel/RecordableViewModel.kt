@@ -145,6 +145,12 @@ open class RecordableViewModel(
                 take.equals(it.take)
             }
             found?.let {
+                selectedTakeProperty.value?.let { selectedTake ->
+                    selectedTake.selected = false
+                    addToAlternateTakes(selectedTake)
+                }
+                removeFromAlternateTakes(take)
+
                 it.selected = true
                 recordable?.audio?.selectTake(it.take) ?: throw IllegalStateException("Recordable is null")
                 selectedTakeProperty.set(it)
@@ -293,8 +299,10 @@ open class RecordableViewModel(
 
     private fun addToAlternateTakes(take: TakeCardModel) {
         Platform.runLater {
-            takeCardModels.add(take)
-            sortTakes()
+            if (!takeCardModels.contains(take)) {
+                takeCardModels.add(take)
+                sortTakes()
+            }
         }
     }
 

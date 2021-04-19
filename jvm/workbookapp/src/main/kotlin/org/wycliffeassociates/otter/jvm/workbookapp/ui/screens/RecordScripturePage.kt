@@ -79,6 +79,10 @@ class RecordScriptureFragment : RecordableFragment(
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
+        isDraggingProperty.onChange {
+            if (it) stopPlayers()
+        }
+
         recordableViewModel.takeCardModels.onChangeAndDoNow {
             takesGrid.gridItems.setAll(it)
         }
@@ -188,6 +192,10 @@ class RecordScriptureFragment : RecordableFragment(
                 rowConstraints.add(sourceContentRowConstraints)
             }
         }
+    }
+
+    override fun stopPlayers() {
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.stop() }
     }
 
     override fun closePlayers() {
