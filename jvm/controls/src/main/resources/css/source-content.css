@@ -1,0 +1,98 @@
+@import "root.css"
+
+.source-content {
+    -fx-background-color: -wa-white;
+    -fx-padding: 10px 20px;
+    -fx-alignment: center;
+}
+
+.source-content__label {
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
+}
+
+.source-content__top {
+    -fx-alignment: center;
+}
+
+.source-content__bottom {
+    -fx-min-height: 60px;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -wa-gray-light;
+}
+
+.source-content__not-available {
+    -fx-alignment: center;
+    -fx-font-size: 1.3em;
+    -fx-background-color: #e7ecf5;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10px;
+    -fx-pref-height: 45px;
+}
+
+.source-content__not-available .label {
+    -fx-text-fill: -wa-gray-dark;
+}
+
+.source-content__audio-slider {
+    -fx-padding: 0 0 0 30px;
+    -fx-background-insets: 0 0 0 30px;
+}
+
+.source-content__play-btn {
+    -fx-pref-width: 250px;
+    -fx-max-width: 250px;
+    -fx-pref-height: 50px;
+    -fx-font-size: 1.3em;
+    -fx-graphic-text-gap: 20px;
+}
+
+.source-content__play-btn .ikonli-font-icon {
+    -fx-icon-size: 18px;
+}
+
+.source-content__play-btn.btn--primary .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.source-content__play-btn.btn--secondary {
+    -fx-fill: -wa-primary;
+}
+
+.source-content__play-btn.btn--secondary .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
+.source-content__minimize-btn {
+    -fx-border-color: -wa-gray;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+}
+
+.source-content__minimize-btn .ikonli-font-icon {
+    -fx-icon-size: 20px;
+}
+
+.source-content__text-container {
+    -fx-background: -wa-white;
+    -fx-background-color: -wa-white;
+    -fx-pref-height: 100px;
+}
+
+.source-content__audio_container {
+    -fx-alignment: center-left;
+    -fx-padding: 5px 0;
+    -fx-min-height: 60px;
+}
+
+.source-content__text {
+    -fx-font-size: 1.5em;
+    -fx-alignment: center;
+    -fx-text-alignment: justify;
+    -fx-fill: -wa-gray-darker;
+}
+
+.source-content__title {
+    -fx-font-size: 1.5em;
+    -fx-font-weight: bold;
+}

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox fx:id="root" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="224.0" prefWidth="176.0" styleClass="project-card" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox alignment="CENTER">
+         <children>
+            <Label fx:id="bookTitle" text="Book">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Label>
+            <HBox HBox.hgrow="ALWAYS" />
+            <JFXButton fx:id="cardMoreButton">
+               <graphic>
+                  <FontIcon iconLiteral="mdi-dots-vertical" iconSize="24" />
+               </graphic>
+            </JFXButton>
+         </children>
+         <VBox.margin>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </VBox.margin>
+      </HBox>
+      <StackPane prefHeight="128.0" prefWidth="176.0" style="-fx-background-color: #015ad932;">
+         <children>
+            <ImageView fx:id="coverArt" pickOnBounds="true" preserveRatio="true" />
+            <Text fx:id="bookSlug" fill="#0a3373" strokeType="OUTSIDE" strokeWidth="0.0" text="Slug">
+               <font>
+                  <Font size="72.0" />
+               </font>
+            </Text>
+            <VBox alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">
+               <children>
+                  <Label fx:id="language" text="language">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <graphic>
+                        <FontIcon iconLiteral="mdi-translate" iconSize="18" />
+                     </graphic>
+                  </Label>
+               </children>
+               <padding>
+                  <Insets bottom="4.0" />
+               </padding>
+            </VBox>
+         </children>
+      </StackPane>
+      <JFXButton fx:id="cardPrimaryButton" prefHeight="40.0" prefWidth="160.0" styleClass="btn--secondary">
+         <VBox.margin>
+            <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+         </VBox.margin>
+         <graphic>
+            <FontIcon iconLiteral="mdi-arrow-right" iconSize="22" styleClass="btn--secondary" />
+         </graphic>
+      </JFXButton>
+   </children>
+</VBox>

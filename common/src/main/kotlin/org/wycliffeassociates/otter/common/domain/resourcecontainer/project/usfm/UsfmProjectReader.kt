@@ -1,9 +1,12 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
-import org.wycliffeassociates.otter.common.collections.tree.OtterTree
-import org.wycliffeassociates.otter.common.collections.tree.OtterTreeNode
-import org.wycliffeassociates.otter.common.data.model.*
-import org.wycliffeassociates.otter.common.data.model.Collection
+import org.wycliffeassociates.otter.common.collections.OtterTree
+import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
@@ -12,6 +15,10 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.IZip
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.toCollection
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
+import org.wycliffeassociates.usfmtools.USFMParser
+import org.wycliffeassociates.usfmtools.models.markers.CMarker
+import org.wycliffeassociates.usfmtools.models.markers.TextBlock
+import org.wycliffeassociates.usfmtools.models.markers.VMarker
 import java.io.File
 import java.io.Reader
 
@@ -106,14 +113,20 @@ private fun parseFromReader(
 }
 
 private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<OtterTree<CollectionOrContent>> {
-    val doc = ParseUsfm(reader).parse()
-    return doc.chapters.map { chapter ->
-        val chapterSlug = "${projectSlug}_${chapter.key}"
+    val usfmText = reader.readText()
+    val parser = USFMParser(arrayListOf("s5"))
+    val doc = parser.parseFromString(usfmText)
+    val chapters = doc.getChildMarkers(CMarker::class.java)
+    return chapters.map { chapter ->
+        val verses = chapter.getChildMarkers(VMarker::class.java)
+        val startVerse = verses.minBy { it.startingVerse }?.startingVerse ?: 1
+        val endVerse = verses.maxBy { it.endingVerse }?.endingVerse ?: 1
+        val chapterSlug = "${projectSlug}_${chapter.number}"
         val chapterCollection = Collection(
-            sort = chapter.key,
+            sort = chapter.number,
             slug = chapterSlug,
             labelKey = ContentLabel.CHAPTER.value,
-            titleKey = chapter.key.toString(),
+            titleKey = chapter.number.toString(),
             resourceContainer = null
         )
         val chapterTree = OtterTree<CollectionOrContent>(chapterCollection)
@@ -121,8 +134,8 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
         val chapChunk = Content(
             sort = 0,
             labelKey = ContentLabel.CHAPTER.value,
-            start = chapter.value.values.first().number,
-            end = chapter.value.values.last().number,
+            start = startVerse,
+            end = endVerse,
             selectedTake = null,
             text = null,
             format = null,
@@ -131,14 +144,14 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
         chapterTree.addChild(OtterTreeNode(chapChunk))
 
         // Create content for each verse
-        for (verse in chapter.value.values) {
+        for (verse in verses) {
             val content = Content(
-                sort = verse.number,
+                sort = verse.startingVerse,
                 labelKey = ContentLabel.VERSE.value,
-                start = verse.number,
-                end = verse.number,
+                start = verse.startingVerse,
+                end = verse.endingVerse,
                 selectedTake = null,
-                text = verse.text,
+                text = verse.getText(),
                 format = FORMAT,
                 type = ContentType.TEXT
             )
@@ -146,4 +159,13 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
         }
         return@map chapterTree
     }
+}
+
+fun VMarker.getText(): String {
+    val text = this.getChildMarkers(TextBlock::class.java)
+    val sb = StringBuilder()
+    for (txt in text) {
+        sb.append(txt.text)
+    }
+    return sb.toString()
 }

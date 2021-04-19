@@ -6,21 +6,29 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
-import org.wycliffeassociates.otter.common.data.model.Language
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import java.io.InputStream
+import javax.inject.Inject
 
 // Imports from langnames.json
-class ImportLanguages(val inputStream: InputStream, val languageRepo: ILanguageRepository) {
-    fun import(): Completable {
-        return Completable.fromCallable {
-            val mapper = ObjectMapper(JsonFactory())
-            mapper.registerModule(KotlinModule())
-            val languages = inputStream.bufferedReader().use {
-                mapper.readValue(it, Array<Door43Language>::class.java)
+class ImportLanguages @Inject constructor(val languageRepo: ILanguageRepository) {
+    private val logger = LoggerFactory.getLogger(ImportLanguages::class.java)
+    fun import(inputStream: InputStream): Completable {
+        return Completable
+            .fromCallable {
+                val mapper = ObjectMapper(JsonFactory())
+                mapper.registerModule(KotlinModule())
+                val languages = inputStream.bufferedReader().use {
+                    mapper.readValue(it, Array<Door43Language>::class.java)
+                }
+                languageRepo.insertAll(languages.toList().map { it.toLanguage() }).blockingGet()
             }
-            languageRepo.insertAll(languages.toList().map { it.toLanguage() }).blockingGet()
-        }.subscribeOn(Schedulers.io())
+            .doOnError { e ->
+                logger.error("Error in ImportLanguages", e)
+            }
+            .subscribeOn(Schedulers.io())
     }
 }
 

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<?import javafx.scene.image.ImageView?>
+<HBox fx:id="root" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <StackPane alignment="CENTER" HBox.hgrow="NEVER" prefWidth="70.0" styleClass="chapter-card__graphic">
+            <children>
+                <Label fx:id="noGraphic">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-file" iconSize="25" />
+                    </graphic>
+                </Label>
+                <ImageView fx:id="coverArt" preserveRatio="true" fitWidth="70.0" />
+            </children>
+            <VBox.margin>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+            </VBox.margin>
+        </StackPane>
+        <VBox spacing="10.0" HBox.hgrow="ALWAYS">
+            <children>
+                <Label fx:id="title" styleClass="chapter-card__title" text="Chapter" underline="true" VBox.vgrow="ALWAYS" />
+                <Label fx:id="notStarted" styleClass="chapter-card__not-started" text="not started" VBox.vgrow="ALWAYS" />
+                <VBox fx:id="progressBars" VBox.vgrow="ALWAYS">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="ALWAYS">
+                            <children>
+                                <Label styleClass="chapter-card__recorded-icon" HBox.hgrow="NEVER">
+                                    <graphic>
+                                        <FontIcon iconLiteral="mdi-rocket" iconSize="18" />
+                                    </graphic>
+                                </Label>
+                                <JFXProgressBar fx:id="recordedProgress" styleClass="chapter-card__recorded-progress" maxWidth="1.7976931348623157E308" progress="0.0" HBox.hgrow="ALWAYS" />
+                                <Label fx:id="recordedChunks" text="0/0" HBox.hgrow="NEVER" />
+                            </children>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="ALWAYS">
+                            <children>
+                                <Label styleClass="chapter-card__selected-icon" HBox.hgrow="NEVER">
+                                    <graphic>
+                                        <FontIcon iconLiteral="mdi-check-circle-outline" />
+                                    </graphic>
+                                </Label>
+                                <JFXProgressBar fx:id="selectedProgress" styleClass="chapter-card__selected-progress" maxWidth="1.7976931348623157E308" progress="0.0" HBox.hgrow="ALWAYS" />
+                                <Label fx:id="selectedChunks" text="0/0" HBox.hgrow="NEVER" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</HBox>

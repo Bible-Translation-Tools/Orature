@@ -1,0 +1,57 @@
+.chapter-card {
+    -fx-background-radius: 10px;
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level1;
+    -fx-cursor: hand;
+    -fx-pref-height: 96px;
+    -fx-max-width: 800px;
+}
+
+.chapter-card__graphic {
+    -fx-background-radius: 10px;
+    -fx-background-color: -wa-gray-lighter;
+}
+
+.chapter-card__title {
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.chapter-card__recorded-icon .ikonli-font-icon {
+    -fx-icon-size: 22px;
+    -fx-icon-color: -wa-primary;
+}
+
+.chapter-card__selected-icon .ikonli-font-icon {
+    -fx-icon-size: 22px;
+    -fx-icon-color: -wa-green;
+}
+
+.chapter-card__recorded-progress, .chapter-card__selected-progress {
+    -fx-pref-height: 7px;
+}
+
+.chapter-card__recorded-progress .track, .chapter-card__selected-progress .track {
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 3px;
+    -fx-border-size: 1px;
+    -fx-border-radius: 3px;
+    -fx-border-color: -wa-gray-lighter;
+}
+
+.chapter-card__recorded-progress .bar, .chapter-card__selected-progress .bar {
+    -fx-background-radius: 3px;
+    -fx-background-color: -wa-primary;
+}
+
+.chapter-card__recorded-progress .bar {
+    -fx-background-color: linear-gradient(to right, -wa-primary, #0097d8);
+}
+
+.chapter-card__selected-progress .bar {
+    -fx-background-color: linear-gradient(to right, #079100, -wa-green);
+}
+
+.chapter-card__not-started {
+    -fx-font-size: 16px;
+}

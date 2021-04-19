@@ -1,0 +1,51 @@
+plugins {
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
+}
+
+javafx {
+    version = "$javafxVer"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    // ReactiveX
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
+    implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
+
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornadofxVer"
+
+    // SVG Loader
+    implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
+
+    // JFoenix
+    implementation "com.jfoenix:jfoenix:$jfoenixVer"
+
+    implementation "org.slf4j:slf4j-api:$slf4jApiVer"
+
+    // FontAwesomeFX
+    implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"
+    implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"
+    implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
+    implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
+
+    implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome5-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-material-pack:$ikonliVer"
+
+
+    // Atlassian commonmark (for rendering markdown)
+    implementation "com.atlassian.commonmark:commonmark:$commonmarkVer"
+
+    implementation project(':common')
+    implementation project(':jvm:utils')
+    implementation project(':common:audio')
+}

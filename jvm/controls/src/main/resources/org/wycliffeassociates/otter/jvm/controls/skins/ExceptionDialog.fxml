@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import com.jfoenix.controls.JFXCheckBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox styleClass="dialog--exception" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity"
+      minHeight="-Infinity" minWidth="-Infinity"
+      prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <ImageView fitHeight="217.0" fitWidth="592.0" pickOnBounds="true" preserveRatio="true">
+            <image>
+                <Image url="@/images/exception_header.png"/>
+            </image>
+        </ImageView>
+        <Label fx:id="titleLabel">
+            <VBox.margin>
+                <Insets top="20.0"/>
+            </VBox.margin>
+            <font>
+                <Font name="System Bold" size="18.0"/>
+            </font>
+        </Label>
+        <Label fx:id="headerLabel" wrapText="true">
+            <VBox.margin>
+                <Insets top="20.0"/>
+            </VBox.margin>
+            <padding>
+                <Insets left="40.0" right="40.0"/>
+            </padding>
+            <font>
+                <Font size="16.0"/>
+            </font>
+        </Label>
+        <VBox maxHeight="180.0">
+            <children>
+                <JFXButton styleClass="btn, btn--tertiary" fx:id="showMoreButton" contentDisplay="RIGHT"
+                           focusTraversable="false">
+                    <graphic>
+                        <FontIcon styleClass="btn__icon"/>
+                    </graphic>
+                </JFXButton>
+                <ScrollPane fx:id="stacktraceScrollPane" styleClass="dialog--exception__stacktrace-container"
+                            fitToWidth="true" hbarPolicy="NEVER" managed="false" visible="false">
+                    <content>
+                        <AnchorPane styleClass="dialog--exception__stacktrace-container__sub">
+                            <children>
+                                <Label fx:id="stacktraceText" alignment="TOP_LEFT" lineSpacing="8.0"
+                                       maxWidth="500.0" text="" wrapText="true">
+                                    <font>
+                                        <Font size="16.0"/>
+                                    </font>
+                                </Label>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="5.0"/>
+                    </padding>
+                    <VBox.margin>
+                        <Insets top="10.0"/>
+                    </VBox.margin>
+                </ScrollPane>
+            </children>
+            <padding>
+                <Insets left="40.0" right="40.0"/>
+            </padding>
+            <VBox.margin>
+                <Insets top="20.0"/>
+            </VBox.margin>
+        </VBox>
+        <HBox>
+            <children>
+                <JFXCheckBox fx:id="sendReportCheckbox" styleClass="dialog--exception__send-report"
+                             prefHeight="30.0" selected="true">
+                    <font>
+                        <Font size="16.0"/>
+                    </font>
+                </JFXCheckBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <JFXButton styleClass="btn, btn--primary" fx:id="closeButton">
+                    <graphic>
+                        <FontIcon styleClass="btn__icon" iconLiteral="gmi-close"/>
+                    </graphic>
+                </JFXButton>
+            </children>
+            <VBox.margin>
+                <Insets bottom="20.0" top="20.0"/>
+            </VBox.margin>
+            <padding>
+                <Insets left="40.0" right="40.0"/>
+            </padding>
+        </HBox>
+    </children>
+    <opaqueInsets>
+        <Insets/>
+    </opaqueInsets>
+</VBox>

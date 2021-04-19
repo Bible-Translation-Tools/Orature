@@ -2,7 +2,7 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import org.junit.Test
 import org.wycliffeassociates.otter.common.assertEqualsForEach
-import org.wycliffeassociates.otter.common.data.model.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 
 class FileNamerTest {
     private fun createFileNamer(chapterCount: Long, chapterTitle: String, chapterSort: Int) = FileNamer(

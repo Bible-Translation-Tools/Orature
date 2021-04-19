@@ -1,0 +1,51 @@
+@import "root.css"
+
+.card--scripture-take {
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level2;
+    -fx-font-size: 1em;
+}
+
+.card--scripture-take__btn {
+    -fx-background-color: #FEFEFE;
+    -fx-effect: -wa-level2;
+    -fx-background-radius: 5px;
+    -fx-border-radius: 5px;
+    -fx-font-size: 1.25em;
+    -fx-font-weight: bold;
+}
+
+.card--scripture-take__btn:hover {
+    -fx-effect: -wa-level4;
+}
+
+.card--scripture-take__btn--play {
+    -fx-background-color: -wa-white;
+}
+
+.card--scripture-take__btn--edit {
+    -fx-background-color: -wa-white;
+    -fx-text-fill: #58BD2F;
+    -fx-icon-color: #58BD2F;
+}
+
+.card--scripture-take__btn--delete {
+    -fx-font-size: 16px;
+    -fx-background-color: -wa-white;
+    -fx-font-weight: normal;
+    -fx-icon-size: 26px;
+    -fx-effect: -wa-level0;
+}
+
+.card--scripture-take__take-label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-icon-size: 26px;
+}
+
+.card--scripture-take__timestamp-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: lighter;
+    -fx-font-style: italic;
+    -fx-text-fill: -wa-gray;
+}

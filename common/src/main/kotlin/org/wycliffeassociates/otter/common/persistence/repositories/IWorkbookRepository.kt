@@ -1,8 +1,14 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
-import org.wycliffeassociates.otter.common.data.model.Collection
+import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 
 interface IWorkbookRepository {
     fun get(source: Collection, target: Collection): Workbook
+    fun getSoftDeletedTakes(book: Book): Single<List<Take>>
+    fun getProjects(): Single<List<Workbook>>
+    fun closeWorkbook(workbook: Workbook)
 }

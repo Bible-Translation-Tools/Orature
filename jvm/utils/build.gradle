@@ -1,0 +1,26 @@
+plugins {
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
+}
+
+javafx {
+    version = "$javafxVer"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    // ReactiveX
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
+    implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
+
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornadofxVer"
+
+    // SVG Loader
+    implementation "com.github.jsarabia:FranzXaverSVG:$franzXaverSvgVer"
+}

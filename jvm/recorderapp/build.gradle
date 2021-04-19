@@ -1,0 +1,56 @@
+plugins {
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
+}
+
+javafx {
+    version = "$javafxVer"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+    maven { url 'https://jitpack.io' } // FranzXaverSVG fork
+}
+
+dependencies {
+    implementation "org.slf4j:slf4j-api:$slf4jApiVer"
+
+    // ReactiveX
+    implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
+    implementation "com.github.thomasnield:rxkotlinfx:$rxkotlinfxVer"
+    implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
+
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornadofxVer"
+
+    // JFoenix
+    implementation "com.jfoenix:jfoenix:$jfoenixVer"
+
+    // Testing
+    testImplementation "junit:junit:$junitVer"
+    testImplementation "org.mockito:mockito-core:$mockitoVer"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
+
+    // Ikonli
+    implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-fontawesome5-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
+    implementation "org.kordamp.ikonli:ikonli-material-pack:$ikonliVer"
+
+    //WA Libraries
+    implementation project(':common')
+    implementation project(':common:audio')
+    implementation project(':jvm:controls')
+    implementation project(':jvm:device')
+    implementation project(':jvm:workbookplugin')
+}
+
+task copyJarToWorkbookAppResources(type: Copy) {
+    dependsOn 'jar'
+    from jar
+    into '../workbookapp/src/main/resources/plugins/jars'
+    rename 'recorderapp.jar', 'recorderapp'
+}
+
+test.dependsOn 'copyJarToWorkbookAppResources'

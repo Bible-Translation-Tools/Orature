@@ -1,10 +1,11 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
-import org.wycliffeassociates.otter.common.data.model.ContentType
-import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
 
 data class Chunk(
     override val sort: Int,
+    override val label: String,
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
 
@@ -13,7 +14,7 @@ data class Chunk(
     val end: Int,
     override val contentType: ContentType
 
-) : BookElement, Recordable {
+) : BookElement, ResourceRecordable {
     override val title
         get() = start.toString()
 }

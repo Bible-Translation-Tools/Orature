@@ -1,0 +1,17 @@
+plugins {
+    id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
+}
+
+javafx {
+    version = "$javafxVer"
+    modules = ['javafx.controls', 'javafx.fxml']
+}
+
+repositories {
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+}
+
+dependencies {
+    // TornadoFX
+    implementation "no.tornado:tornadofx:$tornadofxVer"
+}

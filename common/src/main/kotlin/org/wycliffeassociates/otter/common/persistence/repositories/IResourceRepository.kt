@@ -2,9 +2,9 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
 import io.reactivex.Observable
-import org.wycliffeassociates.otter.common.data.model.Content
-import org.wycliffeassociates.otter.common.data.model.Collection
-import org.wycliffeassociates.otter.common.data.model.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Content
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
 interface IResourceRepository : IRepository<Content> {
     fun getResources(collection: Collection, resourceMetadata: ResourceMetadata): Observable<Content>

@@ -1,0 +1,43 @@
+@import "root.css"
+
+.plugin-opened-page {
+    -fx-background-color: white;
+}
+
+.plugin-opened-page__label {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.4em;
+    -fx-padding: 20px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+}
+
+.plugin-opened-page__title {
+    -fx-alignment: center;
+}
+
+.plugin-opened-page__label--message {
+    -fx-max-width: 1000.0;
+    -fx-font-weight: normal;
+    -fx-padding: 0 20px 20px 20px;
+    -fx-text-alignment: justify;
+    -fx-text-fill: -wa-gray-darker;
+    -fx-font-size: 1.5em;
+}
+
+.plugin-opened-page__close-button {
+    -fx-min-height: 40px;
+    -fx-min-width: 185px;
+    -fx-background-color: -wa-white;
+    -fx-border-color: -wa-primary;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.plugin-opened-page__close-button * {
+    -fx-fill: -wa-primary;
+}

@@ -1,0 +1,23 @@
+@import "root.css"
+
+.project-card {
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level2;
+}
+
+.project-card:hover {
+    -fx-effect: -wa-level4
+}
+
+.project-card__popup-list {
+    -fx-selection-bar: -wa-white;
+}
+
+.project-card__popup-list .list-cell {
+    -fx-padding: 0.25em 0.583em 0.25em 0.583em; /* from modena.css */
+}
+
+.project-card__popup-list .label {
+    -fx-text-fill: -wa-gray-darker;
+    -fx-max-width: infinity;
+}

@@ -1,0 +1,79 @@
+buildscript {
+    apply from: './dependencies.gradle'
+
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVer"
+        classpath "org.jlleitschuh.gradle:ktlint-gradle:$ktlintPluginVer"
+    }
+}
+
+plugins {
+    id 'nebula.lint' version "$nebulaLintPluginVer"
+    id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
+    id "org.sonarqube" version "$sonarcloudPluginVer"
+}
+
+apply plugin: 'io.gitlab.arturbosch.detekt'
+
+repositories {
+    jcenter()
+    maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
+
+detekt {
+    parallel = true
+    input = files(projectDir)
+    buildUponDefaultConfig = true
+}
+
+tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
+    include("**/*.kt")
+    include("**/*.kts")
+    exclude("**/resources/**")
+    exclude("**/build/**")
+}
+
+subprojects {
+    repositories {
+        jcenter()
+        maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
+    }
+
+    apply plugin: 'kotlin'
+    apply plugin: 'kotlin-kapt'
+    apply plugin: 'nebula.lint'
+    apply plugin: 'org.jlleitschuh.gradle.ktlint'
+
+    dependencies {
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVer"
+    }
+
+    ktlint {
+        coloredOutput = false // Colors break source links in the IDEA console.
+        ignoreFailures = true
+    }
+
+    group 'org.wycliffeassociates'
+    sourceCompatibility = 11
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "11"
+    }
+
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "11"
+    }
+
+    gradleLint.rules = ['deprecated-dependency-configuration']
+}

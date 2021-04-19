@@ -4,7 +4,7 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.assertEqualsForEach
-import org.wycliffeassociates.otter.common.data.model.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import java.io.File
 import java.time.LocalDate
 

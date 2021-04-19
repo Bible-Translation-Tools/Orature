@@ -1,0 +1,115 @@
+@import "root.css"
+
+/* -------------- Todo List -------------- */
+/* TODO: .btn class should have a `0.2s Ease-in-out` transition for all effects applied.
+
+/* -------------- Button Base -------------- */
+/* This controls all of the common variables found in each button type */
+.btn {
+    -fx-pref-height: 40px;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-border-style: solid;
+    -fx-font-size: 1em;
+    -fx-cursor: hand;
+}
+
+/* -------------- Button Icon -------------- */
+.btn__icon {
+    -fx-icon-color: inherit;
+    -fx-icon-size: 20px;
+    -fx-space:10px;
+}
+
+/* -------------- Primary Button -------------- */
+.btn--primary {
+    -fx-background-color: -wa-primary;
+    -fx-effect: -wa-level2;
+    -fx-text-fill: -wa-white;
+    -fx-border-width: 0px;
+    -fx-icon-color: -wa-white;
+}
+
+.btn--primary:hover {
+    -fx-background-color: -wa-primary-dark;
+    -fx-effect: -wa-level1;
+}
+
+.btn--primary:disabled {
+    -fx-background-color: -wa-gray-lighter;
+    -fx-text-fill: -wa-gray-dark;
+    -fx-icon-color: -wa-gray-dark;
+    -fx-effect: -wa-level0;
+    -fx-cursor: disappear;
+
+}
+
+/* -------------- Call to Action Button -------------- */
+/*  This is the highest priority button and should always 
+/*  highlight the most desireable action the user would take. 
+/*  Only 1 CTA button should be used on a page. */
+.btn--cta {
+    -fx-background-color: -wa-cta-gradient;
+    -fx-effect: -wa-level3;
+    -fx-border-color: -wa-white-30;
+    -fx-border-width: 2px;  
+    -fx-icon-color: -wa-gray-darker;
+    -fx-text-fill: -wa-gray-darker;
+}
+.btn--cta:hover {
+    -fx-background-color: -wa-accent;
+    -fx-effect: -wa-level1;
+
+}
+.btn--cta:disabled {
+    -fx-background-color: -wa-gray-lighter;
+    -fx-text-fill: -wa-gray;
+    -fx-icon-color: -wa-gray;
+    -fx-effect: -wa-level0;
+    -fx-cursor: disappear;
+    -fx-opacity: 1;
+}
+
+/* -------------- Secondary Button -------------- */
+.btn--secondary {
+    -fx-background-color: transparent;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-primary;
+    -fx-text-fill: -wa-primary;
+    -fx-icon-color: -wa-primary;
+}
+.btn--secondary:hover {
+    -fx-background-color: -wa-primary-light;
+    -fx-text-fill: -wa-primary-dark;
+    -fx-icon-color: -wa-primary-dark;
+}
+.btn--secondary:disabled {
+    -fx-cursor: disappear;
+    -fx-text-fill: -wa-gray;
+    -fx-icon-color: -wa-gray;
+    -fx-border-color: -wa-gray-light;
+    -fx-border-width: 2px;
+}
+
+/* -------------- Tertiary Button -------------- */
+/* This button is very rarely used
+/* Typically only found in misc dialogs or on very heavy screens */
+.btn--tertiary {
+    -fx-background-color: transparent;
+    -fx-border-width: 0px;
+    -fx-text-fill: -wa-primary;
+    -fx-icon-color: -wa-primary;
+}
+.btn--tertiary:hover {
+    -fx-background-color: -wa-primary-light;
+    -fx-text-fill: -wa-primary-dark;
+    -fx-icon-color: -wa-primary-dark;
+}
+.btn--tertiary:disabled {
+    -fx-cursor: disappear;
+    -fx-text-fill: -wa-gray;
+    -fx-icon-color: -wa-gray;
+    -fx-border-width: 0px;
+    -fx-background-color: transparent;
+}
+
