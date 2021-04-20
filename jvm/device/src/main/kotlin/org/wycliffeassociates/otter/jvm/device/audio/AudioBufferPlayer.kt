@@ -129,6 +129,7 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun stop() {
         pause()
+        seek(0)
         listeners.forEach { it.onEvent(AudioPlayerEvent.STOP) }
     }
 
