@@ -139,26 +139,37 @@ open class RecordableViewModel(
             }
     }
 
-    fun selectTake(take: Take?) {
-        if (take != null) {
-            // selectedTakeProperty will be updated when the relay emits the item that it accepts
-            val found = takeCardModels.find {
-                take.equals(it.take)
-            }
-            found?.let {
-                it.selected = true
-                recordable?.audio?.selectTake(it.take) ?: throw IllegalStateException("Recordable is null")
-                selectedTakeProperty.set(it)
-                workbookDataStore.updateSelectedTakesFile()
-            }
-        } else {
-            selectedTakeProperty.set(null)
-        }
+    fun selectTake(take: Take) {
+        clearSelectedTake()
+        setSelectedTake(take)
     }
 
     fun selectTake(filename: String) {
         val take = takeCardModels.find { it.take.name == filename }
-        selectTake(take?.take)
+        take?.let {
+            selectTake(it.take)
+        } ?: clearSelectedTake()
+    }
+
+    private fun clearSelectedTake() {
+        selectedTakeProperty.value?.let { selectedTake ->
+            selectedTake.selected = false
+            addToAlternateTakes(selectedTake)
+        }
+        selectedTakeProperty.set(null)
+    }
+
+    private fun setSelectedTake(take: Take) {
+        val found = takeCardModels.find {
+            take.equals(it.take)
+        }
+        found?.let { takeModel ->
+            removeFromAlternateTakes(take)
+            takeModel.selected = true
+            recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
+            selectedTakeProperty.set(takeModel)
+            workbookDataStore.updateSelectedTakesFile()
+        }
     }
 
     fun deleteTake(take: Take) {
@@ -292,13 +303,6 @@ open class RecordableViewModel(
             .let { disposables.add(it) }
     }
 
-    private fun addToAlternateTakes(take: TakeCardModel) {
-        Platform.runLater {
-            takeCardModels.add(take)
-            sortTakes()
-        }
-    }
-
     private fun sortTakes() {
         FXCollections.sort(
             takeCardModels
@@ -307,6 +311,15 @@ open class RecordableViewModel(
                 take1.selected == take2.selected -> take1.take.number.compareTo(take2.take.number)
                 take1.selected -> 1
                 else -> -1
+            }
+        }
+    }
+
+    private fun addToAlternateTakes(take: TakeCardModel) {
+        Platform.runLater {
+            if (!takeCardModels.contains(take)) {
+                takeCardModels.add(take)
+                sortTakes()
             }
         }
     }
@@ -323,6 +336,11 @@ open class RecordableViewModel(
 
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
+    }
+
+    fun stopPlayers() {
+        takeCardModels.forEach { it.audioPlayer.stop() }
+        selectedTakeProperty.value?.audioPlayer?.stop()
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {

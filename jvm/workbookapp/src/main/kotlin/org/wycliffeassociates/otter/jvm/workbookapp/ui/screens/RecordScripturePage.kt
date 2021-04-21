@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jfoenix.controls.JFXSnackbar
-import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.HPos
@@ -119,6 +117,10 @@ class RecordScriptureFragment : Fragment() {
         importStylesheet<TakeCardStyles>()
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
+
+        isDraggingProperty.onChange {
+            if (it) stopPlayers()
+        }
 
         pluginOpenedPage = createPluginOpenedPage()
 
