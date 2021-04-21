@@ -1,5 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.jfoenix.controls.JFXSnackbar
+import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.HPos
@@ -119,7 +121,7 @@ class RecordScriptureFragment : Fragment() {
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
         isDraggingProperty.onChange {
-            if (it) stopPlayers()
+            if (it) recordableViewModel.stopPlayers()
         }
 
         pluginOpenedPage = createPluginOpenedPage()
@@ -275,8 +277,6 @@ class RecordScriptureFragment : Fragment() {
     }
 
     private fun createSnackBar() {
-        // TODO: This doesn't actually handle anything correctly. Need to know whether the user
-        // TODO... hasn't selected an editor or recorder and respond appropriately.
         recordableViewModel
             .snackBarObservable
             .doOnError { e ->

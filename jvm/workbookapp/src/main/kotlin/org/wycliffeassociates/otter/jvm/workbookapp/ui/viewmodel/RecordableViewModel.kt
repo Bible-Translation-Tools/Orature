@@ -210,13 +210,13 @@ open class RecordableViewModel(
             Callable {
                 when (contextProperty.get()) {
                     PluginType.RECORDER -> {
-                        audioPluginViewModel.selectedRecorderProperty.get().name
+                        audioPluginViewModel.selectedRecorderProperty.get()?.name
                     }
                     PluginType.EDITOR -> {
-                        audioPluginViewModel.selectedEditorProperty.get().name
+                        audioPluginViewModel.selectedEditorProperty.get()?.name
                     }
                     PluginType.MARKER -> {
-                        audioPluginViewModel.selectedMarkerProperty.get().name
+                        audioPluginViewModel.selectedMarkerProperty.get()?.name
                     }
                     null -> throw IllegalStateException("Action is not supported!")
                 }

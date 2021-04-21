@@ -262,8 +262,6 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     }
 
     private fun createSnackBar() {
-        // TODO: This doesn't actually handle anything correctly. Need to know whether the user
-        // TODO... hasn't selected an editor or recorder and respond appropriately.
         recordableViewModel
             .snackBarObservable
             .doOnError { e ->
@@ -330,6 +328,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
 
     private fun startDrag(event: StartDragEvent) {
         if (event.take != recordableViewModel.selectedTakeProperty.value?.take) {
+            recordableViewModel.stopPlayers()
             val draggingNode = event.draggingNode
             val mouseEvent = event.mouseEvent
             dragStartDelta = Point2D(mouseEvent.x, mouseEvent.y)
