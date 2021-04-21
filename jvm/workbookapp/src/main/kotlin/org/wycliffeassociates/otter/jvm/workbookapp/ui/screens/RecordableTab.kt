@@ -38,13 +38,13 @@ class RecordableTab(
     fun bindProperties() {
         textProperty().bind(viewModel.labelProperty)
         recordableProperty.bind(viewModel.recordableProperty)
-        recordResourceFragment.onDock()
+        viewModel.openPlayers()
     }
 
     fun unbindProperties() {
         textProperty().unbind()
         recordableProperty.unbind()
-        recordResourceFragment.onUndock()
+        viewModel.closePlayers()
     }
 
     private fun callOnTabSelect() {

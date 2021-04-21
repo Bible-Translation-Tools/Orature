@@ -15,16 +15,17 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.*
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.util.concurrent.Callable
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -314,6 +315,10 @@ open class RecordableViewModel(
         Platform.runLater {
             takeCardModels.removeAll { it.take.equals(take) }
         }
+    }
+
+    fun openPlayers() {
+        takeCardModels.forEach { it.audioPlayer.load(it.take.file) }
     }
 
     fun closePlayers() {
