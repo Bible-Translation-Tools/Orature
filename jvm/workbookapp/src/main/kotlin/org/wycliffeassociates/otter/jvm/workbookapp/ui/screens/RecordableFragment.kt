@@ -142,6 +142,8 @@ abstract class RecordableFragment(
         }
     }
 
+    abstract fun stopPlayers()
+
     abstract fun closePlayers()
 
     abstract fun openPlayers()
@@ -207,6 +209,7 @@ abstract class RecordableFragment(
 
     private fun startDrag(event: StartDragEvent) {
         if (event.take != recordableViewModel.selectedTakeProperty.value?.take) {
+            stopPlayers()
             val draggingNode = event.draggingNode
             val mouseEvent = event.mouseEvent
             dragStartDelta = Point2D(mouseEvent.x, mouseEvent.y)
