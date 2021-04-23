@@ -26,7 +26,6 @@ class AppBar : Fragment() {
 
             add(
                 AppBarButton().apply {
-                    addClass("app-bar__btn")
                     btnTextProperty.set(messages["add"])
                     btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
                 }
@@ -34,7 +33,6 @@ class AppBar : Fragment() {
 
             add(
                 AppBarButton().apply {
-                    addClass("app-bar__btn")
                     btnTextProperty.set(messages["exports"])
                     btnIconProperty.set(FontIcon(MaterialDesign.MDI_FOLDER))
                 }
@@ -42,7 +40,6 @@ class AppBar : Fragment() {
 
             add(
                 AppBarButton().apply {
-                    addClass("app-bar__btn")
                     btnTextProperty.set(messages["settings"])
                     btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
                 }
