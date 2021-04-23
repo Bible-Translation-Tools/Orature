@@ -19,6 +19,8 @@
     -wa-gray-light: rgba(26,26,26,0.4);
     -wa-gray-lighter: rgba(26,26,26,0.1); /* used for disabled backgrounds, light borders */
     -wa-white: #ffffff;
+    -wa-white-10: rgba(255,255,255,0.1);
+    -wa-white-20: rgba(255,255,255,0.2);
     -wa-white-30: rgba(255,255,255,0.3); /* Used for CTA Border */
     -wa-transparent: rgba(255,255,255,0);
     -wa-background: #F7FAFF;
