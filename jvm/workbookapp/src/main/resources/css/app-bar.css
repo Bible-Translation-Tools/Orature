@@ -1,0 +1,11 @@
+.app-bar {
+    -fx-padding: 30px 4px 4px 4px;
+    -fx-background-color: -wa-primary-dark  ;
+    -fx-alignment: top-center;
+    -fx-spacing: 4px;
+}
+
+.app-bar__logo .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
+    -fx-icon-size: 40px;
+}
