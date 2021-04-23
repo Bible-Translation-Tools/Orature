@@ -1,0 +1,40 @@
+.app-drawer__content {
+    -fx-pref-width: 400px;
+    -fx-background-color: -wa-white;
+    -fx-effect: -wa-level5;
+}
+
+.app-drawer__scroll-pane {
+    -fx-padding: 40px;
+    -fx-background-color: -wa-white;
+}
+
+.app-drawer__scroll-pane > .viewport {
+    -fx-background-color: -wa-white;
+}
+
+.app-drawer__title {
+    -fx-font-size: 36px;
+}
+
+.app-drawer__btn--close {
+    -fx-background-color: -wa-white;
+    -fx-border-color: -wa-gray;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+}
+
+.app-drawer__btn--close:hover {
+    -fx-background-color: -wa-gray-lighter;
+}
+
+.app-drawer__btn--close .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-fill: -wa-gray;
+}
+
+.app-drawer__btn--close:hover .ikonli-font-icon {
+    -fx-fill: -wa-gray-dark;
+}
