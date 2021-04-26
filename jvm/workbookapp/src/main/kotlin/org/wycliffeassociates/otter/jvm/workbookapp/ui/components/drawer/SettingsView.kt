@@ -38,7 +38,7 @@ class SettingsView : Fragment() {
         importStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
     }
 
-    fun collapse() {
+    private fun collapse() {
         fire(DrawerEvent(this::class, DrawerEventAction.CLOSE))
     }
 }
