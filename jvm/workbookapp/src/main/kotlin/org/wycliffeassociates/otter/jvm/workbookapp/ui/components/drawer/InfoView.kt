@@ -7,7 +7,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
 
-class InfoView : Fragment() {
+class InfoView : View() {
     val info = AppInfo()
 
     override val root = vbox {

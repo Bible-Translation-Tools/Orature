@@ -1,0 +1,61 @@
+.select-radio-button {
+    -fx-background-radius: 6px;
+    -fx-background-color: -wa-white;
+    -fx-pref-height: 48px;
+    -fx-cursor: hand;
+    -fx-padding: 10px;
+}
+
+
+
+.select-radio-button:disabled {
+    -fx-border-width: 0px;
+}
+
+.select-radio-button:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.select-radio-button:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.select-radio-button:selected {
+    -fx-background-color: -wa-primary-light;
+}
+
+.select-radio-button-container {
+    -fx-alignment: center-left;
+}
+
+.select-radio-button__title {
+    -fx-underline: true;
+    -fx-font-size: 20px;
+}
+
+.select-radio-button:selected .select-radio-button__title {
+    -fx-text-fill: -wa-primary-dark;
+}
+
+.select-radio-button:hover .select-radio-button__title,
+.select-radio-button:pressed .select-radio-button__title,
+.select-radio-button:disabled .select-radio-button__title,
+.select-radio-button:selected .select-radio-button__title {
+    -fx-underline: false;
+}
+
+.select-radio-button .radio {
+    -fx-background-color: -wa-white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 1.0em;
+    -fx-border-color: -wa-gray-darker;
+}
+
+.select-radio-button:selected .radio {
+    -fx-border-color: -wa-primary-dark;
+}
+
+.select-radio-button:selected .dot {
+    -fx-background-color: -wa-primary-dark;
+    -fx-background-insets: -2, 0;
+}

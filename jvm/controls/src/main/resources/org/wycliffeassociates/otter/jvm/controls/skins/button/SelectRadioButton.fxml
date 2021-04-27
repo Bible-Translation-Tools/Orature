@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox fx:id="root" styleClass="select-radio-button-container" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Label fx:id="btnIcon" styleClass="select-radio-button__icon" />
+        <Label fx:id="btnLabel" styleClass="select-radio-button__title" />
+        <Region HBox.hgrow="ALWAYS" />
+        <RadioButton fx:id="btnRadio" />
+    </children>
+</HBox>

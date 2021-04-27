@@ -75,3 +75,8 @@
     -fx-underline: true;
     -fx-cursor: hand;
 }
+
+.app-drawer__text--link .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+    -fx-font-size: 20px;
+}
