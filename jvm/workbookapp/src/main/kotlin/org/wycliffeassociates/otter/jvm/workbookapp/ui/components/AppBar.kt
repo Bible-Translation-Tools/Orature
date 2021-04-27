@@ -23,12 +23,12 @@ class AppBar : Fragment() {
         textProperty().set(messages["add"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_PLUS))
         toggleGroup = buttonsToggleGroup
-        onAction {
-            toggleOpen<AddFilesView>(isActiveProperty.value)
+        selectedProperty().onChange {
+            toggleOpen<AddFilesView>(it)
         }
         subscribe<DrawerEvent<UIComponent>> {
             if (it.type == AddFilesView::class) {
-                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+                selectedProperty().set(it.action == DrawerEventAction.OPEN)
             }
         }
     }
@@ -37,12 +37,12 @@ class AppBar : Fragment() {
         textProperty().set(messages["settings"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
         toggleGroup = buttonsToggleGroup
-        onAction {
-            toggleOpen<SettingsView>(isActiveProperty.value)
+        selectedProperty().onChange {
+            toggleOpen<SettingsView>(it)
         }
         subscribe<DrawerEvent<UIComponent>> {
             if (it.type == SettingsView::class) {
-                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+                selectedProperty().set(it.action == DrawerEventAction.OPEN)
             }
         }
     }
@@ -51,12 +51,12 @@ class AppBar : Fragment() {
         textProperty().set(messages["info"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
         toggleGroup = buttonsToggleGroup
-        onAction {
-            toggleOpen<InfoView>(isActiveProperty.value)
+        selectedProperty().onChange {
+            toggleOpen<InfoView>(it)
         }
         subscribe<DrawerEvent<UIComponent>> {
             if (it.type == InfoView::class) {
-                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+                selectedProperty().set(it.action == DrawerEventAction.OPEN)
             }
         }
     }
@@ -82,8 +82,8 @@ class AppBar : Fragment() {
 
     private inline fun <reified T: UIComponent> toggleOpen(isActive: Boolean) {
         when (isActive) {
-            true -> fire(DrawerEvent(T::class, DrawerEventAction.CLOSE))
-            false -> fire(DrawerEvent(T::class, DrawerEventAction.OPEN))
+            true -> fire(DrawerEvent(T::class, DrawerEventAction.OPEN))
+            false -> fire(DrawerEvent(T::class, DrawerEventAction.CLOSE))
         }
     }
 }
