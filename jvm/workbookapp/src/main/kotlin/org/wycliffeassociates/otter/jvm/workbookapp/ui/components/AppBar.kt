@@ -11,6 +11,26 @@ class AppBar : Fragment() {
 
     override val root = VBox()
 
+    private val addButton = AppBarButton().apply {
+        btnTextProperty.set(messages["add"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
+    }
+
+    private val exportsButton = AppBarButton().apply {
+        btnTextProperty.set(messages["exports"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_FOLDER))
+    }
+
+    private val settingsButton = AppBarButton().apply {
+        btnTextProperty.set(messages["settings"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
+    }
+
+    private val infoButton = AppBarButton().apply {
+        btnTextProperty.set(messages["info"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_INFORMATION))
+    }
+
     init {
         importStylesheet(javaClass.getResource("/css/app-bar.css").toExternalForm())
 
@@ -24,34 +44,10 @@ class AppBar : Fragment() {
 
             region { vgrow = Priority.ALWAYS }
 
-            add(
-                AppBarButton().apply {
-                    btnTextProperty.set(messages["add"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
-                }
-            )
-
-            add(
-                AppBarButton().apply {
-                    btnTextProperty.set(messages["exports"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_FOLDER))
-                }
-            )
-
-            add(
-                AppBarButton().apply {
-                    btnTextProperty.set(messages["settings"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
-                }
-            )
-
-            add(
-                AppBarButton().apply {
-                    addClass("app-bar__btn")
-                    btnTextProperty.set(messages["info"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_INFORMATION))
-                }
-            )
+            add(addButton)
+            add(exportsButton)
+            add(settingsButton)
+            add(infoButton)
         }
     }
 }
