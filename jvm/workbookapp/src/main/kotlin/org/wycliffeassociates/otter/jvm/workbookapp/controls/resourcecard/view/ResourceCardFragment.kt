@@ -10,15 +10,17 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordResourcePage
 import tornadofx.*
 
 class ResourceCardFragment(
     private val item: ResourceCardItem,
-    private val filterCompletedCardsProperty: BooleanProperty
+    private val filterCompletedCardsProperty: BooleanProperty,
+    private val navigator: NavigationMediator
 ) : Fragment() {
     override val root = HBox()
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
@@ -68,7 +70,7 @@ class ResourceCardFragment(
                     text = messages["viewRecordings"]
                     action {
                         item.onSelect()
-                        workspace.dock<RecordResourcePage>()
+                        navigator.dock<RecordResourcePage>()
                     }
                 }
             )
@@ -87,5 +89,6 @@ class ResourceCardFragment(
 fun resourceCardFragment(
     resource: ResourceCardItem,
     filterCompletedCardsProperty: BooleanProperty,
+    navigator: NavigationMediator,
     init: ResourceCardFragment.() -> Unit = {}
-) = ResourceCardFragment(resource, filterCompletedCardsProperty).apply { init.invoke(this) }
+) = ResourceCardFragment(resource, filterCompletedCardsProperty, navigator).apply { init.invoke(this) }
