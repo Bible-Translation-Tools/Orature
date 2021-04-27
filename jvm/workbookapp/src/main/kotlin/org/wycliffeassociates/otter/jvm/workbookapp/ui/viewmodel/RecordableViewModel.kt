@@ -80,6 +80,7 @@ open class RecordableViewModel(
     }
 
     fun recordNewTake() {
+        closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
@@ -110,6 +111,7 @@ open class RecordableViewModel(
     }
 
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
+        closePlayers()
         contextProperty.set(pluginType)
         currentTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
@@ -173,6 +175,7 @@ open class RecordableViewModel(
     }
 
     fun deleteTake(take: Take) {
+        stopPlayers()
         take.deletedTimestamp.accept(DateHolder.now())
     }
 

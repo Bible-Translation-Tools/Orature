@@ -185,7 +185,6 @@ class RecordScriptureFragment : Fragment() {
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
                     action {
-                        recordableViewModel.closePlayers()
                         recordScriptureViewModel.previousChunk()
                     }
                     enableWhen(recordScriptureViewModel.hasPrevious)
@@ -199,7 +198,6 @@ class RecordScriptureFragment : Fragment() {
                     addClass(RecordScriptureStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     action {
-                        recordableViewModel.closePlayers()
                         recordScriptureViewModel.nextChunk()
                     }
                     enableWhen(recordScriptureViewModel.hasNext)
@@ -253,11 +251,9 @@ class RecordScriptureFragment : Fragment() {
             recordableViewModel.deleteTake(it.take)
         }
         addEventHandler(TakeEvent.EDIT_TAKE) {
-            recordableViewModel.closePlayers()
             recordableViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
         }
         addEventHandler(TakeEvent.MARK_TAKE) {
-            recordableViewModel.closePlayers()
             recordableViewModel.processTakeWithPlugin(it, PluginType.MARKER)
         }
     }

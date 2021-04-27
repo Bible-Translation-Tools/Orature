@@ -116,7 +116,6 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             text = messages["record"]
 
             action {
-                recordableViewModel.closePlayers()
                 recordableViewModel.recordNewTake()
             }
         }
@@ -126,7 +125,6 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         text = messages["previousChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
         action {
-            recordableViewModel.closePlayers()
             recordResourceViewModel.previousChunk()
         }
         enableWhen(recordResourceViewModel.hasPrevious)
@@ -137,7 +135,6 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         text = messages["nextChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
         action {
-            recordableViewModel.closePlayers()
             recordResourceViewModel.nextChunk()
         }
         enableWhen(recordResourceViewModel.hasNext)
@@ -297,11 +294,9 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             recordableViewModel.deleteTake(it.take)
         }
         addEventHandler(TakeEvent.EDIT_TAKE) {
-            recordableViewModel.closePlayers()
             recordableViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
         }
         addEventHandler(TakeEvent.MARK_TAKE) {
-            recordableViewModel.closePlayers()
             recordableViewModel.processTakeWithPlugin(it, PluginType.MARKER)
         }
     }
