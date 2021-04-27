@@ -16,6 +16,7 @@ class RecordableTab(
 ) : Tab() {
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
+    private val recordResourceFragment = RecordResourceFragment(viewModel)
     val currentTakeNumberProperty = SimpleIntegerProperty()
 
     init {
@@ -24,7 +25,7 @@ class RecordableTab(
             progressProperty.bind(viewModel.getProgressBinding())
         }
 
-        RecordResourceFragment(viewModel).apply {
+        recordResourceFragment.apply {
             formattedTextProperty.bind(viewModel.getFormattedTextBinding())
             this@RecordableTab.content = this.root
         }
@@ -40,12 +41,14 @@ class RecordableTab(
         textProperty().bind(viewModel.labelProperty)
         recordableProperty.bind(viewModel.recordableProperty)
         currentTakeNumberProperty.bind(viewModel.currentTakeNumberProperty)
+        viewModel.openPlayers()
     }
 
     fun unbindProperties() {
         textProperty().unbind()
         recordableProperty.unbind()
         currentTakeNumberProperty.unbind()
+        viewModel.closePlayers()
     }
 
     private fun callOnTabSelect() {

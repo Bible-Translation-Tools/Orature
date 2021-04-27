@@ -165,10 +165,12 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun nextChunk() {
+        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.FORWARD)
     }
 
     fun previousChunk() {
+        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.BACKWARD)
     }
 
