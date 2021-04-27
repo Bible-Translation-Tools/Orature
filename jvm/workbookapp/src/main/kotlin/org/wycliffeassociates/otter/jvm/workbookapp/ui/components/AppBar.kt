@@ -16,11 +16,6 @@ class AppBar : Fragment() {
         btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
     }
 
-    private val exportsButton = AppBarButton().apply {
-        btnTextProperty.set(messages["exports"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_FOLDER))
-    }
-
     private val settingsButton = AppBarButton().apply {
         btnTextProperty.set(messages["settings"])
         btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
@@ -45,7 +40,6 @@ class AppBar : Fragment() {
             region { vgrow = Priority.ALWAYS }
 
             add(addButton)
-            add(exportsButton)
             add(settingsButton)
             add(infoButton)
         }
