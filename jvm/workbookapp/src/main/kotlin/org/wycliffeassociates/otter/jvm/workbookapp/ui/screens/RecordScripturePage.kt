@@ -25,10 +25,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import javafx.scene.layout.VBox
-import javafx.util.Duration
-import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
@@ -58,8 +54,6 @@ class RecordScriptureFragment : Fragment() {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val recordableViewModel = recordScriptureViewModel.recordableViewModel
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
@@ -114,23 +108,6 @@ class RecordScriptureFragment : Fragment() {
         onClickAction {
             navigator.dock(this@RecordScriptureFragment)
         }
-    }
-
-    override val root: Parent = anchorpane {
-        addButtonEventHandlers()
-        createSnackBar()
-
-        add(mainContainer
-            .apply {
-                anchorpaneConstraints {
-                    leftAnchor = 0.0
-                    rightAnchor = 0.0
-                    bottomAnchor = 0.0
-                    topAnchor = 0.0
-                }
-            }
-        )
-        add(dragContainer)
     }
 
     override val root: Parent = anchorpane {
@@ -348,52 +325,9 @@ class RecordScriptureFragment : Fragment() {
     }
 
     override fun onDock() {
+        super.onDock()
         recordableViewModel.openPlayers()
         recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
-    }
-
-    private fun createSnackBar() {
-        recordableViewModel
-            .snackBarObservable
-            .doOnError { e ->
-                logger.error("Error in creating no plugin snackbar", e)
-            }
-            .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(
-                            pluginErrorMessage,
-                            messages["addPlugin"].toUpperCase()
-                        ) {
-                            audioPluginViewModel.addPlugin(true, false)
-                        },
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
-            }
-    }
-
-    private fun createPluginOpenedPage(): PluginOpenedPage {
-        // Plugin active cover
-        return PluginOpenedPage().apply {
-            dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
-            dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
-            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
-            audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
-        }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        recordableViewModel.closePlayers()
-    }
-
-    override fun onDock() {
-        super.onDock()
-        recordableViewModel.openPlayers()
     }
 }
