@@ -18,13 +18,13 @@ import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.RowConstraints
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import javafx.scene.layout.VBox
 import javafx.util.Duration
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
@@ -43,10 +43,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
-import java.text.MessageFormat
 
 private const val TAKES_ROW_HEIGHT = 170.0
 
@@ -327,11 +325,7 @@ class RecordScriptureFragment : Fragment() {
     }
 
     override fun onDock() {
-        super.onDock()
         recordableViewModel.openPlayers()
-    }
-
-    override fun onDock() {
         recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
     }

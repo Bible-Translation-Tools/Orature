@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
 import tornadofx.*
-import java.text.MessageFormat
 
 class RecordResourcePage : Fragment() {
     private val viewModel: RecordResourceViewModel by inject()
