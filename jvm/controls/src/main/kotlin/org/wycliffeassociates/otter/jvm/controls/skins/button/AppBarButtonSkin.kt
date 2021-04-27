@@ -5,11 +5,11 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
+import javafx.scene.control.ToggleButton
 import javafx.scene.layout.VBox
-import org.wycliffeassociates.otter.jvm.controls.button.AppBarButton
 import tornadofx.*
 
-class AppBarButtonSkin(private val button: AppBarButton) : SkinBase<AppBarButton>(button) {
+class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton>(button) {
 
     @FXML
     lateinit var root: VBox
@@ -28,15 +28,13 @@ class AppBarButtonSkin(private val button: AppBarButton) : SkinBase<AppBarButton
     }
 
     private fun initializeControl() {
-        root.apply {
-            onMouseClickedProperty().bind(button.onActionProperty)
-        }
+        button.setOnMouseClicked { button.fire() }
 
         btnLabel.apply {
-            textProperty().bind(button.btnTextProperty)
+            textProperty().bind(button.textProperty())
         }
         btnIcon.apply {
-            graphicProperty().bind(button.btnIconProperty)
+            graphicProperty().bind(button.graphicProperty())
         }
     }
 

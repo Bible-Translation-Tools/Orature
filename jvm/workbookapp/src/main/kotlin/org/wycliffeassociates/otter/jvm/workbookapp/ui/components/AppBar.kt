@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -11,19 +12,24 @@ class AppBar : Fragment() {
 
     override val root = VBox()
 
+    private val buttonsToggleGroup = ToggleGroup()
+
     private val addButton = AppBarButton().apply {
-        btnTextProperty.set(messages["add"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
+        textProperty().set(messages["add"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_PLUS))
+        toggleGroup = buttonsToggleGroup
     }
 
     private val settingsButton = AppBarButton().apply {
-        btnTextProperty.set(messages["settings"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
+        textProperty().set(messages["settings"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
+        toggleGroup = buttonsToggleGroup
     }
 
     private val infoButton = AppBarButton().apply {
-        btnTextProperty.set(messages["info"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_INFORMATION))
+        textProperty().set(messages["info"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
+        toggleGroup = buttonsToggleGroup
     }
 
     init {
