@@ -16,6 +16,45 @@ class AppBar : Fragment() {
 
     override val root = VBox()
 
+    private val addButton = AppBarButton().apply {
+        btnTextProperty.set(messages["add"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
+        onAction {
+            toggleOpen<AddFilesView>(isActiveProperty.value)
+        }
+        subscribe<DrawerEvent<UIComponent>> {
+            if (it.type == AddFilesView::class) {
+                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+            }
+        }
+    }
+
+    private val settingsButton = AppBarButton().apply {
+        btnTextProperty.set(messages["settings"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
+        onAction {
+            toggleOpen<SettingsView>(isActiveProperty.value)
+        }
+        subscribe<DrawerEvent<UIComponent>> {
+            if (it.type == SettingsView::class) {
+                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+            }
+        }
+    }
+
+    private val infoButton = AppBarButton().apply {
+        btnTextProperty.set(messages["info"])
+        btnIconProperty.set(FontIcon(MaterialDesign.MDI_INFORMATION))
+        onAction {
+            toggleOpen<InfoView>(isActiveProperty.value)
+        }
+        subscribe<DrawerEvent<UIComponent>> {
+            if (it.type == InfoView::class) {
+                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+            }
+        }
+    }
+
     init {
         importStylesheet(javaClass.getResource("/css/app-bar.css").toExternalForm())
 
@@ -29,59 +68,9 @@ class AppBar : Fragment() {
 
             region { vgrow = Priority.ALWAYS }
 
-            add(
-                AppBarButton().apply {
-                    btnTextProperty.set(messages["add"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
-                    onAction {
-                        toggleOpen<AddFilesView>(isActiveProperty.value)
-                    }
-                    subscribe<DrawerEvent<UIComponent>> {
-                        if (it.type == AddFilesView::class) {
-                            isActiveProperty.set(it.action == DrawerEventAction.OPEN)
-                        }
-                    }
-                }
-            )
-
-            add(
-                AppBarButton().apply {
-                    btnTextProperty.set(messages["exports"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_FOLDER))
-                    isDisable = true
-                }
-            )
-
-            add(
-                AppBarButton().apply {
-                    btnTextProperty.set(messages["settings"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
-                    onAction {
-                        toggleOpen<SettingsView>(isActiveProperty.value)
-                    }
-                    subscribe<DrawerEvent<UIComponent>> {
-                        if (it.type == SettingsView::class) {
-                            isActiveProperty.set(it.action == DrawerEventAction.OPEN)
-                        }
-                    }
-                }
-            )
-
-            add(
-                AppBarButton().apply {
-                    addClass("app-bar__btn")
-                    btnTextProperty.set(messages["info"])
-                    btnIconProperty.set(FontIcon(MaterialDesign.MDI_INFORMATION))
-                    onAction {
-                        toggleOpen<InfoView>(isActiveProperty.value)
-                    }
-                    subscribe<DrawerEvent<UIComponent>> {
-                        if (it.type == InfoView::class) {
-                            isActiveProperty.set(it.action == DrawerEventAction.OPEN)
-                        }
-                    }
-                }
-            )
+            add(addButton)
+            add(settingsButton)
+            add(infoButton)
         }
     }
 
