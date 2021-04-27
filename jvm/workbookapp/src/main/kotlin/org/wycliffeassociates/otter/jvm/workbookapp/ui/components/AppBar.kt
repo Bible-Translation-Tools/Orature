@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -16,41 +17,46 @@ class AppBar : Fragment() {
 
     override val root = VBox()
 
+    private val buttonsToggleGroup = ToggleGroup()
+
     private val addButton = AppBarButton().apply {
-        btnTextProperty.set(messages["add"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_PLUS))
-        onAction {
-            toggleOpen<AddFilesView>(isActiveProperty.value)
+        textProperty().set(messages["add"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_PLUS))
+        toggleGroup = buttonsToggleGroup
+        selectedProperty().onChange {
+            toggleOpen<AddFilesView>(it)
         }
         subscribe<DrawerEvent<UIComponent>> {
             if (it.type == AddFilesView::class) {
-                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+                selectedProperty().set(it.action == DrawerEventAction.OPEN)
             }
         }
     }
 
     private val settingsButton = AppBarButton().apply {
-        btnTextProperty.set(messages["settings"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_SETTINGS))
-        onAction {
-            toggleOpen<SettingsView>(isActiveProperty.value)
+        textProperty().set(messages["settings"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_SETTINGS))
+        toggleGroup = buttonsToggleGroup
+        selectedProperty().onChange {
+            toggleOpen<SettingsView>(it)
         }
         subscribe<DrawerEvent<UIComponent>> {
             if (it.type == SettingsView::class) {
-                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+                selectedProperty().set(it.action == DrawerEventAction.OPEN)
             }
         }
     }
 
     private val infoButton = AppBarButton().apply {
-        btnTextProperty.set(messages["info"])
-        btnIconProperty.set(FontIcon(MaterialDesign.MDI_INFORMATION))
-        onAction {
-            toggleOpen<InfoView>(isActiveProperty.value)
+        textProperty().set(messages["info"])
+        graphicProperty().set(FontIcon(MaterialDesign.MDI_INFORMATION))
+        toggleGroup = buttonsToggleGroup
+        selectedProperty().onChange {
+            toggleOpen<InfoView>(it)
         }
         subscribe<DrawerEvent<UIComponent>> {
             if (it.type == InfoView::class) {
-                isActiveProperty.set(it.action == DrawerEventAction.OPEN)
+                selectedProperty().set(it.action == DrawerEventAction.OPEN)
             }
         }
     }
@@ -76,8 +82,8 @@ class AppBar : Fragment() {
 
     private inline fun <reified T: UIComponent> toggleOpen(isActive: Boolean) {
         when (isActive) {
-            true -> fire(DrawerEvent(T::class, DrawerEventAction.CLOSE))
-            false -> fire(DrawerEvent(T::class, DrawerEventAction.OPEN))
+            true -> fire(DrawerEvent(T::class, DrawerEventAction.OPEN))
+            false -> fire(DrawerEvent(T::class, DrawerEventAction.CLOSE))
         }
     }
 }

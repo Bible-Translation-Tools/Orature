@@ -21,7 +21,7 @@
     -fx-background-color: -wa-white-20;
 }
 
-.app-bar-button:active {
+.app-bar-button:selected {
     -fx-background-color: -wa-white;
     -fx-background-radius: 6px;
     -fx-border-width: 0px;
@@ -37,7 +37,7 @@
     -fx-font-size: 16px;
 }
 
-.app-bar-button:active .app-bar-button__title {
+.app-bar-button:selected .app-bar-button__title {
     -fx-text-fill: -wa-primary;
 }
 
@@ -50,6 +50,6 @@
     -fx-icon-size: 30px;
 }
 
-.app-bar-button:active .app-bar-button__icon .ikonli-font-icon {
+.app-bar-button:selected .app-bar-button__icon .ikonli-font-icon {
     -fx-icon-color: -wa-primary;
 }
