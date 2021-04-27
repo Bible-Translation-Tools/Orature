@@ -80,7 +80,6 @@ open class RecordableViewModel(
     }
 
     fun recordNewTake() {
-        closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
@@ -111,7 +110,6 @@ open class RecordableViewModel(
     }
 
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
-        closePlayers()
         contextProperty.set(pluginType)
         currentTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
@@ -175,7 +173,6 @@ open class RecordableViewModel(
     }
 
     fun deleteTake(take: Take) {
-        stopPlayers()
         take.deletedTimestamp.accept(DateHolder.now())
     }
 
@@ -213,13 +210,13 @@ open class RecordableViewModel(
             Callable {
                 when (contextProperty.get()) {
                     PluginType.RECORDER -> {
-                        audioPluginViewModel.selectedRecorderProperty.get()?.name
+                        audioPluginViewModel.selectedRecorderProperty.get().name
                     }
                     PluginType.EDITOR -> {
-                        audioPluginViewModel.selectedEditorProperty.get()?.name
+                        audioPluginViewModel.selectedEditorProperty.get().name
                     }
                     PluginType.MARKER -> {
-                        audioPluginViewModel.selectedMarkerProperty.get()?.name
+                        audioPluginViewModel.selectedMarkerProperty.get().name
                     }
                     null -> throw IllegalStateException("Action is not supported!")
                 }
@@ -331,10 +328,6 @@ open class RecordableViewModel(
         Platform.runLater {
             takeCardModels.removeAll { it.take.equals(take) }
         }
-    }
-
-    fun openPlayers() {
-        takeCardModels.forEach { it.audioPlayer.load(it.take.file) }
     }
 
     fun closePlayers() {

@@ -1,14 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jfoenix.controls.JFXSnackbar
-import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.HPos
 import javafx.geometry.Pos
 import javafx.geometry.VPos
-import javafx.scene.Node
-import javafx.scene.Parent
 import javafx.scene.control.ContentDisplay
 import javafx.scene.control.Control
 import javafx.scene.input.DragEvent
@@ -18,51 +13,41 @@ import javafx.scene.layout.ColumnConstraints
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.RowConstraints
-import javafx.scene.layout.VBox
-import javafx.util.Duration
-import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
-import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
-import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
+private class RecordScriptureViewModelProvider : Component() {
+    private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    fun get() = recordScriptureViewModel.recordableViewModel
+}
+
 private const val TAKES_ROW_HEIGHT = 170.0
 
-class RecordScriptureFragment : Fragment() {
-    private val logger = LoggerFactory.getLogger(RecordScriptureFragment::class.java)
-
+class RecordScriptureFragment : RecordableFragment(
+    RecordScriptureViewModelProvider().get(),
+    DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
+) {
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
-    private val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
-    private val mainContainer = VBox()
     private val takesGrid = ScriptureTakesGridView(
         workbookDataStore.activeChunkProperty.isNull,
         recordableViewModel::recordNewTake
     )
-    private val pluginOpenedPage: PluginOpenedPage
 
     private val isDraggingProperty = SimpleBooleanProperty(false)
-    private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
-    private val dragTarget =
+    private val scriptureDragTarget =
         DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
             .build(isDraggingProperty.toBinding())
             .apply {
@@ -72,15 +57,6 @@ class RecordScriptureFragment : Fragment() {
                     this.selectedNodeProperty.value = take?.let { createTakeCard(take) }
                 }
             }
-
-    private val dragContainer = VBox().apply {
-        this.prefWidthProperty().bind(dragTarget.widthProperty())
-        draggingNodeProperty.onChange { draggingNode ->
-            (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
-            clear()
-            draggingNode?.let { add(draggingNode) }
-        }
-    }
 
     private val sourceContent =
         SourceContent().apply {
@@ -97,23 +73,6 @@ class RecordScriptureFragment : Fragment() {
             contentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
         }
 
-    override val root: Parent = anchorpane {
-        addButtonEventHandlers()
-        createSnackBar()
-
-        add(mainContainer
-            .apply {
-                anchorpaneConstraints {
-                    leftAnchor = 0.0
-                    rightAnchor = 0.0
-                    bottomAnchor = 0.0
-                    topAnchor = 0.0
-                }
-            }
-        )
-        add(dragContainer)
-    }
-
     init {
         importStylesheet<RecordScriptureStyles>()
         importStylesheet<TakeCardStyles>()
@@ -121,21 +80,7 @@ class RecordScriptureFragment : Fragment() {
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
         isDraggingProperty.onChange {
-            if (it) recordableViewModel.stopPlayers()
-        }
-
-        pluginOpenedPage = createPluginOpenedPage()
-
-        workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
-            if (!pluginInfo.isNative) {
-                workspace.dock(pluginOpenedPage)
-            }
-        }
-        workspace.subscribe<PluginClosedEvent> {
-            (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
-                workspace.navigateBack()
-            }
-            recordableViewModel.openPlayers()
+            if (it) stopPlayers()
         }
 
         recordableViewModel.takeCardModels.onChangeAndDoNow {
@@ -148,7 +93,7 @@ class RecordScriptureFragment : Fragment() {
             }
         }
 
-        dragTarget.setOnDragDropped {
+        scriptureDragTarget.setOnDragDropped {
             val db: Dragboard = it.dragboard
             var success = false
             if (db.hasString()) {
@@ -162,16 +107,17 @@ class RecordScriptureFragment : Fragment() {
             it.consume()
         }
 
-        dragTarget.setOnDragOver {
-            if (it.gestureSource != dragTarget && it.dragboard.hasString()) {
+        scriptureDragTarget.setOnDragOver {
+            if (it.gestureSource != scriptureDragTarget && it.dragboard.hasString()) {
                 it.acceptTransferModes(*TransferMode.ANY)
             }
             it.consume()
         }
 
         mainContainer.apply {
-            addEventHandler(DragEvent.DRAG_ENTERED) { isDraggingProperty.value = true }
-            addEventHandler(DragEvent.DRAG_EXITED) { isDraggingProperty.value = false }
+
+            addEventHandler(DragEvent.DRAG_ENTERED, { isDraggingProperty.value = true })
+            addEventHandler(DragEvent.DRAG_EXITED, { isDraggingProperty.value = false })
 
             addClass(RecordScriptureStyles.background)
 
@@ -185,12 +131,13 @@ class RecordScriptureFragment : Fragment() {
                 button(messages["previousVerse"], AppStyles.backIcon()) {
                     addClass(RecordScriptureStyles.navigationButton)
                     action {
+                        closePlayers()
                         recordScriptureViewModel.previousChunk()
                     }
                     enableWhen(recordScriptureViewModel.hasPrevious)
                 }
                 vbox {
-                    add(dragTarget)
+                    add(scriptureDragTarget)
                 }
 
                 // next verse button
@@ -198,6 +145,7 @@ class RecordScriptureFragment : Fragment() {
                     addClass(RecordScriptureStyles.navigationButton)
                     contentDisplay = ContentDisplay.RIGHT
                     action {
+                        closePlayers()
                         recordScriptureViewModel.nextChunk()
                     }
                     enableWhen(recordScriptureViewModel.hasNext)
@@ -246,73 +194,31 @@ class RecordScriptureFragment : Fragment() {
         }
     }
 
-    private fun Parent.addButtonEventHandlers() {
-        addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
-            recordableViewModel.deleteTake(it.take)
-        }
-        addEventHandler(TakeEvent.EDIT_TAKE) {
-            recordableViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
-        }
-        addEventHandler(TakeEvent.MARK_TAKE) {
-            recordableViewModel.processTakeWithPlugin(it, PluginType.MARKER)
-        }
+    override fun stopPlayers() {
+        recordableViewModel.stopPlayers()
     }
 
-    private fun createTakeCard(take: TakeCardModel): Control {
-        return ScriptureTakeCard().apply {
+    override fun closePlayers() {
+        recordableViewModel.takeCardModels.forEach { it.audioPlayer.close() }
+    }
+
+    override fun openPlayers() {
+        (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.refresh()
+        takesGrid.reloadPlayers()
+    }
+
+    override fun createTakeCard(take: TakeCardModel): Control {
+        val card = ScriptureTakeCard().apply {
             audioPlayerProperty().set(take.audioPlayer)
-            deleteTextProperty().set(take.deleteText)
-            editTextProperty().set(take.editText)
-            pauseTextProperty().set(take.playText)
-            playTextProperty().set(take.playText)
-            markerTextProperty().set(take.markerText)
-            takeProperty().set(take.take)
-            takeNumberProperty().set(take.take.number.toString())
-            allowMarkerProperty().bind(recordableViewModel.workbookDataStore.activeChunkProperty.isNull)
+            this.deleteTextProperty().set(take.deleteText)
+            this.editTextProperty().set(take.editText)
+            this.pauseTextProperty().set(take.playText)
+            this.playTextProperty().set(take.playText)
+            this.markerTextProperty().set(take.markerText)
+            this.takeProperty().set(take.take)
+            this.takeNumberProperty().set(take.take.number.toString())
+            this.allowMarkerProperty().bind(recordableViewModel.workbookDataStore.activeChunkProperty.isNull)
         }
-    }
-
-    private fun createSnackBar() {
-        recordableViewModel
-            .snackBarObservable
-            .doOnError { e ->
-                logger.error("Error in creating no plugin snackbar", e)
-            }
-            .subscribe { pluginErrorMessage ->
-                SnackbarHandler.enqueue(
-                    JFXSnackbar.SnackbarEvent(
-                        JFXSnackbarLayout(
-                            pluginErrorMessage,
-                            messages["addPlugin"].toUpperCase()
-                        ) {
-                            audioPluginViewModel.addPlugin(true, false)
-                        },
-                        Duration.millis(5000.0),
-                        null
-                    )
-                )
-            }
-    }
-
-    private fun createPluginOpenedPage(): PluginOpenedPage {
-        // Plugin active cover
-        return PluginOpenedPage().apply {
-            dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
-            dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
-            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
-            audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
-        }
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        recordableViewModel.closePlayers()
-    }
-
-    override fun onDock() {
-        super.onDock()
-        recordableViewModel.openPlayers()
+        return card
     }
 }
