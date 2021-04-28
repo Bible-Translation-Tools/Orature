@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Tab
 import javafx.scene.paint.Color
@@ -15,6 +16,8 @@ class RecordableTab(
 ) : Tab() {
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
+    private val recordResourceFragment = RecordResourceFragment(viewModel)
+    val currentTakeNumberProperty = SimpleIntegerProperty()
 
     init {
         graphic = statusindicator {
@@ -22,8 +25,7 @@ class RecordableTab(
             progressProperty.bind(viewModel.getProgressBinding())
         }
 
-        val recordResourceFragment: RecordResourceFragment = find()
-        RecordResourceFragment(viewModel).apply {
+        recordResourceFragment.apply {
             formattedTextProperty.bind(viewModel.getFormattedTextBinding())
             this@RecordableTab.content = this.root
         }
@@ -38,11 +40,15 @@ class RecordableTab(
     fun bindProperties() {
         textProperty().bind(viewModel.labelProperty)
         recordableProperty.bind(viewModel.recordableProperty)
+        currentTakeNumberProperty.bind(viewModel.currentTakeNumberProperty)
+        viewModel.openPlayers()
     }
 
     fun unbindProperties() {
         textProperty().unbind()
         recordableProperty.unbind()
+        currentTakeNumberProperty.unbind()
+        viewModel.closePlayers()
     }
 
     private fun callOnTabSelect() {

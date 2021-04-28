@@ -6,16 +6,18 @@ import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.styles.ResourceListStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
 
 class ResourceListView(
     items: ObservableList<ResourceGroupCardItem>,
-    filterCompletedCardsProperty: BooleanProperty
+    filterCompletedCardsProperty: BooleanProperty,
+    navigator: NavigationMediator
 ) : ListView<ResourceGroupCardItem>(items) {
     init {
         cellFormat {
             graphic = cache(it.title) {
-                resourcegroupcard(it, filterCompletedCardsProperty)
+                resourcegroupcard(it, filterCompletedCardsProperty, navigator)
             }
         }
 

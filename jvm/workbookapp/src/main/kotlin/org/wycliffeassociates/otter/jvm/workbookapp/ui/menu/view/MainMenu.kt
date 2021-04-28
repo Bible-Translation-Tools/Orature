@@ -20,13 +20,6 @@ class MainMenu : MenuBar() {
 
     private val viewModel: MainMenuViewModel = find()
 
-    private fun Menu.exportMenuItem(message: String): MenuItem {
-        return item(message) {
-            graphic = MainMenuStyles.exportIcon("20px")
-            disableProperty().bind(viewModel.disableExportProjectProperty)
-        }
-    }
-
     private fun Menu.importMenuItem(message: String): MenuItem {
         return item(message) {
             graphic = MainMenuStyles.importIcon("20px")
@@ -73,13 +66,66 @@ class MainMenu : MenuBar() {
                             viewModel.importResourceContainer(file)
                         }
                     }
-                exportMenuItem(messages["exportProject"])
-                    .setOnAction {
-                        val directory = chooseDirectory(messages["exportProject"])
-                        directory?.let {
-                            viewModel.exportWorkbook(it)
+                separator()
+                item(messages["version"]) {
+                    setOnAction {
+                        find<AppVersionView>().openModal()
+                    }
+                }
+            }
+            menu(messages["audioPlugins"]) {
+                onShowing = EventHandler {
+                    viewModel.refreshPlugins()
+                }
+                item(messages["new"]) {
+                    graphic = MainMenuStyles.addPluginIcon("20px")
+                    action {
+                        find<AddPluginDialog>().apply {
+                            openModal()
                         }
                     }
+                }
+                item(messages["remove"]) {
+                    graphic = MainMenuStyles.removePluginIcon("20px")
+                    action {
+                        find<RemovePluginsDialog>().apply {
+                            openModal()
+                        }
+                    }
+                }
+                separator()
+                menu(messages["audioRecorder"]) {
+                    graphic = MainMenuStyles.recorderIcon("20px")
+                    val pluginToggleGroup = ToggleGroup()
+                    viewModel.recorderPlugins.onChange { _ ->
+                        items.clear()
+                        items.setAll(
+                            viewModel.recorderPlugins.map { pluginData ->
+                                radiomenuitem(pluginData.name, pluginToggleGroup) {
+                                    userData = pluginData
+                                    action { if (isSelected) viewModel.selectRecorder(pluginData) }
+                                    isSelected = viewModel.selectedRecorderProperty.value == pluginData
+                                }
+                            }
+                        )
+                    }
+                }
+                menu(messages["audioEditor"]) {
+                    graphic = MainMenuStyles.editorIcon("20px")
+                    val pluginToggleGroup = ToggleGroup()
+                    viewModel.editorPlugins.onChange { _ ->
+                        items.clear()
+                        items.setAll(
+                            viewModel.editorPlugins.map { pluginData ->
+                                radiomenuitem(pluginData.name, pluginToggleGroup) {
+                                    userData = pluginData
+                                    action { if (isSelected) viewModel.selectEditor(pluginData) }
+                                    isSelected = viewModel.selectedEditorProperty.value == pluginData
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
     }

@@ -38,7 +38,6 @@ class MainMenuViewModel : ViewModel() {
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     private val workbookDataStore = find<WorkbookDataStore>()
-    val disableExportProjectProperty = workbookDataStore.activeWorkbookProperty.booleanBinding { it == null }
 
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
