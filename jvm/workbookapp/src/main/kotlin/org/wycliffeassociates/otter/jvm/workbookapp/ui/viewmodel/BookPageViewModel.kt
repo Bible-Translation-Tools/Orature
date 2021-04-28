@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import tornadofx.*
@@ -20,6 +21,7 @@ class BookPageViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(BookPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
+    val navigator: NavigationMediator by inject()
 
     val allContent: ObservableList<CardData> = FXCollections.observableArrayList()
     val currentTabProperty = SimpleStringProperty("ulb")
@@ -67,8 +69,8 @@ class BookPageViewModel : ViewModel() {
 
     fun navigate(resourceMetadata: ResourceMetadata) {
         when (resourceMetadata.type) {
-            ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
-            ContainerType.Help -> workspace.dock<ResourcePage>()
+            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
+            ContainerType.Help -> navigator.dock<ResourcePage>()
         }
     }
 }

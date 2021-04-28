@@ -38,20 +38,6 @@ class ScriptureTakesGridView(
         }
     }
 
-    fun closePlayers() {
-        gridItems.forEach {
-            it.audioPlayer.pause()
-            it.audioPlayer.close()
-        }
-    }
-
-    fun reloadPlayers() {
-        gridItems.forEach {
-            it.audioPlayer.load(it.take.file)
-        }
-        updateItems()
-    }
-
     private fun updateItems() {
         val columnCount = Math.max(
             calculateColumnCount(

@@ -3,16 +3,26 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.fragments.SelectLanguage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.controls.stepper.stepper
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
 
 class ProjectWizard : View() {
     override val root = borderpane {}
     private val wizardViewModel: ProjectWizardViewModel by inject()
     val wizardWorkspace = Workspace()
+    private val navigator: NavigationMediator by inject()
+
+    val breadCrumb = BreadCrumb().apply {
+        titleProperty.set(messages["create"].toLowerCase().capitalize())
+        iconProperty.set(FontIcon(MaterialDesign.MDI_CREATION))
+    }
 
     data class stepItem(
         val stepText: String,
@@ -103,6 +113,7 @@ class ProjectWizard : View() {
     override fun onDock() {
         super.onDock()
         wizardViewModel.reset()
+        navigator.dock(this, breadCrumb)
     }
 
     override fun onUndock() {

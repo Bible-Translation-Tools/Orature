@@ -3,6 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import javafx.beans.binding.Bindings
+import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -11,7 +13,11 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import tornadofx.*
+import java.text.MessageFormat
+import java.util.concurrent.Callable
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -28,6 +34,8 @@ class ChapterPageViewModel : ViewModel() {
     val loadingProperty = getProperty(ChapterPageViewModel::loading)
 
     val chapterCard = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
+
+    private val navigator: NavigationMediator by inject()
 
     init {
         allContent
@@ -50,6 +58,27 @@ class ChapterPageViewModel : ViewModel() {
                 chapterCard.set(chap)
             }
         }
+    }
+
+    fun breadcrumbTitleBinding(view: UIComponent): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                when {
+                    workbookDataStore.activeChunkProperty.value != null ->
+                        workbookDataStore.activeChunkProperty.value.let { chunk ->
+                            MessageFormat.format(
+                                messages["chunkTitle"],
+                                messages[ContentLabel.of(chunk.contentType).value],
+                                chunk.start
+                            )
+                        }
+                    navigator.workspace.dockedComponentProperty.value == view -> messages["chunk"]
+                    else -> messages["chapter"]
+                }
+            },
+            navigator.workspace.dockedComponentProperty,
+            workbookDataStore.activeChunkProperty
+        )
     }
 
     private fun loadChapterContents(chapter: Chapter): Completable {
