@@ -4,9 +4,12 @@ import com.jfoenix.controls.JFXButton
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
 
 class InfoView : Fragment() {
+    val info = AppInfo()
+
     override val root = vbox {
         addClass("app-drawer__content")
 
@@ -16,6 +19,8 @@ class InfoView : Fragment() {
             vbox {
                 isFitToWidth = true
                 isFitToHeight = true
+
+                addClass("app-drawer-container")
 
                 hbox {
                     label(messages["information"]).apply {
@@ -29,6 +34,29 @@ class InfoView : Fragment() {
                             action { collapse() }
                         }
                     )
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+                    label(messages["aboutOtter"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+
+                    label(messages["aboutOtterDescription"]).apply {
+                        fitToParentWidth()
+                        addClass("app-drawer__text")
+                    }
+                }
+
+                vbox {
+                    addClass("app-drawer__section--filled")
+
+                    label(messages["currentVersion"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    label(info.getVersion() ?: messages["na"]).apply {
+                        addClass("app-drawer__text")
+                    }
                 }
             }
         }
