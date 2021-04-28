@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
-import javafx.scene.control.ToggleGroup
+import javafx.beans.binding.Bindings
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -10,6 +10,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPlugin
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.RemovePluginsDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
+import java.util.concurrent.Callable
 
 class SettingsView : View() {
     private val viewModel: SettingsViewModel by inject()
@@ -56,34 +57,40 @@ class SettingsView : View() {
                     }
 
                     vbox {
-                        val recordingPluginGroup = ToggleGroup()
-                        // Will need to refactor to using listview
-                        viewModel.recorderPlugins.onChange {
-                            children.clear()
-                            it.list.map { pluginData ->
-                                val radio = SelectRadioButton().apply {
-                                    btnTextProperty.set(pluginData.name)
-                                    viewModel.selectedRecorderProperty.onChange { data ->
-                                        isSelected = data == pluginData
-                                    }
-                                    selectedProperty().onChange { selected ->
-                                        if (selected) viewModel.selectRecorder(pluginData)
-                                    }
-                                    toggleGroup = recordingPluginGroup
+                        bindChildren(viewModel.recorderPlugins) { pluginData ->
+                            SelectRadioButton().apply {
+                                textProperty().set(pluginData.name)
+                                viewModel.selectedRecorderProperty.onChange { selectedData ->
+                                    isSelected = selectedData == pluginData
                                 }
-                                children.add(radio)
+                                selectedProperty().onChange { selected ->
+                                    if (selected) viewModel.selectRecorder(pluginData)
+                                }
                             }
                         }
                     }
 
-                    hbox {
-                        label("Add Application").apply {
-                            addClass("app-drawer__text--link")
-                            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                            setOnMouseClicked {
-                                find<AddPluginDialog>().apply {
-                                    openModal()
-                                }
+                    vbox {
+                        addClass("app-drawer__section--filled")
+                        label(messages["noPluginsAdded"]).apply {
+                            addClass("app-drawer__text")
+                            fitToParentWidth()
+                        }
+                        visibleWhen(
+                            Bindings.createBooleanBinding(
+                                Callable { viewModel.recorderPlugins.size <= 0 },
+                                viewModel.recorderPlugins
+                            )
+                        )
+                        managedProperty().bind(visibleProperty())
+                    }
+
+                    label(messages["addApp"]).apply {
+                        addClass("app-drawer__text--link")
+                        graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                        setOnMouseClicked {
+                            find<AddPluginDialog>().apply {
+                                openModal()
                             }
                         }
                     }
@@ -97,33 +104,40 @@ class SettingsView : View() {
                     }
 
                     vbox {
-                        val editPluginGroup = ToggleGroup()
-                        viewModel.editorPlugins.onChange {
-                            children.clear()
-                            it.list.map { pluginData ->
-                                val radio = SelectRadioButton().apply {
-                                    btnTextProperty.set(pluginData.name)
-                                    viewModel.selectedEditorProperty.onChange { data ->
-                                        isSelected = data == pluginData
-                                    }
-                                    selectedProperty().onChange { selected ->
-                                        if (selected) viewModel.selectEditor(pluginData)
-                                    }
-                                    toggleGroup = editPluginGroup
+                        bindChildren(viewModel.editorPlugins) { pluginData ->
+                            SelectRadioButton().apply {
+                                textProperty().set(pluginData.name)
+                                viewModel.selectedEditorProperty.onChange { selectedData ->
+                                    isSelected = selectedData == pluginData
                                 }
-                                children.add(radio)
+                                selectedProperty().onChange { selected ->
+                                    if (selected) viewModel.selectEditor(pluginData)
+                                }
                             }
                         }
                     }
 
-                    hbox {
-                        label("Add Application").apply {
-                            addClass("app-drawer__text--link")
-                            graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
-                            setOnMouseClicked {
-                                find<AddPluginDialog>().apply {
-                                    openModal()
-                                }
+                    vbox {
+                        addClass("app-drawer__section--filled")
+                        label(messages["noPluginsAdded"]).apply {
+                            addClass("app-drawer__text")
+                            fitToParentWidth()
+                        }
+                        visibleWhen(
+                            Bindings.createBooleanBinding(
+                                Callable { viewModel.editorPlugins.size <= 0 },
+                                viewModel.editorPlugins
+                            )
+                        )
+                        managedProperty().bind(visibleProperty())
+                    }
+
+                    label(messages["addApp"]).apply {
+                        addClass("app-drawer__text--link")
+                        graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
+                        setOnMouseClicked {
+                            find<AddPluginDialog>().apply {
+                                openModal()
                             }
                         }
                     }

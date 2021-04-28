@@ -54,7 +54,7 @@
 }
 
 .app-drawer__section {
-    -fx-spacing: 10px;
+    -fx-spacing: 20px;
 }
 
 .app-drawer__section--filled {

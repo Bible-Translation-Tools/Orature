@@ -8,7 +8,6 @@ import javafx.scene.control.RadioButton
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import org.wycliffeassociates.otter.jvm.controls.button.SelectRadioButton
-import tornadofx.*
 
 class SelectRadioButtonSkin(private val button: SelectRadioButton) : SkinBase<SelectRadioButton>(button) {
 
@@ -25,8 +24,6 @@ class SelectRadioButtonSkin(private val button: SelectRadioButton) : SkinBase<Se
     lateinit var btnRadio: RadioButton
 
     init {
-        importStylesheet(javaClass.getResource("/css/select-radio-button.css").toExternalForm())
-
         loadFXML()
         initializeControl()
     }
@@ -35,8 +32,8 @@ class SelectRadioButtonSkin(private val button: SelectRadioButton) : SkinBase<Se
         button.setOnMouseClicked {
             if (!button.isSelected) button.fire()
         }
-        btnLabel.textProperty().bind(button.btnTextProperty)
-        btnIcon.graphicProperty().bind(button.btnIconProperty)
+        btnLabel.textProperty().bind(button.textProperty())
+        btnIcon.graphicProperty().bind(button.graphicProperty())
         btnRadio.selectedProperty().bindBidirectional(button.selectedProperty())
         btnRadio.setOnMouseClicked {
             if (!button.isSelected) button.fire()
