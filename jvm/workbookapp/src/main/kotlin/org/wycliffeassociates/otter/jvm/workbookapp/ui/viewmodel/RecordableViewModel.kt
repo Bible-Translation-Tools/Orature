@@ -6,7 +6,6 @@ import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -41,8 +40,6 @@ open class RecordableViewModel(
     val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val contextProperty = SimpleObjectProperty<PluginType>(PluginType.RECORDER)
-    val showPluginActiveProperty = SimpleBooleanProperty(false)
-    var showPluginActive by showPluginActiveProperty
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -80,6 +77,7 @@ open class RecordableViewModel(
     }
 
     fun recordNewTake() {
+        closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
@@ -88,7 +86,6 @@ open class RecordableViewModel(
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
-                    showPluginActive = !plugin.isNativePlugin()
                     fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
                     audioPluginViewModel.record(rec)
                 }
@@ -98,7 +95,6 @@ open class RecordableViewModel(
                 }
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
-                    showPluginActive = false
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
@@ -110,12 +106,12 @@ open class RecordableViewModel(
     }
 
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
+        closePlayers()
         contextProperty.set(pluginType)
         currentTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
-                showPluginActive = !plugin.isNativePlugin()
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 when (pluginType) {
                     PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
@@ -129,7 +125,6 @@ open class RecordableViewModel(
             }
             .onErrorReturn { TakeActions.Result.NO_PLUGIN }
             .subscribe { result: TakeActions.Result ->
-                showPluginActive = false
                 currentTakeNumberProperty.set(null)
                 fire(PluginClosedEvent(pluginType))
                 when (result) {
@@ -173,6 +168,7 @@ open class RecordableViewModel(
     }
 
     fun deleteTake(take: Take) {
+        stopPlayers()
         take.deletedTimestamp.accept(DateHolder.now())
     }
 
@@ -210,13 +206,13 @@ open class RecordableViewModel(
             Callable {
                 when (contextProperty.get()) {
                     PluginType.RECORDER -> {
-                        audioPluginViewModel.selectedRecorderProperty.get().name
+                        audioPluginViewModel.selectedRecorderProperty.get()?.name
                     }
                     PluginType.EDITOR -> {
-                        audioPluginViewModel.selectedEditorProperty.get().name
+                        audioPluginViewModel.selectedEditorProperty.get()?.name
                     }
                     PluginType.MARKER -> {
-                        audioPluginViewModel.selectedMarkerProperty.get().name
+                        audioPluginViewModel.selectedMarkerProperty.get()?.name
                     }
                     null -> throw IllegalStateException("Action is not supported!")
                 }
@@ -328,6 +324,10 @@ open class RecordableViewModel(
         Platform.runLater {
             takeCardModels.removeAll { it.take.equals(take) }
         }
+    }
+
+    fun openPlayers() {
+        takeCardModels.forEach { it.audioPlayer.load(it.take.file) }
     }
 
     fun closePlayers() {

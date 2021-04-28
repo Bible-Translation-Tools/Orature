@@ -16,6 +16,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
@@ -55,6 +56,8 @@ class WorkbookPageViewModel : ViewModel() {
     val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
+
+    private val navigator: NavigationMediator by inject()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -151,8 +154,8 @@ class WorkbookPageViewModel : ViewModel() {
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         when (resourceMetadata.type) {
-            ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
-            ContainerType.Help -> workspace.dock<ResourcePage>()
+            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
+            ContainerType.Help -> navigator.dock<ResourcePage>()
         }
     }
 

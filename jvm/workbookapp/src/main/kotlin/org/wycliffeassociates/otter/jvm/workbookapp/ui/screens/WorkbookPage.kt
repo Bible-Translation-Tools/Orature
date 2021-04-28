@@ -7,13 +7,16 @@ import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
@@ -37,6 +40,25 @@ import java.text.MessageFormat
 class WorkbookPage : Fragment() {
     private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
+    private val navigator: NavigationMediator by inject()
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(
+            viewModel.workbookDataStore.activeChapterProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["chapterTitle"],
+                        messages["chapter"],
+                        it.sort
+                    )
+                } ?: messages["chapter"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
+        onClickAction {
+            navigator.dock(this@WorkbookPage)
+        }
+    }
 
     init {
         initializeProgressDialogs()
@@ -53,6 +75,10 @@ class WorkbookPage : Fragment() {
         viewModel.openWorkbook()
         createTabs()
         root.tabs.setAll(tabMap.values)
+        viewModel.workbookDataStore.activeChunkProperty.set(null)
+        viewModel.workbookDataStore.activeResourceComponentProperty.set(null)
+        viewModel.workbookDataStore.activeResourceProperty.set(null)
+        navigator.dock(this, breadCrumb)
     }
 
     /**
