@@ -27,6 +27,7 @@ private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class ScopeVM: ViewModel() {
     val parametersProperty = SimpleObjectProperty<Application.Parameters>()
+    lateinit var closeCallback: () -> Unit
 
     val parameters
         get() = parametersProperty.value
@@ -121,15 +122,13 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun saveAndQuit() {
-        (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
                 .subscribe {
-                    it.navigateBack()
+                    scopeVM.closeCallback.invoke()
                 }
-        }
     }
 
     fun placeMarker() {

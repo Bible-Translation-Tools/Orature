@@ -125,9 +125,16 @@ class NotChunkedPage : Fragment() {
             verseTotal = 30
         )
         vm.sourceAudio.set(wav)
-   //     val wiz: ChunkingWizard = find()
+        //     val wiz: ChunkingWizard = find()
 
         scopeVM.parametersProperty.set(constructParams(params))
+        scopeVM.closeCallback =
+            {
+                val wav = WavFile(sourceAudio!!.file)
+                wav.update()
+                val chunks = wav.metadata.getCues().size
+                commitChunks(chunks)
+            }
         val wiz = find<ChunkingWizard> {
             onComplete {
                 println("here")
