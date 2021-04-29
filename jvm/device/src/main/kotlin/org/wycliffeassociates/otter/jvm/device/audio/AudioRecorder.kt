@@ -11,12 +11,12 @@ import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioRecorder : IAudioRecorder {
 
-    private val logger = LoggerFactory.getLogger(AudioRecorder::class.java)
+    private val monitor = Object()
 
-    override fun pause() {
-        line.stop()
-        line.close()
-    }
+    @Volatile
+    private var stop = false
+    @Volatile
+    private var pause = false
 
     companion object {
         val SAMPLE_RATE = 44100F // Hz
@@ -34,35 +34,59 @@ class AudioRecorder : IAudioRecorder {
         val BUFFER_SIZE = 1024
     }
 
-    private var line: TargetDataLine
+    private var line = AudioSystem.getTargetDataLine(FORMAT)
     private val audioByteObservable = PublishSubject.create<ByteArray>()
-
-    init {
-        line = AudioSystem.getTargetDataLine(FORMAT)
-    }
-
-    override fun start() {
-        line.open(FORMAT)
-        line.start()
-        Observable
-            .fromCallable {
-                val byteArray = ByteArray(BUFFER_SIZE)
-                var totalRead = 0
-                while (line.isOpen) {
+    private val recordingStream = Observable
+        .fromCallable {
+            val byteArray = ByteArray(BUFFER_SIZE)
+            var totalRead = 0
+            while (true) {
+                if (line.isOpen || line.available() > 0) {
                     totalRead += line.read(byteArray, 0, byteArray.size)
                     audioByteObservable.onNext(byteArray)
+                } else {
+                    try {
+                        synchronized(monitor) {
+                            monitor.wait()
+                        }
+                    } catch (e: InterruptedException) {
+                        stop()
+                    }
+                }
+                if (stop || pause) {
+                    line.close()
+                    if (stop) break
                 }
             }
-            .subscribeOn(Schedulers.io())
-            .doOnError { e ->
-                logger.error("Error while recording audio", e)
-            }
-            .subscribe()
+            stop = false
+        }
+        .subscribeOn(Schedulers.io())
+        .subscribe()
+
+    @Synchronized // Synchronized so as to not subscribe to multiple streams on quick multipress
+    override fun start() {
+        pause = false
+        line.open(FORMAT)
+        line.start()
+        synchronized(monitor) {
+            monitor.notify()
+        }
+    }
+
+    override fun pause() {
+        line.stop()
+        pause = true
     }
 
     override fun stop() {
         line.stop()
-        line.close()
+        stop = true
+
+        // wakes up the recording thread to allow it to close
+        synchronized(monitor) {
+            monitor.notify()
+        }
+        audioByteObservable.onComplete()
     }
 
     override fun getAudioStream(): Observable<ByteArray> {

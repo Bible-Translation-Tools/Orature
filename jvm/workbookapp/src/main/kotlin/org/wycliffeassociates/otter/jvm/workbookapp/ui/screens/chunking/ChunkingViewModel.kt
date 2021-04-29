@@ -8,5 +8,4 @@ class ChunkingViewModel: ViewModel() {
 
     val sourceAudio = SimpleObjectProperty<WavFile>()
 
-
 }

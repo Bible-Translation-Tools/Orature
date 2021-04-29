@@ -119,7 +119,13 @@ class NotChunkedPage : Fragment() {
             verseTotal = 30
         )
         vm.sourceAudio.set(wav)
-        workspace.dockedComponent!!.replaceWith<Consume>()
+   //     val wiz: ChunkingWizard = find()
+        val wiz = find<ChunkingWizard> {
+            onComplete {
+                println("here")
+            }
+        }
+        workspace.dock(wiz)
 
 //        fire(PluginOpenedEvent(PluginType.MARKER, true))
 //        launchPluginProvider

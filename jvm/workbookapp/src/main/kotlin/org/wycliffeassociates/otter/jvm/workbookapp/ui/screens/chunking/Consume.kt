@@ -2,12 +2,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
+import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import javax.inject.Inject
 import javax.inject.Provider
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
@@ -16,36 +18,40 @@ import tornadofx.*
 class Consume : Fragment() {
 
     val vm: ChunkingViewModel by inject()
+    val audioController: AudioPlayerController
+    val audioSlider: AudioSlider
 
     @Inject
     lateinit var audioPlayerProvider: Provider<IAudioPlayer>
-    lateinit var ap: IAudioPlayer
-    val waveformImageBuilder = WaveformImageBuilder()
+    val ap: IAudioPlayer
+    val waveformImageBuilder = WaveformImageBuilder(wavColor = Color.web("#00153399"))
 
     init {
         (app as OtterApp).dependencyGraph.inject(this)
         ap = audioPlayerProvider.get()
         ap.load(vm.sourceAudio.get().file)
+
+        audioSlider = AudioSlider().apply {
+            prefHeightProperty().set(400.0)
+            player.set(ap)
+            val wav = vm.sourceAudio.get()
+            secondsToHighlightProperty.set(0)
+            waveformImageBuilder.build(WavFileReader(wav), fitToAudioMax = false).subscribe { img ->
+                waveformImageProperty.set(img)
+            }
+        }
+
+        audioController = AudioPlayerController(audioSlider, ap)
     }
 
     override val root = vbox {
         importStylesheet(resources["/css/root.css"])
         importStylesheet(resources["/css/button.css"])
-        hbox {
-            padding = insets(20.0)
+        borderpane {
+            alignment = Pos.CENTER
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
-            add(
-                AudioSlider().apply {
-                    hgrow = Priority.ALWAYS
-                    this.player.set(ap)
-                    val wav = vm.sourceAudio.get()
-                    secondsToHighlightProperty.set(0)
-                    waveformImageBuilder.build(WavFileReader(wav)).subscribe { img ->
-                        waveformImageProperty.set(img)
-                    }
-                }
-            )
+            center = audioSlider
         }
         hbox {
             prefHeight = 74.0
@@ -56,11 +62,11 @@ class Consume : Fragment() {
             button("", FontIcon("mdi-play")) {
                 styleClass.addAll("btn", "btn--cta")
                 action {
-                    if (ap.isPlaying()) {
-                        ap.pause()
-                    } else {
-                        ap.play()
-                    }
+                    audioController.toggle()
+                }
+                style {
+                    borderRadius += box(25.px)
+                    backgroundRadius += box(25.px)
                 }
             }
         }
