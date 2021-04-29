@@ -4,14 +4,24 @@ import javafx.application.Platform
 import javafx.geometry.Side
 import javafx.util.Duration
 import org.controlsfx.control.HiddenSidesPane
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
 class AppContent : View() {
 
+    private val navigator: NavigationMediator by inject()
+    private val rootViewModel: RootViewModel by inject()
+
     override val root = HiddenSidesPane().apply {
-        content = workspace.root
+        content =  borderpane {
+            top = navigator.breadCrumbsBar.apply {
+                disableWhen(rootViewModel.pluginOpenedProperty)
+            }
+            center<Workspace>()
+        }
 
         triggerDistance = 0.0
         animationDelay = Duration.ZERO
