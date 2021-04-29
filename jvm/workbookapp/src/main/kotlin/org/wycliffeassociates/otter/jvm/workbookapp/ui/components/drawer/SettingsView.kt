@@ -7,7 +7,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.SelectRadioButton
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.RemovePluginsDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.util.concurrent.Callable
@@ -137,18 +136,6 @@ class SettingsView : View() {
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         setOnMouseClicked {
                             find<AddPluginDialog>().apply {
-                                openModal()
-                            }
-                        }
-                    }
-                }
-
-                hbox {
-                    label("Remove Application").apply {
-                        addClass("app-drawer__text--link")
-                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                        setOnMouseClicked {
-                            find<RemovePluginsDialog>().apply {
                                 openModal()
                             }
                         }
