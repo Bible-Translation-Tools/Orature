@@ -22,11 +22,17 @@
     -wa-white-05: rgba(255,255,255,0.05);
     -wa-white-10: rgba(255,255,255,0.1);
     -wa-white-20: rgba(255,255,255,0.2);
-    -wa-white-30: rgba(255,255,255,0.3); /* Used for CTA Border */
+    -wa-white-30: rgba(255,255,255,0.3);
+    -wa-white-40: rgba(255,255,255,0.4);
+    -wa-white-50: rgba(255,255,255,0.5);
+    -wa-white-60: rgba(255,255,255,0.6);
     -wa-black-05: rgba(0,0,0,0.05);
     -wa-black-10: rgba(0,0,0,0.1);
     -wa-black-20: rgba(0,0,0,0.2);
     -wa-black-30: rgba(0,0,0,0.3);
+    -wa-black-40: rgba(0,0,0,0.4);
+    -wa-black-50: rgba(0,0,0,0.5);
+    -wa-black-60: rgba(0,0,0,0.6);
     -wa-transparent: rgba(255,255,255,0);
     -wa-background: #F7FAFF;
 

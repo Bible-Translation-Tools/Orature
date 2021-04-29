@@ -64,6 +64,35 @@
     -fx-padding: 10px;
 }
 
+.app-drawer__plugin-list {
+    -fx-spacing: 10px;
+}
+
+.app-drawer__plugin-header {
+    -fx-spacing: 10px;
+}
+
+.app-drawer__plugin-header .ikonli-font-icon {
+    -fx-fill: -wa-black-60;
+    -fx-font-size: 24px;
+}
+
+.app-drawer__plugin-list .radio {
+    -fx-background-color: -wa-white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 1.0em;
+    -fx-border-color: -wa-gray-darker;
+}
+
+.app-drawer__plugin-list .radio:selected {
+    -fx-border-color: -wa-primary-dark;
+}
+
+.app-drawer__plugin-list .radio:selected .dot {
+    -fx-background-color: -wa-primary-dark;
+    -fx-background-insets: -2, 0;
+}
+
 .app-drawer__text {
     -fx-font-size: 20px;
     -fx-wrap-text: true;

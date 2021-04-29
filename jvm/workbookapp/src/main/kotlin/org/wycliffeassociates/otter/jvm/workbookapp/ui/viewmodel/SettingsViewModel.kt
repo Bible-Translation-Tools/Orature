@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.binding.ListBinding
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -75,5 +76,20 @@ class SettingsViewModel : ViewModel() {
     fun selectRecorder(recorderData: AudioPluginData) {
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
+    }
+
+    fun allAudioPlugins() : ListBinding<AudioPluginData> {
+        return object : ListBinding<AudioPluginData>() {
+
+            init {
+                bind(recorderPlugins, editorPlugins)
+            }
+
+            override fun computeValue(): ObservableList<AudioPluginData> {
+                return FXCollections.concat(recorderPlugins, editorPlugins)
+                    .distinctBy { it.name }
+                    .asObservable()
+            }
+        }
     }
 }
