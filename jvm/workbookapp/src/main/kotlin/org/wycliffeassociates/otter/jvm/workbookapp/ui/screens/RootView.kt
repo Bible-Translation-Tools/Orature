@@ -1,20 +1,22 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
 class RootView : View() {
 
-    val navigator: NavigationMediator by inject()
-    val pluginOpenedProperty = SimpleBooleanProperty(false)
+    private val viewModel: RootViewModel by inject()
+    private val navigator: NavigationMediator by inject()
+
     val menu = MainMenu().apply {
-        hiddenWhen(pluginOpenedProperty)
+        hiddenWhen(viewModel.pluginOpenedProperty)
         managedProperty().bind(visibleProperty())
     }
 
@@ -25,11 +27,11 @@ class RootView : View() {
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = true
-            pluginOpenedProperty.set(true)
+            viewModel.pluginOpenedProperty.set(true)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
-            pluginOpenedProperty.set(false)
+            viewModel.pluginOpenedProperty.set(false)
         }
         workspace.add(menu)
         workspace.header.removeFromParent()
@@ -40,12 +42,9 @@ class RootView : View() {
     override val root = stackpane {
         borderpane {
             top = menu
-            center = borderpane {
-                top = navigator.breadCrumbsBar.apply {
-                    disableWhen(pluginOpenedProperty)
-                }
-                center<Workspace>()
-            }
+            left<AppBar>()
+            center<AppContent>()
         }
     }
 }
+
