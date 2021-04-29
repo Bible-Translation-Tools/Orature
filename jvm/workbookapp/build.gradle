@@ -107,6 +107,7 @@ dependencies {
 
     // ControlsFX
     implementation 'com.github.jsarabia:javafx-gridview:-SNAPSHOT'
+    implementation "org.controlsfx:controlsfx:$controlsfxVer"
 
     // FontAwesomeFX
     implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"

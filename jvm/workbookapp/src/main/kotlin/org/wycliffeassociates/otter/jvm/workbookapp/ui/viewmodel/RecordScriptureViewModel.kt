@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
+import java.text.MessageFormat
 
 class RecordScriptureViewModel : ViewModel() {
 
@@ -40,6 +41,16 @@ class RecordScriptureViewModel : ViewModel() {
 
     private var activeChunkSubscription: Disposable? = null
 
+    val breadcrumbTitleBinding = recordableViewModel.currentTakeNumberProperty.stringBinding {
+        it?.let { take ->
+            MessageFormat.format(
+                messages["takeTitle"],
+                messages["take"],
+                take
+            )
+        } ?: messages["take"]
+    }
+
     init {
         activeChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
 
@@ -68,10 +79,12 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun nextChunk() {
+        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.FORWARD)
     }
 
     fun previousChunk() {
+        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.BACKWARD)
     }
 

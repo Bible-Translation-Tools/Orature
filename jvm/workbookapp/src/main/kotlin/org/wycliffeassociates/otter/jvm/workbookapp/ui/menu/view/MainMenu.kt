@@ -20,13 +20,6 @@ class MainMenu : MenuBar() {
 
     private val viewModel: MainMenuViewModel = find()
 
-    private fun Menu.exportMenuItem(message: String): MenuItem {
-        return item(message) {
-            graphic = MainMenuStyles.exportIcon("20px")
-            disableProperty().bind(viewModel.disableExportProjectProperty)
-        }
-    }
-
     private fun Menu.importMenuItem(message: String): MenuItem {
         return item(message) {
             graphic = MainMenuStyles.importIcon("20px")
@@ -71,13 +64,6 @@ class MainMenu : MenuBar() {
                         ).firstOrNull()
                         file?.let {
                             viewModel.importResourceContainer(file)
-                        }
-                    }
-                exportMenuItem(messages["exportProject"])
-                    .setOnAction {
-                        val directory = chooseDirectory(messages["exportProject"])
-                        directory?.let {
-                            viewModel.exportWorkbook(it)
                         }
                     }
                 separator()

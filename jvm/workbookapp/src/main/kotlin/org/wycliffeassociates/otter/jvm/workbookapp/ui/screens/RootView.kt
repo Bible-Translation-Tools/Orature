@@ -1,16 +1,24 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeprecatedNavBar
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
 class RootView : View() {
 
-    val menu = MainMenu()
-    val nav = DeprecatedNavBar()
+    private val viewModel: RootViewModel by inject()
+    private val navigator: NavigationMediator by inject()
+
+    val menu = MainMenu().apply {
+        hiddenWhen(viewModel.pluginOpenedProperty)
+        managedProperty().bind(visibleProperty())
+    }
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -19,28 +27,24 @@ class RootView : View() {
         // loss of communication between the app and the external plugin, thus data loss
         workspace.subscribe<PluginOpenedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = true
-            nav.root.visibleProperty().set(false)
-            nav.root.managedProperty().set(false)
-            menu.visibleProperty().set(false)
-            menu.managedProperty().set(false)
+            viewModel.pluginOpenedProperty.set(true)
         }
         workspace.subscribe<PluginClosedEvent> {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
-            nav.root.visibleProperty().set(true)
-            nav.root.managedProperty().set(true)
-            menu.visibleProperty().set(true)
-            menu.managedProperty().set(true)
+            viewModel.pluginOpenedProperty.set(false)
         }
         workspace.add(menu)
         workspace.header.removeFromParent()
-        workspace.dock<HomePage>()
+        workspace.root.vgrow = Priority.ALWAYS
+        navigator.dock<HomePage>()
     }
 
     override val root = stackpane {
         borderpane {
             top = menu
-            left = nav.root
-            center<Workspace>()
+            left<AppBar>()
+            center<AppContent>()
         }
     }
 }
+

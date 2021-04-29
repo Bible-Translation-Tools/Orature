@@ -10,7 +10,9 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.Action
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
@@ -18,6 +20,7 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import tornadofx.*
@@ -28,8 +31,21 @@ class HomePage : Fragment() {
 
     private val viewModel: ProjectGridViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
 
     private val noProjectsProperty: ReadOnlyBooleanProperty
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(
+            workbookDataStore.activeWorkbookProperty.stringBinding {
+                it?.target?.title ?: messages["project"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
+        onClickAction {
+            navigator.dock(this@HomePage)
+        }
+    }
 
     init {
         importStylesheet<ProjectGridStyles>()
@@ -160,6 +176,7 @@ class HomePage : Fragment() {
     }
 
     override fun onDock() {
+        navigator.dock(this, breadCrumb)
         viewModel.loadProjects()
         viewModel.clearSelectedProject()
         workbookDataStore.activeWorkbookProperty.set(null)

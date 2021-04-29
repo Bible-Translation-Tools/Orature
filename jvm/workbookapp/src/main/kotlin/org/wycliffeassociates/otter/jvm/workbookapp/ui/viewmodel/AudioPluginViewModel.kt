@@ -4,7 +4,6 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javax.inject.Inject
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
@@ -19,6 +18,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import tornadofx.*
+import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository

@@ -12,6 +12,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
@@ -28,6 +29,7 @@ class ProjectGridViewModel : ViewModel() {
     @Inject lateinit var deleteProjectProvider: Provider<DeleteProject>
 
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
 
     val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
@@ -52,7 +54,7 @@ class ProjectGridViewModel : ViewModel() {
     }
 
     fun createProject() {
-        workspace.dock<ProjectWizard>()
+        navigator.dock<ProjectWizard>()
     }
 
     fun deleteWorkbook(workbook: Workbook) {
@@ -75,6 +77,6 @@ class ProjectGridViewModel : ViewModel() {
     fun selectProject(workbook: Workbook) {
         workbookDataStore.activeWorkbookProperty.set(workbook)
         workbook.target.resourceMetadata.let(workbookDataStore::setProjectFilesAccessor)
-        workspace.dock<WorkbookPage>()
+        navigator.dock<WorkbookPage>()
     }
 }

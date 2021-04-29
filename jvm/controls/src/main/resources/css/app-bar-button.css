@@ -1,0 +1,55 @@
+.app-bar-button {
+    -fx-background-color: -wa-primary-dark;
+    -fx-border-width: 1px;
+    -fx-border-color: #678BC2;
+    -fx-border-radius: 6px;
+    -fx-pref-width: 80px;
+    -fx-pref-height: 80px;
+    -fx-text-fill: -wa-white;
+    -fx-cursor: hand;
+}
+
+.app-bar-button:disabled {
+    -fx-border-width: 0px;
+}
+
+.app-bar-button:hover {
+    -fx-background-color: -wa-white-10;
+}
+
+.app-bar-button:pressed {
+    -fx-background-color: -wa-white-20;
+}
+
+.app-bar-button:selected {
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 6px;
+    -fx-border-width: 0px;
+}
+
+.app-bar-container {
+    -fx-alignment: center;
+}
+
+.app-bar-button__title {
+    -fx-text-fill: -wa-white;
+    -fx-underline: true;
+    -fx-font-size: 16px;
+}
+
+.app-bar-button:selected .app-bar-button__title {
+    -fx-text-fill: -wa-primary;
+}
+
+.app-bar-button__title:disabled {
+    -fx-underline: false;
+}
+
+.app-bar-button__icon .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
+    -fx-icon-size: 30px;
+}
+
+.app-bar-button:selected .app-bar-button__icon .ikonli-font-icon {
+    -fx-icon-color: -wa-primary;
+}
