@@ -19,13 +19,22 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
+import javafx.application.Application
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 
+class ScopeVM: ViewModel() {
+    val parametersProperty = SimpleObjectProperty<Application.Parameters>()
+
+    val parameters
+        get() = parametersProperty.value
+}
+
 class VerseMarkerViewModel : ViewModel() {
 
+    val scopeVM: ScopeVM by inject()
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     val markers: VerseMarkerModel
@@ -44,14 +53,13 @@ class VerseMarkerViewModel : ViewModel() {
     val imageWidth: Double
 
     init {
-        val scope = scope as ParameterizedScope
-        val audioFile = File(scope.parameters.named["wav"])
+        val audioFile = File(scopeVM.parameters.named["wav"])
         val wav = WavFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
-            scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
-        headerTitle.set(scope.parameters.named["action_title"])
-        headerSubtitle.set(scope.parameters.named["content_title"])
+            scopeVM.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
+        headerTitle.set(scopeVM.parameters.named["action_title"])
+        headerSubtitle.set(scopeVM.parameters.named["content_title"])
         markers = VerseMarkerModel(wav, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("$it/$totalMarkers")

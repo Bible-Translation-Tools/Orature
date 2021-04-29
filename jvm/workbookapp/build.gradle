@@ -151,6 +151,7 @@ dependencies {
     implementation project(':common')
     implementation project(':common:audio')
     implementation project(':jvm:controls')
+    implementation project(':jvm:markerapp')
     implementation project(':jvm:device')
     implementation project(':jvm:utils')
     implementation project(':jvm:workbookplugin')
