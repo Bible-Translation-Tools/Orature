@@ -4,10 +4,10 @@
 
 .jfx-tab-pane .tab-header-area .tab-down-button {
     -fx-background-color: BLACK;
-    -fx-min-width: 0.8em;
-    -fx-max-width: 0.8em;
-    -fx-min-height: 1.3em;
-    -fx-max-height: 1.3em;
+    -fx-min-width: 0.0em;
+    -fx-max-width: 0.0em;
+    -fx-min-height: 0.0em;
+    -fx-max-height: 0.0em;
 }
 
 .jfx-tab-pane .tab-header-area .control-buttons-tab .jfx-rippler {
@@ -25,8 +25,8 @@
 
 .jfx-tab-pane .headers-region .tab {
     -fx-background-color: rgba(255, 255, 255, .5);
-    -fx-pref-width: 157px;
-    -fx-pref-height: 57px;
+    -fx-pref-width: 0px;
+    -fx-pref-height: 0px;
     -fx-border-color: rgba(224,224,224, .87);
     -fx-border-width: 0 3 3 0;
     -fx-border-style: SOLID;
@@ -38,8 +38,8 @@
 }
 
 .jfx-tab-pane .headers-region > .tab-selected-line{
-    -fx-pref-width: 1px !important;
-    -fx-pref-height: 2px;
+    -fx-pref-width: 0px !important;
+    -fx-pref-height: 0px;
 }
 
 .jfx-tab-pane .headers-region > .tab > .jfx-rippler {
