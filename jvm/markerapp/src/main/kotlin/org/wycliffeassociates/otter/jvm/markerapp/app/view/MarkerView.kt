@@ -7,7 +7,7 @@ import tornadofx.*
 
 const val WINDOW_OFFSET = 50.0
 
-class MarkerView : PluginEntrypoint() {
+open class MarkerView : PluginEntrypoint() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
@@ -36,10 +36,7 @@ class MarkerView : PluginEntrypoint() {
         prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
-        add(titleFragment)
-        add(minimap)
         add(waveformContainer)
-        add(source)
         add(playbackControls)
     }
 }

@@ -13,11 +13,14 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class Consume : Fragment() {
 
     val vm: ChunkingViewModel by inject()
+    val wkbk: WorkbookDataStore by inject()
+
     val audioController: AudioPlayerController
     val audioSlider: AudioSlider
 
@@ -25,6 +28,12 @@ class Consume : Fragment() {
     lateinit var audioPlayerProvider: Provider<IAudioPlayer>
     val ap: IAudioPlayer
     val waveformImageBuilder = WaveformImageBuilder(wavColor = Color.web("#00153399"))
+
+    override fun onDock() {
+        super.onDock()
+        vm.titleProperty.set("Consume")
+        vm.stepProperty.set("Listen to the source audio for chapter ${wkbk.chapter.sort}. Pay attention to stories and important events.")
+    }
 
     init {
         (app as OtterApp).dependencyGraph.inject(this)

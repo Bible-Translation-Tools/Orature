@@ -122,7 +122,7 @@ class NotChunkedPage : Fragment() {
             chapterLabel = chapter.sort.toString(),
             chapterNumber = chapter.sort,
             sourceChapterAudio = file,
-            verseTotal = 30
+            verseTotal = 500
         )
         vm.sourceAudio.set(wav)
         //     val wiz: ChunkingWizard = find()
