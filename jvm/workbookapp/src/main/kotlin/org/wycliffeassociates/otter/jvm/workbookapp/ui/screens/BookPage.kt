@@ -28,6 +28,7 @@ class BookPage : Fragment() {
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
     override val root = JFXTabPane().apply {
+
         importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)

@@ -6,6 +6,8 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Region
 import javafx.scene.control.ButtonBar
 import javafx.scene.paint.Color
+import javafx.scene.paint.Paint
+import javafx.scene.shape.Rectangle
 import javafx.scene.text.FontPosture
 import javafx.scene.text.FontWeight
 import tornadofx.*
@@ -13,6 +15,34 @@ import tornadofx.*
 class ChunkingWizard : Wizard() {
 
     val vm: ChunkingViewModel by inject()
+
+    val consumeStep = Rectangle().apply {
+        style {
+            fillProperty().bind(vm.consumeStepColor)
+            width = 80.0
+            height = 8.0
+            arcHeight = 6.px
+            arcWidth = 6.px
+
+
+        } }
+    val verbalizeStep = Rectangle().apply { style {
+        fillProperty().bind(vm.verbalizeStepColor)
+        width = 80.0
+        height = 8.0
+        arcHeight = 6.px
+        arcWidth = 6.px
+
+    } }
+    val chunkStep = Rectangle().apply { style {
+        fillProperty().bind(vm.chunkStepColor)
+        width = 80.0
+        height = 8.0
+        arcHeight = 6.px
+        arcWidth = 6.px
+
+    } }
+
 
     override fun onDock() {
         val top = vbox {
@@ -37,6 +67,7 @@ class ChunkingWizard : Wizard() {
                 }
             }
             hbox {
+                spacing = 5.0
                 alignment = Pos.CENTER
                 addClass(WizardStyles.buttons)
                 spacer()
@@ -48,7 +79,11 @@ class ChunkingWizard : Wizard() {
                     }
                     action { back() }
                 }
-                spacer()
+
+                add(consumeStep)
+                add(verbalizeStep)
+                add(chunkStep)
+
                 button() {
                     styleClass.addAll("btn", "btn--secondary")
                     textProperty().bind(nextButtonTextProperty)
@@ -57,6 +92,7 @@ class ChunkingWizard : Wizard() {
                     }
                     action { next() }
                 }
+
                 spacer()
                 style {
                     borderWidth += box(0.px)
