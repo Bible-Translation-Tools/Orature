@@ -76,6 +76,16 @@
     -fx-cursor: hand;
 }
 
+.app-drawer__text--link:hover {
+    -fx-underline: false;
+}
+
+.app-drawer__text--centered {
+    -fx-font-size: 20px;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
 .app-drawer__text--link .ikonli-font-icon {
     -fx-fill: -wa-primary;
     -fx-font-size: 24px;
@@ -142,4 +152,21 @@
 .app-drawer__plugin .radio-button:selected .radio .dot {
     -fx-background-color: -wa-primary;
     -fx-background-insets: -1, 0;
+}
+
+.app-drawer__drag-drop-area {
+    -fx-alignment: center;
+    -fx-border-width: 2px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-primary;
+    -fx-border-style: segments(20, 10);
+    -fx-background-color: -wa-primary-05;
+    -fx-background-radius: 6px;
+    -fx-padding: 25px;
+    -fx-spacing: 10px;
+}
+
+.app-drawer__drag-drop-area__icon .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+    -fx-font-size: 80px;
 }

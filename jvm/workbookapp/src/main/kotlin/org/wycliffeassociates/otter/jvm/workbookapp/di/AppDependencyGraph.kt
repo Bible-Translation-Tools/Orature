@@ -12,7 +12,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsViewModel
@@ -36,7 +36,6 @@ import javax.inject.Singleton
 @Singleton
 interface AppDependencyGraph {
     fun inject(viewModel: SplashScreenViewModel)
-    fun inject(viewModel: MainMenuViewModel)
     fun inject(viewModel: ProjectGridViewModel)
     fun inject(viewModel: AddPluginViewModel)
     fun inject(dataStore: WorkbookDataStore)
@@ -44,6 +43,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: ProjectWizardViewModel)
     fun inject(viewModel: WorkbookPageViewModel)
     fun inject(viewModel: SettingsViewModel)
+    fun inject(viewModel: AddFilesViewModel)
 
     fun inject(viewModel: RemovePluginsViewModel)
 

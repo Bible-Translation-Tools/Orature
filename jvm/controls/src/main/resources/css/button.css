@@ -18,30 +18,49 @@
 .btn__icon {
     -fx-icon-color: inherit;
     -fx-icon-size: 20px;
-    -fx-space:10px;
+    -fx-space: 10px;
 }
 
 /* -------------- Primary Button -------------- */
 .btn--primary {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: linear-gradient(to top, -wa-primary, #267CF7);
     -fx-effect: -wa-level2;
     -fx-text-fill: -wa-white;
-    -fx-border-width: 0px;
-    -fx-icon-color: -wa-white;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-primary-dark;
+    -fx-underline: true;
+    -fx-pref-height: 48px;
+    -fx-font-size: 20px;
+}
+
+.btn--primary .ikonli-font-icon {
+    -fx-fill: -wa-white;
+    -fx-icon-size: 22px;
 }
 
 .btn--primary:hover {
+    -fx-background-color: -wa-primary;
+    -fx-effect: -wa-level1;
+    -fx-underline: false;
+}
+
+.btn--primary:pressed {
     -fx-background-color: -wa-primary-dark;
     -fx-effect: -wa-level1;
+    -fx-underline: false;
 }
 
 .btn--primary:disabled {
     -fx-background-color: -wa-gray-lighter;
-    -fx-text-fill: -wa-gray-dark;
-    -fx-icon-color: -wa-gray-dark;
+    -fx-border-width: 0px;
+    -fx-text-fill: -wa-black-60;
     -fx-effect: -wa-level0;
     -fx-cursor: disappear;
+    -fx-underline: false;
+}
 
+.btn--primary:disabled .ikonli-font-icon {
+    -fx-fill: -wa-black-60;
 }
 
 /* -------------- Call to Action Button -------------- */
