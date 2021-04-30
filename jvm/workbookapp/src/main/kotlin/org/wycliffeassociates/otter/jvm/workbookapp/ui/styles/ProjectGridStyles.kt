@@ -25,7 +25,7 @@ class ProjectGridStyles : Stylesheet() {
             hgap = 24.px
             alignment = Pos.TOP_LEFT
             // Add larger padding on bottom to keep FAB from blocking last row cards
-            padding = box(0.px, 0.px, 95.px, 0.px)
+            padding = box(10.px, 35.px, 95.px, 35.px)
         }
 
         noProjectsLabel {

@@ -12,11 +12,15 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class Consume : Fragment() {
+
+    val playIcon = FontIcon("mdi-play").apply {iconSize = 24}
+    val pauseIcon = FontIcon("mdi-pause").apply {iconSize = 24}
 
     val vm: ChunkingViewModel by inject()
     val wkbk: WorkbookDataStore by inject()
@@ -68,14 +72,24 @@ class Consume : Fragment() {
             style {
                 backgroundColor += Paint.valueOf("#015AD9")
             }
-            button("", FontIcon("mdi-play")) {
+            button {
+                audioController.isPlayingProperty.onChangeAndDoNow {
+                    it?.let {
+                        when(it) {
+                            true -> graphic = pauseIcon
+                            false -> graphic = playIcon
+                        }
+                    }
+                }
                 styleClass.addAll("btn", "btn--cta")
                 action {
                     audioController.toggle()
                 }
                 style {
-                    borderRadius += box(25.px)
-                    backgroundRadius += box(25.px)
+                    prefHeight = 50.px
+                    prefWidth = 50.px
+                    borderRadius += box(90.px)
+                    backgroundRadius += box(90.px)
                 }
             }
         }

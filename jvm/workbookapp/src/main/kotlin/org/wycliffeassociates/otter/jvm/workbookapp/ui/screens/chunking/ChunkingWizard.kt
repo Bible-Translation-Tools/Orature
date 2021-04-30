@@ -47,21 +47,24 @@ class ChunkingWizard : Wizard() {
     override fun onDock() {
         val top = vbox {
             addClass(WizardStyles.header)
+            removeClass(WizardStyles.content)
             alignment = Pos.CENTER
             label {
                 textProperty().bind(vm.titleProperty)
                 style {
-                    fontSize = 18.pt
-                    fontFamily = "Atkinson Hyperlegible"
-                    fontWeight = FontWeight.BOLD
+                    fontSize = 26.px
+                    //fontSize = 18.pt
+                    //fontFamily = "Atkinson Hyperlegible"
+                    fontWeight = FontWeight.EXTRA_BOLD
                     fontStyle = FontPosture.REGULAR
                 }
             }
             label {
                 textProperty().bind(vm.stepProperty)
                 style {
-                    fontSize = 12.pt
-                    fontFamily = "Atkinson Hyperlegible"
+                    fontSize = 20.px
+                    //fontSize = 12.pt
+                    //fontFamily = "Atkinson Hyperlegible"
                     fontWeight = FontWeight.NORMAL
                     fontStyle = FontPosture.REGULAR
                 }
@@ -95,6 +98,8 @@ class ChunkingWizard : Wizard() {
 
                 spacer()
                 style {
+                    padding = box(0.px)
+                    backgroundColor += Color.WHITE
                     borderWidth += box(0.px)
                     borderColor += box(Color.TRANSPARENT)
                 }
@@ -104,6 +109,9 @@ class ChunkingWizard : Wizard() {
         root.top.replaceWith(top)
         root.bottom.replaceWith(Region())
         root.left.replaceWith(Region())
+        root.center.style {
+            padding = box(0.px)
+        }
     }
 
     init {
