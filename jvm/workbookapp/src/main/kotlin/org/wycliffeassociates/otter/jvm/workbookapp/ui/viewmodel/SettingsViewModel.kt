@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.ListBinding
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -21,6 +22,8 @@ class SettingsViewModel : ViewModel() {
     @Inject
     lateinit var pluginRepository: IAudioPluginRepository
 
+    private val audioPluginViewModel: AudioPluginViewModel by inject()
+
     val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
     val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
 
@@ -28,8 +31,16 @@ class SettingsViewModel : ViewModel() {
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val allAudioPluginsProperty = SimpleListProperty<AudioPluginData>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        allAudioPluginsProperty.bind(allAudioPluginsBinding())
+
+        audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
+        audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
+        audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
     }
 
     fun refreshPlugins() {
@@ -78,7 +89,7 @@ class SettingsViewModel : ViewModel() {
         selectedRecorderProperty.set(recorderData)
     }
 
-    fun allAudioPlugins() : ListBinding<AudioPluginData> {
+    private fun allAudioPluginsBinding() : ListBinding<AudioPluginData> {
         return object : ListBinding<AudioPluginData>() {
 
             init {
