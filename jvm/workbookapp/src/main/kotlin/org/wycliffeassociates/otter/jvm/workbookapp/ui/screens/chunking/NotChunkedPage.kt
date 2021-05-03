@@ -51,7 +51,7 @@ class NotChunkedPage : Fragment() {
                 fontSize = 36.px
             }
         }
-        text("Please chunk chapter # to continue. You may skip the chunking step if you prefer translating verse by verse.").apply {
+        text("Please chunk chapter ${workbookDataStore.chapter.sort} to continue. You may skip the chunking step if you prefer translating verse by verse.").apply {
             wrappingWidth = 500.0
             style {
                 fontSize = 16.px
