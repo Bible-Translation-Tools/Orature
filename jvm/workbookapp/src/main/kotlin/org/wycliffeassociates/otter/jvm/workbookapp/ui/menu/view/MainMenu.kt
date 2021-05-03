@@ -1,18 +1,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view
 
 import javafx.application.Platform
-import javafx.event.EventHandler
 import javafx.scene.control.Menu
 import javafx.scene.control.MenuBar
 import javafx.scene.control.MenuItem
-import javafx.scene.control.ToggleGroup
 import javafx.stage.FileChooser
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.RemovePluginsDialog
 import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.dialogs.AppVersionView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
@@ -66,66 +61,6 @@ class MainMenu : MenuBar() {
                             viewModel.importResourceContainer(file)
                         }
                     }
-                separator()
-                item(messages["version"]) {
-                    setOnAction {
-                        find<AppVersionView>().openModal()
-                    }
-                }
-            }
-            menu(messages["audioPlugins"]) {
-                onShowing = EventHandler {
-                    viewModel.refreshPlugins()
-                }
-                item(messages["new"]) {
-                    graphic = MainMenuStyles.addPluginIcon("20px")
-                    action {
-                        find<AddPluginDialog>().apply {
-                            openModal()
-                        }
-                    }
-                }
-                item(messages["remove"]) {
-                    graphic = MainMenuStyles.removePluginIcon("20px")
-                    action {
-                        find<RemovePluginsDialog>().apply {
-                            openModal()
-                        }
-                    }
-                }
-                separator()
-                menu(messages["audioRecorder"]) {
-                    graphic = MainMenuStyles.recorderIcon("20px")
-                    val pluginToggleGroup = ToggleGroup()
-                    viewModel.recorderPlugins.onChange { _ ->
-                        items.clear()
-                        items.setAll(
-                            viewModel.recorderPlugins.map { pluginData ->
-                                radiomenuitem(pluginData.name, pluginToggleGroup) {
-                                    userData = pluginData
-                                    action { if (isSelected) viewModel.selectRecorder(pluginData) }
-                                    isSelected = viewModel.selectedRecorderProperty.value == pluginData
-                                }
-                            }
-                        )
-                    }
-                }
-                menu(messages["audioEditor"]) {
-                    graphic = MainMenuStyles.editorIcon("20px")
-                    val pluginToggleGroup = ToggleGroup()
-                    viewModel.editorPlugins.onChange { _ ->
-                        items.clear()
-                        items.setAll(
-                            viewModel.editorPlugins.map { pluginData ->
-                                radiomenuitem(pluginData.name, pluginToggleGroup) {
-                                    userData = pluginData
-                                    action { if (isSelected) viewModel.selectEditor(pluginData) }
-                                    isSelected = viewModel.selectedEditorProperty.value == pluginData
-                                }
-                            }
-                        )
-                    }
-                }
             }
         }
     }

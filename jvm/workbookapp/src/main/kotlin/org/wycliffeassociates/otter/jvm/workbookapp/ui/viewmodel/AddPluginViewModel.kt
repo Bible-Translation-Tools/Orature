@@ -20,7 +20,7 @@ class AddPluginViewModel : ViewModel() {
 
     @Inject lateinit var pluginRepository: IAudioPluginRepository
 
-    private val mainMenuViewModel: MainMenuViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     var name: String by property("")
     val nameProperty = getProperty(AddPluginViewModel::name)
@@ -87,9 +87,10 @@ class AddPluginViewModel : ViewModel() {
                 .create(pluginData)
                 .doOnSuccess {
                     pluginData.id = it
-                    mainMenuViewModel.selectRecorder(pluginData)
-                    mainMenuViewModel.selectEditor(pluginData)
-                    mainMenuViewModel.refreshPlugins()
+
+                    settingsViewModel.selectRecorder(pluginData)
+                    settingsViewModel.selectEditor(pluginData)
+                    settingsViewModel.refreshPlugins()
                 }
                 .doOnError { e ->
                     logger.error("Error creating a plugin:")
