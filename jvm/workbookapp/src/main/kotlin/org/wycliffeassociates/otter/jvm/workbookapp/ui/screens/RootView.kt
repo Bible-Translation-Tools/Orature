@@ -6,7 +6,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.view.MainMenu
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
@@ -14,11 +13,6 @@ class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
     private val navigator: NavigationMediator by inject()
-
-    val menu = MainMenu().apply {
-        hiddenWhen(viewModel.pluginOpenedProperty)
-        managedProperty().bind(visibleProperty())
-    }
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -33,7 +27,6 @@ class RootView : View() {
             (app as OtterApp).shouldBlockWindowCloseRequest = false
             viewModel.pluginOpenedProperty.set(false)
         }
-        workspace.add(menu)
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
         navigator.dock<HomePage>()
@@ -41,7 +34,6 @@ class RootView : View() {
 
     override val root = stackpane {
         borderpane {
-            top = menu
             left<AppBar>()
             center<AppContent>()
         }

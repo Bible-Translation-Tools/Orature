@@ -17,12 +17,12 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpor
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
