@@ -16,7 +16,6 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class OtterApp : App(RootView::class), IDependencyGraphProvider {
-
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     var shouldBlockWindowCloseRequest = false
 
@@ -31,8 +30,6 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         ConfigureLogger(
             directoryProvider.logsDirectory
         ).configure()
-        val logger = LoggerFactory.getLogger(OtterApp::class.java)
-        logger.info("Initialized logger")
     }
 
     override fun start(stage: Stage) {
