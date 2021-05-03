@@ -23,8 +23,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     init {
         val directoryProvider = dependencyGraph.injectDirectoryProvider()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
-        //initializeLogger(directoryProvider)
-
+        initializeLogger(directoryProvider)
         importStylesheet<AppStyles>()
     }
 
