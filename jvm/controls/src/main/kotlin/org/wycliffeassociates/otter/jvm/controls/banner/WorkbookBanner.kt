@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.jvm.controls.banner
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -27,6 +28,7 @@ class WorkbookBanner : Control() {
     val backgroundImageFileProperty = SimpleObjectProperty<File>()
     val bookTitleProperty = SimpleStringProperty()
     val resourceTitleProperty = SimpleStringProperty()
+    val hideDeleteButtonProperty = SimpleBooleanProperty(false)
 
     val deleteTitleProperty = SimpleStringProperty("delete")
     val exportTitleProperty = SimpleStringProperty("export")

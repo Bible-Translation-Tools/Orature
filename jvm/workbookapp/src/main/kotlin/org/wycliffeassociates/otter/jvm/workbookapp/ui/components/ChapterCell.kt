@@ -47,6 +47,7 @@ class ChapterCell : ListCell<WorkbookItemModel>() {
             backgroundImageFileProperty.set(item.coverArt)
             bookTitleProperty.set(item.title)
             resourceTitleProperty.set(item.rcTitle)
+            hideDeleteButtonProperty.set(item.rcMetadataProperty.value.type == ContainerType.Help)
 
             deleteTitleProperty.set(FX.messages["delete"])
 
