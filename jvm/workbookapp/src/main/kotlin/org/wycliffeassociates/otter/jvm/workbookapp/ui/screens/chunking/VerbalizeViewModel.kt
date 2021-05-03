@@ -2,9 +2,13 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import java.io.File
 import javafx.animation.AnimationTimer
+import javafx.animation.Interpolator
+import javafx.animation.Timeline
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.util.Duration
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
@@ -16,7 +20,9 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.ViewModel
 import tornadofx.add
 import tornadofx.getValue
+import tornadofx.keyframe
 import tornadofx.setValue
+import tornadofx.timeline
 
 class VerbalizeViewModel : ViewModel() {
 
@@ -39,10 +45,12 @@ class VerbalizeViewModel : ViewModel() {
 
     fun toggle() {
         if (isRecording) {
+            stop()
             recorder.stop()
             writer.pause()
             hasWritten = true
         } else {
+            animate()
             recorder.start()
             writer.start()
         }
@@ -52,7 +60,7 @@ class VerbalizeViewModel : ViewModel() {
     fun reRec() {
         wav.file.delete()
         wav = WavFile(File.createTempFile("temp",".wav"), 1, 44100, 16)
-        writer = WavFileWriter(wav, recorder.getAudioStream()) { }
+        writer = WavFileWriter(wav, recorder.getAudioStream()) {}
         toggle()
     }
 
@@ -71,5 +79,23 @@ class VerbalizeViewModel : ViewModel() {
 
     fun save() {
         recorder.stop()
+    }
+
+    val arcLengthProperty = SimpleDoubleProperty(60.0)
+    var animation: Timeline = timeline {
+        cycleCount = Timeline.INDEFINITE
+        isAutoReverse = true
+
+        keyframe(Duration.millis(750.0)) {
+            keyvalue(arcLengthProperty, 100.0, Interpolator.EASE_BOTH)
+        }
+    }
+
+    fun animate() {
+        animation.playFrom(Duration.ZERO)
+    }
+
+    fun stop() {
+        animation?.pause()
     }
 }

@@ -19,8 +19,8 @@ import tornadofx.*
 
 class Consume : Fragment() {
 
-    val playIcon = FontIcon("mdi-play").apply {iconSize = 24}
-    val pauseIcon = FontIcon("mdi-pause").apply {iconSize = 24}
+    val playIcon = FontIcon("mdi-play").apply {iconSize = 36}
+    val pauseIcon = FontIcon("mdi-pause").apply {iconSize = 36}
 
     val vm: ChunkingViewModel by inject()
     val wkbk: WorkbookDataStore by inject()
@@ -67,10 +67,10 @@ class Consume : Fragment() {
             center = audioSlider
         }
         hbox {
-            prefHeight = 74.0
+            prefHeight = 88.0
             alignment = Pos.CENTER
             style {
-                backgroundColor += Paint.valueOf("#015AD9")
+                backgroundColor += Paint.valueOf("#00377C")
             }
             button {
                 audioController.isPlayingProperty.onChangeAndDoNow {
@@ -86,8 +86,8 @@ class Consume : Fragment() {
                     audioController.toggle()
                 }
                 style {
-                    prefHeight = 50.px
-                    prefWidth = 50.px
+                    prefHeight = 60.px
+                    prefWidth = 60.px
                     borderRadius += box(90.px)
                     backgroundRadius += box(90.px)
                 }

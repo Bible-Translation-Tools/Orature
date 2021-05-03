@@ -1,13 +1,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.animation.Timeline
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
+import javafx.scene.shape.Arc
+import javafx.scene.shape.ArcType
+import javafx.scene.shape.Circle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class Verbalize : View() {
+    val chunkvm: ChunkingViewModel by inject()
+    val vm: VerbalizeViewModel by inject()
 
     val playIcon = FontIcon("mdi-play").apply {
         iconSize = 36
@@ -17,16 +23,22 @@ class Verbalize : View() {
         iconSize = 36
         iconColor = Color.WHITE
     }
-    val recordIcon = FontIcon("mdi-microphone").apply {iconSize = 48}
-    val stopIcon = FontIcon("mdi-stop").apply {iconSize = 48}
+    val recordIcon = FontIcon("mdi-microphone").apply { iconSize = 48 }
+    val stopIcon = FontIcon("mdi-stop").apply { iconSize = 48 }
     val rerecordButton = FontIcon("mdi-sync").apply {
         iconColor = Paint.valueOf("#00377c")
         iconSize = 36
     }
 
-    val chunkvm: ChunkingViewModel by inject()
-
-    val vm: VerbalizeViewModel by inject()
+    val arc = Circle().apply {
+        fill = c("#001533", .10);
+        centerX = 120.0
+        centerY = 120.0
+        radius = 60.0
+        style {
+            backgroundColor += Color.TRANSPARENT
+        }
+    }
 
     override fun onDock() {
         super.onDock()
@@ -53,22 +65,29 @@ class Verbalize : View() {
                     backgroundRadius += box(90.px)
                 }
             }
-            button {
-                vm.recordingProperty.onChangeAndDoNow {
-                    it?.let {
-                        when(it) {
-                            true -> graphic = stopIcon
-                            false -> graphic = recordIcon
+            stackpane {
+                prefWidth = 200.0
+                add(arc)
+                button {
+                    vm.recordingProperty.onChangeAndDoNow {
+                        it?.let {
+                            when (it) {
+                                true -> graphic = stopIcon
+                                false -> graphic = recordIcon
+                            }
                         }
                     }
-                }
-                styleClass.addAll("btn", "btn--cta")
-                action { vm.toggle() }
-                style {
-                    prefHeight = 125.px
-                    prefWidth = 125.px
-                    borderRadius += box(90.px)
-                    backgroundRadius += box(90.px)
+                    styleClass.addAll("btn", "btn--cta")
+                    action {
+                        arc.radiusProperty().bind(vm.arcLengthProperty)
+                        vm.toggle()
+                    }
+                    style {
+                        prefHeight = 125.px
+                        prefWidth = 125.px
+                        borderRadius += box(90.px)
+                        backgroundRadius += box(90.px)
+                    }
                 }
             }
             button {
