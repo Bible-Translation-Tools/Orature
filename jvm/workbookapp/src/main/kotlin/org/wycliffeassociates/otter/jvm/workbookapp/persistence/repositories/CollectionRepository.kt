@@ -733,7 +733,7 @@ class CollectionRepository @Inject constructor(
                                             )
                                     ) // and the content should be a verse, not meta
                                     .and(
-                                        CONTENT_ENTITY.LABEL.eq("verse")
+                                        CONTENT_ENTITY.LABEL.eq("chunk")
                                     )
                             )
                     )
