@@ -62,6 +62,8 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
 
     private fun bindAction() {
         deleteBtn.apply {
+            visibleProperty().bind(banner.hideDeleteButtonProperty.not())
+            managedProperty().bind(visibleProperty())
             onActionProperty().bind(banner.onDeleteActionProperty)
         }
         exportBtn.apply {
