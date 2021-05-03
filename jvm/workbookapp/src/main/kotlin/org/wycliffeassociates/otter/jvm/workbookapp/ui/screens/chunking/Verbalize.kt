@@ -55,7 +55,15 @@ class Verbalize : View() {
             alignment = Pos.CENTER
 
             button {
-                graphic = playIcon
+                visibleProperty().bind(vm.hasContentProperty)
+                vm.isPlayingProperty.onChangeAndDoNow {
+                    it?.let {
+                        when(it) {
+                            true -> graphic = pauseIcon
+                            false -> graphic = playIcon
+                        }
+                    }
+                }
                 styleClass.addAll("btn", "btn--primary")
                 action { vm.playToggle() }
                 style {
@@ -91,6 +99,7 @@ class Verbalize : View() {
                 }
             }
             button {
+                visibleProperty().bind(vm.hasContentProperty)
                 graphic = rerecordButton
                 styleClass.addAll("btn", "btn--secondary")
                 action { vm.reRec() }
