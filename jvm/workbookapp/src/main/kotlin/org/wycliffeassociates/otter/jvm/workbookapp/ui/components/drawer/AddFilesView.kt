@@ -6,7 +6,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 
-class AddFilesView : Fragment() {
+class AddFilesView : View() {
     override val root = vbox {
         addClass("app-drawer__content")
 

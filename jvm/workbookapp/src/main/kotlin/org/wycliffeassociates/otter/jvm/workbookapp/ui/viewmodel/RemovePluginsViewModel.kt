@@ -18,6 +18,8 @@ class RemovePluginsViewModel : ViewModel() {
 
     @Inject lateinit var pluginRepository: IAudioPluginRepository
 
+    private val settingsViewModel: SettingsViewModel by inject()
+
     val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
     val noPluginsProperty: ReadOnlyBooleanProperty
 
@@ -42,6 +44,9 @@ class RemovePluginsViewModel : ViewModel() {
 
     fun remove(plugin: AudioPluginData) {
         plugins.remove(plugin)
-        pluginRepository.delete(plugin).subscribe()
+        pluginRepository.delete(plugin).subscribe {
+            settingsViewModel.refreshPlugins()
+        }
+
     }
 }

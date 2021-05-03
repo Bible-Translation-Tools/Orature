@@ -54,7 +54,7 @@
 }
 
 .app-drawer__section {
-    -fx-spacing: 10px;
+    -fx-spacing: 20px;
 }
 
 .app-drawer__section--filled {
@@ -74,4 +74,72 @@
     -fx-text-fill: -wa-primary;
     -fx-underline: true;
     -fx-cursor: hand;
+}
+
+.app-drawer__text--link .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+    -fx-font-size: 24px;
+}
+
+.app-drawer__plugin-list {
+    -fx-spacing: 10px;
+}
+
+.app-drawer__plugin {
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+}
+
+.app-drawer__plugin-header {
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+}
+
+.app-drawer__plugin-header .app-drawer__text {
+    -fx-text-fill: -wa-black-60;
+    -fx-font-size: 16px;
+}
+
+.app-drawer__plugin-header__icon {
+    -fx-pref-width: 50px;
+    -fx-pref-height: 50px;
+    -fx-alignment: center;
+}
+
+.app-drawer__plugin-header .ikonli-font-icon {
+    -fx-fill: -wa-black-60;
+    -fx-font-size: 24px;
+}
+
+.app-drawer__plugin .radio-button {
+    -fx-padding: 14px;
+    -fx-background-radius: 6px;
+}
+
+.app-drawer__plugin .radio-button:selected {
+    -fx-background-color: -wa-primary-05;
+}
+
+.app-drawer__plugin .radio-button:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.app-drawer__plugin .radio-button:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.app-drawer__plugin .radio-button .radio {
+    -fx-background-color: -wa-white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 1.0em;
+    -fx-border-color: -wa-gray-darker;
+}
+
+.app-drawer__plugin .radio-button:selected .radio {
+    -fx-border-color: -wa-primary;
+}
+
+.app-drawer__plugin .radio-button:selected .radio .dot {
+    -fx-background-color: -wa-primary;
+    -fx-background-insets: -1, 0;
 }

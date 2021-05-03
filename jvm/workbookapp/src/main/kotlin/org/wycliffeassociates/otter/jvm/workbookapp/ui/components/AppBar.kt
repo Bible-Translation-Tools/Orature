@@ -11,9 +11,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerE
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.InfoView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.SettingsView
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
 class AppBar : Fragment() {
+
+    private val rootViewModel: RootViewModel by inject()
 
     override val root = VBox()
 
@@ -66,6 +69,8 @@ class AppBar : Fragment() {
 
         root.apply {
             styleClass.setAll("app-bar")
+
+            disableProperty().bind(rootViewModel.pluginOpenedProperty)
 
             label {
                 addClass("app-bar__logo")
