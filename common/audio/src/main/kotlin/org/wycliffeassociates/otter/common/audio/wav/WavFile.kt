@@ -8,6 +8,7 @@ import java.io.IOException
 import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import org.slf4j.LoggerFactory
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
@@ -33,6 +34,8 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
  * Wraps a file for the purposes of reading wav header metadata
  */
 class WavFile private constructor() {
+
+    val logger = LoggerFactory.getLogger(WavFile::class.java)
 
     internal lateinit var file: File
         private set
@@ -184,7 +187,12 @@ class WavFile private constructor() {
                 it.skip(metadataStart.toLong())
                 it.read(bytes)
             }
-            metadata.parseMetadata(ByteBuffer.wrap(bytes))
+            try {
+                metadata.parseMetadata(ByteBuffer.wrap(bytes))
+            } catch (e: Exception) {
+                logger.error("Error parsing metadata for file: ${file.name}")
+                throw e
+            }
         }
     }
 
