@@ -20,10 +20,22 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import tornadofx.*
+import java.text.MessageFormat
 
 class RecordResourceViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordResourceViewModel::class.java)
+
+    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
+    val breadcrumbTitleBinding = currentTakeNumberProperty.stringBinding {
+        it?.let { take ->
+            MessageFormat.format(
+                messages["takeTitle"],
+                messages["take"],
+                take
+            )
+        } ?: messages["take"]
+    }
 
     private enum class StepDirection {
         FORWARD,

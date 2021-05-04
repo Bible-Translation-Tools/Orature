@@ -47,7 +47,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val activeProjectFilesAccessorProperty = SimpleObjectProperty<ProjectFilesAccessor>()
     val activeProjectFilesAccessor: ProjectFilesAccessor
         get() = activeProjectFilesAccessorProperty.value
-            ?: throw IllegalStateException("Project files is null")
+            ?: throw IllegalStateException("ProjectFilesAccessor is null")
 
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }

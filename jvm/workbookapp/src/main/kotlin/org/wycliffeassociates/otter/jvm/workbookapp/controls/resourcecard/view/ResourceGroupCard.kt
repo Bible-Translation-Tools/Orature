@@ -5,11 +5,13 @@ import javafx.beans.property.BooleanProperty
 import javafx.scene.layout.VBox
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
 
 class ResourceGroupCard(
     group: ResourceGroupCardItem,
-    filterCompletedCardsProperty: BooleanProperty
+    filterCompletedCardsProperty: BooleanProperty,
+    navigator: NavigationMediator
 ) : VBox() {
 
     private val logger = LoggerFactory.getLogger(ResourceGroupCard::class.java)
@@ -33,7 +35,7 @@ class ResourceGroupCard(
                 Platform.runLater {
                     items.forEach {
                         add(
-                            resourceCardFragment(it, filterCompletedCardsProperty).root
+                            resourceCardFragment(it, filterCompletedCardsProperty, navigator).root
                         )
                     }
                 }
@@ -44,9 +46,10 @@ class ResourceGroupCard(
 fun resourcegroupcard(
     group: ResourceGroupCardItem,
     filterCompletedCardsProperty: BooleanProperty,
+    navigator: NavigationMediator,
     init: ResourceGroupCard.() -> Unit = {}
 ): ResourceGroupCard {
-    val rgc = ResourceGroupCard(group, filterCompletedCardsProperty)
+    val rgc = ResourceGroupCard(group, filterCompletedCardsProperty, navigator)
     rgc.init()
     return rgc
 }

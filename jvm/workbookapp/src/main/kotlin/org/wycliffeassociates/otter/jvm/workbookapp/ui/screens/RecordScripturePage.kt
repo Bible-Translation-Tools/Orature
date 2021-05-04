@@ -20,8 +20,11 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.RowConstraints
 import javafx.scene.layout.VBox
 import javafx.util.Duration
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
@@ -35,6 +38,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardSt
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
@@ -49,6 +53,7 @@ class RecordScriptureFragment : Fragment() {
 
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val navigator: NavigationMediator by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
@@ -96,6 +101,14 @@ class RecordScriptureFragment : Fragment() {
 
             contentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
         }
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(recordScriptureViewModel.breadcrumbTitleBinding)
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+        onClickAction {
+            navigator.dock(this@RecordScriptureFragment)
+        }
+    }
 
     override val root: Parent = anchorpane {
         addButtonEventHandlers()
@@ -314,5 +327,7 @@ class RecordScriptureFragment : Fragment() {
     override fun onDock() {
         super.onDock()
         recordableViewModel.openPlayers()
+        recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.set(null)
+        navigator.dock(this, breadCrumb)
     }
 }

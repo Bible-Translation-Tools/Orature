@@ -112,6 +112,18 @@ class VerseMarkerViewModel : ViewModel() {
         return markers.writeMarkers()
     }
 
+    fun saveAndQuit() {
+        (scope as ParameterizedScope).let {
+            writeMarkers()
+                .doOnError { e ->
+                    logger.error("Error in closing the maker app", e)
+                }
+                .subscribe {
+                    it.navigateBack()
+                }
+        }
+    }
+
     fun placeMarker() {
         markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
     }

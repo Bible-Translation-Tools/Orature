@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="root" styleClass="app-bar-button-container" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <Label fx:id="btnIcon" styleClass="app-bar-button__icon" />
+        <Label fx:id="btnLabel" styleClass="app-bar-button__title" />
+    </children>
+</VBox>
