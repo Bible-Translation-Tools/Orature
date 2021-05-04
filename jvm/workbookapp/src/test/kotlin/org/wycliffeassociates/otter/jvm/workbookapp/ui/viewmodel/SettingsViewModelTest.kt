@@ -1,8 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
-import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -35,7 +32,6 @@ class SettingsViewModelTest : ViewModel() {
         listOf(),
         null
     )
-    private val audioPlugins = listOf(recorder, editor)
 
     init {
         FX.setApplication(FX.defaultScope, testApp)
@@ -54,18 +50,5 @@ class SettingsViewModelTest : ViewModel() {
         settingsViewModel.selectEditor(editor)
 
         Assert.assertEquals(editor, settingsViewModel.selectedEditorProperty.value)
-    }
-
-    @Test
-    fun refreshPlugins_setsRecordersList() {
-        val spiedSettingsViewModel = spy(settingsViewModel)
-        val spiedPluginRepository = spy(spiedSettingsViewModel.pluginRepository)
-
-        whenever(spiedPluginRepository.getAll()).thenReturn(Single.just(audioPlugins))
-        whenever(spiedSettingsViewModel.pluginRepository).thenReturn(spiedPluginRepository)
-
-        spiedSettingsViewModel.refreshPlugins()
-
-        Assert.assertEquals(2, spiedSettingsViewModel.audioPlugins.size)
     }
 }
