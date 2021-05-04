@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.binding.ListBinding
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -22,14 +24,19 @@ class SettingsViewModel : ViewModel() {
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
+    val editorPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
+    val recorderPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
 
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val allAudioPluginsProperty = SimpleListProperty<AudioPluginData>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        allAudioPluginsProperty.bind(allAudioPluginsBinding())
 
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
@@ -40,10 +47,9 @@ class SettingsViewModel : ViewModel() {
         pluginRepository
             .getAll()
             .observeOnFx()
-            .doOnSuccess { plugins ->
-                audioPlugins.setAll(
-                    plugins.filter { it.canEdit || it.canRecord }
-                )
+            .doOnSuccess { pluginData ->
+                editorPlugins.setAll(pluginData.filter { it.canEdit })
+                recorderPlugins.setAll(pluginData.filter { it.canRecord })
             }
             .observeOn(Schedulers.io())
             .flatMapMaybe {
@@ -81,5 +87,20 @@ class SettingsViewModel : ViewModel() {
     fun selectRecorder(recorderData: AudioPluginData) {
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
+    }
+
+    private fun allAudioPluginsBinding() : ListBinding<AudioPluginData> {
+        return object : ListBinding<AudioPluginData>() {
+
+            init {
+                bind(recorderPlugins, editorPlugins)
+            }
+
+            override fun computeValue(): ObservableList<AudioPluginData> {
+                return FXCollections.concat(recorderPlugins, editorPlugins)
+                    .distinctBy { it.name }
+                    .asObservable()
+            }
+        }
     }
 }
