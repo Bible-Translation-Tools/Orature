@@ -5,14 +5,10 @@ import io.reactivex.schedulers.Schedulers
 import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
-import javafx.scene.control.Dialog
-import javafx.scene.paint.Color
-import javafx.stage.Modality
-import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.jvm.controls.dialog.exceptionDialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import tornadofx.*
@@ -22,7 +18,7 @@ import java.io.PrintWriter
 import java.util.*
 
 class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.UncaughtExceptionHandler {
-    val log = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
+    val logger = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
         internal var consumed = false
@@ -42,10 +38,10 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     override fun uncaughtException(t: Thread, error: Throwable) {
-        log.error("Uncaught error", error)
+        logger.error("Uncaught error", error)
 
         if (isCycle(error)) {
-            log.info("Detected cycle handling error, aborting.", error)
+            logger.info("Detected cycle handling error, aborting.", error)
         } else {
             val event = ErrorEvent(t, error)
             filter(event)
@@ -64,45 +60,32 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     private fun showErrorDialog(error: Throwable) {
-        Dialog<Unit>().apply {
-            dialogPane.content = exceptionDialog {
-                titleTextProperty().set(FX.messages["needsRestart"])
-                headerTextProperty().set(FX.messages["yourWorkSaved"])
-                showMoreTextProperty().set(FX.messages["showMore"])
-                showLessTextProperty().set(FX.messages["showLess"])
-                sendReportTextProperty().set(FX.messages["sendErrorReport"])
-                stackTraceProperty().set(stringFromError(error))
-                closeTextProperty().set(FX.messages["closeApp"])
-                onCloseAction {
-                    if (sendReportProperty().get()) {
-                        sendReport(error)
-                            .doOnSubscribe { sendingReportProperty().set(true) }
-                            .doOnComplete {
-                                sendingReportProperty().set(false)
-                                Platform.exit()
-                            }
-                            .subscribeOn(Schedulers.computation())
-                            .doOnError { e -> log.error("Error in showErrorDialog", e) }
-                            .subscribe()
-                    } else {
-                        Platform.exit()
-                    }
+        ExceptionDialog().apply {
+            titleTextProperty.set(FX.messages["needsRestart"])
+            headerTextProperty.set(FX.messages["yourWorkSaved"])
+            showMoreTextProperty.set(FX.messages["showMore"])
+            showLessTextProperty.set(FX.messages["showLess"])
+            sendReportTextProperty.set(FX.messages["sendErrorReport"])
+            stackTraceProperty.set(stringFromError(error))
+            closeTextProperty.set(FX.messages["closeApp"])
+
+            onCloseAction {
+                if (sendReportProperty.value) {
+                    sendReport(error)
+                        .doOnSubscribe { sendingReportProperty.set(true) }
+                        .doOnComplete {
+                            sendingReportProperty.set(false)
+                            Platform.exit()
+                        }
+                        .subscribeOn(Schedulers.computation())
+                        .doOnError { e -> logger.error("Error in showErrorDialog", e) }
+                        .subscribe()
+                } else {
+                    Platform.exit()
                 }
             }
 
-            dialogPane.stylesheets.addAll(
-                listOf(
-                    javaClass.getResource("/css/root.css").toExternalForm(),
-                    javaClass.getResource("/css/button.css").toExternalForm(),
-                    javaClass.getResource("/css/exception-dialog.css").toExternalForm()
-                )
-            )
-
-            initModality(Modality.APPLICATION_MODAL)
-            initStyle(StageStyle.TRANSPARENT)
-            dialogPane.scene.fill = Color.TRANSPARENT
-
-            show()
+            open()
         }
     }
 

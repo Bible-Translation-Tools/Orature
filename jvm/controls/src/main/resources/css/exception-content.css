@@ -1,0 +1,56 @@
+/* Dialog style */
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 0;
+}
+
+.dialog-pane > .content {
+    -fx-padding: 0;
+}
+
+/* Exception dialog style */
+.exception-content {
+    -fx-background-color: -wa-white;
+}
+
+.exception-content__send-report {
+    -fx-cursor: hand;
+    -jfx-checked-color: -wa-primary;
+}
+
+.exception-content__stacktrace-container {
+    -fx-background-color: -wa-primary-light;
+    -fx-background-radius: 10px;
+}
+
+.exception-content__stacktrace-container__sub {
+    -fx-background-color: -wa-primary-light;
+}
+
+/* Scrollbar style */
+.exception-content__stacktrace-container .scroll-bar {
+    -fx-background-color: -wa-transparent;
+}
+
+.exception-content__stacktrace-container .scroll-bar .track {
+    -fx-background-color: -wa-transparent;
+	-fx-border-color: -wa-transparent;
+}
+
+.exception-content__stacktrace-container .scroll-bar .increment-button,
+.exception-content__stacktrace-container .scroll-bar .decrement-button {
+    -fx-background-color: -wa-transparent;
+	-fx-border-color: -wa-transparent;
+	-fx-padding: 0;
+}
+
+.exception-content__stacktrace-container .scroll-bar .increment-arrow,
+.exception-content__stacktrace-container .scroll-bar .decrement-arrow {
+	-fx-background-color: -wa-transparent;
+	-fx-padding: 0 5;
+}
+
+.exception-content__stacktrace-container .scroll-bar .thumb {
+    -fx-background-color: -wa-gray;
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 10px;
+}
