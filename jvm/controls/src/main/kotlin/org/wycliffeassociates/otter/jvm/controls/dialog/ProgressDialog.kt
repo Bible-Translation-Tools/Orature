@@ -6,12 +6,10 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.VBox
-import javafx.stage.Modality
-import javafx.stage.StageStyle
 import org.slf4j.LoggerFactory
 import tornadofx.*
 
-class ProgressDialog : Fragment() {
+class ProgressDialog : OtterDialog() {
 
     private val logger = LoggerFactory.getLogger(ProgressDialog::class.java)
 
@@ -21,11 +19,7 @@ class ProgressDialog : Fragment() {
     val textProperty = SimpleStringProperty()
     var text by textProperty
 
-    init {
-        importStylesheet(resources.get("/css/progress-dialog.css"))
-    }
-
-    override val root = borderpane {
+    private val content = borderpane {
         addClass("progress-dialog")
         center {
             stackpane {
@@ -56,8 +50,9 @@ class ProgressDialog : Fragment() {
         }
     }
 
-    fun open() {
-        openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL)
+    init {
+        importStylesheet(resources.get("/css/progress-dialog.css"))
+        setContent(content)
     }
 }
 
