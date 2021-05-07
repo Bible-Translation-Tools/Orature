@@ -6,7 +6,7 @@
 /* -------------- Button Base -------------- */
 /* This controls all of the common variables found in each button type */
 .btn {
-    -fx-pref-height: 40px;
+    -fx-pref-height: 48px;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
     -fx-border-style: solid;
@@ -29,7 +29,6 @@
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary-dark;
     -fx-underline: true;
-    -fx-pref-height: 48px;
     -fx-font-size: 20px;
 }
 
@@ -95,19 +94,38 @@
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
     -fx-text-fill: -wa-primary;
-    -fx-icon-color: -wa-primary;
+    -fx-font-size: 20px;
+    -fx-underline: true;
+    -jfx-disable-visual-focus: true;
+}
+.btn--secondary .ikonli-font-icon {
+    -fx-font-size: 20px;
+    -fx-fill: -wa-primary;
 }
 .btn--secondary:hover {
-    -fx-background-color: -wa-primary-light;
+    -fx-background-color: -wa-primary-05;
+    -fx-border-color: -wa-primary-dark;
     -fx-text-fill: -wa-primary-dark;
-    -fx-icon-color: -wa-primary-dark;
+    -fx-underline: false;
+}
+.btn--secondary:hover .ikonli-font-icon {
+    -fx-fill: -wa-primary-dark;
+}
+.btn--secondary:pressed {
+    -fx-background-color: -wa-primary-10;
+    -fx-border-color: -wa-primary-dark;
+    -fx-text-fill: -wa-primary-dark;
+    -fx-underline: false;
+}
+.btn--secondary:pressed .ikonli-font-icon {
+    -fx-fill: -wa-primary-dark;
 }
 .btn--secondary:disabled {
     -fx-cursor: disappear;
     -fx-text-fill: -wa-gray;
-    -fx-icon-color: -wa-gray;
     -fx-border-color: -wa-gray-light;
     -fx-border-width: 2px;
+    -fx-underline: false;
 }
 
 /* -------------- Tertiary Button -------------- */
@@ -130,5 +148,54 @@
     -fx-icon-color: -wa-gray;
     -fx-border-width: 0px;
     -fx-background-color: transparent;
+}
+
+/* -------------- Text Input ---------------- */
+.txt-input {
+    -fx-pref-height: 48px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-gray-light;
+    -fx-border-radius: 6px;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 8px;
+    -fx-font-size: 20px;
+}
+.txt-input:hover {
+    -fx-background-color: -wa-black-10;
+}
+.txt-input:focused:hover {
+    -fx-background-color: -wa-white;
+}
+.txt-input:focused {
+    -fx-border-color: -wa-primary;
+    -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
+}
+.txt-input:disabled {
+    -fx-border-width: 0px;
+    -fx-background-color: -wa-black-20;
+}
+.txt-input--success {
+    -fx-border-color: -wa-green;
+    -fx-background-color: -wa-green-05-noalpha;
+    -fx-text-fill: -wa-green;
+}
+.txt-input--success:hover {
+    -fx-background-color: -wa-green-10-noalpha;
+}
+.txt-input--success:focused {
+    -fx-border-color: -wa-green;
+    -fx-effect: dropshadow(gaussian, -wa-green, 10, 0, 0, 0);
+}
+.txt-input--error {
+    -fx-border-color: -wa-red;
+    -fx-background-color: -wa-red-05-noalpha;
+    -fx-text-fill: -wa-red;
+}
+.txt-input--error:hover {
+    -fx-background-color: -wa-red-10-noalpha;
+}
+.txt-input--error:focused {
+    -fx-border-color: -wa-red;
+    -fx-effect: dropshadow(gaussian, -wa-red, 10, 0, 0, 0);
 }
 
