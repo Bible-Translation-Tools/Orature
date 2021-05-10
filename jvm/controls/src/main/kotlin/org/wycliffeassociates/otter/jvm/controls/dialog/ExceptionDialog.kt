@@ -1,85 +1,45 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.event.EventTarget
-import javafx.scene.control.Control
-import javafx.scene.control.Skin
-import org.wycliffeassociates.otter.jvm.controls.skins.ExceptionDialogSkin
+import org.wycliffeassociates.otter.jvm.controls.media.ExceptionContent
 
-class ExceptionDialog : Control() {
+class ExceptionDialog : OtterDialog() {
 
-    private val titleTextProperty = SimpleStringProperty()
-    private val headerTextProperty = SimpleStringProperty()
-    private val showMoreTextProperty = SimpleStringProperty()
-    private val showLessTextProperty = SimpleStringProperty()
-    private val showMoreProperty = SimpleBooleanProperty()
-    private val sendReportTextProperty = SimpleStringProperty()
-    private val sendReportProperty = SimpleBooleanProperty()
-    private val stackTraceProperty = SimpleStringProperty()
+    val titleTextProperty = SimpleStringProperty()
+    val headerTextProperty = SimpleStringProperty()
+    val showMoreTextProperty = SimpleStringProperty()
+    val showLessTextProperty = SimpleStringProperty()
+    val sendReportTextProperty = SimpleStringProperty()
+    val sendReportProperty = SimpleBooleanProperty()
+    val stackTraceProperty = SimpleStringProperty()
+    val closeTextProperty = SimpleStringProperty()
+    val sendingReportProperty = SimpleBooleanProperty()
+
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    private val closeTextProperty = SimpleStringProperty()
-    private val sendingReportProperty = SimpleBooleanProperty()
 
-    fun titleTextProperty(): StringProperty {
-        return titleTextProperty
+    private val exceptionContent = ExceptionContent().apply {
+        titleTextProperty().bind(titleTextProperty)
+        headerTextProperty().bind(headerTextProperty)
+        showMoreTextProperty().bind(showMoreTextProperty)
+        showLessTextProperty().bind(showLessTextProperty)
+        sendReportTextProperty().bind(sendReportTextProperty)
+        sendingReportProperty().bind(sendingReportProperty)
+        stackTraceProperty().bind(stackTraceProperty)
+        closeTextProperty().bind(closeTextProperty)
+        onCloseActionProperty().bind(onCloseActionProperty)
+
+        sendReportProperty.bind(sendReportProperty())
     }
 
-    fun headerTextProperty(): StringProperty {
-        return headerTextProperty
-    }
-
-    fun showMoreTextProperty(): StringProperty {
-        return showMoreTextProperty
-    }
-
-    fun showLessTextProperty(): StringProperty {
-        return showLessTextProperty
-    }
-
-    fun showMoreProperty(): BooleanProperty {
-        return showMoreProperty
-    }
-
-    fun sendReportTextProperty(): StringProperty {
-        return sendReportTextProperty
-    }
-
-    fun sendReportProperty(): BooleanProperty {
-        return sendReportProperty
-    }
-
-    fun stackTraceProperty(): StringProperty {
-        return stackTraceProperty
-    }
-
-    fun closeTextProperty(): StringProperty {
-        return closeTextProperty
+    init {
+        setContent(exceptionContent)
     }
 
     fun onCloseAction(op: () -> Unit) {
         onCloseActionProperty.set(EventHandler { op.invoke() })
     }
-
-    fun onCloseActionProperty(): ObjectProperty<EventHandler<ActionEvent>> {
-        return onCloseActionProperty
-    }
-
-    fun sendingReportProperty(): BooleanProperty {
-        return sendingReportProperty
-    }
-
-    override fun createDefaultSkin(): Skin<*> {
-        return ExceptionDialogSkin(this)
-    }
 }
-
-fun EventTarget.exceptionDialog(
-    op: ExceptionDialog.() -> Unit = {}
-) = ExceptionDialog().apply(op)

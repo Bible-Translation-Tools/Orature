@@ -21,15 +21,14 @@ import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import javafx.stage.Modality
-import javafx.stage.StageStyle
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 
-class ConfirmDialog : Fragment() {
+class ConfirmDialog : OtterDialog() {
 
     val titleTextProperty = SimpleStringProperty()
     val messageTextProperty = SimpleStringProperty()
@@ -41,11 +40,7 @@ class ConfirmDialog : Fragment() {
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onConfirmActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    init {
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
-    }
-
-    override val root = vbox {
+    private val content = vbox {
         addClass("confirm-dialog")
 
         stackpane {
@@ -116,8 +111,9 @@ class ConfirmDialog : Fragment() {
         }
     }
 
-    fun open() {
-        openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
+    init {
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        setContent(content)
     }
 
     private fun backgroundBinding(): ObjectBinding<Background?> {
