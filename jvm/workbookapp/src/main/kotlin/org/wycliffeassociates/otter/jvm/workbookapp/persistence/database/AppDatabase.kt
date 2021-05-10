@@ -53,7 +53,7 @@ class AppDatabase(
             .bufferedReader()
             .readText()
             .split(";")
-            .filter { it.isNotEmpty() }
+            .filter { it.isNotBlank() }
             .map { "$it;" }
 
         // Execute each SQL statement
