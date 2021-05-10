@@ -1,0 +1,64 @@
+.add-plugin-dialog {
+    -fx-background-color: -wa-white;
+    -fx-pref-width: 600px;
+    -fx-padding: 15px;
+    -fx-spacing: 20px;
+}
+
+.add-plugin-dialog__header {
+    -fx-alignment: center;
+}
+
+.add-plugin-dialog__title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-primary;
+}
+
+.add-plugin-dialog__btn--close {
+    -fx-background-color: -wa-white;
+    -fx-border-color: -wa-gray;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -jfx-disable-visual-focus: true;
+}
+
+.add-plugin-dialog__btn--close:hover {
+    -fx-background-color: -wa-gray-lighter;
+}
+
+.add-plugin-dialog__btn--close .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-fill: -wa-gray;
+}
+
+.add-plugin-dialog__btn--close:hover .ikonli-font-icon {
+    -fx-fill: -wa-gray-dark;
+}
+
+.add-plugin-dialog__subtitle {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.add-plugin-dialog__text {
+    -fx-font-size: 18px;
+}
+
+.add-plugin-dialog__inputs {
+    -fx-spacing: 10px;
+}
+
+.add-plugin-dialog__label {
+    -fx-font-weight: bold;
+}
+
+.add-plugin-dialog__bottom-controls {
+    -fx-spacing: 10px;
+}
+
+.add-plugin-dialog__checkboxes {
+    -fx-spacing: 15px;
+}

@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.controls.skins
+package org.wycliffeassociates.otter.jvm.controls.skins.media
 
 import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
@@ -10,9 +10,10 @@ import javafx.scene.control.Label
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
+import org.wycliffeassociates.otter.jvm.controls.media.ExceptionContent
+import tornadofx.*
 
-class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<ExceptionDialog>(dialog) {
+class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<ExceptionContent>(content) {
 
     @FXML
     private lateinit var titleLabel: Label
@@ -44,27 +45,29 @@ class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<Except
         bindAction()
 
         stacktraceScrollPane.apply {
-            visibleProperty().bind(dialog.showMoreProperty())
-            managedProperty().bind(dialog.showMoreProperty())
+            visibleProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
+            managedProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
         }
+
+        importStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())
     }
 
     private fun bindText() {
-        titleLabel.textProperty().bind(dialog.titleTextProperty())
-        headerLabel.textProperty().bind(dialog.headerTextProperty())
+        titleLabel.textProperty().bind(content.titleTextProperty())
+        headerLabel.textProperty().bind(content.headerTextProperty())
         sendReportCheckbox.apply {
-            textProperty().bind(dialog.sendReportTextProperty())
-            dialog.sendReportProperty().bind(selectedProperty())
+            textProperty().bind(content.sendReportTextProperty())
+            content.sendReportProperty().bind(selectedProperty())
         }
-        stacktraceText.textProperty().bind(dialog.stackTraceProperty())
+        stacktraceText.textProperty().bind(content.stackTraceProperty())
         showMoreButton.apply {
             textProperty().bind(
-                Bindings.`when`(dialog.showMoreProperty())
-                    .then(dialog.showLessTextProperty())
-                    .otherwise(dialog.showMoreTextProperty())
+                Bindings.`when`(content.showMoreProperty())
+                    .then(content.showLessTextProperty())
+                    .otherwise(content.showMoreTextProperty())
             )
             graphicProperty().bind(
-                Bindings.`when`(dialog.showMoreProperty())
+                Bindings.`when`(content.showMoreProperty())
                     .then(showLessIcon)
                     .otherwise(showMoreIcon)
             )
@@ -76,19 +79,18 @@ class ExceptionDialogSkin(private var dialog: ExceptionDialog) : SkinBase<Except
             showMore()
         }
         closeButton.apply {
-            onActionProperty().bind(dialog.onCloseActionProperty())
-            textProperty().bind(dialog.closeTextProperty())
-            disableProperty().bind(dialog.sendingReportProperty())
+            onActionProperty().bind(content.onCloseActionProperty())
+            textProperty().bind(content.closeTextProperty())
+            disableProperty().bind(content.sendingReportProperty())
         }
     }
 
     private fun showMore() {
-        dialog.showMoreProperty().set(!dialog.showMoreProperty().get())
-        dialog.scene.window.sizeToScene()
+        content.showMoreProperty().set(!content.showMoreProperty().get())
     }
 
     private fun loadFXML() {
-        val loader = FXMLLoader(javaClass.getResource("ExceptionDialog.fxml"))
+        val loader = FXMLLoader(javaClass.getResource("ExceptionContent.fxml"))
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
