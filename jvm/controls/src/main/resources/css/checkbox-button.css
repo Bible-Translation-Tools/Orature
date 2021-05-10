@@ -1,0 +1,72 @@
+.checkbox-button-container {
+    -fx-alignment: center;
+    -fx-padding: 10px;
+    -fx-spacing: 10px;
+}
+
+.checkbox-button {
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 6px;
+    -fx-pref-height: 48px;
+    -fx-cursor: hand;
+}
+
+.checkbox-button:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.checkbox-button:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.checkbox-button:selected {
+    -fx-background-color: -wa-primary-10;
+    -fx-text-fill: -wa-primary;
+}
+
+.checkbox-button__title {
+    -fx-text-fill: -wa-black;
+    -fx-underline: true;
+    -fx-font-size: 20px;
+}
+
+.checkbox-button:selected .checkbox-button__title {
+    -fx-text-fill: -wa-primary;
+}
+
+.checkbox-button:selected .checkbox-button__title,
+.checkbox-button:hover .checkbox-button__title,
+.checkbox-button:pressed .checkbox-button__title,
+.checkbox-button:disabled .checkbox-button__title {
+    -fx-underline: false;
+}
+
+.checkbox-button__icon .ikonli-font-icon {
+    -fx-icon-color: -wa-black;
+    -fx-icon-size: 30px;
+}
+
+.checkbox-button:selected .checkbox-button__icon .ikonli-font-icon {
+    -fx-icon-color: -wa-primary;
+}
+
+.checkbox-button__checkbox {
+    -fx-pref-width: 18px;
+    -fx-pref-height: 18px;
+}
+
+.checkbox-button__checkbox .box {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black;
+    -fx-border-radius: 2px;
+    -fx-background-color: -wa-white;
+}
+
+.checkbox-button:selected .checkbox-button__checkbox .box {
+    -fx-border-color: -wa-primary;
+    -fx-background-color: -wa-primary;
+}
+
+.checkbox-button:selected .checkbox-button__checkbox .mark {
+    -fx-background-color: -wa-white;
+}

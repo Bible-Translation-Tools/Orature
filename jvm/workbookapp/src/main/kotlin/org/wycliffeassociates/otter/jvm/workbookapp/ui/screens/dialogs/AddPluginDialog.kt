@@ -1,90 +1,120 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
-import com.jfoenix.controls.JFXButton
-import com.jfoenix.controls.JFXCheckBox
-import com.jfoenix.controls.JFXTextField
-import javafx.geometry.Pos
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.button.CheckboxButton
+import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.AddPluginStyles
 import tornadofx.*
 
-class AddPluginDialog : View() {
-    private var nameField: JFXTextField by singleAssign()
-    private var executableField: JFXTextField by singleAssign()
-    private var canEditBox: JFXCheckBox by singleAssign()
-    private var canRecordBox: JFXCheckBox by singleAssign()
-    init {
-        title = messages["addPlugin"]
-        importStylesheet<AddPluginStyles>()
-    }
+class AddPluginDialog : OtterDialog() {
 
     private val viewModel: AddPluginViewModel by inject()
 
-    override val root = form {
-        fieldset {
-            field {
-                nameField = JFXTextField().apply {
-                    isLabelFloat = true
-                    promptText = messages["name"]
-                    bind(viewModel.nameProperty)
-                    validator { viewModel.validateName() }
-                }
-                add(nameField)
+    private val content = VBox().apply {
+        addClass("add-plugin-dialog")
+        hbox {
+            addClass("add-plugin-dialog__header")
+            label(messages["addApp"]).apply {
+                addClass("add-plugin-dialog__title")
             }
-            field {
-                executableField = JFXTextField().apply {
-                    isLabelFloat = true
-                    promptText = messages["executable"]
-                    bind(viewModel.pathProperty)
-                    validator { viewModel.validatePath() }
+            region { hgrow = Priority.ALWAYS }
+            button {
+                addClass("add-plugin-dialog__btn--close")
+                graphic = FontIcon("gmi-close")
+                action { close() }
+            }
+        }
+        vbox {
+            addClass("add-plugin-dialog__info")
+            label(messages["thirdPartySupport"]) {
+                addClass("add-plugin-dialog__subtitle")
+            }
+            label(messages["addAppDescription"]) {
+                addClass("add-plugin-dialog__text")
+            }
+        }
+        vbox {
+            addClass("add-plugin-dialog__inputs")
+            label(messages["applicationName"]) {
+                addClass("add-plugin-dialog__label")
+            }
+            textfield {
+                addClass("txt-input")
+                promptTextProperty().set(messages["applicationNamePrompt"])
+                viewModel.nameProperty.bindBidirectional(textProperty())
+            }
+            label(messages["filePath"]) {
+                addClass("add-plugin-dialog__label")
+            }
+            hbox {
+                addClass("add-plugin-dialog__bottom-controls")
+                textfield {
+                    addClass("txt-input")
+                    hgrow = Priority.ALWAYS
+                    textProperty().bind(viewModel.pathProperty)
                 }
-                add(executableField)
-                add(JFXButton(messages["browse"].toUpperCase()).apply {
-                    addClass(AddPluginStyles.browseButton)
+                button(messages["browse"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                     action {
                         val files = chooseFile(
-                                messages["chooseExecutable"],
-                                arrayOf(),
-                                mode = FileChooserMode.Single
+                            messages["chooseExecutable"],
+                            arrayOf(),
+                            mode = FileChooserMode.Single
                         )
                         if (files.isNotEmpty()) {
-                            viewModel.path = files.single().toString()
+                            viewModel.pathProperty.set(files.single().toString())
                         }
                     }
-                })
-            }
-            field {
-                canEditBox = JFXCheckBox(messages["canRecord"])
-                        .apply { selectedProperty().bindBidirectional(viewModel.canRecordProperty) }
-                add(canEditBox)
-                canRecordBox = JFXCheckBox(messages["canEdit"])
-                        .apply { selectedProperty().bindBidirectional(viewModel.canEditProperty) }
-                add(canRecordBox)
+                }
             }
         }
         hbox {
-            alignment = Pos.TOP_RIGHT
-            add(JFXButton(messages["save"].toUpperCase()).apply {
-                addClass(AddPluginStyles.saveButton)
-                action {
-                    viewModel.save()
-                    close()
+            addClass("add-plugin-dialog__checkboxes")
+            add(
+                CheckboxButton().apply {
+                    hgrow = Priority.ALWAYS
+
+                    graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                    text = messages["canRecord"]
+                    viewModel.canRecordProperty.bindBidirectional(selectedProperty())
                 }
-                enableWhen { viewModel.validated() }
-            })
+            )
+            add(
+                CheckboxButton().apply {
+                    hgrow = Priority.ALWAYS
+
+                    graphic = FontIcon(MaterialDesign.MDI_PENCIL)
+                    text = messages["canEdit"]
+                    viewModel.canEditProperty.bindBidirectional(selectedProperty())
+                }
+            )
+        }
+        button(messages["addApp"]) {
+            addClass("btn", "btn--primary")
+            graphic = FontIcon(MaterialDesign.MDI_PLUS)
+            disableProperty().bind(viewModel.validProperty.not())
+
+            action {
+                viewModel.save()
+                close()
+            }
         }
     }
 
-    override fun onDock() {
-        super.onDock()
-        nameField.requestFocus()
+    init {
+        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        setContent(content)
     }
 
     override fun onUndock() {
         super.onUndock()
-        canEditBox.isSelected = false
-        canRecordBox.isSelected = false
-        nameField.text = ""
-        executableField.text = ""
+        viewModel.nameProperty.set("")
+        viewModel.pathProperty.set("")
+        viewModel.canEditProperty.set(false)
+        viewModel.canRecordProperty.set(false)
     }
 }

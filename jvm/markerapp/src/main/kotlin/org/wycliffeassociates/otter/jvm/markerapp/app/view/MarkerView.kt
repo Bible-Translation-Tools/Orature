@@ -25,7 +25,7 @@ class MarkerView : PluginEntrypoint() {
             importStylesheet(css)
 
             FX.stylesheets.addAll(
-                javaClass.getResource("/css/button.css").toExternalForm(),
+                javaClass.getResource("/css/control.css").toExternalForm(),
                 css
             )
         }

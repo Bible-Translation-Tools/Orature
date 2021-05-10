@@ -13,6 +13,8 @@ import tornadofx.*
 class SettingsView : View() {
     private val viewModel: SettingsViewModel by inject()
 
+    private val addPluginDialog: AddPluginDialog = find()
+
     override val root = vbox {
         addClass("app-drawer__content")
 
@@ -113,9 +115,7 @@ class SettingsView : View() {
                         addClass("app-drawer__text--link")
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
                         setOnMouseClicked {
-                            find<AddPluginDialog>().apply {
-                                openModal()
-                            }
+                            addPluginDialog.open()
                         }
                     }
                 }
