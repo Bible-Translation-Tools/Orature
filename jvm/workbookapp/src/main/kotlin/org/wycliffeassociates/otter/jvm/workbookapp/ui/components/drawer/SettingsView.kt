@@ -75,7 +75,7 @@ class SettingsView : View() {
                         val recorderToggleGroup = ToggleGroup()
                         val editorToggleGroup = ToggleGroup()
 
-                        bindChildren(viewModel.allAudioPluginsProperty) { pluginData ->
+                        bindChildren(viewModel.audioPlugins) { pluginData ->
                             hbox {
                                 addClass("app-drawer__plugin")
 
