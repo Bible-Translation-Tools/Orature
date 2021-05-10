@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import java.lang.String?>
+<?import javafx.scene.layout.Region?>
+<HBox fx:id="root" styleClass="book-card__root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <StackPane>
+            <children>
+                <HBox fx:id="bookCardPlaceholder" styleClass="book-card__placeholder">
+                    <children>
+                        <Label styleClass="book-card__placeholder-icon">
+                            <graphic>
+                                <FontIcon iconLiteral="mdi-book" />
+                            </graphic>
+                        </Label>
+                    </children>
+                </HBox>
+                <Region fx:id="coverArt" styleClass="book-card__image" />
+            </children>
+            <VBox.margin>
+                <Insets bottom="8.0" left="8.0" right="8.0" top="8.0" />
+            </VBox.margin>
+        </StackPane>
+        <StackPane>
+            <children>
+                <VBox fx:id="bookCardInfo" styleClass="book-card__info">
+                    <children>
+                        <Label fx:id="title" styleClass="book-card__title" />
+                        <Label fx:id="projectType" styleClass="book-card__type" />
+                    </children>
+                </VBox>
+                <Button fx:id="addBookBtn">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-plus" />
+                    </graphic>
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn--secondary" />
+                    </styleClass>
+                </Button>
+            </children>
+        </StackPane>
+    </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</HBox>

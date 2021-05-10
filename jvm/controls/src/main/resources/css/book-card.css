@@ -1,0 +1,36 @@
+.book-card__root {
+    -fx-spacing: 20px;
+    -fx-cursor: hand;
+}
+
+.book-card__placeholder {
+    -fx-pref-width: 160px;
+    -fx-pref-height: 80px;
+    -fx-alignment: center;
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 10px;
+}
+
+.book-card__placeholder .label .ikonli-font-icon {
+    -fx-font-size: 22px;
+    -fx-fill: -wa-gray-darker;
+}
+
+.book-card__image {
+    -fx-pref-width: 160px;
+    -fx-pref-height: 80px;
+}
+
+.book-card__info {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+}
+
+.book-card__title {
+    -fx-font-weight: bold;
+    -fx-font-size: 20px;
+}
+
+.book-card__type {
+    -fx-font-size: 16px;
+}
