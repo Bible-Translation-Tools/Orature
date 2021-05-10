@@ -8,8 +8,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Observable
 import java.io.File
 import java.time.LocalDate
-import javafx.scene.Parent
-import javafx.scene.layout.Region
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -24,16 +22,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
-
-private class TestView(override val root: Parent = Region()) : Fragment()
-
-private class TestApp : App(TestView::class), IDependencyGraphProvider {
-    override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
-}
 
 class ResourceListViewModelTest : ViewModel() {
 

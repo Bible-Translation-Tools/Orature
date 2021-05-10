@@ -104,10 +104,10 @@ class AudioPluginViewModel : ViewModel() {
     }
 
     fun addPlugin(record: Boolean, edit: Boolean) {
+        find<AddPluginDialog>().open()
         find<AddPluginViewModel>().apply {
-            canRecord = record
-            canEdit = edit
+            canRecordProperty.value = record
+            canEditProperty.value = edit
         }
-        find<AddPluginDialog>().openModal()
     }
 }

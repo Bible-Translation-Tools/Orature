@@ -28,20 +28,35 @@
     -wa-white-40: rgba(255,255,255,0.4);
     -wa-white-50: rgba(255,255,255,0.5);
     -wa-white-60: rgba(255,255,255,0.6);
-    -wa-black-05: rgba(0,0,0,0.05);
-    -wa-black-10: rgba(0,0,0,0.1);
-    -wa-black-20: rgba(0,0,0,0.2);
-    -wa-black-30: rgba(0,0,0,0.3);
-    -wa-black-40: rgba(0,0,0,0.4);
-    -wa-black-50: rgba(0,0,0,0.5);
-    -wa-black-60: rgba(0,0,0,0.6);
+    -wa-black: rgb(0, 21, 51);
+    -wa-black-05: rgba(0, 21, 51,0.05);
+    -wa-black-10: rgba(0, 21, 51,0.1);
+    -wa-black-20: rgba(0, 21, 51,0.2);
+    -wa-black-30: rgba(0, 21, 51,0.3);
+    -wa-black-40: rgba(0, 21, 51,0.4);
+    -wa-black-50: rgba(0, 21, 51,0.5);
+    -wa-black-60: rgba(0, 21, 51,0.6);
     -wa-transparent: rgba(255,255,255,0);
     -wa-background: #F7FAFF;
 
     /* Extra Colors */
-    -wa-green: #1EDD76;    /* this is used as a confirmation or success indicator */
-    -wa-green-dark: #004525;
-    -wa-green-light: rgba(30, 221, 119, 0.3);
+    -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */
+    -wa-green-dark: rgb(0, 69, 37);
+    -wa-green-light: rgb(30, 221, 119);
+    -wa-green-05: rgba(0, 134, 75, 0.05);
+    -wa-green-05-noalpha: rgb(240, 250, 245);
+    -wa-green-10: rgba(0, 134, 75, 0.1);
+    -wa-green-10-noalpha: rgb(226, 242, 232);
+    -wa-green-20: rgba(0, 134, 75, 0.2);
+    -wa-green-30: rgba(0, 134, 75, 0.3);
+
+    -wa-red: rgb(227, 42, 42);    /* this is used as a error indicator */
+    -wa-red-05: rgba(227, 42, 42, 0.05);
+    -wa-red-05-noalpha: rgb(255, 245, 245);
+    -wa-red-10: rgba(227, 42, 42, 0.1);
+    -wa-red-10-noalpha: rgb(255, 232, 232);
+    -wa-red-20: rgba(227, 42, 42, 0.2);
+    -wa-red-30: rgba(227, 42, 42, 0.3);
 
     -wa-purple: #8B00DE;
     -wa-purple-dark: #430193;

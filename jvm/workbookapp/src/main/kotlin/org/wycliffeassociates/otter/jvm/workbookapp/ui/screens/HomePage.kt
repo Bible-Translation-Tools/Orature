@@ -62,7 +62,7 @@ class HomePage : Fragment() {
     override val root = anchorpane {
 
         importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/button.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/control.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/projectcard.css").toExternalForm())
 
         fitToParentSize()
