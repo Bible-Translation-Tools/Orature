@@ -1,0 +1,35 @@
+.translation-card__root {
+    -fx-spacing: 10px;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-pref-width: 800px;
+}
+
+.translation-card__header {
+    -fx-spacing: 15px;
+    -fx-padding: 15px;
+    -fx-alignment: center-left;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -wa-black-20;
+}
+
+.translation-card__language {
+    -fx-font-size: 20px;
+}
+
+.translation-card__language .ikonli-font-icon {
+    -fx-font-size: 24px;
+}
+
+.translation-card__divider .ikonli-font-icon {
+    -fx-font-size: 20px;
+}
+
+.translation-card__books {
+    -fx-background-color: -wa-transparent;
+}
+
+.translation-card__books .list-cell {
+    -fx-background-color: -wa-transparent;
+}

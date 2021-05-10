@@ -23,6 +23,9 @@ import java.io.File
 class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
 
     @FXML
+    lateinit var root: HBox
+
+    @FXML
     lateinit var bookCardPlaceholder: HBox
 
     @FXML
@@ -50,6 +53,7 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
     }
 
     private fun initializeControl() {
+        root.setOnMouseClicked { card.onPrimaryActionProperty.value.invoke() }
         bookCardPlaceholder.apply {
             visibleProperty().bind(
                 card.coverArtProperty.isNull.or(card.newBookProperty)
