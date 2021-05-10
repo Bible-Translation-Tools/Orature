@@ -53,7 +53,7 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
     }
 
     private fun initializeControl() {
-        root.setOnMouseClicked { card.onPrimaryActionProperty.value.invoke() }
+        root.setOnMouseClicked { card.onPrimaryActionProperty.value?.invoke() }
         bookCardPlaceholder.apply {
             visibleProperty().bind(
                 card.coverArtProperty.isNull.or(card.newBookProperty)
