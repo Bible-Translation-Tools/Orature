@@ -127,6 +127,9 @@
     -fx-border-width: 2px;
     -fx-underline: false;
 }
+.btn--borderless {
+    -fx-border-width: 0;
+}
 
 /* -------------- Tertiary Button -------------- */
 /* This button is very rarely used

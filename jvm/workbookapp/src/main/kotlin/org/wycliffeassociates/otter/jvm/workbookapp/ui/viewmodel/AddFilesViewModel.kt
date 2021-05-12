@@ -4,12 +4,17 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
@@ -19,10 +24,12 @@ class AddFilesViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(AddFilesViewModel::class.java)
 
-    @Inject
-    lateinit var importRcProvider: Provider<ImportResourceContainer>
+    @Inject lateinit var importRcProvider: Provider<ImportResourceContainer>
+    @Inject lateinit var importProvider: Provider<ProjectImporter>
 
     val showImportDialogProperty = SimpleBooleanProperty(false)
+    val importedProjectTitleProperty = SimpleStringProperty()
+    val importedProjectCoverProperty = SimpleObjectProperty<File>()
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -43,6 +50,7 @@ class AddFilesViewModel : ViewModel() {
             mode = FileChooserMode.Single
         ).firstOrNull()
         file?.let {
+            setProjectInfo(file)
             importResourceContainer(file)
         }
     }
@@ -56,6 +64,10 @@ class AddFilesViewModel : ViewModel() {
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in importing resource container $file", e)
+            }
+            .doFinally {
+                importedProjectTitleProperty.set(null)
+                importedProjectCoverProperty.set(null)
             }
             .subscribe { result: ImportResult ->
                 if (result == ImportResult.SUCCESS) {
@@ -85,6 +97,24 @@ class AddFilesViewModel : ViewModel() {
                 false
             }
             else -> true
+        }
+    }
+
+    private fun setProjectInfo(rc: File) {
+        try {
+            val project = ResourceContainer.load(rc, true).use { it.project() }
+            project?.let {
+                importProvider.get()
+                    .getSourceMetadata(rc)
+                    .subscribe { resourceMetadata ->
+                        resourceMetadata?.let {
+                            importedProjectTitleProperty.set(project.title)
+                            val coverArtAccessor = CoverArtAccessor(it, project.identifier)
+                            importedProjectCoverProperty.set(coverArtAccessor.getArtwork())
+                        }
+                    }
+            }
+        } catch (e: Exception) {
         }
     }
 }
