@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.controls.banner
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -15,25 +14,25 @@ import javafx.scene.layout.BackgroundImage
 import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
-import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
+import org.wycliffeassociates.otter.jvm.controls.skins.banner.ResumeBookBannerSkin
 import java.io.File
 import java.util.concurrent.Callable
 
-class WorkbookBanner : Control() {
+class ResumeBookBanner : Control() {
 
     val backgroundImageFileProperty = SimpleObjectProperty<File>()
     val bookTitleProperty = SimpleStringProperty()
-    val resourceTitleProperty = SimpleStringProperty()
-    val hideDeleteButtonProperty = SimpleBooleanProperty(false)
-
-    val deleteTitleProperty = SimpleStringProperty("delete")
-    val exportTitleProperty = SimpleStringProperty("export")
-
-    val onDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onExportActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val sourceLanguageProperty = SimpleStringProperty()
+    val targetLanguageProperty = SimpleStringProperty()
+    val resumeTextProperty = SimpleStringProperty("Resume")
+    val onResumeActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        styleClass.setAll("workbook-banner")
+        styleClass.setAll("resume-book-banner")
+    }
+
+    fun onResumeAction(op: () -> Unit) {
+        onResumeActionProperty.set(EventHandler { op.invoke() })
     }
 
     fun backgroundBinding(): ObjectBinding<Background?> {
@@ -54,27 +53,19 @@ class WorkbookBanner : Control() {
             1.0,
             true,
             true,
-            false,
+            true,
             true
         )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
+            BackgroundPosition.CENTER,
             backgroundSize
         )
     }
 
-    fun onDeleteAction(op: () -> Unit) {
-        onDeleteActionProperty.set(EventHandler { op.invoke() })
-    }
-
-    fun onExportAction(op: () -> Unit) {
-        onExportActionProperty.set(EventHandler { op.invoke() })
-    }
-
     override fun createDefaultSkin(): Skin<*> {
-        return WorkbookBannerSkin(this)
+        return ResumeBookBannerSkin(this)
     }
 }

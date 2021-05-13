@@ -1,9 +1,11 @@
 .workbook-banner {
     -fx-max-width: 800px;
+    -fx-background-color: -wa-primary;
+    -fx-background-radius: 15px;
 }
 
 .workbook-banner__overlay {
-    -fx-background-color: linear-gradient(to right, #094687f8, #09468733);
+    -fx-background-color: linear-gradient(to right, -wa-primary-dark 15%, -wa-transparent);
     -fx-background-radius: 10px;
 }
 
