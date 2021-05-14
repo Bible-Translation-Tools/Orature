@@ -26,10 +26,12 @@
     -fx-font-size: 20px;
 }
 
-.translation-card__books {
-    -fx-background-color: -wa-transparent;
+.translation-card__book--no-bg:hover,
+.translation-card__book--no-bg:pressed {
+    -fx-background-color: -wa-white !important;
 }
 
-.translation-card__books .list-cell {
-    -fx-background-color: -wa-transparent;
+.translation-card__show-more-content {
+    -fx-alignment: center;
+    -fx-padding: 20px;
 }

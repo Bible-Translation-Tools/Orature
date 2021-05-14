@@ -1,28 +1,33 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.ObservableList
+import javafx.scene.Node
 import javafx.scene.control.Control
-import javafx.scene.control.ListCell
-import javafx.scene.control.ListView
 import javafx.scene.control.Skin
-import javafx.util.Callback
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.TranslationCardSkin
 import tornadofx.*
 
 class TranslationCard<T>(
     sourceLanguage: String = "",
     targetLanguage: String = "",
-    books: ObservableList<T> = observableListOf()
+    items: ObservableList<T> = observableListOf()
 ) : Control() {
 
     val sourceLanguageProperty = SimpleStringProperty(sourceLanguage)
     val targetLanguageProperty = SimpleStringProperty(targetLanguage)
-    val booksProperty = SimpleObjectProperty<ObservableList<T>>(books)
+    val itemsProperty = SimpleListProperty<T>(items)
+    val showMoreTextProperty = SimpleStringProperty()
 
-    val cellFactoryProperty = SimpleObjectProperty<Callback<ListView<T>, ListCell<T>>>()
     val onNewBookActionProperty = SimpleObjectProperty<() -> Unit>()
+    val shownItemsNumberProperty = SimpleIntegerProperty(3)
+
+    internal val converterProperty = SimpleObjectProperty<(T) -> Node>()
+    internal val showAllProperty = SimpleBooleanProperty(false)
 
     init {
         importStylesheet(javaClass.getResource("/css/translation-card.css").toExternalForm())
@@ -33,11 +38,11 @@ class TranslationCard<T>(
         return TranslationCardSkin(this)
     }
 
-    fun setCellFactory(value: (ListView<T>) -> ListCell<T>) {
-        cellFactoryProperty.set(Callback(value))
-    }
-
     fun setOnNewBookAction(op: () -> Unit) {
         onNewBookActionProperty.set(op)
+    }
+
+    fun setConverter(op: (T) -> Node) {
+        converterProperty.set(op)
     }
 }

@@ -6,6 +6,7 @@
 <?import org.kordamp.ikonli.javafx.*?>
 
 <?import org.wycliffeassociates.otter.jvm.controls.card.BookCard?>
+<?import java.lang.String?>
 <VBox fx:id="root" styleClass="translation-card__root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox styleClass="translation-card__header">
@@ -17,7 +18,7 @@
                 </Label>
                 <Label styleClass="translation-card__divider">
                     <graphic>
-                        <FontIcon iconLiteral="mdi-play" />
+                        <FontIcon iconLiteral="mdi-menu-right" />
                     </graphic>
                 </Label>
                 <Label fx:id="targetLanguageText" graphicTextGap="8.0" styleClass="translation-card__language">
@@ -27,8 +28,22 @@
                 </Label>
             </children>
         </HBox>
-        <ListView fx:id="bookCards" styleClass="translation-card__books" />
-        <BookCard fx:id="newBookCard" />
+        <VBox fx:id="bookCards" styleClass="translation-card__books" />
+        <BookCard styleClass="translation-card__book--no-bg" fx:id="newBookCard" />
+        <VBox styleClass="translation-card__show-more-content">
+            <children>
+                <Button fx:id="showMoreBtn">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-menu-down" />
+                    </graphic>
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn--secondary" />
+                        <String fx:value="btn--borderless" />
+                    </styleClass>
+                </Button>
+            </children>
+        </VBox>
     </children>
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

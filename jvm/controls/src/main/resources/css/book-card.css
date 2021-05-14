@@ -1,3 +1,15 @@
+.book-card {
+    -fx-background-radius: 10px;
+}
+
+.book-card:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.book-card:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
 .book-card__root {
     -fx-spacing: 20px;
     -fx-cursor: hand;
