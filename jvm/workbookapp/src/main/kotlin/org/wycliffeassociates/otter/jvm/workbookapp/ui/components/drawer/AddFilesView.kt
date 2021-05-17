@@ -12,10 +12,11 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import tornadofx.*
+import java.text.MessageFormat
 
 class AddFilesView : View() {
     private val logger = LoggerFactory.getLogger(AddFilesView::class.java)
@@ -109,10 +110,24 @@ class AddFilesView : View() {
     }
 
     private fun initImportDialog() {
-        val importDialog = progressdialog {
-            text = messages["importResource"]
-            graphic = FontIcon("mdi-import")
+        val importDialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it
+                        )
+                    } ?: messages["importResource"]
+                }
+            )
+            messageTextProperty.set(messages["importResourceMessage"])
+            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
         }
+
         viewModel.showImportDialogProperty.onChange {
             Platform.runLater { if (it) importDialog.open() else importDialog.close() }
         }

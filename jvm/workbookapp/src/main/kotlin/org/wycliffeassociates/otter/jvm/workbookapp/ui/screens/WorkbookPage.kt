@@ -12,11 +12,10 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
-import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
@@ -141,26 +140,49 @@ class WorkbookPage : Fragment() {
     }
 
     private fun initializeProgressDialogs() {
-        progressdialog {
+        confirmdialog {
             viewModel.showDeleteProgressDialogProperty.onChange {
                 if (it) {
-                    text = messages["deletingProject"]
-                    graphic = FontIcon("mdi-delete")
+                    titleTextProperty.bind(
+                        viewModel.activeProjectTitleProperty.stringBinding {
+                            it?.let {
+                                MessageFormat.format(
+                                    messages["deleteProjectTitle"],
+                                    messages["delete"],
+                                    it
+                                )
+                            }
+                        }
+                    )
+                    messageTextProperty.set(messages["deleteProjectMessage"])
+                    backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
                     close()
                 }
             }
-
             viewModel.showExportProgressDialogProperty.onChange {
                 if (it) {
-                    text = messages["exportProject"]
-                    graphic = FontIcon("mdi-share-variant")
+                    titleTextProperty.bind(
+                        viewModel.activeProjectTitleProperty.stringBinding {
+                            it?.let {
+                                MessageFormat.format(
+                                    messages["exportProjectTitle"],
+                                    messages["export"],
+                                    it
+                                )
+                            }
+                        }
+                    )
+                    messageTextProperty.set(messages["exportProjectMessage"])
+                    backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
                     close()
                 }
             }
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
         }
     }
 
