@@ -55,18 +55,16 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
             children.bind(card.itemsProperty, card.converterProperty.value)
 
             children.onChangeAndDoNow { list ->
+                card.seeAllProperty.set(false)
                 if (list.size > toShow) {
                     list.slice(toShow..list.lastIndex).forEach(::hideNode)
                 }
             }
 
             card.seeAllProperty.onChange {
-                if (it) {
-                    children.forEach(::showNode)
-                } else {
-                    if (children.size > toShow) {
-                        children.slice(toShow..children.lastIndex).forEach(::hideNode)
-                    }
+                when (it) {
+                    true -> children.forEach(::showNode)
+                    false -> children.slice(toShow..children.lastIndex).forEach(::hideNode)
                 }
             }
         }
