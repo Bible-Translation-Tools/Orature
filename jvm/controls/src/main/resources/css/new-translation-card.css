@@ -1,0 +1,33 @@
+.new-translation-card {
+    -fx-max-width: 800px;
+    -fx-padding: 5px;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 15px;
+    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-pref-width: 800px;
+}
+
+.new-translation-card__root {
+    -fx-alignment: center-left;
+}
+
+.new-translation-card__languages {
+    -fx-spacing: 15px;
+    -fx-padding: 15px;
+    -fx-alignment: center-left;
+}
+
+.new-translation-card__language {
+    -fx-font-size: 20px;
+    -fx-text-fill: -wa-black-60;
+}
+
+.new-translation-card__language .ikonli-font-icon {
+    -fx-font-size: 24px;
+    -fx-fill: -wa-black-60;
+}
+
+.new-translation-card__divider .ikonli-font-icon {
+    -fx-font-size: 20px;
+    -fx-fill: -wa-black-60;
+}
