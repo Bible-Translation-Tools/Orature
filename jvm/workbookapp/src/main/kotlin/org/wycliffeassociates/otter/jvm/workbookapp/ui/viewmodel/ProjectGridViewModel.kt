@@ -3,6 +3,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
@@ -17,6 +19,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizard
 import tornadofx.*
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.WorkbookPage
+import java.io.File
 import javax.inject.Provider
 
 class ProjectGridViewModel : ViewModel() {
@@ -31,6 +34,8 @@ class ProjectGridViewModel : ViewModel() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
     val projects: ObservableList<Workbook> = FXCollections.observableArrayList()
 
@@ -59,6 +64,9 @@ class ProjectGridViewModel : ViewModel() {
 
     fun deleteWorkbook(workbook: Workbook) {
         showDeleteDialogProperty.set(true)
+        activeProjectTitleProperty.set(workbook.target.title)
+        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+
         val deleteProject = deleteProjectProvider.get()
 
         workbookRepo.closeWorkbook(workbook)
@@ -67,6 +75,10 @@ class ProjectGridViewModel : ViewModel() {
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
+            }
+            .doFinally {
+                activeProjectTitleProperty.set(null)
+                activeProjectCoverProperty.set(null)
             }
             .subscribe {
                 showDeleteDialogProperty.set(false)

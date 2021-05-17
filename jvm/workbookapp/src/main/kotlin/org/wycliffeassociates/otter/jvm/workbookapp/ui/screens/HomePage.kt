@@ -17,15 +17,14 @@ import org.wycliffeassociates.otter.jvm.controls.card.Action
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.projectcard
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
-import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 
 class HomePage : Fragment() {
 
@@ -183,9 +182,22 @@ class HomePage : Fragment() {
     }
 
     private fun initializeProgressDialogs() {
-        val deletingProjectDialog = progressdialog {
-            text = messages["deletingProject"]
-            graphic = FontIcon("mdi-delete")
+        val deletingProjectDialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.activeProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["deleteProjectTitle"],
+                            messages["delete"],
+                            it
+                        )
+                    }
+                }
+            )
+            messageTextProperty.set(messages["deleteProjectMessage"])
+            backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
         }
         viewModel.showDeleteDialogProperty.onChange {
             Platform.runLater { if (it) deletingProjectDialog.open() else deletingProjectDialog.close() }

@@ -5,12 +5,13 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
+import org.wycliffeassociates.otter.jvm.controls.card.wizardcard
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.ProjectWizardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.viewmodel.ProjectWizardViewModel
-import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
-import org.wycliffeassociates.otter.jvm.controls.card.wizardcard
 import tornadofx.*
+import java.text.MessageFormat
 
 class SelectCollection : Fragment() {
     private val viewModel: ProjectWizardViewModel by inject()
@@ -67,8 +68,22 @@ class SelectCollection : Fragment() {
                 }
             }
         }
-        val dialog = progressdialog {
-            text = messages["pleaseWaitCreatingProject"]
+        val dialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.activeProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["createProjectTitle"],
+                            messages["createAlt"],
+                            it
+                        )
+                    }
+                }
+            )
+            messageTextProperty.set(messages["pleaseWaitCreatingProject"])
+            backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
         }
         viewModel.showOverlayProperty.onChange { it: Boolean ->
             Platform.runLater { if (it) dialog.open() else dialog.close() }

@@ -1,5 +1,5 @@
 .confirm-dialog {
-    -fx-pref-width: 800px;
+    -fx-pref-width: 480px;
     -fx-background-color: -wa-white;
 }
 
@@ -8,8 +8,8 @@
 }
 
 .confirm-dialog__title-bar {
-    -fx-alignment: center;
-    -fx-padding: 0 30px 0 100px;
+    -fx-alignment: center-left;
+    -fx-padding: 0 15px;
 }
 
 .confirm-dialog__title {
@@ -18,7 +18,7 @@
 }
 
 .confirm-dialog__body {
-    -fx-padding: 20px 100px;
+    -fx-padding: 15px;
     -fx-text-alignment: justify;
     -fx-min-height: 100px;
 }
@@ -29,53 +29,57 @@
     -fx-wrap-text: true;
 }
 
+.confirm-dialog__progress {
+    -fx-alignment: left;
+    -fx-padding: 20px;
+    -fx-spacing: 6px;
+}
+
+.confirm-dialog__progress .progress-bar {
+    -fx-pref-height: 8px;
+}
+
+.confirm-dialog__progress .progress-bar .bar {
+    -fx-background-radius: 6px;
+    -fx-background-color: -wa-primary;
+}
+
+.confirm-dialog__progress .progress-bar .track {
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-black-40;
+}
+
+.confirm-dialog__progress-title {
+    -fx-font-size: 16px;
+    -fx-text-fill: -wa-black-60;
+}
+
 .confirm-dialog__footer {
-    -fx-padding: 20px 100px;
+    -fx-padding: 20px 15px;
     -fx-border-width: 2px 0 0 0;
     -fx-border-color: #ccc;
 }
 
-.confirm-dialog__btn--close {
+.confirm-dialog__btn--close,
+.confirm-dialog__btn--close:hover,
+.confirm-dialog__btn--close:pressed {
     -fx-border-color: -wa-white;
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
 }
 
-.confirm-dialog__btn--close .ikonli-font-icon {
+.confirm-dialog__btn--close:hover {
+    -fx-background-color: -wa-white-30;
+}
+
+.confirm-dialog__btn--close .ikonli-font-icon,
+.confirm-dialog__btn--close:hover .ikonli-font-icon,
+.confirm-dialog__btn--close:pressed .ikonli-font-icon {
     -fx-icon-size: 18px;
     -fx-fill: -wa-white;
-}
-
-.confirm-dialog__btn--close:hover .ikonli-font-icon {
-    -fx-icon-size: 18px;
-    -fx-fill: -wa-gray-darker;
-}
-
-.confirm-dialog__btn--cancel {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-}
-
-.confirm-dialog__btn--cancel .ikonli-font-icon {
-    -fx-icon-size: 22px;
-    -fx-fill: -wa-white;
-}
-
-.confirm-dialog__btn--confirm {
-    -fx-font-size: 16px;
-    -fx-text-fill: #d11919;
-    -fx-border-width: 0;
-    -fx-font-weight: bold;
-}
-
-.confirm-dialog__btn--confirm:hover {
-    -fx-background-color: -wa-purple-light;
-    -fx-text-fill: #d11919;
-}
-
-.confirm-dialog__btn--confirm .ikonli-font-icon {
-    -fx-icon-size: 22px;
-    -fx-fill: #d11919;
 }
 
 .confirm-dialog__footer-spacer {
