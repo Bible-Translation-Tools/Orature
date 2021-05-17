@@ -30,9 +30,9 @@
         </HBox>
         <VBox fx:id="bookCards" styleClass="translation-card__books" />
         <BookCard styleClass="translation-card__book--no-bg" fx:id="newBookCard" />
-        <VBox styleClass="translation-card__show-more-content">
+        <VBox styleClass="translation-card__see-more-content">
             <children>
-                <Button fx:id="showMoreBtn">
+                <Button fx:id="seeMoreBtn">
                     <graphic>
                         <FontIcon iconLiteral="mdi-menu-down" />
                     </graphic>

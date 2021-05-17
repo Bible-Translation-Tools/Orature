@@ -21,13 +21,14 @@ class TranslationCard<T>(
     val sourceLanguageProperty = SimpleStringProperty(sourceLanguage)
     val targetLanguageProperty = SimpleStringProperty(targetLanguage)
     val itemsProperty = SimpleListProperty<T>(items)
-    val showMoreTextProperty = SimpleStringProperty()
+    val seeMoreTextProperty = SimpleStringProperty()
+    val seeLessTextProperty = SimpleStringProperty()
 
     val onNewBookActionProperty = SimpleObjectProperty<() -> Unit>()
     val shownItemsNumberProperty = SimpleIntegerProperty(3)
 
     internal val converterProperty = SimpleObjectProperty<(T) -> Node>()
-    internal val showAllProperty = SimpleBooleanProperty(false)
+    internal val seeAllProperty = SimpleBooleanProperty(false)
 
     init {
         importStylesheet(javaClass.getResource("/css/translation-card.css").toExternalForm())
