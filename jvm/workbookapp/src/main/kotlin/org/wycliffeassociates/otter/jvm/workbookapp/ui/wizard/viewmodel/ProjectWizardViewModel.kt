@@ -10,11 +10,11 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
-import javax.inject.Inject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -27,6 +27,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.fragments.Sel
 import tornadofx.SortedFilteredList
 import tornadofx.ViewModel
 import tornadofx.booleanBinding
+import java.io.File
+import javax.inject.Inject
 
 class ProjectWizardViewModel : ViewModel() {
 
@@ -58,6 +60,9 @@ class ProjectWizardViewModel : ViewModel() {
     val languageCompletedText = SimpleStringProperty()
     val resourceCompletedText = SimpleStringProperty()
     val bookCompletedText = SimpleStringProperty()
+
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -165,6 +170,11 @@ class ProjectWizardViewModel : ViewModel() {
     private fun createProject(selectedCollection: Collection) {
         selectedTargetLanguage.value?.let { language ->
             showOverlayProperty.value = true
+
+            activeProjectTitleProperty.set(selectedCollection.titleKey)
+            val accessor = CoverArtAccessor(selectedCollection.resourceContainer!!, selectedCollection.slug)
+            activeProjectCoverProperty.set(accessor.getArtwork())
+
             creationUseCase
                 .create(selectedCollection, language)
                 .doOnError { e ->

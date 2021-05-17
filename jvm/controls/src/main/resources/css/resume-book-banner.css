@@ -1,0 +1,42 @@
+.resume-book-banner {
+    -fx-max-width: 800px;
+    -fx-background-color: -wa-primary;
+    -fx-background-radius: 15px;
+}
+
+.resume-book-banner__overlay {
+    -fx-background-color: linear-gradient(to right, -wa-primary-dark 15%, -wa-transparent);
+    -fx-background-radius: 10px;
+}
+
+.resume-book-banner__content {
+    -fx-padding: 40px 15px;
+    -fx-alignment: center-left;
+    -fx-spacing: 20px;
+}
+
+.resume-book-banner__book-title {
+    -fx-text-fill: -wa-white;
+    -fx-font-weight: bold;
+    -fx-font-size: 26px;
+}
+
+.resume-book-banner__language-container {
+    -fx-spacing: 15px;
+    -fx-alignment: center-left;
+}
+
+.resume-book-banner__language {
+    -fx-font-size: 20px;
+    -fx-text-fill: -wa-white;
+}
+
+.resume-book-banner__language .ikonli-font-icon {
+    -fx-font-size: 24px;
+    -fx-fill: -wa-white;
+}
+
+.resume-book-banner__divider .ikonli-font-icon {
+    -fx-font-size: 20px;
+    -fx-fill: -wa-white;
+}
