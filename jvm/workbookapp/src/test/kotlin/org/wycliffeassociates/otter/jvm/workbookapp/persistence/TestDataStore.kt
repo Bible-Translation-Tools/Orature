@@ -13,11 +13,11 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 
 object TestDataStore {
     val languages = listOf(
-            Language("ar", "العَرَبِيَّة", "Arabic", "rtl", true),
-            Language("en", "English", "English", "ltr", true),
-            Language("atj", "Atikamekw", "Atikamekw", "ltr", false),
-            Language("bbs", "Bakpinka", "Bakpinka", "ltr", false),
-            Language("nfl", "Äiwoo", "Ayiwo", "ltr", false)
+            Language("ar", "العَرَبِيَّة", "Arabic", "rtl", true, "Africa"),
+            Language("en", "English", "English", "ltr", true, "Africa"),
+            Language("atj", "Atikamekw", "Atikamekw", "ltr", false, "Africa"),
+            Language("bbs", "Bakpinka", "Bakpinka", "ltr", false, "Africa"),
+            Language("nfl", "Äiwoo", "Ayiwo", "ltr", false, "Africa")
     )
     val resourceContainers = listOf(
             ResourceMetadata(

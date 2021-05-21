@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.controlsfx.control.textfield.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<HBox fx:id="root" styleClass="filtered-search-bar__root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <CustomTextField fx:id="searchField" promptText="Search" HBox.hgrow="ALWAYS">
+            <styleClass>
+                <String fx:value="txt-input" />
+                <String fx:value="filtered-search-bar__input" />
+            </styleClass>
+            <left>
+                <FontIcon iconLiteral="gmi-hearing" />
+            </left>
+            <right>
+                <FontIcon iconLiteral="mdi-magnify" />
+            </right>
+        </CustomTextField>
+        <MenuButton fx:id="filterMenu" styleClass="filtered-search-bar__menu">
+            <graphic>
+                <FontIcon iconLiteral="mdi-filter-variant" />
+            </graphic>
+        </MenuButton>
+    </children>
+</HBox>

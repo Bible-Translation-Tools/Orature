@@ -86,7 +86,21 @@ class ResourceMetadataRepository @Inject constructor(
                     .map(this::buildMetadata)
             }
             .doOnError { e ->
-                logger.error("Error in getAll", e)
+                logger.error("Error in getAllSources", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getAllTargets(): Single<List<ResourceMetadata>> {
+        return Single
+            .fromCallable {
+                resourceMetadataDao
+                    .fetchAll()
+                    .filter { it.derivedFromFk != null }
+                    .map(this::buildMetadata)
+            }
+            .doOnError { e ->
+                logger.error("Error in getAllTargets", e)
             }
             .subscribeOn(Schedulers.io())
     }

@@ -27,6 +27,9 @@ dependencies {
     // JFoenix
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
+    // ControlsFX
+    implementation "org.controlsfx:controlsfx:$controlsfxVer"
+
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
 
     // FontAwesomeFX

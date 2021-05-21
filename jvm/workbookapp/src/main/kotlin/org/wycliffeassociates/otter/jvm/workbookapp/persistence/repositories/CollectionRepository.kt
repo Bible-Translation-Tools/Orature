@@ -402,6 +402,19 @@ class CollectionRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun deriveTranslation(
+        sourceMetadatas: List<ResourceMetadata>,
+        language: Language
+    ): Single<ResourceMetadata> {
+        return Single.fromCallable {
+            database.transactionResult { dsl ->
+                val derivedMetadata = deriveAndLinkMetadata(sourceMetadatas, language, dsl)
+                val mainDerivedMetadata = derivedMetadata.first()
+                return@transactionResult metadataMapper.mapFromEntity(mainDerivedMetadata, language)
+            }
+        }
+    }
+
     private fun findProjectCollection(
         sourceEntity: CollectionEntity,
         derivedMetadata: ResourceMetadataEntity,
