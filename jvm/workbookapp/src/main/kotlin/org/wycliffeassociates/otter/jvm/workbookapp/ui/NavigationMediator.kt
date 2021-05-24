@@ -66,4 +66,8 @@ class NavigationMediator : Component(), ScopedInstance {
     fun forward() {
         workspace.navigateForward()
     }
+
+    fun home() {
+        dock(workspace.viewStack.first())
+    }
 }

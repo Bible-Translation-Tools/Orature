@@ -1,12 +1,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.geometry.Pos
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.SplashScreenStyles
 import tornadofx.*
 
 class SplashScreen : View() {
     private val viewModel: SplashScreenViewModel by inject()
+    private val navigator: NavigationMediator by inject()
+
     override val root = stackpane {
         addStylesheet(SplashScreenStyles::class)
         addClass(SplashScreenStyles.splashRoot)
@@ -31,6 +35,7 @@ class SplashScreen : View() {
 
     private fun finish() {
         close()
+        navigator.dock<HomePage>()
         primaryStage.show()
     }
 }

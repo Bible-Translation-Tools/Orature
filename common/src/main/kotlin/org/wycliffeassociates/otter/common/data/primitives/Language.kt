@@ -6,5 +6,6 @@ data class Language(
     var anglicizedName: String,
     var direction: String,
     var isGateway: Boolean,
+    var region: String,
     var id: Int = 0
 )

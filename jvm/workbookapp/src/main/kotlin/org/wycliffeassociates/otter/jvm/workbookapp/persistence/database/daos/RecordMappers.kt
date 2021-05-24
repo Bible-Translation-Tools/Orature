@@ -22,7 +22,8 @@ class RecordMappers {
                 record.getValue(LANGUAGE_ENTITY.NAME),
                 record.getValue(LANGUAGE_ENTITY.ANGLICIZED),
                 record.getValue(LANGUAGE_ENTITY.DIRECTION),
-                record.getValue(LANGUAGE_ENTITY.GATEWAY)
+                record.getValue(LANGUAGE_ENTITY.GATEWAY),
+                record.getValue(LANGUAGE_ENTITY.REGION)
             )
         }
 

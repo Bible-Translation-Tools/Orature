@@ -6,5 +6,6 @@ data class LanguageEntity(
     var name: String,
     var anglicizedName: String,
     var direction: String,
-    var gateway: Int
+    var gateway: Int,
+    var region: String
 )

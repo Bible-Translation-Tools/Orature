@@ -32,8 +32,24 @@ class TestWorkbookRepository {
     private var autoincrement: Int = 1
         get() = field++
 
-    private val english = Language("en", "English", "English", "ltr", isGateway = true, id = autoincrement)
-    private val latin = Language("la", "Latin", "Latin", "ltr", isGateway = false, id = autoincrement)
+    private val english = Language(
+        "en",
+        "English",
+        "English",
+        "ltr",
+        isGateway = true,
+        region = "Europe",
+        id = autoincrement
+    )
+    private val latin = Language(
+        "la",
+        "Latin",
+        "Latin",
+        "ltr",
+        isGateway = false,
+        region = "Europe",
+        id = autoincrement
+    )
 
     private val rcBase = ResourceMetadata(
         conformsTo = "rc0.2",

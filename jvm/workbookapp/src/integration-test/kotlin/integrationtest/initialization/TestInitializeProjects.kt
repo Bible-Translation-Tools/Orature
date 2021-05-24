@@ -41,7 +41,7 @@ class TestInitializeProjects {
         "",
         "ulb",
         LocalDate.now(),
-        Language("en", "", "", "", true),
+        Language("en", "", "", "", true, "Europe"),
         LocalDate.now(),
         "",
         "",
@@ -53,7 +53,7 @@ class TestInitializeProjects {
 
     private val targetMetadata = sourceMetadata.copy(
         creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true)
+        language = Language("en-x-demo1", "", "", "", true, "Europe")
     )
 
     private val project = Collection(
