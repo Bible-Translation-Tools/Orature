@@ -8,7 +8,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.jvm.controls.card.LanguageCard
+import org.wycliffeassociates.otter.jvm.controls.card.LanguageCardCell
 import tornadofx.*
 import java.util.concurrent.Callable
 
@@ -24,7 +24,7 @@ class LanguageCell(
     private val onSelected: (Language) -> Unit
 ) : ListCell<Language>() {
 
-    private val view = LanguageCard()
+    private val view = LanguageCardCell()
 
     override fun updateItem(item: Language?, empty: Boolean) {
         super.updateItem(item, empty)

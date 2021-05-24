@@ -6,7 +6,7 @@ import javafx.scene.Node
 import javafx.scene.layout.HBox
 import tornadofx.*
 
-class LanguageCard : HBox() {
+class LanguageCardCell : HBox() {
 
     val iconProperty = SimpleObjectProperty<Node>()
     val languageNameProperty = SimpleStringProperty()
