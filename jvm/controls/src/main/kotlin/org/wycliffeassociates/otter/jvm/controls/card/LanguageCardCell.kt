@@ -13,21 +13,21 @@ class LanguageCardCell : HBox() {
     val languageSlugProperty = SimpleStringProperty()
 
     init {
-        importStylesheet(javaClass.getResource("/css/language-card.css").toExternalForm())
-        styleClass.setAll("language-card")
+        importStylesheet(javaClass.getResource("/css/language-card-cell.css").toExternalForm())
+        styleClass.setAll("language-card-cell")
 
         label {
-            addClass("language-card__icon")
+            addClass("language-card-cell__icon")
             graphicProperty().bind(iconProperty)
         }
 
         vbox {
-            addClass("language-card__title")
+            addClass("language-card-cell__title")
             label(languageNameProperty).apply {
-                addClass("language-card__name")
+                addClass("language-card-cell__name")
             }
             label(languageSlugProperty).apply {
-                addClass("language-card__slug")
+                addClass("language-card-cell__slug")
             }
         }
     }
