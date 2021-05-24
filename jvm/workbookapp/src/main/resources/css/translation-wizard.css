@@ -26,6 +26,6 @@
     -fx-text-fill: inherit;
 }
 
-.translation-wizard__root .list-cell .language-card {
+.translation-wizard__root .list-cell .language-card-cell {
     -fx-max-width: 800px;
 }
