@@ -1,4 +1,4 @@
-.language-card {
+.language-card-cell {
     -fx-padding: 10px;
     -fx-spacing: 20px;
     -fx-alignment: center-left;
@@ -7,31 +7,31 @@
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
 }
 
-.language-card:hover {
+.language-card-cell:hover {
     -fx-background-color: -wa-black-05;
 }
 
-.language-card:pressed {
+.language-card-cell:pressed {
     -fx-background-color: -wa-black-10;
 }
 
-.language-card__icon {
+.language-card-cell__icon {
     -fx-padding: 0 10px;
 }
 
-.language-card__icon .ikonli-font-icon {
+.language-card-cell__icon .ikonli-font-icon {
     -fx-font-size: 24px;
 }
 
-.language-card__title {
+.language-card-cell__title {
     -fx-spacing: 5px;
 }
 
-.language-card__name {
+.language-card-cell__name {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
 }
 
-.language-card__slug {
+.language-card-cell__slug {
     -fx-font-size: 16px;
 }
