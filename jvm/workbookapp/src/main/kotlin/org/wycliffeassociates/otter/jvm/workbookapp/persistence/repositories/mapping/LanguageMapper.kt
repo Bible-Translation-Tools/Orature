@@ -14,6 +14,7 @@ class LanguageMapper @Inject constructor() : Mapper<LanguageEntity, Language> {
             type.anglicizedName,
             type.direction.toLowerCase(),
             type.gateway == 1,
+            type.region,
             type.id
         )
 
@@ -24,7 +25,8 @@ class LanguageMapper @Inject constructor() : Mapper<LanguageEntity, Language> {
             type.name,
             type.anglicizedName,
             type.direction.toLowerCase(),
-            if (type.isGateway) 1 else 0
+            if (type.isGateway) 1 else 0,
+            type.region
         )
     }
 }

@@ -1,0 +1,31 @@
+.translation-wizard__root {
+    -fx-pref-width: 800px;
+    -fx-padding: 40px 10px 0 30px;
+    -fx-background-color: #EDF1F8;
+    -fx-spacing: 30px;
+}
+
+.translation-wizard__title {
+    -fx-font-size: 36px;
+}
+
+.translation-wizard__list {
+    -fx-background-color: -wa-transparent;
+}
+
+.translation-wizard__root .filtered-search-bar {
+    -fx-max-width: 800px;
+}
+
+.translation-wizard__list .list-cell {
+    -fx-background-color: -wa-transparent;
+    -fx-padding: 5px 0;
+}
+
+.translation-wizard__list .list-cell .label {
+    -fx-text-fill: inherit;
+}
+
+.translation-wizard__root .list-cell .language-card-cell {
+    -fx-max-width: 800px;
+}

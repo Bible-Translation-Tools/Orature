@@ -39,7 +39,8 @@ private data class Door43Language(
     val ln: String, // name
     val ld: String, // direction
     val gw: Boolean, // isGateway
-    val ang: String // anglicizedName
+    val ang: String, // anglicizedName
+    val lr: String // region
 ) {
-    fun toLanguage(): Language = Language(lc, ln, ang, ld, gw)
+    fun toLanguage(): Language = Language(lc, ln, ang, ld, gw, lr)
 }

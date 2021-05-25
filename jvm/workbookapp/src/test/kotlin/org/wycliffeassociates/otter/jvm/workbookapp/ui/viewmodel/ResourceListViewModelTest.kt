@@ -38,7 +38,14 @@ class ResourceListViewModelTest : ViewModel() {
         recordResourceViewModel = find()
     }
 
-    private val english = Language("en", "English", "English", "ltr", isGateway = true)
+    private val english = Language(
+        "en",
+        "English",
+        "English",
+        "ltr",
+        isGateway = true,
+        region = "Europe"
+    )
     private val resourceMetadataTn = ResourceMetadata(
         conformsTo = "rc0.2",
         creator = "Door43 World Missions Community",

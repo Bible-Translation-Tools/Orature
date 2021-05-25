@@ -34,7 +34,7 @@ class TestProjectImport {
         "",
         "ulb",
         LocalDate.now(),
-        Language("en", "", "", "", true),
+        Language("en", "", "", "", true, ""),
         LocalDate.now(),
         "",
         "",
@@ -46,12 +46,12 @@ class TestProjectImport {
 
     private val ulbTargetMetadata = sourceMetadata.copy(
         creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true)
+        language = Language("en-x-demo1", "", "", "", true, "Europe")
     )
 
     private val tnTargetMetadata = sourceMetadata.copy(
         creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true),
+        language = Language("en-x-demo1", "", "", "", true, "Europe"),
         identifier = "tn",
         version = "11",
         type = ContainerType.Help

@@ -53,14 +53,16 @@ class LanguageDao(
                 LANGUAGE_ENTITY.NAME,
                 LANGUAGE_ENTITY.ANGLICIZED,
                 LANGUAGE_ENTITY.DIRECTION,
-                LANGUAGE_ENTITY.GATEWAY
+                LANGUAGE_ENTITY.GATEWAY,
+                LANGUAGE_ENTITY.REGION
             )
             .values(
                 entity.slug,
                 entity.name,
                 entity.anglicizedName,
                 entity.direction,
-                entity.gateway
+                entity.gateway,
+                entity.region
             )
             .execute()
 
@@ -92,14 +94,16 @@ class LanguageDao(
                         LANGUAGE_ENTITY.NAME,
                         LANGUAGE_ENTITY.ANGLICIZED,
                         LANGUAGE_ENTITY.DIRECTION,
-                        LANGUAGE_ENTITY.GATEWAY
+                        LANGUAGE_ENTITY.GATEWAY,
+                        LANGUAGE_ENTITY.REGION
                     )
                     .values(
                         entity.slug,
                         entity.name,
                         entity.anglicizedName,
                         entity.direction,
-                        entity.gateway
+                        entity.gateway,
+                        entity.region
                     )
                     .execute()
             }
@@ -143,6 +147,7 @@ class LanguageDao(
             .set(LANGUAGE_ENTITY.ANGLICIZED, entity.anglicizedName)
             .set(LANGUAGE_ENTITY.DIRECTION, entity.direction)
             .set(LANGUAGE_ENTITY.GATEWAY, entity.gateway)
+            .set(LANGUAGE_ENTITY.REGION, entity.region)
             .where(LANGUAGE_ENTITY.ID.eq(entity.id))
             .execute()
     }

@@ -16,7 +16,7 @@ class InitializeLanguages @Inject constructor(
 ) : Installable {
 
     override val name = "LANGUAGES"
-    override val version = 1
+    override val version = 2
 
     private val log = LoggerFactory.getLogger(InitializeLanguages::class.java)
 
