@@ -24,6 +24,7 @@ class BookCard(
     val newBookProperty = SimpleBooleanProperty(newBook)
 
     val addBookTextProperty = SimpleStringProperty("Add Book")
+    val onPrimaryActionProperty = SimpleObjectProperty<() -> Unit>()
     val onAddBookActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -35,7 +36,11 @@ class BookCard(
         return BookCardSkin(this)
     }
 
-    fun onAddBookAction(op: () -> Unit) {
+    fun setOnPrimaryAction(op: () -> Unit) {
+        onPrimaryActionProperty.set(op)
+    }
+
+    fun setOnAddBookAction(op: () -> Unit) {
         onAddBookActionProperty.set(EventHandler { op.invoke() })
     }
 }
