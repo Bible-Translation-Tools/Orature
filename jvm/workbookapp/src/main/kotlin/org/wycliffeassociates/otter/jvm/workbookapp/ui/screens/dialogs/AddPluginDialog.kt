@@ -66,7 +66,8 @@ class AddPluginDialog : OtterDialog() {
                             mode = FileChooserMode.Single
                         )
                         if (files.isNotEmpty()) {
-                            viewModel.pathProperty.set(files.single().toString())
+                            val finalPath = viewModel.completePluginPath(files.single().toString())
+                            viewModel.pathProperty.set(finalPath)
                         }
                     }
                 }
