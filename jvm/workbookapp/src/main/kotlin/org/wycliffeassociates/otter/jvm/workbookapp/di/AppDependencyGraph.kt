@@ -11,15 +11,16 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProviderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.viewmodel.ProjectWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
@@ -46,6 +47,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: SettingsViewModel)
     fun inject(viewModel: AddFilesViewModel)
     fun inject(viewModel: TranslationViewModel)
+    fun inject(viewModel: BookWizardViewModel)
 
     fun inject(viewModel: RemovePluginsViewModel)
 

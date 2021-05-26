@@ -32,7 +32,7 @@ class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(ch
 
     private fun initializeControl() {
         checkbox.setOnMouseClicked { checkbox.fire() }
-        checkbox.selectedProperty().bindBidirectional(btnCheckbox.selectedProperty())
+        btnCheckbox.selectedProperty().bindBidirectional(checkbox.selectedProperty())
 
         btnLabel.apply {
             textProperty().bind(checkbox.textProperty())

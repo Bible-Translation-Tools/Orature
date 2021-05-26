@@ -28,26 +28,25 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
 
     init {
         selectedRegions.onChange {
-            if (it.list.isEmpty()) {
-                filteredLanguages.predicate = queryPredicate.and { true }
+            regionPredicate = if (it.list.isEmpty()) {
+                Predicate { true }
             } else {
-                regionPredicate = Predicate { language -> selectedRegions.contains(language.region) }
-                filteredLanguages.predicate = regionPredicate.and(queryPredicate)
+                Predicate { language -> selectedRegions.contains(language.region) }
             }
+            filteredLanguages.predicate = regionPredicate.and(queryPredicate)
         }
 
         searchQueryProperty.onChange { query ->
-            when {
-                query.isNullOrBlank() -> filteredLanguages.predicate = regionPredicate.and { true }
-                else -> {
-                    queryPredicate = Predicate { language ->
-                        language.slug.startsWith(query, true)
-                            .or(language.name.startsWith(query, true))
-                            .or(language.anglicizedName.startsWith(query, true))
-                    }
-                    filteredLanguages.predicate = queryPredicate.and(regionPredicate)
+            queryPredicate = if(query.isNullOrBlank()) {
+                Predicate { true }
+            } else {
+                Predicate { language ->
+                    language.slug.startsWith(query, true)
+                        .or(language.name.startsWith(query, true))
+                        .or(language.anglicizedName.startsWith(query, true))
                 }
             }
+            filteredLanguages.predicate = queryPredicate.and(regionPredicate)
         }
     }
 
