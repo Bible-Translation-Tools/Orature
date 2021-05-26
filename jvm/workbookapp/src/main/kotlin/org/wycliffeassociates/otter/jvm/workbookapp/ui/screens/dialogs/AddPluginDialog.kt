@@ -54,7 +54,7 @@ class AddPluginDialog : OtterDialog() {
                 textfield {
                     addClass("txt-input")
                     hgrow = Priority.ALWAYS
-                    textProperty().bind(viewModel.pathProperty)
+                    textProperty().bindBidirectional(viewModel.pathProperty)
                 }
                 button(messages["browse"]) {
                     addClass("btn", "btn--secondary")
