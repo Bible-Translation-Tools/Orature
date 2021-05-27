@@ -54,7 +54,7 @@ class AddPluginDialog : OtterDialog() {
                 textfield {
                     addClass("txt-input")
                     hgrow = Priority.ALWAYS
-                    textProperty().bind(viewModel.pathProperty)
+                    textProperty().bindBidirectional(viewModel.pathProperty)
                 }
                 button(messages["browse"]) {
                     addClass("btn", "btn--secondary")
@@ -66,7 +66,8 @@ class AddPluginDialog : OtterDialog() {
                             mode = FileChooserMode.Single
                         )
                         if (files.isNotEmpty()) {
-                            viewModel.pathProperty.set(files.single().toString())
+                            val finalPath = viewModel.completePluginPath(files.single().toString())
+                            viewModel.pathProperty.set(finalPath)
                         }
                     }
                 }
