@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -24,22 +23,14 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.jvm.controls.button.CheckboxButton
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
+import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
+import org.wycliffeassociates.otter.jvm.workbookapp.enums.SlugsEnum
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view.SlugsEnum
 import tornadofx.*
 import java.io.File
 import java.util.function.Predicate
 import javax.inject.Inject
-
-enum class ProjectType(val value: String) {
-    DRAFTING("draftingProject"),
-    FINAL_RECORDING("finalRecordingProject")
-}
-
-enum class SortBy {
-    BOOK_ORDER,
-    ALPHABETICAL
-}
 
 class BookWizardViewModel : ViewModel() {
 
@@ -78,7 +69,7 @@ class BookWizardViewModel : ViewModel() {
 
     private val lastOTBookSort = 39
 
-    private val sortByProperty = SimpleObjectProperty<SortBy>(SortBy.BOOK_ORDER)
+    private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
     private val sourcesToggleGroup = ToggleGroup()
     private val sortByToggleGroup = ToggleGroup()
 
@@ -195,8 +186,8 @@ class BookWizardViewModel : ViewModel() {
         sortByProperty.onChange {
             it?.let { sortBy ->
                 when (sortBy) {
-                    SortBy.BOOK_ORDER -> books.sortBy { collection -> collection.sort }
-                    SortBy.ALPHABETICAL -> books.sortBy { collection -> collection.titleKey }
+                    BookSortBy.BOOK_ORDER -> books.sortBy { collection -> collection.sort }
+                    BookSortBy.ALPHABETICAL -> books.sortBy { collection -> collection.titleKey }
                 }
             }
         }
@@ -257,12 +248,12 @@ class BookWizardViewModel : ViewModel() {
         items.add(createMenuSeparator(messages["sortBy"]))
         items.add(
             createRadioMenuItem(messages["bookOrder"], true, sortByToggleGroup) { selected ->
-                if (selected) sortByProperty.set(SortBy.BOOK_ORDER)
+                if (selected) sortByProperty.set(BookSortBy.BOOK_ORDER)
             }
         )
         items.add(
             createRadioMenuItem(messages["alphabetical"], false, sortByToggleGroup) { selected ->
-                if (selected) sortByProperty.set(SortBy.ALPHABETICAL)
+                if (selected) sortByProperty.set(BookSortBy.ALPHABETICAL)
             }
         )
 

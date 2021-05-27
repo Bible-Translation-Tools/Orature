@@ -7,7 +7,7 @@ import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectType
+import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
 import tornadofx.*
 import java.util.concurrent.Callable
 
