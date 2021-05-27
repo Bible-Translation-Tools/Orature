@@ -52,8 +52,8 @@ class BookWizardViewModel : ViewModel() {
     val showProgressProperty = SimpleBooleanProperty(false)
 
     private val anthologyVisibleProperty = SimpleBooleanProperty()
-    private val activeProjectTitleProperty = SimpleStringProperty()
-    private val activeProjectCoverProperty = SimpleObjectProperty<File>()
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
     private val books = observableListOf<Collection>()
     private val sourceCollections = observableListOf<Collection>()

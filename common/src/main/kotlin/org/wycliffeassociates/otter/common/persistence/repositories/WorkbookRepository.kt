@@ -86,7 +86,20 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .toList()
     }
 
-    private fun getWorkbook(project: Collection): Maybe<Workbook> {
+    override fun getProjects(target: ResourceMetadata): Single<List<Workbook>> {
+        return db.getDerivedProjects()
+            .map { projects ->
+                projects
+                    .filter { it.resourceContainer?.type == ContainerType.Book }
+                    .filter { it.resourceContainer?.language == target.language }
+                    .filter { it.resourceContainer?.identifier == target.identifier }
+            }
+            .flattenAsObservable { it }
+            .flatMapMaybe(::getWorkbook)
+            .toList()
+    }
+
+    override fun getWorkbook(project: Collection): Maybe<Workbook> {
         return db.getSourceProject(project)
             .map { sourceProject ->
                 get(sourceProject, project)

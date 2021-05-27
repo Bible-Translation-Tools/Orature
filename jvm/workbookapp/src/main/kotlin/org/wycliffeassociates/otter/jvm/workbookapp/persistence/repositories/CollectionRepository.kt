@@ -206,6 +206,19 @@ class CollectionRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getProject(id: Int): Maybe<Collection> {
+        return Maybe
+            .fromCallable {
+                buildCollection(
+                    collectionDao.fetchById(id)
+                )
+            }
+            .doOnError { e ->
+                log.error("Error in getProject, id: $id", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun getSourceProjects(): Single<List<Collection>> {
         return Single
             .fromCallable {

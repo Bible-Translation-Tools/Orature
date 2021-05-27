@@ -13,6 +13,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.BookCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import tornadofx.*
+import java.text.MessageFormat
 
 class BookSelection : Fragment() {
 
@@ -78,8 +79,19 @@ class BookSelection : Fragment() {
 
     private fun createProgressDialog() {
         confirmdialog {
-            titleTextProperty.set(messages["createProjectTitle"])
+            titleTextProperty.bind(
+                viewModel.activeProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["createProjectTitle"],
+                            messages["createAlt"],
+                            it
+                        )
+                    }
+                }
+            )
             messageTextProperty.set(messages["pleaseWaitCreatingProject"])
+            backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
 

@@ -71,7 +71,7 @@ class AddFilesViewModel : ViewModel() {
             }
             .subscribe { result: ImportResult ->
                 if (result == ImportResult.SUCCESS) {
-                    find<ProjectGridViewModel>().loadProjects()
+                    find<HomePageViewModel>().loadTranslations()
                 }
 
                 showImportDialogProperty.value = false
@@ -106,6 +106,10 @@ class AddFilesViewModel : ViewModel() {
             project?.let {
                 importProvider.get()
                     .getSourceMetadata(rc)
+                    .doOnError {
+                        logger.debug("Error in getSourceMetadata: $rc")
+                    }
+                    .onErrorReturnItem(null)
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)
