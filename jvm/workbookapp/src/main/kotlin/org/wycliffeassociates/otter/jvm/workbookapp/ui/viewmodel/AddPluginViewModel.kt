@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import java.io.File
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
@@ -69,5 +70,21 @@ class AddPluginViewModel : ViewModel() {
             }
             .onErrorComplete()
             .subscribe()
+    }
+
+    /**
+     * Allows for completing the path to the plugin binary, if needed based on platform.
+     * Currently only adds the remaining path after the .app directory on MacOS.
+     */
+    fun completePluginPath(path: String): String {
+        if (File(path).isDirectory && path.matches(Regex(".*.app"))) {
+            val macPath = File(path, "Contents/MacOS/")
+            if (macPath.exists()) {
+                // This directory may have multiple files, but we can't necessarily know the binary name
+                // thus, we'll try the first, and if it's wrong, the user can edit the text after.
+                return macPath.listFiles().first().absolutePath
+            }
+        }
+        return path
     }
 }
