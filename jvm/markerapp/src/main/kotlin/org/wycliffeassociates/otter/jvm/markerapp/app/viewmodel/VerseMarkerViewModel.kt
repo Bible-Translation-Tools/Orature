@@ -99,11 +99,17 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun seekNext() {
+        val wasPlaying = audioPlayer.isPlaying()
+        if (wasPlaying) { audioController?.toggle() }
         seek(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
+        if (wasPlaying) { audioController?.toggle() }
     }
 
     fun seekPrevious() {
+        val wasPlaying = audioPlayer.isPlaying()
+        if (wasPlaying) { audioController?.toggle() }
         seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+        if (wasPlaying) { audioController?.toggle() }
     }
 
     fun writeMarkers(): Completable {

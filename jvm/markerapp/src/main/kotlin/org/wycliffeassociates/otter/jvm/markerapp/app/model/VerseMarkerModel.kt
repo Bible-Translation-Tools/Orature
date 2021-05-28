@@ -7,7 +7,7 @@ import org.wycliffeassociates.otter.common.audio.wav.WavCue
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import tornadofx.isInt
 
-private const val SEEK_EPSILON = 100
+private const val SEEK_EPSILON = 15_000
 
 class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
@@ -56,23 +56,19 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
 
     fun seekPrevious(location: Int): Int {
         val filtered = markers.filter { it.placed }
-        filtered.forEachIndexed { idx, marker ->
-            if (location < marker.frame) {
-                return if (idx - 2 >= 0) {
-                    filtered[idx - 2].frame
-                } else {
-                    0
-                }
-            } else if (idx == filtered.size - 1 && idx - 1 >= 0) {
-                // allows for seeking back and not getting stuck on the last marker
-                return if (location > filtered[idx].frame + SEEK_EPSILON) {
-                    filtered[idx].frame
-                } else {
-                    filtered[idx - 1].frame
-                }
-            }
+        return findMarkerPrecedingPosition(location, filtered).frame
+    }
+
+    private fun findMarkerPrecedingPosition(
+        location: Int,
+        list: List<ChunkMarkerModel>
+    ): ChunkMarkerModel {
+        list.forEachIndexed { idx, _ ->
+            if (list.lastIndex == idx) return@forEachIndexed
+            // Seek Epsilon used so that the user can seek back while playing
+            if (location < list[idx + 1].frame + SEEK_EPSILON) return list[idx]
         }
-        return 0
+        return list.last()
     }
 
     fun writeMarkers(): Completable {
