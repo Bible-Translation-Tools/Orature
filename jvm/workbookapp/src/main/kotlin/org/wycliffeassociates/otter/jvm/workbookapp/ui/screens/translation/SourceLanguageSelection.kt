@@ -56,6 +56,9 @@ class SourceLanguageSelection : Fragment() {
                         translationViewModel.selectedSourceLanguageProperty.set(it)
                     }
                 }
+                viewModel.searchQueryProperty.onChange {
+                    it?.let { if (it.isNotBlank()) scrollTo(0) }
+                }
             }
         }
     }

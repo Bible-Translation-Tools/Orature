@@ -36,8 +36,8 @@ class LanguageCell(
 
         graphic = view.apply {
             iconProperty.value = when (type) {
-                LanguageType.SOURCE -> FontIcon(MaterialDesign.MDI_VOICE)
-                LanguageType.TARGET -> FontIcon(Material.HEARING)
+                LanguageType.SOURCE -> FontIcon(Material.HEARING)
+                LanguageType.TARGET -> FontIcon(MaterialDesign.MDI_VOICE)
             }
 
             languageNameProperty.bind(anglicisedProperty.stringBinding {

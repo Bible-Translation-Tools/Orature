@@ -70,7 +70,7 @@ class BookWizardViewModel : ViewModel() {
     private val lastOTBookSort = 39
 
     private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
-    private val sourcesToggleGroup = ToggleGroup()
+    private val resourcesToggleGroup = ToggleGroup()
     private val sortByToggleGroup = ToggleGroup()
 
     init {
@@ -164,7 +164,7 @@ class BookWizardViewModel : ViewModel() {
     private fun bindFilterProperties() {
         selectedAnthologies.onChange {
             anthologiesPredicate = if (it.list.isEmpty()) {
-                Predicate { true }
+                Predicate { false }
             } else {
                 Predicate { collection -> belongsToAnthologies(collection.sort) }
             }
@@ -230,17 +230,17 @@ class BookWizardViewModel : ViewModel() {
         items.addAll(resourcesMenuItems())
         items.add(createMenuSeparator(messages["anthology"], anthologyVisibleProperty))
         items.add(
-            createCheckboxMenuItem(messages["oldTestament"], anthologyVisibleProperty) { selected ->
+            createCheckboxMenuItem(messages["oldTestament"], true, anthologyVisibleProperty) { selected ->
                 when (selected) {
-                    true -> selectedAnthologies.add(SlugsEnum.OT)
+                    true -> if (!selectedAnthologies.contains(SlugsEnum.OT)) selectedAnthologies.add(SlugsEnum.OT)
                     else -> selectedAnthologies.remove(SlugsEnum.OT)
                 }
             }
         )
         items.add(
-            createCheckboxMenuItem(messages["newTestament"], anthologyVisibleProperty) { selected ->
+            createCheckboxMenuItem(messages["newTestament"], true, anthologyVisibleProperty) { selected ->
                 when (selected) {
-                    true -> selectedAnthologies.add(SlugsEnum.NT)
+                    true -> if (!selectedAnthologies.contains(SlugsEnum.NT)) selectedAnthologies.add(SlugsEnum.NT)
                     else -> selectedAnthologies.remove(SlugsEnum.NT)
                 }
             }
@@ -260,6 +260,23 @@ class BookWizardViewModel : ViewModel() {
         menuItems.setAll(items)
     }
 
+    private fun resourcesMenuItems(): List<MenuItem> {
+        return sourceCollections.map { collection ->
+            val isUlb = collection.slug == SlugsEnum.ULB.slug
+            createRadioMenuItem(collection.titleKey, isUlb, resourcesToggleGroup) { selected ->
+                if (selected) {
+                    selectedSourceProperty.set(collection)
+                    anthologyVisibleProperty.set(isUlb)
+
+                    when (isUlb) {
+                        true -> selectedAnthologies.setAll(SlugsEnum.OT, SlugsEnum.NT)
+                        else -> selectedAnthologies.setAll(SlugsEnum.OT)
+                    }
+                }
+            }
+        }
+    }
+
     private fun createMenuSeparator(label: String, visibleProperty: BooleanProperty? = null): MenuItem {
         return CustomMenuItem().apply {
             styleClass.add("filtered-search-bar__menu__separator")
@@ -273,6 +290,7 @@ class BookWizardViewModel : ViewModel() {
 
     private fun createCheckboxMenuItem(
         label: String,
+        preSelected: Boolean,
         visibleProperty: BooleanProperty? = null,
         onChecked: (Boolean) -> Unit
     ): MenuItem {
@@ -283,24 +301,12 @@ class BookWizardViewModel : ViewModel() {
                 selectedProperty().onChange {
                     onChecked(it)
                 }
-                visibleProperty?.onChange { if (!it) isSelected = false }
+                isSelected = preSelected
+                visibleProperty?.onChange { if (it) isSelected = true }
             }
             isHideOnClick = false
             visibleProperty?.let {
                 visibleProperty().bind(it)
-            }
-        }
-    }
-
-    private fun resourcesMenuItems(): List<MenuItem> {
-        return sourceCollections.map { collection ->
-            val preselected = collection.slug == SlugsEnum.ULB.slug
-            createRadioMenuItem(collection.titleKey, preselected, sourcesToggleGroup) { selected ->
-                if (selected) {
-                    selectedSourceProperty.set(collection)
-                    anthologyVisibleProperty.set(collection.slug == SlugsEnum.ULB.slug)
-                    selectedAnthologies.clear()
-                }
             }
         }
     }

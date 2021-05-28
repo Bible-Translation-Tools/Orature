@@ -68,6 +68,9 @@ class BookSelection : Fragment() {
                         viewModel.selectedBookProperty.set(it)
                     }
                 }
+                viewModel.searchQueryProperty.onChange {
+                    it?.let { if (it.isNotBlank()) scrollTo(0) }
+                }
             }
         }
     }

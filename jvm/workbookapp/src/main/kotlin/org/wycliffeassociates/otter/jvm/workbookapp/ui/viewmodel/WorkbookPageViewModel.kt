@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -41,6 +42,9 @@ class WorkbookPageViewModel : ViewModel() {
 
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
+
+    @Inject
+    lateinit var preferencesRepository: IAppPreferencesRepository
 
     val workbookDataStore: WorkbookDataStore by inject()
 
@@ -214,6 +218,7 @@ class WorkbookPageViewModel : ViewModel() {
             }
             .subscribe {
                 showDeleteProgressDialogProperty.set(false)
+                preferencesRepository.setResumeProjectId(-1).subscribe()
                 workspace.navigateBack()
             }
     }

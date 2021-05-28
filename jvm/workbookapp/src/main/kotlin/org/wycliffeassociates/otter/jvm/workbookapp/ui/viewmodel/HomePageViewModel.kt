@@ -46,6 +46,7 @@ class HomePageViewModel : ViewModel() {
     }
 
     fun loadResumeBook() {
+        resumeBookProperty.set(null)
         preferencesRepository.resumeProjectId()
             .doOnError { logger.debug("Error in resumeProjectId: $it") }
             .subscribe { id ->
