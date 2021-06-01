@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS language_entity (
   gateway       INTEGER DEFAULT 0 NOT NULL,
   anglicized    TEXT NOT NULL,
   direction     TEXT NOT NULL,
-  region        TEXT NOT NULL
+  region        TEXT
 );
 
 CREATE TABLE IF NOT EXISTS dublin_core_entity (

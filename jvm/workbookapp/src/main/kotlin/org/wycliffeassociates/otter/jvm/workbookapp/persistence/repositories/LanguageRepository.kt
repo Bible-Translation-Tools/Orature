@@ -40,6 +40,17 @@ class LanguageRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun updateRegions(languages: List<Language>): Completable {
+        return Completable
+            .fromCallable {
+                languageDao.updateRegions(languages.map(mapper::mapToEntity))
+            }
+            .doOnError { e ->
+                logger.error("Error in updateRegions", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun getAll(): Single<List<Language>> {
         return Single
             .fromCallable {

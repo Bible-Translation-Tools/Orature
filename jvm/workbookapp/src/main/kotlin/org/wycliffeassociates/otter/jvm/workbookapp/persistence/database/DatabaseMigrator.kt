@@ -2,11 +2,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.AudioPluginEntity
 import jooq.tables.InstalledEntity
+import jooq.tables.LanguageEntity
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 2
+const val SCHEMA_VERSION = 3
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -17,6 +18,7 @@ class DatabaseMigrator {
         if (currentVersion != SCHEMA_VERSION) {
             currentVersion = migrate0to1(dsl, currentVersion)
             currentVersion = migrate1to2(dsl, currentVersion)
+            currentVersion = migrate2to3(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -86,6 +88,30 @@ class DatabaseMigrator {
                 // be performed in sqlite.
             }
             return 2
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 2
+     * Adds a column for the region to the languages table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate2to3(dsl: DSLContext, current: Int): Int {
+        return if (current < 3) {
+            try {
+                dsl
+                    .alterTable(LanguageEntity.LANGUAGE_ENTITY)
+                    .addColumn(LanguageEntity.LANGUAGE_ENTITY.REGION)
+                    .execute()
+                logger.info("Updated database from version 2 to 3")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+            }
+            return 3
         } else {
             current
         }
