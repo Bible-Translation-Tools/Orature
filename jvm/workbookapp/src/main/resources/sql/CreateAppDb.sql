@@ -136,3 +136,10 @@ CREATE TABLE IF NOT EXISTS installed_entity (
     name                TEXT PRIMARY KEY NOT NULL,
     version             INTEGER NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS translation_entity (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
+    target_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
+    UNIQUE (source_fk, target_fk)
+);

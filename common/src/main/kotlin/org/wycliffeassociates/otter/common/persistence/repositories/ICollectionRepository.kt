@@ -23,10 +23,6 @@ interface ICollectionRepository : IRepository<Collection> {
         sourceCollection: Collection,
         language: Language
     ): Single<Collection>
-    fun deriveTranslation(
-        sourceMetadatas: List<ResourceMetadata>,
-        language: Language
-    ): Single<ResourceMetadata>
 
     /**
      * Deletes a derived project. This should remove all associated derived collections, content, and takes associated

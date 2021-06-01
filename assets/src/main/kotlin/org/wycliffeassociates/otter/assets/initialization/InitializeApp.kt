@@ -12,7 +12,8 @@ class InitializeApp @Inject constructor(
     private val initializeMarker: InitializeMarker,
     private val initializePlugins: InitializePlugins,
     private val initializeTakeRepository: InitializeTakeRepository,
-    private val initializeProjects: InitializeProjects
+    private val initializeProjects: InitializeProjects,
+    private val initializeTranslations: InitializeTranslations
 ) {
 
     private val logger = LoggerFactory.getLogger(InitializeApp::class.java)
@@ -27,7 +28,8 @@ class InitializeApp @Inject constructor(
                     initializeMarker,
                     initializePlugins,
                     initializeTakeRepository,
-                    initializeProjects
+                    initializeProjects,
+                    initializeTranslations
                 )
 
                 var total = 0.0

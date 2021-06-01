@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
@@ -86,13 +87,12 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             .toList()
     }
 
-    override fun getProjects(target: ResourceMetadata): Single<List<Workbook>> {
+    override fun getProjects(translation: Translation): Single<List<Workbook>> {
         return db.getDerivedProjects()
             .map { projects ->
                 projects
                     .filter { it.resourceContainer?.type == ContainerType.Book }
-                    .filter { it.resourceContainer?.language == target.language }
-                    .filter { it.resourceContainer?.identifier == target.identifier }
+                    .filter { it.resourceContainer?.language == translation.target }
             }
             .flattenAsObservable { it }
             .flatMapMaybe(::getWorkbook)

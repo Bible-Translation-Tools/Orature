@@ -4,9 +4,6 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import java.io.File
-import java.time.LocalDate
-import javax.inject.Inject
 import jooq.Tables.DUBLIN_CORE_ENTITY
 import jooq.Tables.RC_LINK_ENTITY
 import jooq.Tables.RESOURCE_LINK
@@ -41,6 +38,9 @@ import org.wycliffeassociates.resourcecontainer.entity.Checking
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.dublincore
 import org.wycliffeassociates.resourcecontainer.entity.project
+import java.io.File
+import java.time.LocalDate
+import javax.inject.Inject
 
 class CollectionRepository @Inject constructor(
     private val database: AppDatabase,
@@ -413,19 +413,6 @@ class CollectionRepository @Inject constructor(
                 log.error("End Metadata", e)
             }
             .subscribeOn(Schedulers.io())
-    }
-
-    override fun deriveTranslation(
-        sourceMetadatas: List<ResourceMetadata>,
-        language: Language
-    ): Single<ResourceMetadata> {
-        return Single.fromCallable {
-            database.transactionResult { dsl ->
-                val derivedMetadata = deriveAndLinkMetadata(sourceMetadatas, language, dsl)
-                val mainDerivedMetadata = derivedMetadata.first()
-                return@transactionResult metadataMapper.mapFromEntity(mainDerivedMetadata, language)
-            }
-        }
     }
 
     private fun findProjectCollection(
