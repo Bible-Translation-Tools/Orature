@@ -15,6 +15,11 @@
     -fx-background-color: -wa-black-10;
 }
 
+.language-card-cell:disabled {
+    -fx-background-color: -wa-transparent;
+    -fx-effect: none;
+}
+
 .language-card-cell__icon {
     -fx-padding: 0 10px;
 }

@@ -27,7 +27,8 @@
     -fx-background-radius: 6px;
 }
 
-.filtered-search-bar__menu .checkbox-button {
+.filtered-search-bar__menu .checkbox-button,
+.filtered-search-bar__menu .select-button {
     -fx-pref-width: 300px;
 }
 

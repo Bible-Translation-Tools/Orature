@@ -26,7 +26,9 @@ class SourceLanguageSelection : Fragment() {
         )
         iconProperty.set(FontIcon(Material.HEARING))
         onClickAction {
-            navigator.back()
+            translationViewModel.selectedSourceLanguageProperty.value?.let {
+                navigator.back()
+            }
         }
     }
 

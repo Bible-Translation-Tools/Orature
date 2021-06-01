@@ -91,6 +91,19 @@ class ResourceMetadataRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getTargets(metadata: ResourceMetadata): Single<List<ResourceMetadata>> {
+        return Single.fromCallable {
+            resourceMetadataDao
+                .fetchAll()
+                .filter { it.derivedFromFk == metadata.id }
+                .map(this::buildMetadata)
+            }
+            .doOnError { e ->
+                logger.error("Error in getTargets", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun getAllTargets(): Single<List<ResourceMetadata>> {
         return Single
             .fromCallable {

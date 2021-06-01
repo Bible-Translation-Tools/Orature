@@ -1,0 +1,53 @@
+.book-card-cell {
+    -fx-padding: 10px;
+    -fx-spacing: 20px;
+    -fx-alignment: center-left;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 6px;
+    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+}
+
+.book-card-cell:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.book-card-cell:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.book-card-cell:disabled {
+    -fx-background-color: -wa-transparent;
+    -fx-effect: none;
+}
+
+.book-card-cell__title {
+    -fx-spacing: 5px;
+}
+
+.book-card-cell__name {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.book-card-cell__project-type {
+    -fx-font-size: 16px;
+}
+
+.book-card-cell__graphic {
+    -fx-pref-width: 160px;
+    -fx-pref-height: 80px;
+}
+
+.book-card-cell:disabled .book-card-cell__graphic {
+    -fx-opacity: 0.5;
+}
+
+.book-card-cell__bg {
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 6px;
+    -fx-alignment: center;
+}
+
+.book-card-cell__bg .ikonli-font-icon {
+    -fx-font-size: 20px;
+}

@@ -80,6 +80,7 @@ class TranslationViewModel : ViewModel() {
         sourceTranslations.clear()
         sourceLanguages.clear()
         targetLanguages.clear()
+        existingLanguages.clear()
         selectedSourceCollectionProperty.set(null)
         selectedSourceLanguageProperty.set(null)
         selectedTargetLanguageProperty.set(null)
@@ -119,8 +120,9 @@ class TranslationViewModel : ViewModel() {
     }
 
     private fun loadTranslations() {
+        val source = selectedSourceCollectionProperty.value
         resourceMetadataRepository
-            .getAllTargets()
+            .getTargets(source)
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error loading translations", e)

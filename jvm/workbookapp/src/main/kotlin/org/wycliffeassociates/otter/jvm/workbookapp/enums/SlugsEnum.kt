@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.wizard.view
+package org.wycliffeassociates.otter.jvm.workbookapp.enums
 //
 enum class SlugsEnum(val slug: String) {
     ULB("ulb"),

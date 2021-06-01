@@ -15,9 +15,9 @@
                         <FontIcon iconLiteral="gmi-hearing" />
                     </graphic>
                 </Label>
-                <Label styleClass="translation-card__divider">
+                <Label styleClass="new-translation-card__divider">
                     <graphic>
-                        <FontIcon iconLiteral="mdi-play" />
+                        <FontIcon iconLiteral="mdi-menu-right" />
                     </graphic>
                 </Label>
                 <Label fx:id="targetLanguageText" graphicTextGap="8.0" styleClass="new-translation-card__language">
