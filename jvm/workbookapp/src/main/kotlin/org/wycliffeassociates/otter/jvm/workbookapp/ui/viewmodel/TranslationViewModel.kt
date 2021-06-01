@@ -126,18 +126,5 @@ class TranslationViewModel : ViewModel() {
                     translations.map { it.target }.intersect(targetLanguages)
                 )
             }
-
-        /*val source = selectedSourceCollectionProperty.value
-        resourceMetadataRepository
-            .getTargets(source)
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error loading translations", e)
-            }
-            .subscribe { translations ->
-                existingLanguages.setAll(
-                    translations.map { it.language }.intersect(targetLanguages)
-                )
-            }*/
     }
 }
