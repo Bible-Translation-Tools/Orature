@@ -109,7 +109,7 @@ class AddFilesViewModel : ViewModel() {
                     .doOnError {
                         logger.debug("Error in getSourceMetadata: $rc")
                     }
-                    .onErrorReturnItem(null)
+                    .onErrorComplete()
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)

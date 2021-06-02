@@ -66,15 +66,13 @@ class ProjectImporter @Inject constructor(
         }
     }
 
-    fun getSourceMetadata(resourceContainer: File): Single<ResourceMetadata?> {
-        return Single.fromCallable {
-            try {
-                val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
-                val manifestSources = manifest.dublinCore.source.toSet()
-                val manifestProject = manifest.projects.single()
-                val sourceCollection = findSourceCollection(manifestSources, manifestProject)
-                sourceCollection.resourceContainer!!
-            } catch (t: Throwable) { null }
+    fun getSourceMetadata(resourceContainer: File): Maybe<ResourceMetadata> {
+        return Maybe.fromCallable {
+            val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
+            val manifestSources = manifest.dublinCore.source.toSet()
+            val manifestProject = manifest.projects.single()
+            val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+            sourceCollection.resourceContainer
         }
     }
 

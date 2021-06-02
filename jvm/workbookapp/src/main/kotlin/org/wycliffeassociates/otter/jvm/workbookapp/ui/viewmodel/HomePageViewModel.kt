@@ -72,7 +72,7 @@ class HomePageViewModel : ViewModel() {
             .subscribe { retrieved ->
                 val translations = retrieved
                     .map(::mapToTranslationCardModel)
-                    .sortedWith(translationCardModelSorter())
+                    .sortedWith(translationCardModelComparator())
                 translationModels.setAll(translations)
             }
     }
@@ -105,7 +105,7 @@ class HomePageViewModel : ViewModel() {
         )
     }
 
-    private fun translationCardModelSorter(): Comparator<TranslationCardModel> {
+    private fun translationCardModelComparator(): Comparator<TranslationCardModel> {
         return compareBy<TranslationCardModel> { translation ->
             translation.sourceLanguage.slug
         }.thenComparing { translation ->
