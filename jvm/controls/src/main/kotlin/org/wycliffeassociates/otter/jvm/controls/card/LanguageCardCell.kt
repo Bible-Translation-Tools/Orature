@@ -13,7 +13,6 @@ class LanguageCardCell : HBox() {
     val languageSlugProperty = SimpleStringProperty()
 
     init {
-        importStylesheet(javaClass.getResource("/css/language-card-cell.css").toExternalForm())
         styleClass.setAll("language-card-cell")
 
         label {

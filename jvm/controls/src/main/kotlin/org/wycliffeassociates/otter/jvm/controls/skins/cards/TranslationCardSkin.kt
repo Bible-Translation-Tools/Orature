@@ -41,8 +41,6 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
     init {
         loadFXML()
         initializeControl()
-
-        importStylesheet(javaClass.getResource("/css/translation-card.css").toExternalForm())
     }
 
     private fun initializeControl() {

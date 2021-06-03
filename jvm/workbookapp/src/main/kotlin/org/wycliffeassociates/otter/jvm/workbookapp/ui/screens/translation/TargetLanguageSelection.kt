@@ -63,6 +63,8 @@ class TargetLanguageSelection : Fragment() {
 
     init {
         importStylesheet(javaClass.getResource("/css/translation-wizard.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/language-card-cell.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/filtered-search-bar.css").toExternalForm())
 
         translationViewModel.targetLanguages.onChange {
             viewModel.regions.setAll(

@@ -9,7 +9,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.banner.ResumeBookBanner
-import tornadofx.*
 
 class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<ResumeBookBanner>(banner) {
 
@@ -31,8 +30,6 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
     private val cornerRadius = 20.0
 
     init {
-        importStylesheet(javaClass.getResource("/css/resume-book-banner.css").toExternalForm())
-
         loadFXML()
         initializeControl()
     }

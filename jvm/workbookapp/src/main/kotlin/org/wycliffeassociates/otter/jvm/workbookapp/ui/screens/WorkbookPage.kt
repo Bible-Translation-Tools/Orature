@@ -63,6 +63,8 @@ class WorkbookPage : Fragment() {
         initializeProgressDialogs()
         initializeDeleteConfirmDialog()
         importStylesheet(resources.get("/css/workbook-page.css"))
+        importStylesheet(resources.get("/css/chapter-card.css"))
+        importStylesheet(resources.get("/css/workbook-banner.css"))
     }
 
     /**

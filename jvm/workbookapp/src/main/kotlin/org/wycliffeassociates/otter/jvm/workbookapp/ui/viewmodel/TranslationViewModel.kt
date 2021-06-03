@@ -35,7 +35,7 @@ class TranslationViewModel : ViewModel() {
 
     val showProgressProperty = SimpleBooleanProperty(false)
 
-    private val sourceCollections = mutableListOf<ResourceMetadata>()
+    private val sourceResources = mutableListOf<ResourceMetadata>()
     val existingLanguages = observableListOf<Language>()
 
     init {
@@ -73,7 +73,7 @@ class TranslationViewModel : ViewModel() {
     }
 
     fun reset() {
-        sourceCollections.clear()
+        sourceResources.clear()
         sourceLanguages.clear()
         targetLanguages.clear()
         existingLanguages.clear()
@@ -95,7 +95,7 @@ class TranslationViewModel : ViewModel() {
                 logger.error("Error in initializing source languages", e)
             }
             .subscribe { collections ->
-                sourceCollections.addAll(collections)
+                sourceResources.addAll(collections)
                 sourceLanguages.addAll(collections.map { it.language })
             }
     }

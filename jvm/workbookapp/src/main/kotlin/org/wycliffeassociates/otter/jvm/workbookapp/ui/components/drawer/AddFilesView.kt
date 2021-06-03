@@ -106,6 +106,8 @@ class AddFilesView : View() {
         importStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
 
         initImportDialog()
+        initSuccessDialog()
+        initErrorDialog()
         createSnackBar()
     }
 
@@ -130,6 +132,58 @@ class AddFilesView : View() {
 
         viewModel.showImportDialogProperty.onChange {
             Platform.runLater { if (it) importDialog.open() else importDialog.close() }
+        }
+    }
+
+    private fun initSuccessDialog() {
+        val successDialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it
+                        )
+                    } ?: messages["importResource"]
+                }
+            )
+            messageTextProperty.set(messages["importResourceSuccessMessage"])
+            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+
+            cancelButtonTextProperty.set(messages["goHome"])
+            onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
+            onCancelAction { viewModel.showImportSuccessDialogProperty.set(false) }
+        }
+
+        viewModel.showImportSuccessDialogProperty.onChange {
+            Platform.runLater { if (it) successDialog.open() else successDialog.close() }
+        }
+    }
+
+    private fun initErrorDialog() {
+        val errorDialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it
+                        )
+                    } ?: messages["importResource"]
+                }
+            )
+            messageTextProperty.set(messages["importResourceFailMessage"])
+            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+
+            cancelButtonTextProperty.set(messages["close"])
+            onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }
+            onCancelAction { viewModel.showImportErrorDialogProperty.set(false) }
+        }
+
+        viewModel.showImportErrorDialogProperty.onChange {
+            Platform.runLater { if (it) errorDialog.open() else errorDialog.close() }
         }
     }
 

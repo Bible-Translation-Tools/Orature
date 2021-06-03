@@ -101,7 +101,7 @@ class HomePageViewModel : ViewModel() {
         return TranslationCardModel(
             translation.source,
             translation.target,
-            projects.asObservable()
+            projects.sortedBy { it.target.sort }.asObservable()
         )
     }
 

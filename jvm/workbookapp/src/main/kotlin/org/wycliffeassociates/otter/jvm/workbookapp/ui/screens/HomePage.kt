@@ -33,9 +33,13 @@ class HomePage : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/control.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/home-page.css").toExternalForm())
+        importStylesheet(resources.get("/css/root.css"))
+        importStylesheet(resources.get("/css/control.css"))
+        importStylesheet(resources.get("/css/home-page.css"))
+        importStylesheet(resources.get("/css/resume-book-banner.css"))
+        importStylesheet(resources.get("/css/new-translation-card.css"))
+        importStylesheet(resources.get("/css/translation-card.css"))
+        importStylesheet(resources.get("/css/book-card.css"))
     }
 
     override val root = stackpane {

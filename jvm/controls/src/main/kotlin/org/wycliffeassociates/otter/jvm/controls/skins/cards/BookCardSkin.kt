@@ -48,8 +48,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
     init {
         loadFXML()
         initializeControl()
-
-        importStylesheet(javaClass.getResource("/css/book-card.css").toExternalForm())
     }
 
     private fun initializeControl() {
