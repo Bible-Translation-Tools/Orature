@@ -60,11 +60,15 @@ class WorkbookPage : Fragment() {
     }
 
     init {
-        initializeProgressDialogs()
-        initializeDeleteConfirmDialog()
         importStylesheet(resources.get("/css/workbook-page.css"))
         importStylesheet(resources.get("/css/chapter-card.css"))
         importStylesheet(resources.get("/css/workbook-banner.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
+
+        initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
+        initializeDeleteSuccessDialog()
+        initializeDeleteFailDialog()
     }
 
     /**
@@ -128,7 +132,6 @@ class WorkbookPage : Fragment() {
             )
 
             onConfirmAction {
-                viewModel.showDeleteDialogProperty.set(false)
                 viewModel.deleteWorkbook()
             }
 
@@ -138,6 +141,58 @@ class WorkbookPage : Fragment() {
 
             onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
+        }
+    }
+
+    private fun initializeDeleteSuccessDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectSuccess"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["goHome"])
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["remove"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+            )
+
+            viewModel.showDeleteSuccessDialogProperty.onChange {
+                if (it) open() else close()
+            }
+
+            onCloseAction { viewModel.goBack() }
+            onCancelAction { viewModel.goBack() }
+        }
+    }
+
+    private fun initializeDeleteFailDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectFail"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["remove"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+            )
+
+            viewModel.showDeleteFailDialogProperty.onChange {
+                if (it) open() else close()
+            }
+
+            onCloseAction { viewModel.showDeleteFailDialogProperty.set(false) }
+            onCancelAction { viewModel.showDeleteFailDialogProperty.set(false) }
         }
     }
 

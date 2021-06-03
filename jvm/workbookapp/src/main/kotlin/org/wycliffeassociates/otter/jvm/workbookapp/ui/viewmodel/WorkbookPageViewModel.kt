@@ -62,8 +62,11 @@ class WorkbookPageViewModel : ViewModel() {
 
     val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
+    val showDeleteSuccessDialogProperty = SimpleBooleanProperty(false)
+    val showDeleteFailDialogProperty = SimpleBooleanProperty(false)
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
 
+    private val noResumableProject = -1
     private val navigator: NavigationMediator by inject()
 
     init {
@@ -198,6 +201,7 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun deleteWorkbook() {
+        showDeleteDialogProperty.set(false)
         showDeleteProgressDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
@@ -215,11 +219,21 @@ class WorkbookPageViewModel : ViewModel() {
             .doFinally {
                 activeProjectTitleProperty.set(null)
                 activeProjectCoverProperty.set(null)
-            }
-            .subscribe {
                 showDeleteProgressDialogProperty.set(false)
-                preferencesRepository.setResumeProjectId(-1).subscribe()
-                workspace.navigateBack()
             }
+            .subscribe(
+                {
+                    showDeleteSuccessDialogProperty.set(true)
+                    preferencesRepository.setResumeProjectId(noResumableProject).subscribe()
+                },
+                {
+                    showDeleteFailDialogProperty.set(true)
+                }
+            )
+    }
+
+    fun goBack() {
+        showDeleteSuccessDialogProperty.set(false)
+        navigator.back()
     }
 }

@@ -42,6 +42,8 @@ class HomePageViewModel : ViewModel() {
     val translationModels = observableListOf<TranslationCardModel>()
     val resumeBookProperty = SimpleObjectProperty<Workbook>()
 
+    private val noResumableProject = -1
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
     }
@@ -51,14 +53,16 @@ class HomePageViewModel : ViewModel() {
         preferencesRepository.resumeProjectId()
             .doOnError { logger.debug("Error in resumeProjectId: $it") }
             .subscribe { id ->
-                collectionRepo
-                    .getProject(id)
-                    .flatMap { workbookRepo.getWorkbook(it) }
-                    .onErrorComplete()
-                    .observeOnFx()
-                    .subscribe {
-                        resumeBookProperty.set(it)
-                    }
+                if (id != noResumableProject) {
+                    collectionRepo
+                        .getProject(id)
+                        .flatMap { workbookRepo.getWorkbook(it) }
+                        .onErrorComplete()
+                        .observeOnFx()
+                        .subscribe {
+                            resumeBookProperty.set(it)
+                        }
+                }
             }
     }
 

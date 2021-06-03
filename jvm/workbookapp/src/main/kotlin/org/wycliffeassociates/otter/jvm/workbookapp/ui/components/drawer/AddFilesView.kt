@@ -103,7 +103,8 @@ class AddFilesView : View() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
+        importStylesheet(resources.get("/css/app-drawer.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
 
         initImportDialog()
         initSuccessDialog()

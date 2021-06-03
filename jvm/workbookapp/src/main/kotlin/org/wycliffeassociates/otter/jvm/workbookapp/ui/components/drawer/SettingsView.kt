@@ -124,7 +124,8 @@ class SettingsView : View() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
+        importStylesheet(resources.get("/css/app-drawer.css"))
+        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
         viewModel.refreshPlugins()
     }
 
