@@ -593,9 +593,6 @@ for desktop in /home/*/Desktop; do
     rm "$desktop/orature.desktop" || true
 done</postUninstallScript>
     </linuxDeb>
-    <macosFolder name="macOS Folder" id="166">
-      <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
-    </macosFolder>
     <macosArchive name="macOS Single Bundle Archive" id="415" launcherId="59">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
     </macosArchive>
