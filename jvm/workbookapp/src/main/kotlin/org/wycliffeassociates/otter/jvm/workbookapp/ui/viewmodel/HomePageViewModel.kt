@@ -5,12 +5,10 @@ import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
-import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -20,9 +18,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book.BookSelectio
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.SourceLanguageSelection
 import tornadofx.*
 import javax.inject.Inject
-import javax.inject.Provider
 
 fun Workbook.toKey() = Translation(this.source.language, this.target.language)
+
+const val NO_RESUMABLE_PROJECT = -1
 
 class HomePageViewModel : ViewModel() {
 
@@ -31,8 +30,6 @@ class HomePageViewModel : ViewModel() {
     @Inject lateinit var collectionRepo: ICollectionRepository
     @Inject lateinit var workbookRepo: IWorkbookRepository
     @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var deleteProjectProvider: Provider<DeleteProject>
-    @Inject lateinit var resourceMetadataRepository: IResourceMetadataRepository
     @Inject lateinit var preferencesRepository: IAppPreferencesRepository
     @Inject lateinit var languageRepository: ILanguageRepository
 
@@ -41,8 +38,6 @@ class HomePageViewModel : ViewModel() {
 
     val translationModels = observableListOf<TranslationCardModel>()
     val resumeBookProperty = SimpleObjectProperty<Workbook>()
-
-    private val noResumableProject = -1
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -53,7 +48,7 @@ class HomePageViewModel : ViewModel() {
         preferencesRepository.resumeProjectId()
             .doOnError { logger.debug("Error in resumeProjectId: $it") }
             .subscribe { id ->
-                if (id != noResumableProject) {
+                if (id != NO_RESUMABLE_PROJECT) {
                     collectionRepo
                         .getProject(id)
                         .flatMap { workbookRepo.getWorkbook(it) }

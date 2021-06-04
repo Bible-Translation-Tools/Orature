@@ -66,7 +66,6 @@ class WorkbookPageViewModel : ViewModel() {
     val showDeleteFailDialogProperty = SimpleBooleanProperty(false)
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
 
-    private val noResumableProject = -1
     private val navigator: NavigationMediator by inject()
 
     init {
@@ -224,7 +223,7 @@ class WorkbookPageViewModel : ViewModel() {
             .subscribe(
                 {
                     showDeleteSuccessDialogProperty.set(true)
-                    preferencesRepository.setResumeProjectId(noResumableProject).subscribe()
+                    preferencesRepository.setResumeProjectId(NO_RESUMABLE_PROJECT).subscribe()
                 },
                 {
                     showDeleteFailDialogProperty.set(true)
