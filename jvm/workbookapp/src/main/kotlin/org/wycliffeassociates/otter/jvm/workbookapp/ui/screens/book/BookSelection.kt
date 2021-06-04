@@ -76,9 +76,10 @@ class BookSelection : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/book-wizard.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/filtered-search-bar.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/book-card-cell.css").toExternalForm())
+        importStylesheet(resources.get("/css/book-wizard.css"))
+        importStylesheet(resources.get("/css/filtered-search-bar.css"))
+        importStylesheet(resources.get("/css/book-card-cell.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
 
         createProgressDialog()
     }
