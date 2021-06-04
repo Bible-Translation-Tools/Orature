@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundImage
@@ -25,7 +24,6 @@ class BookCardCell : HBox() {
     private val graphicRadius = 15.0
 
     init {
-        importStylesheet(javaClass.getResource("/css/book-card-cell.css").toExternalForm())
         styleClass.setAll("book-card-cell")
 
         stackpane {

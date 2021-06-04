@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 import jooq.Tables
 import jooq.tables.AudioPluginEntity
 import jooq.tables.InstalledEntity
+import jooq.tables.LanguageEntity
 import org.jooq.DSLContext
 import org.junit.After
 import org.junit.Assert
@@ -10,6 +11,7 @@ import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DATABASE_INSTALLABLE_NAME
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.DatabaseMigrator
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.SCHEMA_VERSION
 import java.io.File
 import java.lang.Exception
 
@@ -18,6 +20,7 @@ class TestDatabaseMigrator {
     var dsl: DSLContext? = null
     val dbFile = File.createTempFile("database", ".sqlite").apply { deleteOnExit() }
     val schemaFile = File.createTempFile("schema0", ".sql").apply { deleteOnExit() }
+    val latestVersion = SCHEMA_VERSION
 
     @Before
     fun setup() {
@@ -92,16 +95,6 @@ class TestDatabaseMigrator {
             } catch (e: Exception) {
             }
 
-            // Test that database version is version 2
-            val databaseVersionRecord = _dsl
-                .select()
-                .from(InstalledEntity.INSTALLED_ENTITY)
-                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
-                .fetchSingle()
-            Assert.assertNotNull(databaseVersionRecord)
-            val version = databaseVersionRecord.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION)
-            Assert.assertEquals("Assert version is migrated from 0 to 2", 2, version)
-
             // Test that marker exists and the default value is provided after migration
             val pluginRecord = _dsl.select().from(AudioPluginEntity.AUDIO_PLUGIN_ENTITY).fetchOne()
             Assert.assertEquals(
@@ -111,5 +104,80 @@ class TestDatabaseMigrator {
             val canMark = pluginRecord.getValue(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
             Assert.assertEquals(canMark, 0)
         } ?: Assert.fail()
+    }
+
+    @Test
+    fun `test migrate from version 2 to 3`() {
+        dsl?.let { _dsl ->
+            _dsl
+                .insertInto(
+                    Tables.LANGUAGE_ENTITY,
+                    Tables.LANGUAGE_ENTITY.SLUG,
+                    Tables.LANGUAGE_ENTITY.NAME,
+                    Tables.LANGUAGE_ENTITY.GATEWAY,
+                    Tables.LANGUAGE_ENTITY.ANGLICIZED,
+                    Tables.LANGUAGE_ENTITY.DIRECTION
+                )
+                .values(
+                    "en",
+                    "english",
+                    1,
+                    "english",
+                    "ltr"
+                )
+                .execute()
+
+            // Test that region column does not exist before migration
+            var exceptionThrown = false
+            try {
+                var languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()
+                languageRecord.fields().contains(LanguageEntity.LANGUAGE_ENTITY.REGION)
+            } catch (e: Exception) {
+                Assert.assertTrue(
+                    "Exception thrown that region column does not exist",
+                    e.message!!.contains("no such column: language_entity.region")
+                )
+                exceptionThrown = true
+            }
+            Assert.assertTrue(
+                "Mark field exception thrown to verify region column does not exist",
+                exceptionThrown
+            )
+
+            try {
+                DatabaseMigrator().migrate(_dsl)
+            } catch (e: Exception) {
+            }
+
+            // Test that region exists and the default value is null
+            val languageRecord = _dsl.select().from(LanguageEntity.LANGUAGE_ENTITY).fetchOne()
+            Assert.assertEquals(
+                true,
+                languageRecord.fields().contains(LanguageEntity.LANGUAGE_ENTITY.REGION)
+            )
+            val region = languageRecord.getValue(LanguageEntity.LANGUAGE_ENTITY.REGION)
+            Assert.assertEquals(region, null)
+        } ?: Assert.fail()
+    }
+
+    @Test
+    fun `migrated to the latest version`() {
+        dsl?.let { _dsl ->
+            try {
+                DatabaseMigrator().migrate(_dsl)
+            } catch (e: Exception) {
+            }
+
+            // Test that database version is latest version
+            val databaseVersionRecord = _dsl
+                .select()
+                .from(InstalledEntity.INSTALLED_ENTITY)
+                .where(InstalledEntity.INSTALLED_ENTITY.NAME.eq(DATABASE_INSTALLABLE_NAME))
+                .fetchSingle()
+
+            Assert.assertNotNull(databaseVersionRecord)
+            val version = databaseVersionRecord.getValue(InstalledEntity.INSTALLED_ENTITY.VERSION)
+            Assert.assertEquals("Assert version is migrated from 0 to $latestVersion", latestVersion, version)
+        }
     }
 }

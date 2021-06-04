@@ -20,24 +20,30 @@
     -fx-font-size: 16px;
 }
 
-.workbook-banner .btn {
-    -fx-font-weight: bold;
-    -fx-font-size: 18px;
-}
-
 .workbook-banner__btn--delete {
-    -fx-background-color: -wa-gray-light;
-    -fx-border-width: 0px;
+    -fx-background-color: -wa-transparent;
+    -fx-border-color: -wa-white;
     -fx-text-fill: -wa-white;
 }
 
-.workbook-banner__btn--delete .ikonli-font-icon, .workbook-banner__btn--export .ikonli-font-icon {
-    -fx-icon-size: 18px;
-    -fx-icon-color: -wa-white;
+.workbook-banner__btn--delete:hover,
+.workbook-banner__btn--delete:pressed {
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
 }
 
-.workbook-banner__btn--delete:hover .ikonli-font-icon {
-    -fx-icon-color: -wa-primary;
+.workbook-banner__btn--delete:hover {
+    -fx-background-color: -wa-white-05;
+}
+
+.workbook-banner__btn--delete:pressed {
+    -fx-background-color: -wa-white-10;
+}
+
+.workbook-banner__btn--delete .ikonli-font-icon,
+.workbook-banner__btn--delete:hover .ikonli-font-icon,
+.workbook-banner__btn--delete:pressed .ikonli-font-icon {
+    -fx-fill: -wa-white;
 }
 
 

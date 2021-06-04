@@ -12,4 +12,6 @@ interface IAppPreferences {
     fun setAppInitialized(initialized: Boolean): Completable
     fun pluginId(type: PluginType): Single<Int>
     fun setPluginId(type: PluginType, id: Int): Completable
+    fun resumeBookId(): Single<Int>
+    fun setResumeBookId(id: Int): Completable
 }

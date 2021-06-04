@@ -5,18 +5,22 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.LanguageMapper
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TranslationMapper
 import javax.inject.Inject
 
 class LanguageRepository @Inject constructor(
     database: AppDatabase,
-    private val mapper: LanguageMapper
+    private val mapper: LanguageMapper,
+    private val translationMapper: TranslationMapper
 ) : ILanguageRepository {
     private val logger = LoggerFactory.getLogger(LanguageRepository::class.java)
 
     private val languageDao = database.languageDao
+    private val translationDao = database.translationDao
 
     override fun insert(language: Language): Single<Int> {
         return Single
@@ -36,6 +40,17 @@ class LanguageRepository @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in insertAll", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun updateRegions(languages: List<Language>): Completable {
+        return Completable
+            .fromCallable {
+                languageDao.updateRegions(languages.map(mapper::mapToEntity))
+            }
+            .doOnError { e ->
+                logger.error("Error in updateRegions", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -114,6 +129,30 @@ class LanguageRepository @Inject constructor(
             }
             .doOnError { e ->
                 logger.error("Error in delete for language: $obj", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getAllTranslations(): Single<List<Translation>> {
+        return Single.fromCallable {
+            translationDao.fetchAll()
+                .map {
+                    val source = mapper
+                        .mapFromEntity(languageDao.fetchById(it.sourceFk))
+                    val target = mapper
+                        .mapFromEntity(languageDao.fetchById(it.targetFk))
+                    translationMapper.mapFromEntity(it, source, target)
+                }
+        }
+    }
+
+    override fun insertTranslation(translation: Translation): Single<Int> {
+        return Single
+            .fromCallable {
+                translationDao.insert(translationMapper.mapToEntity(translation))
+            }
+            .doOnError { e ->
+                logger.error("Error in insert for translation: $translation", e)
             }
             .subscribeOn(Schedulers.io())
     }

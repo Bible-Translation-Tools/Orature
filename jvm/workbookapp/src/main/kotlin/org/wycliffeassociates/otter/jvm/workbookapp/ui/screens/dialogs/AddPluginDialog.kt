@@ -107,7 +107,6 @@ class AddPluginDialog : OtterDialog() {
     }
 
     init {
-        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
         setContent(content)
     }
 

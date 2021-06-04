@@ -35,18 +35,14 @@ class TranslationViewModel : ViewModel() {
 
     val showProgressProperty = SimpleBooleanProperty(false)
 
-    private val sourceTranslations = mutableListOf<ResourceMetadata>()
+    private val sourceResources = mutableListOf<ResourceMetadata>()
     val existingLanguages = observableListOf<Language>()
-    private val selectedSourceCollectionProperty = SimpleObjectProperty<ResourceMetadata>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         selectedSourceLanguageProperty.onChange { language ->
             language?.let {
-                selectedSourceCollectionProperty.set(
-                    sourceTranslations.singleOrNull { it.language == language }
-                )
                 navigator.dock<TargetLanguageSelection>()
             }
         }
@@ -59,13 +55,13 @@ class TranslationViewModel : ViewModel() {
     }
 
     private fun createTranslation() {
-        val source = selectedSourceCollectionProperty.value
-        val language = selectedTargetLanguageProperty.value
+        val source = selectedSourceLanguageProperty.value
+        val target = selectedTargetLanguageProperty.value
 
-        if (source != null && language != null) {
+        if (source != null && target != null) {
             showProgressProperty.set(true)
             creationUseCase
-                .create(selectedSourceCollectionProperty.value, selectedTargetLanguageProperty.value)
+                .create(source, target)
                 .doOnError { e ->
                     logger.error("Error in creating a translation for collection: $source", e)
                 }
@@ -77,11 +73,10 @@ class TranslationViewModel : ViewModel() {
     }
 
     fun reset() {
-        sourceTranslations.clear()
+        sourceResources.clear()
         sourceLanguages.clear()
         targetLanguages.clear()
         existingLanguages.clear()
-        selectedSourceCollectionProperty.set(null)
         selectedSourceLanguageProperty.set(null)
         selectedTargetLanguageProperty.set(null)
     }
@@ -100,7 +95,7 @@ class TranslationViewModel : ViewModel() {
                 logger.error("Error in initializing source languages", e)
             }
             .subscribe { collections ->
-                sourceTranslations.addAll(collections)
+                sourceResources.addAll(collections)
                 sourceLanguages.addAll(collections.map { it.language })
             }
     }
@@ -120,16 +115,15 @@ class TranslationViewModel : ViewModel() {
     }
 
     private fun loadTranslations() {
-        val source = selectedSourceCollectionProperty.value
-        resourceMetadataRepository
-            .getTargets(source)
+        languageRepo
+            .getAllTranslations()
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error loading translations", e)
             }
             .subscribe { translations ->
                 existingLanguages.setAll(
-                    translations.map { it.language }.intersect(targetLanguages)
+                    translations.map { it.target }.intersect(targetLanguages)
                 )
             }
     }

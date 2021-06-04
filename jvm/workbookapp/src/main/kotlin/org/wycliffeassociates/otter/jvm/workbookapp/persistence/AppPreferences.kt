@@ -24,6 +24,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val EDITOR_PLUGIN_ID_KEY = "editorPluginId"
     private val RECORDER_PLUGIN_ID_KEY = "recorderPluginId"
     private val MARKER_PLUGIN_ID_KEY = "markerPluginId"
+    private val RESUME_BOOK_ID_KEY = "resumeBookId"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -95,6 +96,14 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setPluginId(type: PluginType, id: Int): Completable {
         return putInt(getPluginKeyByType(type), id)
+    }
+
+    override fun resumeBookId(): Single<Int> {
+        return getInt(RESUME_BOOK_ID_KEY, -1)
+    }
+
+    override fun setResumeBookId(id: Int): Completable {
+        return putInt(RESUME_BOOK_ID_KEY, id)
     }
 
     private fun getPluginKeyByType(type: PluginType): String {

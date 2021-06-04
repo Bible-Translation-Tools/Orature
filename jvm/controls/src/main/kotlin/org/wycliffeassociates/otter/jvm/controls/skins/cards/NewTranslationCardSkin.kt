@@ -7,7 +7,6 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
-import tornadofx.*
 
 class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<NewTranslationCard>(card) {
 
@@ -21,8 +20,6 @@ class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<Ne
     lateinit var newTranslationBtn: Button
 
     init {
-        importStylesheet(javaClass.getResource("/css/new-translation-card.css").toExternalForm())
-
         loadFXML()
         initializeControl()
     }

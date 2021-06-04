@@ -22,7 +22,6 @@ import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
-import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
@@ -131,7 +130,6 @@ class ConfirmDialog : OtterDialog() {
     }
 
     init {
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
         setContent(content)
     }
 

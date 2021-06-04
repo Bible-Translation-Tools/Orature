@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 import dagger.Binds
 import dagger.Module
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
@@ -14,7 +15,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IResourceRep
 import org.wycliffeassociates.otter.common.persistence.repositories.ITakeRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.AudioPluginRegistrar
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.CollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ContentRepository
@@ -24,6 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.Res
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ResourceRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.TakeRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.AudioPluginRegistrar
 import javax.inject.Singleton
 
 @Module
@@ -93,4 +95,10 @@ abstract class AppRepositoriesModule {
     abstract fun providesRegistrar(
         registrar: AudioPluginRegistrar
     ): IAudioPluginRegistrar
+
+    @Binds
+    @Singleton
+    abstract fun providesAppPreferencesRepository(
+        repository: AppPreferencesRepository
+    ): IAppPreferencesRepository
 }

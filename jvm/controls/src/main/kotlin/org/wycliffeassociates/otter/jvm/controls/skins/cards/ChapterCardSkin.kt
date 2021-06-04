@@ -42,8 +42,6 @@ class ChapterCardSkin(private val card: ChapterCard) : SkinBase<ChapterCard>(car
     init {
         loadFXML()
         initializeControl()
-
-        importStylesheet(javaClass.getResource("/css/chapter-card.css").toExternalForm())
     }
 
     private fun initializeControl() {

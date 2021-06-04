@@ -26,25 +26,52 @@ class InitializeLanguages @Inject constructor(
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     log.info("Initializing $name version: $version...")
-                    importLanguages()
-                        .doOnComplete {
-                            installedEntityRepo.install(this)
-                            log.info("Languages imported!")
-                            log.info("$name version: $version installed!")
-                        }
-                        .doOnError { e ->
-                            log.error("Error importing languages.", e)
-                        }
-                        .blockingAwait()
+
+                    migrate(installedVersion)
+
+                    installedEntityRepo.install(this)
+                    log.info("Languages imported!")
+                    log.info("$name version: $version installed!")
                 } else {
                     log.info("$name up to date with version: $version")
                 }
             }
     }
 
+    private fun migrate(fromVersion: Int?) {
+        when (fromVersion) {
+            1 -> migrate1to2()
+            else -> {
+                migrateTo1()
+                migrate1to2()
+            }
+        }
+    }
+
+    private fun migrateTo1() {
+        importLanguages()
+            .doOnError { e ->
+                log.error("Error importing languages.", e)
+            }
+            .blockingAwait()
+    }
+
+    private fun migrate1to2() {
+        updateRegions()
+            .doOnError { e ->
+                log.error("Error updating regions.", e)
+            }
+            .blockingAwait()
+    }
+
     private fun importLanguages(): Completable {
         return ImportLanguages(
             languageRepo
         ).import(ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH))
+    }
+
+    private fun updateRegions(): Completable {
+        return ImportLanguages(languageRepo)
+            .updateRegions(ClassLoader.getSystemResourceAsStream(LANGNAMES_PATH))
     }
 }
