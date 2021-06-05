@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.audio
 
 import java.io.File
+import java.io.OutputStream
 import javax.sound.sampled.spi.AudioFileWriter
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_CHANNELS
@@ -8,6 +9,7 @@ import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 
 class AudioFile private constructor() {
 
@@ -72,4 +74,10 @@ class AudioFile private constructor() {
         }
     }
 
+    fun writer(append:Boolean = false, buffered: Boolean = true): OutputStream {
+        return when(file.extension) {
+            "wav" -> WavOutputStream(strategy as WavFile, append, buffered)
+            else -> WavOutputStream(strategy as WavFile, append, buffered)
+        }
+    }
 }
