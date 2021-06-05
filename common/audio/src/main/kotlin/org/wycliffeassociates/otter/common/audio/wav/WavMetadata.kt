@@ -2,8 +2,9 @@ package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import org.wycliffeassociates.otter.common.audio.AudioMetadata
 
-class WavMetadata(parsableChunks: List<RiffChunk>? = null) {
+class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetadata {
 
     private val cueChunk: CueChunk
     private val chunks: Set<RiffChunk>
@@ -33,11 +34,11 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) {
         chunks.forEach { out.write(it.toByteArray()) }
     }
 
-    fun addCue(location: Int, label: String) {
+    override fun addCue(location: Int, label: String) {
         cueChunk.addCue(WavCue(location, label))
     }
 
-    fun getCues(): List<WavCue> {
+    override fun getCues(): List<WavCue> {
         return cueChunk.cues
     }
 }

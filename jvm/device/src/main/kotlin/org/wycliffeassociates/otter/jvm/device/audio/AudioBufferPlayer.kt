@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
+import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class AudioBufferPlayer : IAudioPlayer {
 
@@ -42,7 +43,7 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun load(file: File) {
         reader?.let { close() }
-        reader = WavFileReader(WavFile(file)).let { _reader ->
+        reader = AudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
@@ -65,7 +66,7 @@ class AudioBufferPlayer : IAudioPlayer {
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
-        reader = WavFileReader(WavFile(file), frameStart, frameEnd).let { _reader ->
+        reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
             player = AudioSystem.getSourceDataLine(
                 AudioFormat(

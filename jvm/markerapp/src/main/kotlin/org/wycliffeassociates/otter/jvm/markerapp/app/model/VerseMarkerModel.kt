@@ -4,12 +4,12 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import javafx.beans.property.SimpleIntegerProperty
 import org.wycliffeassociates.otter.common.audio.wav.WavCue
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import tornadofx.isInt
 
 private const val SEEK_EPSILON = 15_000
 
-class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
+class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
 
     val cues = sanitizeCues(audio)
     val markers: List<ChunkMarkerModel>
@@ -88,7 +88,7 @@ class VerseMarkerModel(private val audio: WavFile, val markerTotal: Int) {
         }.ignoreElement()
     }
 
-    private fun sanitizeCues(audio: WavFile): List<WavCue> {
+    private fun sanitizeCues(audio: AudioFile): List<WavCue> {
         return audio.metadata.getCues().filter { it.label.isInt() }
     }
 

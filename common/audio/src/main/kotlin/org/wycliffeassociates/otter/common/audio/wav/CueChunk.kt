@@ -57,7 +57,7 @@ private const val DONT_CARE_CUE_DATA_SIZE = 16
  * 4 - cue point id (matching the id from the cue chunk)
  * _ - text of the label (should be word aligned, but technically we double word align
  */
-class CueChunk : RiffChunk {
+internal class CueChunk : RiffChunk {
 
     val cues: List<WavCue> = mutableListOf()
 
