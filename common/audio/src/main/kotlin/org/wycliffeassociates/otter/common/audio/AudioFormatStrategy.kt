@@ -1,7 +1,5 @@
 package org.wycliffeassociates.otter.common.audio
 
-import org.wycliffeassociates.otter.common.audio.wav.WavCue
-
 internal interface AudioFormatStrategy {
     val sampleRate: Int
     val channels: Int
@@ -10,6 +8,6 @@ internal interface AudioFormatStrategy {
     val metadata: AudioMetadata
 
     fun addCue(location: Int, label: String)
-    fun getCues(): List<WavCue>
+    fun getCues(): List<AudioCue>
     fun update()
 }

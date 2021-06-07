@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.model
 import io.reactivex.Completable
 import io.reactivex.Single
 import javafx.beans.property.SimpleIntegerProperty
-import org.wycliffeassociates.otter.common.audio.wav.WavCue
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import tornadofx.isInt
 
@@ -22,7 +22,7 @@ class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
 
     init {
         cues as MutableList
-        if (cues.isEmpty()) cues.add(WavCue(0, "1"))
+        if (cues.isEmpty()) cues.add(AudioCue(0, "1"))
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
 
@@ -77,7 +77,7 @@ class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
             cues.clear()
             markers.forEach {
                 if (it.placed) {
-                    cues.add(it.toWavCue())
+                    cues.add(it.toAudioCue())
                 }
             }
             val audioFileCues = audio.metadata.getCues() as MutableList
@@ -88,11 +88,11 @@ class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
         }.ignoreElement()
     }
 
-    private fun sanitizeCues(audio: AudioFile): List<WavCue> {
+    private fun sanitizeCues(audio: AudioFile): List<AudioCue> {
         return audio.metadata.getCues().filter { it.label.isInt() }
     }
 
-    private fun initializeMarkers(markerTotal: Int, cues: List<WavCue>): List<ChunkMarkerModel> {
+    private fun initializeMarkers(markerTotal: Int, cues: List<AudioCue>): List<ChunkMarkerModel> {
         cues as MutableList
         cues.sortBy { it.location }
 
@@ -128,9 +128,9 @@ data class ChunkMarkerModel(
     var label: String,
     var placed: Boolean
 ) {
-    constructor(wavCue: WavCue) : this(wavCue.location, wavCue.label, true)
+    constructor(audioCue: AudioCue) : this(audioCue.location, audioCue.label, true)
 
-    fun toWavCue(): WavCue {
-        return WavCue(frame, label)
+    fun toAudioCue(): AudioCue {
+        return AudioCue(frame, label)
     }
 }

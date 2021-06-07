@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.common.audio.wav
 import java.io.OutputStream
 import java.nio.ByteBuffer
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
+import org.wycliffeassociates.otter.common.audio.AudioCue
 
 class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetadata {
 
@@ -35,10 +36,10 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetadata {
     }
 
     override fun addCue(location: Int, label: String) {
-        cueChunk.addCue(WavCue(location, label))
+        cueChunk.addCue(AudioCue(location, label))
     }
 
-    override fun getCues(): List<WavCue> {
+    override fun getCues(): List<AudioCue> {
         return cueChunk.cues
     }
 }

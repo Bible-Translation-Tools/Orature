@@ -10,6 +10,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
+import org.wycliffeassociates.otter.common.audio.AudioCue
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
@@ -56,7 +57,7 @@ class WavFile private constructor() : AudioFormatStrategy {
         metadata.addCue(location, label)
     }
 
-    override fun getCues(): List<WavCue> {
+    override fun getCues(): List<AudioCue> {
         return metadata.getCues()
     }
 
