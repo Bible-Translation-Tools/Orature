@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.audio.wav
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import org.wycliffeassociates.otter.common.audio.AudioCue
 
 private const val CUE_LABEL = "cue "
 private const val DATA_LABEL = "data"
@@ -57,9 +58,9 @@ private const val DONT_CARE_CUE_DATA_SIZE = 16
  * 4 - cue point id (matching the id from the cue chunk)
  * _ - text of the label (should be word aligned, but technically we double word align
  */
-class CueChunk : RiffChunk {
+internal class CueChunk : RiffChunk {
 
-    val cues: List<WavCue> = mutableListOf()
+    val cues: List<AudioCue> = mutableListOf()
 
     val cueChunkSize: Int
         get() = CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
@@ -76,12 +77,12 @@ class CueChunk : RiffChunk {
             } else 0
         }
 
-    fun addCue(cue: WavCue) {
+    fun addCue(cue: AudioCue) {
         cues as MutableList
         cues.add(cue)
     }
 
-    fun addCues(cues: List<WavCue>) {
+    fun addCues(cues: List<AudioCue>) {
         cues as MutableList
         cues.addAll(cues)
     }
@@ -108,7 +109,7 @@ class CueChunk : RiffChunk {
         return combinedBuffer.array()
     }
 
-    private fun createCueData(cueNumber: Int, cue: WavCue): ByteArray {
+    private fun createCueData(cueNumber: Int, cue: AudioCue): ByteArray {
         val buffer = ByteBuffer.allocate(CUE_DATA_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putInt(cueNumber)
@@ -120,7 +121,7 @@ class CueChunk : RiffChunk {
         return buffer.array()
     }
 
-    private fun createLabelChunk(cues: List<WavCue>): ByteArray {
+    private fun createLabelChunk(cues: List<AudioCue>): ByteArray {
         // size = (8 for labl header, 4 for cue id) * num cues + all strings
         val size = (CHUNK_HEADER_SIZE + CHUNK_LABEL_SIZE) * cues.size + computeTextSize(cues)
         // adds LIST header which is a standard chunk header and a "adtl" label
@@ -139,7 +140,7 @@ class CueChunk : RiffChunk {
         return buffer.array()
     }
 
-    private fun computeTextSize(cues: List<WavCue>): Int {
+    private fun computeTextSize(cues: List<AudioCue>): Int {
         return cues
             .map { getWordAlignedLength(it.label.length) }
             .sum()
@@ -148,7 +149,7 @@ class CueChunk : RiffChunk {
     private fun getWordAlignedLength(length: Int) =
         if (length % DWORD_SIZE != 0) length + DWORD_SIZE - (length % DWORD_SIZE) else length
 
-    private fun wordAlignedLabel(cue: WavCue): ByteArray {
+    private fun wordAlignedLabel(cue: AudioCue): ByteArray {
         val label = cue.label
         val alignedLength = getWordAlignedLength(cue.label.length)
         return label.toByteArray().copyOf(alignedLength)
@@ -283,11 +284,11 @@ private class CueListBuilder {
         } ?: map.put(id, TempCue(null, label))
     }
 
-    fun build(): List<WavCue> {
+    fun build(): List<AudioCue> {
         return map.values.mapNotNull { cue ->
             cue.location?.let { loc ->
                 cue.label?.let { label ->
-                    WavCue(loc, label)
+                    AudioCue(loc, label)
                 }
             }
         }

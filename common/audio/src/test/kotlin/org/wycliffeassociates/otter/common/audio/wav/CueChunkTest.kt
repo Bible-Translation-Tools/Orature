@@ -5,35 +5,36 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.nio.ByteBuffer
+import org.wycliffeassociates.otter.common.audio.AudioCue
 
 class CueChunkTest {
 
     val testEnv = listOf(
         listOf(
-            WavCue(1, "1"),
-            WavCue(2, "2"),
-            WavCue(3, "3")
+            AudioCue(1, "1"),
+            AudioCue(2, "2"),
+            AudioCue(3, "3")
         ),
         // locations out of order
         listOf(
-            WavCue(2, "2"),
-            WavCue(1, "1"),
-            WavCue(3, "3")
+            AudioCue(2, "2"),
+            AudioCue(1, "1"),
+            AudioCue(3, "3")
         ),
         // requiring padding to get to double word aligned
         listOf(
-            WavCue(2, "1"),
-            WavCue(1, "12"),
-            WavCue(3, "123"),
-            WavCue(4, "1234")
+            AudioCue(2, "1"),
+            AudioCue(1, "12"),
+            AudioCue(3, "123"),
+            AudioCue(4, "1234")
         ),
         // labels have various whitespace, location range from 0 to max
         listOf(
-            WavCue(0, "    "),
-            WavCue(2, "Verse 1"),
-            WavCue(3, "Verse 1   "),
-            WavCue(4, "   Verse 1"),
-            WavCue(Int.MAX_VALUE, "         ")
+            AudioCue(0, "    "),
+            AudioCue(2, "Verse 1"),
+            AudioCue(3, "Verse 1   "),
+            AudioCue(4, "   Verse 1"),
+            AudioCue(Int.MAX_VALUE, "         ")
         )
     )
 

@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
@@ -44,8 +44,8 @@ class SourceAudioAccessor(
                 cache[path] = temp
                 temp.deleteOnExit()
                 inputStream.copyTo(temp.outputStream())
-                val wav = WavFile(temp)
-                val size = wav.totalAudioLength / wav.frameSizeInBytes
+                val wav = AudioFile(temp)
+                val size = wav.totalFrames
                 SourceAudio(temp, 0, size)
             } else {
                 null
@@ -58,13 +58,13 @@ class SourceAudioAccessor(
     fun getChunk(chapter: Int, chunk: Int): SourceAudio? {
         val file = getChapter(chapter)?.file
         if (file != null) {
-            val wav = WavFile(file)
+            val wav = AudioFile(file)
             val cues = wav.metadata.getCues()
             cues.sortedBy { it.location }
             val index = chunk - 1
             if (cues.size > index) {
                 val start = cues[index].location
-                val end = if (cues.size > chunk) cues[chunk].location else wav.totalAudioLength / wav.frameSizeInBytes
+                val end = if (cues.size > chunk) cues[chunk].location else wav.totalFrames
                 return SourceAudio(file, start, end)
             }
         }
