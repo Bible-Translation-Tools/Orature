@@ -9,7 +9,7 @@ import java.lang.Exception
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.AudioFileFormat
+import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
@@ -34,7 +34,7 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
-class WavFile private constructor() : AudioFileFormat {
+class WavFile private constructor() : AudioFormatStrategy {
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 

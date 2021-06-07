@@ -1,15 +1,15 @@
 package org.wycliffeassociates.otter.common.audio
 
-import org.wycliffeassociates.otter.common.audio.wav.WavCue
+enum class AudioFileFormat(val extension: String) {
+    WAV("wav");
+    //MP3("mp3");
 
-internal interface AudioFileFormat {
-    val sampleRate: Int
-    val channels: Int
-    val bitsPerSample: Int
-    val totalFrames: Int
-    val metadata: AudioMetadata
+    companion object {
+        private val map = values().associateBy { it.extension.toLowerCase() }
 
-    fun addCue(location: Int, label: String)
-    fun getCues(): List<WavCue>
-    fun update()
+        /** @throws IllegalArgumentException */
+        fun of(extension: String) =
+            map[extension.toLowerCase()]
+                ?: throw IllegalArgumentException("Audio extension $extension not supported")
+    }
 }
