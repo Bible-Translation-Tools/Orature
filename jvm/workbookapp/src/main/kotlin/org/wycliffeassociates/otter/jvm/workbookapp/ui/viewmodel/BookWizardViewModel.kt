@@ -12,18 +12,20 @@ import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.workbook.Translation
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
 import java.io.File
 import java.util.function.Predicate
@@ -36,12 +38,11 @@ class BookWizardViewModel : ViewModel() {
     @Inject lateinit var collectionRepo: ICollectionRepository
     @Inject lateinit var creationUseCase: CreateProject
     @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var workbookRepo: IWorkbookRepository
 
     private val navigator: NavigationMediator by inject()
 
-    val sourceLanguageProperty = SimpleObjectProperty<Language>()
-    val targetLanguageProperty = SimpleObjectProperty<Language>()
-
+    val translationProperty = SimpleObjectProperty<TranslationCardModel>()
     val projectTypeProperty = SimpleObjectProperty<ProjectType>()
     val selectedBookProperty = SimpleObjectProperty<Collection>()
 
@@ -55,7 +56,7 @@ class BookWizardViewModel : ViewModel() {
     private val sourceCollections = observableListOf<Collection>()
     private val selectedSourceProperty = SimpleObjectProperty<Collection>()
     val filteredBooks = FilteredList(books)
-    val existingBooks = observableListOf<Collection>()
+    val existingBooks = observableListOf<Workbook>()
     val menuItems = observableListOf<MenuItem>()
 
     private var queryPredicate = Predicate<Collection> { true }
@@ -72,7 +73,6 @@ class BookWizardViewModel : ViewModel() {
         selectedSourceProperty.onChange {
             it?.let { collection ->
                 loadChildren(collection)
-                loadExistingProjects(collection)
             }
         }
 
@@ -89,7 +89,7 @@ class BookWizardViewModel : ViewModel() {
             .map {
                 it.filter { collection ->
                     val sourceLanguage = collection.resourceContainer?.language?.slug
-                    val selectedLanguage = sourceLanguageProperty.value.slug
+                    val selectedLanguage = translationProperty.value.sourceLanguage.slug
                     sourceLanguage == selectedLanguage
                 }
             }
@@ -115,27 +115,18 @@ class BookWizardViewModel : ViewModel() {
             }
     }
 
-    private fun loadExistingProjects(source: Collection) {
-        existingBooks.clear()
-        collectionRepo
-            .getDerivedProjects()
-            .map { list ->
-                list
-                    .filter {
-                        it.resourceContainer?.type == ContainerType.Book
-                    }
-                    .filter {
-                        it.resourceContainer?.language == targetLanguageProperty.value
-                    }
-                    .filter {
-                        it.resourceContainer?.identifier == source.resourceContainer?.identifier
-                    }
-            }
+    fun loadExistingProjects() {
+        val translation = Translation(
+            translationProperty.value.sourceLanguage,
+            translationProperty.value.targetLanguage
+        )
+        workbookRepo
+            .getProjects(translation)
             .doOnError { e ->
                 logger.error("Error in loading existing projects", e)
             }
             .subscribe { retrieved ->
-                existingBooks.addAll(retrieved)
+                existingBooks.setAll(retrieved)
             }
     }
 
@@ -156,8 +147,8 @@ class BookWizardViewModel : ViewModel() {
                 Predicate { true }
             } else {
                 Predicate { collection ->
-                    collection.slug.startsWith(query, true)
-                        .or(collection.titleKey.startsWith(query, true))
+                    collection.slug.contains(query, true)
+                        .or(collection.titleKey.contains(query, true))
                 }
             }
             filteredBooks.predicate = queryPredicate
@@ -174,7 +165,7 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun createProject(collection: Collection) {
-        targetLanguageProperty.value?.let { language ->
+        translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
             activeProjectTitleProperty.set(collection.titleKey)
@@ -182,7 +173,7 @@ class BookWizardViewModel : ViewModel() {
             activeProjectCoverProperty.set(accessor.getArtwork())
 
             creationUseCase
-                .create(collection, language)
+                .create(collection, translation.targetLanguage)
                 .doOnError { e ->
                     logger.error("Error in creating a project for collection: $collection", e)
                 }
