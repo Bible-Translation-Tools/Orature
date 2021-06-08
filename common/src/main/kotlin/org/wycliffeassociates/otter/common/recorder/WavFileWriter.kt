@@ -4,12 +4,11 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
-import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
+import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class WavFileWriter(
-    private val wav: WavFile,
+    private val audioFile: AudioFile,
     private val audioStream: Observable<ByteArray>,
     private val onComplete: () -> Unit
 ) {
@@ -32,7 +31,7 @@ class WavFileWriter(
     val writer = Observable
         .using(
             {
-                WavOutputStream(wav, append = false, buffered = true)
+                audioFile.writer(append = false, buffered = true)
             },
             { writer ->
                 audioStream.map {

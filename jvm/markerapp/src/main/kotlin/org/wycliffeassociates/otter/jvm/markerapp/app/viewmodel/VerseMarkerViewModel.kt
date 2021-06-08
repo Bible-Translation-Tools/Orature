@@ -10,7 +10,7 @@ import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
@@ -46,7 +46,7 @@ class VerseMarkerViewModel : ViewModel() {
     init {
         val scope = scope as ParameterizedScope
         val audioFile = File(scope.parameters.named["wav"])
-        val wav = WavFile(audioFile)
+        val wav = AudioFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
             scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
