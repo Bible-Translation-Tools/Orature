@@ -3,7 +3,6 @@
     -fx-background-color: -wa-white;
     -fx-background-radius: 15px;
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
-    -fx-pref-width: 800px;
 }
 
 .translation-card__header {

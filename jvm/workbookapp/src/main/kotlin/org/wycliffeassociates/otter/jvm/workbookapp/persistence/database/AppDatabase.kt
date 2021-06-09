@@ -84,6 +84,7 @@ class AppDatabase(
     val audioPluginDao = AudioPluginDao(dsl)
     val preferenceDao = PreferenceDao(dsl)
     val installedEntityDao = InstalledEntityDao(dsl)
+    val translationDao = TranslationDao(dsl)
 
     // Transaction support
     fun transaction(block: (DSLContext) -> Unit) {

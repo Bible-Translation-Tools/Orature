@@ -29,7 +29,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     init {
         selectedRegions.onChange {
             regionPredicate = if (it.list.isEmpty()) {
-                Predicate { true }
+                Predicate { false }
             } else {
                 Predicate { language -> selectedRegions.contains(language.region) }
             }
@@ -64,7 +64,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         items.add(createMenuSeparator(messages["region"]))
         items.addAll(
             regions.map {
-                createMenuItem(it) { selected ->
+                createMenuItem(it, true) { selected ->
                     when (selected) {
                         true -> selectedRegions.add(it)
                         else -> selectedRegions.remove(it)
@@ -74,7 +74,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         )
         items.add(createMenuSeparator(messages["display"]))
         items.add(
-            createMenuItem(messages["anglicized"]) { selected ->
+            createMenuItem(messages["anglicized"], false) { selected ->
                 anglicizedProperty.set(selected)
             }
         )
@@ -89,13 +89,18 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         }
     }
 
-    private fun createMenuItem(label: String, onChecked: (Boolean) -> Unit): MenuItem {
+    private fun createMenuItem(
+        label: String,
+        preSelected: Boolean,
+        onChecked: (Boolean) -> Unit
+    ): MenuItem {
         return CustomMenuItem().apply {
             content = CheckboxButton().apply {
                 text = label
                 selectedProperty().onChange {
                     onChecked(it)
                 }
+                isSelected = preSelected
             }
             isHideOnClick = false
         }

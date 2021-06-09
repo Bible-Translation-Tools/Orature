@@ -22,12 +22,12 @@
                     <children>
                         <JFXButton fx:id="deleteBtn" styleClass="btn, btn--secondary, workbook-banner__btn--delete" text="delete" underline="true">
                             <graphic>
-                                <FontIcon iconLiteral="mdi-minus" />
+                                <FontIcon iconLiteral="mdi-delete" />
                             </graphic>
                         </JFXButton>
-                        <JFXButton fx:id="exportBtn" styleClass="btn, btn--primary, workbook-banner__btn--export" text="export" underline="true">
+                        <JFXButton fx:id="exportBtn" styleClass="btn, btn--primary" text="export" underline="true">
                             <graphic>
-                                <FontIcon iconLiteral="mdi-upload" />
+                                <FontIcon iconLiteral="mdi-cloud-upload" />
                             </graphic>
                         </JFXButton>
                     </children>

@@ -9,7 +9,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
-import tornadofx.*
 
 class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<WorkbookBanner>(banner) {
 
@@ -31,8 +30,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
     init {
         loadFXML()
         initializeControl()
-
-        importStylesheet(javaClass.getResource("/css/workbook-banner.css").toExternalForm())
     }
 
     private fun initializeControl() {

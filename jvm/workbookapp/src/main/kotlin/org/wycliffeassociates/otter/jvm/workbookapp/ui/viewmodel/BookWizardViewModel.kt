@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.application.Platform
-import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -20,12 +19,10 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAcce
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.jvm.controls.button.CheckboxButton
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
-import org.wycliffeassociates.otter.jvm.workbookapp.enums.SlugsEnum
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
 import java.io.File
@@ -51,26 +48,20 @@ class BookWizardViewModel : ViewModel() {
     val searchQueryProperty = SimpleStringProperty("")
     val showProgressProperty = SimpleBooleanProperty(false)
 
-    private val anthologyVisibleProperty = SimpleBooleanProperty()
-    private val activeProjectTitleProperty = SimpleStringProperty()
-    private val activeProjectCoverProperty = SimpleObjectProperty<File>()
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
     private val books = observableListOf<Collection>()
     private val sourceCollections = observableListOf<Collection>()
     private val selectedSourceProperty = SimpleObjectProperty<Collection>()
     val filteredBooks = FilteredList(books)
     val existingBooks = observableListOf<Collection>()
-
     val menuItems = observableListOf<MenuItem>()
-    private val selectedAnthologies = observableListOf<SlugsEnum>()
 
-    private var anthologiesPredicate = Predicate<Collection> { true }
     private var queryPredicate = Predicate<Collection> { true }
 
-    private val lastOTBookSort = 39
-
     private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
-    private val sourcesToggleGroup = ToggleGroup()
+    private val resourcesToggleGroup = ToggleGroup()
     private val sortByToggleGroup = ToggleGroup()
 
     init {
@@ -152,25 +143,14 @@ class BookWizardViewModel : ViewModel() {
         sourceCollections.clear()
         books.clear()
         existingBooks.clear()
-        anthologiesPredicate = Predicate { true }
         queryPredicate = Predicate { true }
         searchQueryProperty.set("")
-        selectedAnthologies.clear()
         selectedBookProperty.set(null)
         selectedSourceProperty.set(null)
         projectTypeProperty.set(null)
     }
 
     private fun bindFilterProperties() {
-        selectedAnthologies.onChange {
-            anthologiesPredicate = if (it.list.isEmpty()) {
-                Predicate { true }
-            } else {
-                Predicate { collection -> belongsToAnthologies(collection.sort) }
-            }
-            filteredBooks.predicate = anthologiesPredicate.and(queryPredicate)
-        }
-
         searchQueryProperty.onChange { query ->
             queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
@@ -180,7 +160,7 @@ class BookWizardViewModel : ViewModel() {
                         .or(collection.titleKey.startsWith(query, true))
                 }
             }
-            filteredBooks.predicate = queryPredicate.and(anthologiesPredicate)
+            filteredBooks.predicate = queryPredicate
         }
 
         sortByProperty.onChange {
@@ -228,23 +208,6 @@ class BookWizardViewModel : ViewModel() {
         val items = mutableListOf<MenuItem>()
         items.add(createMenuSeparator(messages["resources"]))
         items.addAll(resourcesMenuItems())
-        items.add(createMenuSeparator(messages["anthology"], anthologyVisibleProperty))
-        items.add(
-            createCheckboxMenuItem(messages["oldTestament"], anthologyVisibleProperty) { selected ->
-                when (selected) {
-                    true -> selectedAnthologies.add(SlugsEnum.OT)
-                    else -> selectedAnthologies.remove(SlugsEnum.OT)
-                }
-            }
-        )
-        items.add(
-            createCheckboxMenuItem(messages["newTestament"], anthologyVisibleProperty) { selected ->
-                when (selected) {
-                    true -> selectedAnthologies.add(SlugsEnum.NT)
-                    else -> selectedAnthologies.remove(SlugsEnum.NT)
-                }
-            }
-        )
         items.add(createMenuSeparator(messages["sortBy"]))
         items.add(
             createRadioMenuItem(messages["bookOrder"], true, sortByToggleGroup) { selected ->
@@ -260,48 +223,22 @@ class BookWizardViewModel : ViewModel() {
         menuItems.setAll(items)
     }
 
-    private fun createMenuSeparator(label: String, visibleProperty: BooleanProperty? = null): MenuItem {
+    private fun resourcesMenuItems(): List<MenuItem> {
+        return sourceCollections.mapIndexed { index, collection ->
+            val preselected = index == 0
+            createRadioMenuItem(collection.titleKey, preselected, resourcesToggleGroup) { selected ->
+                if (selected) {
+                    selectedSourceProperty.set(collection)
+                }
+            }
+        }
+    }
+
+    private fun createMenuSeparator(label: String): MenuItem {
         return CustomMenuItem().apply {
             styleClass.add("filtered-search-bar__menu__separator")
             content = Label(label)
             isHideOnClick = false
-            visibleProperty?.let {
-                visibleProperty().bind(it)
-            }
-        }
-    }
-
-    private fun createCheckboxMenuItem(
-        label: String,
-        visibleProperty: BooleanProperty? = null,
-        onChecked: (Boolean) -> Unit
-    ): MenuItem {
-        return CustomMenuItem().apply {
-            content = CheckboxButton().apply {
-                text = label
-                tooltip(label)
-                selectedProperty().onChange {
-                    onChecked(it)
-                }
-                visibleProperty?.onChange { if (!it) isSelected = false }
-            }
-            isHideOnClick = false
-            visibleProperty?.let {
-                visibleProperty().bind(it)
-            }
-        }
-    }
-
-    private fun resourcesMenuItems(): List<MenuItem> {
-        return sourceCollections.map { collection ->
-            val preselected = collection.slug == SlugsEnum.ULB.slug
-            createRadioMenuItem(collection.titleKey, preselected, sourcesToggleGroup) { selected ->
-                if (selected) {
-                    selectedSourceProperty.set(collection)
-                    anthologyVisibleProperty.set(collection.slug == SlugsEnum.ULB.slug)
-                    selectedAnthologies.clear()
-                }
-            }
         }
     }
 
@@ -323,17 +260,5 @@ class BookWizardViewModel : ViewModel() {
             }
             isHideOnClick = false
         }
-    }
-
-    private fun belongsToAnthologies(sort: Int): Boolean {
-        if (selectedAnthologies.isEmpty()) return true
-
-        return selectedAnthologies.map { anthology ->
-            when (anthology) {
-                SlugsEnum.OT -> sort <= lastOTBookSort
-                SlugsEnum.NT -> sort > lastOTBookSort
-                else -> false
-            }
-        }.reduce { acc, b -> acc || b }
     }
 }

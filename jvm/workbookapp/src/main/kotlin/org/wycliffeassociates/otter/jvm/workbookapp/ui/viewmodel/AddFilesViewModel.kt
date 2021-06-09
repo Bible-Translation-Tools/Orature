@@ -13,7 +13,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResour
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectImporter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
@@ -28,6 +27,8 @@ class AddFilesViewModel : ViewModel() {
     @Inject lateinit var importProvider: Provider<ProjectImporter>
 
     val showImportDialogProperty = SimpleBooleanProperty(false)
+    val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
+    val showImportErrorDialogProperty = SimpleBooleanProperty(false)
     val importedProjectTitleProperty = SimpleStringProperty()
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
 
@@ -71,14 +72,13 @@ class AddFilesViewModel : ViewModel() {
             }
             .subscribe { result: ImportResult ->
                 if (result == ImportResult.SUCCESS) {
-                    find<ProjectGridViewModel>().loadProjects()
+                    showImportSuccessDialogProperty.value = true
+                    find<HomePageViewModel>().loadTranslations()
+                } else {
+                    showImportErrorDialogProperty.value = true
                 }
 
                 showImportDialogProperty.value = false
-
-                result.errorMessage?.let {
-                    error(messages["importError"], it)
-                }
             }
     }
 
@@ -106,6 +106,10 @@ class AddFilesViewModel : ViewModel() {
             project?.let {
                 importProvider.get()
                     .getSourceMetadata(rc)
+                    .doOnError {
+                        logger.debug("Error in getSourceMetadata: $rc")
+                    }
+                    .onErrorComplete()
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)

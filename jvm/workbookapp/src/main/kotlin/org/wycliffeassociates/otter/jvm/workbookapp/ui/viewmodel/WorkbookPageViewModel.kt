@@ -14,6 +14,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -42,6 +43,9 @@ class WorkbookPageViewModel : ViewModel() {
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
 
+    @Inject
+    lateinit var preferencesRepository: IAppPreferencesRepository
+
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
@@ -58,6 +62,8 @@ class WorkbookPageViewModel : ViewModel() {
 
     val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
+    val showDeleteSuccessDialogProperty = SimpleBooleanProperty(false)
+    val showDeleteFailDialogProperty = SimpleBooleanProperty(false)
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
 
     private val navigator: NavigationMediator by inject()
@@ -194,6 +200,7 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun deleteWorkbook() {
+        showDeleteDialogProperty.set(false)
         showDeleteProgressDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
@@ -211,10 +218,21 @@ class WorkbookPageViewModel : ViewModel() {
             .doFinally {
                 activeProjectTitleProperty.set(null)
                 activeProjectCoverProperty.set(null)
-            }
-            .subscribe {
                 showDeleteProgressDialogProperty.set(false)
-                workspace.navigateBack()
             }
+            .subscribe(
+                {
+                    showDeleteSuccessDialogProperty.set(true)
+                    preferencesRepository.setResumeProjectId(NO_RESUMABLE_PROJECT).subscribe()
+                },
+                {
+                    showDeleteFailDialogProperty.set(true)
+                }
+            )
+    }
+
+    fun goBack() {
+        showDeleteSuccessDialogProperty.set(false)
+        navigator.back()
     }
 }

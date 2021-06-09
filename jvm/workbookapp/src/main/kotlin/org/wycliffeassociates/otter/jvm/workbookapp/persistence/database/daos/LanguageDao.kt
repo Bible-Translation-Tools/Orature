@@ -120,6 +120,21 @@ class LanguageDao(
         return ((initialLargest + 1)..finalLargest).toList()
     }
 
+    @Synchronized
+    fun updateRegions(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl) {
+        dsl.transaction { config ->
+            val transactionDsl = DSL.using(config)
+            entities.forEach { entity ->
+                // Update region of the language entity
+                transactionDsl.
+                    update(LANGUAGE_ENTITY)
+                    .set(LANGUAGE_ENTITY.REGION, entity.region)
+                    .where(LANGUAGE_ENTITY.SLUG.eq(entity.slug))
+                    .execute()
+            }
+        }
+    }
+
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity {
         return dsl
             .select()

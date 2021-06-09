@@ -30,7 +30,7 @@
 }
 
 .confirm-dialog__progress {
-    -fx-alignment: left;
+    -fx-alignment: center-left;
     -fx-padding: 20px;
     -fx-spacing: 6px;
 }

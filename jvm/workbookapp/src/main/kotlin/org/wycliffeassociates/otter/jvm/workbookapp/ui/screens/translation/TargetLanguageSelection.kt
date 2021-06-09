@@ -36,7 +36,7 @@ class TargetLanguageSelection : Fragment() {
             }
             add(
                 FilteredSearchBar().apply {
-                    leftIconProperty.set(FontIcon(Material.HEARING))
+                    leftIconProperty.set(FontIcon(MaterialDesign.MDI_VOICE))
                     promptTextProperty.set(messages["search"])
                     filterItems.bind(viewModel.menuItems) { it }
                     viewModel.searchQueryProperty.bindBidirectional(textProperty)
@@ -54,12 +54,18 @@ class TargetLanguageSelection : Fragment() {
                         translationViewModel.selectedTargetLanguageProperty.set(it)
                     }
                 }
+                viewModel.searchQueryProperty.onChange {
+                    it?.let { if (it.isNotBlank()) scrollTo(0) }
+                }
             }
         }
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/translation-wizard.css").toExternalForm())
+        importStylesheet(resources.get("/css/translation-wizard.css"))
+        importStylesheet(resources.get("/css/language-card-cell.css"))
+        importStylesheet(resources.get("/css/filtered-search-bar.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
 
         translationViewModel.targetLanguages.onChange {
             viewModel.regions.setAll(

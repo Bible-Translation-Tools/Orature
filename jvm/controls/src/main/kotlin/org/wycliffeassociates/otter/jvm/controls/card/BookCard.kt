@@ -8,7 +8,6 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.BookCardSkin
-import tornadofx.*
 import java.io.File
 
 class BookCard(
@@ -28,7 +27,6 @@ class BookCard(
     val onAddBookActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        importStylesheet(javaClass.getResource("/css/book-card.css").toExternalForm())
         styleClass.setAll("book-card")
     }
 

@@ -31,7 +31,6 @@ class TranslationCard<T>(
     internal val seeAllProperty = SimpleBooleanProperty(false)
 
     init {
-        importStylesheet(javaClass.getResource("/css/translation-card.css").toExternalForm())
         styleClass.setAll("translation-card")
     }
 

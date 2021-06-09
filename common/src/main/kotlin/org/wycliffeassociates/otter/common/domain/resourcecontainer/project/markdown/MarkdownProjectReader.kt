@@ -209,8 +209,8 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
             content(
                 type = ContentType.META,
                 index = 0,
-                start = contents.map { it.start }.min() ?: 0,
-                end = contents.map { it.end }.max() ?: 0
+                start = contents.map { it.start }.minOrNull() ?: 0,
+                end = contents.map { it.end }.maxOrNull() ?: 0
             )
         )
     }

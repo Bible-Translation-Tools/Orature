@@ -11,6 +11,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -66,15 +67,13 @@ class ProjectImporter @Inject constructor(
         }
     }
 
-    fun getSourceMetadata(resourceContainer: File): Single<ResourceMetadata?> {
-        return Single.fromCallable {
-            try {
-                val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
-                val manifestSources = manifest.dublinCore.source.toSet()
-                val manifestProject = manifest.projects.single()
-                val sourceCollection = findSourceCollection(manifestSources, manifestProject)
-                sourceCollection.resourceContainer!!
-            } catch (t: Throwable) { null }
+    fun getSourceMetadata(resourceContainer: File): Maybe<ResourceMetadata> {
+        return Maybe.fromCallable {
+            val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
+            val manifestSources = manifest.dublinCore.source.toSet()
+            val manifestProject = manifest.projects.single()
+            val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+            sourceCollection.resourceContainer
         }
     }
 
@@ -124,6 +123,8 @@ class ProjectImporter @Inject constructor(
         val sourceCollection = findSourceCollection(manifestSources, manifestProject)
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
+
+        createTranslation(sourceMetadata.language, metadata.language)
 
         val projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
@@ -269,6 +270,17 @@ class ProjectImporter @Inject constructor(
             .blockingGet()
         log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
+    }
+
+    private fun createTranslation(sourceLanguage: Language, targetLanguage: Language) {
+        val translation = Translation(sourceLanguage, targetLanguage)
+        languageRepository
+            .insertTranslation(translation)
+            .doOnError { e ->
+                log.error("Error in inserting translation", e)
+            }
+            .onErrorReturnItem(0)
+            .blockingGet()
     }
 
     private fun getContent(sig: ContentSignature, project: Collection, metadata: ResourceMetadata): Content? {

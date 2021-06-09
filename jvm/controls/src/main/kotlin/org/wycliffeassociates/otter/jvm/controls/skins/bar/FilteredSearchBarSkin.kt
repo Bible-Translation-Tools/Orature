@@ -18,8 +18,6 @@ class FilteredSearchBarSkin(private val bar: FilteredSearchBar) : SkinBase<Filte
     lateinit var filterMenu: MenuButton
 
     init {
-        importStylesheet(javaClass.getResource("/css/filtered-search-bar.css").toExternalForm())
-
         loadFXML()
         initializeControl()
     }

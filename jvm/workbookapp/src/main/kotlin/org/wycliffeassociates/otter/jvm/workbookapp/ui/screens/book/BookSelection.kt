@@ -13,6 +13,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.BookCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import tornadofx.*
+import java.text.MessageFormat
 
 class BookSelection : Fragment() {
 
@@ -67,19 +68,37 @@ class BookSelection : Fragment() {
                         viewModel.selectedBookProperty.set(it)
                     }
                 }
+                viewModel.searchQueryProperty.onChange {
+                    it?.let { if (it.isNotBlank()) scrollTo(0) }
+                }
             }
         }
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/book-wizard.css").toExternalForm())
+        importStylesheet(resources.get("/css/book-wizard.css"))
+        importStylesheet(resources.get("/css/filtered-search-bar.css"))
+        importStylesheet(resources.get("/css/book-card-cell.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
+
         createProgressDialog()
     }
 
     private fun createProgressDialog() {
         confirmdialog {
-            titleTextProperty.set(messages["createProjectTitle"])
+            titleTextProperty.bind(
+                viewModel.activeProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["createProjectTitle"],
+                            messages["createAlt"],
+                            it
+                        )
+                    }
+                }
+            )
             messageTextProperty.set(messages["pleaseWaitCreatingProject"])
+            backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
 

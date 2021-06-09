@@ -56,12 +56,17 @@ class SourceLanguageSelection : Fragment() {
                         translationViewModel.selectedSourceLanguageProperty.set(it)
                     }
                 }
+                viewModel.searchQueryProperty.onChange {
+                    it?.let { if (it.isNotBlank()) scrollTo(0) }
+                }
             }
         }
     }
 
     init {
         importStylesheet(javaClass.getResource("/css/translation-wizard.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/language-card-cell.css").toExternalForm())
+        importStylesheet(javaClass.getResource("/css/filtered-search-bar.css").toExternalForm())
 
         translationViewModel.sourceLanguages.onChange {
             viewModel.regions.setAll(

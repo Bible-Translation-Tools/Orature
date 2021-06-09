@@ -23,7 +23,7 @@
     -fx-background-radius: 10px;
 }
 
-.book-card__placeholder .label .ikonli-font-icon {
+.book-card__placeholder-icon .ikonli-font-icon {
     -fx-font-size: 22px;
     -fx-fill: -wa-gray-darker;
 }
