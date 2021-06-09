@@ -39,7 +39,11 @@ class BookSelection : Fragment() {
                     label {
                         addClass("book-wizard__language")
                         graphic = FontIcon(Material.HEARING)
-                        textProperty().bind(viewModel.sourceLanguageProperty.stringBinding { it?.name })
+                        textProperty().bind(
+                            viewModel.translationProperty.stringBinding {
+                                it?.sourceLanguage?.name
+                            }
+                        )
                     }
                     label {
                         addClass("book-wizard__divider")
@@ -48,7 +52,11 @@ class BookSelection : Fragment() {
                     label {
                         addClass("book-wizard__language")
                         graphic = FontIcon(MaterialDesign.MDI_VOICE)
-                        textProperty().bind(viewModel.targetLanguageProperty.stringBinding { it?.name })
+                        textProperty().bind(
+                            viewModel.translationProperty.stringBinding {
+                                it?.targetLanguage?.name
+                            }
+                        )
                     }
                 }
             }
@@ -111,6 +119,7 @@ class BookSelection : Fragment() {
     override fun onDock() {
         navigator.dock(this, breadCrumb)
         viewModel.reset()
+        viewModel.loadExistingProjects()
         viewModel.loadResources()
     }
 }

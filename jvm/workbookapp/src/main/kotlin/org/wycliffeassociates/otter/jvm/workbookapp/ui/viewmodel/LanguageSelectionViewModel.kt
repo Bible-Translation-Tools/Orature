@@ -41,9 +41,9 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
                 Predicate { true }
             } else {
                 Predicate { language ->
-                    language.slug.startsWith(query, true)
-                        .or(language.name.startsWith(query, true))
-                        .or(language.anglicizedName.startsWith(query, true))
+                    language.slug.contains(query, true)
+                        .or(language.name.contains(query, true))
+                        .or(language.anglicizedName.contains(query, true))
                 }
             }
             filteredLanguages.predicate = queryPredicate.and(regionPredicate)
@@ -64,7 +64,8 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         items.add(createMenuSeparator(messages["region"]))
         items.addAll(
             regions.map {
-                createMenuItem(it, true) { selected ->
+                val title = it.ifBlank { messages["unknown"] }
+                createMenuItem(title, true) { selected ->
                     when (selected) {
                         true -> selectedRegions.add(it)
                         else -> selectedRegions.remove(it)

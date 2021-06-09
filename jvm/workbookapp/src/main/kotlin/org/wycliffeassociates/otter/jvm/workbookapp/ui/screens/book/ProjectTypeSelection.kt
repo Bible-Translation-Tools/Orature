@@ -46,7 +46,11 @@ class ProjectTypeSelection : Fragment() {
                     label {
                         addClass("book-wizard__language")
                         graphic = FontIcon(Material.HEARING)
-                        textProperty().bind(viewModel.sourceLanguageProperty.stringBinding { it?.name })
+                        textProperty().bind(
+                            viewModel.translationProperty.stringBinding {
+                                it?.sourceLanguage?.name
+                            }
+                        )
                     }
                     label {
                         addClass("book-wizard__divider")
@@ -55,7 +59,11 @@ class ProjectTypeSelection : Fragment() {
                     label {
                         addClass("book-wizard__language")
                         graphic = FontIcon(MaterialDesign.MDI_VOICE)
-                        textProperty().bind(viewModel.targetLanguageProperty.stringBinding { it?.name })
+                        textProperty().bind(
+                            viewModel.translationProperty.stringBinding {
+                                it?.targetLanguage?.name
+                            }
+                        )
                     }
                 }
             }
@@ -114,7 +122,7 @@ class ProjectTypeSelection : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/book-wizard.css").toExternalForm())
+        importStylesheet(resources.get("/css/book-wizard.css"))
     }
 
     override fun onDock() {

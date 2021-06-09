@@ -64,16 +64,15 @@ class SourceLanguageSelection : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/translation-wizard.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/language-card-cell.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/filtered-search-bar.css").toExternalForm())
+        importStylesheet(resources.get("/css/translation-wizard.css"))
+        importStylesheet(resources.get("/css/language-card-cell.css"))
+        importStylesheet(resources.get("/css/filtered-search-bar.css"))
 
         translationViewModel.sourceLanguages.onChange {
             viewModel.regions.setAll(
                 it.list
                     .distinctBy { language -> language.region }
                     .map { language -> language.region }
-                    .filter { region -> region.isNotBlank() }
             )
             viewModel.setFilterMenu()
         }
