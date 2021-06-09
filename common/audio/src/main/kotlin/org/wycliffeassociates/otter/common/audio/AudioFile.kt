@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.audio
 
 import java.io.File
 import java.io.OutputStream
+import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
@@ -24,6 +25,7 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
+            AudioFileFormat.MP3 -> MP3FileReader(file)
         }
     }
 
@@ -31,6 +33,7 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file)
         }
     }
 
@@ -43,6 +46,7 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample)
+            AudioFileFormat.MP3 -> MP3FileReader(file)
         }
     }
 
@@ -56,6 +60,7 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample, metadata as WavMetadata)
+            AudioFileFormat.MP3 -> MP3FileReader(file)
         }
     }
 
@@ -78,12 +83,14 @@ class AudioFile private constructor() {
     fun reader(start: Int? = null, end: Int? = null): AudioFileReader {
         return when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFileReader(strategy as WavFile, start, end)
+            AudioFileFormat.MP3 -> MP3FileReader(file)
         }
     }
 
     fun writer(append: Boolean = false, buffered: Boolean = true): OutputStream {
         return when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavOutputStream(strategy as WavFile, append, buffered)
+            AudioFileFormat.MP3 -> TODO()
         }
     }
 }
