@@ -239,7 +239,7 @@ class ResourceRepository @Inject constructor(private val database: AppDatabase) 
     private fun buildResource(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)
-        val contentEnd = sources.map { it.start }.max() ?: entity.start
+        val contentEnd = sources.map { it.start }.maxOrNull() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
                 // Retrieve the markers

@@ -48,7 +48,7 @@ class ContentRepository @Inject constructor(
                 contentDao
                     .fetchByCollectionIdAndType(collection.id, ContentType.META)
                     .map(this::buildContent)
-                    .minBy { it.start }
+                    .minByOrNull { it.start }
                     ?: throw IllegalStateException("Missing meta info for chapter.")
             }
             .doOnError { e ->
@@ -142,7 +142,7 @@ class ContentRepository @Inject constructor(
     private fun buildContent(entity: ContentEntity): Content {
         // Check for sources
         val sources = contentDao.fetchSources(entity)
-        val contentEnd = sources.map { it.start }.max() ?: entity.start
+        val contentEnd = sources.map { it.start }.maxOrNull() ?: entity.start
         val selectedTake = entity
             .selectedTakeFk?.let { selectedTakeFk ->
             // Retrieve the markers

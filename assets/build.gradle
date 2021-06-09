@@ -18,12 +18,14 @@ repositories {
         patternLayout {
             artifact '[organisation]/[module]/archive/[revision].[ext]'
         }
+        metadataSources { artifact() }
     }
     ivy {
         url 'http://td.unfoldingword.org/exports/'
         patternLayout {
             artifact '[artifact].[ext]'
         }
+        metadataSources { artifact() }
     }
 }
 

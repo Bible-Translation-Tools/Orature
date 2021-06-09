@@ -98,3 +98,4 @@ hs_err_pid*
 
 # Ignore unencrypted signing file
 signing.p12
+Makefile
