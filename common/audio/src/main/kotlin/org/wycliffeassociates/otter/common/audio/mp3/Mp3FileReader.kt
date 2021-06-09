@@ -25,7 +25,8 @@ class MP3FileReader(
         get() = decoder.sampleCount
     override val bitsPerSample = 16
 
-    override val metadata = Mp3Metadata()
+    override val metadata = Mp3Metadata(File(file.parent, "${file.nameWithoutExtension}.cue"))
+
     override fun addCue(location: Int, label: String) {
         metadata.addCue(location, label)
     }
@@ -35,7 +36,7 @@ class MP3FileReader(
     }
 
     override fun update() {
-        TODO("Not yet implemented")
+        metadata.write()
     }
 
     private val bufferSize = 12288
