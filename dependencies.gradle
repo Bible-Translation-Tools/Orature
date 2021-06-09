@@ -11,7 +11,7 @@ ext {
     sonarcloudPluginVer = '3.0'
 
     // Libraries
-    kotlinVer = '1.3.72'
+    kotlinVer = '1.5.10'
     javafxVer = '11'
     tornadofxVer = '2.0.0-SNAPSHOT'
     rxkotlinVer = '2.4.0'
