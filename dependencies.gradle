@@ -3,7 +3,7 @@ ext {
     javafxPluginVer = '0.0.8'
     jooqPluginVer = '3.0.3'
     install4jPluginVer = '7.0.8'
-    nebulaLintPluginVer = '14.2.1' // Gradle Linter
+    nebulaLintPluginVer = '16.23.0' // Gradle Linter
     buildscanPluginVer = '2.4.2'
     detektPluginVer = '1.10.0-RC1'
     ktlintPluginVer = '8.2.0'
