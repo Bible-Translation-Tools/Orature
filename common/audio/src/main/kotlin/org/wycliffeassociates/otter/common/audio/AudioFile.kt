@@ -83,7 +83,7 @@ class AudioFile private constructor() {
     fun reader(start: Int? = null, end: Int? = null): AudioFileReader {
         return when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFileReader(strategy as WavFile, start, end)
-            AudioFileFormat.MP3 -> MP3FileReader(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file, start, end)
         }
     }
 

@@ -2,15 +2,19 @@ package org.wycliffeassociates.otter.common.audio.mp3
 
 import java.io.File
 import java.io.IOException
+import java.lang.Integer.max
+import java.lang.Integer.min
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
-import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.yellowcouch.javazoom.RandomAccessDecoder
 
 class MP3FileReader(
-    val file: File
+    val file: File, start: Int? = null, end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
+
+    val start = start ?: 0
+    val end = end ?: Int.MAX_VALUE
 
     private var pos = 0
 
@@ -46,7 +50,7 @@ class MP3FileReader(
         fillBuffers(pos, buff)
         val n = buff.size
         var j = 0
-        for (i in 0 until Integer.min(n, outBuff.size) step 2) {
+        for (i in 0 until min(n, outBuff.size) step 2) {
             val leftShort = buff[i].toInt()
             outBuff[j++] = (leftShort and 0xff).toByte()
             outBuff[j++] = (leftShort ushr 0x08 and 0xff).toByte()
@@ -68,7 +72,7 @@ class MP3FileReader(
     }
 
     override fun hasRemaining(): Boolean {
-        return framePosition < decoder.sampleCount
+        return framePosition < min(decoder.sampleCount, end)
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
@@ -78,7 +82,7 @@ class MP3FileReader(
     }
 
     override fun seek(sample: Int) {
-        pos = sample
+        pos = max(start, min(sample, end))
     }
 
     override fun open() {
