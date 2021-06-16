@@ -5,15 +5,18 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 data class SourceAudio(val file: File, val start: Int, val end: Int)
 
 class SourceAudioAccessor(
+    val directoryProvider: IDirectoryProvider,
     val metadata: ResourceMetadata,
     val project: String
 ) {
 
-    val cache = mutableMapOf<String, File>()
+    private val dir = File(directoryProvider.cacheDirectory, "source").apply { mkdirs() }
+    private val cache = mutableMapOf<String, File>()
 
     fun getChapter(chapter: Int): SourceAudio? {
         ResourceContainer.load(metadata.path).use { rc ->
@@ -40,13 +43,13 @@ class SourceAudioAccessor(
                     cache[path]
                 }
                 val extension = File(path).extension
-                val temp = File.createTempFile("source", ".$extension")
+                val temp = File(dir, File(path).name).apply { createNewFile() }
                 if (extension == "mp3") {
                     val cueFile = File(temp.absolutePath.replace(".mp3", ".cue")).apply { createNewFile() }
                     cueFile.deleteOnExit()
                     val cuePath = path.replace(".mp3", ".cue")
                     rc.accessor.getInputStream(cuePath).use {
-                        it.copyTo(temp.outputStream())
+                        it.copyTo(cueFile.outputStream())
                     }
                 }
                 cache[path] = temp

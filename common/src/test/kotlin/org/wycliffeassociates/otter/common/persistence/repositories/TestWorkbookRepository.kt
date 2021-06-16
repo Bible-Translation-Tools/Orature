@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
 class TestWorkbookRepository {
@@ -101,7 +102,10 @@ class TestWorkbookRepository {
         db: IDatabaseAccessors,
         source: Collection = collSource,
         target: Collection = collTarget
-    ) = WorkbookRepository(db).get(source, target)
+    ) = WorkbookRepository(
+        mock(),
+        db
+    ).get(source, target)
 
     private fun resourceSlugArray(resourceMetadatas: List<ResourceMetadata>) =
         resourceMetadatas

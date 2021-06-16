@@ -26,7 +26,8 @@ class Mp3Metadata(val file: File): AudioMetadata {
                     val label = it.title
                     val index = it.indices.find { it.number == 1 }
                     index?.let {
-                        _cues.add(AudioCue(index.position.frames, label))
+                        val position = Math.round(index.position.totalFrames / 75.0 * 44100.0).toInt()
+                        _cues.add(AudioCue(position, label))
                     }
                 }
             } catch (e: Exception) {

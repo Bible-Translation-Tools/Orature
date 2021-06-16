@@ -30,21 +30,27 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
-class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookRepository {
+class WorkbookRepository(
+    private val directoryProvider: IDirectoryProvider,
+    private val db: IDatabaseAccessors
+) : IWorkbookRepository {
     private val logger = LoggerFactory.getLogger(WorkbookRepository::class.java)
 
     @Inject
     constructor(
+        directoryProvider: IDirectoryProvider,
         collectionRepository: ICollectionRepository,
         contentRepository: IContentRepository,
         resourceRepository: IResourceRepository,
         resourceMetadataRepo: IResourceMetadataRepository,
         takeRepository: ITakeRepository
     ) : this(
+        directoryProvider,
         DefaultDatabaseAccessors(
             collectionRepository,
             contentRepository,
@@ -61,7 +67,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
-        val workbook = Workbook(book(source, disposables), book(target, disposables))
+        val workbook = Workbook(directoryProvider, book(source, disposables), book(target, disposables))
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
     }
