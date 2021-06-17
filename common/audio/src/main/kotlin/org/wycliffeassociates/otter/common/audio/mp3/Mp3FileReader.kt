@@ -9,6 +9,9 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
 import org.yellowcouch.javazoom.RandomAccessDecoder
 
+// arbitrary size, though setting this too small results in choppy playback
+private const val MP3_BUFFER_SIZE = 24576
+
 class MP3FileReader(
     val file: File, start: Int? = null, end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
@@ -43,8 +46,7 @@ class MP3FileReader(
         metadata.write()
     }
 
-    private val bufferSize = 12288
-    private val buff = ShortArray(bufferSize * 2)
+    private val buff = ShortArray(MP3_BUFFER_SIZE * 2)
 
     private fun getPCMData(outBuff: ByteArray, pos: Int) {
         fillBuffers(pos, buff)
