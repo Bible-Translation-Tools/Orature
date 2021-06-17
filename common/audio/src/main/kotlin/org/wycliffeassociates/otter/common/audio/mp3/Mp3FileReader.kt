@@ -79,9 +79,11 @@ class MP3FileReader(
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
+        val remainingFrames = (end - framePosition)
         getPCMData(bytes, pos)
         pos += bytes.size / 2
-        return bytes.size
+        // remaining frames is multiplied by 2 for bitrate (16 bit)
+        return bytes.size.coerceAtMost(remainingFrames * 2)
     }
 
     override fun seek(sample: Int) {
