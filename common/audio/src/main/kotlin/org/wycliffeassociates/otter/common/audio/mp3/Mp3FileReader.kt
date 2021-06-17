@@ -19,7 +19,8 @@ class MP3FileReader(
     val start = start ?: 0
     val end = end ?: Int.MAX_VALUE
 
-    private var pos = 0
+    private var pos = min(max(0, this.start), this.end)
+
 
     private var decoder: RandomAccessDecoder = RandomAccessDecoder(file.absolutePath)
 
