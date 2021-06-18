@@ -2,6 +2,7 @@ package org.wycliffeassociates.otter.common.audio.mp3
 
 import java.io.File
 import java.lang.Exception
+import kotlin.math.roundToInt
 import org.digitalmediaserver.cuelib.CueParser
 import org.digitalmediaserver.cuelib.CueSheet
 import org.digitalmediaserver.cuelib.CueSheetSerializer
@@ -26,7 +27,7 @@ class Mp3Metadata(val file: File): AudioMetadata {
                     val label = it.title
                     val index = it.indices.find { it.number == 1 }
                     index?.let {
-                        val position = Math.round(index.position.totalFrames / 75.0 * 44100.0).toInt()
+                        val position = (index.position.totalFrames / 75.0 * 44100.0).roundToInt()
                         _cues.add(AudioCue(position, label))
                     }
                 }
