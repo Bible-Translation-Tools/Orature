@@ -4,6 +4,8 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 
 interface IAudioPlayer {
+    val frameStart: Int
+    val frameEnd: Int
     fun addEventListener(listener: IAudioPlayerListener)
     fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit)
     fun load(file: File)

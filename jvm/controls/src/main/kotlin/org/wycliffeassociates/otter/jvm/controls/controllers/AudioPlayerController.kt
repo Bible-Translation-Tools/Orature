@@ -143,7 +143,7 @@ class AudioPlayerController(
 
     private fun playbackPosition(): Int {
         return player?.let {
-            it.getAbsoluteLocationInFrames()
+            it.getAbsoluteLocationInFrames() - it.frameStart
         } ?: 0
     }
 }

@@ -15,6 +15,11 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class AudioBufferPlayer : IAudioPlayer {
 
+    override val frameStart: Int
+        get() = begin
+    override val frameEnd: Int
+        get() = end
+
     private var pause = AtomicBoolean(false)
     private var startPosition: Int = 0
 
