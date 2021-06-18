@@ -26,7 +26,7 @@ data class AssociatedAudio(
     fun getNewTakeNumber(): Single<Int> =
         Single.just(
             getAllTakes()
-                .maxBy { it.number }
+                .maxByOrNull { it.number }
                 ?.number
                 ?.plus(1)
                 ?: 1

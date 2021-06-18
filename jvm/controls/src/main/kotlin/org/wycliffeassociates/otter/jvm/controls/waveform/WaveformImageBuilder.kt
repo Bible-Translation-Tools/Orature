@@ -80,8 +80,8 @@ class WaveformImageBuilder(
             // to push everything below 0; because the image top left is 0,0
             // the absolute value will put the max values close to 0 and the
             // min values further away to the maximum
-            val min = ((shortsArray.min()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
-            val max = ((shortsArray.max()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
+            val min = ((shortsArray.minOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
+            val max = ((shortsArray.maxOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
             globalMax = max(globalMax, min)
             globalMin = max(globalMin, max)
             val range = scaleToHeight(max, height) until scaleToHeight(min, height)
