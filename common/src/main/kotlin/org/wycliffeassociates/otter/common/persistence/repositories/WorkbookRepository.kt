@@ -86,7 +86,9 @@ class WorkbookRepository(
     override fun getProjects(): Single<List<Workbook>> {
         return db.getDerivedProjects()
             .map { projects ->
-                projects.filter { it.resourceContainer?.type == ContainerType.Book }
+                projects.filter {
+                    it.resourceContainer?.type == ContainerType.Book
+                }
             }
             .flattenAsObservable { it }
             .flatMapMaybe(::getWorkbook)
@@ -99,6 +101,10 @@ class WorkbookRepository(
                 projects
                     .filter { it.resourceContainer?.type == ContainerType.Book }
                     .filter { it.resourceContainer?.language == translation.target }
+                    .filter {
+                        val sourceProject = db.getSourceProject(it).blockingGet()
+                        sourceProject.resourceContainer?.language == translation.source
+                    }
             }
             .flattenAsObservable { it }
             .flatMapMaybe(::getWorkbook)

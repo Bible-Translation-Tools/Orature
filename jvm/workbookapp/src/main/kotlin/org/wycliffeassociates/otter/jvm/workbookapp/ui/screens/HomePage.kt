@@ -9,7 +9,6 @@ import org.wycliffeassociates.otter.jvm.controls.card.BookCard
 import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -96,10 +95,7 @@ class HomePage : Fragment() {
                             seeLessTextProperty.set(messages["seeLess"])
 
                             setOnNewBookAction {
-                                val vm: BookWizardViewModel = find()
-                                vm.sourceLanguageProperty.set(it.sourceLanguage)
-                                vm.targetLanguageProperty.set(it.targetLanguage)
-                                viewModel.createProject()
+                                viewModel.createProject(it)
                             }
                         }
                     }

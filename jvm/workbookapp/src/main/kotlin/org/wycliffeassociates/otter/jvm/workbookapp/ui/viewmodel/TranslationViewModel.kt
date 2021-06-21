@@ -117,6 +117,11 @@ class TranslationViewModel : ViewModel() {
     private fun loadTranslations() {
         languageRepo
             .getAllTranslations()
+            .map { list ->
+                list.filter {
+                    it.source == selectedSourceLanguageProperty.value
+                }
+            }
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error loading translations", e)

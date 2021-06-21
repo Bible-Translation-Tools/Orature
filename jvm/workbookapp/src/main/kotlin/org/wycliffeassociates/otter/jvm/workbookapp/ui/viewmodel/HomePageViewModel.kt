@@ -80,7 +80,9 @@ class HomePageViewModel : ViewModel() {
         workbookDataStore.activeWorkbookProperty.set(null)
     }
 
-    fun createProject() {
+    fun createProject(translation: TranslationCardModel) {
+        val vm: BookWizardViewModel = find()
+        vm.translationProperty.set(translation)
         navigator.dock<BookSelection>()
     }
 

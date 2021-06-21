@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
@@ -13,7 +14,7 @@ import java.util.concurrent.Callable
 
 class BookCell(
     private val projectTypeProperty: SimpleObjectProperty<ProjectType>,
-    private val existingBooks: ObservableList<Collection> = observableListOf(),
+    private val existingBooks: ObservableList<Workbook> = observableListOf(),
     private val onSelected: (Collection) -> Unit
 ) : ListCell<Collection>() {
 
@@ -42,7 +43,9 @@ class BookCell(
 
             disableProperty().bind(Bindings.createBooleanBinding(
                 Callable {
-                    existingBooks.map { it.slug }.contains(item.slug)
+                    existingBooks.map {
+                        it.target.slug
+                    }.contains(item.slug)
                 },
                 existingBooks
             ))

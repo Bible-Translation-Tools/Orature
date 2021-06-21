@@ -62,7 +62,8 @@ class BookCardCell : HBox() {
     }
 
     private fun backgroundImage(file: File): BackgroundImage {
-        val image = Image(file.inputStream())
+        val url = file.toURI().toURL().toExternalForm()
+        val image = Image(url, true)
         val backgroundSize = BackgroundSize(
             BackgroundSize.AUTO,
             BackgroundSize.AUTO,

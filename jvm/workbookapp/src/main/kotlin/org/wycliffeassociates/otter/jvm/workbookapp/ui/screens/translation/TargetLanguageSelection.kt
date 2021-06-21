@@ -72,7 +72,6 @@ class TargetLanguageSelection : Fragment() {
                 it.list
                     .distinctBy { language -> language.region }
                     .map { language -> language.region }
-                    .filter { region -> region.isNotBlank() }
             )
             viewModel.setFilterMenu()
         }
