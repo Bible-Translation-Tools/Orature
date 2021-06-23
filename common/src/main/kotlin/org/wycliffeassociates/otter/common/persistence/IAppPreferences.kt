@@ -14,4 +14,6 @@ interface IAppPreferences {
     fun setPluginId(type: PluginType, id: Int): Completable
     fun resumeBookId(): Single<Int>
     fun setResumeBookId(id: Int): Completable
+    fun lastResource(): Single<String>
+    fun setLastResource(resource: String): Completable
 }

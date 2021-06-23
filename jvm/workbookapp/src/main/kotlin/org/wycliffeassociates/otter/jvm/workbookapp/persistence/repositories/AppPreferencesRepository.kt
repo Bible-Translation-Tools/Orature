@@ -18,4 +18,11 @@ class AppPreferencesRepository @Inject constructor(
         return preferences.setResumeBookId(id)
     }
 
+    override fun lastResource(): Single<String> {
+        return preferences.lastResource()
+    }
+
+    override fun setLastResource(resource: String): Completable {
+        return preferences.setLastResource(resource)
+    }
 }

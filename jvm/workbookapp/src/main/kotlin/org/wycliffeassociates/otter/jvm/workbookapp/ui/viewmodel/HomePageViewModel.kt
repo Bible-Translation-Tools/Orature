@@ -22,6 +22,7 @@ import javax.inject.Inject
 fun Workbook.toKey() = Translation(this.source.language, this.target.language)
 
 const val NO_RESUMABLE_PROJECT = -1
+const val NO_LAST_RESOURCE = ""
 
 class HomePageViewModel : ViewModel() {
 
@@ -115,8 +116,20 @@ class HomePageViewModel : ViewModel() {
     }
 
     private fun setResumeBook(workbook: Workbook) {
+        updateLastResource(workbook.target.collectionId)
         preferencesRepository
             .setResumeProjectId(workbook.target.collectionId)
             .subscribe()
+    }
+
+    private fun updateLastResource(resumeBookId: Int) {
+        preferencesRepository
+            .resumeProjectId()
+            .subscribe { id ->
+                if (id != resumeBookId) {
+                    // If selected project has changed, reset last resource tab
+                    preferencesRepository.setLastResource(NO_LAST_RESOURCE).subscribe()
+                }
+            }
     }
 }

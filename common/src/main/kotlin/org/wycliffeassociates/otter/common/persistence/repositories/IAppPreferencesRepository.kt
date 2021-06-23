@@ -6,4 +6,6 @@ import io.reactivex.Single
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
     fun setResumeProjectId(id: Int): Completable
+    fun lastResource(): Single<String>
+    fun setLastResource(resource: String): Completable
 }

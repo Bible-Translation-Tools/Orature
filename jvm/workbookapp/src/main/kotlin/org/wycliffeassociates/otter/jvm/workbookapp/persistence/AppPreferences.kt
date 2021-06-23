@@ -25,6 +25,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val RECORDER_PLUGIN_ID_KEY = "recorderPluginId"
     private val MARKER_PLUGIN_ID_KEY = "markerPluginId"
     private val RESUME_BOOK_ID_KEY = "resumeBookId"
+    private val LAST_RESOURCE_KEY = "lastResource"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -44,6 +45,17 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
             }
             .doOnError { e ->
                 logger.error("Error in putBoolean for key: $key, value: $value", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun putString(key: String, value: String): Completable {
+        return Completable
+            .fromAction {
+                preferenceDao.upsert(PreferenceEntity(key, value))
+            }
+            .doOnError { e ->
+                logger.error("Error in putString for key: $key, value: $value", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -82,6 +94,23 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
             .subscribeOn(Schedulers.io())
     }
 
+    private fun getString(key: String, def: String): Single<String> {
+        return Single
+            .fromCallable {
+                var value = def
+                try {
+                    value = preferenceDao.fetchByKey(key).value
+                } catch (e: RuntimeException) {
+                    // do nothing
+                }
+                return@fromCallable value
+            }
+            .doOnError { e ->
+                logger.error("Error in getString for key: $key, default: $def", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     override fun currentUserId(): Single<Int> = getInt(CURRENT_USER_ID_KEY, -1)
 
     override fun setCurrentUserId(userId: Int): Completable = putInt(CURRENT_USER_ID_KEY, userId)
@@ -112,5 +141,13 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
             PluginType.EDITOR -> EDITOR_PLUGIN_ID_KEY
             PluginType.MARKER -> MARKER_PLUGIN_ID_KEY
         }
+    }
+
+    override fun lastResource(): Single<String> {
+        return getString(LAST_RESOURCE_KEY, "")
+    }
+
+    override fun setLastResource(resource: String): Completable {
+        return putString(LAST_RESOURCE_KEY, resource)
     }
 }
