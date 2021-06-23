@@ -16,24 +16,25 @@ class MP3FileReader(
     val file: File, start: Int? = null, end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
 
-    val start = start ?: 0
-    val end = end ?: Int.MAX_VALUE
-
-    private var pos = min(max(0, this.start), this.end)
-
-
     private var decoder: RandomAccessDecoder = RandomAccessDecoder(file.absolutePath)
+
+    val start = start ?: 0
+    val end = end ?: decoder.sampleCount
+    private var pos = min(max(0, this.start), this.end)
 
     override val sampleRate: Int = 44100
     override val channels: Int = 1
     override val sampleSize: Int = 16
     override val framePosition: Int
-        get() = pos
+        get() = pos - start
+
     override val totalFrames: Int
-        get() = decoder.sampleCount
+        get() = end - start
     override val bitsPerSample = 16
 
     override val metadata = Mp3Metadata(File(file.parent, "${file.nameWithoutExtension}.cue"))
+
+    private val buff = ShortArray(MP3_BUFFER_SIZE * 2)
 
     override fun addCue(location: Int, label: String) {
         metadata.addCue(location, label)
@@ -46,8 +47,6 @@ class MP3FileReader(
     override fun update() {
         metadata.write()
     }
-
-    private val buff = ShortArray(MP3_BUFFER_SIZE * 2)
 
     private fun getPCMData(outBuff: ByteArray, pos: Int) {
         fillBuffers(pos, buff)
@@ -75,11 +74,11 @@ class MP3FileReader(
     }
 
     override fun hasRemaining(): Boolean {
-        return framePosition < min(decoder.sampleCount, end)
+        return pos < min(decoder.sampleCount, end)
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
-        val remainingFrames = (end - framePosition)
+        val remainingFrames = (end - pos)
         getPCMData(bytes, pos)
         pos += bytes.size / 2
         // remaining frames is multiplied by 2 for bitrate (16 bit)
@@ -87,7 +86,10 @@ class MP3FileReader(
     }
 
     override fun seek(sample: Int) {
-        pos = max(start, min(sample, end))
+        // seek API should not be aware of audio outside of start and end;
+        // so that a selected section can be treated as its own "track"
+        var mappedSample = sample + start
+        pos = max(start, min(mappedSample, end))
     }
 
     override fun open() {

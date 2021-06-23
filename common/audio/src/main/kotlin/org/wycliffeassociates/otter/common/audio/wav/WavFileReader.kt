@@ -15,6 +15,7 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
 
     private val logger = LoggerFactory.getLogger(WavFileReader::class.java)
 
+    override val totalFrames = wav.totalFrames
     override val sampleRate: Int = wav.sampleRate
     override val channels: Int = wav.channels
     override val sampleSize: Int = wav.bitsPerSample
@@ -67,8 +68,6 @@ class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = nu
     override fun hasRemaining(): Boolean {
         return mappedFile?.hasRemaining() ?: throw IllegalStateException("hasRemaining called before opening file")
     }
-
-    override val totalFrames = wav.totalFrames
 
     override fun release() {
         if (mappedFile != null) {

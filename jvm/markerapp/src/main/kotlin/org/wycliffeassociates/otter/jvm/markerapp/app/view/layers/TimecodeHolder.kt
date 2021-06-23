@@ -7,7 +7,7 @@ class TimecodeHolder(
     viewModel: VerseMarkerViewModel,
     val height: Double,
     val imageWidth: Double = viewModel.imageWidth,
-    durationMs: Int = viewModel.audioPlayer.getAbsoluteDurationMs()
+    durationMs: Int = viewModel.audioPlayer.getDurationMs()
 ) : ImageView() {
 
     val timecode: Timecode = Timecode(Math.floor(imageWidth), height)

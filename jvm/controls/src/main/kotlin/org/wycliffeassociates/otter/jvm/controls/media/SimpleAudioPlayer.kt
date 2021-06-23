@@ -98,9 +98,9 @@ class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioP
             }
             .subscribe {
                 val location = player
-                    .getAbsoluteLocationInFrames()
+                    .getLocationInFrames()
                     .toDouble()
-                progressBar.progress = location / player.getAbsoluteDurationInFrames()
+                progressBar.progress = location / player.getDurationInFrames()
             }
     }
 }
