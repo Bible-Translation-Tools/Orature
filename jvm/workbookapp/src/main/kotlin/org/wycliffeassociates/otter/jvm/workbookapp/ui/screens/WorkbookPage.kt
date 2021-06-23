@@ -91,6 +91,7 @@ class WorkbookPage : Fragment() {
         viewModel.workbookDataStore.activeResourceComponentProperty.set(null)
         viewModel.workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
+        selectLastResourceTab()
     }
 
     /**
@@ -104,6 +105,16 @@ class WorkbookPage : Fragment() {
     private fun createTabs() {
         viewModel.getAllBookResources().forEach { metadata ->
             tabMap.putIfAbsent(metadata.identifier, WorkbookResourceTab(metadata))
+        }
+    }
+
+    private fun selectLastResourceTab() {
+        val lastResource = viewModel.getLastResource()
+        tabMap.map {
+            val tab = (it.value as? WorkbookResourceTab)
+            if (tab?.resourceMetadata?.identifier == lastResource) {
+                tab.select()
+            }
         }
     }
 

@@ -153,6 +153,14 @@ class WorkbookPageViewModel : ViewModel() {
         }
     }
 
+    fun getLastResource(): String {
+        return preferencesRepository.lastResource().blockingGet()
+    }
+
+    private fun updateLastResource(resource: String) {
+        preferencesRepository.setLastResource(resource).subscribe()
+    }
+
     /**
      * Opens the next page of the workbook based on the selected chapter.
      * This updates the active properties of the WorkbookDataStore and selects
@@ -162,6 +170,7 @@ class WorkbookPageViewModel : ViewModel() {
         selectedChapterProperty.set(chapter)
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
+        updateLastResource(resourceMetadata.identifier)
         when (resourceMetadata.type) {
             ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
             ContainerType.Help -> navigator.dock<ResourcePage>()

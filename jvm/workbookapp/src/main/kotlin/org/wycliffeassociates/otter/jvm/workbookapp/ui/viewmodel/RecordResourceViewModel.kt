@@ -48,10 +48,10 @@ class RecordResourceViewModel : ViewModel() {
     val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
-    private val activeChunk: Chunk by activeChunkProperty
+    private val activeChunk: Chunk? by activeChunkProperty
 
     private val activeResourceProperty = SimpleObjectProperty<Resource>()
-    private val activeResource: Resource by activeResourceProperty
+    private val activeResource: Resource? by activeResourceProperty
 
     private val resourceList: ObservableList<Resource> = observableListOf()
 
@@ -107,9 +107,7 @@ class RecordResourceViewModel : ViewModel() {
 
         workbookDataStore.activeResourceProperty.onChangeAndDoNow {
             activeResourceProperty.set(it)
-            if (it != null) {
-                setHasNextAndPrevious()
-            }
+            setHasNextAndPrevious()
         }
     }
 
