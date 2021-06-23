@@ -82,6 +82,7 @@
     -fx-alignment: center-left;
     -fx-padding: 5px 0;
     -fx-min-height: 60px;
+    -fx-spacing: 20px;
 }
 
 .source-content__text {
