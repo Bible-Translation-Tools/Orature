@@ -1,7 +1,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.sun.glass.ui.Screen
-import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 
 private const val EPSILON = 10

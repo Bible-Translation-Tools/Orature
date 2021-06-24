@@ -4,10 +4,10 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.collections.FloatRingBuffer
-import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 
