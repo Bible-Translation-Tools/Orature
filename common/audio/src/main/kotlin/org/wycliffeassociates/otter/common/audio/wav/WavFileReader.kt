@@ -11,7 +11,7 @@ import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = null) : AudioFileReader {
+internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: Int? = null) : AudioFileReader {
 
     private val logger = LoggerFactory.getLogger(WavFileReader::class.java)
 

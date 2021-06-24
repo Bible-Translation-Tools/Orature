@@ -7,12 +7,15 @@ import java.lang.Integer.min
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.yellowcouch.javazoom.RandomAccessDecoder
 
 // arbitrary size, though setting this too small results in choppy playback
 private const val MP3_BUFFER_SIZE = 24576
 
-class MP3FileReader(
+internal class MP3FileReader(
     val file: File, start: Int? = null, end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
 
@@ -22,15 +25,15 @@ class MP3FileReader(
     val end = end ?: decoder.sampleCount
     private var pos = min(max(0, this.start), this.end)
 
-    override val sampleRate: Int = 44100
-    override val channels: Int = 1
-    override val sampleSize: Int = 16
+    override val sampleRate: Int = DEFAULT_SAMPLE_RATE
+    override val channels: Int = DEFAULT_CHANNELS
+    override val sampleSize: Int = DEFAULT_BITS_PER_SAMPLE
     override val framePosition: Int
         get() = pos - start
 
     override val totalFrames: Int
         get() = end - start
-    override val bitsPerSample = 16
+    override val bitsPerSample = DEFAULT_BITS_PER_SAMPLE
 
     override val metadata = Mp3Metadata(File(file.parent, "${file.nameWithoutExtension}.cue"))
 

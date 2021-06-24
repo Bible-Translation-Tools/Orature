@@ -13,7 +13,7 @@ import java.nio.ByteOrder
 /**
  * Created by sarabiaj on 10/4/2016.
  */
-class WavOutputStream @Throws(FileNotFoundException::class)
+internal class WavOutputStream @Throws(FileNotFoundException::class)
 @JvmOverloads constructor(
     private val wav: WavFile,
     append: Boolean = false,

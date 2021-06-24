@@ -4,7 +4,6 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter

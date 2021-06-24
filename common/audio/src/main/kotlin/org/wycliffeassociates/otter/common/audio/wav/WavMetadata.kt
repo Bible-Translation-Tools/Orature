@@ -5,7 +5,7 @@ import java.nio.ByteBuffer
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetadata {
+internal class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetadata {
 
     private val cueChunk: CueChunk
     private val chunks: Set<RiffChunk>

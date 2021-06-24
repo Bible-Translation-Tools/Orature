@@ -3,13 +3,14 @@ package org.wycliffeassociates.otter.common.audio
 import java.io.File
 import java.io.OutputStream
 import org.wycliffeassociates.otter.common.audio.mp3.MP3FileReader
-import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_BITS_PER_SAMPLE
-import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_CHANNELS
-import org.wycliffeassociates.otter.common.audio.wav.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFileReader
 import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
 import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
+
+const val DEFAULT_SAMPLE_RATE = 44100
+const val DEFAULT_CHANNELS = 1
+const val DEFAULT_BITS_PER_SAMPLE = 16
 
 class AudioFile private constructor() {
 

@@ -12,14 +12,23 @@ import org.digitalmediaserver.cuelib.Position
 import org.digitalmediaserver.cuelib.TrackData
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
-class Mp3Metadata(val file: File): AudioMetadata {
+/**
+ * Frames in Cue files are different from frames in the audio sample context.
+ * Frames in the cue context are with respect to CD-ROM Sectors, in which there are 75 in one second.
+ * https://en.wikipedia.org/wiki/Cue_sheet_(computing)
+ * https://www.cdrfaq.org/faq02.html#S2-43-3
+ */
+private const val CUE_FRAME_SIZE = 75.0
+
+internal class Mp3Metadata(val file: File) : AudioMetadata {
 
     private val _cues = mutableListOf<AudioCue>()
     private var title = ""
 
     init {
-        if(file.exists() && file.length() > 0) {
+        if (file.exists() && file.length() > 0) {
             try {
                 val cuesheet = CueParser.parse(file, Charsets.UTF_8)
                 title = cuesheet.title
@@ -27,7 +36,10 @@ class Mp3Metadata(val file: File): AudioMetadata {
                     val label = it.title
                     val index = it.indices.find { it.number == 1 }
                     index?.let {
-                        val position = (index.position.totalFrames / 75.0 * 44100.0).roundToInt()
+                        val position = (
+                                index.position.totalFrames / CUE_FRAME_SIZE * DEFAULT_SAMPLE_RATE.toFloat()
+                                )
+                            .roundToInt()
                         _cues.add(AudioCue(position, label))
                     }
                 }
@@ -56,7 +68,7 @@ class Mp3Metadata(val file: File): AudioMetadata {
             trackData.title = cue.label
             val index = Index()
             index.number = 1
-            index.position = Position(cue.location.toLong(), 44100)
+            index.position = Position(cue.location.toLong(), DEFAULT_SAMPLE_RATE)
             trackData.indices.add(index)
 
             fileData.trackData.add(trackData)
