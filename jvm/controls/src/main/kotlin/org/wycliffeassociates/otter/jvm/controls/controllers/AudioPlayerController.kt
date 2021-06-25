@@ -63,7 +63,7 @@ class AudioPlayerController(
 
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
-        audioSlider.max = player.getAbsoluteDurationInFrames().toDouble()
+        audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
     }
 
@@ -115,7 +115,7 @@ class AudioPlayerController(
 
     fun pause() {
         player?.let {
-            startAtLocation = it.getAbsoluteLocationInFrames()
+            startAtLocation = it.getLocationInFrames()
             it.pause()
         }
     }
@@ -135,7 +135,7 @@ class AudioPlayerController(
     private fun percentageToLocation(percent: Double): Int {
         var _percent = if (percent > 1.00) percent / 100F else percent
         player?.let {
-            return (_percent * it.getAbsoluteDurationInFrames()).toInt()
+            return (_percent * it.getDurationInFrames()).toInt()
         } ?: run {
             return 0
         }
@@ -143,7 +143,7 @@ class AudioPlayerController(
 
     private fun playbackPosition(): Int {
         return player?.let {
-            it.getAbsoluteLocationInFrames()
+            it.getLocationInFrames() - it.frameStart
         } ?: 0
     }
 }

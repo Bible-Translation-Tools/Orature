@@ -45,4 +45,6 @@ ext {
     sentryVer = '1.7.30'
     usfmToolsVer = "1.6.0"
     testFxVer = '4.0.16-alpha'
+    jlayerVer = '1.0'
+    cuelibVer = '2.0.0'
 }

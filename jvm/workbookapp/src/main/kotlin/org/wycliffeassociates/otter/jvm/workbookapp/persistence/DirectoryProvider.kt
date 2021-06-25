@@ -196,4 +196,7 @@ class DirectoryProvider(
 
     override val logsDirectory: File
         get() = getAppDataDirectory("logs")
+
+    override val cacheDirectory: File
+        get() = getAppDataDirectory("cache")
 }

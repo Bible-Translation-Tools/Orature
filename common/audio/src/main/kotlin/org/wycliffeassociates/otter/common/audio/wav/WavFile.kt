@@ -11,16 +11,15 @@ import java.nio.ByteOrder
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFormatStrategy
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 private const val RIFF = "RIFF"
 private const val WAVE = "WAVE"
 private const val FMT = "fmt "
 private const val DATA = "data"
 private const val PCM: Short = 1
-
-const val DEFAULT_SAMPLE_RATE = 44100
-const val DEFAULT_CHANNELS = 1
-const val DEFAULT_BITS_PER_SAMPLE = 16
 
 internal const val WAV_HEADER_SIZE = 44
 private const val AUDIO_LENGTH_LOCATION = 40
@@ -35,7 +34,7 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
-class WavFile private constructor() : AudioFormatStrategy {
+internal class WavFile private constructor() : AudioFormatStrategy {
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 

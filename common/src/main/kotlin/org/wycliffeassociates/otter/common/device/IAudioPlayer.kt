@@ -4,6 +4,8 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 
 interface IAudioPlayer {
+    val frameStart: Int
+    val frameEnd: Int
     fun addEventListener(listener: IAudioPlayerListener)
     fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit)
     fun load(file: File)
@@ -15,8 +17,8 @@ interface IAudioPlayer {
     fun close()
     fun seek(position: Int)
     fun isPlaying(): Boolean
-    fun getAbsoluteDurationInFrames(): Int
-    fun getAbsoluteDurationMs(): Int
-    fun getAbsoluteLocationInFrames(): Int
-    fun getAbsoluteLocationMs(): Int
+    fun getDurationInFrames(): Int
+    fun getDurationMs(): Int
+    fun getLocationInFrames(): Int
+    fun getLocationMs(): Int
 }
