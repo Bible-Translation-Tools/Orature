@@ -2,4 +2,5 @@
     -fx-padding: 40px;
     -fx-pref-width: 800px;
     -fx-spacing: 20px;
+    -fx-max-width: 800px;
 }

@@ -311,8 +311,8 @@ class WorkbookPage : Fragment() {
             return VBox().apply {
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
-                alignment = Pos.CENTER
-                addClass(AppStyles.whiteBackground)
+                alignment = Pos.CENTER_LEFT
+                addClass("workbook-page")
                 progressindicator {
                     visibleProperty().bind(viewModel.loadingProperty)
                     managedProperty().bind(visibleProperty())

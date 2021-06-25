@@ -1,6 +1,11 @@
+.workbook-page {
+    -fx-background-color: #f7faff;
+}
+
 .workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
     -fx-background-color: #f7faff;
+    -fx-max-width: 800px;
 }
 
 .workbook-page__chapter-list .list-cell:selected,
