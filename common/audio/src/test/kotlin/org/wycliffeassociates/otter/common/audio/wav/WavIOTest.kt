@@ -5,6 +5,9 @@ import org.junit.Test
 import java.io.File
 import java.io.FileInputStream
 import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 class WavIOTest {
     private val testCues = listOf(
