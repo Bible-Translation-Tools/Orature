@@ -60,22 +60,6 @@ class AppStyles : Stylesheet() {
             fontWeight = FontWeight.BOLD
             cursor = Cursor.HAND
         }
-        // Material design scroll bar
-        scrollBar {
-            backgroundColor += Color.TRANSPARENT
-            padding = box(0.px, 4.px)
-            prefWidth = 16.px
-            Stylesheet.thumb {
-                backgroundColor += Color.DARKGRAY
-                backgroundRadius += box(10.px)
-            }
-            Stylesheet.incrementArrow {
-                visibility = FXVisibility.COLLAPSE
-            }
-            Stylesheet.decrementArrow {
-                visibility = FXVisibility.COLLAPSE
-            }
-        }
 
         scrollPane {
             backgroundColor += Color.TRANSPARENT
