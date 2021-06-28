@@ -38,7 +38,7 @@ object ParseMd {
         reader
             .lineSequence()
             .filter { it.isNotBlank() }
-            .filter { it.matches(Regex("^!\\[.*\\]\\(.*\\)$")) }
+            .filter { !it.matches(Regex("^!\\[.*\\]\\(.*\\)$")) }
             .toList()
 
     internal fun getTitleText(line: String): String? {
