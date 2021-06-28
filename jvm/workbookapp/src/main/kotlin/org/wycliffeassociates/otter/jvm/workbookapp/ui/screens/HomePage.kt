@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.geometry.Pos
+import javafx.scene.control.ScrollPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.banner.ResumeBookBanner
@@ -45,6 +46,8 @@ class HomePage : Fragment() {
         alignment = Pos.TOP_LEFT
 
         scrollpane {
+            isFitToWidth = true
+            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             vbox {
                 addClass("home-page__container")
 
@@ -79,6 +82,7 @@ class HomePage : Fragment() {
                 )
 
                 vbox {
+                    maxWidth = 800.0
                     spacing = 20.0
                     bindChildren(viewModel.translationModels) {
                         TranslationCard(it.sourceLanguage.name, it.targetLanguage.name, it.books).apply {
