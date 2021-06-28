@@ -82,6 +82,7 @@ class HomePage : Fragment() {
                 )
 
                 vbox {
+                    maxWidth = 800.0
                     spacing = 20.0
                     bindChildren(viewModel.translationModels) {
                         TranslationCard(it.sourceLanguage.name, it.targetLanguage.name, it.books).apply {

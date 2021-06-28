@@ -1,4 +1,5 @@
 .new-translation-card {
+    -fx-max-width: 800px;
     -fx-padding: 5px;
     -fx-background-color: -wa-white;
     -fx-background-radius: 15px;
