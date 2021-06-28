@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
 import java.io.BufferedReader
+import java.util.regex.Pattern
 
 // TODO: Add Help type enum to HelpResource? (tn, tq)
 data class HelpResource(var title: String, var body: String)
@@ -34,7 +35,11 @@ object ParseMd {
     }
 
     fun parse(reader: BufferedReader): List<String> =
-        reader.lineSequence().filter { it.isNotBlank() }.toList()
+        reader
+            .lineSequence()
+            .filter { it.isNotBlank() }
+            .filter { it.matches(Regex("^!\\[.*\\]\\(.*\\)$")) }
+            .toList()
 
     internal fun getTitleText(line: String): String? {
         titleTextRegex.find(line)?.let {
