@@ -21,6 +21,8 @@ import org.wycliffeassociates.usfmtools.models.markers.TextBlock
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
 import java.io.File
 import java.io.Reader
+import org.wycliffeassociates.usfmtools.models.markers.FMarker
+import org.wycliffeassociates.usfmtools.models.markers.Marker
 
 private const val FORMAT = "text/usfm"
 
@@ -162,10 +164,22 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
 }
 
 fun VMarker.getText(): String {
-    val text = this.getChildMarkers(TextBlock::class.java)
     val sb = StringBuilder()
+    val text = getTextBlocks()
     for (txt in text) {
         sb.append(txt.text)
     }
     return sb.toString()
+}
+
+fun Marker.getTextBlocks(): MutableList<TextBlock> {
+    val textBlocks = mutableListOf<TextBlock>()
+    for (marker in contents) {
+        when (marker) {
+            is FMarker -> continue
+            is TextBlock -> textBlocks.add(marker)
+            else -> marker.getChildMarkers(TextBlock::class.java).forEach { textBlocks.addAll(it.getTextBlocks()) }
+        }
+    }
+    return textBlocks
 }
