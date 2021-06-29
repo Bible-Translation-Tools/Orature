@@ -178,11 +178,7 @@ fun Marker.getTextBlocks(): MutableList<TextBlock> {
         when (marker) {
             is FMarker -> continue
             is TextBlock -> textBlocks.add(marker)
-            else -> {
-                marker
-                    .getChildMarkers(TextBlock::class.java)
-                    .forEach { textBlocks.addAll(it.getTextBlocks()) }
-            }
+            else -> marker.getChildMarkers(TextBlock::class.java).forEach { textBlocks.addAll(it.getTextBlocks()) }
         }
     }
     return textBlocks
