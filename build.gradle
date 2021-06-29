@@ -49,6 +49,7 @@ allprojects {
     apply plugin: "license"
 
     license {
+        ignoreFailures = true
         header = rootProject.file("LICENSE")
         mapping {
             gradle = 'JAVADOC_STYLE'
