@@ -55,7 +55,7 @@ allprojects {
             fxml = 'XML_STYLE'
         }
         includes(["**/*.kt", "**/*.java", "**/*.properties", "**/*.css", "**/*.fxml", "**/*.gradle"])
-        exclude "**/*.sqlite"
+        excludes(["**/src/main/java/jooq/*.java", "**/*.sqlite"])
     }
 }
 
