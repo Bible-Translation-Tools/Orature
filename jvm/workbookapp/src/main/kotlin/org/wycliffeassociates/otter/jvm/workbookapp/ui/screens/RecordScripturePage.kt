@@ -4,6 +4,7 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ChangeListener
 import javafx.geometry.HPos
 import javafx.geometry.Pos
 import javafx.geometry.VPos
@@ -29,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -45,6 +47,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.util.*
 
 private const val TAKES_ROW_HEIGHT = 170.0
 
@@ -64,12 +67,17 @@ class RecordScriptureFragment : Fragment() {
     )
     private val pluginOpenedPage: PluginOpenedPage
 
-    private val isDraggingProperty = SimpleBooleanProperty(false)
+    private val isDraggingTakeProperty = SimpleBooleanProperty(false)
+    private val isDraggingFileProperty = SimpleBooleanProperty(false)
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
+
+    private var importProgressListener: ChangeListener<Boolean>? = null
+    private var importSuccessListener: ChangeListener<Boolean>? = null
+    private var importFailListener: ChangeListener<Boolean>? = null
 
     private val dragTarget =
         DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
-            .build(isDraggingProperty.toBinding())
+            .build(isDraggingTakeProperty.toBinding())
             .apply {
                 recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
                     /* We can't just add the node being dragged, since the selected take might have just been
@@ -86,6 +94,8 @@ class RecordScriptureFragment : Fragment() {
             draggingNode?.let { add(draggingNode) }
         }
     }
+
+    private val fileDragTarget = VBox()
 
     private val sourceContent =
         SourceContent().apply {
@@ -124,6 +134,16 @@ class RecordScriptureFragment : Fragment() {
                 }
             }
         )
+        add(fileDragTarget
+            .apply {
+                anchorpaneConstraints {
+                    leftAnchor = 0.0
+                    rightAnchor = 0.0
+                    bottomAnchor = 0.0
+                    topAnchor = 0.0
+                }
+            }
+        )
         add(dragContainer)
     }
 
@@ -133,7 +153,10 @@ class RecordScriptureFragment : Fragment() {
         importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
         importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
 
-        isDraggingProperty.onChange {
+        isDraggingTakeProperty.onChange {
+            if (it) recordableViewModel.stopPlayers()
+        }
+        isDraggingFileProperty.onChange {
             if (it) recordableViewModel.stopPlayers()
         }
 
@@ -171,7 +194,7 @@ class RecordScriptureFragment : Fragment() {
             (it.source as? ScriptureTakeCard)?.let {
                 it.isDraggingProperty().value = false
             }
-            it.setDropCompleted(success)
+            it.isDropCompleted = success
             it.consume()
         }
 
@@ -182,11 +205,37 @@ class RecordScriptureFragment : Fragment() {
             it.consume()
         }
 
-        mainContainer.apply {
-            addEventHandler(DragEvent.DRAG_ENTERED) { isDraggingProperty.value = true }
-            addEventHandler(DragEvent.DRAG_EXITED) { isDraggingProperty.value = false }
+        fileDragTarget.setOnDragOver {
+            if (it.gestureSource != fileDragTarget && it.dragboard.hasFiles()) {
+                it.acceptTransferModes(*TransferMode.ANY)
+            }
+            it.consume()
+        }
 
-            addClass(RecordScriptureStyles.background)
+        fileDragTarget.setOnDragDropped {
+            val db: Dragboard = it.dragboard
+            var success = false
+            if (db.hasFiles()) {
+                recordableViewModel.importTakes(db.files)
+                success = true
+            }
+            it.isDropCompleted = success
+            it.consume()
+        }
+
+        mainContainer.apply {
+            addEventHandler(DragEvent.DRAG_ENTERED) {
+                if (it.dragboard.hasFiles()) {
+                    isDraggingFileProperty.value = true
+                } else {
+                    isDraggingTakeProperty.value = true
+                }
+            }
+            addEventHandler(DragEvent.DRAG_EXITED) {
+                isDraggingTakeProperty.value = false
+            }
+
+            addClass("card--main-container")
 
             hgrow = Priority.ALWAYS
             // Top items above the alternate takes
@@ -257,6 +306,16 @@ class RecordScriptureFragment : Fragment() {
                 rowConstraints.add(sourceContentRowConstraints)
             }
         }
+
+        fileDragTarget.apply {
+            visibleProperty().bind(isDraggingFileProperty)
+            isDraggingFileProperty.onChange {
+                toggleClass("card--container-dragover", it)
+            }
+            addEventHandler(DragEvent.DRAG_EXITED) {
+                isDraggingFileProperty.value = false
+            }
+        }
     }
 
     private fun Parent.addButtonEventHandlers() {
@@ -296,7 +355,7 @@ class RecordScriptureFragment : Fragment() {
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
                             pluginErrorMessage,
-                            messages["addPlugin"].toUpperCase()
+                            messages["addPlugin"].uppercase(Locale.getDefault())
                         ) {
                             audioPluginViewModel.addPlugin(true, false)
                         },
@@ -319,9 +378,63 @@ class RecordScriptureFragment : Fragment() {
         }
     }
 
+    private fun initializeImportProgressDialog() {
+        confirmdialog {
+            titleTextProperty.set(messages["importTakesTitle"])
+            messageTextProperty.set(messages["importTakesMessage"])
+
+            importProgressListener = ChangeListener { _, _, value ->
+                if (value) open() else close()
+            }
+            recordableViewModel.showImportProgressDialogProperty.addListener(importProgressListener)
+
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
+        }
+    }
+
+    private fun initializeImportSuccessDialog() {
+        confirmdialog {
+            titleTextProperty.set(messages["importTakesTitle"])
+            messageTextProperty.set(messages["importTakesSuccessMessage"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            importSuccessListener = ChangeListener { _, _, value ->
+                if (value) open() else close()
+            }
+            recordableViewModel.showImportSuccessDialogProperty.addListener(importSuccessListener)
+
+            onCloseAction { recordableViewModel.showImportSuccessDialogProperty.set(false) }
+            onCancelAction { recordableViewModel.showImportSuccessDialogProperty.set(false) }
+        }
+    }
+
+    private fun initializeImportFailDialog() {
+        confirmdialog {
+            titleTextProperty.set(messages["importTakesTitle"])
+            messageTextProperty.set(messages["importTakesFailMessage"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            importFailListener = ChangeListener { _, _, value ->
+                if (value) open() else close()
+            }
+            recordableViewModel.showImportFailDialogProperty.addListener(importFailListener)
+
+            onCloseAction { recordableViewModel.showImportFailDialogProperty.set(false) }
+            onCancelAction { recordableViewModel.showImportFailDialogProperty.set(false) }
+        }
+    }
+
+    private fun removeDialogListeners() {
+        recordableViewModel.showImportProgressDialogProperty.removeListener(importProgressListener)
+        recordableViewModel.showImportFailDialogProperty.removeListener(importFailListener)
+        recordableViewModel.showImportSuccessDialogProperty.removeListener(importSuccessListener)
+    }
+
     override fun onUndock() {
         super.onUndock()
         recordableViewModel.closePlayers()
+        removeDialogListeners()
     }
 
     override fun onDock() {
@@ -329,5 +442,9 @@ class RecordScriptureFragment : Fragment() {
         recordableViewModel.openPlayers()
         recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
+
+        initializeImportProgressDialog()
+        initializeImportFailDialog()
+        initializeImportSuccessDialog()
     }
 }

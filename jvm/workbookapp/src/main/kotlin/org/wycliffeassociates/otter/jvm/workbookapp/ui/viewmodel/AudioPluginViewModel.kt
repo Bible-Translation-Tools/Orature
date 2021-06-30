@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
@@ -18,6 +19,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import tornadofx.*
+import java.io.File
 import javax.inject.Inject
 
 class AudioPluginViewModel : ViewModel() {
@@ -47,6 +49,15 @@ class AudioPluginViewModel : ViewModel() {
             projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
             namer = createFileNamer(recordable),
             pluginParameters = params
+        )
+    }
+
+    fun import(recordable: Recordable, take: File): Completable {
+        return takeActions.import(
+            audio = recordable.audio,
+            projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
+            namer = createFileNamer(recordable),
+            take = take
         )
     }
 

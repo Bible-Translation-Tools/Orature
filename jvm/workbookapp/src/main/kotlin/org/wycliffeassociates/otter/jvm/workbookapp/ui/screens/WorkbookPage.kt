@@ -71,11 +71,6 @@ class WorkbookPage : Fragment() {
         importStylesheet(resources.get("/css/chapter-card.css"))
         importStylesheet(resources.get("/css/workbook-banner.css"))
         importStylesheet(resources.get("/css/confirm-dialog.css"))
-
-        initializeProgressDialogs()
-        initializeDeleteConfirmDialog()
-        initializeDeleteSuccessDialog()
-        initializeDeleteFailDialog()
     }
 
     /**
@@ -92,6 +87,10 @@ class WorkbookPage : Fragment() {
         viewModel.workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
         selectLastResourceTab()
+        initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
+        initializeDeleteSuccessDialog()
+        initializeDeleteFailDialog()
     }
 
     /**

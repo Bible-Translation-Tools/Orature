@@ -1,8 +1,12 @@
 package org.wycliffeassociates.otter.common.domain.content
 
+import io.reactivex.Completable
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.audio.wav.EMPTY_WAVE_FILE_SIZE
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.audio.wav.InvalidWavFileException
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -10,6 +14,7 @@ import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import java.io.File
+import java.lang.Exception
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -39,17 +44,41 @@ class TakeActions @Inject constructor(
     ): Single<Result> {
         return audio.getNewTakeNumber()
             .map { newTakeNumber ->
-                val filename = namer.generateName(newTakeNumber)
+                val filename = namer.generateName(newTakeNumber, AudioFileFormat.WAV)
                 val chapterAudioDir = getChapterAudioDirectory(
                     projectAudioDir,
                     namer.formatChapterNumber()
                 )
-                createNewTake(newTakeNumber, filename, chapterAudioDir)
+                createNewTake(newTakeNumber, filename, chapterAudioDir, true)
             }
             .flatMap { take ->
                 launchPlugin(PluginType.RECORDER, take, pluginParameters)
             }.map { (take, result) ->
                 handleRecorderPluginResult(audio::insertTake, take, result)
+            }
+    }
+
+    fun import(
+        audio: AssociatedAudio,
+        projectAudioDir: File,
+        namer: FileNamer,
+        take: File
+    ): Completable {
+        return audio.getNewTakeNumber()
+            .map { newTakeNumber ->
+                val format = AudioFileFormat.of(take.extension)
+                val filename = namer.generateName(newTakeNumber, format)
+                val chapterAudioDir = getChapterAudioDirectory(
+                    projectAudioDir,
+                    namer.formatChapterNumber()
+                )
+                writeTakeFile(chapterAudioDir, filename, take)
+                createNewTake(newTakeNumber, filename, chapterAudioDir, false)
+            }
+            .flatMapCompletable {
+                Completable.fromAction {
+                    handleImportTake(audio::insertTake, it)
+                }
             }
     }
 
@@ -77,10 +106,10 @@ class TakeActions @Inject constructor(
     private fun createNewTake(
         newTakeNumber: Int,
         filename: String,
-        audioDir: File
+        audioDir: File,
+        createEmpty: Boolean
     ): Take {
         val takeFile = audioDir.resolve(File(filename))
-
         val newTake = Take(
             name = takeFile.name,
             file = takeFile,
@@ -88,8 +117,19 @@ class TakeActions @Inject constructor(
             format = MimeType.WAV,
             createdTimestamp = LocalDate.now()
         )
-        waveFileCreator.createEmpty(newTake.file)
+        if (createEmpty) {
+            waveFileCreator.createEmpty(newTake.file)
+        }
         return newTake
+    }
+
+    private fun writeTakeFile(audioDir: File, filename: String, take: File) {
+        val takeFile = audioDir.resolve(File(filename))
+        take.inputStream().use { input ->
+            takeFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
     }
 
     internal fun handleRecorderPluginResult(
@@ -111,6 +151,18 @@ class TakeActions @Inject constructor(
                 take.file.delete()
                 Result.NO_PLUGIN
             }
+        }
+    }
+
+    internal fun handleImportTake(insertTake: (Take) -> Unit, take: Take) {
+        try {
+            // Create an instance of the audio file
+            // to check if it's valid
+            AudioFile(take.file)
+            insertTake(take)
+        } catch (e: Exception) {
+            take.file.delete()
+            throw InvalidWavFileException("Invalid audio file")
         }
     }
 }
