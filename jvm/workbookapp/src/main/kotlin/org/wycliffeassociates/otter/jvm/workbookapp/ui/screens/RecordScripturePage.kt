@@ -160,6 +160,7 @@ class RecordScriptureFragment : Fragment() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
+                recordableViewModel.openSourceAudioPlayer()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
@@ -345,7 +346,7 @@ class RecordScriptureFragment : Fragment() {
     override fun onDock() {
         super.onDock()
         recordableViewModel.openPlayers()
-        recordScriptureViewModel.recordableViewModel.currentTakeNumberProperty.set(null)
+        recordableViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
     }
 }

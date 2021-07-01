@@ -82,13 +82,8 @@ open class RecordableViewModel(
             }
         }
 
-        workbookDataStore.sourceAudioProperty.onChangeAndDoNow { source ->
-            var audioPlayer: IAudioPlayer? = null
-            if (source != null) {
-                audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                audioPlayer.loadSection(source.file, source.start, source.end)
-            }
-            sourceAudioPlayerProperty.set(audioPlayer)
+        workbookDataStore.sourceAudioProperty.onChangeAndDoNow {
+            openSourceAudioPlayer()
         }
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
@@ -267,7 +262,6 @@ open class RecordableViewModel(
         val selectedModel = takes.find { it.selected }
         selectedTakeProperty.set(selectedModel)
 
-        closePlayers()
         takeCardModels.clear()
         takeCardModels.addAll(takes)
         sortTakes()
@@ -346,15 +340,26 @@ open class RecordableViewModel(
 
     fun openPlayers() {
         takeCardModels.forEach { it.audioPlayer.load(it.take.file) }
+        openSourceAudioPlayer()
+    }
+
+    fun openSourceAudioPlayer() {
+        workbookDataStore.sourceAudioProperty.value?.let { source ->
+            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            audioPlayer.loadSection(source.file, source.start, source.end)
+            sourceAudioPlayerProperty.set(audioPlayer)
+        }
     }
 
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
+        sourceAudioPlayerProperty.value?.close()
     }
 
     fun stopPlayers() {
         takeCardModels.forEach { it.audioPlayer.stop() }
         selectedTakeProperty.value?.audioPlayer?.stop()
+        sourceAudioPlayerProperty.value?.stop()
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
