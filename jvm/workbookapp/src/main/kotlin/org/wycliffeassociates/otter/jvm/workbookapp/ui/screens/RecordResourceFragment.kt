@@ -143,6 +143,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         text = messages["previousChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
         action {
+            recordableViewModel.stopPlayers()
             recordResourceViewModel.previousChunk()
         }
         enableWhen(recordResourceViewModel.hasPrevious)
@@ -153,6 +154,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         text = messages["nextChunk"]
         graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
         action {
+            recordableViewModel.stopPlayers()
             recordResourceViewModel.nextChunk()
         }
         enableWhen(recordResourceViewModel.hasNext)
