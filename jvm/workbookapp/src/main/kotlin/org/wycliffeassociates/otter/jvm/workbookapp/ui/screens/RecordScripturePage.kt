@@ -24,11 +24,9 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
 import javafx.geometry.HPos
-import javafx.geometry.Pos
 import javafx.geometry.VPos
 import javafx.scene.Node
 import javafx.scene.Parent
-import javafx.scene.control.ContentDisplay
 import javafx.scene.control.Control
 import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
@@ -53,14 +51,10 @@ import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCardStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordScriptureStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -79,6 +73,7 @@ class RecordScriptureFragment : Fragment() {
     private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
     private val mainContainer = VBox()
+    private val fileDragTarget = VBox()
     private val takesGrid = ScriptureTakesGridView(
         workbookDataStore.activeChunkProperty.isNull,
         recordableViewModel::recordNewTake
@@ -97,6 +92,7 @@ class RecordScriptureFragment : Fragment() {
         DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
             .build(isDraggingTakeProperty.toBinding())
             .apply {
+                addClass("card--scripture-take--empty")
                 recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
                     /* We can't just add the node being dragged, since the selected take might have just been
                         loaded from the database */
@@ -107,18 +103,13 @@ class RecordScriptureFragment : Fragment() {
     private val dragContainer = VBox().apply {
         this.prefWidthProperty().bind(dragTarget.widthProperty())
         draggingNodeProperty.onChange { draggingNode ->
-            (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
             clear()
             draggingNode?.let { add(draggingNode) }
         }
     }
 
-    private val fileDragTarget = VBox()
-
     private val sourceContent =
         SourceContent().apply {
-            vgrow = Priority.ALWAYS
-
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
 
@@ -138,7 +129,7 @@ class RecordScriptureFragment : Fragment() {
         }
     }
 
-    override val root: Parent = anchorpane {
+    override val root = anchorpane {
         addButtonEventHandlers()
         createSnackBar()
 
@@ -166,10 +157,10 @@ class RecordScriptureFragment : Fragment() {
     }
 
     init {
-        importStylesheet<RecordScriptureStyles>()
-        importStylesheet<TakeCardStyles>()
-        importStylesheet(javaClass.getResource("/css/scripturetakecard.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/audioplayer.css").toExternalForm())
+        importStylesheet(resources.get("/css/record-scripture.css"))
+        importStylesheet(resources.get("/css/audioplayer.css"))
+        importStylesheet(resources.get("/css/takecard.css"))
+        importStylesheet(resources.get("/css/scripturetakecard.css"))
 
         isDraggingTakeProperty.onChange {
             if (it) recordableViewModel.stopPlayers()
@@ -179,7 +170,6 @@ class RecordScriptureFragment : Fragment() {
         }
 
         pluginOpenedPage = createPluginOpenedPage()
-
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
@@ -260,11 +250,12 @@ class RecordScriptureFragment : Fragment() {
             // Top items above the alternate takes
             // Drag target and/or selected take, Next Verse Button, Previous Verse Button
             hbox {
-                addClass(RecordScriptureStyles.pageTop)
-                alignment = Pos.CENTER
+                addClass("record-scripture__top")
+
                 // previous verse button
-                button(messages["previousVerse"], AppStyles.backIcon()) {
-                    addClass(RecordScriptureStyles.navigationButton)
+                button(messages["previousVerse"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
                     action {
                         recordScriptureViewModel.previousChunk()
                     }
@@ -275,9 +266,9 @@ class RecordScriptureFragment : Fragment() {
                 }
 
                 // next verse button
-                button(messages["nextVerse"], AppStyles.forwardIcon()) {
-                    addClass(RecordScriptureStyles.navigationButton)
-                    contentDisplay = ContentDisplay.RIGHT
+                button(messages["nextVerse"]) {
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                     action {
                         recordScriptureViewModel.nextChunk()
                     }

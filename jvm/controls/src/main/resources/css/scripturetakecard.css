@@ -31,6 +31,7 @@
 
 .card--scripture-take {
     -fx-background-color: -wa-white;
+    -fx-background-radius: 6px;
     -fx-effect: -wa-level2;
     -fx-font-size: 1em;
 }
@@ -77,4 +78,11 @@
     -fx-font-weight: lighter;
     -fx-font-style: italic;
     -fx-text-fill: -wa-gray;
+}
+
+.card--scripture-take--empty {
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 10px;
+    -fx-pref-width: 332px;
+    -fx-pref-height: 148px;
 }
