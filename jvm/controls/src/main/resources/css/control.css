@@ -227,3 +227,58 @@
     -fx-effect: dropshadow(gaussian, -wa-red, 10, 0, 0, 0);
 }
 
+/* -------------- Combobox ---------------- */
+
+.dropdown {
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 6px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black-40;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -wa-black;
+    -fx-font-size: 20px;
+    -fx-pref-height: 48px;
+    -fx-cursor: hand;
+}
+
+.dropdown .ikonli-font-icon {
+    -fx-font-size: 20px;
+    -fx-fill: -wa-black;
+}
+
+.dropdown:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.dropdown:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.dropdown .list-cell {
+    -fx-pref-height: 48px;
+}
+
+.dropdown .list-cell .label {
+    -fx-text-fill: -wa-black;
+}
+
+.dropdown .list-cell:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.dropdown .list-cell:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.dropdown .combo-box-popup .list-cell:selected {
+    -fx-background-color: -wa-primary-10;
+}
+
+.dropdown .combo-box-popup .list-cell:selected .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.dropdown .combo-box-popup .list-cell:selected .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+

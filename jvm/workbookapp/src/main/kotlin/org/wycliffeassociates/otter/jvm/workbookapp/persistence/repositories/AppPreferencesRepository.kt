@@ -43,4 +43,12 @@ class AppPreferencesRepository @Inject constructor(
     override fun setLastResource(resource: String): Completable {
         return preferences.setLastResource(resource)
     }
+
+    override fun locale(): Single<String> {
+        return preferences.locale()
+    }
+
+    override fun setLocale(locale: String): Completable {
+        return preferences.setLocale(locale)
+    }
 }

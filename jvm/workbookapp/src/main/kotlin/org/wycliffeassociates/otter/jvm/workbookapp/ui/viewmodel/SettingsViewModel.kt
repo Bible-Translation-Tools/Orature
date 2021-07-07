@@ -20,14 +20,17 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterLocale
 import tornadofx.*
 import javax.inject.Inject
 
@@ -38,6 +41,9 @@ class SettingsViewModel : ViewModel() {
     @Inject
     lateinit var pluginRepository: IAudioPluginRepository
 
+    @Inject
+    lateinit var appPrefRepository: IAppPreferencesRepository
+
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
@@ -46,12 +52,20 @@ class SettingsViewModel : ViewModel() {
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val locales: ObservableList<OtterLocale> = observableListOf()
+    val selectedLocaleProperty = SimpleObjectProperty<OtterLocale>()
+
+    val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
+
+        locales.setAll(OtterLocale.values().toList())
+        loadLocale()
     }
 
     fun refreshPlugins() {
@@ -99,5 +113,22 @@ class SettingsViewModel : ViewModel() {
     fun selectRecorder(recorderData: AudioPluginData) {
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
+    }
+
+    private fun loadLocale() {
+        appPrefRepository.locale()
+            .doOnError {
+                logger.error("Error in loadLocale: ", it)
+            }
+            .subscribe { locale ->
+                selectedLocaleProperty.set(OtterLocale.of(locale))
+            }
+    }
+
+    fun updateLocale(locale: OtterLocale) {
+        appPrefRepository.setLocale(locale.slug)
+            .subscribe {
+                showChangeLanguageSuccessDialogProperty.set(true)
+            }
     }
 }

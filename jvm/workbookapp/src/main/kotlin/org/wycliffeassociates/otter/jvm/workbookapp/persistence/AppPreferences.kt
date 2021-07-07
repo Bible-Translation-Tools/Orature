@@ -44,6 +44,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val MARKER_PLUGIN_ID_KEY = "markerPluginId"
     private val RESUME_BOOK_ID_KEY = "resumeBookId"
     private val LAST_RESOURCE_KEY = "lastResource"
+    private val LOCALE_KEY = "locale"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -167,5 +168,13 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setLastResource(resource: String): Completable {
         return putString(LAST_RESOURCE_KEY, resource)
+    }
+
+    override fun locale(): Single<String> {
+        return getString(LOCALE_KEY, "en")
+    }
+
+    override fun setLocale(locale: String): Completable {
+        return putString(LOCALE_KEY, locale)
     }
 }

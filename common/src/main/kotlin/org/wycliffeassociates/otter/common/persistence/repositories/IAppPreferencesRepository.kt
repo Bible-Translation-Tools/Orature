@@ -26,4 +26,6 @@ interface IAppPreferencesRepository {
     fun setResumeProjectId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
+    fun locale(): Single<String>
+    fun setLocale(locale: String): Completable
 }
