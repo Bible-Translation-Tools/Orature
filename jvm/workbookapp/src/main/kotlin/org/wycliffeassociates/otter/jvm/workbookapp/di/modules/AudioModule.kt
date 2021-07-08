@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioDevicesRepository
 
 @Module
 class AudioModule {
@@ -33,7 +34,9 @@ class AudioModule {
     fun providesRecorder(): IAudioRecorder = AudioRecorder()
 
     @Provides
-    fun providesPlayer(): IAudioPlayer = AudioBufferPlayer()
+    fun providesPlayer(
+        audioDevicesRepository: AudioDevicesRepository
+    ): IAudioPlayer = AudioBufferPlayer(audioDevicesRepository)
 
     @Provides
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()

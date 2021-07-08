@@ -34,4 +34,8 @@ interface IAppPreferences {
     fun setResumeBookId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
+    fun audioPlaybackDevice(): Single<String>
+    fun setAudioPlaybackDevice(name: String): Completable
+    fun audioRecordDevice(): Single<String>
+    fun setAudioRecordDevice(name: String): Completable
 }

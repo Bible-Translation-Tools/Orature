@@ -28,8 +28,13 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioDevicesRepository
+import javax.sound.sampled.DataLine
+import javax.sound.sampled.Mixer
+import javax.sound.sampled.Port
+import javax.sound.sampled.TargetDataLine
 
-class AudioBufferPlayer : IAudioPlayer {
+class AudioBufferPlayer(val audioDevicesRepository: IAudioDevicesRepository? = null) : IAudioPlayer {
 
     override val frameStart: Int
         get() = begin
@@ -68,7 +73,22 @@ class AudioBufferPlayer : IAudioPlayer {
             begin = 0
             end = _reader.totalFrames
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
+
+            val audioFormat = AudioFormat(
+                _reader.sampleRate.toFloat(),
+                _reader.sampleSize,
+                _reader.channels,
+                true,
+                false
+            )
+
+            val mixer = audioDevicesRepository?.getCurrentPlayer()?.blockingGet()
+
             player = AudioSystem.getSourceDataLine(
+                audioFormat,
+                mixer
+            )
+            /*player = AudioSystem.getSourceDataLine(
                 AudioFormat(
                     _reader.sampleRate.toFloat(),
                     _reader.sampleSize,
@@ -76,7 +96,8 @@ class AudioBufferPlayer : IAudioPlayer {
                     true,
                     false
                 )
-            )
+            )*/
+
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader

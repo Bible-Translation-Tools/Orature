@@ -25,11 +25,13 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioDevicesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
+import javax.sound.sampled.Mixer
 
 class SettingsViewModel : ViewModel() {
 
@@ -37,6 +39,9 @@ class SettingsViewModel : ViewModel() {
 
     @Inject
     lateinit var pluginRepository: IAudioPluginRepository
+
+    @Inject
+    lateinit var audioDevicesRepository: IAudioDevicesRepository
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -46,12 +51,23 @@ class SettingsViewModel : ViewModel() {
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
+    val playbackDevices = observableListOf<Mixer.Info>()
+    val selectedPlaybackDeviceProperty = SimpleObjectProperty<Mixer.Info>()
+
+    val recordDevices = observableListOf<Mixer.Info>()
+    val selectedRecordDeviceProperty = SimpleObjectProperty<Mixer.Info>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
+
+        loadPlaybackDevices()
+        loadRecordDevices()
+        loadCurrentPlayer()
+        loadCurrentRecorder()
     }
 
     fun refreshPlugins() {
@@ -99,5 +115,53 @@ class SettingsViewModel : ViewModel() {
     fun selectRecorder(recorderData: AudioPluginData) {
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
+    }
+
+    private fun loadCurrentPlayer() {
+        audioDevicesRepository.getCurrentPlayer()
+            .doOnError {
+                logger.error("Error in loadCurrentPlayer: ", it)
+            }
+            .subscribe { device ->
+                selectedPlaybackDeviceProperty.set(device)
+            }
+    }
+
+    private fun loadCurrentRecorder() {
+        audioDevicesRepository.getCurrentRecorder()
+            .doOnError {
+                logger.error("Error in loadCurrentRecorder: ", it)
+            }
+            .subscribe { device ->
+                selectedRecordDeviceProperty.set(device)
+            }
+    }
+
+    private fun loadPlaybackDevices() {
+        audioDevicesRepository.getPlayers()
+            .doOnError {
+                logger.error("Error in loadPlaybackDevices: ", it)
+            }
+            .subscribe { players ->
+                playbackDevices.setAll(players)
+            }
+    }
+
+    private fun loadRecordDevices() {
+        audioDevicesRepository.getRecorders()
+            .doOnError {
+                logger.error("Error in loadRecorderDevices: ", it)
+            }
+            .subscribe { recorders ->
+                recordDevices.setAll(recorders)
+            }
+    }
+
+    fun updatePlaybackDevice(mixer: Mixer.Info) {
+        audioDevicesRepository.setPlayer(mixer).subscribe()
+    }
+
+    fun updateRecorderDevice(mixer: Mixer.Info) {
+        audioDevicesRepository.setRecorder(mixer).subscribe()
     }
 }
