@@ -60,6 +60,7 @@ class RecordableTab(
         recordableProperty.bind(viewModel.recordableProperty)
         currentTakeNumberProperty.bind(viewModel.currentTakeNumberProperty)
         viewModel.openPlayers()
+        recordResourceFragment.onDock()
     }
 
     fun unbindProperties() {
@@ -67,6 +68,7 @@ class RecordableTab(
         recordableProperty.unbind()
         currentTakeNumberProperty.unbind()
         viewModel.closePlayers()
+        recordResourceFragment.onUndock()
     }
 
     private fun callOnTabSelect() {

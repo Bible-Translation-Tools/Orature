@@ -22,7 +22,6 @@ import javafx.collections.ObservableList
 import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordResourceStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 
@@ -42,6 +41,6 @@ class TakesListView(
         }
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
-        addClass(RecordResourceStyles.takesList)
+        addClass("card__takes-list")
     }
 }
