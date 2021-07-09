@@ -15,7 +15,7 @@ jobs:
           LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
       - name: install4j build
         shell: bash
-        run: docker run -v $(pwd):/repo -v $HOME/signing.p12:/root/signing.p12 -e SONAR_TOKEN -e GITHUB_TOKEN -e ORG_GRADLE_PROJECT_githubRepoUrl -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword -e ORG_GRADLE_PROJECT_githubOauthToken -e ORG_GRADLE_PROJECT_sentryDsn -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp wycliffeassociates/install4j-docker ./gradlew build detekt sonarqube :jvm:workbookapp:install4jdeploy
+        run: docker run -v $(pwd):/repo -v $HOME/signing.p12:/root/signing.p12 -e SONAR_TOKEN -e GITHUB_TOKEN -e ORG_GRADLE_PROJECT_githubRepoUrl -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword -e ORG_GRADLE_PROJECT_githubOauthToken -e ORG_GRADLE_PROJECT_sentryDsn -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp wycliffeassociates/install4j-docker ./gradlew "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m" build detekt sonarqube :jvm:workbookapp:install4jdeploy
         env:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
