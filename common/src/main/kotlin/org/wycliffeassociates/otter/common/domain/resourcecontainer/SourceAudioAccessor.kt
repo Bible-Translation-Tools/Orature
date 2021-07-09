@@ -67,8 +67,10 @@ class SourceAudioAccessor(
                                 .apply { createNewFile() }
                             cueFile.deleteOnExit()
                             val cuePath = path.replace(".mp3", ".cue")
-                            rc.accessor.getInputStream(cuePath).use {
-                                it.copyTo(cueFile.outputStream())
+                            rc.accessor.getInputStream(cuePath).use { input ->
+                                cueFile.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
                             }
                         }
                         cache[path] = temp
