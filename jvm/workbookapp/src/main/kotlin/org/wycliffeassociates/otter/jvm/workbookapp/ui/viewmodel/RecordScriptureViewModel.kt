@@ -97,12 +97,12 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun nextChunk() {
-        recordableViewModel.closePlayers()
+        recordableViewModel.stopPlayers()
         stepToChunk(StepDirection.FORWARD)
     }
 
     fun previousChunk() {
-        recordableViewModel.closePlayers()
+        recordableViewModel.stopPlayers()
         stepToChunk(StepDirection.BACKWARD)
     }
 

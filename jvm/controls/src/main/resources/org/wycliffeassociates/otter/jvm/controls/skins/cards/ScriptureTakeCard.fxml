@@ -28,7 +28,7 @@
 <?import javafx.scene.text.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="208.0" prefWidth="392.0" styleClass="card--scripture-take" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+<VBox styleClass="card--scripture-take" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <HBox alignment="CENTER_LEFT" spacing="8.0" VBox.vgrow="ALWAYS">
          <children>
@@ -59,8 +59,9 @@
       </HBox>
       <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
          <children>
-            <JFXSlider fx:id="slider" HBox.hgrow="ALWAYS" />
-         </children></HBox>
+            <JFXSlider fx:id="slider" styleClass="card--take__slider" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
       <HBox alignment="CENTER" spacing="16.0" VBox.vgrow="ALWAYS">
          <children>
             <JFXButton fx:id="playBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Play" HBox.hgrow="ALWAYS">

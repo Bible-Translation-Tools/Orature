@@ -22,18 +22,23 @@ import dev.jbs.gridview.control.GridCell
 import javafx.beans.binding.BooleanBinding
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.NewRecordingCard
+import org.wycliffeassociates.otter.jvm.controls.card.NewRecordingCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
+import tornadofx.*
 
 class ScriptureTakesGridCell(
     newRecordingAction: () -> Unit,
-    val contentIsMarkable: BooleanBinding
+    private val contentIsMarkable: BooleanBinding
 ) : GridCell<Pair<TakeCardType, TakeCardModel?>>() {
 
     private var rect = EmptyCardCell()
     private var takeCard = ScriptureTakeCard()
-    private var newRecording = NewRecordingCard(newRecordingAction)
+    private var newRecording = NewRecordingCard(
+        FX.messages["newTake"],
+        FX.messages["record"],
+        newRecordingAction
+    )
 
     override fun updateItem(item: Pair<TakeCardType, TakeCardModel?>?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -56,10 +61,16 @@ class ScriptureTakesGridCell(
                 takeCard.timestampProperty().set(model.take.createdTimestamp.toString())
                 takeCard.takeNumberProperty().set(model.take.number.toString())
                 takeCard.allowMarkerProperty().set(contentIsMarkable.value)
+
+                takeCard.prefWidthProperty().bind(widthProperty())
+                takeCard.prefHeightProperty().bind(heightProperty())
                 this.graphic = takeCard
             } else {
-                rect.heightProperty().bind(heightProperty())
-                rect.widthProperty().bind(widthProperty())
+                rect.apply {
+                    addClass("card--scripture-take--empty")
+                    prefHeightProperty().bind(this@ScriptureTakesGridCell.heightProperty())
+                    prefWidthProperty().bind(this@ScriptureTakesGridCell.widthProperty())
+                }
                 this.graphic = rect
             }
         }

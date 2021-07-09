@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.content
 
+import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import kotlin.IllegalStateException
 
@@ -51,7 +52,7 @@ class FileNamer(
         }
     }
 
-    fun generateName(takeNumber: Int?): String {
+    fun generateName(takeNumber: Int, format: AudioFileFormat): String {
         return listOfNotNull(
             languageSlug,
             rcSlug,
@@ -61,7 +62,7 @@ class FileNamer(
             formatSort(),
             formatContentType(),
             "t$takeNumber"
-        ).joinToString("_", postfix = ".wav")
+        ).joinToString("_", postfix = ".${format.extension}")
     }
 
     internal fun formatChapterNumber(): String {
