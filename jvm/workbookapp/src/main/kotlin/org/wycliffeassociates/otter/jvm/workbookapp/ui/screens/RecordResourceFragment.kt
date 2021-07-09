@@ -18,45 +18,43 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.github.thomasnield.rxkotlinfx.toObservable
-import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import de.jensd.fx.glyphs.materialicons.MaterialIcon
 import de.jensd.fx.glyphs.materialicons.MaterialIconView
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.BoundingBox
-import javafx.geometry.Bounds
-import javafx.geometry.Point2D
-import javafx.geometry.Pos
+import javafx.beans.value.ChangeListener
 import javafx.scene.Node
 import javafx.scene.Parent
+import javafx.scene.control.Button
+import javafx.scene.control.Control
 import javafx.scene.effect.DropShadow
+import javafx.scene.input.DragEvent
+import javafx.scene.input.Dragboard
+import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.util.Duration
+import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
+import org.wycliffeassociates.otter.jvm.controls.card.ResourceTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.PlayOrPauseEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.AnimateDragEvent
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.CompleteDragEvent
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.events.StartDragEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.TakeCard
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.takecard.resourcetakecard
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.RecordResourceStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel
@@ -71,15 +69,19 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val workbookDataStore: WorkbookDataStore by inject()
 
     val formattedTextProperty = SimpleStringProperty()
+    private val isDraggingTakeProperty = SimpleBooleanProperty(false)
+    private val isDraggingFileProperty = SimpleBooleanProperty(false)
     private val draggingNodeProperty = SimpleObjectProperty<Node>()
-    private val lastPlayOrPauseEvent: SimpleObjectProperty<PlayOrPauseEvent> = SimpleObjectProperty()
 
-    private var dragStartDelta = Point2D(0.0, 0.0)
-    private val dragTargetBuilder = DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
+    private var importProgressListener: ChangeListener<Boolean>? = null
+    private var importSuccessListener: ChangeListener<Boolean>? = null
+    private var importFailListener: ChangeListener<Boolean>? = null
+
     val dragTarget =
-        dragTargetBuilder
-            .build(draggingNodeProperty.booleanBinding { it != null })
+        DragTargetBuilder(DragTargetBuilder.Type.RESOURCE_TAKE)
+            .build(isDraggingTakeProperty.toBinding())
             .apply {
+                addClass("card--resource-take--empty")
                 recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
                     /* We can't just add the node being dragged, since the selected take might have just been
                         loaded from the database */
@@ -90,7 +92,6 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val dragContainer = VBox().apply {
         this.prefWidthProperty().bind(dragTarget.widthProperty())
         draggingNodeProperty.onChange { draggingNode ->
-            (dragTarget.selectedNodeProperty.get() as? TakeCard)?.simpleAudioPlayer?.close()
             clear()
             draggingNode?.let { add(draggingNode) }
         }
@@ -104,14 +105,23 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     )
 
     private val mainContainer = VBox()
+    private val fileDragTarget = VBox()
 
     override val root: Parent = anchorpane {
-        addDragTakeEventHandlers()
         addButtonEventHandlers()
-
         createSnackBar()
 
         add(mainContainer
+            .apply {
+                anchorpaneConstraints {
+                    leftAnchor = 0.0
+                    rightAnchor = 0.0
+                    bottomAnchor = 0.0
+                    topAnchor = 0.0
+                }
+            }
+        )
+        add(fileDragTarget
             .apply {
                 anchorpaneConstraints {
                     leftAnchor = 0.0
@@ -138,21 +148,23 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             }
         }
 
-    private val previousButton = JFXButton().apply {
-        addClass(RecordResourceStyles.bottomButton)
+    private val previousButton = Button().apply {
+        addClass("btn", "btn--secondary", "card__navigate-button")
         text = messages["previousChunk"]
-        graphic = MaterialIconView(MaterialIcon.ARROW_BACK, "26px")
+        graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
         action {
+            recordableViewModel.stopPlayers()
             recordResourceViewModel.previousChunk()
         }
         enableWhen(recordResourceViewModel.hasPrevious)
     }
 
-    private val nextButton = JFXButton().apply {
-        addClass(RecordResourceStyles.bottomButton)
+    private val nextButton = Button().apply {
+        addClass("btn", "btn--secondary", "card__navigate-button")
         text = messages["nextChunk"]
-        graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "26px")
+        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
         action {
+            recordableViewModel.stopPlayers()
             recordResourceViewModel.nextChunk()
         }
         enableWhen(recordResourceViewModel.hasNext)
@@ -162,31 +174,26 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         vgrow = Priority.ALWAYS
 
         hbox {
-            region {
-                hgrow = Priority.ALWAYS
-            }
+            addClass("card__dragtarget-region")
             add(
                 dragTarget.apply {
                     hgrow = Priority.ALWAYS
                 }
             )
-            region {
-                hgrow = Priority.ALWAYS
-            }
         }
 
         scrollpane {
-            addClass(RecordResourceStyles.contentScrollPane)
+            addClass("card__content-scrollpane")
             isFitToWidth = true
             vgrow = Priority.ALWAYS
             label(formattedTextProperty) {
                 isWrapText = true
-                addClass(RecordResourceStyles.contentText)
+                addClass("card__content-text")
             }
         }
 
         vbox {
-            addClass(RecordResourceStyles.newTakeRegion)
+            addClass("card__new-takes-region")
             add(newTakeButton).apply {
                 effect = DropShadow(2.0, 0.0, 3.0, Color.valueOf("#0d4082"))
             }
@@ -195,7 +202,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
 
     private val grid = gridpane {
         vgrow = Priority.ALWAYS
-        addClass(RecordResourceStyles.takesTab)
+        addClass("card--takes-tab")
 
         constraintsForRow(0).percentHeight = 90.0
         constraintsForRow(1).percentHeight = 10.0
@@ -205,21 +212,21 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
                 gridpaneColumnConstraints {
                     percentWidth = 50.0
                 }
-                addClass(RecordResourceStyles.leftRegionContainer)
+                addClass("card--left-region-container")
                 add(leftRegion)
             }
             vbox(20.0) {
                 gridpaneColumnConstraints {
                     percentWidth = 50.0
                 }
-                addClass(RecordResourceStyles.rightRegion)
+                addClass("card__right-region")
                 add(alternateTakesList)
             }
         }
 
         row {
             vbox {
-                alignment = Pos.CENTER
+                addClass("card__button-cell")
                 gridpaneColumnConstraints {
                     percentWidth = 50.0
                 }
@@ -227,7 +234,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             }
 
             vbox {
-                alignment = Pos.CENTER
+                addClass("card__button-cell")
                 gridpaneColumnConstraints {
                     percentWidth = 50.0
                 }
@@ -237,7 +244,15 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     }
 
     init {
-        importStylesheet<RecordResourceStyles>()
+        importStylesheet(resources.get("/css/takecard.css"))
+        importStylesheet(resources.get("/css/resourcetakecard.css"))
+
+        isDraggingTakeProperty.onChange {
+            if (it) recordableViewModel.stopPlayers()
+        }
+        isDraggingFileProperty.onChange {
+            if (it) recordableViewModel.stopPlayers()
+        }
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
@@ -253,15 +268,78 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         }
 
         mainContainer.apply {
+            addEventHandler(DragEvent.DRAG_ENTERED) {
+                if (it.dragboard.hasFiles()) {
+                    isDraggingFileProperty.value = true
+                } else {
+                    isDraggingTakeProperty.value = true
+                }
+            }
+            addEventHandler(DragEvent.DRAG_EXITED) {
+                isDraggingTakeProperty.value = false
+            }
+
+            addClass("card--main-container")
+
             add(grid)
+        }
+
+        dragTarget.setOnDragDropped {
+            val db: Dragboard = it.dragboard
+            var success = false
+            if (db.hasString()) {
+                recordableViewModel.selectTake(db.string)
+                success = true
+            }
+            (it.source as? ResourceTakeCard)?.let {
+                it.isDraggingProperty().value = false
+            }
+            it.isDropCompleted = success
+            it.consume()
+        }
+
+        dragTarget.setOnDragOver {
+            if (it.gestureSource != dragTarget && it.dragboard.hasString()) {
+                it.acceptTransferModes(*TransferMode.ANY)
+            }
+            it.consume()
+        }
+
+        fileDragTarget.setOnDragOver {
+            if (it.gestureSource != fileDragTarget && it.dragboard.hasFiles()) {
+                it.acceptTransferModes(*TransferMode.ANY)
+            }
+            it.consume()
+        }
+
+        fileDragTarget.setOnDragDropped {
+            val db: Dragboard = it.dragboard
+            var success = false
+            if (db.hasFiles()) {
+                recordableViewModel.importTakes(db.files)
+                success = true
+            }
+            it.isDropCompleted = success
+            it.consume()
+        }
+
+        fileDragTarget.apply {
+            visibleProperty().bind(isDraggingFileProperty)
+            isDraggingFileProperty.onChange {
+                toggleClass("card--container-dragover", it)
+            }
+            addEventHandler(DragEvent.DRAG_EXITED) {
+                isDraggingFileProperty.value = false
+            }
         }
     }
 
-    private fun createTakeCard(take: TakeCardModel): TakeCard {
-        return resourcetakecard(
-            take,
-            lastPlayOrPauseEvent.toObservable()
-        )
+    private fun createTakeCard(take: TakeCardModel): Control {
+        return ResourceTakeCard().apply {
+            audioPlayerProperty().set(take.audioPlayer)
+            takeProperty().set(take.take)
+            takeNumberProperty().set(take.take.number.toString())
+        }
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
@@ -298,94 +376,75 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             }
     }
 
-    private fun Parent.addDragTakeEventHandlers() {
-        addEventHandler(StartDragEvent.START_DRAG, ::startDrag)
-        addEventHandler(AnimateDragEvent.ANIMATE_DRAG, ::animateDrag)
-        addEventHandler(CompleteDragEvent.COMPLETE_DRAG, ::completeDrag)
+    private fun initializeImportProgressDialog() {
+        confirmdialog {
+            titleTextProperty.set(messages["importTakesTitle"])
+            messageTextProperty.set(messages["importTakesMessage"])
+
+            importProgressListener = ChangeListener { _, _, value ->
+                if (value) open() else close()
+            }
+            recordableViewModel.showImportProgressDialogProperty.addListener(importProgressListener)
+
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
+        }
+    }
+
+    private fun initializeImportSuccessDialog() {
+        confirmdialog {
+            titleTextProperty.set(messages["importTakesTitle"])
+            messageTextProperty.set(messages["importTakesSuccessMessage"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            importSuccessListener = ChangeListener { _, _, value ->
+                if (value) open() else close()
+            }
+            recordableViewModel.showImportSuccessDialogProperty.addListener(importSuccessListener)
+
+            onCloseAction { recordableViewModel.showImportSuccessDialogProperty.set(false) }
+            onCancelAction { recordableViewModel.showImportSuccessDialogProperty.set(false) }
+        }
+    }
+
+    private fun initializeImportFailDialog() {
+        confirmdialog {
+            titleTextProperty.set(messages["importTakesTitle"])
+            messageTextProperty.set(messages["importTakesFailMessage"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            importFailListener = ChangeListener { _, _, value ->
+                if (value) open() else close()
+            }
+            recordableViewModel.showImportFailDialogProperty.addListener(importFailListener)
+
+            onCloseAction { recordableViewModel.showImportFailDialogProperty.set(false) }
+            onCancelAction { recordableViewModel.showImportFailDialogProperty.set(false) }
+        }
+    }
+
+    private fun removeDialogListeners() {
+        recordableViewModel.showImportProgressDialogProperty.removeListener(importProgressListener)
+        recordableViewModel.showImportFailDialogProperty.removeListener(importFailListener)
+        recordableViewModel.showImportSuccessDialogProperty.removeListener(importSuccessListener)
     }
 
     private fun Parent.addButtonEventHandlers() {
-        addEventHandler(PlayOrPauseEvent.PLAY) {
-            lastPlayOrPauseEvent.set(it)
-        }
         addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
             recordableViewModel.deleteTake(it.take)
         }
         addEventHandler(TakeEvent.EDIT_TAKE) {
             recordableViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
         }
-        addEventHandler(TakeEvent.MARK_TAKE) {
-            recordableViewModel.processTakeWithPlugin(it, PluginType.MARKER)
-        }
     }
 
-    private fun getPointInRoot(node: Node, pointInNode: Point2D): Point2D {
-        return when (node) {
-            root -> pointInNode
-            else -> getPointInRoot(node.parent, node.localToParent(pointInNode))
-        }
+    override fun onUndock() {
+        removeDialogListeners()
     }
 
-    private fun getBoundsInRoot(node: Node, bounds: Bounds): Bounds {
-        return when (node) {
-            root -> bounds
-            else -> getBoundsInRoot(node.parent, node.localToParent(bounds))
-        }
-    }
-
-    private fun relocateDragContainer(pointInRoot: Point2D) {
-        val newX = pointInRoot.x - dragStartDelta.x
-        val newY = pointInRoot.y - dragStartDelta.y
-        dragContainer.relocate(newX, newY)
-    }
-
-    private fun startDrag(event: StartDragEvent) {
-        if (event.take != recordableViewModel.selectedTakeProperty.value?.take) {
-            recordableViewModel.stopPlayers()
-            val draggingNode = event.draggingNode
-            val mouseEvent = event.mouseEvent
-            dragStartDelta = Point2D(mouseEvent.x, mouseEvent.y)
-            val pointInRoot = getPointInRoot(draggingNode, Point2D(mouseEvent.x, mouseEvent.y))
-
-            draggingNodeProperty.set(draggingNode)
-            dragContainer.toFront()
-            relocateDragContainer(pointInRoot)
-        }
-    }
-
-    private fun animateDrag(event: AnimateDragEvent) {
-        draggingNodeProperty.value?.let { draggingNode ->
-            val pointInRoot = getPointInRoot(draggingNode, Point2D(event.mouseEvent.x, event.mouseEvent.y))
-            relocateDragContainer(pointInRoot)
-        }
-    }
-
-    private fun isDraggedToTarget(): Boolean {
-        val draggingNodeBounds =
-            getBoundsInRoot(draggingNodeProperty.value.parent, draggingNodeProperty.value.boundsInParent)
-        val dragTargetBounds = getBoundsInRoot(dragTarget.parent, dragTarget.boundsInParent)
-
-        // Reduce the bounds of the drag target slightly so that we are sure there is enough overlap
-        // to trigger select take
-        val dragTargetReducedBounds = dragTargetBounds.let {
-            BoundingBox(
-                it.minX + it.width * .05,
-                it.minY + it.height * .05,
-                it.width * .9,
-                it.height * .9
-            )
-        }
-        return draggingNodeBounds.intersects(dragTargetReducedBounds)
-    }
-
-    private fun completeDrag(event: CompleteDragEvent) {
-        if (draggingNodeProperty.value != null) {
-            if (isDraggedToTarget()) {
-                recordableViewModel.selectTake(event.take)
-            } else {
-                event.onCancel()
-            }
-            draggingNodeProperty.set(null)
-        }
+    override fun onDock() {
+        initializeImportProgressDialog()
+        initializeImportFailDialog()
+        initializeImportSuccessDialog()
     }
 }

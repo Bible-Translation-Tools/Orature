@@ -54,28 +54,39 @@ class SourceAudioAccessor(
     }
 
     private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer): SourceAudio? {
-        return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
+        return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
-                if (cache.containsKey(path)) {
-                    cache[path]
-                }
-                val extension = File(path).extension
-                val temp = File(dir, File(path).name).apply { createNewFile() }
-                if (extension == "mp3") {
-                    val cueFile = File(temp.absolutePath.replace(".mp3", ".cue")).apply { createNewFile() }
-                    cueFile.deleteOnExit()
-                    val cuePath = path.replace(".mp3", ".cue")
-                    rc.accessor.getInputStream(cuePath).use {
-                        it.copyTo(cueFile.outputStream())
+                val file = when(cache.containsKey(path)) {
+                    true -> cache[path]!!
+                    false -> {
+                        val temp = File(dir, File(path).name).apply { createNewFile() }
+                        val extension = File(path).extension
+                        if (extension == "mp3") {
+                            val cueFile = File(temp.absolutePath.replace(".mp3", ".cue"))
+                                .apply { createNewFile() }
+                            cueFile.deleteOnExit()
+                            val cuePath = path.replace(".mp3", ".cue")
+                            rc.accessor.getInputStream(cuePath).use { input ->
+                                cueFile.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                        }
+                        cache[path] = temp
+                        temp.deleteOnExit()
+                        rc.accessor.getInputStream(path).use { input ->
+                            temp.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                        temp
                     }
                 }
-                cache[path] = temp
-                temp.deleteOnExit()
-                rc.accessor.getInputStream(path).use { it.copyTo(temp.outputStream()) }
-                val audioFile = AudioFile(temp)
+
+                val audioFile = AudioFile(file)
                 val size = audioFile.totalFrames
-                SourceAudio(temp, 0, size)
+                SourceAudio(file, 0, size)
             } else {
                 null
             }
