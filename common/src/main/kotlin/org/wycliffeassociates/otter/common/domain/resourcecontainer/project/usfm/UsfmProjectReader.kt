@@ -137,7 +137,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
     val chapters = doc.getChildMarkers(CMarker::class.java)
     return chapters.map { chapter ->
         val verses = chapter.getChildMarkers(VMarker::class.java)
-        val startVerse = verses.maxByOrNull { it.startingVerse }?.startingVerse ?: 1
+        val startVerse = verses.minByOrNull { it.startingVerse }?.startingVerse ?: 1
         val endVerse = verses.maxByOrNull { it.endingVerse }?.endingVerse ?: 1
         val chapterSlug = "${projectSlug}_${chapter.number}"
         val chapterCollection = Collection(
