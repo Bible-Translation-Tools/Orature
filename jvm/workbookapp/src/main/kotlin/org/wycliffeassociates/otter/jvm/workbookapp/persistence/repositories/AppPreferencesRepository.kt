@@ -22,6 +22,7 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import java.util.*
 import javax.inject.Inject
 
 class AppPreferencesRepository @Inject constructor(
@@ -44,11 +45,18 @@ class AppPreferencesRepository @Inject constructor(
         return preferences.setLastResource(resource)
     }
 
-    override fun locale(): Single<String> {
-        return preferences.locale()
+    override fun actualLocale(): Single<Locale> {
+        return preferences
+            .locale()
+            .map {
+                val parts = it.split("_", limit = 2)
+                val language = parts[0]
+                val country = parts.getOrNull(1) ?: ""
+                Locale(language, country)
+            }
     }
 
-    override fun setLocale(locale: String): Completable {
-        return preferences.setLocale(locale)
+    override fun setActualLocale(locale: Locale): Completable {
+        return preferences.setLocale(locale.toString())
     }
 }

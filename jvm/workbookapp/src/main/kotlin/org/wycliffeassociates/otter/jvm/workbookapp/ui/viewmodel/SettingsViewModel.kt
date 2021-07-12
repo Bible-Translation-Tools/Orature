@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterLocale
 import tornadofx.*
+import java.util.*
 import javax.inject.Inject
 
 class SettingsViewModel : ViewModel() {
@@ -46,14 +47,14 @@ class SettingsViewModel : ViewModel() {
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
+    val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
 
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
-    val locales: ObservableList<OtterLocale> = observableListOf()
-    val selectedLocaleProperty = SimpleObjectProperty<OtterLocale>()
+    val supportedLocales: ObservableList<Locale> = observableListOf()
+    val selectedLocaleProperty = SimpleObjectProperty<Locale>()
 
     val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
 
@@ -64,8 +65,8 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
 
-        locales.setAll(OtterLocale.values().toList())
-        loadLocale()
+        loadSupportedLocales()
+        loadActualLocale()
     }
 
     fun refreshPlugins() {
@@ -115,18 +116,29 @@ class SettingsViewModel : ViewModel() {
         selectedRecorderProperty.set(recorderData)
     }
 
-    private fun loadLocale() {
-        appPrefRepository.locale()
+    private fun loadSupportedLocales() {
+        val localeBuilder = OtterLocale.Builder().build()
+        supportedLocales.setAll(localeBuilder.getSupportedLocales())
+    }
+
+    private fun loadActualLocale() {
+        appPrefRepository
+            .actualLocale()
             .doOnError {
                 logger.error("Error in loadLocale: ", it)
             }
             .subscribe { locale ->
-                selectedLocaleProperty.set(OtterLocale.of(locale))
+                val localeBuilder = OtterLocale.Builder()
+                    .setActualLocale(locale)
+                    .build()
+
+                selectedLocaleProperty.set(localeBuilder.getActualLocale())
             }
     }
 
-    fun updateLocale(locale: OtterLocale) {
-        appPrefRepository.setLocale(locale.slug)
+    fun updateLocale(locale: Locale) {
+        appPrefRepository
+            .setActualLocale(locale)
             .subscribe {
                 showChangeLanguageSuccessDialogProperty.set(true)
             }

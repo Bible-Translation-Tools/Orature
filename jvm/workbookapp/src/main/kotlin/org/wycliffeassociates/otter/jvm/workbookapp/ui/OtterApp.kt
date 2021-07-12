@@ -37,9 +37,12 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     var shouldBlockWindowCloseRequest = false
 
     init {
+        initializeAppLocale()
+
         val directoryProvider = dependencyGraph.injectDirectoryProvider()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
         initializeLogger(directoryProvider)
+
         importStylesheet<AppStyles>()
     }
 
@@ -47,6 +50,15 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         ConfigureLogger(
             directoryProvider.logsDirectory
         ).configure()
+    }
+
+    fun initializeAppLocale() {
+        val appPrefRepo = dependencyGraph.injectAppPreferencesRepository()
+        val localeBuilder = OtterLocale.Builder()
+            .setActualLocale(appPrefRepo.actualLocale().blockingGet())
+            .build()
+
+        FX.locale = localeBuilder.getActualLocale()
     }
 
     override fun start(stage: Stage) {

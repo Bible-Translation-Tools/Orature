@@ -25,9 +25,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterLocale
 import tornadofx.*
-import java.util.*
 import javax.inject.Inject
 
 class SplashScreenViewModel : ViewModel() {
@@ -44,24 +42,12 @@ class SplashScreenViewModel : ViewModel() {
     fun initApp(): Observable<Double> {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        applyAppLocale()
-
         return initApp.initApp()
             .observeOnFx()
             .doOnError { logger.error("Error initializing app: ", it) }
             .map {
                 progressProperty.value = it
                 it
-            }
-    }
-
-    private fun applyAppLocale() {
-        appPrefRepo.locale()
-            .doOnError {
-                logger.error("Error in setLocale: ", it)
-            }
-            .subscribe { locale ->
-                FX.locale = Locale(OtterLocale.of(locale).slug)
             }
     }
 }

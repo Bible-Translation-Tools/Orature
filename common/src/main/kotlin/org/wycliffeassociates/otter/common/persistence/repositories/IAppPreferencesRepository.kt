@@ -20,12 +20,13 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
 import io.reactivex.Single
+import java.util.*
 
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
     fun setResumeProjectId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
-    fun locale(): Single<String>
-    fun setLocale(locale: String): Completable
+    fun actualLocale(): Single<Locale>
+    fun setActualLocale(locale: Locale): Completable
 }

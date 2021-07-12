@@ -171,7 +171,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     }
 
     override fun locale(): Single<String> {
-        return getString(LOCALE_KEY, "en")
+        return getString(LOCALE_KEY, "")
     }
 
     override fun setLocale(locale: String): Completable {

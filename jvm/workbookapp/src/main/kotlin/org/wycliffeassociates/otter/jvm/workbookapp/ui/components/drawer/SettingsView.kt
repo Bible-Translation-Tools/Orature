@@ -72,13 +72,13 @@ class SettingsView : View() {
                     label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
-                    combobox(viewModel.selectedLocaleProperty, viewModel.locales) {
+                    combobox(viewModel.selectedLocaleProperty, viewModel.supportedLocales) {
                         addClass("dropdown")
                         fitToParentWidth()
 
                         cellFormat {
                             graphic = Label().apply {
-                                text = it.language
+                                text = it.displayName.capitalize()
                                 graphic = FontIcon(MaterialDesign.MDI_WEB)
                             }
                         }
