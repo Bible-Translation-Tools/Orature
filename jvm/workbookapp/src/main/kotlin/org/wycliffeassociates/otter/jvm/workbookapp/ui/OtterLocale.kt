@@ -6,7 +6,7 @@ class OtterLocale private constructor(
     private val defaultLocale: Locale,
     private val actualLocale: Locale,
     private val supportedLocales: List<Locale>,
-    private val alternativeLocales: Map<String, Locale>
+    private val localeAlternatives: Map<String, Locale>
 ) {
 
     fun getSupportedLocales(): List<Locale> {
@@ -19,7 +19,7 @@ class OtterLocale private constructor(
         return when {
             supportedLocales.contains(defaultLocale) -> defaultLocale
             supportedLocales.contains(languageLocale) -> languageLocale
-            alternativeLocales.containsKey(localeStr) -> alternativeLocales[localeStr]!!
+            localeAlternatives.containsKey(localeStr) -> localeAlternatives[localeStr]!!
             else -> Locale.ENGLISH
         }
     }
@@ -30,7 +30,7 @@ class OtterLocale private constructor(
         return when {
             supportedLocales.contains(actualLocale) -> actualLocale
             supportedLocales.contains(languageLocale) -> languageLocale
-            alternativeLocales.containsKey(localeStr) -> alternativeLocales[localeStr]!!
+            localeAlternatives.containsKey(localeStr) -> localeAlternatives[localeStr]!!
             else -> getDefaultLocale()
         }
     }
@@ -54,7 +54,7 @@ class OtterLocale private constructor(
             return this
         }
 
-        fun setAlternativeLocales(locales: Map<String, Locale>): Builder {
+        fun setLocaleAlternatives(locales: Map<String, Locale>): Builder {
             localeAlternatives.clear()
             localeAlternatives.putAll(locales)
             return this
