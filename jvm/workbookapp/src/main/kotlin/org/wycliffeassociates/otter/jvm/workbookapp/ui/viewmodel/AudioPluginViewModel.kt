@@ -23,6 +23,7 @@ import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.device.IAudioDevice
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
@@ -31,6 +32,7 @@ import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -42,6 +44,7 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var launchPlugin: LaunchPlugin
     @Inject lateinit var takeActions: TakeActions
+    @Inject lateinit var appPrefRepository: IAppPreferencesRepository
 
     private val workbookDataStore: WorkbookDataStore by inject()
 
@@ -84,6 +87,9 @@ class AudioPluginViewModel : ViewModel() {
             messages[workbookDataStore.activeResourceComponentProperty.value.label]
         }
 
+        val inputDevice = appPrefRepository.getInputDevice().blockingGet()
+        val outputDevice = appPrefRepository.getOutputDevice().blockingGet()
+
         return PluginParameters(
             languageName = workbook.target.language.name,
             bookTitle = workbook.target.title,
@@ -97,7 +103,9 @@ class AudioPluginViewModel : ViewModel() {
             sourceChunkStart = sourceAudio?.start,
             sourceChunkEnd = sourceAudio?.end,
             sourceText = sourceText,
-            actionText = action
+            actionText = action,
+            inputDevice = inputDevice.name,
+            outputDevice = outputDevice.name
         )
     }
 

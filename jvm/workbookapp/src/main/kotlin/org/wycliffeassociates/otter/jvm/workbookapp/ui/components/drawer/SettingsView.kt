@@ -70,7 +70,7 @@ class SettingsView : View() {
                     label(messages["playbackSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
-                    combobox(viewModel.selectedPlaybackDeviceProperty, viewModel.playbackDevices) {
+                    combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
                         addClass("dropdown")
                         fitToParentWidth()
 
@@ -82,14 +82,14 @@ class SettingsView : View() {
                         }
 
                         selectionModel.selectedItemProperty().onChange {
-                            it?.let { viewModel.updatePlaybackDevice(it) }
+                            it?.let { viewModel.updateOutputDevice(it) }
                         }
                     }
 
                     label(messages["recordSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
-                    combobox(viewModel.selectedRecordDeviceProperty, viewModel.recordDevices) {
+                    combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
                         addClass("dropdown")
                         fitToParentWidth()
 
@@ -101,7 +101,7 @@ class SettingsView : View() {
                         }
 
                         selectionModel.selectedItemProperty().onChange {
-                            it?.let { viewModel.updateRecorderDevice(it) }
+                            it?.let { viewModel.updateInputDevice(it) }
                         }
                     }
                 }

@@ -22,28 +22,29 @@ import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
-import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDevice
+import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
-import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
-import org.wycliffeassociates.otter.jvm.recorder.device.AudioRecorder
+import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
-import tornadofx.ViewModel
-import tornadofx.add
-import tornadofx.getValue
-import tornadofx.setValue
+import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
+import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
+import tornadofx.*
 import java.io.File
-import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class RecorderViewModel : ViewModel() {
 
     val parameters = (scope as ParameterizedScope).parameters
     val wav = AudioFile(File(parameters.named["wav"]), 1, 44100, 16)
-    val recorder = AudioRecorder()
+
+    val audioDevice = AudioDevice()
+    val inputDevice = audioDevice.getInputDevice(parameters.named["input_device"]).blockingGet()
+    val recorder = AudioRecorder(inputDevice)
 
     val writer = WavFileWriter(wav, recorder.getAudioStream()) {
         (scope as ParameterizedScope).navigateBack()
@@ -53,7 +54,6 @@ class RecorderViewModel : ViewModel() {
     val volumeBarView = CanvasFragment()
 
     val fps = FramerateView()
-
     val volumeBar = VolumeBar(recorder.getAudioStream())
 
     val timer = RecordingTimer()

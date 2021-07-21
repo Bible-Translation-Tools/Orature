@@ -24,8 +24,9 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.device.IAudioDevice
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioDevicesRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -41,7 +42,10 @@ class SettingsViewModel : ViewModel() {
     lateinit var pluginRepository: IAudioPluginRepository
 
     @Inject
-    lateinit var audioDevicesRepository: IAudioDevicesRepository
+    lateinit var audioDevice: IAudioDevice
+
+    @Inject
+    lateinit var appPrefRepository: IAppPreferencesRepository
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -51,11 +55,11 @@ class SettingsViewModel : ViewModel() {
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
 
-    val playbackDevices = observableListOf<Mixer.Info>()
-    val selectedPlaybackDeviceProperty = SimpleObjectProperty<Mixer.Info>()
+    val outputDevices = observableListOf<Mixer.Info>()
+    val selectedOutputDeviceProperty = SimpleObjectProperty<Mixer.Info>()
 
-    val recordDevices = observableListOf<Mixer.Info>()
-    val selectedRecordDeviceProperty = SimpleObjectProperty<Mixer.Info>()
+    val inputDevices = observableListOf<Mixer.Info>()
+    val selectedInputDeviceProperty = SimpleObjectProperty<Mixer.Info>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -64,10 +68,10 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
 
-        loadPlaybackDevices()
-        loadRecordDevices()
-        loadCurrentPlayer()
-        loadCurrentRecorder()
+        loadOutputDevices()
+        loadInputDevices()
+        loadCurrentOutputDevice()
+        loadCurrentInputDevice()
     }
 
     fun refreshPlugins() {
@@ -117,51 +121,51 @@ class SettingsViewModel : ViewModel() {
         selectedRecorderProperty.set(recorderData)
     }
 
-    private fun loadCurrentPlayer() {
-        audioDevicesRepository.getCurrentPlayer()
+    private fun loadCurrentOutputDevice() {
+        appPrefRepository.getOutputDevice()
             .doOnError {
-                logger.error("Error in loadCurrentPlayer: ", it)
+                logger.error("Error in loadCurrentOutputDevice: ", it)
             }
             .subscribe { device ->
-                selectedPlaybackDeviceProperty.set(device)
+                selectedOutputDeviceProperty.set(device)
             }
     }
 
-    private fun loadCurrentRecorder() {
-        audioDevicesRepository.getCurrentRecorder()
+    private fun loadCurrentInputDevice() {
+        appPrefRepository.getInputDevice()
             .doOnError {
-                logger.error("Error in loadCurrentRecorder: ", it)
+                logger.error("Error in loadCurrentInputDevice: ", it)
             }
             .subscribe { device ->
-                selectedRecordDeviceProperty.set(device)
+                selectedInputDeviceProperty.set(device)
             }
     }
 
-    private fun loadPlaybackDevices() {
-        audioDevicesRepository.getPlayers()
+    private fun loadOutputDevices() {
+        audioDevice.getOutputDevices()
             .doOnError {
-                logger.error("Error in loadPlaybackDevices: ", it)
+                logger.error("Error in loadOutputDevices: ", it)
             }
             .subscribe { players ->
-                playbackDevices.setAll(players)
+                outputDevices.setAll(players)
             }
     }
 
-    private fun loadRecordDevices() {
-        audioDevicesRepository.getRecorders()
+    private fun loadInputDevices() {
+        audioDevice.getInputDevices()
             .doOnError {
-                logger.error("Error in loadRecorderDevices: ", it)
+                logger.error("Error in loadInputDevices: ", it)
             }
             .subscribe { recorders ->
-                recordDevices.setAll(recorders)
+                inputDevices.setAll(recorders)
             }
     }
 
-    fun updatePlaybackDevice(mixer: Mixer.Info) {
-        audioDevicesRepository.setPlayer(mixer).subscribe()
+    fun updateOutputDevice(mixer: Mixer.Info) {
+        appPrefRepository.setOutputDevice(mixer).subscribe()
     }
 
-    fun updateRecorderDevice(mixer: Mixer.Info) {
-        audioDevicesRepository.setRecorder(mixer).subscribe()
+    fun updateInputDevice(mixer: Mixer.Info) {
+        appPrefRepository.setInputDevice(mixer).subscribe()
     }
 }

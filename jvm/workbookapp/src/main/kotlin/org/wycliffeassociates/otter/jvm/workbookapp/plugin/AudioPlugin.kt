@@ -135,7 +135,9 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                             pluginParameters.bookTitle,
                             pluginParameters.chapterNumber
                         )
-                    }"
+                    }",
+                    "--input_device=${pluginParameters.inputDevice}",
+                    "--output_device=${pluginParameters.outputDevice}"
                 )
             }
         return ParametersImpl(insertedArgs)

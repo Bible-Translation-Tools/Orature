@@ -171,19 +171,19 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
         return putString(LAST_RESOURCE_KEY, resource)
     }
 
-    override fun audioPlaybackDevice(): Single<String> {
+    override fun audioOutputDevice(): Single<String> {
         return getString(AUDIO_PLAYBACK_DEVICE_KEY, "")
     }
 
-    override fun setAudioPlaybackDevice(name: String): Completable {
+    override fun setAudioOutputDevice(name: String): Completable {
         return putString(AUDIO_PLAYBACK_DEVICE_KEY, name)
     }
 
-    override fun audioRecordDevice(): Single<String> {
+    override fun audioInputDevice(): Single<String> {
         return getString(AUDIO_RECORD_DEVICE_KEY, "")
     }
 
-    override fun setAudioRecordDevice(name: String): Completable {
+    override fun setAudioInputDevice(name: String): Completable {
         return putString(AUDIO_RECORD_DEVICE_KEY, name)
     }
 }

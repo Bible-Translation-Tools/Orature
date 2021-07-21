@@ -28,13 +28,9 @@ import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioDevicesRepository
-import javax.sound.sampled.DataLine
 import javax.sound.sampled.Mixer
-import javax.sound.sampled.Port
-import javax.sound.sampled.TargetDataLine
 
-class AudioBufferPlayer(val audioDevicesRepository: IAudioDevicesRepository? = null) : IAudioPlayer {
+class AudioBufferPlayer(private val outputDevice: Mixer.Info? = null) : IAudioPlayer {
 
     override val frameStart: Int
         get() = begin
@@ -74,29 +70,16 @@ class AudioBufferPlayer(val audioDevicesRepository: IAudioDevicesRepository? = n
             end = _reader.totalFrames
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
 
-            val audioFormat = AudioFormat(
-                _reader.sampleRate.toFloat(),
-                _reader.sampleSize,
-                _reader.channels,
-                true,
-                false
-            )
-
-            val mixer = audioDevicesRepository?.getCurrentPlayer()?.blockingGet()
-
             player = AudioSystem.getSourceDataLine(
-                audioFormat,
-                mixer
-            )
-            /*player = AudioSystem.getSourceDataLine(
                 AudioFormat(
                     _reader.sampleRate.toFloat(),
                     _reader.sampleSize,
                     _reader.channels,
                     true,
                     false
-                )
-            )*/
+                ),
+                outputDevice
+            )
 
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
@@ -117,7 +100,8 @@ class AudioBufferPlayer(val audioDevicesRepository: IAudioDevicesRepository? = n
                     _reader.channels,
                     true,
                     false
-                )
+                ),
+                outputDevice
             )
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()

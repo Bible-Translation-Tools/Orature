@@ -22,7 +22,6 @@ import dagger.Binds
 import dagger.Module
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPluginRegistrar
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IAudioDevicesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IContentRepository
@@ -35,7 +34,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ITakeReposit
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AppPreferencesRepository
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioDevicesRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.CollectionRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ContentRepository
@@ -121,10 +119,4 @@ abstract class AppRepositoriesModule {
     abstract fun providesAppPreferencesRepository(
         repository: AppPreferencesRepository
     ): IAppPreferencesRepository
-
-    @Binds
-    @Singleton
-    abstract fun providesAudioDevicesRepository(
-        repository: AudioDevicesRepository
-    ): IAudioDevicesRepository
 }

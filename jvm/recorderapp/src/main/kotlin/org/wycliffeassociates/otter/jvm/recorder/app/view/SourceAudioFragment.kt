@@ -21,14 +21,16 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDevice
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
-import java.lang.Exception
 import java.text.MessageFormat
+import javax.sound.sampled.Mixer
 
 class SourceAudioFragment : Fragment() {
 
+    private val audioDevice = AudioDevice()
     override val root = initializeSourceContent()
 
     private fun initializeSourceContent(): SourceContent {
@@ -37,6 +39,7 @@ class SourceAudioFragment : Fragment() {
         var endFrame: Int? = null
         var sourceText: String? = null
         var sourceContentTitle: String? = null
+        var ouputDevice: Mixer.Info? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -58,10 +61,16 @@ class SourceAudioFragment : Fragment() {
                     parameters.named["chapter_number"],
                     parameters.named["unit_number"]
                 )
+
+                ouputDevice = audioDevice.getOutputDevice(
+                    parameters.named["output_device"]
+                ).blockingGet()
             }
         }
 
-        val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
+        val player = sourceFile?.let {
+            initializeAudioPlayer(it, startFrame, endFrame, ouputDevice)
+        }
 
         return SourceContent().apply {
             audioPlayerProperty.set(player)
@@ -76,8 +85,13 @@ class SourceAudioFragment : Fragment() {
         }
     }
 
-    private fun initializeAudioPlayer(file: File, start: Int?, end: Int?): IAudioPlayer? {
-        val player = AudioBufferPlayer()
+    private fun initializeAudioPlayer(
+        file: File,
+        start: Int?,
+        end: Int?,
+        audioDevice: Mixer.Info?
+    ): IAudioPlayer? {
+        val player = AudioBufferPlayer(audioDevice)
         return try {
             if (start != null && end != null) {
                 player.loadSection(file, start, end)

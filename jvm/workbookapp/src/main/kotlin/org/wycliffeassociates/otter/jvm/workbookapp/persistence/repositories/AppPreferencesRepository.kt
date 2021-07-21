@@ -19,13 +19,17 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.device.IAudioDevice
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import javax.inject.Inject
+import javax.sound.sampled.Mixer
 
 class AppPreferencesRepository @Inject constructor(
-    private val preferences: IAppPreferences
+    private val preferences: IAppPreferences,
+    private val audioDevice: IAudioDevice
 ) : IAppPreferencesRepository {
 
     override fun resumeProjectId(): Single<Int> {
@@ -42,5 +46,27 @@ class AppPreferencesRepository @Inject constructor(
 
     override fun setLastResource(resource: String): Completable {
         return preferences.setLastResource(resource)
+    }
+
+    override fun getInputDevice(): Maybe<Mixer.Info> {
+        return preferences.audioInputDevice()
+            .flatMapMaybe {
+                audioDevice.getOutputDevice(it)
+            }
+    }
+
+    override fun setOutputDevice(mixer: Mixer.Info): Completable {
+        return preferences.setAudioOutputDevice(mixer.name)
+    }
+
+    override fun getOutputDevice(): Maybe<Mixer.Info> {
+        return preferences.audioOutputDevice()
+            .flatMapMaybe {
+                audioDevice.getInputDevice(it)
+            }
+    }
+
+    override fun setInputDevice(mixer: Mixer.Info): Completable {
+        return preferences.setAudioInputDevice(mixer.name)
     }
 }

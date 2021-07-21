@@ -21,23 +21,36 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 import dagger.Module
 import dagger.Provides
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
+import org.wycliffeassociates.otter.common.device.IAudioDevice
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDevice
 import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
-import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.AudioDevicesRepository
 
 @Module
 class AudioModule {
     @Provides
-    fun providesRecorder(): IAudioRecorder = AudioRecorder()
+    fun providesRecorder(
+        appPreferencesRepository: IAppPreferencesRepository
+    ): IAudioRecorder {
+        val device = appPreferencesRepository.getInputDevice().blockingGet()
+        return AudioRecorder(device)
+    }
 
     @Provides
     fun providesPlayer(
-        audioDevicesRepository: AudioDevicesRepository
-    ): IAudioPlayer = AudioBufferPlayer(audioDevicesRepository)
+        appPreferencesRepository: IAppPreferencesRepository
+    ): IAudioPlayer {
+        val audioDevice = appPreferencesRepository.getOutputDevice().blockingGet()
+        return AudioBufferPlayer(audioDevice)
+    }
 
     @Provides
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()
+
+    @Provides
+    fun providesAudioDevice(): IAudioDevice = AudioDevice()
 }

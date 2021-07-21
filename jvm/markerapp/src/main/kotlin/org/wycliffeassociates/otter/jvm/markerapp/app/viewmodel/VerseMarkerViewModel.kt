@@ -32,6 +32,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDevice
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
@@ -46,8 +47,11 @@ class VerseMarkerViewModel : ViewModel() {
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
+    val parameters = (scope as ParameterizedScope).parameters
     val markers: VerseMarkerModel
-    val audioPlayer = AudioBufferPlayer()
+    val audioDevice = AudioDevice()
+    val outputDevice = audioDevice.getInputDevice(parameters.named["output_device"]).blockingGet()
+    val audioPlayer = AudioBufferPlayer(outputDevice)
     var audioController: AudioPlayerController? = null
     val isPlayingProperty = SimpleBooleanProperty(false)
     val markerRatioProperty = SimpleStringProperty()

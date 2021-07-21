@@ -19,11 +19,17 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
+import javax.sound.sampled.Mixer
 
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
     fun setResumeProjectId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
+    fun getOutputDevice(): Maybe<Mixer.Info>
+    fun setOutputDevice(mixer: Mixer.Info): Completable
+    fun getInputDevice(): Maybe<Mixer.Info>
+    fun setInputDevice(mixer: Mixer.Info): Completable
 }
