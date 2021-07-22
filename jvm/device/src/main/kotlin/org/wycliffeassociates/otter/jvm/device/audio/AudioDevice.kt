@@ -30,9 +30,9 @@ class AudioDevice : IAudioDevice {
             val mixers = AudioSystem.getMixerInfo()
             mixers.filter { mixerInfo ->
                 val mixer = AudioSystem.getMixer(mixerInfo)
-                val playerInfo = DataLine.Info(SourceDataLine::class.java, audioFormat)
-                val playerLines = mixer.getSourceLineInfo(playerInfo)
-                playerLines.isNotEmpty()
+                val info = DataLine.Info(SourceDataLine::class.java, audioFormat)
+                val lines = mixer.getSourceLineInfo(info)
+                lines.isNotEmpty()
             }.toList()
         }
     }
@@ -42,9 +42,9 @@ class AudioDevice : IAudioDevice {
             val mixers = AudioSystem.getMixerInfo()
             mixers.filter { mixerInfo ->
                 val mixer = AudioSystem.getMixer(mixerInfo)
-                val recorderInfo = DataLine.Info(TargetDataLine::class.java, audioFormat)
-                val recorderLines = mixer.getTargetLineInfo(recorderInfo)
-                recorderLines.isNotEmpty()
+                val info = DataLine.Info(TargetDataLine::class.java, audioFormat)
+                val lines = mixer.getTargetLineInfo(info)
+                lines.isNotEmpty()
             }.toList()
         }
     }
