@@ -33,8 +33,8 @@ ext {
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
-    kotlinresourcecontainerVer = '0.7.0'
-    jdenticonKoltinVer = '1.0'
+    kotlinresourcecontainerVer = '0.8.0'
+    jdenticonKoltinVer = '1.1'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'
     fontawesomeCommonsVer = '11.0'
@@ -45,7 +45,7 @@ ext {
     controlsfxVer = '11.0.1'
     sentryVer = '1.7.30'
     usfmToolsVer = "1.6.0"
-    testFxVer = '4.0.16-alpha'
+    testFxVer = '4.0.15-alpha'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
 }
