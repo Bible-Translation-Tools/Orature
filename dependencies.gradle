@@ -37,10 +37,6 @@ ext {
     jdenticonKoltinVer = '1.1'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'
-    fontawesomeCommonsVer = '11.0'
-    fontawesomeMaterialIconsVer = "2.2.0-11"
-    fontawesomeIcons525Ver = '3.0.0-11'
-    fontawesomeMaterialFontVer = '1.7.22-11'
     ikonliVer = '11.3.4'
     controlsfxVer = '11.0.1'
     sentryVer = '1.7.30'
