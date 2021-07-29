@@ -20,8 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -139,7 +137,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             highlightColor = AppTheme.colors.appBlue
             secondaryColor = AppTheme.colors.white
             isHighlighted = true
-            graphic = MaterialIconView(MaterialIcon.MIC, "25px")
+            graphic = FontIcon("gmi-mic").apply { iconSize = 25 }
             maxWidth = 500.0
             text = messages["record"]
 

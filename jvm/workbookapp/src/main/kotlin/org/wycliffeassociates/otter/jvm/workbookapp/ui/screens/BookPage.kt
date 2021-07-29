@@ -19,14 +19,13 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
@@ -162,8 +161,11 @@ class BookPage : Fragment() {
                             cardbutton {
                                 addClass(DefaultStyles.defaultCardButton)
                                 text = messages["openProject"]
-                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                    .apply { fill = AppTheme.colors.appRed }
+                                graphic = FontIcon("gmi-arrow-forward")
+                                    .apply {
+                                        iconSize = 25
+                                        iconColor = AppTheme.colors.appRed
+                                    }
                                 onMousePressed = EventHandler {
                                     workbookDataStore.activeChapterProperty.set(item.chapterSource)
                                     viewModel.navigate(workbookDataStore.activeResourceMetadata)

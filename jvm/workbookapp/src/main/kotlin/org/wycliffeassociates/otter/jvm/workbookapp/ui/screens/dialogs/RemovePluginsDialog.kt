@@ -51,7 +51,7 @@ class RemovePluginsDialog : View() {
                         maxWidth = Double.MAX_VALUE
                     }
                     add(JFXButton().apply {
-                        graphic = RemovePluginsStyles.deleteIcon("20px")
+                        graphic = RemovePluginsStyles.deleteIcon(20)
                         isDisableVisualFocus = true
                         addClass(RemovePluginsStyles.deleteButton)
                         action {

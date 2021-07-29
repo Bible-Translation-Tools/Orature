@@ -44,7 +44,7 @@ class SearchableList<T>(listItems: SortedFilteredList<T>, outputValue: Property<
         outputValue.bindBidirectional(valueProperty())
         hbox {
             addClass(SearchableListStyles.searchFieldContainer)
-            add(SearchableListStyles.searchIcon("1.5em").apply { addClass(SearchableListStyles.icon) })
+            add(SearchableListStyles.searchIcon(24).apply { addClass(SearchableListStyles.icon) })
             searchField = JFXTextField()
             searchField.addClass(SearchableListStyles.searchField)
             searchField.focusColor = Color.TRANSPARENT
