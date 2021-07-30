@@ -45,13 +45,7 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
 
     override fun open() {
         mappedFile?.let { release() }
-        val totalFrames = wav.totalFrames
-        var begin = if (start != null) min(max(0, start), totalFrames) else 0
-        var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
-        begin *= wav.frameSizeInBytes
-        begin += WAV_HEADER_SIZE
-        end *= wav.frameSizeInBytes
-        end += WAV_HEADER_SIZE
+        val (begin, end) = computeBounds(wav)
         mappedFile =
             RandomAccessFile(wav.file, "r").use {
                 channel = it.channel
@@ -61,6 +55,35 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
                     (end - begin).toLong()
                 )
             }
+    }
+
+    fun computeBounds(wav: WavFile): Pair<Int, Int> {
+        if (wav.file.length() <= WAV_HEADER_SIZE) {
+            logger.info("Wav file ${wav.file.name} is just a header or empty, size is ${wav.file.length()}")
+            return Pair(0,0)
+        }
+
+        val totalFrames = wav.totalFrames
+        var begin = if (start != null) min(max(0, start), totalFrames) else 0
+        var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
+
+        // Convert from frames to array index
+        begin *= wav.frameSizeInBytes
+        begin += WAV_HEADER_SIZE
+        end *= wav.frameSizeInBytes
+        end += WAV_HEADER_SIZE
+
+        // Should be clamped between header size, computed beginning, and the file length minus the header size
+        val clampedBegin = max(WAV_HEADER_SIZE, min(begin, max(wav.file.length().toInt() - WAV_HEADER_SIZE, WAV_HEADER_SIZE)))
+        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt() - WAV_HEADER_SIZE, WAV_HEADER_SIZE)))
+
+        if (clampedBegin != begin || clampedEnd != end) {
+            logger.error("Error in file ${wav.file.name}")
+            logger.error("Wanted to open for bounds: $begin to $end; file length is ${wav.file.length()}")
+            logger.error("Bounds clamped to: $clampedBegin to $clampedEnd")
+        }
+
+        return Pair(clampedBegin, clampedEnd)
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
