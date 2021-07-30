@@ -73,9 +73,9 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
         end *= wav.frameSizeInBytes
         end += WAV_HEADER_SIZE
 
-        // Should be clamped between header size, computed beginning, and the file length minus the header size
-        val clampedBegin = max(WAV_HEADER_SIZE, min(begin, max(wav.file.length().toInt() - WAV_HEADER_SIZE, WAV_HEADER_SIZE)))
-        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt() - WAV_HEADER_SIZE, WAV_HEADER_SIZE)))
+        // Should be clamped between header size, computed beginning, and the file length
+        val clampedBegin = max(WAV_HEADER_SIZE, min(begin, max(wav.file.length().toInt(), WAV_HEADER_SIZE)))
+        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt(), WAV_HEADER_SIZE)))
 
         if (clampedBegin != begin || clampedEnd != end) {
             logger.error("Error in file ${wav.file.name}")
