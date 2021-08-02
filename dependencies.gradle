@@ -5,7 +5,7 @@ ext {
     install4jPluginVer = '7.0.8'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
     buildscanPluginVer = '2.4.2'
-    detektPluginVer = '1.10.0-RC1'
+    detektPluginVer = '1.17.0'
     ktlintPluginVer = '8.2.0'
     shadowPluginVer = '5.2.0'
     sonarcloudPluginVer = '3.0'
@@ -34,7 +34,6 @@ ext {
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
     kotlinresourcecontainerVer = '0.8.0'
-    jdenticonKoltinVer = '1.1'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'
     ikonliVer = '11.3.4'

@@ -151,7 +151,6 @@ dependencies {
     implementation project(':jvm:utils')
     implementation project(':jvm:workbookplugin')
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
-    implementation "org.wycliffeassociates:jdenticon-kotlin:$jdenticonKoltinVer"
     implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
 
     // Atlassian commonmark (for rendering markdown)
