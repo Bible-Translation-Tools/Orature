@@ -185,9 +185,15 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         return contents.filterNot { it.text.isNullOrEmpty() }
     }
 
-    private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> =
-        this.filterPreserveParents { it.isFile && extensions.matches(it.name) }
-            ?: throw ImportException(ImportResult.LOAD_RC_ERROR) // No markdown found
+    private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> {
+        val filtered = this.filterPreserveParents {
+            println("file ${it.name} extension matches: ${extensions.matches(it.name)}, is file: ${it.isFile}")
+            it.isFile && extensions.matches(it.name)
+        }
+        if (filtered != null) {
+            return filtered
+        } else throw ImportException(ImportResult.LOAD_RC_ERROR) // No markdown found
+    }
 
     /** Expand any list values to be individual tree nodes. */
     private fun OtterTree<Contents>.flattenContent(): OtterTree<CollectionOrContent> =
