@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -27,6 +25,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
@@ -84,7 +83,7 @@ class ResourceCardFragment(
                     highlightColorProperty.bind(primaryColorProperty)
                     secondaryColor = Color.WHITE
                     isHighlightedProperty.bind(isCurrentResourceProperty)
-                    graphic = MaterialIconView(MaterialIcon.APPS, "25px")
+                    graphic = FontIcon("gmi-apps").apply { iconSize = 25 }
                     text = messages["viewRecordings"]
                     action {
                         item.onSelect()

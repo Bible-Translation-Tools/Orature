@@ -19,10 +19,10 @@
 package org.wycliffeassociates.otter.jvm.controls.button
 
 import com.jfoenix.controls.JFXButton
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.paint.Color
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.styles.HighlightableButtonStyles
 import tornadofx.*
 
@@ -61,8 +61,8 @@ class HighlightableButton : JFXButton() {
                 borderColor += box(highlightColor)
             }
         }
-        (graphic as? MaterialIconView)?.apply {
-            fill = contentFillColor
+        (graphic as? FontIcon)?.apply {
+            iconColor = contentFillColor
         }
         textFill = contentFillColor
     }

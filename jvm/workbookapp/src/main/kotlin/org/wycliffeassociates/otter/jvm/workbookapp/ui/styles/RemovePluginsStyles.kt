@@ -18,11 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.styles
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import tornadofx.*
 
@@ -34,7 +33,7 @@ class RemovePluginsStyles : Stylesheet() {
         val pluginList by cssclass()
         val pluginListCell by cssclass()
 
-        fun deleteIcon(size: String) = MaterialIconView(MaterialIcon.DELETE, size)
+        fun deleteIcon(sizePx: Int) = FontIcon("gmi-delete").apply { iconSize = sizePx }
     }
 
     init {

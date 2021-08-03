@@ -2,7 +2,6 @@ buildscript {
     apply from: './dependencies.gradle'
 
     repositories {
-        jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -22,7 +21,6 @@ plugins {
 apply plugin: 'io.gitlab.arturbosch.detekt'
 
 repositories {
-    jcenter()
     maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
 }
 
@@ -62,7 +60,6 @@ allprojects {
 
 subprojects {
     repositories {
-        jcenter()
         maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
     }
 

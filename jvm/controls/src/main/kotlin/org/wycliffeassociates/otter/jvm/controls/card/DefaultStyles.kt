@@ -18,13 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.card
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.Cursor
 import javafx.scene.effect.DropShadow
 import javafx.scene.paint.Color
 import javafx.scene.text.FontWeight
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.styles.AppTheme
 import tornadofx.*
 
@@ -51,7 +50,7 @@ class DefaultStyles : Stylesheet() {
         val defaultMinorLabel by cssclass()
         val completedProgress by cssclass()
 
-        fun checkCircle(size: String = "1em") = MaterialIconView(MaterialIcon.CHECK_CIRCLE, size)
+        fun checkCircle(sizePx: Int = 16) = FontIcon("gmi-check-circle").apply { iconSize = sizePx }
         fun green() = c("58bd2f")
     }
 
