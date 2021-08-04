@@ -31,8 +31,7 @@ class OtterZipFile(
     val parentFile: OtterFile? = null,
     private val zipEntry: ZipEntry? = null
 ) {
-    val isFile
-        get() = !(zipEntry == null || zipEntry.isDirectory)
+    val isFile = !(zipEntry == null || zipEntry.isDirectory)
     val name: String = File(absolutePath).name
     val nameWithoutExtension = File(absolutePath).nameWithoutExtension
 
