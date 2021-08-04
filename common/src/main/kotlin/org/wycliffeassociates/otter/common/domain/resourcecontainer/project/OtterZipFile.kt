@@ -22,7 +22,6 @@ import java.io.BufferedReader
 import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import org.slf4j.LoggerFactory
 
 class OtterZipFile(
     val absolutePath: String,
@@ -47,8 +46,6 @@ class OtterZipFile(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(OtterZipFile::class.java)
-
         fun otterFileZ(
             absolutePath: String,
             rootZipFile: ZipFile,
@@ -56,9 +53,7 @@ class OtterZipFile(
             rootPathWithinZip: String?,
             parentFile: OtterFile? = null
         ): OtterFile {
-            logger.info("absolutePath is ${absolutePath}, rootPathWithinZip is ${rootPathWithinZip}")
-            val fixedPath = if (rootPathWithinZip != null && !absolutePath.startsWith(rootPathWithinZip)) rootPathWithinZip + separator + absolutePath else absolutePath
-            val zipEntry = rootZipFile.getEntry(fixedPath)
+            val zipEntry = rootZipFile.getEntry(absolutePath)
             return OtterFile.Z(
                 OtterZipFile(
                     absolutePath = absolutePath,

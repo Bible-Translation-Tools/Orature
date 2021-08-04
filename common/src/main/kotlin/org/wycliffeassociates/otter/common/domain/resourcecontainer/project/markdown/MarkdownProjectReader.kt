@@ -187,7 +187,6 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
 
     private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> {
         val filtered = this.filterPreserveParents {
-            println("file ${it.name} extension matches: ${extensions.matches(it.name)}, is file: ${it.isFile}")
             it.isFile && extensions.matches(it.name)
         }
         if (filtered != null) {
