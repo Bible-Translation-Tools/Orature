@@ -92,7 +92,7 @@ class HomePage : Fragment() {
 
                 add(
                     NewTranslationCard().apply {
-                        newTranslationTextProperty.set(messages["newTranslation"])
+                        newTranslationTextProperty.set(messages["createTranslation"])
                         setOnAction {
                             viewModel.createTranslation()
                         }

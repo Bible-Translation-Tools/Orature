@@ -55,7 +55,7 @@ class AddFilesView : View() {
                 addClass("app-drawer-container")
 
                 hbox {
-                    label(messages["addFiles"]).apply {
+                    label(messages["importFiles"]).apply {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
