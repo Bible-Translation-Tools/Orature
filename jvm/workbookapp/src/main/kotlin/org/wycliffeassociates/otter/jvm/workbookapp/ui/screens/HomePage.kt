@@ -113,8 +113,8 @@ class HomePage : Fragment() {
                                 }
                             }
 
-                            seeMoreTextProperty.set(messages["seeMore"])
-                            seeLessTextProperty.set(messages["seeLess"])
+                            showMoreTextProperty.set(messages["showMore"])
+                            showLessTextProperty.set(messages["showLess"])
 
                             setOnNewBookAction {
                                 viewModel.createProject(it)
