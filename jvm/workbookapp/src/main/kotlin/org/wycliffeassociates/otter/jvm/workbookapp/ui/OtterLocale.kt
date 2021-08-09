@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
-import java.io.File
 import java.util.*
 
 
@@ -38,9 +37,6 @@ class OtterLocale private constructor(
     }
 
     class Builder {
-        private val bundlePrefix = "Messages_"
-        private val bundleExtension = ".properties"
-
         private var defaultLocale: Locale = Locale.getDefault()
         private var actualLocale: Locale = Locale.ENGLISH
         private val supportedLocales = getSupportedLocales()
@@ -51,20 +47,18 @@ class OtterLocale private constructor(
         )
 
         private fun getSupportedLocales(): MutableList<Locale> {
-            val url = this.javaClass.getResource("/Messages_en.properties")
-            return url?.let {
-                val path = it.path
-                val parentDir = File(path).parentFile
-                val files = parentDir.listFiles { file ->
-                    file.name.startsWith(bundlePrefix) && file.name.endsWith(bundleExtension)
-                }
-                files?.map(this::fileToLocale)?.toMutableList()
-            } ?: mutableListOf()
+            return this.javaClass.getResourceAsStream("/locales.properties").use {
+                val props = Properties()
+                it?.let {
+                    props.load(it)
+                    props.keys.map(this::propToLocale).toMutableList()
+                } ?: mutableListOf()
+            }
         }
 
-        private fun fileToLocale(file: File): Locale {
-            val name = file.nameWithoutExtension.replace(bundlePrefix, "")
-            val parts = name.split("_", limit = 2)
+        private fun propToLocale(prop: Any): Locale {
+            val key = prop.toString()
+            val parts = key.split("_", limit = 2)
             val language = parts[0]
             val country = parts.getOrNull(1) ?: ""
             return Locale(language, country)

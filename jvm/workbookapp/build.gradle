@@ -234,6 +234,23 @@ task createSentryProperties(dependsOn: processResources) {
     }
 }
 
+task createLocalesProperties(dependsOn: processResources) {
+    doLast {
+        FileTree resources = fileTree("$buildDir/resources/main").matching {
+            include "Messages*"
+        }
+
+        new File("$buildDir/resources/main/locales.properties").withWriter { w ->
+            Properties p = new Properties()
+            resources.files.each {
+                String name = it.name.replace(".properties", "").replace("Messages_", "")
+                p[name] = ''
+            }
+            p.store w, null
+        }
+    }
+}
+
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
     testLogging {
@@ -285,6 +302,7 @@ compileJava.dependsOn ':jvm:markerapp:copyJarToWorkbookAppResources'
 compileJava.dependsOn createVersionProperties
 compileJava.dependsOn createGithubProperties
 compileJava.dependsOn createSentryProperties
+compileJava.dependsOn createLocalesProperties
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

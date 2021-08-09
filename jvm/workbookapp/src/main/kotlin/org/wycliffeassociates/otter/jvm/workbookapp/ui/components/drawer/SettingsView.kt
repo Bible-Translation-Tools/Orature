@@ -78,7 +78,8 @@ class SettingsView : View() {
 
                         cellFormat {
                             graphic = Label().apply {
-                                text = it.displayName.capitalize()
+                                val country = if (it.country.isNotEmpty()) "_${it.country}" else ""
+                                text = "(${it.language}$country) ${it.getDisplayLanguage(it).capitalize()}"
                                 graphic = FontIcon(MaterialDesign.MDI_WEB)
                             }
                         }
