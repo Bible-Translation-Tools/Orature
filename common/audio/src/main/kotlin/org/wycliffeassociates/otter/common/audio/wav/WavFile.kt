@@ -206,19 +206,19 @@ internal class WavFile private constructor() : AudioFormatStrategy {
     }
 
     private fun parseMetadata() {
-        if (totalDataLength > totalAudioLength + (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)) {
-            val metadataSize = totalDataLength - totalAudioLength - (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)
-            val bytes = ByteArray(metadataSize)
-            file.inputStream().use {
-                val metadataStart = WAV_HEADER_SIZE + totalAudioLength
-                it.skip(metadataStart.toLong())
-                it.read(bytes)
-            }
+        val nonMetadataSize = totalAudioLength + (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)
+        if (totalDataLength > nonMetadataSize) {
             try {
+                val metadataSize = totalDataLength - nonMetadataSize
+                val bytes = ByteArray(metadataSize)
+                file.inputStream().use {
+                    val metadataStart = WAV_HEADER_SIZE + totalAudioLength
+                    it.skip(metadataStart.toLong())
+                    it.read(bytes)
+                }
                 metadata.parseMetadata(ByteBuffer.wrap(bytes))
             } catch (e: Exception) {
                 logger.error("Error parsing metadata for file: ${file.name}")
-                throw e
             }
         }
     }
