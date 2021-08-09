@@ -51,7 +51,9 @@ class OtterLocale private constructor(
                 val props = Properties()
                 it?.let {
                     props.load(it)
-                    props.keys.map(this::propToLocale).toMutableList()
+                    props.keys.map(this::propToLocale)
+                        .sortedBy { it.language }
+                        .toMutableList()
                 } ?: mutableListOf()
             }
         }
