@@ -33,7 +33,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
@@ -43,6 +43,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
 import java.io.File
@@ -70,14 +71,14 @@ class BookWizardViewModel : ViewModel() {
     val activeProjectTitleProperty = SimpleStringProperty()
     val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
-    private val books = observableListOf<Collection>()
+    private val books = observableListOf<BookCardData>()
     private val sourceCollections = observableListOf<Collection>()
     private val selectedSourceProperty = SimpleObjectProperty<Collection>()
     val filteredBooks = FilteredList(books)
     val existingBooks = observableListOf<Workbook>()
     val menuItems = observableListOf<MenuItem>()
 
-    private var queryPredicate = Predicate<Collection> { true }
+    private var queryPredicate = Predicate<BookCardData> { true }
 
     private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
     private val resourcesToggleGroup = ToggleGroup()
@@ -122,6 +123,8 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun loadChildren(parent: Collection) {
+        val artworkAccessor = ArtworkAccessor(directoryProvider)
+
         collectionRepo
             .getChildren(parent)
             .observeOnFx()
@@ -129,7 +132,17 @@ class BookWizardViewModel : ViewModel() {
                 logger.error("Error in loading children", e)
             }
             .subscribe { retrieved ->
-                books.setAll(retrieved)
+                val bookViewDataList = retrieved
+                    .map {
+                        val artwork = if (it.resourceContainer != null) {
+                            artworkAccessor.getArtwork(it.resourceContainer!!, it.slug)
+                        } else {
+                            null
+                        }
+
+                        BookCardData(it, artwork)
+                    }
+                books.setAll(bookViewDataList)
             }
     }
 
@@ -164,9 +177,9 @@ class BookWizardViewModel : ViewModel() {
             queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
-                Predicate { collection ->
-                    collection.slug.contains(query, true)
-                        .or(collection.titleKey.contains(query, true))
+                Predicate { viewData ->
+                    viewData.collection.slug.contains(query, true)
+                        .or(viewData.collection.titleKey.contains(query, true))
                 }
             }
             filteredBooks.predicate = queryPredicate
@@ -175,8 +188,8 @@ class BookWizardViewModel : ViewModel() {
         sortByProperty.onChange {
             it?.let { sortBy ->
                 when (sortBy) {
-                    BookSortBy.BOOK_ORDER -> books.sortBy { collection -> collection.sort }
-                    BookSortBy.ALPHABETICAL -> books.sortBy { collection -> collection.titleKey }
+                    BookSortBy.BOOK_ORDER -> books.sortBy { it.collection.sort }
+                    BookSortBy.ALPHABETICAL -> books.sortBy { it.collection.titleKey }
                 }
             }
         }
@@ -186,9 +199,11 @@ class BookWizardViewModel : ViewModel() {
         translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
+            val artworkAccessor = ArtworkAccessor(directoryProvider)
             activeProjectTitleProperty.set(collection.titleKey)
-            val accessor = CoverArtAccessor(collection.resourceContainer!!, collection.slug)
-            activeProjectCoverProperty.set(accessor.getArtwork())
+            activeProjectCoverProperty.set(
+                artworkAccessor.getArtwork(collection.resourceContainer!!, collection.slug)
+            )
 
             creationUseCase
                 .create(collection, translation.targetLanguage)

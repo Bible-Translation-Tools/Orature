@@ -156,9 +156,13 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     private fun createWorkbookBanner(): WorkbookBannerModel {
+        val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
-            title = workbookDataStore.workbook.target.title,
-            coverArt = workbookDataStore.workbook.coverArtAccessor.getArtwork(),
+            title = workbook.target.title,
+            coverArt = workbook.artworkAccessor.getArtwork(
+                workbook.source.resourceMetadata,
+                workbook.source.slug
+            ),
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])
@@ -204,7 +208,12 @@ class WorkbookPageViewModel : ViewModel() {
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
         activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(
+                workbook.source.resourceMetadata,
+                workbook.source.slug
+            )
+        )
 
         projectExporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
@@ -233,7 +242,12 @@ class WorkbookPageViewModel : ViewModel() {
         val deleteProject = deleteProjectProvider.get()
 
         activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(
+                workbook.source.resourceMetadata,
+                workbook.source.slug
+            )
+        )
 
         workbookRepository.closeWorkbook(workbook)
         deleteProject
