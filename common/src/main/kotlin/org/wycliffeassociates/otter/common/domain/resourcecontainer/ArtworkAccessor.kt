@@ -26,9 +26,13 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.ImagesDataSource
 import java.io.File
 
-class ArtworkAccessor(val directoryProvider: IDirectoryProvider) {
+class ArtworkAccessor(
+    val directoryProvider: IDirectoryProvider,
+    val metadata: ResourceMetadata,
+    val projectSlug: String
+) {
 
-    fun getArtwork(metadata: ResourceMetadata, projectSlug: String): File? {
+    fun getArtwork(): File? {
         val imgDataSource1: ImagesDataSource = CustomImagesDataSource()
         val imgDataSource2: ImagesDataSource = BibleImagesDataSource(directoryProvider)
         val imgDataSource3: ImagesDataSource = DefaultImagesDataSource()

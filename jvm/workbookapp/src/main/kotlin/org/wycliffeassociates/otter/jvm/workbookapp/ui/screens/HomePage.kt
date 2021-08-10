@@ -77,9 +77,7 @@ class HomePage : Fragment() {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
                                 backgroundImageFileProperty.set(
-                                    workbook.artworkAccessor.getArtwork(
-                                        workbook.source.resourceMetadata, workbook.source.slug
-                                    )
+                                    workbook.artworkAccessor.getArtwork()
                                 )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)
@@ -112,7 +110,7 @@ class HomePage : Fragment() {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
                                     coverArtProperty.set(
-                                        it.artworkAccessor.getArtwork(it.source.resourceMetadata, it.source.slug)
+                                        it.artworkAccessor.getArtwork()
                                     )
 
                                     setOnPrimaryAction { viewModel.selectProject(it) }

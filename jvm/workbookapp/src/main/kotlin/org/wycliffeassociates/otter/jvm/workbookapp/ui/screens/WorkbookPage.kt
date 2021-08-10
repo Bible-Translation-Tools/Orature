@@ -151,8 +151,6 @@ class WorkbookPage : Fragment() {
     }
 
     private fun initializeDeleteConfirmDialog() {
-        val workbook = viewModel.workbookDataStore.workbook
-
         confirmdialog {
             messageTextProperty.set(messages["deleteProjectConfirmation"])
             confirmButtonTextProperty.set(messages["removeProject"])
@@ -161,15 +159,12 @@ class WorkbookPage : Fragment() {
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
                 messages["remove"],
-                workbook.target.title
+                viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(
-                    workbook.source.resourceMetadata,
-                    workbook.source.slug
-                )
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork()
             )
 
             onConfirmAction {
@@ -187,8 +182,6 @@ class WorkbookPage : Fragment() {
     }
 
     private fun initializeDeleteSuccessDialog() {
-        val workbook = viewModel.workbookDataStore.workbook
-
         confirmdialog {
             messageTextProperty.set(messages["deleteProjectSuccess"])
             confirmButtonTextProperty.set(messages["removeProject"])
@@ -197,15 +190,12 @@ class WorkbookPage : Fragment() {
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
                 messages["remove"],
-                workbook.target.title
+                viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                workbook.artworkAccessor.getArtwork(
-                    workbook.source.resourceMetadata,
-                    workbook.source.slug
-                )
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork()
             )
 
             deleteSuccessListener = ChangeListener { _, _, new ->
@@ -219,8 +209,6 @@ class WorkbookPage : Fragment() {
     }
 
     private fun initializeDeleteFailDialog() {
-        val workbook = viewModel.workbookDataStore.workbook
-
         confirmdialog {
             messageTextProperty.set(messages["deleteProjectFail"])
             confirmButtonTextProperty.set(messages["removeProject"])
@@ -229,15 +217,12 @@ class WorkbookPage : Fragment() {
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
                 messages["remove"],
-                workbook.target.title
+                viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                workbook.artworkAccessor.getArtwork(
-                    workbook.source.resourceMetadata,
-                    workbook.source.slug
-                )
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork()
             )
 
             deleteFailListener = ChangeListener { _, _, new ->

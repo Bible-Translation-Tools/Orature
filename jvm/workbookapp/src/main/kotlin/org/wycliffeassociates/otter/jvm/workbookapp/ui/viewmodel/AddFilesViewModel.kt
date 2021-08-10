@@ -133,9 +133,9 @@ class AddFilesViewModel : ViewModel() {
                     .subscribe { resourceMetadata ->
                         resourceMetadata?.let {
                             importedProjectTitleProperty.set(project.title)
-                            val coverArtAccessor = ArtworkAccessor(directoryProvider)
+                            val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
                             importedProjectCoverProperty.set(
-                                coverArtAccessor.getArtwork(it, project.identifier)
+                                coverArtAccessor.getArtwork()
                             )
                         }
                     }

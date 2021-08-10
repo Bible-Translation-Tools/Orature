@@ -35,7 +35,13 @@ class Workbook(
             source.slug
         )
     }
-    val artworkAccessor: ArtworkAccessor by lazy { ArtworkAccessor(directoryProvider) }
+    val artworkAccessor: ArtworkAccessor by lazy {
+        ArtworkAccessor(
+            directoryProvider,
+            source.resourceMetadata,
+            source.slug
+        )
+    }
 
     override fun hashCode(): Int {
         return Objects.hash(

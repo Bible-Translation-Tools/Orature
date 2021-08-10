@@ -54,10 +54,14 @@ class BookWizardViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(BookWizardViewModel::class.java)
 
-    @Inject lateinit var collectionRepo: ICollectionRepository
-    @Inject lateinit var creationUseCase: CreateProject
-    @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var workbookRepo: IWorkbookRepository
+    @Inject
+    lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var creationUseCase: CreateProject
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var workbookRepo: IWorkbookRepository
 
     private val navigator: NavigationMediator by inject()
 
@@ -123,7 +127,7 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun loadChildren(parent: Collection) {
-        val artworkAccessor = ArtworkAccessor(directoryProvider)
+
 
         collectionRepo
             .getChildren(parent)
@@ -135,7 +139,11 @@ class BookWizardViewModel : ViewModel() {
                 val bookViewDataList = retrieved
                     .map {
                         val artwork = if (it.resourceContainer != null) {
-                            artworkAccessor.getArtwork(it.resourceContainer!!, it.slug)
+                            ArtworkAccessor(
+                                directoryProvider,
+                                it.resourceContainer!!,
+                                it.slug
+                            ).getArtwork()
                         } else {
                             null
                         }
@@ -199,10 +207,14 @@ class BookWizardViewModel : ViewModel() {
         translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
-            val artworkAccessor = ArtworkAccessor(directoryProvider)
+            val artworkAccessor = ArtworkAccessor(
+                directoryProvider,
+                collection.resourceContainer!!,
+                collection.slug
+            )
             activeProjectTitleProperty.set(collection.titleKey)
             activeProjectCoverProperty.set(
-                artworkAccessor.getArtwork(collection.resourceContainer!!, collection.slug)
+                artworkAccessor.getArtwork()
             )
 
             creationUseCase
