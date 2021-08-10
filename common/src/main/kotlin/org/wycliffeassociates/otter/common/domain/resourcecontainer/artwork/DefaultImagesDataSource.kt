@@ -1,4 +1,4 @@
-package org.wycliffeassociates.otter.common.persistence
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import java.io.File

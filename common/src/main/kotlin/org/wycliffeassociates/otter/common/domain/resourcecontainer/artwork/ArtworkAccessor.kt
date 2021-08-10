@@ -16,14 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.resourcecontainer
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.persistence.BibleImagesDataSource
-import org.wycliffeassociates.otter.common.persistence.CustomImagesDataSource
-import org.wycliffeassociates.otter.common.persistence.DefaultImagesDataSource
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.ImagesDataSource
 import java.io.File
 
 class ArtworkAccessor(
@@ -32,7 +28,7 @@ class ArtworkAccessor(
     val projectSlug: String
 ) {
     private val imagesDataSources = listOf<ImagesDataSource>(
-        CustomImagesDataSource(),
+        ResourceContainerImagesDataSource(),
         BibleImagesDataSource(directoryProvider),
         DefaultImagesDataSource()
     )

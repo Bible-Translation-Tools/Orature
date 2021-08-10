@@ -1,6 +1,7 @@
-package org.wycliffeassociates.otter.common.persistence
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 
