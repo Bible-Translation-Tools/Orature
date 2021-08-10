@@ -30,17 +30,38 @@ class BibleImagesDataSource(
                 imagesContainerName.format(metadata.language.slug, metadata.identifier)
             )
 
-        if (!imagesContainer.exists()) {
-            return null
+        if (imagesContainer.exists()) {
+            getImageFromRC(imagesContainer, metadata, projectSlug)
+                ?.let {
+                    return it
+                }
         }
 
-        ResourceContainer.load(imagesContainer).use { rc ->
+        return nextDataSource?.getImage(metadata, projectSlug)
+    }
+
+    private fun getImageFromRC(
+        rcFile: File,
+        metadata: ResourceMetadata,
+        projectSlug: String
+    ): File? {
+
+        ResourceContainer.load(rcFile).use { rc ->
             val imgPath = rc.manifest.projects.firstOrNull {
                 it.identifier == projectSlug
             }?.path
 
             if (imgPath != null && rc.accessor.fileExists(imgPath)) {
-                val img = getImageFromRC(imgPath, rc)
+                val relativeImgPath = File(imgPath)
+                val img = cacheDir.resolve(relativeImgPath.name)
+                    .apply { createNewFile() }
+
+                img.deleteOnExit()
+                img.outputStream().use { fos ->
+                    rc.accessor.getInputStream(imgPath).use {
+                        it.transferTo(fos)
+                    }
+                }
 
                 cacheImage(
                     metadata.language.slug,
@@ -52,21 +73,7 @@ class BibleImagesDataSource(
             }
         }
 
-        return nextDataSource?.getImage(metadata, projectSlug)
-    }
-
-    private fun getImageFromRC(imgPath: String, rc: ResourceContainer): File {
-        val relativeImgPath = File(imgPath)
-        val img = cacheDir.resolve(relativeImgPath.name)
-            .apply { createNewFile() }
-
-        img.deleteOnExit()
-        img.outputStream().use { fos ->
-            rc.accessor.getInputStream(imgPath).use {
-                it.transferTo(fos)
-            }
-        }
-        return img
+        return null
     }
 
     private fun cacheKey(metadata: ResourceMetadata, project: String): String {
