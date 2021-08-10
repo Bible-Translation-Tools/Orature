@@ -5,11 +5,11 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 
 class BibleImagesDataSource(
-    private val directoryProvider: IDirectoryProvider,
-    private val imagesContainer: File
+    private val directoryProvider: IDirectoryProvider
 ) : ImagesDataSource() {
 
-    private val imagesDir = File(
+    private val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}_artwork
+    private val cacheDir = File(
         directoryProvider.cacheDirectory,
         "bible-images"
     ).apply { mkdirs() }
@@ -24,6 +24,15 @@ class BibleImagesDataSource(
             metadata.identifier,
             projectSlug
         )?.let { return it }
+
+        val imagesContainer = directoryProvider.resourceContainerDirectory
+            .resolve(
+                imagesContainerName.format(metadata.language.slug, metadata.identifier)
+            )
+
+        if (!imagesContainer.exists()) {
+            return null
+        }
 
         ResourceContainer.load(imagesContainer).use { rc ->
             val imgPath = rc.manifest.projects.firstOrNull {
@@ -48,7 +57,7 @@ class BibleImagesDataSource(
 
     private fun getImageFromRC(imgPath: String, rc: ResourceContainer): File {
         val relativeImgPath = File(imgPath)
-        val img = imagesDir.resolve(relativeImgPath.name)
+        val img = cacheDir.resolve(relativeImgPath.name)
             .apply { createNewFile() }
 
         img.deleteOnExit()

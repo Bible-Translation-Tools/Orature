@@ -30,7 +30,7 @@ class ArtworkAccessor(val directoryProvider: IDirectoryProvider) {
 
     fun getArtwork(metadata: ResourceMetadata, projectSlug: String): File? {
         val imgDataSource1: ImagesDataSource = CustomImagesDataSource()
-        val imgDataSource2: ImagesDataSource = BibleImagesDataSource(directoryProvider, File("""\bible\images\container"""))
+        val imgDataSource2: ImagesDataSource = BibleImagesDataSource(directoryProvider)
         val imgDataSource3: ImagesDataSource = DefaultImagesDataSource()
 
         imgDataSource1.setFallbackDataSource(imgDataSource2)
