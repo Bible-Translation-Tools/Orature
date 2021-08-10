@@ -80,7 +80,7 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
+        private const val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
         private val filesCache = mutableMapOf<String, File>()
 
         private fun getImageFromCache(
