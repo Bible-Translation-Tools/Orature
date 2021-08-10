@@ -9,16 +9,21 @@ class BibleImagesDataSource(
     private val imagesContainer: File
 ) : ImagesDataSource() {
 
-    private val imagesDir = File(directoryProvider.cacheDirectory, "bible-images").apply { mkdirs() }
+    private val imagesDir = File(
+        directoryProvider.cacheDirectory,
+        "bible-images"
+    ).apply { mkdirs() }
 
-    override fun getImage(metadata: ResourceMetadata, projectSlug: String): File? {
-        imageFromCache(
+    override fun getImage(
+        metadata: ResourceMetadata,
+        projectSlug: String
+    ): File? {
+
+        getImageFromCache(
             metadata.language.slug,
             metadata.identifier,
             projectSlug
-        )?.let {
-            return it
-        }
+        )?.let { return it }
 
         ResourceContainer.load(imagesContainer).use { rc ->
             val imgPath = rc.manifest.projects.firstOrNull {
@@ -26,26 +31,33 @@ class BibleImagesDataSource(
             }?.path
 
             if (imgPath != null && rc.accessor.fileExists(imgPath)) {
-                val relativeImgPath = File(imgPath)
-                val img = imagesDir.resolve(relativeImgPath.name).apply { createNewFile() }
-                img.deleteOnExit()
-                img.outputStream().use { fos ->
-                    rc.accessor.getInputStream(imgPath).use {
-                        it.transferTo(fos)
-                    }
-                }
+                val img = getImageFromRC(imgPath, rc)
 
                 cacheImage(
                     metadata.language.slug,
                     metadata.identifier,
                     projectSlug,
-                    img!!
+                    img
                 )
                 return img
             }
         }
 
         return nextDataSource?.getImage(metadata, projectSlug)
+    }
+
+    private fun getImageFromRC(imgPath: String, rc: ResourceContainer): File {
+        val relativeImgPath = File(imgPath)
+        val img = imagesDir.resolve(relativeImgPath.name)
+            .apply { createNewFile() }
+
+        img.deleteOnExit()
+        img.outputStream().use { fos ->
+            rc.accessor.getInputStream(imgPath).use {
+                it.transferTo(fos)
+            }
+        }
+        return img
     }
 
     private fun cacheKey(metadata: ResourceMetadata, project: String): String {
@@ -55,7 +67,7 @@ class BibleImagesDataSource(
     companion object {
         private val filesCache = mutableMapOf<String, File>()
 
-        private fun imageFromCache(
+        private fun getImageFromCache(
             languageSlug: String,
             resourceId: String,
             project: String
