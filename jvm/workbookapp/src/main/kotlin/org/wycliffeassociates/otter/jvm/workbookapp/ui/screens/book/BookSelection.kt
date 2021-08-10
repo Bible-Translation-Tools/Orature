@@ -37,7 +37,6 @@ class BookSelection : Fragment() {
 
     private val viewModel: BookWizardViewModel by inject()
     private val navigator: NavigationMediator by inject()
-//    @Inject lateinit var directoryProvider: IDirectoryProvider
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["newBook"])

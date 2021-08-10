@@ -8,7 +8,6 @@ class BibleImagesDataSource(
     private val directoryProvider: IDirectoryProvider
 ) : ImagesDataSource() {
 
-    private val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}_artwork
     private val cacheDir = File(
         directoryProvider.cacheDirectory,
         "bible-images"
@@ -81,6 +80,7 @@ class BibleImagesDataSource(
     }
 
     companion object {
+        private val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
         private val filesCache = mutableMapOf<String, File>()
 
         private fun getImageFromCache(

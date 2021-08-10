@@ -17,10 +17,4 @@ abstract class ImagesDataSource {
     fun setFallbackDataSource(dataSource: ImagesDataSource) {
         nextDataSource = dataSource
     }
-
-    protected fun getImageFromContainer(): File? {
-        // read rc
-
-        return null
-    }
 }
