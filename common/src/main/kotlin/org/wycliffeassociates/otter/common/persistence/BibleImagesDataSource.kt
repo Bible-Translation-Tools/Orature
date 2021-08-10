@@ -29,14 +29,11 @@ class BibleImagesDataSource(
                 imagesContainerName.format(metadata.language.slug, metadata.identifier)
             )
 
-        if (imagesContainer.exists()) {
+        return if (imagesContainer.exists()) {
             getImageFromRC(imagesContainer, metadata, projectSlug)
-                ?.let {
-                    return it
-                }
+        } else {
+            null
         }
-
-        return nextDataSource?.getImage(metadata, projectSlug)
     }
 
     private fun getImageFromRC(

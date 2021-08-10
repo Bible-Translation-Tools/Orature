@@ -31,15 +31,24 @@ class ArtworkAccessor(
     val metadata: ResourceMetadata,
     val projectSlug: String
 ) {
+    private val imagesDataSources = listOf<ImagesDataSource>(
+        CustomImagesDataSource(),
+        BibleImagesDataSource(directoryProvider),
+        DefaultImagesDataSource()
+    )
 
     fun getArtwork(): File? {
-        val imgDataSource1: ImagesDataSource = CustomImagesDataSource()
-        val imgDataSource2: ImagesDataSource = BibleImagesDataSource(directoryProvider)
-        val imgDataSource3: ImagesDataSource = DefaultImagesDataSource()
+        imagesDataSources.forEach {
+            val image = it.getImage(metadata, projectSlug)
+            if (image != null) {
+                return image
+            }
+        }
 
-        imgDataSource1.setFallbackDataSource(imgDataSource2)
-        imgDataSource2.setFallbackDataSource(imgDataSource3)
+        return null
+    }
 
-        return imgDataSource1.getImage(metadata, projectSlug)
+    private companion object {
+
     }
 }
