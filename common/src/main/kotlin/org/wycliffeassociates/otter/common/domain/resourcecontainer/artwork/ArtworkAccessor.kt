@@ -43,8 +43,4 @@ class ArtworkAccessor(
 
         return null
     }
-
-    private companion object {
-
-    }
 }

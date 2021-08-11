@@ -1,0 +1,40 @@
+---
+dublin_core:
+  type: "image"
+  conformsto: "0.2"
+  format: "image/jpg"
+  identifier: "ulb"
+  title: ""
+  subject: ""
+  description: ""
+  language:
+    direction: "ltr"
+    identifier: "en"
+    title: "English"
+  source: []
+  rights: "CC BY-SA 4.0"
+  creator: ""
+  contributor: []
+  relation: []
+  publisher: ""
+  issued: ""
+  modified: ""
+  version: "12"
+projects:
+- title: "Matthew"
+  versification: "ufw"
+  identifier: "mat"
+  sort: 40
+  path: "./content/mat/41-mat_background.jpg"
+  categories:
+  - "bible-nt"
+- title: "James"
+  versification: "ufw"
+  identifier: "jas"
+  sort: 59
+  path: "./content/jas/60-jas_background.jpg"
+  categories:
+  - "bible-nt"
+checking:
+  checking_entity: []
+  checking_level: ""
