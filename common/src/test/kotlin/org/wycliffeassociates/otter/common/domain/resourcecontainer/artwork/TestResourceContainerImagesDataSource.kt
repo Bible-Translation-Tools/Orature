@@ -14,10 +14,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.jvm.Throws
 
 class TestResourceContainerImagesDataSource {
-
     private val rcName = """images_rc"""
-
-    // this name must be valid according to BibleImagesDataSource container name
     private val language = "en"
     private val resourceId = "ulb"
     private val project = "jas"

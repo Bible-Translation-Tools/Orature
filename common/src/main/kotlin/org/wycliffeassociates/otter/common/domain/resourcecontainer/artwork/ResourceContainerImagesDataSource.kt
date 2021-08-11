@@ -88,6 +88,7 @@ class ResourceContainerImagesDataSource(
                         it.transferTo(fos)
                     }
                 }
+                
                 return image
             }
         }
