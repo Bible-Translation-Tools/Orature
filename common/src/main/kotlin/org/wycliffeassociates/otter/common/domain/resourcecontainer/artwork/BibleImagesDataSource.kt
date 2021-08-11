@@ -73,10 +73,6 @@ class BibleImagesDataSource(
         return null
     }
 
-    private fun cacheKey(metadata: ResourceMetadata, project: String): String {
-        return "${metadata.language.slug}-${metadata.identifier}-$project"
-    }
-
     companion object {
         private const val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
         private val filesCache = mutableMapOf<String, File>()
