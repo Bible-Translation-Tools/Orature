@@ -21,13 +21,6 @@ dublin_core:
   modified: ""
   version: "12"
 projects:
-- title: "Matthew"
-  versification: "ufw"
-  identifier: "mat"
-  sort: 40
-  path: "./content/mat/41-mat_background.jpg"
-  categories:
-  - "bible-nt"
 - title: "James"
   versification: "ufw"
   identifier: "jas"

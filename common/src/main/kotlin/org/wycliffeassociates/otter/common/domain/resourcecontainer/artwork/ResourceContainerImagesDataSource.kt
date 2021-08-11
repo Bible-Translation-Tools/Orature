@@ -50,7 +50,7 @@ class ResourceContainerImagesDataSource(
         projectSlug: String
     ): File? {
         val paths = mutableListOf<String>()
-
+        paths.add(media.url)
         media.quality.forEach { quality ->
             paths.add(
                 media.url
