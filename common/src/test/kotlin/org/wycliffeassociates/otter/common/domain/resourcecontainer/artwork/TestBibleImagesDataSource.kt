@@ -20,7 +20,7 @@ class TestBibleImagesDataSource {
     private val rcName = """bible_images_rc"""
 
     // this name must be valid according to BibleImagesDataSource container name
-    private val imagesContainerName = "en_ulb_bible_artwork"
+    private val imagesContainerName = "bible_artwork"
     private val language = "en"
     private val resourceId = "ulb"
     private val project = "jas"
