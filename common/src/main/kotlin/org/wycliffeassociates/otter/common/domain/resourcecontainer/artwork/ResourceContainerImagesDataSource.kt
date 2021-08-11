@@ -36,8 +36,14 @@ class ResourceContainerImagesDataSource(
                 if (
                     media != null && !media.url.isNullOrEmpty()
                 ) {
-                    val image = getImageFromRC(media, rc, metadata, projectSlug)
+                    val image = getImageFromRC(media, rc)
                     if (image != null) {
+                        cacheImage(
+                            image,
+                            metadata.language.slug,
+                            metadata.identifier,
+                            projectSlug
+                        )
                         return image
                     }
                 }
@@ -49,9 +55,7 @@ class ResourceContainerImagesDataSource(
 
     private fun getImageFromRC(
         media: Media,
-        rc: ResourceContainer,
-        metadata: ResourceMetadata,
-        projectSlug: String
+        rc: ResourceContainer
     ): File? {
         val paths = mutableListOf<String>()
         paths.add(media.url)
@@ -76,12 +80,6 @@ class ResourceContainerImagesDataSource(
                     }
                 }
 
-                cacheImage(
-                    image,
-                    metadata.language.slug,
-                    metadata.identifier,
-                    projectSlug
-                )
                 return image
             }
         }

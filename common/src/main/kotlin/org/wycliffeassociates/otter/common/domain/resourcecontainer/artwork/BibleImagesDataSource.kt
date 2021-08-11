@@ -19,20 +19,18 @@ class BibleImagesDataSource(
         metadata: ResourceMetadata,
         projectSlug: String
     ): File? {
-
-        getImageFromCache(
-            metadata.language.slug,
-            metadata.identifier,
-            projectSlug
-        )?.let { return it }
+        // fetch and return from cache if any
+        filesCache[projectSlug]?.let { return it }
 
         val imagesContainer = directoryProvider.resourceContainerDirectory
             .resolve(
-                imagesContainerName.format(metadata.language.slug, metadata.identifier)
+                imagesContainerName.format(
+                    metadata.language.slug, metadata.identifier
+                )
             )
 
         return if (imagesContainer.exists()) {
-            getImageFromRC(imagesContainer, metadata, projectSlug)
+            getImageFromRC(imagesContainer, projectSlug)
         } else {
             null
         }
@@ -40,7 +38,6 @@ class BibleImagesDataSource(
 
     private fun getImageFromRC(
         rcFile: File,
-        metadata: ResourceMetadata,
         projectSlug: String
     ): File? {
 
@@ -51,23 +48,18 @@ class BibleImagesDataSource(
 
             if (imgPath != null && rc.accessor.fileExists(imgPath)) {
                 val relativeImgPath = File(imgPath)
-                val img = cacheDir.resolve(relativeImgPath.name)
+                val image = cacheDir.resolve(relativeImgPath.name)
                     .apply { createNewFile() }
 
-                img.deleteOnExit()
-                img.outputStream().use { fos ->
+                image.deleteOnExit()
+                image.outputStream().use { fos ->
                     rc.accessor.getInputStream(imgPath).use {
                         it.transferTo(fos)
                     }
                 }
 
-                cacheImage(
-                    metadata.language.slug,
-                    metadata.identifier,
-                    projectSlug,
-                    img
-                )
-                return img
+                filesCache[projectSlug] = image
+                return image
             }
         }
 
@@ -75,28 +67,7 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        // {languageSlug}_{resourceId}...
-        private const val imagesContainerName = "%s_%s_bible_artwork"
-        private const val cacheKeyTemplate = "%s-%s-%s"
+        private const val imagesContainerName = "bible_artwork"
         private val filesCache = ConcurrentHashMap<String, File>()
-
-        private fun getImageFromCache(
-            languageSlug: String,
-            resourceId: String,
-            project: String
-        ): File? {
-            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
-            return filesCache[key]
-        }
-
-        private fun cacheImage(
-            languageSlug: String,
-            resourceId: String,
-            project: String,
-            image: File
-        ) {
-            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
-            filesCache[key] = image
-        }
     }
 }
