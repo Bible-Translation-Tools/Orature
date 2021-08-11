@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -32,9 +33,9 @@ class ArtworkAccessor(
         BibleImagesDataSource(directoryProvider)
     )
 
-    fun getArtwork(): File? {
+    fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): File? {
         imagesDataSources.forEach {
-            val image = it.getImage(metadata, projectSlug)
+            val image = it.getImage(metadata, projectSlug, imageRatio)
             if (image != null) {
                 return image
             }

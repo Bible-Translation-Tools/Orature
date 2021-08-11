@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
@@ -17,7 +18,8 @@ class BibleImagesDataSource(
 
     override fun getImage(
         metadata: ResourceMetadata,
-        projectSlug: String
+        projectSlug: String,
+        imageRatio: ImageRatio
     ): File? {
 
         getImageFromCache(
@@ -75,7 +77,8 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private const val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
+        // {languageSlug}_{resourceId}_...
+        private const val imagesContainerName = "%s_%s_bible_artwork"
         private const val cacheKeyTemplate = "%s-%s-%s"
         private val filesCache = ConcurrentHashMap<String, File>()
 

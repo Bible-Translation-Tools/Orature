@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.entity.Media
@@ -16,7 +17,11 @@ class ResourceContainerImagesDataSource(
         "bible-images-custom"
     ).apply { mkdirs() }
 
-    override fun getImage(metadata: ResourceMetadata, projectSlug: String): File? {
+    override fun getImage(
+        metadata: ResourceMetadata,
+        projectSlug: String,
+        imageRatio: ImageRatio
+    ): File? {
         getImageFromCache(
             metadata.language.slug,
             metadata.identifier,
@@ -33,8 +38,14 @@ class ResourceContainerImagesDataSource(
                 if (
                     media != null && !media.url.isNullOrEmpty()
                 ) {
-                    val image = getImageFromRC(media, rc, metadata, projectSlug)
+                    val image = getImageFromRC(media, rc, imageRatio)
                     if (image != null) {
+                        cacheImage(
+                            image,
+                            metadata.language.slug,
+                            metadata.identifier,
+                            projectSlug
+                        )
                         return image
                     }
                 }
@@ -47,16 +58,21 @@ class ResourceContainerImagesDataSource(
     private fun getImageFromRC(
         media: Media,
         rc: ResourceContainer,
-        metadata: ResourceMetadata,
-        projectSlug: String
+        imageRatio: ImageRatio
     ): File? {
         val paths = mutableListOf<String>()
         paths.add(media.url)
+        paths.add(
+            getImagePathWithRatio(media.url, imageRatio)
+        )
+
         media.quality.forEach { quality ->
+            val urlWithParameters = media.url
+                .replace("{quality}", quality)
+                .replace("{version}", media.version)
+            paths.add(urlWithParameters)
             paths.add(
-                media.url
-                    .replace("{quality}", quality)
-                    .replace("{version}", media.version)
+                getImagePathWithRatio(urlWithParameters, imageRatio)
             )
         }
 
@@ -72,18 +88,23 @@ class ResourceContainerImagesDataSource(
                         it.transferTo(fos)
                     }
                 }
-
-                cacheImage(
-                    image,
-                    metadata.language.slug,
-                    metadata.identifier,
-                    projectSlug
-                )
                 return image
             }
         }
 
         return null
+    }
+
+    private fun getImagePathWithRatio(
+        path: String,
+        ratio: ImageRatio
+    ): String {
+        val image = File(path)
+        val nameWithRatio =
+            image.nameWithoutExtension + ratio.getStringFormat()
+
+        return image.parentFile.resolve(nameWithRatio)
+            .invariantSeparatorsPath
     }
 
     companion object {
