@@ -75,6 +75,7 @@ class BibleImagesDataSource(
 
     companion object {
         private const val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
+        private const val cacheKeyTemplate = "%s-%s-%s"
         private val filesCache = mutableMapOf<String, File>()
 
         private fun getImageFromCache(
@@ -83,7 +84,8 @@ class BibleImagesDataSource(
             project: String
         ): File? {
             synchronized(filesCache) {
-                return filesCache["$languageSlug-$resourceId-$project"]
+                val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+                return filesCache[key]
             }
         }
 
@@ -91,10 +93,11 @@ class BibleImagesDataSource(
             languageSlug: String,
             resourceId: String,
             project: String,
-            file: File
+            image: File
         ) {
             synchronized(filesCache) {
-                filesCache["$languageSlug-$resourceId-$project"] = file
+                val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+                filesCache[key] = image
             }
         }
     }
