@@ -16,7 +16,10 @@ class ResourceContainerImagesDataSource(
         "bible-images-custom"
     ).apply { mkdirs() }
 
-    override fun getImage(metadata: ResourceMetadata, projectSlug: String): File? {
+    override fun getImage(
+        metadata: ResourceMetadata,
+        projectSlug: String
+    ): File? {
         getImageFromCache(
             metadata.language.slug,
             metadata.identifier,
