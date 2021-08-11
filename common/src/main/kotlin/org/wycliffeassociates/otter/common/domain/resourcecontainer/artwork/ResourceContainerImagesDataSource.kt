@@ -5,6 +5,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 class ResourceContainerImagesDataSource(
     private val directoryProvider: IDirectoryProvider
@@ -87,16 +88,17 @@ class ResourceContainerImagesDataSource(
 
     companion object {
         private val mediaTypes = listOf("jpg", "jpeg", "png")
-        private val filesCache = mutableMapOf<String, File>()
+        private const val cacheKeyTemplate = "%s-%s-%s"
+        private val filesCache = ConcurrentHashMap<String, File>()
 
         private fun getImageFromCache(
             languageSlug: String,
             resourceId: String,
             project: String
         ): File? {
-            synchronized(filesCache) {
-                return filesCache["$languageSlug-$resourceId-$project"]
-            }
+            return filesCache[
+                cacheKeyTemplate.format(languageSlug, resourceId, project)
+            ]
         }
 
         private fun cacheImage(
@@ -105,9 +107,9 @@ class ResourceContainerImagesDataSource(
             resourceId: String,
             project: String
         ) {
-            synchronized(filesCache) {
-                filesCache["$languageSlug-$resourceId-$project"] = image
-            }
+            filesCache[
+                cacheKeyTemplate.format(languageSlug, resourceId, project)
+            ] = image
         }
     }
 }
