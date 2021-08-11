@@ -4,6 +4,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 class BibleImagesDataSource(
     private val directoryProvider: IDirectoryProvider
@@ -76,17 +77,15 @@ class BibleImagesDataSource(
     companion object {
         private const val imagesContainerName = "%s_%s_bible_artwork" // {languageSlug}_{resourceId}...
         private const val cacheKeyTemplate = "%s-%s-%s"
-        private val filesCache = mutableMapOf<String, File>()
+        private val filesCache = ConcurrentHashMap<String, File>()
 
         private fun getImageFromCache(
             languageSlug: String,
             resourceId: String,
             project: String
         ): File? {
-            synchronized(filesCache) {
-                val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
-                return filesCache[key]
-            }
+            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            return filesCache[key]
         }
 
         private fun cacheImage(
@@ -95,10 +94,8 @@ class BibleImagesDataSource(
             project: String,
             image: File
         ) {
-            synchronized(filesCache) {
-                val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
-                filesCache[key] = image
-            }
+            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            filesCache[key] = image
         }
     }
 }

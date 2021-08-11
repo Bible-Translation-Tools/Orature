@@ -96,9 +96,8 @@ class ResourceContainerImagesDataSource(
             resourceId: String,
             project: String
         ): File? {
-            return filesCache[
-                cacheKeyTemplate.format(languageSlug, resourceId, project)
-            ]
+            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            return filesCache[key]
         }
 
         private fun cacheImage(
@@ -107,9 +106,8 @@ class ResourceContainerImagesDataSource(
             resourceId: String,
             project: String
         ) {
-            filesCache[
-                cacheKeyTemplate.format(languageSlug, resourceId, project)
-            ] = image
+            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            filesCache[key] = image
         }
     }
 }
