@@ -1,0 +1,18 @@
+---
+resource:
+  version: "{latest}"
+  media:
+  - identifier: "pdf"
+    version: "{latest}"
+    url: "https://cdn.door43.org/en/ulb/v{latest}/pdf/en_ulb_v{latest}.pdf"
+    quality: []
+    chapter_url: ""
+projects:
+- identifier: "jas"
+  version: "{latest}"
+  media:
+  - identifier: "jpg"
+    version: "{latest}"
+    url: "media/jas/60-jas_background.jpg"
+    quality: []
+    chapter_url: "media/jas/60-jas_background.jpg"

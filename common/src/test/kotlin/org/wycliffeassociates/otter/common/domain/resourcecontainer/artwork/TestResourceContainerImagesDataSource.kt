@@ -1,48 +1,40 @@
-package org.wycliffeassociates.otter.common.persistence
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
+import org.junit.Assert
 import org.junit.Test
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.BibleImagesDataSource
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.io.FileNotFoundException
 import java.time.LocalDate
 import kotlin.io.path.createTempDirectory
 import kotlin.jvm.Throws
 
-class TestBibleImagesDataSource {
+class TestResourceContainerImagesDataSource {
 
-    private val rcName = """bible_images_rc"""
+    private val rcName = """images_rc"""
 
     // this name must be valid according to BibleImagesDataSource container name
-    private val imagesContainerName = "en_ulb_bible_artwork"
     private val language = "en"
     private val resourceId = "ulb"
     private val project = "jas"
 
     @Test
-    fun getBibleImage() {
-        val sourceRC = getResource(rcName)
+    fun getImage() {
+        val rcFile = getResource(rcName)
         val tempDir = createTempDirectory().toFile()
-        val tempContainer = tempDir.resolve(imagesContainerName)
 
-        sourceRC.copyRecursively(tempContainer)
+        val directoryProviderMock = Mockito.mock(IDirectoryProvider::class.java)
+        val languageMock = Mockito.mock(Language::class.java)
 
-        val directoryProviderMock = mock(IDirectoryProvider::class.java)
-        val languageMock = mock(Language::class.java)
-
-        `when`(directoryProviderMock.resourceContainerDirectory)
-            .thenReturn(tempDir)
-        `when`(directoryProviderMock.cacheDirectory)
+        Mockito.`when`(directoryProviderMock.cacheDirectory)
             .thenReturn(
                 tempDir.resolve("cache").apply { mkdirs() }
             )
-        `when`(languageMock.slug).thenReturn(language)
+        Mockito.`when`(languageMock.slug).thenReturn(language)
 
         val metadata = ResourceMetadata(
             conformsTo = "unused",
@@ -50,26 +42,26 @@ class TestBibleImagesDataSource {
             description = "unused",
             format = "unused",
             identifier = resourceId,
-            issued = mock(LocalDate::class.java),
+            issued = Mockito.mock(LocalDate::class.java),
             language = languageMock,
-            modified = mock(LocalDate::class.java),
+            modified = Mockito.mock(LocalDate::class.java),
             publisher = "unused",
             subject = "unused",
-            type = mock(ContainerType::class.java),
+            type = Mockito.mock(ContainerType::class.java),
             title = "unused",
             version = "unused",
-            path = mock(File::class.java)
+            path = rcFile
         )
 
-        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadata, project)
         val notFoundImage = dataSource.getImage(metadata, "gen")
 
-        assertNotNull(
+        Assert.assertNotNull(
             "Could not get image for [$language-$resourceId-$project]",
             image
         )
-        assertNull(notFoundImage)
+        Assert.assertNull(notFoundImage)
 
         tempDir.deleteRecursively()
     }

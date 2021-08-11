@@ -1,0 +1,29 @@
+---
+dublin_core:
+  type: "bundle"
+  conformsto: "rc0.2"
+  format: "image/jpg"
+  identifier: "ulb"
+  title: "Unlocked Literal Bible"
+  subject: "Bible"
+  description: ""
+  language:
+    direction: "ltr"
+    identifier: "en"
+    title: "English"
+  source:
+  - identifier: "asv"
+    language: "en"
+    version: "1901"
+  rights: "CC BY-SA 4.0"
+  contributor: []
+  relation:
+  - "en/tw"
+  - "en/tq"
+  - "en/tn"
+  publisher: ""
+  issued: "2017-11-29"
+  modified: "2017-11-29"
+  version: "12"
+projects: []
+  creator: "Door43 World Missions Community"
