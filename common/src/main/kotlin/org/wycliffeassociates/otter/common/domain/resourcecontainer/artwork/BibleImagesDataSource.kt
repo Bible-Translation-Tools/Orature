@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class BibleImagesDataSource(
     private val directoryProvider: IDirectoryProvider
-) : ImagesDataSource() {
+) : ImagesDataSource {
 
     private val cacheDir = File(
         directoryProvider.cacheDirectory,

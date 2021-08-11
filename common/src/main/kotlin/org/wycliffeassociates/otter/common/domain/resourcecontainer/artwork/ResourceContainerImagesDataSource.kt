@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class ResourceContainerImagesDataSource(
     private val directoryProvider: IDirectoryProvider
-) : ImagesDataSource() {
+) : ImagesDataSource {
 
     private val cacheDir = File(
         directoryProvider.cacheDirectory,

@@ -6,8 +6,8 @@ import java.io.File
 /*
  * Chain of Responsibility - Base handler class
  */
-abstract class ImagesDataSource {
-    abstract fun getImage(
+interface ImagesDataSource {
+    fun getImage(
         metadata: ResourceMetadata,
         projectSlug: String
     ): File?

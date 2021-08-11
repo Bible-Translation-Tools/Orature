@@ -29,8 +29,7 @@ class ArtworkAccessor(
 ) {
     private val imagesDataSources = listOf<ImagesDataSource>(
         ResourceContainerImagesDataSource(directoryProvider),
-        BibleImagesDataSource(directoryProvider),
-        DefaultImagesDataSource()
+        BibleImagesDataSource(directoryProvider)
     )
 
     fun getArtwork(): File? {
