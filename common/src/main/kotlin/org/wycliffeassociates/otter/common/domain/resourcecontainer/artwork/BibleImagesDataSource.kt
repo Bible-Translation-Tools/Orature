@@ -32,7 +32,7 @@ class BibleImagesDataSource(
             )
 
         return if (imagesContainer.exists()) {
-            getImageFromRC(imagesContainer, projectSlug)
+            getImageFromRC(imagesContainer, projectSlug, imageRatio)
         } else {
             null
         }
@@ -40,7 +40,8 @@ class BibleImagesDataSource(
 
     private fun getImageFromRC(
         rcFile: File,
-        projectSlug: String
+        projectSlug: String,
+        imageRatio: ImageRatio
     ): File? {
 
         ResourceContainer.load(rcFile).use { rc ->
@@ -48,9 +49,17 @@ class BibleImagesDataSource(
                 it.identifier == projectSlug
             }?.path
 
-            if (imgPath != null && rc.accessor.fileExists(imgPath)) {
-                val relativeImgPath = File(imgPath)
-                val image = cacheDir.resolve(relativeImgPath.name)
+            if (imgPath != null) {
+                val pathWithRatio = getImagePathWithRatio(imgPath, imageRatio)
+                val path = if (rc.accessor.fileExists(pathWithRatio)) {
+                    pathWithRatio
+                } else if (rc.accessor.fileExists(imgPath)) {
+                    imgPath
+                } else {
+                    return null
+                }
+
+                val image = cacheDir.resolve(File(path).name)
                     .apply { createNewFile() }
 
                 image.deleteOnExit()

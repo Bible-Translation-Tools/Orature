@@ -10,4 +10,17 @@ interface ImagesDataSource {
         projectSlug: String,
         imageRatio: ImageRatio
     ): File?
+
+
+    fun getImagePathWithRatio(
+        path: String,
+        ratio: ImageRatio
+    ): String {
+        val image = File(path)
+        val nameWithRatio =
+            image.nameWithoutExtension + ratio.getStringFormat()
+
+        return image.parentFile.resolve(nameWithRatio)
+            .invariantSeparatorsPath
+    }
 }

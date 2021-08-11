@@ -88,24 +88,12 @@ class ResourceContainerImagesDataSource(
                         it.transferTo(fos)
                     }
                 }
-                
+
                 return image
             }
         }
 
         return null
-    }
-
-    private fun getImagePathWithRatio(
-        path: String,
-        ratio: ImageRatio
-    ): String {
-        val image = File(path)
-        val nameWithRatio =
-            image.nameWithoutExtension + ratio.getStringFormat()
-
-        return image.parentFile.resolve(nameWithRatio)
-            .invariantSeparatorsPath
     }
 
     companion object {
