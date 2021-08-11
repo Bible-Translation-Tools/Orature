@@ -28,7 +28,7 @@ class ArtworkAccessor(
     val projectSlug: String
 ) {
     private val imagesDataSources = listOf<ImagesDataSource>(
-        ResourceContainerImagesDataSource(),
+        ResourceContainerImagesDataSource(directoryProvider),
         BibleImagesDataSource(directoryProvider),
         DefaultImagesDataSource()
     )
