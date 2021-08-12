@@ -43,7 +43,6 @@ class TestBibleImagesDataSource {
             )
         `when`(languageMock.slug).thenReturn(language)
 
-
         val dataSource = BibleImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadata, project)
         val notFoundImage = dataSource.getImage(metadata, "gen")

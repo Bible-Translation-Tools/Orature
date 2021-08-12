@@ -1,6 +1,8 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.junit.Assert
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -54,11 +56,11 @@ class TestResourceContainerImagesDataSource {
         val image = dataSource.getImage(metadata, project)
         val notFoundImage = dataSource.getImage(metadata, "gen")
 
-        Assert.assertNotNull(
+        assertNotNull(
             "Could not get image for [$language-$resourceId-$project]",
             image
         )
-        Assert.assertNull(notFoundImage)
+        assertNull(notFoundImage)
 
         tempDir.deleteRecursively()
     }
