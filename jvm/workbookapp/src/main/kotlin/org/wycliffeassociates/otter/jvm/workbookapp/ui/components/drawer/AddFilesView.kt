@@ -55,7 +55,7 @@ class AddFilesView : View() {
                 addClass("app-drawer-container")
 
                 hbox {
-                    label(messages["addFiles"]).apply {
+                    label(messages["importFiles"]).apply {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
@@ -170,7 +170,7 @@ class AddFilesView : View() {
             messageTextProperty.set(messages["importResourceSuccessMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
 
-            cancelButtonTextProperty.set(messages["goHome"])
+            cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
             onCancelAction { viewModel.showImportSuccessDialogProperty.set(false) }
         }

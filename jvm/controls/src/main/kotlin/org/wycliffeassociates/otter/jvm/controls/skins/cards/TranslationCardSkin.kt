@@ -93,7 +93,7 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
         }
 
         seeMoreBtn.apply {
-            textProperty().bind(card.seeMoreTextProperty)
+            textProperty().bind(card.showMoreTextProperty)
             visibleProperty().bind(card.itemsProperty.booleanBinding {
                 it?.let {
                     it.size > card.shownItemsNumberProperty.value
@@ -130,22 +130,22 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
                      true -> {
                         MessageFormat.format(
                             "{0} ({1})",
-                            card.seeLessTextProperty.value,
+                            card.showLessTextProperty.value,
                             hidden
                         )
                      }
                      false -> {
                          MessageFormat.format(
                              "{0} ({1})",
-                             card.seeMoreTextProperty.value,
+                             card.showMoreTextProperty.value,
                              hidden
                          )
                      }
                  }
             },
             card.seeAllProperty,
-            card.seeMoreTextProperty,
-            card.seeLessTextProperty,
+            card.showMoreTextProperty,
+            card.showLessTextProperty,
             card.itemsProperty
         )
     }
