@@ -18,7 +18,7 @@ interface ImagesDataSource {
     ): String {
         val image = File(path)
         val nameWithRatio =
-            image.nameWithoutExtension + ratio.getStringFormat()
+            "${image.nameWithoutExtension}_${ratio.getStringFormat()}"
 
         return image.parentFile.resolve(nameWithRatio)
             .invariantSeparatorsPath
