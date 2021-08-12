@@ -25,11 +25,7 @@ class BibleImagesDataSource(
         filesCache[projectSlug]?.let { return it }
 
         val imagesContainer = directoryProvider.resourceContainerDirectory
-            .resolve(
-                imagesContainerName.format(
-                    metadata.language.slug, metadata.identifier
-                )
-            )
+            .resolve(imagesContainerName)
 
         return if (imagesContainer.exists()) {
             getImageFromRC(imagesContainer, projectSlug, imageRatio)
