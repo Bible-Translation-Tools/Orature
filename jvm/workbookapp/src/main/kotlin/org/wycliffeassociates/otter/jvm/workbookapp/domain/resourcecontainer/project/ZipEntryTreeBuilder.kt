@@ -29,6 +29,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
 import java.util.zip.ZipFile
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
 
 class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
 
@@ -57,7 +58,8 @@ class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
                         file: Path,
                         attrs: BasicFileAttributes
                     ): FileVisitResult {
-                        val filepath = file.toString().substringAfter(sep)
+                        // Previously used file.toString, but the path was not absolute
+                        val filepath = file.absolutePathString().substringAfter(sep)
                         val otterZipFile =
                             otterFileZ(filepath, zipFile, sep, rootPathWithinZip, treeCursor.peek()?.value)
                         treeCursor.peek()?.addChild(OtterTreeNode(otterZipFile))
@@ -77,7 +79,7 @@ class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
                     ): FileVisitResult {
                         val newDirNode = OtterTree(
                             otterFileZ(
-                                absolutePath = dir.toString(),
+                                absolutePath = dir.absolutePathString().substringAfter(sep),
                                 rootZipFile = zipFile,
                                 separator = zipFileSystem.separator,
                                 rootPathWithinZip = rootPathWithinZip,
