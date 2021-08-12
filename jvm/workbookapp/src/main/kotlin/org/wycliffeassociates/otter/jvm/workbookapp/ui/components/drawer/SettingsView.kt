@@ -73,7 +73,7 @@ class SettingsView : View() {
                         addClass("app-drawer__subtitle--small")
                     }
                     combobox(viewModel.selectedLocaleProperty, viewModel.supportedLocales) {
-                        addClass("dropdown")
+                        addClass("wa-combobox")
                         fitToParentWidth()
 
                         cellFormat {
