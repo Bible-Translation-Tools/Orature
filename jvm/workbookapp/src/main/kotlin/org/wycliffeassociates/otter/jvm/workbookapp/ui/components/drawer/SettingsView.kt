@@ -71,7 +71,7 @@ class SettingsView : View() {
                         addClass("app-drawer__subtitle--small")
                     }
                     combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
-                        addClass("dropdown")
+                        addClass("wa-combobox")
                         fitToParentWidth()
 
                         cellFormat {
@@ -90,7 +90,7 @@ class SettingsView : View() {
                         addClass("app-drawer__subtitle--small")
                     }
                     combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
-                        addClass("dropdown")
+                        addClass("wa-combobox")
                         fitToParentWidth()
 
                         cellFormat {
