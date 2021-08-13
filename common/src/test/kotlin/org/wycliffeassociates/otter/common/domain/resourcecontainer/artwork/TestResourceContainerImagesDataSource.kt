@@ -83,7 +83,7 @@ class TestResourceContainerImagesDataSource {
 
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
         val notFoundImage = dataSource.getImage(metadataMock, genSlug)
-        val nonBibleNotFoundImage =  dataSource.getImage(metadataMock, nonBibleProject)
+        val nonBibleNotFoundImage = dataSource.getImage(metadataMock, nonBibleProject)
         val remoteImageNotFound = dataSource.getImage(metadataMock, remoteUrlProject)
 
         assertNull(
