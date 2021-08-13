@@ -16,3 +16,11 @@ projects:
     url: "media/jas/60-jas_background.jpg"
     quality: []
     chapter_url: "media/jas/60-jas_background.jpg"
+- identifier: "tit"
+  version: "{latest}"
+  media:
+    - identifier: "png"
+      version: "{latest}"
+      url: "https://remote-url.org/image.png"
+      quality: []
+      chapter_url: ""

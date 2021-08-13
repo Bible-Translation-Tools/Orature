@@ -1,15 +1,17 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
-import org.junit.Assert
+import org.junit.After
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 import java.io.FileNotFoundException
-import java.time.LocalDate
 import kotlin.io.path.createTempDirectory
 import kotlin.jvm.Throws
 
@@ -18,49 +20,66 @@ class TestResourceContainerImagesDataSource {
     private val language = "en"
     private val resourceId = "ulb"
     private val project = "jas"
+    private lateinit var rcFile: File
+    private lateinit var tempDir: File
+    private val directoryProviderMock = mock(IDirectoryProvider::class.java)
+    private val metadataMock = mock(ResourceMetadata::class.java)
 
-    @Test
-    fun getImage() {
-        val rcFile = getResource(rcName)
-        val tempDir = createTempDirectory().toFile()
-
-        val directoryProviderMock = Mockito.mock(IDirectoryProvider::class.java)
-        val languageMock = Mockito.mock(Language::class.java)
-
-        Mockito.`when`(directoryProviderMock.cacheDirectory)
+    @Before
+    fun setUp() {
+        rcFile = getResource(rcName)
+        tempDir = createTempDirectory().toFile()
+        `when`(directoryProviderMock.cacheDirectory)
             .thenReturn(
                 tempDir.resolve("cache").apply { mkdirs() }
             )
-        Mockito.`when`(languageMock.slug).thenReturn(language)
 
-        val metadata = ResourceMetadata(
-            conformsTo = "unused",
-            creator = "unused",
-            description = "unused",
-            format = "unused",
-            identifier = resourceId,
-            issued = Mockito.mock(LocalDate::class.java),
-            language = languageMock,
-            modified = Mockito.mock(LocalDate::class.java),
-            publisher = "unused",
-            subject = "unused",
-            type = Mockito.mock(ContainerType::class.java),
-            title = "unused",
-            version = "unused",
-            path = rcFile
-        )
+        val languageMock = mock(Language::class.java)
+        `when`(languageMock.slug).thenReturn(language)
+        `when`(metadataMock.identifier).thenReturn(resourceId)
+        `when`(metadataMock.language).thenReturn(languageMock)
+        `when`(metadataMock.path).thenReturn(rcFile)
+    }
 
+    @After
+    fun cleanUp() {
+        tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun testGetImage() {
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
-        val image = dataSource.getImage(metadata, project)
-        val notFoundImage = dataSource.getImage(metadata, "gen")
+        val image = dataSource.getImage(metadataMock, project)
 
-        Assert.assertNotNull(
+        assertNotNull(
             "Could not get image for [$language-$resourceId-$project]",
             image
         )
-        Assert.assertNull(notFoundImage)
+    }
 
-        tempDir.deleteRecursively()
+    @Test
+    fun testNotFoundImage() {
+        val genSlug = "gen"
+        val nonBibleProject = "unknown"
+        val remoteUrlProject = "tit"
+
+        val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
+        val notFoundImage = dataSource.getImage(metadataMock, genSlug)
+        val nonBibleNotFoundImage =  dataSource.getImage(metadataMock, nonBibleProject)
+        val remoteImageNotFound = dataSource.getImage(metadataMock, remoteUrlProject)
+
+        assertNull(
+            "Project $genSlug should not have image in data source",
+            notFoundImage
+        )
+        assertNull(
+            "Project $nonBibleProject should not have image in data source",
+            nonBibleNotFoundImage
+        )
+        assertNull(
+            "Project $remoteUrlProject should not have image in data source",
+            remoteImageNotFound
+        )
     }
 
     @Throws(FileNotFoundException::class)
