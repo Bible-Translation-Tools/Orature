@@ -158,7 +158,7 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
@@ -189,7 +189,7 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
@@ -216,7 +216,7 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 

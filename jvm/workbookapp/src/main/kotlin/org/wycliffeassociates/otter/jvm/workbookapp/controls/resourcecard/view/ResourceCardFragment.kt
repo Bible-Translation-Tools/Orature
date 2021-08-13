@@ -84,7 +84,7 @@ class ResourceCardFragment(
                     secondaryColor = Color.WHITE
                     isHighlightedProperty.bind(isCurrentResourceProperty)
                     graphic = FontIcon("gmi-apps").apply { iconSize = 25 }
-                    text = messages["viewRecordings"]
+                    text = messages["open"]
                     action {
                         item.onSelect()
                         navigator.dock<RecordResourcePage>()

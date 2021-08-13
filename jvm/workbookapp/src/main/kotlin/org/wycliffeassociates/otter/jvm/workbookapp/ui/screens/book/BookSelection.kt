@@ -39,7 +39,7 @@ class BookSelection : Fragment() {
     private val navigator: NavigationMediator by inject()
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["newBook"])
+        titleProperty.set(messages["selectBook"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
     }
 
@@ -49,7 +49,7 @@ class BookSelection : Fragment() {
             addClass("book-wizard__root")
 
             vbox {
-                label(messages["chooseBook"]) {
+                label(messages["selectBook"]) {
                     addClass("book-wizard__title")
                 }
                 hbox {

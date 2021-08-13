@@ -94,7 +94,7 @@ class HomePage : Fragment() {
 
                 add(
                     NewTranslationCard().apply {
-                        newTranslationTextProperty.set(messages["newTranslation"])
+                        newTranslationTextProperty.set(messages["createTranslation"])
                         setOnAction {
                             viewModel.createTranslation()
                         }
@@ -117,8 +117,8 @@ class HomePage : Fragment() {
                                 }
                             }
 
-                            seeMoreTextProperty.set(messages["seeMore"])
-                            seeLessTextProperty.set(messages["seeLess"])
+                            showMoreTextProperty.set(messages["showMore"])
+                            showLessTextProperty.set(messages["showLess"])
 
                             setOnNewBookAction {
                                 viewModel.createProject(it)

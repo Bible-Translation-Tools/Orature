@@ -56,11 +56,11 @@ class InfoView : View() {
 
                 vbox {
                     addClass("app-drawer__section")
-                    label(messages["aboutOtter"]).apply {
+                    label(messages["aboutOrature"]).apply {
                         addClass("app-drawer__subtitle")
                     }
 
-                    label(messages["aboutOtterDescription"]).apply {
+                    label(messages["aboutOratureDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
                     }
