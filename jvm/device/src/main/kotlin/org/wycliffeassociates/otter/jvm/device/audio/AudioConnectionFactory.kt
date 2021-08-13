@@ -11,7 +11,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 
 open class AudioConnectionFactory {
-
     private val line = AudioSystem.getSourceDataLine(
         AudioFormat(
             44100F,
@@ -37,9 +36,9 @@ open class AudioConnectionFactory {
 
     @Synchronized
     protected fun load(request: AudioConnection.State) {
-        println("here")
         if (currentConnection?.id ?: 0 != request.id) {
             currentConnection?.let {
+                it.position = player.getLocationInFrames()
                 it.durationInFrames = player.getDurationInFrames()
                 it.locationInFrames = player.getLocationInFrames()
                 it.durationInMs = player.getDurationMs()
@@ -50,9 +49,7 @@ open class AudioConnectionFactory {
             currentConnection = request
             currentConnection?.let {
                 it.durationInFrames = player.getDurationInFrames()
-                it.locationInFrames = player.getLocationInFrames()
                 it.durationInMs = player.getDurationMs()
-                it.durationInFrames = player.getDurationInFrames()
             }
             line.flush()
             player.stop()
@@ -66,7 +63,6 @@ open class AudioConnectionFactory {
                 player.load(request.file)
             }
             player.seek(request.position)
-
     }
 
     enum class PlayerState{PAUSE, PLAY, STOPPED, COMPLETED}
