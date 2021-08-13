@@ -29,9 +29,15 @@ import java.text.MessageFormat
 
 class SourceAudioFragment : Fragment() {
 
+//    @Inject
+//    lateinit var player: IAudioPlayer
+
     override val root = initializeSourceContent()
 
     private fun initializeSourceContent(): SourceContent {
+
+        //(app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
         var sourceFile: File? = null
         var startFrame: Int? = null
         var endFrame: Int? = null
@@ -80,17 +86,18 @@ class SourceAudioFragment : Fragment() {
     }
 
     private fun initializeAudioPlayer(file: File, start: Int?, end: Int?): IAudioPlayer? {
-        val player = AudioBufferPlayer()
-        return try {
-            if (start != null && end != null) {
-                player.loadSection(file, start, end)
-            } else {
-                player.load(file)
-            }
-            player
-        } catch (e: Exception) {
-            null
-        }
+//        val player = AudioBufferPlayer()
+//        return try {
+//            if (start != null && end != null) {
+//                player.loadSection(file, start, end)
+//            } else {
+//                player.load(file)
+//            }
+//            player
+//        } catch (e: Exception) {
+//            null
+//        }
+        return null
     }
 
     private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {

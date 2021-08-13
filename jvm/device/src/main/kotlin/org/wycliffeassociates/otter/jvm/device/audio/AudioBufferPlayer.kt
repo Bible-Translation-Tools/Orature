@@ -29,7 +29,12 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
 
-class AudioBufferPlayer : IAudioPlayer {
+class AudioBufferPlayer(private val player: SourceDataLine) : IAudioPlayer {
+
+    // should have an event loop
+    // actions get posted to the event loop from the connections
+    // a queue per connection? maybe just for line write requests?
+    // which queue is being read from to send to the line is based on the active context
 
     override val frameStart: Int
         get() = begin
@@ -40,7 +45,7 @@ class AudioBufferPlayer : IAudioPlayer {
     private var startPosition: Int = 0
 
     private var reader: AudioFileReader? = null
-    private lateinit var player: SourceDataLine
+
     private lateinit var bytes: ByteArray
     private lateinit var playbackThread: Thread
     private var begin = 0
@@ -68,15 +73,6 @@ class AudioBufferPlayer : IAudioPlayer {
             begin = 0
             end = _reader.totalFrames
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
-            player = AudioSystem.getSourceDataLine(
-                AudioFormat(
-                    _reader.sampleRate.toFloat(),
-                    _reader.sampleSize,
-                    _reader.channels,
-                    true,
-                    false
-                )
-            )
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -89,15 +85,6 @@ class AudioBufferPlayer : IAudioPlayer {
         end = frameEnd
         reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
             bytes = ByteArray(_reader.sampleRate * _reader.channels)
-            player = AudioSystem.getSourceDataLine(
-                AudioFormat(
-                    _reader.sampleRate.toFloat(),
-                    _reader.sampleSize,
-                    _reader.channels,
-                    true,
-                    false
-                )
-            )
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -136,16 +123,14 @@ class AudioBufferPlayer : IAudioPlayer {
 
     override fun pause() {
         reader?.let { _reader ->
-            if (::player.isInitialized) {
-                val stoppedAt = getLocationInFrames()
-                startPosition = stoppedAt
-                pause.set(true)
-                player.stop()
-                player.flush()
-                player.close()
-                listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
-                _reader.seek(stoppedAt)
-            }
+            val stoppedAt = getLocationInFrames()
+            startPosition = stoppedAt
+            pause.set(true)
+            player.stop()
+            player.flush()
+            player.close()
+            listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
+            _reader.seek(stoppedAt)
         }
     }
 
@@ -156,10 +141,7 @@ class AudioBufferPlayer : IAudioPlayer {
     }
 
     override fun close() {
-        if (::player.isInitialized) {
-            stop()
-            player.close()
-        }
+        stop()
         if (reader != null) {
             reader?.release()
             reader = null

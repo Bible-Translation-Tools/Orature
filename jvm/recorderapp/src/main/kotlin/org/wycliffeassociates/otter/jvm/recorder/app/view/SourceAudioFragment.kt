@@ -77,17 +77,18 @@ class SourceAudioFragment : Fragment() {
     }
 
     private fun initializeAudioPlayer(file: File, start: Int?, end: Int?): IAudioPlayer? {
-        val player = AudioBufferPlayer()
-        return try {
-            if (start != null && end != null) {
-                player.loadSection(file, start, end)
-            } else {
-                player.load(file)
-            }
-            player
-        } catch (e: Exception) {
-            null
-        }
+//        val player = AudioBufferPlayer()
+//        return try {
+//            if (start != null && end != null) {
+//                player.loadSection(file, start, end)
+//            } else {
+//                player.load(file)
+//            }
+//            player
+//        } catch (e: Exception) {
+//            null
+//        }
+        return null
     }
 
     private fun getSourceContentTitle(book: String?, chapter: String?, chunk: String?): String? {
