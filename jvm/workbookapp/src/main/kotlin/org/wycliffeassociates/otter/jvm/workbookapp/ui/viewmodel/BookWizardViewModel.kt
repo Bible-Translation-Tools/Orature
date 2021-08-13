@@ -127,8 +127,6 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun loadChildren(parent: Collection) {
-
-
         collectionRepo
             .getChildren(parent)
             .observeOnFx()
