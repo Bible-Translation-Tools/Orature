@@ -90,8 +90,11 @@ class BookSelection : Fragment() {
                 addClass("book-wizard__list")
                 vgrow = Priority.ALWAYS
                 setCellFactory {
-                    BookCell(viewModel.projectTypeProperty, viewModel.existingBooks) {
-                        viewModel.selectedBookProperty.set(it)
+                    BookCell(
+                        viewModel.projectTypeProperty,
+                        viewModel.existingBooks
+                    ) {
+                        viewModel.selectedBookProperty.set(it.collection)
                     }
                 }
                 viewModel.searchQueryProperty.onChange {

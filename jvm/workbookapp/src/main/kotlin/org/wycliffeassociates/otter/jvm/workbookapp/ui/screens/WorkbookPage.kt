@@ -164,7 +164,7 @@ class WorkbookPage : Fragment() {
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork()
             )
 
             onConfirmAction {
@@ -195,7 +195,7 @@ class WorkbookPage : Fragment() {
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork()
             )
 
             deleteSuccessListener = ChangeListener { _, _, new ->
@@ -222,7 +222,7 @@ class WorkbookPage : Fragment() {
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork()
             )
 
             deleteFailListener = ChangeListener { _, _, new ->

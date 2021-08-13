@@ -76,7 +76,9 @@ class HomePage : Fragment() {
                         viewModel.resumeBookProperty.onChange {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
-                                backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+                                backgroundImageFileProperty.set(
+                                    workbook.artworkAccessor.getArtwork()
+                                )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)
                                 onResumeAction {
@@ -107,7 +109,9 @@ class HomePage : Fragment() {
                             setConverter {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
-                                    coverArtProperty.set(it.coverArtAccessor.getArtwork())
+                                    coverArtProperty.set(
+                                        it.artworkAccessor.getArtwork()
+                                    )
 
                                     setOnPrimaryAction { viewModel.selectProject(it) }
                                 }
