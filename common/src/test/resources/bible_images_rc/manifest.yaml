@@ -21,6 +21,13 @@ dublin_core:
   modified: ""
   version: "12"
 projects:
+- title: "Titus"
+  versification: "ufw"
+  identifier: "tit"
+  sort: 56
+  path: "https://remote-url.org/image.png"
+  categories:
+    - "bible-nt"
 - title: "James"
   versification: "ufw"
   identifier: "jas"
