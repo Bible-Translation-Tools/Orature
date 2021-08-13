@@ -36,9 +36,9 @@ class ResourceContainerImagesDataSource(
             mediaTypes.forEach { type ->
                 val media = mediaList.find { it.identifier == type }
                 if (
-                    media != null && !media.url.isNullOrEmpty()
+                    media != null && media.url.isNotEmpty()
                 ) {
-                    val image = getImageFromRC(media, rc, imageRatio)
+                    val image = getImageFromRC(media, rc, projectSlug, imageRatio)
                     if (image != null) {
                         cacheImage(
                             image,
@@ -58,10 +58,10 @@ class ResourceContainerImagesDataSource(
     private fun getImageFromRC(
         media: Media,
         rc: ResourceContainer,
+        project: String,
         imageRatio: ImageRatio
     ): File? {
         val paths = mutableListOf<String>()
-        paths.add(media.url)
         paths.add(
             getImagePathWithRatio(media.url, imageRatio)
         )
@@ -70,15 +70,20 @@ class ResourceContainerImagesDataSource(
             val urlWithParameters = media.url
                 .replace("{quality}", quality)
                 .replace("{version}", media.version)
-            paths.add(urlWithParameters)
             paths.add(
                 getImagePathWithRatio(urlWithParameters, imageRatio)
             )
         }
 
+        val language = rc.manifest.dublinCore.language.identifier
+        val resourceId = rc.manifest.dublinCore.identifier
+
         for (path in paths) {
             if (rc.accessor.fileExists(path)) {
-                val image = cacheDir.resolve(File(path).name)
+                val fileName =
+                    "${language}_${resourceId}_${project}_${File(path).name}"
+
+                val image = cacheDir.resolve(fileName)
                     .apply { createNewFile() }
 
                 image.deleteOnExit()

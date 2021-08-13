@@ -41,26 +41,22 @@ class BibleImagesDataSource(
     ): File? {
 
         ResourceContainer.load(rcFile).use { rc ->
-            val imgPath = rc.manifest.projects.firstOrNull {
+            val contentPath = rc.manifest.projects.firstOrNull {
                 it.identifier == projectSlug
             }?.path
 
-            if (imgPath != null) {
-                val pathWithRatio = getImagePathWithRatio(imgPath, imageRatio)
-                val path = if (rc.accessor.fileExists(pathWithRatio)) {
-                    pathWithRatio
-                } else if (rc.accessor.fileExists(imgPath)) {
-                    imgPath
-                } else {
+            if (contentPath != null) {
+                val imagePath = getImagePathWithRatio(contentPath, imageRatio)
+                if (!rc.accessor.fileExists(imagePath)) {
                     return null
                 }
 
-                val image = cacheDir.resolve(File(path).name)
+                val image = cacheDir.resolve(File(imagePath).name)
                     .apply { createNewFile() }
 
                 image.deleteOnExit()
                 image.outputStream().use { fos ->
-                    rc.accessor.getInputStream(imgPath).use {
+                    rc.accessor.getInputStream(imagePath).use {
                         it.transferTo(fos)
                     }
                 }

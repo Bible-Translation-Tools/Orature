@@ -8,7 +8,7 @@ interface ImagesDataSource {
     fun getImage(
         metadata: ResourceMetadata,
         projectSlug: String,
-        imageRatio: ImageRatio
+        imageRatio: ImageRatio = ImageRatio.DEFAULT
     ): File?
 
 
@@ -16,9 +16,12 @@ interface ImagesDataSource {
         path: String,
         ratio: ImageRatio
     ): String {
+        if (ratio == ImageRatio.DEFAULT) {
+            return path
+        }
         val image = File(path)
         val nameWithRatio =
-            "${image.nameWithoutExtension}_${ratio.getStringFormat()}"
+            "${image.nameWithoutExtension}_${ratio.getStringFormat()}.${image.extension}"
 
         return image.parentFile.resolve(nameWithRatio)
             .invariantSeparatorsPath
