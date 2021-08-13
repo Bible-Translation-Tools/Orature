@@ -1,10 +1,8 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import java.io.File
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import javax.crypto.KeyGenerator
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
@@ -40,59 +38,35 @@ open class AudioConnectionFactory {
     @Synchronized
     protected fun load(request: AudioConnection.State) {
         println("here")
-        // if (currentConnection?.id ?: 0 != request.id) {
+        if (currentConnection?.id ?: 0 != request.id) {
+            currentConnection?.let {
+                it.durationInFrames = player.getDurationInFrames()
+                it.locationInFrames = player.getLocationInFrames()
+                it.durationInMs = player.getDurationMs()
+                it.durationInFrames = player.getDurationInFrames()
+            }
+        }
             player.pause()
             currentConnection = request
+            currentConnection?.let {
+                it.durationInFrames = player.getDurationInFrames()
+                it.locationInFrames = player.getLocationInFrames()
+                it.durationInMs = player.getDurationMs()
+                it.durationInFrames = player.getDurationInFrames()
+            }
             line.flush()
             player.stop()
             player = AudioBufferPlayer(line)
+            request.listeners.forEach {
+                player.addEventListener(it)
+            }
             if (request.begin != null && request.end != null) {
                 player.loadSection(request.file, request.begin!!, request.end!!)
             } else {
                 player.load(request.file)
             }
             player.seek(request.position)
-       // }
-    }
 
-
-    private fun getAudioReader(state: AudioConnection.State): AudioFileReader? {
-        return null
-    }
-
-    private fun play(state: AudioConnection.State) {
-    }
-
-    private fun pause(state: AudioConnection.State) {
-    }
-
-    private fun stop(state: AudioConnection.State) {
-    }
-
-    private fun close(state: AudioConnection.State) {
-    }
-
-    private fun seek(position: Int, state: AudioConnection.State) {
-    }
-
-    private fun isPlaying(state: AudioConnection.State): Boolean {
-        return false
-    }
-
-    private fun getDurationInFrames(state: AudioConnection.State): Int {
-        return 0
-    }
-
-    private fun getDurationMs(state: AudioConnection.State): Int {
-        return 0
-    }
-
-    private fun getLocationInFrames(state: AudioConnection.State): Int {
-        return 0
-    }
-
-    private fun getLocationMs(state: AudioConnection.State): Int {
-        return 0
     }
 
     enum class PlayerState{PAUSE, PLAY, STOPPED, COMPLETED}
@@ -105,7 +79,12 @@ open class AudioConnectionFactory {
             var begin: Int? = null,
             var end: Int? = null,
             var position: Int = 0,
-            var status: PlayerState = PlayerState.PAUSE
+            var durationInFrames: Int = 0,
+            var durationInMs: Int = 0,
+            var locationInFrames: Int = 0,
+            var locationInMs: Int = 0,
+            var status: PlayerState = PlayerState.PAUSE,
+            val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
         )
 
         override val frameStart: Int
@@ -118,12 +97,32 @@ open class AudioConnectionFactory {
 
         private var state = State(id)
 
+        fun addListeners() {
+            currentConnection?.id?.let {
+                if (it == id) {
+                    state.listeners.forEach {
+                        player.addEventListener(it)
+                    }
+                }
+            }
+        }
+
         override fun addEventListener(listener: IAudioPlayerListener) {
-//            TODO("Not yet implemented")
+            println("adding event listener")
+            state.listeners.add(listener)
+            addListeners()
         }
 
         override fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit) {
-//            TODO("Not yet implemented")
+            println("adding listener via lambda")
+            state.listeners.add(
+                object : IAudioPlayerListener {
+                    override fun onEvent(event: AudioPlayerEvent) {
+                        onEvent(event)
+                    }
+                }
+            )
+            addListeners()
         }
 
         override fun load(file: File) {
@@ -155,7 +154,8 @@ open class AudioConnectionFactory {
         override fun pause() {
             currentConnection?.id?.let {
                 if (it == id) {
-                    return player.pause()
+                    state.position = player.getLocationInFrames()
+                    player.pause()
                 }
             }
         }
@@ -163,6 +163,7 @@ open class AudioConnectionFactory {
         override fun stop() {
             currentConnection?.id?.let {
                 if (it == id) {
+                    state.position = player.getLocationInFrames()
                     return player.stop()
                 }
             }
@@ -193,13 +194,21 @@ open class AudioConnectionFactory {
         }
 
         override fun getDurationInFrames(): Int {
-            return 0
+            currentConnection?.id?.let {
+                if (it == id) {
+                    return player.getDurationInFrames()
+                }
+            }
+            return state.durationInFrames
         }
 
         override fun getDurationMs(): Int {
-//            this@AudioConnectionFactory.load(state)
-//            return player.getDurationMs()
-            return 0
+            currentConnection?.id?.let {
+                if (it == id) {
+                    return player.getDurationMs()
+                }
+            }
+            return state.durationInMs
         }
 
         override fun getLocationInFrames(): Int {
@@ -208,31 +217,16 @@ open class AudioConnectionFactory {
                     return player.getLocationInFrames()
                 }
             }
-            return state.position
+            return state.locationInFrames
         }
 
         override fun getLocationMs(): Int {
-//            this@AudioConnectionFactory.load(state)
-//            return player.getLocationMs()
-            return 0
+            currentConnection?.id?.let {
+                if (it == id) {
+                    return player.getLocationMs()
+                }
+            }
+            return state.locationInMs
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
