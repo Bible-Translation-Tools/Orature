@@ -272,7 +272,16 @@ class WorkbookPage : Fragment() {
                             }
                         }
                     )
-                    messageTextProperty.set(messages["exportProjectMessage"])
+                    messageTextProperty.bind(
+                        viewModel.activeProjectTitleProperty.stringBinding {
+                            it?.let {
+                                MessageFormat.format(
+                                    messages["exportProjectMessage"],
+                                    it
+                                )
+                            }
+                        }
+                    )
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
