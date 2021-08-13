@@ -29,7 +29,6 @@ interface ImagesDataSource {
         imageRatio: ImageRatio = ImageRatio.DEFAULT
     ): File?
 
-
     fun getImagePathWithRatio(
         path: String,
         ratio: ImageRatio
