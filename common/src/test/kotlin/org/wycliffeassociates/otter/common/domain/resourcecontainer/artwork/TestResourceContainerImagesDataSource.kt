@@ -76,6 +76,17 @@ class TestResourceContainerImagesDataSource {
     }
 
     @Test
+    fun testGetImageWithRatio() {
+        val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
+        val image = dataSource.getImage(metadataMock, project)
+
+        assertNotNull(
+            "Could not get image for [$language-$resourceId-$project]",
+            image
+        )
+    }
+
+    @Test
     fun testNotFoundImage() {
         val genSlug = "gen"
         val nonBibleProject = "unknown"
