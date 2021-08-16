@@ -125,6 +125,7 @@ class ResourceContainerImagesDataSource(
 
     companion object {
         private val mediaTypes = listOf("jpg", "jpeg", "png")
+        // {languageSlug}-{resourceId}-{projectSlug}{ratio}
         private const val cacheKeyTemplate = "%s-%s-%s%s"
         private val filesCache = ConcurrentHashMap<String, File>()
 
