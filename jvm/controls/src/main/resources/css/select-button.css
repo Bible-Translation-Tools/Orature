@@ -61,19 +61,3 @@
 .select-button:selected .select-button__title {
     -fx-underline: false;
 }
-
-.select-button__radio .radio {
-    -fx-background-color: -wa-white;
-    -fx-border-width: 2px;
-    -fx-border-radius: 1.0em;
-    -fx-border-color: -wa-gray-darker;
-}
-
-.select-button:selected .select-button__radio .radio {
-    -fx-border-color: -wa-primary;
-}
-
-.select-button:selected .select-button__radio .dot {
-    -fx-background-color: -wa-primary;
-    -fx-background-insets: -2, 0;
-}

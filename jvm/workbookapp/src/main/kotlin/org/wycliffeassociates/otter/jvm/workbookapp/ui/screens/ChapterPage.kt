@@ -18,34 +18,25 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import javafx.application.Platform
-import javafx.event.EventHandler
-import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.controls.card.card
-import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterBanner
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class ChapterPage : Fragment() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
 
     private val viewModel: ChapterPageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
-    private val banner: ChapterBanner
     private val navigator: NavigationMediator by inject()
 
     private val breadCrumb = BreadCrumb().apply {
@@ -64,79 +55,100 @@ class ChapterPage : Fragment() {
     }
 
     init {
-        banner = ChapterBanner().apply {
-            viewModel.chapterCard.onChangeAndDoNow {
-                it?.let {
-                    bookTitle.text = viewModel.workbookDataStore.workbook.target.title
-                    chapterCount.text = viewModel.workbookDataStore.activeChapterProperty.value?.title
-                    openButton.text = messages["open"]
-                    viewModel
-                        .workbookDataStore
-                        .activeChapterProperty
-                        .value
-                        ?.let { chapter ->
-                            chapter.chunks
-                                .filter {
-                                    it.contentType == ContentType.TEXT
-                                }
-                                .count()
-                                .doOnError { e ->
-                                    logger.error("Error in setting chapter banner chunk count", e)
-                                }
-                                .subscribe { count ->
-                                    Platform.runLater {
-                                        chunkCount.text = count.toString()
-                                    }
-                                }
-                            openButton.setOnMouseClicked {
-                                viewModel.onCardSelection(CardData(chapter))
-                                navigator.dock<RecordScriptureFragment>()
-                            }
-                        }
-                }
-            }
-        }
+        importStylesheet(resources.get("/css/chapter-page.css"))
     }
 
-    override val root = vbox {
-        add(banner)
-        datagrid(viewModel.filteredContent) {
+    override val root = hbox {
+        addClass("chapter-page")
+        vbox {
+            addClass("chapter-page__chapter-info")
             vgrow = Priority.ALWAYS
-            hgrow = Priority.ALWAYS
-            isFillWidth = true
-            addClass(AppStyles.whiteBackground)
-            addClass(CardGridStyles.contentContainer)
-            cellCache { item ->
-                card {
-                    addClass(DefaultStyles.defaultCard)
-                    cardfront {
-                        innercard(cardGraphic()) {
-                            title = item.item.toUpperCase()
-                            bodyText = item.bodyText
-                        }
-                        cardbutton {
-                            addClass(DefaultStyles.defaultCardButton)
-                            text = messages["open"]
-                            graphic = FontIcon("gmi-arrow-forward")
-                                .apply {
-                                    iconSize = 25
-                                    iconColor = AppTheme.colors.appRed
+
+            vbox {
+                addClass("chapter-page__chapter-box")
+                vgrow = Priority.ALWAYS
+
+                viewModel.chapterCard.onChangeAndDoNow {
+                    label {
+                        addClass("chapter-page__chapter-title")
+                        text = MessageFormat.format(
+                            FX.messages["chapterTitle"],
+                            FX.messages["chapter"].capitalize(),
+                            viewModel.workbookDataStore.activeChapterProperty.value?.title
+                        )
+                    }
+
+                    hbox {
+                        addClass("chapter-page__chapter-audio")
+                        vgrow = Priority.ALWAYS
+
+                        label("Drafting not Started")
+                    }
+
+                    hbox {
+                        addClass("chapter-page__chapter-actions")
+                        button {
+                            addClass("btn", "btn--secondary")
+                            text = "Record Chapter"
+                            graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            viewModel.workbookDataStore.activeChapterProperty.value?.let { chapter ->
+                                setOnAction {
+                                    viewModel.onCardSelection(CardData(chapter))
+                                    navigator.dock<RecordScriptureFragment>()
                                 }
-                            onMousePressed = EventHandler {
-                                viewModel.onCardSelection(item)
-                                navigator.dock<RecordScriptureFragment>()
                             }
+                        }
+                        button {
+                            addClass("btn", "btn--secondary")
+                            text = "Continue Translation"
+                            graphic = FontIcon(MaterialDesign.MDI_VOICE)
                         }
                     }
                 }
             }
-        }
-    }
 
-    private fun cardGraphic(): Node {
-        if (viewModel.filteredContent.first().dataType == "content") {
-            return AppStyles.chunkGraphic()
+            vbox {
+                addClass("chapter-page__actions")
+                vgrow = Priority.ALWAYS
+
+
+                button {
+                    addClass("btn", "btn--primary")
+                    text = "Edit Chapter"
+                    graphic = FontIcon(MaterialDesign.MDI_PENCIL)
+                }
+                button {
+                    addClass("btn", "btn--primary")
+                    text = "Add Verse Markers"
+                    graphic = FontIcon(MaterialDesign.MDI_BOOKMARK)
+                }
+                button {
+                    addClass("btn", "btn--primary")
+                    text = "View Takes"
+                    graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
+                }
+            }
         }
-        return AppStyles.chapterGraphic()
+
+        vbox {
+            addClass("chapter-page__chunks")
+            vgrow = Priority.ALWAYS
+
+            button {
+                addClass("btn", "btn--primary")
+                text = "Compile"
+                graphic = FontIcon(MaterialDesign.MDI_LAYERS)
+            }
+
+            listview(viewModel.filteredContent) {
+                fitToParentHeight()
+                setCellFactory {
+                    ChunkCell {
+                        viewModel.onCardSelection(it)
+                        navigator.dock<RecordScriptureFragment>()
+                    }
+                }
+            }
+        }
     }
 }

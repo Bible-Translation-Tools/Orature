@@ -1,0 +1,74 @@
+.chapter-page {
+    -fx-spacing: 30px;
+    -fx-padding: 30px;
+}
+
+.chapter-page__chapter-info {
+    -fx-spacing: 30px;
+}
+
+.chapter-page__chapter-box {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+    -fx-padding: 20px;
+    -fx-effect: -wa-level2;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 16px;
+}
+
+.chapter-page__chapter-title {
+    -fx-font-size: 36px;
+}
+
+.chapter-page__chapter-audio {
+    -fx-max-height: 200px;
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 8px;
+    -fx-alignment: center;
+}
+
+.chapter-page__chapter-audio > .label {
+    -fx-font-size: 20px;
+    -fx-text-fill: -wa-black-40;
+}
+
+.chapter-page__chapter-actions {
+    -fx-spacing: 20px;
+}
+
+.chapter-page__actions {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+    -fx-padding: 30px;
+    -fx-effect: -wa-level2;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 16px;
+}
+
+.chapter-page__actions > .button {
+    -fx-max-width: infinity;
+}
+
+.chapter-page__chunks {
+    -fx-effect: -wa-level2;
+    -fx-background-color: -wa-white;
+    -fx-background-radius: 16px;
+    -fx-padding: 20px 0 0 0;
+    -fx-alignment: top-center;
+    -fx-spacing: 10px;
+    -fx-pref-width: 500px;
+}
+
+.chapter-page__chunks .list-view {
+    -fx-background-color: -wa-white;
+}
+
+.chapter-page__chunks .list-view .list-cell:selected,
+.chapter-page__chunks .list-view .list-cell:even,
+.chapter-page__chunks .list-view .list-cell:odd {
+    -fx-background-color: -wa-white;
+}
+
+.chapter-page__chunks .list-view .label {
+    -fx-text-fill: -wa-black;
+}
