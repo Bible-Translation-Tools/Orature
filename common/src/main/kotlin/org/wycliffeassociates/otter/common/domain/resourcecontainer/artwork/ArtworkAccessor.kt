@@ -36,10 +36,6 @@ class ArtworkAccessor(
     fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): File? {
         imagesDataSources.forEach { dataSource ->
             var image = dataSource.getImage(metadata, projectSlug, imageRatio)
-            // ratio not found, find default
-            if (image == null && imageRatio != ImageRatio.DEFAULT) {
-                image = dataSource.getImage(metadata, projectSlug)
-            }
             if (image != null) {
                 return image
             }
