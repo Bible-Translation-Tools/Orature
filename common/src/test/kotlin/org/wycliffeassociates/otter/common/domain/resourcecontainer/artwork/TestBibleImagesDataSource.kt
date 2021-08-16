@@ -119,14 +119,14 @@ class TestBibleImagesDataSource {
     }
 
     @Test
-    fun testGetImageWithNoMatchingRatio() {
+    fun testNotFoundImageWithRatio() {
         val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
         val ratioString = ratio16x9.getStringFormat()
         val dataSource = BibleImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio16x9)
 
         assertNull(
-            "Project $project should not have image with ratio $ratio16x9 in data source",
+            "Project $project should not have image with ratio $ratioString in data source",
             image
         )
     }
