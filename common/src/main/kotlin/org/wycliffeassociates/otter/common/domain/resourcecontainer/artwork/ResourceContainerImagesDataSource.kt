@@ -40,10 +40,13 @@ class ResourceContainerImagesDataSource(
         projectSlug: String,
         imageRatio: ImageRatio
     ): File? {
+        val ratioString = imageRatio.getStringFormat()
+
         getImageFromCache(
             metadata.language.slug,
             metadata.identifier,
-            projectSlug
+            projectSlug,
+            ratioString
         )?.let { return it }
 
         ResourceContainer.load(metadata.path).use { rc ->
@@ -62,7 +65,8 @@ class ResourceContainerImagesDataSource(
                             image,
                             metadata.language.slug,
                             metadata.identifier,
-                            projectSlug
+                            projectSlug,
+                            ratioString
                         )
                         return image
                     }
@@ -121,15 +125,18 @@ class ResourceContainerImagesDataSource(
 
     companion object {
         private val mediaTypes = listOf("jpg", "jpeg", "png")
-        private const val cacheKeyTemplate = "%s-%s-%s"
+        private const val cacheKeyTemplate = "%s-%s-%s%s"
         private val filesCache = ConcurrentHashMap<String, File>()
 
         private fun getImageFromCache(
             languageSlug: String,
             resourceId: String,
-            project: String
+            project: String,
+            ratio: String
         ): File? {
-            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            val key = cacheKeyTemplate.format(
+                languageSlug, resourceId, project, ratio
+            )
             return filesCache[key]
         }
 
@@ -137,9 +144,12 @@ class ResourceContainerImagesDataSource(
             image: File,
             languageSlug: String,
             resourceId: String,
-            project: String
+            project: String,
+            ratio: String
         ) {
-            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            val key = cacheKeyTemplate.format(
+                languageSlug, resourceId, project, ratio
+            )
             filesCache[key] = image
         }
     }
