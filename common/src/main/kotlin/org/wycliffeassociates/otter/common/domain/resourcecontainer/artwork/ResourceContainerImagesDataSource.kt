@@ -40,7 +40,7 @@ class ResourceContainerImagesDataSource(
         projectSlug: String,
         imageRatio: ImageRatio
     ): File? {
-        val ratioString = imageRatio.getStringFormat()
+        val ratioString = imageRatio.getImageSuffix()
 
         getImageFromCache(
             metadata.language.slug,
@@ -102,8 +102,7 @@ class ResourceContainerImagesDataSource(
 
         for (path in paths) {
             if (rc.accessor.fileExists(path)) {
-                val fileName =
-                    "${language}_${resourceId}_${project}_${File(path).name}"
+                val fileName = "${language}_${resourceId}_${project}_${File(path).name}"
 
                 val image = cacheDir.resolve(fileName)
                     .apply { createNewFile() }

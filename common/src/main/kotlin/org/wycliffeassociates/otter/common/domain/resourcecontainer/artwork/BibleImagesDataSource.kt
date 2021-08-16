@@ -40,11 +40,12 @@ class BibleImagesDataSource(
         imageRatio: ImageRatio
     ): File? {
         // fetch and return from cache if any
-        filesCache[projectSlug + imageRatio.getStringFormat()]
+        filesCache[projectSlug + imageRatio.getImageSuffix()]
             ?.let { return it }
 
-        val imagesContainer = directoryProvider.resourceContainerDirectory
-            .resolve(imagesContainerName)
+        val imagesContainer = directoryProvider
+                                            .resourceContainerDirectory
+                                            .resolve(imagesContainerName)
 
         return if (imagesContainer.exists()) {
             getImageFromRC(imagesContainer, projectSlug, imageRatio)
@@ -80,7 +81,7 @@ class BibleImagesDataSource(
                     }
                 }
 
-                filesCache[projectSlug + imageRatio.getStringFormat()] = image
+                filesCache[projectSlug + imageRatio.getImageSuffix()] = image
                 return image
             }
         }
