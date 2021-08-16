@@ -81,7 +81,7 @@ class TestResourceContainerImagesDataSource {
     @Test
     fun testGetImageWithRatio() {
         val ratio4x3 = ImageRatio.FOUR_BY_THREE
-        val ratioString = ratio4x3.getStringFormat()
+        val ratioString = ratio4x3.toString()
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio4x3)
 
@@ -123,7 +123,7 @@ class TestResourceContainerImagesDataSource {
     @Test
     fun testNotFoundImageWithRatio() {
         val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
-        val ratioString = ratio16x9.getStringFormat()
+        val ratioString = ratio16x9.toString()
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio16x9)
 

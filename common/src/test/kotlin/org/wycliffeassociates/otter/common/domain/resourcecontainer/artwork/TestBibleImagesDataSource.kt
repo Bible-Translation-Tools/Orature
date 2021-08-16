@@ -79,7 +79,7 @@ class TestBibleImagesDataSource {
     @Test
     fun testGetBibleImageWithRatio() {
         val ratio4x3 = ImageRatio.FOUR_BY_THREE
-        val ratioString = ratio4x3.getStringFormat()
+        val ratioString = ratio4x3.toString()
         val dataSource = BibleImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio4x3)
 
@@ -121,7 +121,7 @@ class TestBibleImagesDataSource {
     @Test
     fun testNotFoundImageWithRatio() {
         val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
-        val ratioString = ratio16x9.getStringFormat()
+        val ratioString = ratio16x9.toString()
         val dataSource = BibleImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio16x9)
 
