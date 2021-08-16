@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -127,9 +127,13 @@ class TestResourceContainerImagesDataSource {
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio16x9)
 
-        assertNull(
-            "Project $project should not have image with ratio $ratioString in data source",
+        assertNotNull(
+            "Could not get default image (${ratioString}) for $project",
             image
+        )
+        assertFalse(
+            "Project $project should not have image with ratio $ratioString in data source",
+            image!!.nameWithoutExtension.endsWith(ratioString)
         )
     }
 

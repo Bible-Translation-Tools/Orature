@@ -95,7 +95,9 @@ class ResourceContainerImagesDataSource(
             paths.add(
                 getImagePathWithRatio(urlWithParameters, imageRatio)
             )
+            paths.add(urlWithParameters) // if image ratio is not found
         }
+        paths.add(media.url)
 
         val language = rc.manifest.dublinCore.language.identifier
         val resourceId = rc.manifest.dublinCore.identifier
