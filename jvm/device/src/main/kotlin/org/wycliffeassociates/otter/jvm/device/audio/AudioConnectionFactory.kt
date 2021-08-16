@@ -36,7 +36,7 @@ open class AudioConnectionFactory {
 
     @Synchronized
     protected fun load(request: AudioConnection.State) {
-        if (currentConnection?.id ?: 0 != request.id) {
+
             currentConnection?.let {
                 it.position = player.getLocationInFrames()
                 it.durationInFrames = player.getDurationInFrames()
@@ -44,30 +44,30 @@ open class AudioConnectionFactory {
                 it.durationInMs = player.getDurationMs()
                 it.durationInFrames = player.getDurationInFrames()
             }
+
+        player.pause()
+        currentConnection = request
+        currentConnection?.let {
+            it.durationInFrames = player.getDurationInFrames()
+            it.durationInMs = player.getDurationMs()
         }
-            player.pause()
-            currentConnection = request
-            currentConnection?.let {
-                it.durationInFrames = player.getDurationInFrames()
-                it.durationInMs = player.getDurationMs()
-            }
-            line.flush()
-            player.stop()
-            player = AudioBufferPlayer(line)
-            request.listeners.forEach {
-                player.addEventListener(it)
-            }
-            if (request.begin != null && request.end != null) {
-                player.loadSection(request.file, request.begin!!, request.end!!)
-            } else {
-                player.load(request.file)
-            }
-            player.seek(request.position)
+        line.flush()
+        player.stop()
+        player = AudioBufferPlayer(line)
+        request.listeners.forEach {
+            player.addEventListener(it)
+        }
+        if (request.begin != null && request.end != null) {
+            player.loadSection(request.file, request.begin!!, request.end!!)
+        } else {
+            player.load(request.file)
+        }
+        player.seek(request.position)
     }
 
-    enum class PlayerState{PAUSE, PLAY, STOPPED, COMPLETED}
+    enum class PlayerState { PAUSE, PLAY, STOPPED, COMPLETED }
 
-    protected inner class AudioConnection(val id: Int): IAudioPlayer {
+    protected inner class AudioConnection(val id: Int) : IAudioPlayer {
 
         inner class State(
             val id: Int,
