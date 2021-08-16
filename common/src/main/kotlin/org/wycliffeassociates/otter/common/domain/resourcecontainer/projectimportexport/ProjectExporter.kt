@@ -41,7 +41,8 @@ class ProjectExporter @Inject constructor(
         directory: File,
         projectMetadataToExport: ResourceMetadata,
         workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
+        projectFilesAccessor: ProjectFilesAccessor,
+        customExtension: String = "zip"
     ): Single<ExportResult> {
         return Single
             .fromCallable {
@@ -69,6 +70,11 @@ class ProjectExporter @Inject constructor(
                         .firstOrNull { it.identifier == projectMetadataToExport.identifier }
                     projectFilesAccessor.copySourceFiles(fileWriter, linkedResource)
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
+                }
+
+                if (customExtension != "zip") {
+                    val oratureFileName = zipFile.nameWithoutExtension + ".$customExtension"
+                    zipFile.renameTo(zipFile.parentFile.resolve(oratureFileName))
                 }
 
                 return@fromCallable ExportResult.SUCCESS
