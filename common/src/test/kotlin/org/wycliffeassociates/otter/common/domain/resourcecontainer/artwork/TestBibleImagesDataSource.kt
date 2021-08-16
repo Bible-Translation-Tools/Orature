@@ -19,9 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.junit.After
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.`when`
@@ -125,9 +123,9 @@ class TestBibleImagesDataSource {
         val dataSource = BibleImagesDataSource(directoryProviderMock)
         val image = dataSource.getImage(metadataMock, project, ratio16x9)
 
-        assertNull(
+        assertFalse(
             "Project $project should not have image with ratio $ratioString in data source",
-            image
+            image!!.nameWithoutExtension.endsWith(ratioString)
         )
     }
 

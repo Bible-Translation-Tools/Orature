@@ -66,8 +66,12 @@ class BibleImagesDataSource(
             }?.path
 
             if (contentPath != null) {
-                val imagePath = getImagePathWithRatio(contentPath, imageRatio)
-                if (!rc.accessor.fileExists(imagePath)) {
+                val pathWithRatio = getImagePathWithRatio(contentPath, imageRatio)
+                val imagePath = if (rc.accessor.fileExists(pathWithRatio)) {
+                    pathWithRatio
+                } else if (rc.accessor.fileExists(contentPath)) {
+                    contentPath
+                } else {
                     return null
                 }
 
