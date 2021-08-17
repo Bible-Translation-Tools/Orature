@@ -23,6 +23,12 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import java.io.File
 
 interface ImagesDataSource {
+    /**
+     *  Returns an image file of the specified project metadata
+     *  or null if none exists.
+     *
+     *  @param imageRatio the aspect ratio of the image.
+     */
     fun getImage(
         metadata: ResourceMetadata,
         projectSlug: String,

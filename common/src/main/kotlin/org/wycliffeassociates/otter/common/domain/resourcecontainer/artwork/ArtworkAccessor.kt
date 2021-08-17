@@ -33,6 +33,13 @@ class ArtworkAccessor(
         BibleImagesDataSource(directoryProvider)
     )
 
+    /**
+     *  Returns an image file of the specified project metadata or null if none exists.
+     *  This method will try to get the most relevant image based on the given parameters.
+     *
+     *  @param imageRatio the aspect ratio preference of the requested image.
+     *  A default ratio will be used if it the requested ratio is not found.
+     */
     fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): File? {
         imagesDataSources.forEach { dataSource ->
             var image = dataSource.getImage(metadata, projectSlug, imageRatio)
