@@ -77,6 +77,7 @@ class ProjectExporter @Inject constructor(
 
                 if (customExtension != "zip") {
                     val oratureFileName = zipFile.nameWithoutExtension + ".$customExtension"
+                    // using nio Files.move() instead of file.rename() for platform independent
                     Files.move(
                         zipFile.toPath(),
                         zipFile.parentFile.resolve(oratureFileName).toPath(),
