@@ -21,6 +21,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioSystem
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -33,7 +35,16 @@ import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 class AudioModule {
 
     companion object {
-        val audioConnectionFactory = AudioConnectionFactory()
+        private val line = AudioSystem.getSourceDataLine(
+            AudioFormat(
+                44100F,
+                16,
+                1,
+                true,
+                false
+            )
+        )
+        val audioConnectionFactory = AudioConnectionFactory(line)
     }
 
     @Provides

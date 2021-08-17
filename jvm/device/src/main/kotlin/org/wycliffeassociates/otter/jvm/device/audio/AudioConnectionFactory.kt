@@ -3,29 +3,26 @@ package org.wycliffeassociates.otter.jvm.device.audio
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 
-open class AudioConnectionFactory {
-    private val line = AudioSystem.getSourceDataLine(
-        AudioFormat(
-            44100F,
-            16,
-            1,
-            true,
-            false
-        )
-    )
-
+open class AudioConnectionFactory(var line: SourceDataLine) {
     private var player = AudioBufferPlayer(line)
-    val connections = ConcurrentHashMap<Int, IAudioPlayer>()
+    private val connections = ConcurrentHashMap<Int, IAudioPlayer>()
     private val idgen = AtomicInteger(1)
     private var currentConnection: AudioConnection.State? = null
 
+    @Synchronized
+    fun replaceLine(newLine: SourceDataLine) {
+        player.pause()
+        line = newLine
+        currentConnection?.let {
+            load(it)
+        }
+    }
 
     fun getPlayer(): IAudioPlayer {
         val id = idgen.getAndIncrement()
@@ -36,16 +33,14 @@ open class AudioConnectionFactory {
 
     @Synchronized
     protected fun load(request: AudioConnection.State) {
-
-            currentConnection?.let {
-                it.position = player.getLocationInFrames()
-                it.durationInFrames = player.getDurationInFrames()
-                it.locationInFrames = player.getLocationInFrames()
-                it.durationInMs = player.getDurationMs()
-                it.durationInFrames = player.getDurationInFrames()
-            }
-
         player.pause()
+        currentConnection?.let {
+            it.position = player.getLocationInFrames()
+            it.durationInFrames = player.getDurationInFrames()
+            it.locationInFrames = player.getLocationInFrames()
+            it.durationInMs = player.getDurationMs()
+            it.durationInFrames = player.getDurationInFrames()
+        }
         currentConnection = request
         currentConnection?.let {
             it.durationInFrames = player.getDurationInFrames()
@@ -65,8 +60,6 @@ open class AudioConnectionFactory {
         player.seek(request.position)
     }
 
-    enum class PlayerState { PAUSE, PLAY, STOPPED, COMPLETED }
-
     protected inner class AudioConnection(val id: Int) : IAudioPlayer {
 
         inner class State(
@@ -79,7 +72,6 @@ open class AudioConnectionFactory {
             var durationInMs: Int = 0,
             var locationInFrames: Int = 0,
             var locationInMs: Int = 0,
-            var status: PlayerState = PlayerState.PAUSE,
             val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
         )
 
@@ -104,13 +96,11 @@ open class AudioConnectionFactory {
         }
 
         override fun addEventListener(listener: IAudioPlayerListener) {
-            println("adding event listener")
             state.listeners.add(listener)
             addListeners()
         }
 
         override fun addEventListener(onEvent: (event: AudioPlayerEvent) -> Unit) {
-            println("adding listener via lambda")
             state.listeners.add(
                 object : IAudioPlayerListener {
                     override fun onEvent(event: AudioPlayerEvent) {

@@ -31,11 +31,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class AudioBufferPlayer(private val player: SourceDataLine) : IAudioPlayer {
 
-    // should have an event loop
-    // actions get posted to the event loop from the connections
-    // a queue per connection? maybe just for line write requests?
-    // which queue is being read from to send to the line is based on the active context
-
     override val frameStart: Int
         get() = begin
     override val frameEnd: Int

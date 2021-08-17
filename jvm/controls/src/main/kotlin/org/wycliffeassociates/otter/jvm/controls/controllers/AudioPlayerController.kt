@@ -119,6 +119,11 @@ class AudioPlayerController(
                 logger.error("Error in startProgressUpdate", e)
             }
             .subscribe {
+                if (player?.isPlaying() == true){
+                    isPlayingProperty.set(true)
+                } else {
+                    isPlayingProperty.set(false)
+                }
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
                     audioSlider.value = playbackPosition().toDouble()
                 }
