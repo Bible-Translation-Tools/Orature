@@ -24,10 +24,22 @@ import java.io.File
 
 interface ImagesDataSource {
     /**
-     *  Returns an image file of the specified project metadata
-     *  or null if none exists.
+     *  Searches for the appropriate image for a given project slug.
+     *  A preferred aspect ratio can be provided, which will be returned if it exists.
+     *  If a matching image exists, but not in the requested aspect ratio, the original image
+     *  will be returned (in whichever aspect ratio it exists in).
      *
-     *  @param imageRatio the aspect ratio of the image.
+     *  If no matching image exists, null will be returned.
+     *
+     *  Aspect ratios will search for a file with the suffix _{width}x{height} appended to the file
+     *  name (preceding the file extension). For example: gen_16x9.png
+     *
+     *  @param metadata metadata of the book/resource
+     *  @param projectSlug project identifier
+     *  @param imageRatio (Optional) preferred aspect ratio, by default, no aspect ratio will be used
+     *
+     *  @returns a nullable file, in which the file contains the requested image, and null if
+     *  no match was found.
      */
     fun getImage(
         metadata: ResourceMetadata,

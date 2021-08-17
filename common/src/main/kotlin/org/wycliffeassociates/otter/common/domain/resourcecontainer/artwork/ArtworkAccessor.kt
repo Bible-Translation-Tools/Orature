@@ -34,11 +34,16 @@ class ArtworkAccessor(
     )
 
     /**
-     *  Returns an image file of the specified project metadata or null if none exists.
-     *  This method will try to get the most relevant image based on the given parameters.
+     *  Retrieves the most relevant image based on the given parameters.
+     *  If imageRatio is specified but the result is not found,
+     *  the original image will be returned (if exists). Otherwise,
+     *  null is returned
      *
      *  @param imageRatio the aspect ratio preference of the requested image.
      *  A default ratio will be used if it the requested ratio is not found.
+     *
+     *  @return a nullable file which contains the image or null if no match
+     *  was found.
      */
     fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): File? {
         imagesDataSources.forEach { dataSource ->

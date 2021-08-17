@@ -20,6 +20,12 @@ package org.wycliffeassociates.otter.common.utils
 
 import java.io.File
 
+/**
+ *  Returns a new file path with the suffix appended to the file name.
+ *
+ *  @param path the original file path
+ *  @param suffix the suffix to append to the file name
+ */
 fun filePathWithSuffix(path: String, suffix: String): String {
     val file = File(path)
     return file

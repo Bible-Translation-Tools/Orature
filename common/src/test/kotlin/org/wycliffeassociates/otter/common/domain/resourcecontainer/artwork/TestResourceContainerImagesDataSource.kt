@@ -121,7 +121,7 @@ class TestResourceContainerImagesDataSource {
     }
 
     @Test
-    fun testNotFoundImageWithRatio() {
+    fun `test fallback to default when aspect ratio not found`() {
         val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
         val ratioString = ratio16x9.toString()
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)

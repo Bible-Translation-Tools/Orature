@@ -35,14 +35,6 @@ class BibleImagesDataSource(
         "bible-images"
     ).apply { mkdirs() }
 
-    /**
-     *  Returns an image file of the specified project metadata
-     *  or null if none exists.
-     *
-     *  @param imageRatio the aspect ratio of the image.
-     *  If the requested ratio is not available, a default ratio
-     *  will be used instead.
-     */
     override fun getImage(
         metadata: ResourceMetadata,
         projectSlug: String,
