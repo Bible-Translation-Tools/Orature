@@ -27,6 +27,9 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
+import java.nio.file.CopyOption
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -42,7 +45,7 @@ class ProjectExporter @Inject constructor(
         projectMetadataToExport: ResourceMetadata,
         workbook: Workbook,
         projectFilesAccessor: ProjectFilesAccessor,
-        customExtension: String = "zip"
+        customExtension: String = "orature"
     ): Single<ExportResult> {
         return Single
             .fromCallable {
@@ -74,7 +77,11 @@ class ProjectExporter @Inject constructor(
 
                 if (customExtension != "zip") {
                     val oratureFileName = zipFile.nameWithoutExtension + ".$customExtension"
-                    zipFile.renameTo(zipFile.parentFile.resolve(oratureFileName))
+                    Files.move(
+                        zipFile.toPath(),
+                        zipFile.parentFile.resolve(oratureFileName).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
                 }
 
                 return@fromCallable ExportResult.SUCCESS
