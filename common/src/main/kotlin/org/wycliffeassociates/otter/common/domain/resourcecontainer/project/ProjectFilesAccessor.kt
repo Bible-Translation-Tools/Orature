@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -88,7 +89,10 @@ class ProjectFilesAccessor(
     fun copySourceFiles(fileReader: IFileReader) {
         val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
-            .filter { it.endsWith(".zip", ignoreCase = true) }
+            .filter {
+                it.endsWith("." + OratureFileFormat.ZIP.extension, ignoreCase = true) &&
+                it.endsWith("." + OratureFileFormat.ORATURE.extension, ignoreCase = true)
+            }
 
         sourceFiles.forEach { path ->
             val inFile = File(path)
