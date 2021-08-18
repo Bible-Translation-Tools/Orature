@@ -130,7 +130,7 @@ class InitializeProjects @Inject constructor(
                     resourceMetadata.path.listFiles()
                         ?.forEach { it.deleteRecursively() }
 
-                    val zip = resourceMetadata.path.resolve("$zipName.zip")
+                    val zip = resourceMetadata.path.resolve("$zipName.orature")
                     tempZip.renameTo(zip)
 
                     val updatedRc = resourceMetadata.copy(path = zip)

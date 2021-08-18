@@ -73,7 +73,7 @@ class AddFilesViewModel : ViewModel() {
                     messages["oratureFileTypes"],
                     "*.${OratureFileFormat.ZIP.extension}",
                     "*.${OratureFileFormat.ORATURE.extension}"
-                ),
+                )
             ),
             mode = FileChooserMode.Single
         ).firstOrNull()
