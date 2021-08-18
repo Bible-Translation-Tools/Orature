@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -58,6 +59,7 @@ class ChapterPage : View() {
         chunkListView.refresh()
         viewModel.openPlayers()
         viewModel.checkCanCompile()
+        viewModel.setWorkChunk()
     }
 
     override fun onUndock() {
@@ -126,8 +128,19 @@ class ChapterPage : View() {
                     }
                     button {
                         addClass("btn", "btn--secondary")
-                        text = "Continue Translation"
+                        textProperty().bind(viewModel.noTakesProperty.stringBinding {
+                            when (it) {
+                                true -> "Begin Translation"
+                                else -> "Continue Translation"
+                            }
+                        })
                         graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                        action {
+                            viewModel.workChunkProperty.value?.let {
+                                viewModel.onCardSelection(it)
+                                navigator.dock<RecordScripturePage>()
+                            }
+                        }
                     }
                 }
             }
@@ -181,12 +194,18 @@ class ChapterPage : View() {
                 chunkListView = this
                 fitToParentHeight()
                 setCellFactory {
-                    ChunkCell {
-                        viewModel.onCardSelection(it)
-                        navigator.dock<RecordScripturePage>()
-                    }
+                    ChunkCell(::onChunkOpen, ::onTakeSelected)
                 }
             }
         }
+    }
+
+    private fun onChunkOpen(chunk: CardData) {
+        viewModel.onCardSelection(chunk)
+        navigator.dock<RecordScripturePage>()
+    }
+
+    private fun onTakeSelected(chunk: CardData, take: TakeModel) {
+        chunk.chunkSource?.audio?.selectTake(take.take)
     }
 }

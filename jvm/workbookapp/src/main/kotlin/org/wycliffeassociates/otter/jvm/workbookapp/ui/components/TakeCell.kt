@@ -4,7 +4,10 @@ import javafx.scene.control.ListCell
 import javafx.scene.control.ToggleGroup
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 
-class TakeCell(private val toggleGroup: ToggleGroup) : ListCell<TakeModel>() {
+class TakeCell(
+    private val toggleGroup: ToggleGroup,
+    private val onTakeSelected: (TakeModel) -> Unit
+) : ListCell<TakeModel>() {
     private val view = TakeItem()
 
     override fun updateItem(item: TakeModel?, empty: Boolean) {
@@ -18,6 +21,8 @@ class TakeCell(private val toggleGroup: ToggleGroup) : ListCell<TakeModel>() {
             radioGroupProperty.set(toggleGroup)
             selectedProperty.set(item.selected)
             takeProperty.set(item)
+
+            setOnTakeSelected { onTakeSelected(item) }
         }
     }
 }

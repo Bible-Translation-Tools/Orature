@@ -57,6 +57,8 @@ class ChapterPageViewModel : ViewModel() {
     val chapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val canCompileProperty = SimpleBooleanProperty()
     val selectedChapterTakeProperty = SimpleObjectProperty<Take>()
+    val workChunkProperty = SimpleObjectProperty<CardData>()
+    val noTakesProperty = SimpleBooleanProperty()
 
     val chapterCardProperty = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
 
@@ -75,6 +77,7 @@ class ChapterPageViewModel : ViewModel() {
                     }
                 )
                 checkCanCompile()
+                setWorkChunk()
             }
 
         workbookDataStore.activeChapterProperty.onChangeAndDoNow { _chapter ->
@@ -154,6 +157,25 @@ class ChapterPageViewModel : ViewModel() {
             chunk.chunkSource?.audio?.selected?.value?.value == null
         }.any()
         canCompileProperty.set(hasUnselected.not())
+    }
+
+    fun setWorkChunk() {
+        if (filteredContent.isEmpty()) return
+
+        val hasTakes = filteredContent.filter { chunk ->
+            chunk.chunkSource?.audio?.getAllTakes()?.isNotEmpty() ?: false
+        }.any()
+
+        if (hasTakes) {
+            val notSelected = filteredContent.filter { chunk ->
+                chunk.chunkSource?.audio?.selected?.value?.value == null
+            }.firstOrNull() ?: filteredContent.last()
+            noTakesProperty.set(false)
+            workChunkProperty.set(notSelected)
+        } else {
+            noTakesProperty.set(true)
+            workChunkProperty.set(filteredContent.first())
+        }
     }
 
     private fun setSelectedChapterTake(chapter: CardData) {

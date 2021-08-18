@@ -2,6 +2,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -13,6 +15,8 @@ class TakeItem : HBox() {
     val takeProperty = SimpleObjectProperty<TakeModel>()
     val selectedProperty = SimpleBooleanProperty(false)
     val radioGroupProperty = SimpleObjectProperty(ToggleGroup())
+
+    private val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         styleClass.setAll("take-item")
@@ -32,6 +36,15 @@ class TakeItem : HBox() {
             addClass("wa-radio", "wa-radio--bordered")
             toggleGroupProperty().bind(radioGroupProperty)
             selectedProperty().bindBidirectional(selectedProperty)
+            selectedProperty().onChange { selected ->
+                onTakeSelectedActionProperty.value?.let {
+                    if (selected) it.handle(ActionEvent())
+                }
+            }
         }
+    }
+
+    fun setOnTakeSelected(op: () -> Unit) {
+        onTakeSelectedActionProperty.set(EventHandler { op.invoke() })
     }
 }

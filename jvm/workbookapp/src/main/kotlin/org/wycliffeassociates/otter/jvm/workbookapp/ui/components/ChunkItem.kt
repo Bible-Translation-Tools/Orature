@@ -27,6 +27,7 @@ class ChunkItem : VBox() {
 
     private val hasSelectedProperty = SimpleBooleanProperty(false)
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         styleClass.setAll("chunk-item")
@@ -90,7 +91,11 @@ class ChunkItem : VBox() {
                 val toggleGroup = ToggleGroup()
                 listview(takes) {
                     setCellFactory {
-                        TakeCell(toggleGroup)
+                        TakeCell(toggleGroup) {
+                            onTakeSelectedActionProperty.value?.handle(
+                                ActionEvent(it, null)
+                            )
+                        }
                     }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
                 }
@@ -100,5 +105,11 @@ class ChunkItem : VBox() {
 
     fun setOnChunkOpen(op: () -> Unit) {
         onChunkOpenActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    fun setOnTakeSelected(op: (take: TakeModel) -> Unit) {
+        onTakeSelectedActionProperty.set(
+            EventHandler { op.invoke(it.source as TakeModel) }
+        )
     }
 }

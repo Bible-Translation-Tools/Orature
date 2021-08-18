@@ -8,7 +8,10 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 import java.text.MessageFormat
 
-class ChunkCell(private val onChunkOpen: (CardData) -> Unit) : ListCell<CardData>() {
+class ChunkCell(
+    private val onChunkOpen: (CardData) -> Unit,
+    private val onTakeSelected: (CardData, TakeModel) -> Unit
+) : ListCell<CardData>() {
     private val view = ChunkItem()
 
     override fun updateItem(item: CardData?, empty: Boolean) {
@@ -41,6 +44,7 @@ class ChunkCell(private val onChunkOpen: (CardData) -> Unit) : ListCell<CardData
             }
 
             setOnChunkOpen { onChunkOpen(item) }
+            setOnTakeSelected { onTakeSelected(item, it) }
         }
     }
 
