@@ -19,13 +19,15 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -76,6 +78,23 @@ class TestBibleImagesDataSource {
     }
 
     @Test
+    fun testGetBibleImageWithRatio() {
+        val ratio4x3 = ImageRatio.FOUR_BY_THREE
+        val ratioString = ratio4x3.toString()
+        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val image = dataSource.getImage(metadataMock, project, ratio4x3)
+
+        assertNotNull(
+            "Could not get artwork image (${ratioString}) for $project",
+            image
+        )
+        assertTrue(
+            "Could not get image with ratio $ratioString for $project",
+            image!!.nameWithoutExtension.endsWith(ratioString)
+        )
+    }
+
+    @Test
     fun testNotFoundImage() {
         val genSlug = "gen"
         val nonBibleProject = "unknown"
@@ -97,6 +116,23 @@ class TestBibleImagesDataSource {
         assertNull(
             "Project '$remoteContentProject' should not have image in data source",
             remoteImageNotFound
+        )
+    }
+
+    @Test
+    fun `test fallback to default when aspect ratio not found`() {
+        val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
+        val ratioString = ratio16x9.toString()
+        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val image = dataSource.getImage(metadataMock, project, ratio16x9)
+
+        assertNotNull(
+            "Could not get default image (${ratioString}) for $project",
+            image
+        )
+        assertFalse(
+            "Project $project should not have image with ratio $ratioString in data source",
+            image!!.nameWithoutExtension.endsWith(ratioString)
         )
     }
 

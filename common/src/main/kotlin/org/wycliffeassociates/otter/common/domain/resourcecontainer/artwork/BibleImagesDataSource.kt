@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.filePathWithSuffix
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -35,16 +37,19 @@ class BibleImagesDataSource(
 
     override fun getImage(
         metadata: ResourceMetadata,
-        projectSlug: String
+        projectSlug: String,
+        imageRatio: ImageRatio
     ): File? {
         // fetch and return from cache if any
-        filesCache[projectSlug]?.let { return it }
+        filesCache[projectSlug + imageRatio.getImageSuffix()]
+            ?.let { return it }
 
-        val imagesContainer = directoryProvider.resourceContainerDirectory
-            .resolve(imagesContainerName)
+        val imagesContainer = directoryProvider
+                                            .resourceContainerDirectory
+                                            .resolve(imagesContainerName)
 
         return if (imagesContainer.exists()) {
-            getImageFromRC(imagesContainer, projectSlug)
+            getImageFromRC(imagesContainer, projectSlug, imageRatio)
         } else {
             null
         }
@@ -52,27 +57,36 @@ class BibleImagesDataSource(
 
     private fun getImageFromRC(
         rcFile: File,
-        projectSlug: String
+        projectSlug: String,
+        imageRatio: ImageRatio
     ): File? {
 
         ResourceContainer.load(rcFile).use { rc ->
-            val imgPath = rc.manifest.projects.firstOrNull {
+            val contentPath = rc.manifest.projects.firstOrNull {
                 it.identifier == projectSlug
             }?.path
 
-            if (imgPath != null && rc.accessor.fileExists(imgPath)) {
-                val relativeImgPath = File(imgPath)
-                val image = cacheDir.resolve(relativeImgPath.name)
+            if (contentPath != null) {
+                val pathWithRatio = filePathWithSuffix(contentPath, imageRatio.getImageSuffix())
+                val imagePath = if (rc.accessor.fileExists(pathWithRatio)) {
+                    pathWithRatio
+                } else if (rc.accessor.fileExists(contentPath)) {
+                    contentPath
+                } else {
+                    return null
+                }
+
+                val image = cacheDir.resolve(File(imagePath).name)
                     .apply { createNewFile() }
 
                 image.deleteOnExit()
                 image.outputStream().use { fos ->
-                    rc.accessor.getInputStream(imgPath).use {
+                    rc.accessor.getInputStream(imagePath).use {
                         it.transferTo(fos)
                     }
                 }
 
-                filesCache[projectSlug] = image
+                filesCache[projectSlug + imageRatio.getImageSuffix()] = image
                 return image
             }
         }

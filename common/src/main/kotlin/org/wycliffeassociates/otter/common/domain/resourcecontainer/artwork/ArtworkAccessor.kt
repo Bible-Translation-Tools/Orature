@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -32,9 +33,21 @@ class ArtworkAccessor(
         BibleImagesDataSource(directoryProvider)
     )
 
-    fun getArtwork(): File? {
-        imagesDataSources.forEach {
-            val image = it.getImage(metadata, projectSlug)
+    /**
+     *  Retrieves the most relevant image based on the given parameters.
+     *  If imageRatio is specified but the result is not found,
+     *  the original image will be returned (if exists). Otherwise,
+     *  null is returned
+     *
+     *  @param imageRatio the aspect ratio preference of the requested image.
+     *  A default ratio will be used if it the requested ratio is not found.
+     *
+     *  @return a nullable file which contains the image or null if no match
+     *  was found.
+     */
+    fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): File? {
+        imagesDataSources.forEach { dataSource ->
+            var image = dataSource.getImage(metadata, projectSlug, imageRatio)
             if (image != null) {
                 return image
             }
