@@ -1,5 +1,6 @@
-package org.wycliffeassociates.otter.jvm.controls.item
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -10,24 +11,29 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 
-class ChunkItem : VBox() {
+private const val TAKE_CELL_HEIGHT = 60.0
 
+class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
     val showTakesProperty = SimpleBooleanProperty(false)
-    val takes = observableListOf<Take>()
+
+    val takes = observableListOf<TakeModel>()
 
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
     private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
 
+    private val hasSelectedProperty = SimpleBooleanProperty(false)
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
-        importStylesheet(javaClass.getResource("/css/chunk-item.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/take-item.css").toExternalForm())
         styleClass.setAll("chunk-item")
+
+        takes.onChange {
+            hasSelectedProperty.set(it.list?.any { it.selected } ?: false)
+        }
 
         hbox {
             vbox {
@@ -39,13 +45,16 @@ class ChunkItem : VBox() {
                 label {
                     addClass("chunk-item__take-counter")
                     graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
-                    text = "3"
+                    textProperty().bind(takes.sizeProperty.asString())
                 }
             }
             hbox {
                 addClass("chunk-item__status")
                 circle {
                     addClass("chunk-item__selected-status")
+                    hasSelectedProperty.onChange {
+                        toggleClass("chunk-item__selected-status--active", it)
+                    }
                     radius = 12.0
                 }
                 label {
@@ -65,7 +74,7 @@ class ChunkItem : VBox() {
         }
         vbox {
             addClass("chunk-item__takes")
-            visibleProperty().bind(showTakesProperty)
+            visibleWhen(showTakesProperty)
             managedProperty().bind(visibleProperty())
 
             button {
@@ -77,11 +86,13 @@ class ChunkItem : VBox() {
 
             vbox {
                 addClass("chunk-item__take-items")
+
                 val toggleGroup = ToggleGroup()
-                bindChildren(takes) {
-                    TakeItem(toggleGroup).apply {
-                        audioProperty.set("Hello")
+                listview(takes) {
+                    setCellFactory {
+                        TakeCell(toggleGroup)
                     }
+                    prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
                 }
             }
         }

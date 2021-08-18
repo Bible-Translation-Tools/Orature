@@ -18,12 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
@@ -32,12 +33,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 
-class ChapterPage : Fragment() {
+class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
 
     private val viewModel: ChapterPageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
+    private lateinit var chunkListView: ListView<CardData>
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(viewModel.breadcrumbTitleBinding(this@ChapterPage))
@@ -48,14 +50,25 @@ class ChapterPage : Fragment() {
     }
 
     override fun onDock() {
+        super.onDock()
         workbookDataStore.activeChunkProperty.set(null)
         workbookDataStore.activeResourceComponentProperty.set(null)
         workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
+        chunkListView.refresh()
+        viewModel.openPlayers()
+        viewModel.checkCanCompile()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.closePlayers()
     }
 
     init {
         importStylesheet(resources.get("/css/chapter-page.css"))
+        importStylesheet(resources.get("/css/chunk-item.css"))
+        importStylesheet(resources.get("/css/take-item.css"))
     }
 
     override val root = hbox {
@@ -68,41 +81,53 @@ class ChapterPage : Fragment() {
                 addClass("chapter-page__chapter-box")
                 vgrow = Priority.ALWAYS
 
-                viewModel.chapterCard.onChangeAndDoNow {
-                    label {
-                        addClass("chapter-page__chapter-title")
-                        text = MessageFormat.format(
+                label {
+                    addClass("chapter-page__chapter-title")
+                    textProperty().bind(viewModel.chapterCardProperty.stringBinding {
+                        MessageFormat.format(
                             FX.messages["chapterTitle"],
                             FX.messages["chapter"].capitalize(),
-                            viewModel.workbookDataStore.activeChapterProperty.value?.title
+                            it?.bodyText
                         )
+                    })
+                }
+
+                hbox {
+                    addClass("chapter-page__chapter-audio")
+                    vgrow = Priority.ALWAYS
+
+                    simpleaudioplayer {
+                        hgrow = Priority.ALWAYS
+                        playerProperty.bind(viewModel.chapterPlayerProperty)
+                        visibleWhen(playerProperty.isNotNull)
+                        managedProperty().bind(visibleProperty())
                     }
 
                     hbox {
-                        addClass("chapter-page__chapter-audio")
-                        vgrow = Priority.ALWAYS
+                        hgrow = Priority.ALWAYS
+                        addClass("chapter-page__not-started")
 
                         label("Drafting not Started")
-                    }
 
-                    hbox {
-                        addClass("chapter-page__chapter-actions")
-                        button {
-                            addClass("btn", "btn--secondary")
-                            text = "Record Chapter"
-                            graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                            viewModel.workbookDataStore.activeChapterProperty.value?.let { chapter ->
-                                setOnAction {
-                                    viewModel.onCardSelection(CardData(chapter))
-                                    navigator.dock<RecordScriptureFragment>()
-                                }
-                            }
+                        visibleWhen(viewModel.chapterPlayerProperty.isNull)
+                        managedProperty().bind(visibleProperty())
+                    }
+                }
+
+                hbox {
+                    addClass("chapter-page__chapter-actions")
+                    button {
+                        addClass("btn", "btn--secondary")
+                        text = "Record Chapter"
+                        graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                        action {
+
                         }
-                        button {
-                            addClass("btn", "btn--secondary")
-                            text = "Continue Translation"
-                            graphic = FontIcon(MaterialDesign.MDI_VOICE)
-                        }
+                    }
+                    button {
+                        addClass("btn", "btn--secondary")
+                        text = "Continue Translation"
+                        graphic = FontIcon(MaterialDesign.MDI_VOICE)
                     }
                 }
             }
@@ -111,21 +136,29 @@ class ChapterPage : Fragment() {
                 addClass("chapter-page__actions")
                 vgrow = Priority.ALWAYS
 
-
                 button {
                     addClass("btn", "btn--primary")
                     text = "Edit Chapter"
                     graphic = FontIcon(MaterialDesign.MDI_PENCIL)
+                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                 }
                 button {
                     addClass("btn", "btn--primary")
                     text = "Add Verse Markers"
                     graphic = FontIcon(MaterialDesign.MDI_BOOKMARK)
+                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                 }
                 button {
                     addClass("btn", "btn--primary")
                     text = "View Takes"
                     graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
+                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
+                    action {
+                        viewModel.chapterCardProperty.value?.let {
+                            viewModel.onCardSelection(it)
+                            navigator.dock<RecordScripturePage>()
+                        }
+                    }
                 }
             }
         }
@@ -138,14 +171,19 @@ class ChapterPage : Fragment() {
                 addClass("btn", "btn--primary")
                 text = "Compile"
                 graphic = FontIcon(MaterialDesign.MDI_LAYERS)
+                enableWhen(viewModel.canCompileProperty)
+                action {
+                    println("Can finally compile")
+                }
             }
 
             listview(viewModel.filteredContent) {
+                chunkListView = this
                 fitToParentHeight()
                 setCellFactory {
                     ChunkCell {
                         viewModel.onCardSelection(it)
-                        navigator.dock<RecordScriptureFragment>()
+                        navigator.dock<RecordScripturePage>()
                     }
                 }
             }

@@ -23,16 +23,19 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
@@ -51,7 +54,11 @@ class ChapterPageViewModel : ViewModel() {
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(ChapterPageViewModel::loading)
 
-    val chapterCard = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
+    val chapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val canCompileProperty = SimpleBooleanProperty()
+    val selectedChapterTakeProperty = SimpleObjectProperty<Take>()
+
+    val chapterCardProperty = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
 
     private val navigator: NavigationMediator by inject()
 
@@ -67,13 +74,15 @@ class ChapterPageViewModel : ViewModel() {
                         cardData.item != ContentLabel.CHAPTER.value
                     }
                 )
+                checkCanCompile()
             }
 
         workbookDataStore.activeChapterProperty.onChangeAndDoNow { _chapter ->
             _chapter?.let { chapter ->
                 loadChapterContents(chapter).subscribe()
                 val chap = CardData(chapter)
-                chapterCard.set(chap)
+                chapterCardProperty.set(chap)
+                setSelectedChapterTake(chap)
             }
         }
     }
@@ -125,5 +134,33 @@ class ChapterPageViewModel : ViewModel() {
         // Chunk will be null if the chapter recording is opened. This needs to happen to update the recordable to
         // use the chapter recordable.
         workbookDataStore.activeChunkProperty.set(cardData.chunkSource)
+    }
+
+    fun openPlayers() {
+        selectedChapterTakeProperty.value?.let {
+            val player = (app as OtterApp).dependencyGraph.injectPlayer()
+            player.load(it.file)
+            chapterPlayerProperty.set(player)
+        }
+    }
+
+    fun closePlayers() {
+        chapterPlayerProperty.value?.close()
+        chapterPlayerProperty.set(null)
+    }
+
+    fun checkCanCompile() {
+        val hasUnselected = filteredContent.filter { chunk ->
+            chunk.chunkSource?.audio?.selected?.value?.value == null
+        }.any()
+        canCompileProperty.set(hasUnselected.not())
+    }
+
+    private fun setSelectedChapterTake(chapter: CardData) {
+        val selected = chapter.chapterSource?.audio?.selected?.value?.value
+        val take = chapter.chapterSource?.audio?.getAllTakes()?.singleOrNull {
+            it == selected
+        }
+        selectedChapterTakeProperty.set(take)
     }
 }

@@ -1,8 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.scene.control.ListCell
-import org.wycliffeassociates.otter.jvm.controls.item.ChunkItem
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -18,6 +20,8 @@ class ChunkCell(private val onChunkOpen: (CardData) -> Unit) : ListCell<CardData
         }
 
         graphic = view.apply {
+            showTakesProperty.set(false)
+
             chunkTitleProperty.set(
                 MessageFormat.format(
                     FX.messages["chunkTitle"],
@@ -27,14 +31,22 @@ class ChunkCell(private val onChunkOpen: (CardData) -> Unit) : ListCell<CardData
             )
 
             item.chunkSource?.let { chunk ->
-                val _takes = chunk.audio.getAllTakes()
+                val selected = chunk.audio.selected.value?.value
+                val takeModels = chunk.audio.getAllTakes()
                     .filter { it.deletedTimestamp.value?.value == null }
-                takes.setAll(_takes)
+                    .map { take ->
+                        take.mapToModel(take == selected)
+                    }
+                takes.setAll(takeModels)
             }
-
-            showTakesProperty.set(false)
 
             setOnChunkOpen { onChunkOpen(item) }
         }
+    }
+
+    private fun Take.mapToModel(selected: Boolean): TakeModel {
+        val audioPlayer = AudioBufferPlayer()
+        audioPlayer.load(this.file)
+        return TakeModel(this, selected, audioPlayer)
     }
 }

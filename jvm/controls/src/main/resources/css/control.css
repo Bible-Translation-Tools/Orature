@@ -90,16 +90,16 @@
 }
 
 .btn--primary:disabled {
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-black-15;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-black-90;
     -fx-effect: -wa-level0;
     -fx-cursor: disappear;
     -fx-underline: false;
 }
 
 .btn--primary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-black-60;
+    -fx-fill: -wa-black-80;
 }
 
 /* -------------- Call to Action Button -------------- */
