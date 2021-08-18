@@ -41,7 +41,7 @@ task copyToResources(type: Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('-v\\d{2}-\\d{2}\\.zip$', '.zip')
+                filename.replaceAll('-v\\d{2}-\\d{2}\\.zip$', '.orature')
             }
     }
 }

@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import javax.inject.Inject
 
 private const val EN_ULB_FILENAME = "en_ulb"
-private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.zip"
+private const val EN_ULB_PATH = "content/$EN_ULB_FILENAME.orature"
 
 class InitializeUlb @Inject constructor(
     private val installedEntityRepo: IInstalledEntityRepository,
