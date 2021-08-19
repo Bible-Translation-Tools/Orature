@@ -44,7 +44,10 @@ class ChunkCell(
             }
 
             setOnChunkOpen { onChunkOpen(item) }
-            setOnTakeSelected { onTakeSelected(item, it) }
+            setOnTakeSelected {
+                hasSelectedProperty.set(true)
+                onTakeSelected(item, it)
+            }
         }
     }
 

@@ -19,13 +19,13 @@ private const val TAKE_CELL_HEIGHT = 60.0
 class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
     val showTakesProperty = SimpleBooleanProperty(false)
+    val hasSelectedProperty = SimpleBooleanProperty(false)
 
     val takes = observableListOf<TakeModel>()
 
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
     private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
 
-    private val hasSelectedProperty = SimpleBooleanProperty(false)
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 

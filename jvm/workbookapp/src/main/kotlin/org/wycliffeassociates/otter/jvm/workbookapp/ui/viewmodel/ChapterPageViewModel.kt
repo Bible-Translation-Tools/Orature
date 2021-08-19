@@ -127,25 +127,6 @@ class ChapterPageViewModel : ViewModel() {
         )
     }
 
-    private fun loadChapterContents(chapter: Chapter): Completable {
-        // Remove existing content so the user knows they are outdated
-        allContent.clear()
-        loading = true
-        return chapter.chunks
-            .map { CardData(it) }
-            .doOnComplete {
-                loading = false
-            }
-            .observeOnFx()
-            .toList()
-            .doOnError { e ->
-                logger.error("Error in loading chapter contents for chapter: $chapter", e)
-            }
-            .map { list: List<CardData> ->
-                allContent.setAll(list)
-            }.ignoreElement()
-    }
-
     fun onCardSelection(cardData: CardData) {
         cardData.chapterSource?.let {
             workbookDataStore.activeChapterProperty.set(it)
@@ -179,9 +160,11 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun checkCanCompile() {
-        val hasUnselected = filteredContent.filter { chunk ->
-            chunk.chunkSource?.audio?.selected?.value?.value == null
-        }.any()
+        val hasUnselected = filteredContent
+            .filter { chunk ->
+                chunk.chunkSource?.audio?.selected?.value?.value == null
+            }
+            .any()
         canCompileProperty.set(hasUnselected.not())
     }
 
@@ -237,6 +220,7 @@ class ChapterPageViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            selectLastChapterTake()
                         }
                     }
                 }
@@ -324,5 +308,35 @@ class ChapterPageViewModel : ViewModel() {
             audioPluginViewModel.selectedEditorProperty,
             audioPluginViewModel.selectedMarkerProperty
         )
+    }
+
+    private fun loadChapterContents(chapter: Chapter): Completable {
+        // Remove existing content so the user knows they are outdated
+        allContent.clear()
+        loading = true
+        return chapter.chunks
+            .map { CardData(it) }
+            .doOnComplete {
+                loading = false
+            }
+            .observeOnFx()
+            .toList()
+            .doOnError { e ->
+                logger.error("Error in loading chapter contents for chapter: $chapter", e)
+            }
+            .map { list: List<CardData> ->
+                allContent.setAll(list)
+            }.ignoreElement()
+    }
+
+    private fun selectLastChapterTake() {
+        chapterCardProperty.value?.let { chapter ->
+            val lastTake = chapter.chapterSource?.audio?.getAllTakes()?.last()
+            lastTake?.let { take ->
+                chapter.chapterSource.audio.selectTake(take)
+                setSelectedChapterTake()
+                openPlayers()
+            }
+        }
     }
 }

@@ -70,12 +70,13 @@ class ChapterPage : View() {
         workbookDataStore.activeResourceComponentProperty.set(null)
         workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
-        chunkListView.refresh()
 
         viewModel.checkCanCompile()
         viewModel.setWorkChunk()
         viewModel.setSelectedChapterTake()
         viewModel.openPlayers()
+
+        chunkListView.refresh()
     }
 
     override fun onUndock() {
