@@ -21,7 +21,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -33,10 +35,8 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -44,7 +44,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
+import java.util.*
 import java.util.concurrent.Callable
 
 class ChapterPageViewModel : ViewModel() {
@@ -64,6 +66,7 @@ class ChapterPageViewModel : ViewModel() {
 
     val chapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val canCompileProperty = SimpleBooleanProperty()
+    val isCompilingProperty = SimpleBooleanProperty()
     val selectedChapterTakeProperty = SimpleObjectProperty<Take>()
     val workChunkProperty = SimpleObjectProperty<CardData>()
     val noTakesProperty = SimpleBooleanProperty()
@@ -254,6 +257,34 @@ class ChapterPageViewModel : ViewModel() {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                         TakeActions.Result.SUCCESS -> {}
                     }
+                }
+        }
+    }
+
+    fun compile() {
+        canCompileProperty.value?.let {
+            if (!it) return
+
+            isCompilingProperty.set(true)
+
+            val chapter = chapterCardProperty.value!!.chapterSource!!
+
+            val takes = filteredContent.mapNotNull { chunk ->
+                chunk.chunkSource?.audio?.selected?.value?.value?.file
+            }
+
+            val audioMerger = (app as OtterApp).dependencyGraph.injectAudioMerger()
+            val outputFile = File("/home/max/Desktop/output.wav")
+            audioMerger.merge(takes, outputFile)
+                .andThen(audioPluginViewModel.import(chapter, outputFile))
+                .subscribeOn(Schedulers.io())
+                .doOnError { e ->
+                    logger.error("Error in compiling chapter: $chapter", e)
+                }
+                .doFinally { isCompilingProperty.set(false) }
+                .observeOnFx()
+                .subscribe {
+                    selectLastChapterTake()
                 }
         }
     }

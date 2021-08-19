@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.di
 
 import dagger.Component
+import org.wycliffeassociates.otter.common.device.IAudioMerger
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -72,4 +73,5 @@ interface AppDependencyGraph {
 
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer
+    fun injectAudioMerger(): IAudioMerger
 }

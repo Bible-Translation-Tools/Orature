@@ -376,9 +376,11 @@ class WorkbookRepository(
             }
             .subscribe {
                 content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
-                db.updateContent(content)
-                    .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
-                    .subscribe()
+                if (content.selectedTake?.id != 0) {
+                    db.updateContent(content)
+                        .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
+                        .subscribe()
+                }
             }
 
         /** Initial Takes read from the DB. */

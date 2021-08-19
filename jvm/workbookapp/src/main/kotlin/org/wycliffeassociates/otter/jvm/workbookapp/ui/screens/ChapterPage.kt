@@ -224,9 +224,9 @@ class ChapterPage : View() {
                 addClass("btn", "btn--primary")
                 text = messages["compile"]
                 graphic = FontIcon(MaterialDesign.MDI_LAYERS)
-                enableWhen(viewModel.canCompileProperty)
+                enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
                 action {
-                    println("Can finally compile")
+                    viewModel.compile()
                 }
             }
 
