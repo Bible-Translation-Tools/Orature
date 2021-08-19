@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -32,7 +33,13 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
@@ -45,6 +52,7 @@ class ChapterPageViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
 
     val workbookDataStore: WorkbookDataStore by inject()
+    val audioPluginViewModel: AudioPluginViewModel by inject()
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -61,6 +69,13 @@ class ChapterPageViewModel : ViewModel() {
     val noTakesProperty = SimpleBooleanProperty()
 
     val chapterCardProperty = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
+    val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
+    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
+
+    val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
+    val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val navigator: NavigationMediator by inject()
 
@@ -85,9 +100,10 @@ class ChapterPageViewModel : ViewModel() {
                 loadChapterContents(chapter).subscribe()
                 val chap = CardData(chapter)
                 chapterCardProperty.set(chap)
-                setSelectedChapterTake(chap)
             }
         }
+
+        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
     }
 
     fun breadcrumbTitleBinding(view: UIComponent): StringBinding {
@@ -102,7 +118,7 @@ class ChapterPageViewModel : ViewModel() {
                                 chunk.start
                             )
                         }
-                    navigator.workspace.dockedComponentProperty.value == view -> messages["chunk"]
+                        navigator.workspace.dockedComponentProperty.value == view -> messages["chunk"]
                     else -> messages["chapter"]
                 }
             },
@@ -147,9 +163,19 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
+    fun openSourceAudioPlayer() {
+        workbookDataStore.sourceAudioProperty.value?.let { source ->
+            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            audioPlayer.loadSection(source.file, source.start, source.end)
+            sourceAudioPlayerProperty.set(audioPlayer)
+        }
+    }
+
     fun closePlayers() {
         chapterPlayerProperty.value?.close()
         chapterPlayerProperty.set(null)
+        sourceAudioPlayerProperty.value?.close()
+        sourceAudioPlayerProperty.set(null)
     }
 
     fun checkCanCompile() {
@@ -178,11 +204,125 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    private fun setSelectedChapterTake(chapter: CardData) {
-        val selected = chapter.chapterSource?.audio?.selected?.value?.value
-        val take = chapter.chapterSource?.audio?.getAllTakes()?.singleOrNull {
-            it == selected
+    fun setSelectedChapterTake() {
+        chapterCardProperty.value?.let { chapter ->
+            val selected = chapter.chapterSource?.audio?.selected?.value?.value
+            val take = chapter.chapterSource?.audio?.getAllTakes()?.singleOrNull {
+                it == selected
+            }
+            selectedChapterTakeProperty.set(take)
         }
-        selectedChapterTakeProperty.set(take)
+    }
+
+    fun recordChapter() {
+        closePlayers()
+        chapterCardProperty.value?.chapterSource?.let { rec ->
+            contextProperty.set(PluginType.RECORDER)
+            rec.audio.getNewTakeNumber()
+                .flatMapMaybe { takeNumber ->
+                    currentTakeNumberProperty.set(takeNumber)
+                    audioPluginViewModel.getPlugin(PluginType.RECORDER)
+                }
+                .flatMapSingle { plugin ->
+                    fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
+                    audioPluginViewModel.record(rec)
+                }
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in recording a new take", e)
+                }
+                .onErrorReturn { TakeActions.Result.NO_PLUGIN }
+                .subscribe { result: TakeActions.Result ->
+                    fire(PluginClosedEvent(PluginType.RECORDER))
+                    when (result) {
+                        TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
+                        TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                        }
+                    }
+                }
+        } ?: throw IllegalStateException("Recordable is null")
+    }
+
+    fun processTakeWithPlugin(pluginType: PluginType) {
+        selectedChapterTakeProperty.value?.let { take ->
+            closePlayers()
+            contextProperty.set(pluginType)
+            currentTakeNumberProperty.set(take.number)
+            audioPluginViewModel
+                .getPlugin(pluginType)
+                .flatMapSingle { plugin ->
+                    fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
+                    when (pluginType) {
+                        PluginType.EDITOR -> audioPluginViewModel.edit(take)
+                        PluginType.MARKER -> audioPluginViewModel.mark(take)
+                        else -> null
+                    }
+                }
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in processing take with plugin type: $pluginType", e)
+                }
+                .onErrorReturn { TakeActions.Result.NO_PLUGIN }
+                .subscribe { result: TakeActions.Result ->
+                    currentTakeNumberProperty.set(null)
+                    fire(PluginClosedEvent(pluginType))
+                    when (result) {
+                        TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
+                        TakeActions.Result.SUCCESS -> {}
+                    }
+                }
+        }
+    }
+
+    fun dialogTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                String.format(
+                    messages["sourceDialogTitle"],
+                    currentTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
+                )
+            },
+            audioPluginViewModel.pluginNameProperty,
+            currentTakeNumberProperty
+        )
+    }
+
+    fun dialogTextBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                String.format(
+                    messages["sourceDialogMessage"],
+                    currentTakeNumberProperty.get(),
+                    audioPluginViewModel.pluginNameProperty.get(),
+                    audioPluginViewModel.pluginNameProperty.get()
+                )
+            },
+            audioPluginViewModel.pluginNameProperty,
+            currentTakeNumberProperty
+        )
+    }
+
+    fun pluginNameBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                when (contextProperty.get()) {
+                    PluginType.RECORDER -> {
+                        audioPluginViewModel.selectedRecorderProperty.get()?.name
+                    }
+                    PluginType.EDITOR -> {
+                        audioPluginViewModel.selectedEditorProperty.get()?.name
+                    }
+                    PluginType.MARKER -> {
+                        audioPluginViewModel.selectedMarkerProperty.get()?.name
+                    }
+                    null -> throw IllegalStateException("Action is not supported!")
+                }
+            },
+            contextProperty,
+            audioPluginViewModel.selectedRecorderProperty,
+            audioPluginViewModel.selectedEditorProperty,
+            audioPluginViewModel.selectedMarkerProperty
+        )
     }
 }
