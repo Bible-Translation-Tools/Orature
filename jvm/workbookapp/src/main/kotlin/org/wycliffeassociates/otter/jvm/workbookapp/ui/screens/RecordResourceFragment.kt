@@ -363,7 +363,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
                             pluginErrorMessage,
-                            messages["addPlugin"].toUpperCase()
+                            messages["addApp"].toUpperCase()
                         ) {
                             audioPluginViewModel.addPlugin(true, false)
                         },

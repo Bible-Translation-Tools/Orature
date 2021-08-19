@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.utils.filePathWithSuffix
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -36,12 +38,16 @@ class ResourceContainerImagesDataSource(
 
     override fun getImage(
         metadata: ResourceMetadata,
-        projectSlug: String
+        projectSlug: String,
+        imageRatio: ImageRatio
     ): File? {
+        val ratioString = imageRatio.getImageSuffix()
+
         getImageFromCache(
             metadata.language.slug,
             metadata.identifier,
-            projectSlug
+            projectSlug,
+            ratioString
         )?.let { return it }
 
         ResourceContainer.load(metadata.path).use { rc ->
@@ -52,15 +58,16 @@ class ResourceContainerImagesDataSource(
             mediaTypes.forEach { type ->
                 val media = mediaList.find { it.identifier == type }
                 if (
-                    media != null && !media.url.isNullOrEmpty()
+                    media != null && media.url.isNotEmpty()
                 ) {
-                    val image = getImageFromRC(media, rc)
+                    val image = getImageFromRC(media, rc, projectSlug, imageRatio)
                     if (image != null) {
                         cacheImage(
                             image,
                             metadata.language.slug,
                             metadata.identifier,
-                            projectSlug
+                            projectSlug,
+                            ratioString
                         )
                         return image
                     }
@@ -73,21 +80,34 @@ class ResourceContainerImagesDataSource(
 
     private fun getImageFromRC(
         media: Media,
-        rc: ResourceContainer
+        rc: ResourceContainer,
+        project: String,
+        imageRatio: ImageRatio
     ): File? {
         val paths = mutableListOf<String>()
-        paths.add(media.url)
+        paths.add(
+            filePathWithSuffix(media.url, imageRatio.getImageSuffix())
+        )
+
         media.quality.forEach { quality ->
+            val urlWithParameters = media.url
+                .replace("{quality}", quality)
+                .replace("{version}", media.version)
             paths.add(
-                media.url
-                    .replace("{quality}", quality)
-                    .replace("{version}", media.version)
+                filePathWithSuffix(urlWithParameters, imageRatio.getImageSuffix())
             )
+            paths.add(urlWithParameters) // if image ratio is not found
         }
+        paths.add(media.url)
+
+        val language = rc.manifest.dublinCore.language.identifier
+        val resourceId = rc.manifest.dublinCore.identifier
 
         for (path in paths) {
             if (rc.accessor.fileExists(path)) {
-                val image = cacheDir.resolve(File(path).name)
+                val fileName = "${language}_${resourceId}_${project}_${File(path).name}"
+
+                val image = cacheDir.resolve(fileName)
                     .apply { createNewFile() }
 
                 image.deleteOnExit()
@@ -107,15 +127,19 @@ class ResourceContainerImagesDataSource(
 
     companion object {
         private val mediaTypes = listOf("jpg", "jpeg", "png")
-        private const val cacheKeyTemplate = "%s-%s-%s"
+        // {languageSlug}-{resourceId}-{projectSlug}{ratio}
+        private const val cacheKeyTemplate = "%s-%s-%s%s"
         private val filesCache = ConcurrentHashMap<String, File>()
 
         private fun getImageFromCache(
             languageSlug: String,
             resourceId: String,
-            project: String
+            project: String,
+            ratio: String
         ): File? {
-            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            val key = cacheKeyTemplate.format(
+                languageSlug, resourceId, project, ratio
+            )
             return filesCache[key]
         }
 
@@ -123,9 +147,12 @@ class ResourceContainerImagesDataSource(
             image: File,
             languageSlug: String,
             resourceId: String,
-            project: String
+            project: String,
+            ratio: String
         ) {
-            val key = cacheKeyTemplate.format(languageSlug, resourceId, project)
+            val key = cacheKeyTemplate.format(
+                languageSlug, resourceId, project, ratio
+            )
             filesCache[key] = image
         }
     }

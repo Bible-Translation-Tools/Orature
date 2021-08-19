@@ -365,7 +365,7 @@ class RecordScriptureFragment : Fragment() {
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
                             pluginErrorMessage,
-                            messages["addPlugin"].uppercase(Locale.getDefault())
+                            messages["addApp"].uppercase(Locale.getDefault())
                         ) {
                             audioPluginViewModel.addPlugin(true, false)
                         },

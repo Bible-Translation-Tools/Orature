@@ -19,12 +19,15 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -70,8 +73,25 @@ class TestResourceContainerImagesDataSource {
         val image = dataSource.getImage(metadataMock, project)
 
         assertNotNull(
-            "Could not get image for [$language-$resourceId-$project]",
+            "Could not get image for $project",
             image
+        )
+    }
+
+    @Test
+    fun testGetImageWithRatio() {
+        val ratio4x3 = ImageRatio.FOUR_BY_THREE
+        val ratioString = ratio4x3.toString()
+        val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
+        val image = dataSource.getImage(metadataMock, project, ratio4x3)
+
+        assertNotNull(
+            "Could not get image for $project",
+            image
+        )
+        assertTrue(
+            "Could not get image with ratio $ratioString for $project",
+            image!!.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
@@ -83,7 +103,7 @@ class TestResourceContainerImagesDataSource {
 
         val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
         val notFoundImage = dataSource.getImage(metadataMock, genSlug)
-        val nonBibleNotFoundImage =  dataSource.getImage(metadataMock, nonBibleProject)
+        val nonBibleNotFoundImage = dataSource.getImage(metadataMock, nonBibleProject)
         val remoteImageNotFound = dataSource.getImage(metadataMock, remoteUrlProject)
 
         assertNull(
@@ -97,6 +117,23 @@ class TestResourceContainerImagesDataSource {
         assertNull(
             "Project $remoteUrlProject should not have image in data source",
             remoteImageNotFound
+        )
+    }
+
+    @Test
+    fun `test fallback to default when aspect ratio not found`() {
+        val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
+        val ratioString = ratio16x9.toString()
+        val dataSource = ResourceContainerImagesDataSource(directoryProviderMock)
+        val image = dataSource.getImage(metadataMock, project, ratio16x9)
+
+        assertNotNull(
+            "Could not get default image (${ratioString}) for $project",
+            image
+        )
+        assertFalse(
+            "Project $project should not have image with ratio $ratioString in data source",
+            image!!.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
