@@ -274,14 +274,17 @@ class ChapterPageViewModel : ViewModel() {
             }
 
             val audioMerger = (app as OtterApp).dependencyGraph.injectAudioMerger()
-            val outputFile = File("/home/max/Desktop/output.wav")
+            val outputFile = File.createTempFile("output", ".wav")
             audioMerger.merge(takes, outputFile)
                 .andThen(audioPluginViewModel.import(chapter, outputFile))
                 .subscribeOn(Schedulers.io())
                 .doOnError { e ->
                     logger.error("Error in compiling chapter: $chapter", e)
                 }
-                .doFinally { isCompilingProperty.set(false) }
+                .doFinally {
+                    outputFile.delete()
+                    isCompilingProperty.set(false)
+                }
                 .observeOnFx()
                 .subscribe {
                     selectLastChapterTake()
