@@ -79,6 +79,14 @@ class DatabaseEnvironment @Inject constructor(
         return targetDir
     }
 
+    fun rcResourceFile(rcFile: String) =
+        File(
+            TestRcImport::class.java.classLoader
+                .getResource("resource-containers/$rcFile")!!
+                .toURI()
+                .path
+        )
+
     fun assertRowCounts(expected: RowCount, message: String? = null): DatabaseEnvironment {
         val actual = RowCount(
             // These ?.let constructs let us skip comparing counts that aren't specified in [expected].
@@ -113,14 +121,6 @@ class DatabaseEnvironment @Inject constructor(
             .onErrorComplete()
             .blockingAwait()
     }
-
-    private fun rcResourceFile(rcFile: String) =
-        File(
-            TestRcImport::class.java.classLoader
-                .getResource("resource-containers/$rcFile")!!
-                .toURI()
-                .path
-        )
 
     /**
      * The path here should match that of the resource structure of main
