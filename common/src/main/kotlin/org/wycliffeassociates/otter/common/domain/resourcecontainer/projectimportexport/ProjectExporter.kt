@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -45,7 +46,7 @@ class ProjectExporter @Inject constructor(
         projectMetadataToExport: ResourceMetadata,
         workbook: Workbook,
         projectFilesAccessor: ProjectFilesAccessor,
-        customExtension: String = "orature"
+        fileFormat: OratureFileFormat = OratureFileFormat.ORATURE
     ): Single<ExportResult> {
         return Single
             .fromCallable {
@@ -75,8 +76,8 @@ class ProjectExporter @Inject constructor(
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                 }
 
-                if (customExtension != "zip") {
-                    val oratureFileName = zipFile.nameWithoutExtension + ".$customExtension"
+                if (fileFormat != OratureFileFormat.ZIP) {
+                    val oratureFileName = zipFile.nameWithoutExtension + ".${fileFormat.extension}"
                     // using nio Files.move() instead of file.rename() for platform independent
                     Files.move(
                         zipFile.toPath(),
