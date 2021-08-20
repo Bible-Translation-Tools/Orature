@@ -26,6 +26,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -159,7 +160,7 @@ class WorkbookPageViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
             title = workbook.target.title,
-            coverArt = workbook.artworkAccessor.getArtwork(),
+            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE),
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])
@@ -206,7 +207,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork()
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
         )
 
         projectExporter
@@ -237,7 +238,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork()
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
         )
 
         workbookRepository.closeWorkbook(workbook)
