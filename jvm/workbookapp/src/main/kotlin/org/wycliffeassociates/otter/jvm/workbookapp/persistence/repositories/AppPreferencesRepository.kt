@@ -51,22 +51,22 @@ class AppPreferencesRepository @Inject constructor(
     override fun getInputDevice(): Maybe<Mixer.Info> {
         return preferences.audioInputDevice()
             .flatMapMaybe {
-                audioDevice.getOutputDevice(it)
-            }
-    }
-
-    override fun setOutputDevice(mixer: Mixer.Info): Completable {
-        return preferences.setAudioOutputDevice(mixer.name)
-    }
-
-    override fun getOutputDevice(): Maybe<Mixer.Info> {
-        return preferences.audioOutputDevice()
-            .flatMapMaybe {
                 audioDevice.getInputDevice(it)
             }
     }
 
     override fun setInputDevice(mixer: Mixer.Info): Completable {
         return preferences.setAudioInputDevice(mixer.name)
+    }
+
+    override fun getOutputDevice(): Maybe<Mixer.Info> {
+        return preferences.audioOutputDevice()
+            .flatMapMaybe {
+                audioDevice.getOutputDevice(it)
+            }
+    }
+
+    override fun setOutputDevice(mixer: Mixer.Info): Completable {
+        return preferences.setAudioOutputDevice(mixer.name)
     }
 }

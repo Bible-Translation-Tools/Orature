@@ -53,7 +53,7 @@ class AudioDevice : IAudioDevice {
         return getOutputDevices()
             .flatMapMaybe {
                 val device = it.singleOrNull { it.name == name }
-                Maybe.just(device)
+                device?.let { Maybe.just(device) } ?: Maybe.empty()
             }
     }
 
@@ -61,7 +61,7 @@ class AudioDevice : IAudioDevice {
         return getInputDevices()
             .flatMapMaybe {
                 val device = it.singleOrNull { it.name == name }
-                Maybe.just(device)
+                device?.let { Maybe.just(device) } ?: Maybe.empty()
             }
     }
 }
