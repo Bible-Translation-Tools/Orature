@@ -63,7 +63,7 @@ class RecordResourceViewModel : ViewModel() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    val recordableViewModel = RecordableViewModel(audioPluginViewModel)
+    private val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
     private val activeChunk: Chunk? by activeChunkProperty
@@ -181,12 +181,10 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun nextChunk() {
-        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.FORWARD)
     }
 
     fun previousChunk() {
-        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.BACKWARD)
     }
 

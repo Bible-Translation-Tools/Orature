@@ -18,16 +18,15 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.stepper
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
+import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 
 class ProgressStepperStyles : Stylesheet() {
 
     companion object {
-        fun checkIcon() = MaterialIconView(MaterialIcon.CHECK, "16px")
+        fun checkIcon() = FontIcon("gmi-check").apply { iconSize = 16 }
 
         val graphicLabel by cssclass()
         val stepGraphicContainer by cssclass()

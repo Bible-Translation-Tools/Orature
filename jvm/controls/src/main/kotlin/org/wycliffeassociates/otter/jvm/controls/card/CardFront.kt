@@ -19,14 +19,13 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import com.jfoenix.controls.JFXButton
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 
 class CardFront : StackPane() {
@@ -34,7 +33,7 @@ class CardFront : StackPane() {
     val childrenList = observableListOf<Node>()
 
     val defaultFill = c("#CC4141")
-    val forwardArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "20px")
+    val forwardArrow = FontIcon("gmi-arrow-forward").apply { iconSize = 20 }
 
     val isActiveProperty = SimpleBooleanProperty(false)
     var isActive by isActiveProperty
@@ -75,7 +74,7 @@ class CardFront : StackPane() {
 
     init {
         importStylesheet<DefaultStyles>()
-        forwardArrow.fill = defaultFill
+        forwardArrow.iconColor = defaultFill
         alignment = Pos.TOP_CENTER
         // the colored top half of the card
         vbox {

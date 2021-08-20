@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.application.Platform
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -118,9 +116,12 @@ class ChapterPage : Fragment() {
                         }
                         cardbutton {
                             addClass(DefaultStyles.defaultCardButton)
-                            text = messages["openProject"]
-                            graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                .apply { fill = AppTheme.colors.appRed }
+                            text = messages["open"]
+                            graphic = FontIcon("gmi-arrow-forward")
+                                .apply {
+                                    iconSize = 25
+                                    iconColor = AppTheme.colors.appRed
+                                }
                             onMousePressed = EventHandler {
                                 viewModel.onCardSelection(item)
                                 navigator.dock<RecordScriptureFragment>()

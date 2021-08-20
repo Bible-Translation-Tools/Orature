@@ -5,7 +5,7 @@ ext {
     install4jPluginVer = '7.0.8'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
     buildscanPluginVer = '2.4.2'
-    detektPluginVer = '1.10.0-RC1'
+    detektPluginVer = '1.17.0'
     ktlintPluginVer = '8.2.0'
     shadowPluginVer = '5.2.0'
     sonarcloudPluginVer = '3.0'
@@ -20,7 +20,7 @@ ext {
     rxrelayVer = '2.1.0'
     jfoenixVer = '9.0.8'
     sqliteJdbcVer = '3.28.0'
-    jooqVer = '3.12.0'
+    jooqVer = '3.12.4'
     franzXaverVer = '0.1' // SVG Loader
     franzXaverSvgVer = 'unspecified'
     retrofitVer = '2.0.0'
@@ -33,19 +33,14 @@ ext {
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
-    kotlinresourcecontainerVer = '0.7.0'
-    jdenticonKoltinVer = '1.0'
+    kotlinresourcecontainerVer = '0.8.0'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'
-    fontawesomeCommonsVer = '11.0'
-    fontawesomeMaterialIconsVer = "2.2.0-11"
-    fontawesomeIcons525Ver = '3.0.0-11'
-    fontawesomeMaterialFontVer = '1.7.22-11'
     ikonliVer = '11.3.4'
     controlsfxVer = '11.0.1'
     sentryVer = '1.7.30'
     usfmToolsVer = "1.6.0"
-    testFxVer = '4.0.16-alpha'
+    testFxVer = '4.0.15-alpha'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
 }
