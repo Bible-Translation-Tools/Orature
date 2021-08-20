@@ -23,7 +23,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -44,9 +43,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
-import java.io.File
 import java.text.MessageFormat
-import java.util.*
 import java.util.concurrent.Callable
 
 class ChapterPageViewModel : ViewModel() {
@@ -274,15 +271,15 @@ class ChapterPageViewModel : ViewModel() {
             }
 
             val audioMerger = (app as OtterApp).dependencyGraph.injectAudioMerger()
-            val outputFile = File.createTempFile("output", ".wav")
-            audioMerger.merge(takes, outputFile)
-                .andThen(audioPluginViewModel.import(chapter, outputFile))
+            audioMerger.merge(takes)
+                .flatMapCompletable { file ->
+                    audioPluginViewModel.import(chapter, file)
+                }
                 .subscribeOn(Schedulers.io())
                 .doOnError { e ->
                     logger.error("Error in compiling chapter: $chapter", e)
                 }
                 .doFinally {
-                    outputFile.delete()
                     isCompilingProperty.set(false)
                 }
                 .observeOnFx()
@@ -311,9 +308,9 @@ class ChapterPageViewModel : ViewModel() {
             Callable {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeNumberProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get()
+                    currentTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
@@ -324,15 +321,15 @@ class ChapterPageViewModel : ViewModel() {
     fun pluginNameBinding(): StringBinding {
         return Bindings.createStringBinding(
             Callable {
-                when (contextProperty.get()) {
+                when (contextProperty.value) {
                     PluginType.RECORDER -> {
-                        audioPluginViewModel.selectedRecorderProperty.get()?.name
+                        audioPluginViewModel.selectedRecorderProperty.value?.name
                     }
                     PluginType.EDITOR -> {
-                        audioPluginViewModel.selectedEditorProperty.get()?.name
+                        audioPluginViewModel.selectedEditorProperty.value?.name
                     }
                     PluginType.MARKER -> {
-                        audioPluginViewModel.selectedMarkerProperty.get()?.name
+                        audioPluginViewModel.selectedMarkerProperty.value?.name
                     }
                     null -> throw IllegalStateException("Action is not supported!")
                 }
@@ -365,8 +362,7 @@ class ChapterPageViewModel : ViewModel() {
 
     private fun selectLastChapterTake() {
         chapterCardProperty.value?.let { chapter ->
-            val lastTake = chapter.chapterSource?.audio?.getAllTakes()?.last()
-            lastTake?.let { take ->
+            chapter.chapterSource?.audio?.getAllTakes()?.last()?.let { take ->
                 chapter.chapterSource.audio.selectTake(take)
                 setSelectedChapterTake()
                 openPlayers()

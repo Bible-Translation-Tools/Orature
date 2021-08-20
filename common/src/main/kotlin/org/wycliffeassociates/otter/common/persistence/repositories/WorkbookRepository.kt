@@ -375,12 +375,16 @@ class WorkbookRepository(
                 logger.error("Error in selectedTakesRelay, content: $content", e)
             }
             .subscribe {
-                content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
-                if (content.selectedTake?.id != 0) {
-                    db.updateContent(content)
-                        .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
-                        .subscribe()
-                }
+                // Wait until selected take gets inserted
+                // before saving selection in database
+                // to avoid race condition issue
+                do {
+                    content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
+                } while(content.selectedTake?.id == 0)
+
+                db.updateContent(content)
+                    .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
+                    .subscribe()
             }
 
         /** Initial Takes read from the DB. */
