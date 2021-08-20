@@ -24,5 +24,7 @@ enum class OratureFileFormat(val extension: String) {
 
     companion object {
         val extensionList: List<String> = values().map { it.extension }
+
+        fun isSupported(extension: String) = extension.toLowerCase() in extensionList
     }
 }

@@ -269,8 +269,8 @@ class ProjectImporter @Inject constructor(
         val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
             .filter {
-                it.endsWith("." + OratureFileFormat.ZIP.extension, ignoreCase = true) ||
-                it.endsWith("." + OratureFileFormat.ORATURE.extension, ignoreCase = true)
+                val ext = it.substringAfterLast(".")
+                OratureFileFormat.isSupported(ext)
             }
 
         val firstTry: Map<String, ImportResult> = sourceFiles
