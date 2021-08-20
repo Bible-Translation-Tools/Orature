@@ -22,7 +22,6 @@ import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -268,10 +267,7 @@ class ProjectImporter @Inject constructor(
     private fun importSources(fileReader: IFileReader) {
         val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
-            .filter {
-                val ext = it.substringAfterLast(".")
-                OratureFileFormat.isSupported(ext)
-            }
+            .filter { it.endsWith(".zip", ignoreCase = true) }
 
         val firstTry: Map<String, ImportResult> = sourceFiles
             .map { importSource(it, fileReader) }

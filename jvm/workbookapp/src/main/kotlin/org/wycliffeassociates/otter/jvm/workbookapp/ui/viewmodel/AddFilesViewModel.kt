@@ -26,7 +26,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
@@ -69,12 +68,7 @@ class AddFilesViewModel : ViewModel() {
     fun onChooseFile() {
         val file = chooseFile(
             FX.messages["importResourceFromZip"],
-            arrayOf(
-                FileChooser.ExtensionFilter(
-                    messages["oratureFileTypes"],
-                    *OratureFileFormat.extensionList.map{ "*.$it"}.toTypedArray()
-                )
-            ),
+            arrayOf(FileChooser.ExtensionFilter(messages["oratureFileTypes"], "*.zip")),
             mode = FileChooserMode.Single
         ).firstOrNull()
         file?.let {
@@ -119,7 +113,7 @@ class AddFilesViewModel : ViewModel() {
                 snackBarObservable.onNext(messages["importDirectoryError"])
                 false
             }
-            files.first().extension !in OratureFileFormat.extensionList -> {
+            files.first().extension != "zip" -> {
                 snackBarObservable.onNext(messages["importInvalidFileError"])
                 false
             }
