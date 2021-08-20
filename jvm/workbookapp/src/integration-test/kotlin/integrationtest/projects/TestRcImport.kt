@@ -49,28 +49,6 @@ class TestRcImport {
             )
     }
 
-    @Test
-    fun ulbOratureExtension() {
-        val fileName = "en_ulb.orature"
-        val sourceRC = dbEnvProvider.get().rcResourceFile("en_ulb.zip")
-        sourceRC
-            .copyTo(sourceRC.parentFile.resolve(fileName))
-            .apply { deleteOnExit() }
-
-        dbEnvProvider.get()
-            .import(fileName)
-            .assertRowCounts(
-                RowCount(
-                    contents = mapOf(
-                        TEXT to 31104,
-                        META to 1189
-                    ),
-                    collections = 1256,
-                    links = 0
-                )
-            )
-    }
-
     /**
      * Runs the same test as ulb(), but rather than test the provided and tested ulb resource container,
      * we instead test the version downloaded from WACS through the downloadUlb gradle task. Failure of this
