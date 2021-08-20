@@ -28,7 +28,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
-import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
@@ -77,13 +76,7 @@ class ProjectExporter @Inject constructor(
                 }
 
                 if (fileFormat != OratureFileFormat.ZIP) {
-                    val oratureFileName = zipFile.nameWithoutExtension + ".${fileFormat.extension}"
-                    // using nio Files.move() instead of file.rename() for platform independent
-                    Files.move(
-                        zipFile.toPath(),
-                        zipFile.parentFile.resolve(oratureFileName).toPath(),
-                        StandardCopyOption.REPLACE_EXISTING
-                    )
+                    restoreFileExtension(zipFile, fileFormat.extension)
                 }
 
                 return@fromCallable ExportResult.SUCCESS
@@ -101,5 +94,15 @@ class ProjectExporter @Inject constructor(
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
         return "$lang-$resource-$project-$timestamp.zip"
+    }
+
+    private fun restoreFileExtension(file: File, extension: String) {
+        val fileName = file.nameWithoutExtension + ".$extension"
+        // using nio Files.move() instead of file.rename() for platform independent
+        Files.move(
+            file.toPath(),
+            file.parentFile.resolve(fileName).toPath(),
+            StandardCopyOption.REPLACE_EXISTING
+        )
     }
 }
