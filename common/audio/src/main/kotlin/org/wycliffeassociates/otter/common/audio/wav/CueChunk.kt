@@ -182,6 +182,11 @@ internal class CueChunk : RiffChunk {
             val subchunkLabel = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
 
+
+            if (subchunkSize < 0) {
+                throw InvalidWavFileException("Chunk $subchunkLabel has a negative size of $subchunkSize")
+            }
+
             if (chunk.remaining() < subchunkSize) {
                 throw InvalidWavFileException(
                     """Chunk $subchunkLabel is of size: $subchunkSize 
@@ -200,7 +205,7 @@ internal class CueChunk : RiffChunk {
             }
 
             // move on to the next chunk
-            chunk.seek(subchunkSize)
+            chunk.seek(wordAlign(subchunkSize))
         }
         cues as MutableList
         cues.clear()
@@ -230,12 +235,13 @@ internal class CueChunk : RiffChunk {
         if (!chunk.hasRemaining()) {
             return
         }
+
         // read number of cues
         val numCues = chunk.int
 
         // each cue subchunk should be 24 bytes, plus 4 for the number of cues field
         if (chunk.remaining() != CUE_DATA_SIZE * numCues) {
-            throw InvalidWavFileException()
+            throw InvalidWavFileException("Cue Chunk Subchunk size is not correct")
         }
 
         // For each cue, read the cue Id and the cue location
@@ -262,10 +268,7 @@ internal class CueChunk : RiffChunk {
             val subchunk = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
 
-            // chunk data must be word aligned but the size might not account for padding
-            // therefore, if odd, the size we read must add one to include the padding
-            // https://sharkysoft.com/jwave/docs/javadocs/lava/riff/wave/doc-files/riffwave-frameset.htm
-            val wordAlignedSubchunkSize = subchunkSize + if (subchunkSize % 2 == 0) 0 else 1
+            val wordAlignedSubchunkSize = wordAlign(subchunkSize)
 
             when (subchunk) {
                 LABEL_LABEL -> {

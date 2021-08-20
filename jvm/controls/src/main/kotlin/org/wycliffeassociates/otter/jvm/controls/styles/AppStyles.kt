@@ -18,12 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.styles
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.scene.Cursor
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
 import tornadofx.*
 
@@ -38,14 +37,14 @@ class AppStyles : Stylesheet() {
         val whiteBackground by cssclass()
         val appToggleButton by cssclass()
 
-        fun recordIcon(size: String = "1em") = MaterialIconView(MaterialIcon.MIC_NONE, size)
-        fun editIcon(size: String = "1em") = MaterialIconView(MaterialIcon.EDIT, size)
-        fun viewTakesIcon(size: String = "1em") = MaterialIconView(MaterialIcon.APPS, size)
-        fun backIcon(size: String = "1em") = MaterialIconView(MaterialIcon.ARROW_BACK, size)
-        fun forwardIcon(size: String = "1em") = MaterialIconView(MaterialIcon.ARROW_FORWARD, size)
-        fun bookIcon(size: String = "1em") = MaterialIconView(MaterialIcon.BOOK, size)
-        fun chapterIcon(size: String = "1em") = MaterialIconView(MaterialIcon.CHROME_READER_MODE, size)
-        fun verseIcon(size: String = "1em") = MaterialIconView(MaterialIcon.BOOKMARK, size)
+        fun recordIcon(sizePx: Int = 16) = FontIcon("gmi-mic-none").apply { iconSize = sizePx }
+        fun editIcon(sizePx: Int = 16) = FontIcon("gmi-edit").apply { iconSize = sizePx }
+        fun viewTakesIcon(sizePx: Int = 16) = FontIcon("gmi-apps").apply { iconSize = sizePx }
+        fun backIcon(sizePx: Int = 16) = FontIcon("gmi-arrow-back").apply { iconSize = sizePx }
+        fun forwardIcon(sizePx: Int = 16) = FontIcon("gmi-arrow-forward").apply { iconSize = sizePx }
+        fun bookIcon(sizePx: Int = 16) = FontIcon("gmi-book").apply { iconSize = sizePx }
+        fun chapterIcon(sizePx: Int = 16) = FontIcon("gmi-chrome-reader-mode").apply { iconSize = sizePx }
+        fun verseIcon(sizePx: Int = 16) = FontIcon("gmi-bookmark").apply { iconSize = sizePx }
         fun projectGraphic() = ImageLoader.load(
             ClassLoader.getSystemResourceAsStream("images/project_image.png"),
             ImageLoader.Format.PNG

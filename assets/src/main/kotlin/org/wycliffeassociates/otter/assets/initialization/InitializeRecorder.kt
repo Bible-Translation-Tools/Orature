@@ -39,7 +39,7 @@ class InitializeRecorder @Inject constructor(
 ) : Installable {
 
     override val name = "RECORDER"
-    override val version = 8
+    override val version = 9
 
     val log = LoggerFactory.getLogger(InitializeRecorder::class.java)
 

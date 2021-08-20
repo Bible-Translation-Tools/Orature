@@ -26,6 +26,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -156,9 +157,10 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     private fun createWorkbookBanner(): WorkbookBannerModel {
+        val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
-            title = workbookDataStore.workbook.target.title,
-            coverArt = workbookDataStore.workbook.coverArtAccessor.getArtwork(),
+            title = workbook.target.title,
+            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE),
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])
@@ -204,7 +206,9 @@ class WorkbookPageViewModel : ViewModel() {
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
         activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+        )
 
         projectExporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
@@ -233,7 +237,9 @@ class WorkbookPageViewModel : ViewModel() {
         val deleteProject = deleteProjectProvider.get()
 
         activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+        )
 
         workbookRepository.closeWorkbook(workbook)
         deleteProject

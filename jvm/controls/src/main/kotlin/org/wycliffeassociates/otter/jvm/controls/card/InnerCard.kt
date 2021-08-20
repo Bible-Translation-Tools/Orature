@@ -107,8 +107,8 @@ class InnerCard(val cardGraphic: Node? = null) : VBox() {
                     visibleWhen { majorLabelProperty.isNotEmpty }
                 }
                 label(minorLabelProperty) {
-                    graphic = DefaultStyles.checkCircle("25px").apply {
-                        fill = DefaultStyles.green()
+                    graphic = DefaultStyles.checkCircle(25).apply {
+                        iconColor = DefaultStyles.green()
                     }
                     graphic.managedProperty().bind(selectedExistsProperty.booleanBinding { it != false })
                     graphic.visibleProperty().bind(selectedExistsProperty.booleanBinding { it != false })

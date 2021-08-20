@@ -20,10 +20,13 @@ package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.OutputStream
 import java.nio.ByteBuffer
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-internal class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetadata {
+internal class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
+
+    private val logger = LoggerFactory.getLogger(WavMetadata::class.java)
 
     private val cueChunk: CueChunk
     private val chunks: Set<RiffChunk>
@@ -43,7 +46,7 @@ internal class WavMetadata(parsableChunks: List<RiffChunk>? = null): AudioMetada
     }
 
     val totalSize
-        get() = chunks.sumBy { it.totalSize }
+        get() = chunks.sumOf { it.totalSize }
 
     fun parseMetadata(buffer: ByteBuffer) {
         chunks.forEach { it.parse(buffer.slice()) }

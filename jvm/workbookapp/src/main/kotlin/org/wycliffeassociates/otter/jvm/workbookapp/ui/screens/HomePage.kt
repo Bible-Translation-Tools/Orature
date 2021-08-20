@@ -22,6 +22,7 @@ import javafx.geometry.Pos
 import javafx.scene.control.ScrollPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.jvm.controls.banner.ResumeBookBanner
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.BookCard
@@ -76,7 +77,9 @@ class HomePage : Fragment() {
                         viewModel.resumeBookProperty.onChange {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
-                                backgroundImageFileProperty.set(workbook.coverArtAccessor.getArtwork())
+                                backgroundImageFileProperty.set(
+                                    workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+                                )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)
                                 onResumeAction {
@@ -92,7 +95,7 @@ class HomePage : Fragment() {
 
                 add(
                     NewTranslationCard().apply {
-                        newTranslationTextProperty.set(messages["newTranslation"])
+                        newTranslationTextProperty.set(messages["createTranslation"])
                         setOnAction {
                             viewModel.createTranslation()
                         }
@@ -107,14 +110,16 @@ class HomePage : Fragment() {
                             setConverter {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
-                                    coverArtProperty.set(it.coverArtAccessor.getArtwork())
+                                    coverArtProperty.set(
+                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+                                    )
 
                                     setOnPrimaryAction { viewModel.selectProject(it) }
                                 }
                             }
 
-                            seeMoreTextProperty.set(messages["seeMore"])
-                            seeLessTextProperty.set(messages["seeLess"])
+                            showMoreTextProperty.set(messages["showMore"])
+                            showLessTextProperty.set(messages["showLess"])
 
                             setOnNewBookAction {
                                 viewModel.createProject(it)

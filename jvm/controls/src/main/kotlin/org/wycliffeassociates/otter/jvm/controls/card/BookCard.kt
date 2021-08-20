@@ -27,6 +27,8 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.BookCardSkin
 import java.io.File
+import tornadofx.FX.Companion.messages
+import tornadofx.get
 
 class BookCard(
     title: String = "",
@@ -40,7 +42,7 @@ class BookCard(
     val projectTypeProperty = SimpleStringProperty(projectType)
     val newBookProperty = SimpleBooleanProperty(newBook)
 
-    val addBookTextProperty = SimpleStringProperty("Add Book")
+    val addBookTextProperty = SimpleStringProperty(messages["createProject"])
     val onPrimaryActionProperty = SimpleObjectProperty<() -> Unit>()
     val onAddBookActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
