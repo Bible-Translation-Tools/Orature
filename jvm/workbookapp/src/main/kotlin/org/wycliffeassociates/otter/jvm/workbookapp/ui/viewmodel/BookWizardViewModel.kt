@@ -30,6 +30,7 @@ import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
@@ -141,7 +142,7 @@ class BookWizardViewModel : ViewModel() {
                                 directoryProvider,
                                 it.resourceContainer!!,
                                 it.slug
-                            ).getArtwork()
+                            ).getArtwork(ImageRatio.TWO_BY_ONE)
                         } else {
                             null
                         }
@@ -212,7 +213,7 @@ class BookWizardViewModel : ViewModel() {
             )
             activeProjectTitleProperty.set(collection.titleKey)
             activeProjectCoverProperty.set(
-                artworkAccessor.getArtwork()
+                artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
             )
 
             creationUseCase

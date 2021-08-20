@@ -26,6 +26,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
@@ -135,7 +136,7 @@ class AddFilesViewModel : ViewModel() {
                             importedProjectTitleProperty.set(project.title)
                             val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
                             importedProjectCoverProperty.set(
-                                coverArtAccessor.getArtwork()
+                                coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
                             )
                         }
                     }
