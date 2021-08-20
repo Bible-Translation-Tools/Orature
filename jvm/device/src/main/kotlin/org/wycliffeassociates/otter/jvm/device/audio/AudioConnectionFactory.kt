@@ -158,16 +158,17 @@ open class AudioConnectionFactory(var line: SourceDataLine) {
         override fun close() {
             currentConnection?.id?.let {
                 if (it == id) {
-                    return player.close()
+                    player.close()
+                    currentConnection = null
                 }
             }
-            currentConnection = null
             connections.remove(state.id)
         }
 
         override fun seek(position: Int) {
             this@AudioConnectionFactory.load(state)
             player.seek(position)
+            this@AudioConnectionFactory.load(state)
         }
 
         override fun isPlaying(): Boolean {
