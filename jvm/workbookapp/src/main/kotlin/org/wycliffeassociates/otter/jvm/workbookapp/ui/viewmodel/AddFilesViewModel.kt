@@ -72,8 +72,7 @@ class AddFilesViewModel : ViewModel() {
             arrayOf(
                 FileChooser.ExtensionFilter(
                     messages["oratureFileTypes"],
-                    "*.${OratureFileFormat.ZIP.extension}",
-                    "*.${OratureFileFormat.ORATURE.extension}"
+                    *OratureFileFormat.extensionList.map{ ".$it"}.toTypedArray()
                 )
             ),
             mode = FileChooserMode.Single
