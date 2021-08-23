@@ -71,11 +71,11 @@ class ChapterPage : View() {
         workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
 
-        viewModel.checkCanCompile()
         viewModel.setWorkChunk()
         viewModel.setSelectedChapterTake()
         viewModel.openPlayers()
 
+        viewModel.checkCanCompile()
         chunkListView.refresh()
     }
 
