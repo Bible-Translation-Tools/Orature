@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="9.0.2" transformSequenceNumber="9">
+<install4j version="9.0.4" transformSequenceNumber="9">
   <directoryPresets config="." />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="11">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
@@ -595,6 +595,11 @@ done</postUninstallScript>
     </linuxDeb>
     <macosArchive name="macOS Single Bundle Archive" id="415" launcherId="59">
       <jreBundle jreBundleSource="preCreated" includedJre="macosx-amd64-11.0.3.tar.gz" manualJreEntry="true" />
+      <topLevelFiles>
+        <symlink name="&quot; &quot;" target="/Applications" />
+        <file name=".background/orature-dmg-bg.png" file="./orature-dmg-bg.png" />
+        <file name=".DS_Store" file="./DS_Store" />
+      </topLevelFiles>
     </macosArchive>
   </mediaSets>
 </install4j>
