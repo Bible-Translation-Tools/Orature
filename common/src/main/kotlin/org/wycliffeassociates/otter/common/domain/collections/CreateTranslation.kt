@@ -1,43 +1,44 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Single
 import io.reactivex.rxkotlin.flatMapIterable
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import javax.inject.Inject
 
 class CreateTranslation @Inject constructor(
-    private val collectionRepo: ICollectionRepository,
-    private val resourceMetadataRepo: IResourceMetadataRepository
+    private val languageRepo: ILanguageRepository
 ) {
     /**
-     * Create derived translations for each source RC that has content in sourceMetadata subtree, optionally
-     * limited to resourceId (if not null).
+     * Create translation based on source and target languages
      */
     fun create(
-        sourceMetadata: ResourceMetadata,
-        targetLanguage: Language,
-        resourceId: String? = null
-    ): Single<ResourceMetadata> {
-        // Find the source RC and its linked (help) RCs
-        val sourceLinkedRcs = resourceMetadataRepo.getLinked(sourceMetadata)
-            .toObservable()
-            .flatMapIterable()
-        val sourceAndLinkedRcs = sourceLinkedRcs.startWith(sourceMetadata)
-
-        // If a resourceId filter is requested, apply it.
-        val matchingRcs = when (resourceId) {
-            null -> sourceAndLinkedRcs
-            else -> sourceAndLinkedRcs.filter { resourceId == it.identifier }
-        }
-
-        // Create derived projects for each of the sources
-        return matchingRcs
-            .toList()
-            .flatMap {
-                collectionRepo.deriveTranslation(it, targetLanguage)
-            }
+        sourceLanguage: Language,
+        targetLanguage: Language
+    ): Single<Int> {
+        val translation = Translation(sourceLanguage, targetLanguage)
+        return languageRepo.insertTranslation(translation)
     }
 }

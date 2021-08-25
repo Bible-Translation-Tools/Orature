@@ -1,8 +1,27 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 * {
     /*Primary Color */
     -wa-primary: #015AD9;
     -wa-primary-05: #015AD90D;
     -wa-primary-10: #015AD91A;
+    -wa-primary-20: #015AD933;
     -wa-primary-light: #CEE6FF;
     -wa-primary-dark: #00377C;
 
@@ -52,6 +71,8 @@
     -wa-green-30: rgba(0, 134, 75, 0.3);
 
     -wa-red: rgb(227, 42, 42);    /* this is used as a error indicator */
+    -wa-red-dark: rgb(158, 34, 34);
+    -wa-red-light: rgb(255, 61, 61);
     -wa-red-05: rgba(227, 42, 42, 0.05);
     -wa-red-05-noalpha: rgb(255, 245, 245);
     -wa-red-10: rgba(227, 42, 42, 0.1);

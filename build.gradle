@@ -2,7 +2,6 @@ buildscript {
     apply from: './dependencies.gradle'
 
     repositories {
-        jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
     }
 
@@ -16,12 +15,12 @@ plugins {
     id 'nebula.lint' version "$nebulaLintPluginVer"
     id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
     id "org.sonarqube" version "$sonarcloudPluginVer"
+    id "com.github.hierynomus.license" version "$licensePluginVer"
 }
 
 apply plugin: 'io.gitlab.arturbosch.detekt'
 
 repositories {
-    jcenter()
     maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
 }
 
@@ -44,9 +43,23 @@ tasks.withType(io.gitlab.arturbosch.detekt.Detekt) {
     exclude("**/build/**")
 }
 
+allprojects {
+    apply plugin: "license"
+
+    license {
+        ignoreFailures = true
+        header = rootProject.file("LICENSE")
+        mapping {
+            gradle = 'JAVADOC_STYLE'
+            fxml = 'XML_STYLE'
+        }
+        includes(["**/*.kt", "**/*.java", "**/*.properties", "**/*.css", "**/*.fxml", "**/*.gradle"])
+        excludes(["**/src/main/java/jooq/**/*.java", "**/*.sqlite"])
+    }
+}
+
 subprojects {
     repositories {
-        jcenter()
         maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
     }
 

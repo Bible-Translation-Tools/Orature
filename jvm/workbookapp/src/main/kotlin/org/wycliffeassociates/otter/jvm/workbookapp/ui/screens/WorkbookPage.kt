@@ -1,6 +1,25 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
+import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -8,6 +27,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
@@ -41,6 +61,12 @@ class WorkbookPage : Fragment() {
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
     private val navigator: NavigationMediator by inject()
 
+    private var deleteListener: ChangeListener<Boolean>? = null
+    private var deleteProgressListener: ChangeListener<Boolean>? = null
+    private var deleteSuccessListener: ChangeListener<Boolean>? = null
+    private var deleteFailListener: ChangeListener<Boolean>? = null
+    private var exportProgressListener: ChangeListener<Boolean>? = null
+
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
             viewModel.workbookDataStore.activeChapterProperty.stringBinding {
@@ -60,9 +86,10 @@ class WorkbookPage : Fragment() {
     }
 
     init {
-        initializeProgressDialogs()
-        initializeDeleteConfirmDialog()
         importStylesheet(resources.get("/css/workbook-page.css"))
+        importStylesheet(resources.get("/css/chapter-card.css"))
+        importStylesheet(resources.get("/css/workbook-banner.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
     }
 
     /**
@@ -78,6 +105,11 @@ class WorkbookPage : Fragment() {
         viewModel.workbookDataStore.activeResourceComponentProperty.set(null)
         viewModel.workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
+        selectLastResourceTab()
+        initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
+        initializeDeleteSuccessDialog()
+        initializeDeleteFailDialog()
     }
 
     /**
@@ -85,11 +117,22 @@ class WorkbookPage : Fragment() {
      */
     override fun onUndock() {
         tabMap.clear()
+        removeDialogListeners()
     }
 
     private fun createTabs() {
         viewModel.getAllBookResources().forEach { metadata ->
             tabMap.putIfAbsent(metadata.identifier, WorkbookResourceTab(metadata))
+        }
+    }
+
+    private fun selectLastResourceTab() {
+        val lastResource = viewModel.getLastResource()
+        tabMap.map {
+            val tab = (it.value as? WorkbookResourceTab)
+            if (tab?.resourceMetadata?.identifier == lastResource) {
+                tab.select()
+            }
         }
     }
 
@@ -116,33 +159,87 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
             )
 
             onConfirmAction {
-                viewModel.showDeleteDialogProperty.set(false)
                 viewModel.deleteWorkbook()
             }
 
-            viewModel.showDeleteDialogProperty.onChange {
-                if (it) open() else close()
+            deleteListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
             }
+            viewModel.showDeleteDialogProperty.addListener(deleteListener)
 
             onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
         }
     }
 
+    private fun initializeDeleteSuccessDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectSuccess"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["goHome"])
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["delete"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+            )
+
+            deleteSuccessListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
+            }
+            viewModel.showDeleteSuccessDialogProperty.addListener(deleteSuccessListener)
+
+            onCloseAction { viewModel.goBack() }
+            onCancelAction { viewModel.goBack() }
+        }
+    }
+
+    private fun initializeDeleteFailDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectFail"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["close"])
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["delete"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+            )
+
+            deleteFailListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
+            }
+            viewModel.showDeleteFailDialogProperty.addListener(deleteFailListener)
+
+            onCloseAction { viewModel.showDeleteFailDialogProperty.set(false) }
+            onCancelAction { viewModel.showDeleteFailDialogProperty.set(false) }
+        }
+    }
+
     private fun initializeProgressDialogs() {
         confirmdialog {
-            viewModel.showDeleteProgressDialogProperty.onChange {
-                if (it) {
+            deleteProgressListener = ChangeListener { _, _, value ->
+                if (value) {
                     titleTextProperty.bind(
                         viewModel.activeProjectTitleProperty.stringBinding {
                             it?.let {
@@ -161,8 +258,10 @@ class WorkbookPage : Fragment() {
                     close()
                 }
             }
-            viewModel.showExportProgressDialogProperty.onChange {
-                if (it) {
+            viewModel.showDeleteProgressDialogProperty.addListener(deleteProgressListener)
+
+            exportProgressListener = ChangeListener { _, _, value ->
+                if (value) {
                     titleTextProperty.bind(
                         viewModel.activeProjectTitleProperty.stringBinding {
                             it?.let {
@@ -174,16 +273,31 @@ class WorkbookPage : Fragment() {
                             }
                         }
                     )
-                    messageTextProperty.set(messages["exportProjectMessage"])
+                    messageTextProperty.set(
+                        MessageFormat.format(
+                            messages["exportProjectMessage"],
+                            viewModel.activeProjectTitleProperty.value
+                        )
+                    )
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
                     close()
                 }
             }
+            viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
+
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
         }
+    }
+
+    private fun removeDialogListeners() {
+        viewModel.showDeleteDialogProperty.removeListener(deleteListener)
+        viewModel.showDeleteProgressDialogProperty.removeListener(deleteProgressListener)
+        viewModel.showDeleteFailDialogProperty.removeListener(deleteFailListener)
+        viewModel.showDeleteSuccessDialogProperty.removeListener(deleteSuccessListener)
+        viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
     }
 
     /**

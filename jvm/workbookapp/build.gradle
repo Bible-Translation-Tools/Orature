@@ -109,12 +109,6 @@ dependencies {
     implementation 'com.github.jsarabia:javafx-gridview:-SNAPSHOT'
     implementation "org.controlsfx:controlsfx:$controlsfxVer"
 
-    // FontAwesomeFX
-    implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"
-    implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"
-    implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
-    implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
-
     // Ikonli
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
@@ -156,7 +150,6 @@ dependencies {
     implementation project(':jvm:utils')
     implementation project(':jvm:workbookplugin')
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
-    implementation "org.wycliffeassociates:jdenticon-kotlin:$jdenticonKoltinVer"
     implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
 
     // Atlassian commonmark (for rendering markdown)

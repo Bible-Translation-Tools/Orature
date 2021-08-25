@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
 import javafx.beans.binding.Bindings
@@ -41,8 +59,6 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
     init {
         loadFXML()
         initializeControl()
-
-        importStylesheet(javaClass.getResource("/css/translation-card.css").toExternalForm())
     }
 
     private fun initializeControl() {
@@ -77,7 +93,7 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
         }
 
         seeMoreBtn.apply {
-            textProperty().bind(card.seeMoreTextProperty)
+            textProperty().bind(card.showMoreTextProperty)
             visibleProperty().bind(card.itemsProperty.booleanBinding {
                 it?.let {
                     it.size > card.shownItemsNumberProperty.value
@@ -114,22 +130,22 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
                      true -> {
                         MessageFormat.format(
                             "{0} ({1})",
-                            card.seeLessTextProperty.value,
+                            card.showLessTextProperty.value,
                             hidden
                         )
                      }
                      false -> {
                          MessageFormat.format(
                              "{0} ({1})",
-                             card.seeMoreTextProperty.value,
+                             card.showMoreTextProperty.value,
                              hidden
                          )
                      }
                  }
             },
             card.seeAllProperty,
-            card.seeMoreTextProperty,
-            card.seeLessTextProperty,
+            card.showMoreTextProperty,
+            card.showLessTextProperty,
             card.itemsProperty
         )
     }

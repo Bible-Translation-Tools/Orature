@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.domain.resourcecontainer.project
 
 import org.wycliffeassociates.otter.common.collections.OtterTree
@@ -11,6 +29,7 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.util.*
 import java.util.zip.ZipFile
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
 
 class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
 
@@ -39,7 +58,8 @@ class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
                         file: Path,
                         attrs: BasicFileAttributes
                     ): FileVisitResult {
-                        val filepath = file.toString().substringAfter(sep)
+                        // Previously used file.toString, but the path was not absolute
+                        val filepath = file.absolutePathString().substringAfter(sep)
                         val otterZipFile =
                             otterFileZ(filepath, zipFile, sep, rootPathWithinZip, treeCursor.peek()?.value)
                         treeCursor.peek()?.addChild(OtterTreeNode(otterZipFile))
@@ -59,7 +79,7 @@ class ZipEntryTreeBuilder @Inject constructor() : IZipEntryTreeBuilder {
                     ): FileVisitResult {
                         val newDirNode = OtterTree(
                             otterFileZ(
-                                absolutePath = dir.toString(),
+                                absolutePath = dir.absolutePathString().substringAfter(sep),
                                 rootZipFile = zipFile,
                                 separator = zipFileSystem.separator,
                                 rootPathWithinZip = rootPathWithinZip,

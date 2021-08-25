@@ -1,12 +1,27 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import java.io.File
-import java.time.LocalDate
-import javax.inject.Inject
 import jooq.Tables.DUBLIN_CORE_ENTITY
 import jooq.Tables.RC_LINK_ENTITY
 import jooq.Tables.RESOURCE_LINK
@@ -41,6 +56,9 @@ import org.wycliffeassociates.resourcecontainer.entity.Checking
 import org.wycliffeassociates.resourcecontainer.entity.Manifest
 import org.wycliffeassociates.resourcecontainer.entity.dublincore
 import org.wycliffeassociates.resourcecontainer.entity.project
+import java.io.File
+import java.time.LocalDate
+import javax.inject.Inject
 
 class CollectionRepository @Inject constructor(
     private val database: AppDatabase,
@@ -202,6 +220,19 @@ class CollectionRepository @Inject constructor(
             }
             .doOnError { e ->
                 log.error("Error in getDerivedProjects", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
+    override fun getProject(id: Int): Maybe<Collection> {
+        return Maybe
+            .fromCallable {
+                buildCollection(
+                    collectionDao.fetchById(id)
+                )
+            }
+            .doOnError { e ->
+                log.error("Error in getProject, id: $id", e)
             }
             .subscribeOn(Schedulers.io())
     }
@@ -400,19 +431,6 @@ class CollectionRepository @Inject constructor(
                 log.error("End Metadata", e)
             }
             .subscribeOn(Schedulers.io())
-    }
-
-    override fun deriveTranslation(
-        sourceMetadatas: List<ResourceMetadata>,
-        language: Language
-    ): Single<ResourceMetadata> {
-        return Single.fromCallable {
-            database.transactionResult { dsl ->
-                val derivedMetadata = deriveAndLinkMetadata(sourceMetadatas, language, dsl)
-                val mainDerivedMetadata = derivedMetadata.first()
-                return@transactionResult metadataMapper.mapFromEntity(mainDerivedMetadata, language)
-            }
-        }
     }
 
     private fun findProjectCollection(

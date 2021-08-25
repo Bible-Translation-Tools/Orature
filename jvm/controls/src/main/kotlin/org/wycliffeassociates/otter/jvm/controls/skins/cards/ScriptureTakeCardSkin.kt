@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
 import javafx.fxml.FXML
@@ -12,8 +30,10 @@ import javafx.scene.control.Slider
 import javafx.scene.input.ClipboardContent
 import javafx.scene.input.MouseEvent
 import javafx.scene.input.TransferMode
+import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.paint.Color
+import javafx.scene.transform.Transform
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
@@ -25,9 +45,11 @@ import tornadofx.*
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
 
-    private val dragDropContainer = StackPane()
     lateinit var cardNode: Node
-    protected val back = EmptyCardCell()
+
+    private val dragDropContainer = StackPane()
+    private val back = EmptyCardCell()
+    private val sliderActiveClass = "card--take__slider--active"
 
     @FXML
     lateinit var playBtn: Button
@@ -52,8 +74,8 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
 
     lateinit var audioPlayerController: AudioPlayerController
 
-    private val PLAY_ICON = FontIcon("fa-play")
-    private val PAUSE_ICON = FontIcon("fa-pause")
+    private val playIcon = FontIcon("fa-play")
+    private val pauseIcon = FontIcon("fa-pause")
 
     init {
         loadFXML()
@@ -63,8 +85,12 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     fun initializeControl() {
         bindText()
         initController()
-        back.widthProperty().bind(skinnable.widthProperty())
-        back.heightProperty().bind(skinnable.heightProperty())
+
+        back.apply {
+            addClass("card--scripture-take--empty")
+            prefWidthProperty().bind(skinnable.widthProperty())
+            prefHeightProperty().bind(skinnable.heightProperty())
+        }
 
         markerBtn.visibleProperty().bind(card.allowMarkerProperty())
         markerBtn.managedProperty().bind(markerBtn.visibleProperty())
@@ -84,10 +110,10 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         audioPlayerController.isPlayingProperty.onChangeAndDoNow { isPlaying ->
             if (isPlaying != null && isPlaying != true) {
                 playBtn.textProperty().set(card.playTextProperty().value)
-                playBtn.graphicProperty().set(PLAY_ICON)
+                playBtn.graphicProperty().set(playIcon)
             } else {
                 playBtn.textProperty().set(card.pauseTextProperty().value)
-                playBtn.graphicProperty().set(PAUSE_ICON)
+                playBtn.graphicProperty().set(pauseIcon)
             }
         }
         playBtn.setOnAction {
@@ -130,9 +156,22 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                 )
             )
         }
-        card.audioPlayerProperty().onChangeAndDoNow { player ->
-            player?.let {
-                audioPlayerController.load(it)
+        slider.valueProperty().onChange {
+            when {
+                it > 0.0 -> {
+                    if (!slider.styleClass.contains(sliderActiveClass)) {
+                        slider.styleClass.add(sliderActiveClass)
+                    }
+                }
+                else -> slider.styleClass.remove(sliderActiveClass)
+            }
+        }
+        card.apply {
+            vgrow = Priority.ALWAYS
+            audioPlayerProperty().onChangeAndDoNow { player ->
+                player?.let {
+                    audioPlayerController.load(it)
+                }
             }
         }
         cardNode.apply {

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
 import com.sun.glass.ui.Screen
@@ -10,7 +28,7 @@ import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
@@ -46,7 +64,7 @@ class VerseMarkerViewModel : ViewModel() {
     init {
         val scope = scope as ParameterizedScope
         val audioFile = File(scope.parameters.named["wav"])
-        val wav = WavFile(audioFile)
+        val wav = AudioFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
             scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
@@ -76,7 +94,7 @@ class VerseMarkerViewModel : ViewModel() {
     fun computeImageWidth(secondsOnScreen: Int): Double {
         val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
-        val pixelsInDuration = audioPlayer.getAbsoluteDurationInFrames() / samplesPerPixel
+        val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
         return pixelsInDuration
     }
 
@@ -101,14 +119,14 @@ class VerseMarkerViewModel : ViewModel() {
     fun seekNext() {
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) { audioController?.toggle() }
-        seek(markers.seekNext(audioPlayer.getAbsoluteLocationInFrames()))
+        seek(markers.seekNext(audioPlayer.getLocationInFrames()))
         if (wasPlaying) { audioController?.toggle() }
     }
 
     fun seekPrevious() {
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) { audioController?.toggle() }
-        seek(markers.seekPrevious(audioPlayer.getAbsoluteLocationInFrames()))
+        seek(markers.seekPrevious(audioPlayer.getLocationInFrames()))
         if (wasPlaying) { audioController?.toggle() }
     }
 
@@ -131,22 +149,22 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun placeMarker() {
-        markers.addMarker(audioPlayer.getAbsoluteLocationInFrames())
+        markers.addMarker(audioPlayer.getLocationInFrames())
     }
 
     fun calculatePosition() {
-        val current = audioPlayer.getAbsoluteLocationInFrames()
-        val duration = audioPlayer.getAbsoluteDurationInFrames().toDouble()
+        val current = audioPlayer.getLocationInFrames()
+        val duration = audioPlayer.getDurationInFrames().toDouble()
         val percentPlayed = current / duration
         val pos = percentPlayed * imageWidth
         positionProperty.set(pos)
     }
 
     fun getLocationInFrames(): Int {
-        return audioPlayer.getAbsoluteLocationInFrames()
+        return audioPlayer.getLocationInFrames()
     }
 
     fun getDurationInFrames(): Int {
-        return audioPlayer.getAbsoluteDurationInFrames()
+        return audioPlayer.getDurationInFrames()
     }
 }

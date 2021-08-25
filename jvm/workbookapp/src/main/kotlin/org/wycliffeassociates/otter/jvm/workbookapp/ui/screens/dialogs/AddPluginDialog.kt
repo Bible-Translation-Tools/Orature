@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.scene.layout.Priority
@@ -80,7 +98,7 @@ class AddPluginDialog : OtterDialog() {
                     hgrow = Priority.ALWAYS
 
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                    text = messages["canRecord"]
+                    text = messages["record"]
                     viewModel.canRecordProperty.bindBidirectional(selectedProperty())
                 }
             )
@@ -89,7 +107,7 @@ class AddPluginDialog : OtterDialog() {
                     hgrow = Priority.ALWAYS
 
                     graphic = FontIcon(MaterialDesign.MDI_PENCIL)
-                    text = messages["canEdit"]
+                    text = messages["edit"]
                     viewModel.canEditProperty.bindBidirectional(selectedProperty())
                 }
             )
@@ -107,7 +125,6 @@ class AddPluginDialog : OtterDialog() {
     }
 
     init {
-        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
         setContent(content)
     }
 

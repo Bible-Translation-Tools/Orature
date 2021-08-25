@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.geometry.Pos
@@ -10,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import tornadofx.*
 
+// TODO: Replace triple string blocks with messages calls if this gets used
 class ProjectTypeSelection : Fragment() {
 
     private val viewModel: BookWizardViewModel by inject()
@@ -20,7 +39,7 @@ class ProjectTypeSelection : Fragment() {
             viewModel.projectTypeProperty.stringBinding {
                 it?.let {
                     messages[it.value]
-                } ?: messages["projectType"]
+                } ?: """Project Type"""
             }
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
@@ -38,7 +57,9 @@ class ProjectTypeSelection : Fragment() {
             isFillWidth = false
 
             vbox {
-                label(messages["chooseProjectType"]) {
+                label("""
+                    Choose Project Type
+                """.trimIndent()) {
                     addClass("book-wizard__title")
                 }
                 hbox {
@@ -46,7 +67,11 @@ class ProjectTypeSelection : Fragment() {
                     label {
                         addClass("book-wizard__language")
                         graphic = FontIcon(Material.HEARING)
-                        textProperty().bind(viewModel.sourceLanguageProperty.stringBinding { it?.name })
+                        textProperty().bind(
+                            viewModel.translationProperty.stringBinding {
+                                it?.sourceLanguage?.name
+                            }
+                        )
                     }
                     label {
                         addClass("book-wizard__divider")
@@ -55,7 +80,11 @@ class ProjectTypeSelection : Fragment() {
                     label {
                         addClass("book-wizard__language")
                         graphic = FontIcon(MaterialDesign.MDI_VOICE)
-                        textProperty().bind(viewModel.targetLanguageProperty.stringBinding { it?.name })
+                        textProperty().bind(
+                            viewModel.translationProperty.stringBinding {
+                                it?.targetLanguage?.name
+                            }
+                        )
                     }
                 }
             }
@@ -70,10 +99,15 @@ class ProjectTypeSelection : Fragment() {
                 }
                 vbox {
                     spacing = 10.0
-                    label(messages["draftingProject"]) {
+                    label("""
+                        Drafting Project
+                    """.trimIndent()) {
                         addClass("book-wizard__project-type-title")
                     }
-                    label(messages["draftingProjectInfo"]) {
+                    label("""
+                        Drafting projects emphasize MAST methodologies. 
+                        Recordings are translated from the source language at the chunk level.
+                    """.trimIndent()) {
                         addClass("book-wizard__project-type-info")
                         isWrapText = true
                     }
@@ -94,10 +128,16 @@ class ProjectTypeSelection : Fragment() {
                 }
                 vbox {
                     spacing = 10.0
-                    label(messages["finalRecordingProject"]) {
+                    label("""
+                        Final Recording Project
+                    """.trimIndent()) {
                         addClass("book-wizard__project-type-title")
                     }
-                    label(messages["finalRecordingProjectInfo"]) {
+                    label("""
+                        Once a translation has been created, it may be converted 
+                        to a final recording project which emphasizes re-recording 
+                        the translated material a chapter at a time.
+                        """.trimIndent()) {
                         addClass("book-wizard__project-type-info")
                         isWrapText = true
                     }
@@ -114,7 +154,7 @@ class ProjectTypeSelection : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/book-wizard.css").toExternalForm())
+        importStylesheet(resources.get("/css/book-wizard.css"))
     }
 
     override fun onDock() {

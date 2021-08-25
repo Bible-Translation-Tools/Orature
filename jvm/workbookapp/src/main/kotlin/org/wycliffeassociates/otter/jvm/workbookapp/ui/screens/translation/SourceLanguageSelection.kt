@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import javafx.geometry.Pos
@@ -56,19 +74,23 @@ class SourceLanguageSelection : Fragment() {
                         translationViewModel.selectedSourceLanguageProperty.set(it)
                     }
                 }
+                viewModel.searchQueryProperty.onChange {
+                    it?.let { if (it.isNotBlank()) scrollTo(0) }
+                }
             }
         }
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/translation-wizard.css").toExternalForm())
+        importStylesheet(resources.get("/css/translation-wizard.css"))
+        importStylesheet(resources.get("/css/language-card-cell.css"))
+        importStylesheet(resources.get("/css/filtered-search-bar.css"))
 
         translationViewModel.sourceLanguages.onChange {
             viewModel.regions.setAll(
                 it.list
                     .distinctBy { language -> language.region }
                     .map { language -> language.region }
-                    .filter { region -> region.isNotBlank() }
             )
             viewModel.setFilterMenu()
         }

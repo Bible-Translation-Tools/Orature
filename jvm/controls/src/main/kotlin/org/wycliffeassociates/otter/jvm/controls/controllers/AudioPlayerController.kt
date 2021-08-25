@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -63,7 +81,7 @@ class AudioPlayerController(
 
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
-        audioSlider.max = player.getAbsoluteDurationInFrames().toDouble()
+        audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
     }
 
@@ -115,7 +133,7 @@ class AudioPlayerController(
 
     fun pause() {
         player?.let {
-            startAtLocation = it.getAbsoluteLocationInFrames()
+            startAtLocation = it.getLocationInFrames()
             it.pause()
         }
     }
@@ -135,7 +153,7 @@ class AudioPlayerController(
     private fun percentageToLocation(percent: Double): Int {
         var _percent = if (percent > 1.00) percent / 100F else percent
         player?.let {
-            return (_percent * it.getAbsoluteDurationInFrames()).toInt()
+            return (_percent * it.getDurationInFrames()).toInt()
         } ?: run {
             return 0
         }
@@ -143,7 +161,7 @@ class AudioPlayerController(
 
     private fun playbackPosition(): Int {
         return player?.let {
-            it.getAbsoluteLocationInFrames()
+            it.getLocationInFrames() - it.frameStart
         } ?: 0
     }
 }

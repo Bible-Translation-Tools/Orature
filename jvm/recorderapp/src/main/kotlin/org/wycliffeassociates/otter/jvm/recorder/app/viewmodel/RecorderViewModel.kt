@@ -1,10 +1,27 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.recorder.app.viewmodel
 
 import javafx.animation.AnimationTimer
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.recorder.ActiveRecordingRenderer
 import org.wycliffeassociates.otter.common.recorder.RecordingTimer
 import org.wycliffeassociates.otter.common.recorder.WavFileWriter
@@ -20,11 +37,12 @@ import tornadofx.add
 import tornadofx.getValue
 import tornadofx.setValue
 import java.io.File
+import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class RecorderViewModel : ViewModel() {
 
     val parameters = (scope as ParameterizedScope).parameters
-    val wav = WavFile(File(parameters.named["wav"]), 1, 44100, 16)
+    val wav = AudioFile(File(parameters.named["wav"]), 1, 44100, 16)
     val recorder = AudioRecorder()
 
     val writer = WavFileWriter(wav, recorder.getAudioStream()) {

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -35,18 +53,14 @@ class TranslationViewModel : ViewModel() {
 
     val showProgressProperty = SimpleBooleanProperty(false)
 
-    private val sourceTranslations = mutableListOf<ResourceMetadata>()
+    private val sourceResources = mutableListOf<ResourceMetadata>()
     val existingLanguages = observableListOf<Language>()
-    private val selectedSourceCollectionProperty = SimpleObjectProperty<ResourceMetadata>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         selectedSourceLanguageProperty.onChange { language ->
             language?.let {
-                selectedSourceCollectionProperty.set(
-                    sourceTranslations.singleOrNull { it.language == language }
-                )
                 navigator.dock<TargetLanguageSelection>()
             }
         }
@@ -59,13 +73,13 @@ class TranslationViewModel : ViewModel() {
     }
 
     private fun createTranslation() {
-        val source = selectedSourceCollectionProperty.value
-        val language = selectedTargetLanguageProperty.value
+        val source = selectedSourceLanguageProperty.value
+        val target = selectedTargetLanguageProperty.value
 
-        if (source != null && language != null) {
+        if (source != null && target != null) {
             showProgressProperty.set(true)
             creationUseCase
-                .create(selectedSourceCollectionProperty.value, selectedTargetLanguageProperty.value)
+                .create(source, target)
                 .doOnError { e ->
                     logger.error("Error in creating a translation for collection: $source", e)
                 }
@@ -77,11 +91,10 @@ class TranslationViewModel : ViewModel() {
     }
 
     fun reset() {
-        sourceTranslations.clear()
+        sourceResources.clear()
         sourceLanguages.clear()
         targetLanguages.clear()
         existingLanguages.clear()
-        selectedSourceCollectionProperty.set(null)
         selectedSourceLanguageProperty.set(null)
         selectedTargetLanguageProperty.set(null)
     }
@@ -100,7 +113,7 @@ class TranslationViewModel : ViewModel() {
                 logger.error("Error in initializing source languages", e)
             }
             .subscribe { collections ->
-                sourceTranslations.addAll(collections)
+                sourceResources.addAll(collections)
                 sourceLanguages.addAll(collections.map { it.language })
             }
     }
@@ -120,16 +133,20 @@ class TranslationViewModel : ViewModel() {
     }
 
     private fun loadTranslations() {
-        val source = selectedSourceCollectionProperty.value
-        resourceMetadataRepository
-            .getTargets(source)
+        languageRepo
+            .getAllTranslations()
+            .map { list ->
+                list.filter {
+                    it.source == selectedSourceLanguageProperty.value
+                }
+            }
             .observeOnFx()
             .doOnError { e ->
                 logger.error("Error loading translations", e)
             }
             .subscribe { translations ->
                 existingLanguages.setAll(
-                    translations.map { it.language }.intersect(targetLanguages)
+                    translations.map { it.target }.intersect(targetLanguages)
                 )
             }
     }

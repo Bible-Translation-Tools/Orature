@@ -1,8 +1,25 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.application.Platform
-import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -13,20 +30,22 @@ import javafx.scene.control.MenuItem
 import javafx.scene.control.ToggleGroup
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.data.primitives.ContainerType
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.common.data.workbook.Translation
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.CoverArtAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
-import org.wycliffeassociates.otter.jvm.controls.button.CheckboxButton
+import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
-import org.wycliffeassociates.otter.jvm.workbookapp.enums.SlugsEnum
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
 import java.io.File
 import java.util.function.Predicate
@@ -36,41 +55,38 @@ class BookWizardViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(BookWizardViewModel::class.java)
 
-    @Inject lateinit var collectionRepo: ICollectionRepository
-    @Inject lateinit var creationUseCase: CreateProject
-    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var creationUseCase: CreateProject
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+    @Inject
+    lateinit var workbookRepo: IWorkbookRepository
 
     private val navigator: NavigationMediator by inject()
 
-    val sourceLanguageProperty = SimpleObjectProperty<Language>()
-    val targetLanguageProperty = SimpleObjectProperty<Language>()
-
+    val translationProperty = SimpleObjectProperty<TranslationCardModel>()
     val projectTypeProperty = SimpleObjectProperty<ProjectType>()
     val selectedBookProperty = SimpleObjectProperty<Collection>()
 
     val searchQueryProperty = SimpleStringProperty("")
     val showProgressProperty = SimpleBooleanProperty(false)
 
-    private val anthologyVisibleProperty = SimpleBooleanProperty()
-    private val activeProjectTitleProperty = SimpleStringProperty()
-    private val activeProjectCoverProperty = SimpleObjectProperty<File>()
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
-    private val books = observableListOf<Collection>()
+    private val books = observableListOf<BookCardData>()
     private val sourceCollections = observableListOf<Collection>()
     private val selectedSourceProperty = SimpleObjectProperty<Collection>()
     val filteredBooks = FilteredList(books)
-    val existingBooks = observableListOf<Collection>()
-
+    val existingBooks = observableListOf<Workbook>()
     val menuItems = observableListOf<MenuItem>()
-    private val selectedAnthologies = observableListOf<SlugsEnum>()
 
-    private var anthologiesPredicate = Predicate<Collection> { true }
-    private var queryPredicate = Predicate<Collection> { true }
-
-    private val lastOTBookSort = 39
+    private var queryPredicate = Predicate<BookCardData> { true }
 
     private val sortByProperty = SimpleObjectProperty<BookSortBy>(BookSortBy.BOOK_ORDER)
-    private val sourcesToggleGroup = ToggleGroup()
+    private val resourcesToggleGroup = ToggleGroup()
     private val sortByToggleGroup = ToggleGroup()
 
     init {
@@ -81,7 +97,6 @@ class BookWizardViewModel : ViewModel() {
         selectedSourceProperty.onChange {
             it?.let { collection ->
                 loadChildren(collection)
-                loadExistingProjects(collection)
             }
         }
 
@@ -98,7 +113,7 @@ class BookWizardViewModel : ViewModel() {
             .map {
                 it.filter { collection ->
                     val sourceLanguage = collection.resourceContainer?.language?.slug
-                    val selectedLanguage = sourceLanguageProperty.value.slug
+                    val selectedLanguage = translationProperty.value.sourceLanguage.slug
                     sourceLanguage == selectedLanguage
                 }
             }
@@ -120,31 +135,36 @@ class BookWizardViewModel : ViewModel() {
                 logger.error("Error in loading children", e)
             }
             .subscribe { retrieved ->
-                books.setAll(retrieved)
+                val bookViewDataList = retrieved
+                    .map {
+                        val artwork = if (it.resourceContainer != null) {
+                            ArtworkAccessor(
+                                directoryProvider,
+                                it.resourceContainer!!,
+                                it.slug
+                            ).getArtwork(ImageRatio.TWO_BY_ONE)
+                        } else {
+                            null
+                        }
+
+                        BookCardData(it, artwork)
+                    }
+                books.setAll(bookViewDataList)
             }
     }
 
-    private fun loadExistingProjects(source: Collection) {
-        existingBooks.clear()
-        collectionRepo
-            .getDerivedProjects()
-            .map { list ->
-                list
-                    .filter {
-                        it.resourceContainer?.type == ContainerType.Book
-                    }
-                    .filter {
-                        it.resourceContainer?.language == targetLanguageProperty.value
-                    }
-                    .filter {
-                        it.resourceContainer?.identifier == source.resourceContainer?.identifier
-                    }
-            }
+    fun loadExistingProjects() {
+        val translation = Translation(
+            translationProperty.value.sourceLanguage,
+            translationProperty.value.targetLanguage
+        )
+        workbookRepo
+            .getProjects(translation)
             .doOnError { e ->
                 logger.error("Error in loading existing projects", e)
             }
             .subscribe { retrieved ->
-                existingBooks.addAll(retrieved)
+                existingBooks.setAll(retrieved)
             }
     }
 
@@ -152,57 +172,52 @@ class BookWizardViewModel : ViewModel() {
         sourceCollections.clear()
         books.clear()
         existingBooks.clear()
-        anthologiesPredicate = Predicate { true }
         queryPredicate = Predicate { true }
         searchQueryProperty.set("")
-        selectedAnthologies.clear()
         selectedBookProperty.set(null)
         selectedSourceProperty.set(null)
         projectTypeProperty.set(null)
     }
 
     private fun bindFilterProperties() {
-        selectedAnthologies.onChange {
-            anthologiesPredicate = if (it.list.isEmpty()) {
-                Predicate { true }
-            } else {
-                Predicate { collection -> belongsToAnthologies(collection.sort) }
-            }
-            filteredBooks.predicate = anthologiesPredicate.and(queryPredicate)
-        }
-
         searchQueryProperty.onChange { query ->
             queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
-                Predicate { collection ->
-                    collection.slug.startsWith(query, true)
-                        .or(collection.titleKey.startsWith(query, true))
+                Predicate { viewData ->
+                    viewData.collection.slug.contains(query, true)
+                        .or(viewData.collection.titleKey.contains(query, true))
                 }
             }
-            filteredBooks.predicate = queryPredicate.and(anthologiesPredicate)
+            filteredBooks.predicate = queryPredicate
         }
 
         sortByProperty.onChange {
             it?.let { sortBy ->
                 when (sortBy) {
-                    BookSortBy.BOOK_ORDER -> books.sortBy { collection -> collection.sort }
-                    BookSortBy.ALPHABETICAL -> books.sortBy { collection -> collection.titleKey }
+                    BookSortBy.BOOK_ORDER -> books.sortBy { it.collection.sort }
+                    BookSortBy.ALPHABETICAL -> books.sortBy { it.collection.titleKey }
                 }
             }
         }
     }
 
     private fun createProject(collection: Collection) {
-        targetLanguageProperty.value?.let { language ->
+        translationProperty.value?.let { translation ->
             showProgressProperty.set(true)
 
+            val artworkAccessor = ArtworkAccessor(
+                directoryProvider,
+                collection.resourceContainer!!,
+                collection.slug
+            )
             activeProjectTitleProperty.set(collection.titleKey)
-            val accessor = CoverArtAccessor(collection.resourceContainer!!, collection.slug)
-            activeProjectCoverProperty.set(accessor.getArtwork())
+            activeProjectCoverProperty.set(
+                artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+            )
 
             creationUseCase
-                .create(collection, language)
+                .create(collection, translation.targetLanguage)
                 .doOnError { e ->
                     logger.error("Error in creating a project for collection: $collection", e)
                 }
@@ -228,23 +243,6 @@ class BookWizardViewModel : ViewModel() {
         val items = mutableListOf<MenuItem>()
         items.add(createMenuSeparator(messages["resources"]))
         items.addAll(resourcesMenuItems())
-        items.add(createMenuSeparator(messages["anthology"], anthologyVisibleProperty))
-        items.add(
-            createCheckboxMenuItem(messages["oldTestament"], anthologyVisibleProperty) { selected ->
-                when (selected) {
-                    true -> selectedAnthologies.add(SlugsEnum.OT)
-                    else -> selectedAnthologies.remove(SlugsEnum.OT)
-                }
-            }
-        )
-        items.add(
-            createCheckboxMenuItem(messages["newTestament"], anthologyVisibleProperty) { selected ->
-                when (selected) {
-                    true -> selectedAnthologies.add(SlugsEnum.NT)
-                    else -> selectedAnthologies.remove(SlugsEnum.NT)
-                }
-            }
-        )
         items.add(createMenuSeparator(messages["sortBy"]))
         items.add(
             createRadioMenuItem(messages["bookOrder"], true, sortByToggleGroup) { selected ->
@@ -260,48 +258,22 @@ class BookWizardViewModel : ViewModel() {
         menuItems.setAll(items)
     }
 
-    private fun createMenuSeparator(label: String, visibleProperty: BooleanProperty? = null): MenuItem {
+    private fun resourcesMenuItems(): List<MenuItem> {
+        return sourceCollections.mapIndexed { index, collection ->
+            val preselected = index == 0
+            createRadioMenuItem(collection.titleKey, preselected, resourcesToggleGroup) { selected ->
+                if (selected) {
+                    selectedSourceProperty.set(collection)
+                }
+            }
+        }
+    }
+
+    private fun createMenuSeparator(label: String): MenuItem {
         return CustomMenuItem().apply {
             styleClass.add("filtered-search-bar__menu__separator")
             content = Label(label)
             isHideOnClick = false
-            visibleProperty?.let {
-                visibleProperty().bind(it)
-            }
-        }
-    }
-
-    private fun createCheckboxMenuItem(
-        label: String,
-        visibleProperty: BooleanProperty? = null,
-        onChecked: (Boolean) -> Unit
-    ): MenuItem {
-        return CustomMenuItem().apply {
-            content = CheckboxButton().apply {
-                text = label
-                tooltip(label)
-                selectedProperty().onChange {
-                    onChecked(it)
-                }
-                visibleProperty?.onChange { if (!it) isSelected = false }
-            }
-            isHideOnClick = false
-            visibleProperty?.let {
-                visibleProperty().bind(it)
-            }
-        }
-    }
-
-    private fun resourcesMenuItems(): List<MenuItem> {
-        return sourceCollections.map { collection ->
-            val preselected = collection.slug == SlugsEnum.ULB.slug
-            createRadioMenuItem(collection.titleKey, preselected, sourcesToggleGroup) { selected ->
-                if (selected) {
-                    selectedSourceProperty.set(collection)
-                    anthologyVisibleProperty.set(collection.slug == SlugsEnum.ULB.slug)
-                    selectedAnthologies.clear()
-                }
-            }
         }
     }
 
@@ -323,17 +295,5 @@ class BookWizardViewModel : ViewModel() {
             }
             isHideOnClick = false
         }
-    }
-
-    private fun belongsToAnthologies(sort: Int): Boolean {
-        if (selectedAnthologies.isEmpty()) return true
-
-        return selectedAnthologies.map { anthology ->
-            when (anthology) {
-                SlugsEnum.OT -> sort <= lastOTBookSort
-                SlugsEnum.NT -> sort > lastOTBookSort
-                else -> false
-            }
-        }.reduce { acc, b -> acc || b }
     }
 }

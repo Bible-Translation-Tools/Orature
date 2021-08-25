@@ -1,4 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2020, 2021 Wycliffe Associates
+
+    This file is part of Orature.
+
+    Orature is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Orature is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
 
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.*?>
@@ -22,12 +42,12 @@
                     <children>
                         <JFXButton fx:id="deleteBtn" styleClass="btn, btn--secondary, workbook-banner__btn--delete" text="delete" underline="true">
                             <graphic>
-                                <FontIcon iconLiteral="mdi-minus" />
+                                <FontIcon iconLiteral="mdi-delete" />
                             </graphic>
                         </JFXButton>
-                        <JFXButton fx:id="exportBtn" styleClass="btn, btn--primary, workbook-banner__btn--export" text="export" underline="true">
+                        <JFXButton fx:id="exportBtn" styleClass="btn, btn--primary" text="export" underline="true">
                             <graphic>
-                                <FontIcon iconLiteral="mdi-upload" />
+                                <FontIcon iconLiteral="mdi-cloud-upload" />
                             </graphic>
                         </JFXButton>
                     </children>

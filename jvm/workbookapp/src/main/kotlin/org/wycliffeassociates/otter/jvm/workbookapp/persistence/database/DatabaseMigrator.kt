@@ -1,12 +1,33 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.AudioPluginEntity
 import jooq.tables.InstalledEntity
+import jooq.tables.LanguageEntity
+import jooq.tables.TranslationEntity
 import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
+import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 2
+const val SCHEMA_VERSION = 4
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -17,6 +38,8 @@ class DatabaseMigrator {
         if (currentVersion != SCHEMA_VERSION) {
             currentVersion = migrate0to1(dsl, currentVersion)
             currentVersion = migrate1to2(dsl, currentVersion)
+            currentVersion = migrate2to3(dsl, currentVersion)
+            currentVersion = migrate3to4(dsl, currentVersion)
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -89,5 +112,59 @@ class DatabaseMigrator {
         } else {
             current
         }
+    }
+
+    /**
+     * Version 3
+     * Adds a column for the region to the languages table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate2to3(dsl: DSLContext, current: Int): Int {
+        return if (current < 3) {
+            try {
+                dsl
+                    .alterTable(LanguageEntity.LANGUAGE_ENTITY)
+                    .addColumn(LanguageEntity.LANGUAGE_ENTITY.REGION)
+                    .execute()
+                logger.info("Updated database from version 2 to 3")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+            }
+            return 3
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 4
+     * Create translation table
+     */
+    private fun migrate3to4(dsl: DSLContext, current: Int): Int {
+        return if (current < 4) {
+            dsl
+                .createTableIfNotExists(
+                    TranslationEntity.TRANSLATION_ENTITY
+                )
+                .column(TranslationEntity.TRANSLATION_ENTITY.ID)
+                .column(TranslationEntity.TRANSLATION_ENTITY.SOURCE_FK)
+                .column(TranslationEntity.TRANSLATION_ENTITY.TARGET_FK)
+                .constraints(
+                    DSL.primaryKey(TranslationEntity.TRANSLATION_ENTITY.ID),
+                    DSL.unique(
+                        TranslationEntity.TRANSLATION_ENTITY.SOURCE_FK,
+                        TranslationEntity.TRANSLATION_ENTITY.TARGET_FK
+                    ),
+                    DSL.foreignKey(TranslationEntity.TRANSLATION_ENTITY.SOURCE_FK)
+                        .references(LanguageEntity.LANGUAGE_ENTITY),
+                    DSL.foreignKey(TranslationEntity.TRANSLATION_ENTITY.TARGET_FK)
+                        .references(LanguageEntity.LANGUAGE_ENTITY)
+                )
+                .execute()
+            logger.info("Updated database from version 3 to 4")
+            return 4
+        } else current
     }
 }

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
@@ -37,7 +55,7 @@ class AddFilesView : View() {
                 addClass("app-drawer-container")
 
                 hbox {
-                    label(messages["addFiles"]).apply {
+                    label(messages["importFiles"]).apply {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
@@ -103,9 +121,12 @@ class AddFilesView : View() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
+        importStylesheet(resources.get("/css/app-drawer.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
 
         initImportDialog()
+        initSuccessDialog()
+        initErrorDialog()
         createSnackBar()
     }
 
@@ -130,6 +151,58 @@ class AddFilesView : View() {
 
         viewModel.showImportDialogProperty.onChange {
             Platform.runLater { if (it) importDialog.open() else importDialog.close() }
+        }
+    }
+
+    private fun initSuccessDialog() {
+        val successDialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it
+                        )
+                    } ?: messages["importResource"]
+                }
+            )
+            messageTextProperty.set(messages["importResourceSuccessMessage"])
+            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+
+            cancelButtonTextProperty.set(messages["close"])
+            onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
+            onCancelAction { viewModel.showImportSuccessDialogProperty.set(false) }
+        }
+
+        viewModel.showImportSuccessDialogProperty.onChange {
+            Platform.runLater { if (it) successDialog.open() else successDialog.close() }
+        }
+    }
+
+    private fun initErrorDialog() {
+        val errorDialog = confirmdialog {
+            titleTextProperty.bind(
+                viewModel.importedProjectTitleProperty.stringBinding {
+                    it?.let {
+                        MessageFormat.format(
+                            messages["importProjectTitle"],
+                            messages["import"],
+                            it
+                        )
+                    } ?: messages["importResource"]
+                }
+            )
+            messageTextProperty.set(messages["importResourceFailMessage"])
+            backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+
+            cancelButtonTextProperty.set(messages["close"])
+            onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }
+            onCancelAction { viewModel.showImportErrorDialogProperty.set(false) }
+        }
+
+        viewModel.showImportErrorDialogProperty.onChange {
+            Platform.runLater { if (it) errorDialog.open() else errorDialog.close() }
         }
     }
 

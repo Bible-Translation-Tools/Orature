@@ -1,38 +1,43 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jfoenix.controls.JFXButton
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
-import javafx.application.Platform
-import javafx.beans.property.ReadOnlyBooleanProperty
-import javafx.beans.property.SimpleListProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
-import javafx.scene.layout.Priority
+import javafx.scene.control.ScrollPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.jvm.controls.banner.ResumeBookBanner
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.controls.card.Action
-import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
-import org.wycliffeassociates.otter.jvm.controls.card.projectcard
-import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
-import org.wycliffeassociates.otter.jvm.utils.images.ImageLoader
-import org.wycliffeassociates.otter.jvm.utils.images.SVGImage
+import org.wycliffeassociates.otter.jvm.controls.card.BookCard
+import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
+import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.ProjectGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ProjectGridViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
-import java.text.MessageFormat
 
 class HomePage : Fragment() {
 
-    private val viewModel: ProjectGridViewModel by inject()
+    private val viewModel: HomePageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
-
-    private val noProjectsProperty: ReadOnlyBooleanProperty
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -47,178 +52,90 @@ class HomePage : Fragment() {
     }
 
     init {
-        importStylesheet<ProjectGridStyles>()
-        importStylesheet<DefaultStyles>()
-        // Setup property bindings to bind to empty property
-        // https://stackoverflow.com/questions/21612969/is-it-possible-to-bind-the-non-empty-state-of-
-        // an-observablelist-inside-an-object
-        val listProperty = SimpleListProperty<Workbook>()
-        listProperty.bind(SimpleObjectProperty(viewModel.projects))
-        noProjectsProperty = listProperty.emptyProperty()
-        initializeProgressDialogs()
+        importStylesheet(resources.get("/css/root.css"))
+        importStylesheet(resources.get("/css/control.css"))
+        importStylesheet(resources.get("/css/home-page.css"))
+        importStylesheet(resources.get("/css/resume-book-banner.css"))
+        importStylesheet(resources.get("/css/new-translation-card.css"))
+        importStylesheet(resources.get("/css/translation-card.css"))
+        importStylesheet(resources.get("/css/book-card.css"))
     }
 
-    override val root = anchorpane {
+    override val root = stackpane {
+        alignment = Pos.TOP_LEFT
 
-        importStylesheet(javaClass.getResource("/css/root.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/control.css").toExternalForm())
-        importStylesheet(javaClass.getResource("/css/projectcard.css").toExternalForm())
+        scrollpane {
+            isFitToWidth = true
+            hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
+            vbox {
+                addClass("home-page__container")
 
-        fitToParentSize()
+                add(
+                    ResumeBookBanner().apply {
+                        resumeTextProperty.set(messages["resume"])
 
-        style {
-            unsafe("-fx-background-color", "#F7FAFF")
-        }
-
-        datagrid(viewModel.projects) {
-            anchorpaneConstraints {
-                topAnchor = 0
-                rightAnchor = 0
-                bottomAnchor = 0
-                leftAnchor = 0
-            }
-            addClass(ProjectGridStyles.projectsGrid)
-            cellWidthProperty.set(176.0)
-            cellHeightProperty.set(224.0)
-            cellCache { item ->
-                projectcard {
-                    titleTextProperty().set(item.target.title)
-                    slugTextProperty().set(item.target.slug)
-                    actionTextProperty().set(messages["openProject"])
-                    languageTextProperty().set(item.target.resourceMetadata.language.name)
-                    coverArtProperty().set(item.coverArtAccessor.getArtwork())
-                    setOnAction {
-                        viewModel.selectProject(item)
-                    }
-                    addActions(
-                        Action(
-                            text = messages["delete"],
-                            iconCode = "gmi-delete",
-                            onClicked = {
-                                showDeleteConfirmDialog(item)
+                        viewModel.resumeBookProperty.onChange {
+                            it?.let { workbook ->
+                                bookTitleProperty.set(workbook.target.title)
+                                backgroundImageFileProperty.set(
+                                    workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+                                )
+                                sourceLanguageProperty.set(workbook.source.language.name)
+                                targetLanguageProperty.set(workbook.target.language.name)
+                                onResumeAction {
+                                    viewModel.selectProject(workbook)
+                                }
                             }
-                        )
-                    )
+                        }
+
+                        visibleProperty().bind(viewModel.resumeBookProperty.isNotNull)
+                        managedProperty().bind(visibleProperty())
+                    }
+                )
+
+                add(
+                    NewTranslationCard().apply {
+                        newTranslationTextProperty.set(messages["createTranslation"])
+                        setOnAction {
+                            viewModel.createTranslation()
+                        }
+                    }
+                )
+
+                vbox {
+                    maxWidth = 800.0
+                    spacing = 20.0
+                    bindChildren(viewModel.translationModels) {
+                        TranslationCard(it.sourceLanguage.name, it.targetLanguage.name, it.books).apply {
+                            setConverter {
+                                BookCard().apply {
+                                    titleProperty.set(it.target.title)
+                                    coverArtProperty.set(
+                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+                                    )
+
+                                    setOnPrimaryAction { viewModel.selectProject(it) }
+                                }
+                            }
+
+                            showMoreTextProperty.set(messages["showMore"])
+                            showLessTextProperty.set(messages["showLess"])
+
+                            setOnNewBookAction {
+                                viewModel.createProject(it)
+                            }
+                        }
+                    }
                 }
             }
-        }
-
-        vbox {
-            anchorpaneConstraints {
-                topAnchor = 0
-                leftAnchor = 0
-                bottomAnchor = 0
-                rightAnchor = 0
-            }
-            alignment = Pos.CENTER
-            vgrow = Priority.ALWAYS
-            label(messages["noProjects"]) {
-                addClass(ProjectGridStyles.noProjectsLabel)
-            }
-            label(messages["noProjectsSubtitle"]) {
-                addClass(ProjectGridStyles.tryCreatingLabel)
-            }
-
-            visibleProperty().bind(noProjectsProperty)
-            managedProperty().bind(visibleProperty())
-        }
-
-        add(JFXButton("", MaterialIconView(MaterialIcon.ADD, "25px")).apply {
-            addClass(ProjectGridStyles.addProjectButton)
-            isDisableVisualFocus = true
-            anchorpaneConstraints {
-                bottomAnchor = 25
-                rightAnchor = 25
-            }
-            action { viewModel.createProject() }
-        })
-    }
-
-    private val confirmDeleteDialog = confirmdialog {
-        root.prefWidthProperty().bind(
-            this@HomePage.root.widthProperty().divide(2)
-        )
-        root.prefHeightProperty().bind(
-            this@HomePage.root.heightProperty().divide(2)
-        )
-
-        messageTextProperty.set(messages["deleteProjectConfirmation"])
-        confirmButtonTextProperty.set(messages["removeProject"])
-        cancelButtonTextProperty.set(messages["keepProject"])
-
-        onCloseAction { close() }
-        onCancelAction { close() }
-    }
-
-    init {
-        with(root) {
-            add(ImageLoader.load(
-                ClassLoader.getSystemResourceAsStream("images/project_home_arrow.svg"),
-                ImageLoader.Format.SVG
-            ).apply {
-                if (this is SVGImage) preserveAspect = false
-                root.widthProperty().onChange {
-                    anchorpaneConstraints { leftAnchor = it / 2.0 }
-                }
-                root.heightProperty().onChange {
-                    anchorpaneConstraints { topAnchor = it / 2.0 + 75.0 }
-                }
-                anchorpaneConstraints {
-                    rightAnchor = 110
-                    bottomAnchor = 10
-                }
-
-                visibleProperty().bind(noProjectsProperty)
-                managedProperty().bind(visibleProperty())
-            })
         }
     }
 
     override fun onDock() {
         navigator.dock(this, breadCrumb)
-        viewModel.loadProjects()
+        viewModel.loadResumeBook()
+        viewModel.loadTranslations()
         viewModel.clearSelectedProject()
         workbookDataStore.activeWorkbookProperty.set(null)
-    }
-
-    private fun initializeProgressDialogs() {
-        val deletingProjectDialog = confirmdialog {
-            titleTextProperty.bind(
-                viewModel.activeProjectTitleProperty.stringBinding {
-                    it?.let {
-                        MessageFormat.format(
-                            messages["deleteProjectTitle"],
-                            messages["delete"],
-                            it
-                        )
-                    }
-                }
-            )
-            messageTextProperty.set(messages["deleteProjectMessage"])
-            backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
-            progressTitleProperty.set(messages["pleaseWait"])
-            showProgressBarProperty.set(true)
-        }
-        viewModel.showDeleteDialogProperty.onChange {
-            Platform.runLater { if (it) deletingProjectDialog.open() else deletingProjectDialog.close() }
-        }
-    }
-
-    private fun showDeleteConfirmDialog(item: Workbook) {
-        confirmDeleteDialog.apply {
-            val titleText = MessageFormat.format(
-                messages["removeProjectTitle"],
-                messages["remove"],
-                item.target.title
-            )
-
-            titleTextProperty.set(titleText)
-            backgroundImageFileProperty.set(item.coverArtAccessor.getArtwork())
-
-            onConfirmAction {
-                close()
-                viewModel.deleteWorkbook(item)
-            }
-        }.open()
     }
 }

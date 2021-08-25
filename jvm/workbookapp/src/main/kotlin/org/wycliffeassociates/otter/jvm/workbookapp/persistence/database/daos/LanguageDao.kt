@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.LANGUAGE_ENTITY
@@ -118,6 +136,21 @@ class LanguageDao(
 
         // Return the ids
         return ((initialLargest + 1)..finalLargest).toList()
+    }
+
+    @Synchronized
+    fun updateRegions(entities: List<LanguageEntity>, dsl: DSLContext = instanceDsl) {
+        dsl.transaction { config ->
+            val transactionDsl = DSL.using(config)
+            entities.forEach { entity ->
+                // Update region of the language entity
+                transactionDsl.
+                    update(LANGUAGE_ENTITY)
+                    .set(LANGUAGE_ENTITY.REGION, entity.region)
+                    .where(LANGUAGE_ENTITY.SLUG.eq(entity.slug))
+                    .execute()
+            }
+        }
     }
 
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): LanguageEntity {

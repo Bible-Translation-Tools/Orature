@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.nhaarman.mockitokotlin2.any
@@ -25,6 +43,7 @@ import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
 class TestWorkbookRepository {
@@ -101,7 +120,10 @@ class TestWorkbookRepository {
         db: IDatabaseAccessors,
         source: Collection = collSource,
         target: Collection = collTarget
-    ) = WorkbookRepository(db).get(source, target)
+    ) = WorkbookRepository(
+        mock(),
+        db
+    ).get(source, target)
 
     private fun resourceSlugArray(resourceMetadatas: List<ResourceMetadata>) =
         resourceMetadatas
@@ -377,7 +399,7 @@ class TestWorkbookRepository {
     fun chunksAreLazyLoad() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
 
         // Load some things that shouldn't trigger chunk fetch, and verify no DB call is made
         Assert.assertEquals(1, chapter.sort)
@@ -393,7 +415,7 @@ class TestWorkbookRepository {
     fun chunksAreCached() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
 
         // Fetch chunks twice, and verify only one DB call is made
         chapter.chunks.blockingLast()
@@ -404,7 +426,7 @@ class TestWorkbookRepository {
     @Test
     fun chunksIsAliasOfChapterChildren() {
         val workbook = buildBasicTestWorkbook()
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
 
         Assert.assertArrayEquals(
             chapter.children.blockingIterable().sortedBy { it.sort }.toTypedArray(),
@@ -415,7 +437,7 @@ class TestWorkbookRepository {
     @Test
     fun subtreeResourcesWork() {
         val workbook = buildBasicTestWorkbook()
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
 
         Assert.assertArrayEquals(arrayOf(resourceMetadataTn), chapter.subtreeResources.toTypedArray())
     }
@@ -423,7 +445,7 @@ class TestWorkbookRepository {
     @Test
     fun resourceGroupsHaveCorrectMetadata() {
         val workbook = buildBasicTestWorkbook()
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
         val resourceGroups = chunk.resources
 
@@ -436,7 +458,7 @@ class TestWorkbookRepository {
     fun resourcesAreLazyLoad() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
         val resourceGroup = chunk.resources.first()
 
@@ -452,7 +474,7 @@ class TestWorkbookRepository {
     @Test
     fun resourceGroupsHaveCorrectResources() {
         val workbook = buildBasicTestWorkbook()
-        val chapter = workbook.source.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.source.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "2" }.blockingSingle()
         val resourceGroup = chunk.resources.firstOrNull()
         Assert.assertNotNull(resourceGroup)
@@ -467,7 +489,7 @@ class TestWorkbookRepository {
     fun pushingToTakesRelayCallsDbWrite() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.target.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.blockingFirst()
         val takes = chunk.audio.takes
 
@@ -490,7 +512,7 @@ class TestWorkbookRepository {
     fun deletingTakeCallsDbWrite() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.target.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "3" }.blockingSingle()
         val takes = chunk.audio.takes
         val take = takes.blockingFirst()
@@ -507,7 +529,7 @@ class TestWorkbookRepository {
     fun settingSelectedTakeCallsDbWrite() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.target.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "3" }.blockingSingle()
         val takes = chunk.audio.takes
         val take = takes.blockingFirst()
@@ -524,7 +546,7 @@ class TestWorkbookRepository {
     fun deletingSelectedTakeResetsSelection() {
         val mockedDb = buildBasicTestDb()
         val workbook = buildBasicTestWorkbook(mockedDb)
-        val chapter = workbook.target.chapters.blockingIterable().minBy { it.sort }!!
+        val chapter = workbook.target.chapters.blockingIterable().minByOrNull { it.sort }!!
         val chunk = chapter.chunks.filter { it.title == "3" }.blockingSingle()
         val takes = chunk.audio.takes
         val take = takes.blockingFirst()

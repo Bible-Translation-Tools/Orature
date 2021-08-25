@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
@@ -29,7 +47,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     init {
         selectedRegions.onChange {
             regionPredicate = if (it.list.isEmpty()) {
-                Predicate { true }
+                Predicate { false }
             } else {
                 Predicate { language -> selectedRegions.contains(language.region) }
             }
@@ -41,9 +59,9 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
                 Predicate { true }
             } else {
                 Predicate { language ->
-                    language.slug.startsWith(query, true)
-                        .or(language.name.startsWith(query, true))
-                        .or(language.anglicizedName.startsWith(query, true))
+                    language.slug.contains(query, true)
+                        .or(language.name.contains(query, true))
+                        .or(language.anglicizedName.contains(query, true))
                 }
             }
             filteredLanguages.predicate = queryPredicate.and(regionPredicate)
@@ -64,7 +82,8 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         items.add(createMenuSeparator(messages["region"]))
         items.addAll(
             regions.map {
-                createMenuItem(it) { selected ->
+                val title = it.ifBlank { messages["unknown"] }
+                createMenuItem(title, true) { selected ->
                     when (selected) {
                         true -> selectedRegions.add(it)
                         else -> selectedRegions.remove(it)
@@ -74,7 +93,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         )
         items.add(createMenuSeparator(messages["display"]))
         items.add(
-            createMenuItem(messages["anglicized"]) { selected ->
+            createMenuItem(messages["anglicized"], false) { selected ->
                 anglicizedProperty.set(selected)
             }
         )
@@ -89,13 +108,18 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         }
     }
 
-    private fun createMenuItem(label: String, onChecked: (Boolean) -> Unit): MenuItem {
+    private fun createMenuItem(
+        label: String,
+        preSelected: Boolean,
+        onChecked: (Boolean) -> Unit
+    ): MenuItem {
         return CustomMenuItem().apply {
             content = CheckboxButton().apply {
                 text = label
                 selectedProperty().onChange {
                     onChecked(it)
                 }
+                isSelected = preSelected
             }
             isHideOnClick = false
         }

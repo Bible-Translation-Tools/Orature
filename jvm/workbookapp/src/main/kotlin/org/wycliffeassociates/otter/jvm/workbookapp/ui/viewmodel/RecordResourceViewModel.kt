@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -45,13 +63,13 @@ class RecordResourceViewModel : ViewModel() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    val recordableViewModel = RecordableViewModel(audioPluginViewModel)
+    private val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
-    private val activeChunk: Chunk by activeChunkProperty
+    private val activeChunk: Chunk? by activeChunkProperty
 
     private val activeResourceProperty = SimpleObjectProperty<Resource>()
-    private val activeResource: Resource by activeResourceProperty
+    private val activeResource: Resource? by activeResourceProperty
 
     private val resourceList: ObservableList<Resource> = observableListOf()
 
@@ -107,9 +125,7 @@ class RecordResourceViewModel : ViewModel() {
 
         workbookDataStore.activeResourceProperty.onChangeAndDoNow {
             activeResourceProperty.set(it)
-            if (it != null) {
-                setHasNextAndPrevious()
-            }
+            setHasNextAndPrevious()
         }
     }
 
@@ -165,12 +181,10 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     fun nextChunk() {
-        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.FORWARD)
     }
 
     fun previousChunk() {
-        recordableViewModel.closePlayers()
         stepToChunk(StepDirection.BACKWARD)
     }
 
