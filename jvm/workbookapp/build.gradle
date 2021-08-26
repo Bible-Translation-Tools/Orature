@@ -17,6 +17,7 @@ javafx {
 }
 
 repositories {
+    maven { url 'https://maven.ej-technologies.com/repository' }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
     maven { url 'https://jitpack.io' }
 }
@@ -165,6 +166,8 @@ dependencies {
 
     // Sentry
     implementation "io.sentry:sentry:$sentryVer"
+
+    implementation "com.install4j:install4j-runtime:$install4jVer"
 }
 
 // tell gradle what to put in the jar
