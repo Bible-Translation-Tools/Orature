@@ -26,7 +26,7 @@ jobs:
           LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
       - name: install4j build
         shell: bash
-        run: docker run -v $(pwd):/repo -v $HOME/signing.p12:/root/signing.p12 -e ORG_GRADLE_PROJECT_githubRepoUrl -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword -e ORG_GRADLE_PROJECT_githubOauthToken -e ORG_GRADLE_PROJECT_sentryDsn -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp wycliffeassociates/install4j-docker:9.0.2 ./gradlew :jvm:workbookapp:install4jdeploy
+        run: docker run -v $(pwd):/repo -v $HOME/signing.p12:/root/signing.p12 -e CI_REF_NAME_SLUG -e ORG_GRADLE_PROJECT_githubRepoUrl -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp -e ORG_GRADLE_PROJECT_gradlewwinKeystorePassword -e ORG_GRADLE_PROJECT_githubOauthToken -e ORG_GRADLE_PROJECT_sentryDsn -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp wycliffeassociates/install4j-docker:9.0.2 ./gradlew :jvm:workbookapp:install4jdeploy
         env:
           ORG_GRADLE_PROJECT_gradlewCommandLicenseProp: ${{ secrets.INSTALL4J_LICENSE_9 }}
           ORG_GRADLE_PROJECT_githubRepoUrl: https://api.github.com/repos/OratureCrashReports/orature-crash-reports/issues
