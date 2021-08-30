@@ -3,7 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmodel.AppUpdaterViewModel
 import tornadofx.*
 
-class UpdaterView: View() {
+class UpdaterView : View() {
 
     val vm: AppUpdaterViewModel by inject()
 
@@ -11,29 +11,24 @@ class UpdaterView: View() {
         vm.applyScheduledUpdate()
     }
 
-    override val root = stackpane {
+    override val root = borderpane {
+        styleClass.add("app-drawer__section")
 
-        borderpane {
-            fitToParentSize()
+        top = label(messages["update"]) {
+            styleClass.add("app-drawer__title")
+        }
 
-            styleClass.add("app-drawer__section")
+        center = stackpane {
+            add<NoUpdatesAvailable>()
+            add<UpdateWillCompleteLaterFragment>()
+            add<UpdateCompleteFragment>()
+            add<UpdateDownloadingFragment>()
+            add<UpdateAvailableFragment>()
+            add<CheckForUpdatesFragment>()
 
-            top = label(messages["update"]) {
-                styleClass.add("app-drawer__title")
-            }
-
-            center = stackpane {
-                add<NoUpdatesAvailable>()
-                add<UpdateWillCompleteLaterFragment>()
-                add<UpdateCompleteFragment>()
-                add<UpdateDownloadingFragment>()
-                add<UpdateAvailableFragment>()
-                add<CheckForUpdatesFragment>()
-
-                style {
-                    paddingTop = 20.0
-                    paddingBottom = 10.0
-                }
+            style {
+                paddingTop = 20.0
+                paddingBottom = 10.0
             }
         }
     }

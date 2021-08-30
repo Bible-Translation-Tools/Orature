@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmodel
 
+import java.io.FileNotFoundException
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -11,6 +12,7 @@ import tornadofx.ViewModel
 
 class AppUpdaterViewModel : ViewModel() {
 
+    val showOffline = SimpleBooleanProperty(false)
     val showCheckForUpdate = SimpleBooleanProperty(true)
     val showUpdateAvailable = SimpleBooleanProperty(false)
     val showUpdateDownloading = SimpleBooleanProperty(false)
@@ -21,7 +23,6 @@ class AppUpdaterViewModel : ViewModel() {
     val percentCompleteProperty = SimpleIntegerProperty()
     val statusMessageProperty = SimpleStringProperty()
     val detailedMessageProperty = SimpleStringProperty()
-
 
     val updateUrlText = SimpleStringProperty()
     val updateSize = SimpleStringProperty()
@@ -36,15 +37,21 @@ class AppUpdaterViewModel : ViewModel() {
     val launcher = UpdateLauncher(progressListener)
 
     fun checkForUpdates() {
-        showCheckForUpdate.set(false)
-        val result = updater.checkUpdate()
-        if (result.possibleUpdateEntry != null) {
-            showUpdateAvailable.set(true)
-            updateVersion.set(result.possibleUpdateEntry.newVersion)
-            updateSize.set(result.possibleUpdateEntry.fileSizeVerbose)
-            updateUrlText.set(result.possibleUpdateEntry.url.toString())
-        } else {
-            showNoUpdatesAvailable.set(true)
+        try {
+            showOffline.set(false)
+            val result = updater.checkUpdate()
+            showCheckForUpdate.set(false)
+            if (result.possibleUpdateEntry != null) {
+                showUpdateAvailable.set(true)
+                updateVersion.set(result.possibleUpdateEntry.newVersion)
+                updateSize.set(result.possibleUpdateEntry.fileSizeVerbose)
+                updateUrlText.set(result.possibleUpdateEntry.url.toString())
+            } else {
+                showNoUpdatesAvailable.set(true)
+            }
+        } catch (e: FileNotFoundException) {
+        } catch (e: Exception) {
+            showOffline.set(true)
         }
     }
 

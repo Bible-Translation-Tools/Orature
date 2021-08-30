@@ -26,6 +26,11 @@ class CheckForUpdatesFragment : Fragment() {
             label("${info.getVersion()}") {
                 styleClass.add("app-drawer__text")
             }
+            label(messages["updateFailedNoInternet"]) {
+                styleClass.addAll("app-drawer__text", "app-drawer__text--error")
+                visibleProperty().bind(vm.showOffline)
+                managedProperty().bind(visibleProperty())
+            }
         }
 
         add(
