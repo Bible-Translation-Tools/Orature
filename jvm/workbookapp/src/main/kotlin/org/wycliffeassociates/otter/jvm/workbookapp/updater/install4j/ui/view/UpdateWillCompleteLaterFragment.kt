@@ -16,7 +16,7 @@ class UpdateWillCompleteLaterFragment : Fragment() {
 
         styleClass.add("app-drawer__section")
 
-        label(messages["updateSchedule"]) {
+        label(messages["updateScheduled"]) {
             styleClass.add("app-drawer__subtitle")
         }
 

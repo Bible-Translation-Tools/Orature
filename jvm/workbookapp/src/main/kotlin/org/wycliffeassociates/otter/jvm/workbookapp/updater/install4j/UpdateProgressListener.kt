@@ -5,6 +5,7 @@ import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.StringProperty
+import org.slf4j.LoggerFactory
 
 class UpdateProgressListener(
     private val screenActivatedProperty: StringProperty? = null,
@@ -16,14 +17,17 @@ class UpdateProgressListener(
     private val indeterminateProgressProperty: BooleanProperty? = null
 ) : ApplicationLauncher.ProgressListener {
 
+    private val logger = LoggerFactory.getLogger(UpdateProgressListener::class.java)
 
     override fun screenActivated(id: String?) {
+        logger.info("Update Screen Activated: $id")
         Platform.runLater {
             screenActivatedProperty?.set(id)
         }
     }
 
     override fun actionStarted(id: String?) {
+        logger.info("Update Action Started: $id")
         Platform.runLater {
             actionStartedProperty?.set(id)
         }
@@ -54,6 +58,7 @@ class UpdateProgressListener(
     }
 
     override fun indeterminateProgress(indeterminateProgress: Boolean) {
+        logger.info("Update indeterminate progress: $indeterminateProgress")
         Platform.runLater {
             indeterminateProgressProperty?.set(indeterminateProgress)
         }
