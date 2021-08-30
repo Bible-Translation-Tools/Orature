@@ -8,21 +8,16 @@ class AudioConverter {
     fun wavToMp3(
         wavFile: File,
         mp3File: File,
-        bitrate: String,
-        delete: Boolean
+        bitrate: Int = 64
     ): Completable {
         return Completable.fromCallable {
             val args = arrayOf(
-                "-b", bitrate,
+                "-b", bitrate.toString(),
                 "-m", "m",
                 wavFile.invariantSeparatorsPath,
                 mp3File.invariantSeparatorsPath
             )
             jump3r().run(args)
-
-            if (delete) {
-                wavFile.delete()
-            }
         }
     }
 }
