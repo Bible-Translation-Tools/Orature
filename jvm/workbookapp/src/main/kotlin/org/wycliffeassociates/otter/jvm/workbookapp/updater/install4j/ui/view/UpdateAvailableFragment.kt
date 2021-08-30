@@ -43,7 +43,7 @@ class UpdateAvailableFragment : Fragment() {
             }
         }
 
-        label(messages["updateURL"]).apply {
+        label(messages["updateUrl"]).apply {
             styleClass.add("app-drawer__subtitle")
         }
 

@@ -5,12 +5,15 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleStringProperty
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.AppUpdater
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.UpdateLauncher
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.UpdateProgressListener
 import tornadofx.ViewModel
 
 class AppUpdaterViewModel : ViewModel() {
+
+    private val logger = LoggerFactory.getLogger(AppUpdaterViewModel::class.java)
 
     val showOffline = SimpleBooleanProperty(false)
     val showCheckForUpdate = SimpleBooleanProperty(true)
@@ -50,7 +53,9 @@ class AppUpdaterViewModel : ViewModel() {
                 showNoUpdatesAvailable.set(true)
             }
         } catch (e: FileNotFoundException) {
+            logger.error("Error checking for updates, config file not found.", e)
         } catch (e: Exception) {
+            logger.error("Error checking for updates.", e)
             showOffline.set(true)
         }
     }
