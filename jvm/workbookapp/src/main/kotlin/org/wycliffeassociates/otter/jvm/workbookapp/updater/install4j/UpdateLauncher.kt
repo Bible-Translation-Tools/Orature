@@ -7,7 +7,7 @@ import kotlin.concurrent.thread
 class UpdateLauncher(private val listener: UpdateProgressListener? = null) : ApplicationLauncher.Callback {
 
     fun update(onComplete: () -> Unit) {
-        ApplicationLauncher.launchApplication("434", null, false, this)
+        ApplicationLauncher.launchApplication("474", null, false, this)
         thread {
             while (!UpdateChecker.isUpdateScheduled()) {
                 Thread.sleep(1000)
