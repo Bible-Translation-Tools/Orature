@@ -43,4 +43,5 @@ ext {
     testFxVer = '4.0.15-alpha'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
+    jump3rVer='1.0.5'
 }
