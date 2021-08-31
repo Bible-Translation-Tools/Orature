@@ -26,6 +26,7 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
@@ -35,6 +36,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
@@ -234,7 +236,7 @@ class ChapterPage : View() {
                 chunkListView = this
                 fitToParentHeight()
                 setCellFactory {
-                    ChunkCell(::onChunkOpen, ::onTakeSelected)
+                    ChunkCell(::getPlayer, ::onChunkOpen, ::onTakeSelected)
                 }
             }
         }
@@ -247,6 +249,10 @@ class ChapterPage : View() {
 
     private fun onTakeSelected(chunk: CardData, take: TakeModel) {
         chunk.chunkSource?.audio?.selectTake(take.take)
+    }
+
+    private fun getPlayer(): IAudioPlayer {
+        return (app as OtterApp).dependencyGraph.injectPlayer()
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {

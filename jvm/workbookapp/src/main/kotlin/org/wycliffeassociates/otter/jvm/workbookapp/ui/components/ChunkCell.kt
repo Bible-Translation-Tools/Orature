@@ -2,13 +2,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 import java.text.MessageFormat
 
 class ChunkCell(
+    private val getPlayer: () -> IAudioPlayer,
     private val onChunkOpen: (CardData) -> Unit,
     private val onTakeSelected: (CardData, TakeModel) -> Unit
 ) : ListCell<CardData>() {
@@ -52,7 +53,7 @@ class ChunkCell(
     }
 
     private fun Take.mapToModel(selected: Boolean): TakeModel {
-        val audioPlayer = AudioBufferPlayer()
+        val audioPlayer = getPlayer()
         audioPlayer.load(this.file)
         return TakeModel(this, selected, audioPlayer)
     }
