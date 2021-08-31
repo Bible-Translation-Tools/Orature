@@ -379,14 +379,15 @@ return console.askYesNo(message, true);
                 <serializedBean>
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
-                      <property name="value" type="string">import java.nio.file.*;
+                      <property name="value" type="string">//import java.nio.file.*;
 
-Path dir = context.getInstallationDirectory().toPath();
+// Path dir = context.getInstallationDirectory().toPath();
 // quit if the current installation is on a read only file system, for example a disk image on macOS
 // or if the directory is not writeable on Linux/Unix. 
 // If there is no "Request privileges" action in the installer, the condition should also
 // check Files.isWritable(dir)
-return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive()));
+//return !Files.getFileStore(dir).isReadOnly() &amp;&amp; ((Util.isWindows() &amp;&amp; !Util.isArchive()) || Util.isMacOS() || (Util.isLinux() &amp;&amp; !Util.isArchive()));
+return true;
 </property>
                     </object>
                   </property>
