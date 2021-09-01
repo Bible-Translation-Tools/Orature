@@ -12,7 +12,12 @@ class UpdateLauncher(private val listener: UpdateProgressListener? = null) : App
     fun update(onComplete: () -> Unit) {
 
         logger.info("Launching update application...")
-        ApplicationLauncher.launchApplication("474", null, false, this)
+        ApplicationLauncher.launchApplication(
+            "474",
+            arrayOf("-Dinstall4j.keepLog=true -Dinstall4j.logToStderr=true"),
+            false,
+            this
+        )
 
         thread {
             while (!UpdateChecker.isUpdateScheduled()) {
