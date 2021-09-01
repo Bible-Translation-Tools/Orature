@@ -14,7 +14,7 @@ class UpdateLauncher(private val listener: UpdateProgressListener? = null) : App
         logger.info("Launching update application...")
         ApplicationLauncher.launchApplication(
             "474",
-            arrayOf("-Dinstall4j.keepLog=true -Dinstall4j.logToStderr=true"),
+            arrayOf("-Dinstall4j.debug=true","-Dinstall4j.logToStderr=true"),
             false,
             this
         )
