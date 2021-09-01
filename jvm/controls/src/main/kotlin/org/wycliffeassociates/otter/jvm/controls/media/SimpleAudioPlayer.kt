@@ -1,79 +1,135 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.media
 
-import com.jfoenix.controls.JFXSlider
-import javafx.beans.property.SimpleObjectProperty
-import javafx.event.EventTarget
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jfoenix.controls.JFXProgressBar
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import tornadofx.*
 import java.io.File
+import java.util.concurrent.TimeUnit
 
-class SimpleAudioPlayer(
-    file: File? = null,
-    player: IAudioPlayer? = null
-) : HBox() {
-    val fileProperty = SimpleObjectProperty<File>(file)
-    val playerProperty = SimpleObjectProperty<IAudioPlayer>(player)
+// Named "Simple" since just displays a progress bar and play/pause button
+// No waveform view
+class SimpleAudioPlayer(private val audioFile: File, private val player: IAudioPlayer) : HBox() {
 
-    private val slider = JFXSlider()
-    private val audioPlayerController = AudioPlayerController(slider)
+    private val logger = LoggerFactory.getLogger(SimpleAudioPlayer::class.java)
 
-    private val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
-    private val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+    val progressBar = JFXProgressBar()
+    val isPlaying = SimpleBooleanProperty(false)
+    var loaded = false
 
     init {
-        alignment = Pos.CENTER
-        spacing = 10.0
-        button {
-            addClass("btn", "btn--icon")
-            graphicProperty().bind(
-                audioPlayerController.isPlayingProperty.objectBinding {
-                    when (it) {
-                        true -> pauseIcon
-                        else -> playIcon
+        style {
+            alignment = Pos.TOP_CENTER
+        }
+        add(progressBar)
+
+        progressBar.progress = 0.0
+        progressBar.hgrow = Priority.ALWAYS
+        progressBar.maxWidth = Double.MAX_VALUE
+
+        // progress update observable
+        var disposable: Disposable? = null
+
+        player.addEventListener { audioEvent ->
+            when (audioEvent) {
+                AudioPlayerEvent.LOAD -> {
+                    Platform.runLater { progressBar.progress = 0.0 }
+                }
+                AudioPlayerEvent.PLAY -> {
+                    isPlaying.set(true)
+                    disposable = startProgressUpdate()
+                }
+                AudioPlayerEvent.PAUSE, AudioPlayerEvent.STOP -> {
+                    disposable?.dispose()
+                    isPlaying.set(false)
+                }
+                AudioPlayerEvent.COMPLETE -> {
+                    disposable?.dispose()
+                    // Make sure we update on the main thread
+                    // Only needed here since rest of events are triggered from FX thread
+                    Platform.runLater {
+                        progressBar.progress = 0.0
+                        isPlaying.set(false)
                     }
                 }
-            )
-            action {
-                audioPlayerController.toggle()
             }
         }
-        add(
-            slider.apply {
-                addClass("wa-slider")
-                hgrow = Priority.ALWAYS
-                value = 0.0
-            }
-        )
-
-        initController()
     }
 
-    private fun initController() {
-        playerProperty.onChange {
-            it?.let {
-                audioPlayerController.load(it)
-            }
-        }
-
-        fileProperty.onChange {
-            it?.let { file ->
-                playerProperty.value?.let { player ->
-                    player.load(file)
-                    audioPlayerController.load(player)
+    fun buttonPressed() {
+        Platform.runLater {
+            if (!isPlaying.value) {
+                if (!loaded) {
+                    player.load(audioFile)
+                    player.play()
+                    loaded = true
+                    return@runLater
                 }
-            }
+                player.play()
+            } else player.pause()
         }
+    }
+
+    fun close() {
+        player.close()
+        loaded = false
+    }
+
+    fun refresh() {
+        player.load(audioFile)
+        loaded = true
+    }
+
+    private fun startProgressUpdate(): Disposable {
+        return Observable
+            .interval(16, TimeUnit.MILLISECONDS)
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in starting progress update", e)
+            }
+            .subscribe {
+                val location = player
+                    .getLocationInFrames()
+                    .toDouble()
+                progressBar.progress = location / player.getDurationInFrames()
+            }
     }
 }
 
-fun EventTarget.simpleaudioplayer(
-    file: File? = null,
-    player: IAudioPlayer? = null,
-    op: SimpleAudioPlayer.() -> Unit = {}
-) = SimpleAudioPlayer(file, player).attachTo(this, op)
+fun simpleaudioplayer(
+    audioFile: File,
+    audioPlayer: IAudioPlayer,
+    init: SimpleAudioPlayer.() -> Unit
+): SimpleAudioPlayer {
+    return SimpleAudioPlayer(audioFile, audioPlayer)
+        .apply {
+            init()
+        }
+}

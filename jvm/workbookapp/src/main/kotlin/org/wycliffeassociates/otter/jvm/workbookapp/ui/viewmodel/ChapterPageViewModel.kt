@@ -34,9 +34,12 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -45,10 +48,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
+import javax.inject.Inject
 
 class ChapterPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -80,6 +87,8 @@ class ChapterPageViewModel : ViewModel() {
     private val navigator: NavigationMediator by inject()
 
     init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
         allContent
             .changes()
             .doOnError { e ->
@@ -270,8 +279,7 @@ class ChapterPageViewModel : ViewModel() {
                 chunk.chunkSource?.audio?.selected?.value?.value?.file
             }
 
-            val audioMerger = (app as OtterApp).dependencyGraph.injectAudioMerger()
-            audioMerger.merge(takes)
+            ConcatenateAudio(directoryProvider).execute(takes)
                 .flatMapCompletable { file ->
                     audioPluginViewModel.import(chapter, file)
                 }

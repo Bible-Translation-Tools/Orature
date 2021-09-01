@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.di
 
 import dagger.Component
-import org.wycliffeassociates.otter.common.device.IAudioMerger
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -34,6 +33,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -65,6 +65,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: AddFilesViewModel)
     fun inject(viewModel: TranslationViewModel)
     fun inject(viewModel: BookWizardViewModel)
+    fun inject(viewModel: ChapterPageViewModel)
 
     fun inject(viewModel: RemovePluginsViewModel)
 
@@ -73,5 +74,4 @@ interface AppDependencyGraph {
 
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer
-    fun injectAudioMerger(): IAudioMerger
 }

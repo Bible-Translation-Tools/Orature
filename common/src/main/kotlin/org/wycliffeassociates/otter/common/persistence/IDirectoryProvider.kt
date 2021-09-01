@@ -90,10 +90,17 @@ interface IDirectoryProvider {
     /** Create a new IFileReader */
     fun newFileReader(file: File): IFileReader
 
+    /** Create temp file */
+    fun createTempFile(prefix: String, suffix: String? = null): File
+
+    /** Clean temporary directory */
+    fun cleanTempDirectory()
+
     val resourceContainerDirectory: File
     val userProfileImageDirectory: File
     val userProfileAudioDirectory: File
     val audioPluginDirectory: File
     val logsDirectory: File
     val cacheDirectory: File
+    val tempDirectory: File
 }

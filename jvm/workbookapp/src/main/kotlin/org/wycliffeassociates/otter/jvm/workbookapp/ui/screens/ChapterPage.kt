@@ -47,7 +47,7 @@ import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
 
-class ChapterPage : View() {
+class ChapterPage : Fragment() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
 
     private val viewModel: ChapterPageViewModel by inject()
@@ -134,12 +134,12 @@ class ChapterPage : View() {
                     addClass("chapter-page__chapter-audio")
                     vgrow = Priority.ALWAYS
 
-                    simpleaudioplayer {
+                    /*simpleaudioplayer {
                         hgrow = Priority.ALWAYS
                         playerProperty.bind(viewModel.chapterPlayerProperty)
                         visibleWhen(playerProperty.isNotNull)
                         managedProperty().bind(visibleProperty())
-                    }
+                    }*/
 
                     hbox {
                         hgrow = Priority.ALWAYS

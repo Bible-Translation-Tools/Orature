@@ -41,6 +41,8 @@ class ChunkCell(
                     .map { take ->
                         take.mapToModel(take == selected)
                     }
+                    .sortedBy { it.selected }
+                    .sortedBy { it.take.file.lastModified() }
                 takes.setAll(takeModels)
             }
 
