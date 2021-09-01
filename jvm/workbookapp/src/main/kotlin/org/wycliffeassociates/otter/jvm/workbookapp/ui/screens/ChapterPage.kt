@@ -134,12 +134,12 @@ class ChapterPage : Fragment() {
                     addClass("chapter-page__chapter-audio")
                     vgrow = Priority.ALWAYS
 
-                    /*simpleaudioplayer {
+                    simpleaudioplayer {
                         hgrow = Priority.ALWAYS
                         playerProperty.bind(viewModel.chapterPlayerProperty)
                         visibleWhen(playerProperty.isNotNull)
                         managedProperty().bind(visibleProperty())
-                    }*/
+                    }
 
                     hbox {
                         hgrow = Priority.ALWAYS

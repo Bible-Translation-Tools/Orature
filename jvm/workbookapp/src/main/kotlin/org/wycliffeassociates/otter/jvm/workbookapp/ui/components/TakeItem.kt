@@ -21,7 +21,7 @@ class TakeItem : HBox() {
     init {
         styleClass.setAll("take-item")
 
-        /*simpleaudioplayer {
+        simpleaudioplayer {
             hgrow = Priority.ALWAYS
 
             takeProperty.onChange { take ->
@@ -30,7 +30,7 @@ class TakeItem : HBox() {
                     playerProperty.set(take.audioPlayer)
                 }
             }
-        }*/
+        }
 
         radiobutton {
             addClass("wa-radio", "wa-radio--bordered")
