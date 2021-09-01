@@ -405,7 +405,9 @@ return true;
                   <property name="script">
                     <object class="com.install4j.api.beans.ScriptProperty">
                       <property name="value" type="string">UpdateDescriptorEntry entry = ((UpdateDescriptor)context.getVariable("updateDescriptor")).getPossibleUpdateEntry();
-
+System.out.println("hello");
+System.out.println(entry);
+return entry;
 if (entry == null) {
     return null;
 } else if (entry.isArchive() &amp;&amp; !entry.isSingleBundle()) {
