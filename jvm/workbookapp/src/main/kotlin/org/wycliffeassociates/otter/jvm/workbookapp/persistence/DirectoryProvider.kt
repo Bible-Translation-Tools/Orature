@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -195,7 +196,8 @@ class DirectoryProvider(
     override fun newFileReader(file: File): IFileReader {
         return when {
             file.isDirectory -> NioDirectoryFileReader(file)
-            file.isFile && file.extension == "zip" -> NioZipFileReader(file)
+            file.isFile && file.extension in OratureFileFormat.extensionList
+                            -> NioZipFileReader(file)
             else -> throw IllegalArgumentException("File type not supported")
         }
     }

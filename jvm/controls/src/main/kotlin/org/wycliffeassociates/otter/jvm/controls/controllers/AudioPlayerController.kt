@@ -58,23 +58,6 @@ class AudioPlayerController(
             } else {
                 disposable = startProgressUpdate()
                 play()
-                _player.addEventListener {
-                    if (
-                        it == AudioPlayerEvent.PAUSE ||
-                        it == AudioPlayerEvent.STOP ||
-                        it == AudioPlayerEvent.COMPLETE
-                    ) {
-                        disposable?.dispose()
-                        Platform.runLater {
-                            isPlayingProperty.set(false)
-                            if (it == AudioPlayerEvent.COMPLETE) {
-                                audioSlider.value = 0.0
-                                _player.getAudioReader()?.seek(0)
-                            }
-                        }
-                    }
-                }
-                isPlayingProperty.set(true)
             }
         }
     }
@@ -83,6 +66,19 @@ class AudioPlayerController(
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
+
+        player.addEventListener {
+            if (it == AudioPlayerEvent.STOP || it == AudioPlayerEvent.COMPLETE) {
+                disposable?.dispose()
+                Platform.runLater {
+                    isPlayingProperty.set(false)
+                    if (it == AudioPlayerEvent.COMPLETE) {
+                        audioSlider.value = 0.0
+                        player.getAudioReader()?.seek(0)
+                    }
+                }
+            }
+        }
     }
 
     private fun initializeSliderActions() {
@@ -96,6 +92,7 @@ class AudioPlayerController(
             dragging = true
         }
         audioSlider.setOnMouseClicked {
+            dragging = false
             val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
             var wasPlaying = false
             if (player?.isPlaying() == true) {
@@ -104,6 +101,10 @@ class AudioPlayerController(
             }
             seek(percentageToLocation(percent))
             if (wasPlaying) {
+                toggle()
+            }
+            if (resumeAfterDrag) {
+                resumeAfterDrag = false
                 toggle()
             }
         }
@@ -124,6 +125,7 @@ class AudioPlayerController(
     }
 
     private fun play() {
+        isPlayingProperty.set(true)
         if (startAtLocation != 0) {
             seek(startAtLocation)
         }
@@ -133,6 +135,7 @@ class AudioPlayerController(
 
     fun pause() {
         player?.let {
+            isPlayingProperty.set(false)
             startAtLocation = it.getLocationInFrames()
             it.pause()
         }
