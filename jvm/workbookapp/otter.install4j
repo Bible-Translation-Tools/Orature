@@ -408,17 +408,7 @@ return true;
 System.out.println("hello");
 System.out.println(entry);
 return entry;
-if (entry == null) {
-    return null;
-} else if (entry.isArchive() &amp;&amp; !entry.isSingleBundle()) {
-    // only installers and single bundle archives on macOS are supported
-    return null;
-} else if (entry.isDownloaded()) {
-    // update has been downloaded already
-    return null;
-} else {
-    return entry;
-}</property>
+</property>
                     </object>
                   </property>
                   <property name="variableName" type="string">updateDescriptorEntry</property>
