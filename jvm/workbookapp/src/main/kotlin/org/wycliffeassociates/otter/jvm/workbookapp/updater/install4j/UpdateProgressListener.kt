@@ -34,24 +34,28 @@ class UpdateProgressListener(
     }
 
     override fun statusMessage(message: String?) {
+        logger.info("status message: $message")
         Platform.runLater {
             statusMessageProperty?.set(message)
         }
     }
 
     override fun detailMessage(message: String?) {
+        logger.info("detail message: $message")
         Platform.runLater {
             detailMessageProperty?.set(message)
         }
     }
 
     override fun percentCompleted(value: Int) {
+        logger.info("percent complete: $value")
         Platform.runLater {
             percentCompletedProperty?.set(value)
         }
     }
 
     override fun secondaryPercentCompleted(value: Int) {
+        logger.info("secondary percent complete: $value")
         Platform.runLater {
             secondaryPercentCompletedProperty?.set(value)
         }
