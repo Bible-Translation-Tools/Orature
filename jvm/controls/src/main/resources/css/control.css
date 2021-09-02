@@ -61,6 +61,15 @@
     -fx-border-width: 0;
 }
 
+.btn--icon:selected {
+    -fx-background-color: -wa-primary-10;
+    -fx-border-width: 0;
+}
+
+.btn--icon:selected .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
 /* -------------- Primary Button -------------- */
 .btn--primary {
     -fx-background-color: -wa-primary-gradient;

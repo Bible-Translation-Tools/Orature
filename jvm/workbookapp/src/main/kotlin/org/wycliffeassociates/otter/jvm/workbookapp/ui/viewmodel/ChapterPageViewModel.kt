@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
@@ -31,6 +32,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -84,6 +86,7 @@ class ChapterPageViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
+    private val disposables = CompositeDisposable()
     private val navigator: NavigationMediator by inject()
 
     init {
@@ -113,6 +116,13 @@ class ChapterPageViewModel : ViewModel() {
         }
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+
+        chapterCardProperty.onChangeAndDoNow { chapter ->
+            clearDisposables()
+            chapter?.chapterSource?.let { chapterSource ->
+                subscribeSelectedTakePropertyToRelay(chapterSource.audio)
+            }
+        }
     }
 
     fun breadcrumbTitleBinding(view: UIComponent): StringBinding {
@@ -196,14 +206,9 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    fun setSelectedChapterTake() {
-        chapterCardProperty.value?.let { chapter ->
-            val selected = chapter.chapterSource?.audio?.selected?.value?.value
-            val take = chapter.chapterSource?.audio?.getAllTakes()?.singleOrNull {
-                it == selected
-            }
-            selectedChapterTakeProperty.set(take)
-        }
+    fun setSelectedChapterTake(take: Take? = null) {
+        selectedChapterTakeProperty.set(take)
+        openPlayers()
     }
 
     fun recordChapter() {
@@ -228,9 +233,7 @@ class ChapterPageViewModel : ViewModel() {
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
-                        TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
-                            selectLastChapterTake()
-                        }
+                        TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {}
                     }
                 }
         } ?: throw IllegalStateException("Recordable is null")
@@ -238,6 +241,7 @@ class ChapterPageViewModel : ViewModel() {
 
     fun processTakeWithPlugin(pluginType: PluginType) {
         selectedChapterTakeProperty.value?.let { take ->
+            val audio = chapterCardProperty.value!!.chapterSource!!.audio
             closePlayers()
             contextProperty.set(pluginType)
             currentTakeNumberProperty.set(take.number)
@@ -246,8 +250,8 @@ class ChapterPageViewModel : ViewModel() {
                 .flatMapSingle { plugin ->
                     fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                     when (pluginType) {
-                        PluginType.EDITOR -> audioPluginViewModel.edit(take)
-                        PluginType.MARKER -> audioPluginViewModel.mark(take)
+                        PluginType.EDITOR -> audioPluginViewModel.edit(audio, take)
+                        PluginType.MARKER -> audioPluginViewModel.mark(audio, take)
                         else -> null
                     }
                 }
@@ -261,7 +265,13 @@ class ChapterPageViewModel : ViewModel() {
                     fire(PluginClosedEvent(pluginType))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
-                        TakeActions.Result.SUCCESS -> {}
+                        else -> {
+                            when (pluginType) {
+                                PluginType.EDITOR, PluginType.MARKER -> {
+
+                                }
+                            }
+                        }
                     }
                 }
         }
@@ -291,9 +301,7 @@ class ChapterPageViewModel : ViewModel() {
                     isCompilingProperty.set(false)
                 }
                 .observeOnFx()
-                .subscribe {
-                    selectLastChapterTake()
-                }
+                .subscribe()
         }
     }
 
@@ -368,13 +376,20 @@ class ChapterPageViewModel : ViewModel() {
             }.ignoreElement()
     }
 
-    private fun selectLastChapterTake() {
-        chapterCardProperty.value?.let { chapter ->
-            chapter.chapterSource?.audio?.getAllTakes()?.last()?.let { take ->
-                chapter.chapterSource.audio.selectTake(take)
-                setSelectedChapterTake()
-                openPlayers()
+    private fun clearDisposables() {
+        disposables.clear()
+    }
+
+    private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
+        audio
+            .selected
+            .doOnError { e ->
+                logger.error("Error in subscribing take to relay for audio: $audio", e)
             }
-        }
+            .observeOnFx()
+            .subscribe { takeHolder ->
+                setSelectedChapterTake(takeHolder.value)
+            }
+            .let { disposables.add(it) }
     }
 }

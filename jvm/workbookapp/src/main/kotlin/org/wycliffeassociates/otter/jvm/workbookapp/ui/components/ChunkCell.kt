@@ -1,5 +1,24 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.collections.ObservableList
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -34,23 +53,30 @@ class ChunkCell(
                 )
             )
 
-            item.chunkSource?.let { chunk ->
-                val selected = chunk.audio.selected.value?.value
-                val takeModels = chunk.audio.getAllTakes()
-                    .filter { it.deletedTimestamp.value?.value == null }
-                    .map { take ->
-                        take.mapToModel(take == selected)
-                    }
-                    .sortedBy { it.selected }
-                    .sortedBy { it.take.file.lastModified() }
-                takes.setAll(takeModels)
-            }
+            setTakes(item, takes)
 
             setOnChunkOpen { onChunkOpen(item) }
             setOnTakeSelected {
                 hasSelectedProperty.set(true)
                 onTakeSelected(item, it)
+                setTakes(item, takes)
             }
+        }
+    }
+
+    private fun setTakes(item: CardData, takes: ObservableList<TakeModel>) {
+        item.chunkSource?.let { chunk ->
+            val selected = chunk.audio.selected.value?.value
+            val takeModels = chunk.audio.getAllTakes()
+                .filter { it.deletedTimestamp.value?.value == null }
+                .map { take ->
+                    take.mapToModel(take == selected)
+                }
+                .sortedWith(
+                    compareByDescending<TakeModel> { it.selected }
+                        .thenByDescending { it.take.file.lastModified() }
+                )
+            takes.setAll(takeModels)
         }
     }
 

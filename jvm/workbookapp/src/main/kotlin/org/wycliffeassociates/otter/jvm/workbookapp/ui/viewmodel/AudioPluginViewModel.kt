@@ -23,6 +23,7 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
@@ -122,14 +123,14 @@ class AudioPluginViewModel : ViewModel() {
         )
     }
 
-    fun edit(take: Take): Single<TakeActions.Result> {
+    fun edit(audio: AssociatedAudio, take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters()
-        return takeActions.edit(take, params)
+        return takeActions.edit(audio, take, params)
     }
 
-    fun mark(take: Take): Single<TakeActions.Result> {
+    fun mark(audio: AssociatedAudio, take: Take): Single<TakeActions.Result> {
         val params = constructPluginParameters(messages["markAction"])
-        return takeActions.mark(take, params)
+        return takeActions.mark(audio, take, params)
     }
 
     fun addPlugin(record: Boolean, edit: Boolean) {

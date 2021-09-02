@@ -74,7 +74,6 @@ class ChapterPage : Fragment() {
         navigator.dock(this, breadCrumb)
 
         viewModel.setWorkChunk()
-        viewModel.setSelectedChapterTake()
         viewModel.openPlayers()
 
         viewModel.checkCanCompile()

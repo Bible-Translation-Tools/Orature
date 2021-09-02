@@ -375,13 +375,7 @@ class WorkbookRepository(
                 logger.error("Error in selectedTakesRelay, content: $content", e)
             }
             .subscribe {
-                // Wait until selected take gets inserted
-                // before saving selection in database
-                // to avoid race condition issue
-                do {
-                    content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
-                } while(content.selectedTake?.id == 0)
-
+                content.selectedTake = it.value?.let { wbTake -> takeMap[wbTake] }
                 db.updateContent(content)
                     .doOnError { e -> logger.error("Error in updating content for content: $content", e) }
                     .subscribe()
@@ -430,10 +424,13 @@ class WorkbookRepository(
             }
 
             // Insert the new take into the DB. (We already filtered existing takes out.)
-            .subscribe { (_, modelTake) ->
+            .subscribe { (wbTake, modelTake) ->
                 db.insertTakeForContent(modelTake, content)
                     .doOnError { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
-                    .subscribe { insertionId -> modelTake.id = insertionId }
+                    .subscribe { insertionId ->
+                        modelTake.id = insertionId
+                        selectedTakeRelay.accept(TakeHolder(wbTake))
+                    }
             }
 
         synchronized(disposables) {
