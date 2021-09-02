@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.REGULAR_RC_SLUG
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
@@ -90,7 +91,11 @@ class ProjectExporter @Inject constructor(
 
     private fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
         val lang = workbook.target.language.slug
-        val resource = metadata.identifier
+        val resource = if (workbook.source.language.slug == workbook.target.language.slug) {
+            metadata.identifier
+        } else {
+            REGULAR_RC_SLUG
+        }
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
         return "$lang-$resource-$project-$timestamp.zip"
