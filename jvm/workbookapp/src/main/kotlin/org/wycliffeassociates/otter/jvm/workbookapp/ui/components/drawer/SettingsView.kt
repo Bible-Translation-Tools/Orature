@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
+import javafx.scene.control.Label
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -57,6 +58,52 @@ class SettingsView : View() {
                             action { collapse() }
                         }
                     )
+                }
+
+                label(messages["audioSettings"]).apply {
+                    addClass("app-drawer__subtitle")
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["playbackSettings"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
+                        addClass("wa-combobox")
+                        fitToParentWidth()
+
+                        cellFormat {
+                            graphic = Label().apply {
+                                text = it
+                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                            }
+                        }
+
+                        selectionModel.selectedItemProperty().onChange {
+                            it?.let { viewModel.updateOutputDevice(it) }
+                        }
+                    }
+
+                    label(messages["recordSettings"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
+                        addClass("wa-combobox")
+                        fitToParentWidth()
+
+                        cellFormat {
+                            graphic = Label().apply {
+                                text = it
+                                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            }
+                        }
+
+                        selectionModel.selectedItemProperty().onChange {
+                            it?.let { viewModel.updateInputDevice(it) }
+                        }
+                    }
                 }
 
                 label(messages["appSettings"]).apply {

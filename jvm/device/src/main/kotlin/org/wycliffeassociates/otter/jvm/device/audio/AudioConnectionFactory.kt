@@ -18,6 +18,7 @@ open class AudioConnectionFactory(var line: SourceDataLine) {
     @Synchronized
     fun replaceLine(newLine: SourceDataLine) {
         player.pause()
+        line.close()
         line = newLine
         currentConnection?.let {
             load(it)
