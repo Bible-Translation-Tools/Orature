@@ -11,20 +11,7 @@ import javax.sound.sampled.Mixer
 import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.TargetDataLine
 
-val SAMPLE_RATE = 44100F // Hz
-val SAMPLE_SIZE = 16 // bits
-val CHANNELS = 1
-val SIGNED = true
-val BIG_ENDIAN = false
-
-class AudioDeviceProvider {
-    private val audioFormat = AudioFormat(
-        SAMPLE_RATE,
-        SAMPLE_SIZE,
-        CHANNELS,
-        SIGNED,
-        BIG_ENDIAN
-    )
+class AudioDeviceProvider(private val audioFormat: AudioFormat) {
 
     val activeInputDevice: Observable<Mixer.Info> = PublishSubject.create()
     val activeOutputDevice: Observable<Mixer.Info> = PublishSubject.create()

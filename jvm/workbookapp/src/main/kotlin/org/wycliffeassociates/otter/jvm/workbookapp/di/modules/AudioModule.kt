@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 class AudioModule {
 
     companion object {
-        private val audioDeviceProvider = AudioDeviceProvider()
         private val defaultFormat = AudioFormat(
             44100F,
             16,
@@ -43,11 +42,11 @@ class AudioModule {
             true,
             false
         )
+        private val audioDeviceProvider = AudioDeviceProvider(defaultFormat)
         private val line = AudioSystem.getSourceDataLine(defaultFormat)
         val audioConnectionFactory = AudioConnectionFactory(line)
         init {
             audioDeviceProvider.activeOutputDevice.subscribe { mixer ->
-                println(mixer.name)
                 val newLine = AudioSystem.getSourceDataLine(defaultFormat, mixer)
                 audioConnectionFactory.replaceLine(newLine)
             }
