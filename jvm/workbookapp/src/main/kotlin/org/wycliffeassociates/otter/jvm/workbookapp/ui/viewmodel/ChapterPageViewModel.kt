@@ -74,6 +74,11 @@ class ChapterPageViewModel : ViewModel() {
     val canCompileProperty = SimpleBooleanProperty()
     val isCompilingProperty = SimpleBooleanProperty()
     val selectedChapterTakeProperty = SimpleObjectProperty<Take>()
+
+    /**
+     * WorkChunk is a first chunk to work with when you Begin Translation
+     * or a next chunk with no takes when you Continue Translation
+     */
     val workChunkProperty = SimpleObjectProperty<CardData>()
     val noTakesProperty = SimpleBooleanProperty()
 

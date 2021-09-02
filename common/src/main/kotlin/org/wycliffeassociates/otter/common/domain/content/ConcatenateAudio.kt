@@ -38,7 +38,7 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
             outputFile.writer(append = true).use { os ->
                 files.forEach { file ->
                     val audioFile = AudioFile(file)
-                    val buffer = ByteArray(1024)
+                    val buffer = ByteArray(10240)
                     val reader = audioFile.reader()
                     reader.open()
                     while (reader.hasRemaining()) {
