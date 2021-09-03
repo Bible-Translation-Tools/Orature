@@ -27,6 +27,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
@@ -158,13 +159,13 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
             )
 
             onConfirmAction {
@@ -189,13 +190,13 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
             )
 
             deleteSuccessListener = ChangeListener { _, _, new ->
@@ -216,13 +217,13 @@ class WorkbookPage : Fragment() {
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
             )
 
             deleteFailListener = ChangeListener { _, _, new ->
@@ -272,7 +273,12 @@ class WorkbookPage : Fragment() {
                             }
                         }
                     )
-                    messageTextProperty.set(messages["exportProjectMessage"])
+                    messageTextProperty.set(
+                        MessageFormat.format(
+                            messages["exportProjectMessage"],
+                            viewModel.activeProjectTitleProperty.value
+                        )
+                    )
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {

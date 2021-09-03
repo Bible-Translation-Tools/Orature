@@ -116,7 +116,7 @@ class ChapterPage : Fragment() {
                         }
                         cardbutton {
                             addClass(DefaultStyles.defaultCardButton)
-                            text = messages["openProject"]
+                            text = messages["open"]
                             graphic = FontIcon("gmi-arrow-forward")
                                 .apply {
                                     iconSize = 25

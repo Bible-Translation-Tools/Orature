@@ -41,7 +41,7 @@ class AppBar : Fragment() {
     private val buttonsToggleGroup = ToggleGroup()
 
     private val addButton = AppBarButton().apply {
-        textProperty().set(messages["add"])
+        textProperty().set(messages["import"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_PLUS))
         toggleGroup = buttonsToggleGroup
         selectedProperty().onChange {
