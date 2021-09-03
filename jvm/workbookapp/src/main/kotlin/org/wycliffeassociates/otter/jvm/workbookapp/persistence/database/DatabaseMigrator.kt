@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.AudioPluginEntity
+import jooq.tables.DublinCoreEntity
 import jooq.tables.InstalledEntity
 import jooq.tables.LanguageEntity
 import jooq.tables.TranslationEntity
@@ -27,7 +28,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 4
+const val SCHEMA_VERSION = 5
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -40,6 +41,8 @@ class DatabaseMigrator {
             currentVersion = migrate1to2(dsl, currentVersion)
             currentVersion = migrate2to3(dsl, currentVersion)
             currentVersion = migrate3to4(dsl, currentVersion)
+            currentVersion = migrate4to5(dsl ,currentVersion)
+
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -166,5 +169,29 @@ class DatabaseMigrator {
             logger.info("Updated database from version 3 to 4")
             return 4
         } else current
+    }
+
+    /**
+     * Version 5
+     * Adds a column for the rights to the dublin core table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate4to5(dsl: DSLContext, current: Int): Int {
+        return if (current < 5) {
+            try {
+                dsl
+                    .alterTable(DublinCoreEntity.DUBLIN_CORE_ENTITY)
+                    .addColumn(DublinCoreEntity.DUBLIN_CORE_ENTITY.LICENSE)
+                    .execute()
+                logger.info("Updated database from version 4 to 5")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+            }
+            return 5
+        } else {
+            current
+        }
     }
 }

@@ -84,6 +84,7 @@ class TestWorkbookRepository {
         type = ContainerType.Bundle,
         title = "Unlocked Literal Bible",
         version = "1",
+        license = "",
         path = File(".")
     )
     private val rcSource = rcBase.copy(id = autoincrement, language = english)
@@ -103,6 +104,7 @@ class TestWorkbookRepository {
         type = ContainerType.Help,
         title = "translationNotes",
         version = "1",
+        license = "",
         path = File(".")
     )
 

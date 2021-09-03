@@ -62,6 +62,7 @@ fun DublinCore.mapToMetadata(dir: File, lang: Language): ResourceMetadata {
         ContainerType.of(type),
         title,
         version,
+        rights,
         dir
     )
 }
