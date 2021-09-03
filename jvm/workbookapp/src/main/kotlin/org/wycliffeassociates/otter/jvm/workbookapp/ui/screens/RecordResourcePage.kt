@@ -30,7 +30,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
 import tornadofx.*
 
-class RecordResourcePage : Fragment() {
+class RecordResourcePage : View() {
     private val viewModel: RecordResourceViewModel by inject()
     private val navigator: NavigationMediator by inject()
 

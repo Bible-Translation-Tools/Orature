@@ -33,7 +33,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
-class HomePage : Fragment() {
+class HomePage : View() {
 
     private val viewModel: HomePageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()

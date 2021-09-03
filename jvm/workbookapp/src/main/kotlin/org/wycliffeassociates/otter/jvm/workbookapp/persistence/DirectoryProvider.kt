@@ -202,6 +202,14 @@ class DirectoryProvider(
         }
     }
 
+    override fun createTempFile(prefix: String, suffix: String?): File {
+        return File.createTempFile(prefix, suffix, tempDirectory)
+    }
+
+    override fun cleanTempDirectory() {
+        deleteRecursively(tempDirectory)
+    }
+
     override val resourceContainerDirectory: File
         get() = getAppDataDirectory("rc")
 
@@ -219,4 +227,16 @@ class DirectoryProvider(
 
     override val cacheDirectory: File
         get() = getAppDataDirectory("cache")
+
+    override val tempDirectory: File
+        get() = getAppDataDirectory("temp")
+
+    private fun deleteRecursively(dir: File) {
+        dir.listFiles()?.forEach {
+            if (it.isDirectory) {
+                deleteRecursively(it)
+            }
+            it.delete()
+        }
+    }
 }

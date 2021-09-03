@@ -39,6 +39,37 @@
     -fx-space: 10px;
 }
 
+.btn--icon {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black-20;
+    -fx-background-color: -wa-transparent;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -fx-padding: 0;
+}
+
+.btn--icon:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.btn--icon:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.btn--icon:disabled {
+    -fx-background-color: -wa-transparent;
+    -fx-border-width: 0;
+}
+
+.btn--icon:selected {
+    -fx-background-color: -wa-primary-10;
+    -fx-border-width: 0;
+}
+
+.btn--icon:selected .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
 /* -------------- Primary Button -------------- */
 .btn--primary {
     -fx-background-color: -wa-primary-gradient;
@@ -68,16 +99,16 @@
 }
 
 .btn--primary:disabled {
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-black-15;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-black-90;
     -fx-effect: -wa-level0;
     -fx-cursor: disappear;
     -fx-underline: false;
 }
 
 .btn--primary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-black-60;
+    -fx-fill: -wa-black-80;
 }
 
 /* -------------- Call to Action Button -------------- */
@@ -283,4 +314,104 @@
 
 .wa-combobox .combo-box-popup .list-cell:selected .ikonli-font-icon {
     -fx-fill: -wa-primary;
+}
+
+/* -------------- Radio button ---------------- */
+
+.wa-radio .radio {
+    -fx-background-color: -wa-white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 1.0em;
+    -fx-border-color: -wa-gray-darker;
+}
+
+.wa-radio:selected .radio {
+    -fx-border-color: -wa-primary;
+}
+
+.wa-radio:selected .dot {
+    -fx-background-color: -wa-primary;
+    -fx-background-insets: -2, 0;
+}
+
+.wa-radio--bordered {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black-30;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.wa-radio:selected.wa-radio--bordered {
+    -fx-border-width: 0px;
+    -fx-background-color: -wa-primary-10;
+    -fx-padding: 14px;
+}
+
+.wa-radio--bordered:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.wa-radio--bordered:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+/* -------------- Checkbox ---------------- */
+
+.wa-checkbox .box {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black;
+    -fx-border-radius: 2px;
+    -fx-background-color: -wa-white;
+}
+
+.wa-checkbox:selected .box {
+    -fx-border-color: -wa-primary;
+    -fx-background-color: -wa-primary;
+}
+
+.wa-checkbox:selected .mark {
+    -fx-background-color: -wa-white;
+}
+
+.wa-checkbox--bordered {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black-30;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.wa-checkbox:selected.wa-checkbox--bordered {
+    -fx-border-width: 0px;
+    -fx-background-color: -wa-primary-10;
+    -fx-padding: 14px;
+}
+
+/* -------------- Slider ---------------- */
+
+.wa-slider .track {
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 6px;
+    -fx-border-color: -wa-black-20;
+    -fx-border-radius: 6px;
+    -fx-pref-height: 8px;
+}
+
+.wa-slider .colored-track {
+    -fx-background-color: -wa-primary;
+}
+
+.wa-slider .thumb {
+    -fx-background-color: -wa-primary;
+    -fx-background-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-white;
+    -fx-border-radius: 10px;
+    -fx-pref-width: 20px;
+    -fx-pref-height: 20px;
+}
+
+.wa-slider .animated-thumb {
+    -fx-background-color: -wa-primary;
 }

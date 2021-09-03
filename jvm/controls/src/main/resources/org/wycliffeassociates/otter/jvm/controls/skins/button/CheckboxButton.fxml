@@ -28,6 +28,6 @@
         <Label fx:id="btnIcon" styleClass="checkbox-button__icon" />
         <Label fx:id="btnLabel" styleClass="checkbox-button__title" />
         <Region HBox.hgrow="ALWAYS" />
-        <CheckBox fx:id="btnCheckbox" styleClass="checkbox-button__checkbox" />
+        <CheckBox fx:id="btnCheckbox" styleClass="wa-checkbox, checkbox-button__checkbox" />
     </children>
 </HBox>
