@@ -39,8 +39,8 @@ class TranslationCard<T>(
     val sourceLanguageProperty = SimpleStringProperty(sourceLanguage)
     val targetLanguageProperty = SimpleStringProperty(targetLanguage)
     val itemsProperty = SimpleListProperty<T>(items)
-    val seeMoreTextProperty = SimpleStringProperty()
-    val seeLessTextProperty = SimpleStringProperty()
+    val showMoreTextProperty = SimpleStringProperty()
+    val showLessTextProperty = SimpleStringProperty()
 
     val onNewBookActionProperty = SimpleObjectProperty<() -> Unit>()
     val shownItemsNumberProperty = SimpleIntegerProperty(3)

@@ -116,7 +116,7 @@ class SettingsView : View() {
                     hbox {
                         addClass("app-drawer__plugin-header")
 
-                        label(messages["name"]).apply {
+                        label(messages["applicationName"]).apply {
                             addClass("app-drawer__text")
                             hgrow = Priority.ALWAYS
                         }

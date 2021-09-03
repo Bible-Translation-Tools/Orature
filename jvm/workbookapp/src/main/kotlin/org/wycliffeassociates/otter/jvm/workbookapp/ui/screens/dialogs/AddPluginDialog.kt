@@ -98,7 +98,7 @@ class AddPluginDialog : OtterDialog() {
                     hgrow = Priority.ALWAYS
 
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
-                    text = messages["canRecord"]
+                    text = messages["record"]
                     viewModel.canRecordProperty.bindBidirectional(selectedProperty())
                 }
             )
@@ -107,7 +107,7 @@ class AddPluginDialog : OtterDialog() {
                     hgrow = Priority.ALWAYS
 
                     graphic = FontIcon(MaterialDesign.MDI_PENCIL)
-                    text = messages["canEdit"]
+                    text = messages["edit"]
                     viewModel.canEditProperty.bindBidirectional(selectedProperty())
                 }
             )
