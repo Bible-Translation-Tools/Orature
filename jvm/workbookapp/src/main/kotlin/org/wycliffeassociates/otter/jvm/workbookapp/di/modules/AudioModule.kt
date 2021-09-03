@@ -54,7 +54,7 @@ class AudioModule {
     }
 
     @Provides
-    fun providesRecorder(): IAudioRecorder = AudioRecorder()
+    fun providesRecorder(): IAudioRecorder = audioConnectionFactory.getRecorder()
 
     @Provides
     fun providesPlayer(): IAudioPlayer = audioConnectionFactory.getPlayer()

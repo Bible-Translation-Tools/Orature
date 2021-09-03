@@ -8,12 +8,17 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 open class AudioConnectionFactory(var line: SourceDataLine) {
     private var player = AudioBufferPlayer(line)
     private val connections = ConcurrentHashMap<Int, IAudioPlayer>()
     private val idgen = AtomicInteger(1)
     private var currentConnection: AudioConnection.State? = null
+
+    fun getRecorder(): IAudioRecorder {
+        return AudioRecorder()
+    }
 
     @Synchronized
     fun replaceLine(newLine: SourceDataLine) {
