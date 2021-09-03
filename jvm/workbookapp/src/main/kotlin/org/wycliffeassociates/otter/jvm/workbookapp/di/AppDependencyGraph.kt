@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -64,6 +65,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: AddFilesViewModel)
     fun inject(viewModel: TranslationViewModel)
     fun inject(viewModel: BookWizardViewModel)
+    fun inject(viewModel: ChapterPageViewModel)
 
     fun inject(viewModel: RemovePluginsViewModel)
 

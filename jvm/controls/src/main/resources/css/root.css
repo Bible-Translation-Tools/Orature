@@ -49,13 +49,17 @@
     -wa-white-50: rgba(255,255,255,0.5);
     -wa-white-60: rgba(255,255,255,0.6);
     -wa-black: rgb(0, 21, 51);
-    -wa-black-05: rgba(0, 21, 51,0.05);
-    -wa-black-10: rgba(0, 21, 51,0.1);
-    -wa-black-20: rgba(0, 21, 51,0.2);
-    -wa-black-30: rgba(0, 21, 51,0.3);
-    -wa-black-40: rgba(0, 21, 51,0.4);
-    -wa-black-50: rgba(0, 21, 51,0.5);
-    -wa-black-60: rgba(0, 21, 51,0.6);
+    -wa-black-05: rgba(0, 21, 51, 0.05);
+    -wa-black-10: rgba(0, 21, 51, 0.1);
+    -wa-black-15: rgba(0, 21, 51, 0.15);
+    -wa-black-20: rgba(0, 21, 51, 0.2);
+    -wa-black-30: rgba(0, 21, 51, 0.3);
+    -wa-black-40: rgba(0, 21, 51, 0.4);
+    -wa-black-50: rgba(0, 21, 51, 0.5);
+    -wa-black-60: rgba(0, 21, 51, 0.6);
+    -wa-black-70: rgba(0, 21, 51, 0.7);
+    -wa-black-80: rgba(0, 21, 51, 0.8);
+    -wa-black-90: rgba(0, 21, 51, 0.9);
     -wa-transparent: rgba(255,255,255,0);
     -wa-background: #F7FAFF;
 

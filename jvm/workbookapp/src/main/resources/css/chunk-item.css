@@ -1,0 +1,64 @@
+.chunk-item {
+    -fx-border-color: -wa-black-10;
+    -fx-border-width: 0 0 2px 0;
+    -fx-padding: 0 10px 10px 10px;
+    -fx-cursor: hand;
+    -fx-spacing: 20px;
+}
+
+.chunk-item__title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.chunk-item__take-counter {
+    -fx-font-size: 16px;
+    -fx-text-fill: -wa-black-60;
+}
+
+.chunk-item__take-counter .ikonli-font-icon {
+    -fx-icon-color: -wa-black-60;
+    -fx-icon-size: 24px;
+}
+
+.chunk-item__status {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+}
+
+.chunk-item__selected-status {
+    -fx-fill: -wa-white;
+    -fx-stroke: -wa-black-10;
+    -fx-stroke-width: 2px;
+}
+
+.chunk-item__selected-status--active {
+    -fx-fill: -wa-green;
+    -fx-stroke: null;
+}
+
+.chunk-item__show-takes .ikonli-font-icon {
+    -fx-icon-size: 24px;
+}
+
+.chunk-item__takes {
+    -fx-background-color: -wa-black-05;
+    -fx-background-radius: 16px;
+    -fx-spacing: 10px;
+    -fx-alignment: top-center;
+    -fx-padding: 15px;
+}
+
+.chunk-item__take-items {
+    -fx-spacing: 20px;
+}
+
+.chunk-item__take-items .list-view {
+    -fx-background-color: -wa-transparent;
+}
+
+.chunk-item__take-items .list-view .list-cell:selected,
+.chunk-item__take-items .list-view .list-cell:even,
+.chunk-item__take-items .list-view .list-cell:odd {
+    -fx-background-color: -wa-transparent;
+}
