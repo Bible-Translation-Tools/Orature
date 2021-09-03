@@ -96,6 +96,6 @@ class FileNamer(
     }
 
     companion object {
-        const val REGULAR_RC_SLUG = "reg"
+        const val DEFAULT_RC_SLUG = "reg"
     }
 }

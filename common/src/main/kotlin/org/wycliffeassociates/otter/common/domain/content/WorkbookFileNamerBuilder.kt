@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import org.wycliffeassociates.otter.common.data.workbook.*
-import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.REGULAR_RC_SLUG
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.DEFAULT_RC_SLUG
 
 object WorkbookFileNamerBuilder {
     fun createFileNamer(
@@ -42,7 +42,7 @@ object WorkbookFileNamerBuilder {
         rcSlug = if (workbook.source.language.slug == workbook.target.language.slug) {
             rcSlug
         } else {
-            REGULAR_RC_SLUG
+            DEFAULT_RC_SLUG
         }
     )
 }
