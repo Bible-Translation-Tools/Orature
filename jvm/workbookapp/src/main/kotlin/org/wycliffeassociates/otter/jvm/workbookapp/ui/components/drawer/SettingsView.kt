@@ -77,7 +77,7 @@ class SettingsView : View() {
                         cellFormat {
                             graphic = Label().apply {
                                 text = it
-                                graphic = FontIcon(MaterialDesign.MDI_PLAY)
+                                graphic = FontIcon(MaterialDesign.MDI_VOLUME_HIGH)
                             }
                         }
 
