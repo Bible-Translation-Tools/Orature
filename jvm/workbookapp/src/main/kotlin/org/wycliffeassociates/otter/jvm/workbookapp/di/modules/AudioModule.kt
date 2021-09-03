@@ -60,6 +60,9 @@ class AudioModule {
     fun providesPlayer(): IAudioPlayer = audioConnectionFactory.getPlayer()
 
     @Provides
+    fun providesConnectionFactory(): AudioConnectionFactory = audioConnectionFactory
+
+    @Provides
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()
 
     @Provides
