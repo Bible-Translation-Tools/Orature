@@ -95,7 +95,7 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private const val imagesContainerName = "bible_artwork"
+        private const val imagesContainerName = "bible_artwork.zip"
         private val filesCache = ConcurrentHashMap<String, File>()
     }
 }

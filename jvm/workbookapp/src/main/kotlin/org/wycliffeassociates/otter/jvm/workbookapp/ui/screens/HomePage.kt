@@ -78,7 +78,7 @@ class HomePage : View() {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
                                 backgroundImageFileProperty.set(
-                                    workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+                                    workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                 )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)
