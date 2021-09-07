@@ -209,6 +209,7 @@ open class RecordableViewModel(
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
             selectedTakeProperty.set(takeModel)
             workbookDataStore.updateSelectedTakesFile()
+            take.file.setLastModified(System.currentTimeMillis())
         }
     }
 

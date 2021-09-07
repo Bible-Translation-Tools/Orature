@@ -248,6 +248,7 @@ class ChapterPage : Fragment() {
 
     private fun onTakeSelected(chunk: CardData, take: TakeModel) {
         chunk.chunkSource?.audio?.selectTake(take.take)
+        take.take.file.setLastModified(System.currentTimeMillis())
     }
 
     private fun getPlayer(): IAudioPlayer {
