@@ -161,6 +161,7 @@ class RecordScripturePage : View() {
         importStylesheet(resources.get("/css/audioplayer.css"))
         importStylesheet(resources.get("/css/takecard.css"))
         importStylesheet(resources.get("/css/scripturetakecard.css"))
+        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
         isDraggingTakeProperty.onChange {
             if (it) recordableViewModel.stopPlayers()
