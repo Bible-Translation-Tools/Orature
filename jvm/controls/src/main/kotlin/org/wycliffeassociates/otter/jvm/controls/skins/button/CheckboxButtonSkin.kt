@@ -25,7 +25,6 @@ import javafx.scene.control.CheckBox
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
-import tornadofx.*
 
 class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(checkbox) {
 
@@ -42,8 +41,6 @@ class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(ch
     lateinit var btnCheckbox: CheckBox
 
     init {
-        importStylesheet(javaClass.getResource("/css/checkbox-button.css").toExternalForm())
-
         loadFXML()
         initializeControl()
     }

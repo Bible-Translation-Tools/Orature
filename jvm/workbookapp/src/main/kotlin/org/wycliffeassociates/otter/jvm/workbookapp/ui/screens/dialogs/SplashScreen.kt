@@ -53,7 +53,7 @@ class SplashScreen : View() {
 
     private fun finish() {
         close()
-        navigator.dock<HomePage>()
         primaryStage.show()
+        navigator.dock<HomePage>()
     }
 }

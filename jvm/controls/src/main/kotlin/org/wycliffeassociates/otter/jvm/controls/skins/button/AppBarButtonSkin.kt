@@ -25,7 +25,6 @@ import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.control.ToggleButton
 import javafx.scene.layout.VBox
-import tornadofx.*
 
 class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton>(button) {
 
@@ -39,8 +38,6 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
     lateinit var btnIcon: Label
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-bar-button.css").toExternalForm())
-
         loadFXML()
         initializeControl()
     }

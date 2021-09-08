@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
+@import "/css/root.css";
+
 .chunk-marker {
     -fx-pref-height: 40px;
     -fx-pref-width: 60px;
