@@ -89,6 +89,7 @@ class ChapterPage : Fragment() {
         importStylesheet(resources.get("/css/chapter-page.css"))
         importStylesheet(resources.get("/css/chunk-item.css"))
         importStylesheet(resources.get("/css/take-item.css"))
+        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
