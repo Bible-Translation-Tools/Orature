@@ -42,6 +42,7 @@ class ResourceMetadataMapper @Inject constructor() {
             ContainerType.of(entity.type),
             entity.title,
             entity.version,
+            entity.license,
             File(entity.path),
             entity.id
         )
@@ -63,6 +64,7 @@ class ResourceMetadataMapper @Inject constructor() {
             obj.type.slug,
             obj.title,
             obj.version,
+            obj.license,
             obj.path.toURI().path,
             derivedFromFk
         )

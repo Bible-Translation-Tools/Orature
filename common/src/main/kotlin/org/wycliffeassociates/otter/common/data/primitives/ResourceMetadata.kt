@@ -35,6 +35,7 @@ data class ResourceMetadata(
     val type: ContainerType,
     val title: String,
     val version: String,
+    val license: String,
     val path: File,
     val id: Int = 0
 )

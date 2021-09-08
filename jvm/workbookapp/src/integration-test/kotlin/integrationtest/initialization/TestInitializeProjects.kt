@@ -66,6 +66,7 @@ class TestInitializeProjects {
         ContainerType.Book,
         "",
         "12",
+        "",
         File(".")
     )
 

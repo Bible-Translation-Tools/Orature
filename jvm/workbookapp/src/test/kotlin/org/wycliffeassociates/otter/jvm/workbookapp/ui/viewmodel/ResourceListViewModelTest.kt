@@ -78,6 +78,7 @@ class ResourceListViewModelTest : ViewModel() {
         type = ContainerType.Help,
         title = "translationNotes",
         version = "1",
+        license = "",
         path = File(".")
     )
 

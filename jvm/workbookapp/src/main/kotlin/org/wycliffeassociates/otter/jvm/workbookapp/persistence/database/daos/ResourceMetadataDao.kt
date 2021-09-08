@@ -132,6 +132,7 @@ class ResourceMetadataDao(
                 DUBLIN_CORE_ENTITY.TYPE,
                 DUBLIN_CORE_ENTITY.TITLE,
                 DUBLIN_CORE_ENTITY.VERSION,
+                DUBLIN_CORE_ENTITY.LICENSE,
                 DUBLIN_CORE_ENTITY.PATH,
                 DUBLIN_CORE_ENTITY.DERIVEDFROM_FK
             )
@@ -149,6 +150,7 @@ class ResourceMetadataDao(
                 entity.type,
                 entity.title,
                 entity.version,
+                entity.license,
                 entity.path,
                 entity.derivedFromFk
             )
@@ -269,6 +271,7 @@ class ResourceMetadataDao(
             .set(DUBLIN_CORE_ENTITY.TYPE, entity.type)
             .set(DUBLIN_CORE_ENTITY.TITLE, entity.title)
             .set(DUBLIN_CORE_ENTITY.VERSION, entity.version)
+            .set(DUBLIN_CORE_ENTITY.LICENSE, entity.license)
             .set(DUBLIN_CORE_ENTITY.PATH, entity.path)
             .set(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK, entity.derivedFromFk)
             .where(DUBLIN_CORE_ENTITY.ID.eq(entity.id))
