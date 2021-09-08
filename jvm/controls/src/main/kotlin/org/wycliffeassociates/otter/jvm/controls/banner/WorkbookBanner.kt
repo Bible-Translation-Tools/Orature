@@ -36,6 +36,7 @@ import javafx.scene.layout.BackgroundSize
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import java.io.File
 import java.util.concurrent.Callable
+import javafx.geometry.Side
 
 class WorkbookBanner : Control() {
 
@@ -72,14 +73,14 @@ class WorkbookBanner : Control() {
             1.0,
             true,
             true,
-            false,
-            true
+            true,
+            false
         )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
+            BackgroundPosition(Side.RIGHT, 0.0, false, Side.TOP, 0.0, false),
             backgroundSize
         )
     }

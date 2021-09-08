@@ -35,6 +35,7 @@ import javafx.scene.layout.BackgroundSize
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.ResumeBookBannerSkin
 import java.io.File
 import java.util.concurrent.Callable
+import javafx.geometry.Side
 
 class ResumeBookBanner : Control() {
 
@@ -72,13 +73,13 @@ class ResumeBookBanner : Control() {
             true,
             true,
             true,
-            true
+            false
         )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.CENTER,
+            BackgroundPosition(Side.RIGHT, 0.0, false, Side.TOP, 0.0, false),
             backgroundSize
         )
     }
