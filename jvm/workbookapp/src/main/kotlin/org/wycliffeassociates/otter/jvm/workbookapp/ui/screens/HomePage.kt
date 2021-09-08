@@ -52,7 +52,6 @@ class HomePage : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/root.css"))
         importStylesheet(resources.get("/css/control.css"))
         importStylesheet(resources.get("/css/home-page.css"))
         importStylesheet(resources.get("/css/resume-book-banner.css"))
