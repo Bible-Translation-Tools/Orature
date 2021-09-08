@@ -18,14 +18,19 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.animation.ParallelTransition
+import javafx.animation.SequentialTransition
+import javafx.animation.TranslateTransition
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
@@ -39,11 +44,12 @@ class ChunkItem : VBox() {
     val hasSelectedProperty = SimpleBooleanProperty(false)
 
     val takes = observableListOf<TakeModel>()
-
-    private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
-    private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
+    val takeViews = observableListOf<TakeItem>()
+    private var isAnimating = false
 
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
+    private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
     private val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -51,6 +57,21 @@ class ChunkItem : VBox() {
 
         takes.onChange {
             hasSelectedProperty.set(it.list?.any { it.selected } ?: false)
+
+            takeViews.setAll(
+                it.list.map {
+                    TakeItem().apply {
+                        selectedProperty.set(it.selected)
+                        takeProperty.set(it)
+
+                        setOnTakeSelected {
+                            onTakeSelectedActionProperty.value?.handle(
+                                ActionEvent(it, null)
+                            )
+                        }
+                    }
+                }
+            )
         }
 
         hbox {
@@ -80,7 +101,7 @@ class ChunkItem : VBox() {
                     graphicProperty().bind(showTakesProperty.objectBinding {
                         when (it) {
                             true -> upIcon
-                            else ->downIcon
+                            else -> downIcon
                         }
                     })
                 }
@@ -105,12 +126,32 @@ class ChunkItem : VBox() {
             vbox {
                 addClass("chunk-item__take-items")
 
-                listview(takes) {
-                    setCellFactory {
-                        TakeCell {
-                            onTakeSelectedActionProperty.value?.handle(
-                                ActionEvent(it, null)
-                            )
+                listview(takeViews) {
+//                    setCellFactory {
+//                        TakeCell {
+//                            onTakeSelectedActionProperty.value?.handle(
+//                                ActionEvent(it, null)
+//                            )
+//                        }
+//                    }
+                    onMouseClicked = EventHandler {
+                        if (isAnimating) {
+                            return@EventHandler
+                        }
+                        isAnimating = true
+
+                        val index = this.selectionModel.selectedIndex
+                        val selectedItem = this.selectedItem
+                        selectedItem?.styleClass?.add("selected")
+                        takeViews.forEach {
+                            if (takeViews.indexOf(it) < index) moveDown(it as Node) { }
+                        }
+
+                        moveToTop(selectedItem as Node) {
+                            takeViews.removeAt(index)
+                            takeViews.add(0, selectedItem)
+                            this.selectionModel.select(0)
+                            selectedItem?.styleClass?.remove("selected")
                         }
                     }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
@@ -127,5 +168,53 @@ class ChunkItem : VBox() {
         onTakeSelectedActionProperty.set(
             EventHandler { op.invoke(it.source as TakeModel) }
         )
+    }
+
+    private fun moveToTop(node: Node, onFinish: () -> Unit) {
+        node.viewOrder = -1.0
+        val parentY = node.parent.layoutY
+        val ttUp = TranslateTransition(Duration.millis(600.0), node)
+        ttUp.toY = -parentY
+
+        val ttLeft = TranslateTransition(Duration.millis(400.0), node)
+        ttLeft.byX = -20.0
+        val ttRight = TranslateTransition(Duration.millis(200.0), node)
+        ttRight.byX = 20.0
+
+        val ttLR = SequentialTransition().apply {
+            children.addAll(ttLeft, ttRight)
+        }
+
+        ParallelTransition()
+            .apply {
+                children.addAll(ttUp, ttLR)
+                onFinished = EventHandler {
+                    onFinish()
+                    revertTransition(node)
+                }
+            }
+            .play()
+    }
+
+    private fun moveDown(node: Node, onFinish: () -> Unit) {
+        val distance = node.boundsInLocal.height + 5
+        val tt = TranslateTransition(Duration.millis(600.0), node)
+        tt.byY = distance
+        tt.onFinished = EventHandler {
+            revertTransition(node)
+        }
+        tt.play()
+    }
+
+    private fun revertTransition(node: Node) {
+        node.viewOrder = 0.0
+        val distance = node.translateY
+        val tt = TranslateTransition(Duration.millis(1.0), node)
+
+        tt.byY = -distance
+        tt.onFinished = EventHandler {
+            isAnimating = false
+        }
+        tt.play()
     }
 }
