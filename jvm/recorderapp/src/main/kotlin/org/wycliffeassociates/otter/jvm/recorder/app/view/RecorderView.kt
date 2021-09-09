@@ -27,10 +27,7 @@ class RecorderView : PluginEntrypoint() {
 
     private var viewInflated = false
 
-    private val info = InfoFragment()
     private val waveform = RecordingVisualizerFragment()
-    private val control = ControlFragment()
-    private val source = SourceAudioFragment()
 
     private val spacer = region().apply {
         prefHeight = 2.0
@@ -42,11 +39,11 @@ class RecorderView : PluginEntrypoint() {
         prefHeight = Screen.getPrimary().visualBounds.height - 50.0
         prefWidth = Screen.getPrimary().visualBounds.width - 50.0
 
-        add(info)
+        add<InfoFragment>()
         add(spacer)
         add(waveform)
-        add(source)
-        add(control)
+        add<SourceAudioFragment>()
+        add<ControlFragment>()
     }
 
     init {

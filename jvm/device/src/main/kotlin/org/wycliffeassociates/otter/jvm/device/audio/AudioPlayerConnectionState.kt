@@ -18,25 +18,18 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import javax.sound.sampled.SourceDataLine
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import java.io.File
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
-class AudioConnectionFactory(var line: SourceDataLine) {
-
-    private val audioPlayerConnectionFactory = AudioPlayerConnectionFactory(line)
-
-    fun getRecorder(): IAudioRecorder {
-        return AudioRecorder()
-    }
-
-    @Synchronized
-    fun replaceLine(newLine: SourceDataLine) {
-        audioPlayerConnectionFactory.replaceLine(newLine)
-    }
-
-    fun getPlayer(): IAudioPlayer {
-        return audioPlayerConnectionFactory.getPlayer()
-    }
-}
+internal class AudioPlayerConnectionState(
+    val id: Int,
+    var file: File = File(""),
+    var begin: Int? = null,
+    var end: Int? = null,
+    var position: Int = 0,
+    var durationInFrames: Int = 0,
+    var durationInMs: Int = 0,
+    var locationInFrames: Int = 0,
+    var locationInMs: Int = 0,
+    val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
+)
