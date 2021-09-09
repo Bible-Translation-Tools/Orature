@@ -30,7 +30,6 @@ import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.BaseWaveLine
 import org.wycliffeassociates.otter.jvm.recorder.app.view.CanvasFragment
 import org.wycliffeassociates.otter.jvm.recorder.app.view.FramerateView
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.WaveformLayer
-import org.wycliffeassociates.otter.jvm.recorder.device.AudioRecorder
 import org.wycliffeassociates.otter.jvm.recorder.app.view.drawables.VolumeBar
 import tornadofx.ViewModel
 import tornadofx.add
