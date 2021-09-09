@@ -424,10 +424,13 @@ class WorkbookRepository(
             }
 
             // Insert the new take into the DB. (We already filtered existing takes out.)
-            .subscribe { (_, modelTake) ->
+            .subscribe { (wbTake, modelTake) ->
                 db.insertTakeForContent(modelTake, content)
                     .doOnError { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
-                    .subscribe { insertionId -> modelTake.id = insertionId }
+                    .subscribe { insertionId ->
+                        modelTake.id = insertionId
+                        selectedTakeRelay.accept(TakeHolder(wbTake))
+                    }
             }
 
         synchronized(disposables) {

@@ -135,8 +135,8 @@ open class RecordableViewModel(
             .flatMapSingle { plugin ->
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 when (pluginType) {
-                    PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
-                    PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)
+                    PluginType.EDITOR -> audioPluginViewModel.edit(recordable!!.audio, takeEvent.take)
+                    PluginType.MARKER -> audioPluginViewModel.mark(recordable!!.audio, takeEvent.take)
                     else -> null
                 }
             }
@@ -209,6 +209,7 @@ open class RecordableViewModel(
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
             selectedTakeProperty.set(takeModel)
             workbookDataStore.updateSelectedTakesFile()
+            take.file.setLastModified(System.currentTimeMillis())
         }
     }
 
@@ -332,6 +333,7 @@ open class RecordableViewModel(
             .doOnError { e ->
                 logger.error("Error in subscribing take to relay for audio: $audio", e)
             }
+            .observeOnFx()
             .subscribe { takeHolder ->
                 takeCardModels.forEach { it.selected = false }
                 val takeModel = takeCardModels.find { it.take == takeHolder.value }

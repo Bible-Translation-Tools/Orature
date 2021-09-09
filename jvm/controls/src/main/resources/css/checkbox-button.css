@@ -72,19 +72,3 @@
     -fx-pref-width: 18px;
     -fx-pref-height: 18px;
 }
-
-.checkbox-button__checkbox .box {
-    -fx-border-width: 2px;
-    -fx-border-color: -wa-black;
-    -fx-border-radius: 2px;
-    -fx-background-color: -wa-white;
-}
-
-.checkbox-button:selected .checkbox-button__checkbox .box {
-    -fx-border-color: -wa-primary;
-    -fx-background-color: -wa-primary;
-}
-
-.checkbox-button:selected .checkbox-button__checkbox .mark {
-    -fx-background-color: -wa-white;
-}

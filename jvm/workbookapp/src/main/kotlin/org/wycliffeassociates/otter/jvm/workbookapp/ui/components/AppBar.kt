@@ -83,7 +83,7 @@ class AppBar : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-bar.css").toExternalForm())
+        importStylesheet(resources.get("/css/app-bar.css"))
 
         root.apply {
             styleClass.setAll("app-bar")

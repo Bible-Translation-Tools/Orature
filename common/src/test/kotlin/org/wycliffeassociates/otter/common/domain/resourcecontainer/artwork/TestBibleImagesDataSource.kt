@@ -68,7 +68,7 @@ class TestBibleImagesDataSource {
 
     @Test
     fun testGetBibleImage() {
-        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
         val image = dataSource.getImage(metadataMock, project)
 
         assertNotNull(
@@ -81,7 +81,7 @@ class TestBibleImagesDataSource {
     fun testGetBibleImageWithRatio() {
         val ratio4x3 = ImageRatio.FOUR_BY_THREE
         val ratioString = ratio4x3.toString()
-        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
         val image = dataSource.getImage(metadataMock, project, ratio4x3)
 
         assertNotNull(
@@ -100,7 +100,7 @@ class TestBibleImagesDataSource {
         val nonBibleProject = "unknown"
         val remoteContentProject = "tit"
 
-        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
         val notFoundImage = dataSource.getImage(metadataMock, genSlug)
         val nonBibleNotFoundImage =  dataSource.getImage(metadataMock, nonBibleProject)
         val remoteImageNotFound =  dataSource.getImage(metadataMock, remoteContentProject)
@@ -123,7 +123,7 @@ class TestBibleImagesDataSource {
     fun `test fallback to default when aspect ratio not found`() {
         val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
         val ratioString = ratio16x9.toString()
-        val dataSource = BibleImagesDataSource(directoryProviderMock)
+        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
         val image = dataSource.getImage(metadataMock, project, ratio16x9)
 
         assertNotNull(

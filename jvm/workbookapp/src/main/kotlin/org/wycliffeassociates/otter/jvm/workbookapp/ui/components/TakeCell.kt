@@ -16,12 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.enums
-//
-enum class SlugsEnum(val slug: String) {
-    ULB("ulb"),
-    TW("tw"),
-    OBS("obs"),
-    OT("bible-ot"),
-    NT("bible-nt"),
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+
+import javafx.scene.control.ListCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
+
+class TakeCell(
+    private val onTakeSelected: (TakeModel) -> Unit
+) : ListCell<TakeModel>() {
+    private val view = TakeItem()
+
+    override fun updateItem(item: TakeModel?, empty: Boolean) {
+        super.updateItem(item, empty)
+
+        if (empty || item == null) {
+            graphic = null
+            return
+        }
+        graphic = view.apply {
+            selectedProperty.set(item.selected)
+            takeProperty.set(item)
+
+            setOnTakeSelected { onTakeSelected(item) }
+        }
+    }
 }

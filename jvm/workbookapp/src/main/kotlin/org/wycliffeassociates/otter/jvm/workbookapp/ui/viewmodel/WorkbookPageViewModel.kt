@@ -160,7 +160,7 @@ class WorkbookPageViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
             title = workbook.target.title,
-            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE),
+            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE),
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])

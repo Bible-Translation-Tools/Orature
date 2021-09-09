@@ -59,6 +59,7 @@ class TestProjectImport {
         ContainerType.Book,
         "",
         "12",
+        "",
         File(".")
     )
 

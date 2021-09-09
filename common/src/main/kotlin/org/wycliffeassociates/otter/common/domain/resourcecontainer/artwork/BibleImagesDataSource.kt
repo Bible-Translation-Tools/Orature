@@ -27,7 +27,8 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 class BibleImagesDataSource(
-    private val directoryProvider: IDirectoryProvider
+    private val directoryProvider: IDirectoryProvider,
+    private val imagesContainerName: String = "bible_artwork.zip"
 ) : ImagesDataSource {
 
     private val cacheDir = File(
@@ -95,7 +96,6 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private const val imagesContainerName = "bible_artwork"
         private val filesCache = ConcurrentHashMap<String, File>()
     }
 }

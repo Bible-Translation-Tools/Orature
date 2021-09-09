@@ -52,6 +52,7 @@ object TestDataStore {
                     ContainerType.Book,
                     "Unlocked Literal Bible",
                     "3",
+                    "",
                     File("/path/to/my/container")
             ),
             ResourceMetadata(
@@ -68,6 +69,7 @@ object TestDataStore {
                     ContainerType.Book,
                     "The Lord of the Rings",
                     "1",
+                    "",
                     File("/path/to/my/amazing/esource")
             )
     )

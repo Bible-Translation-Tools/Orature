@@ -28,6 +28,6 @@
         <Label fx:id="btnIcon" styleClass="select-button__icon" />
         <Label fx:id="btnLabel" styleClass="select-button__title" />
         <Region HBox.hgrow="ALWAYS" />
-        <RadioButton fx:id="btnRadio" styleClass="select-button__radio" />
+        <RadioButton fx:id="btnRadio" styleClass="wa-radio" />
     </children>
 </HBox>

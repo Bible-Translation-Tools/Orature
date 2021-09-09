@@ -63,8 +63,8 @@ import java.util.*
 
 private const val TAKES_ROW_HEIGHT = 170.0
 
-class RecordScriptureFragment : Fragment() {
-    private val logger = LoggerFactory.getLogger(RecordScriptureFragment::class.java)
+class RecordScripturePage : View() {
+    private val logger = LoggerFactory.getLogger(RecordScripturePage::class.java)
 
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -125,7 +125,7 @@ class RecordScriptureFragment : Fragment() {
         titleProperty.bind(recordScriptureViewModel.breadcrumbTitleBinding)
         iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
         onClickAction {
-            navigator.dock(this@RecordScriptureFragment)
+            navigator.dock(this@RecordScripturePage)
         }
     }
 
@@ -161,6 +161,7 @@ class RecordScriptureFragment : Fragment() {
         importStylesheet(resources.get("/css/audioplayer.css"))
         importStylesheet(resources.get("/css/takecard.css"))
         importStylesheet(resources.get("/css/scripturetakecard.css"))
+        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
         isDraggingTakeProperty.onChange {
             if (it) recordableViewModel.stopPlayers()

@@ -24,4 +24,5 @@ internal object RcConstants {
     const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
     const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
     const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
+    const val LICENSE_FILE = "LICENSE.md"
 }

@@ -76,6 +76,7 @@ private fun ResourceMetadata.toEntity() = DublinCore(
     type = type.slug,
     format = format,
     language = language.toEntity(),
+    rights = license,
     issued = LocalDate.now().toString(),
     modified = LocalDate.now().toString()
 )

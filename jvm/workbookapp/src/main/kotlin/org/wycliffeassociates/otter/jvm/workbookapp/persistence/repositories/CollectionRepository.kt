@@ -532,6 +532,7 @@ class CollectionRepository @Inject constructor(
             }
             creator = dublinCoreCreator
             version = source.version
+            rights = source.license
             format = MimeType.of(source.format).norm
             subject = source.subject
             type = derivedContainerType.slug
