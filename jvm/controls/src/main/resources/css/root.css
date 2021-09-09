@@ -62,7 +62,6 @@
     -wa-black-90: rgba(0, 21, 51, 0.9);
     -wa-transparent: rgba(255,255,255,0);
     -wa-background: #F7FAFF;
-    -wa-background-light-gray: rbg(243,243,243);
 
     /* Extra Colors */
     -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */

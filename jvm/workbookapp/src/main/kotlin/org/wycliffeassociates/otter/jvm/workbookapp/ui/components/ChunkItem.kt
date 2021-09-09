@@ -28,6 +28,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.Node
+import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import javafx.util.Duration
@@ -45,6 +46,7 @@ class ChunkItem : VBox() {
 
     val takes = observableListOf<TakeModel>()
     val takeViews = observableListOf<TakeItem>()
+    private lateinit var takesListView: ListView<TakeItem>
     private var isAnimating = false
 
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -55,18 +57,19 @@ class ChunkItem : VBox() {
     init {
         styleClass.setAll("chunk-item")
 
-        takes.onChange {
-            hasSelectedProperty.set(it.list?.any { it.selected } ?: false)
+        takes.onChange { model ->
+            hasSelectedProperty.set(model.list?.any { it.selected } ?: false)
 
             takeViews.setAll(
-                it.list.map {
+                model.list.map { takeModel ->
                     TakeItem().apply {
-                        selectedProperty.set(it.selected)
-                        takeProperty.set(it)
+                        selectedProperty.set(takeModel.selected)
+                        takeProperty.set(takeModel)
 
                         setOnTakeSelected {
+                            takesListView.selectionModel.select(this)
                             onTakeSelectedActionProperty.value?.handle(
-                                ActionEvent(it, null)
+                                ActionEvent(takeModel, null)
                             )
                         }
                     }
@@ -127,6 +130,7 @@ class ChunkItem : VBox() {
                 addClass("chunk-item__take-items")
 
                 listview(takeViews) {
+                    takesListView = this
 //                    setCellFactory {
 //                        TakeCell {
 //                            onTakeSelectedActionProperty.value?.handle(
@@ -134,13 +138,14 @@ class ChunkItem : VBox() {
 //                            )
 //                        }
 //                    }
-                    onMouseClicked = EventHandler {
-                        if (isAnimating) {
-                            return@EventHandler
+
+                    selectionModel.selectedIndexProperty().onChange {
+                        val index = this.selectionModel.selectedIndex
+                        if (isAnimating || selectedItem == null || index <= 0) {
+                            return@onChange
                         }
                         isAnimating = true
 
-                        val index = this.selectionModel.selectedIndex
                         val selectedItem = this.selectedItem
                         selectedItem?.styleClass?.add("selected")
                         takeViews.forEach {
@@ -154,6 +159,28 @@ class ChunkItem : VBox() {
                             selectedItem?.styleClass?.remove("selected")
                         }
                     }
+
+//                    onMouseClicked = EventHandler {
+//                        val index = this.selectionModel.selectedIndex
+//                        if (isAnimating || selectedItem == null || index <= 0) {
+//                            return@EventHandler
+//                        }
+//                        isAnimating = true
+//
+//                        val selectedItem = this.selectedItem
+//                        selectedItem?.styleClass?.add("selected")
+//                        takeViews.forEach {
+//                            if (takeViews.indexOf(it) < index) moveDown(it as Node) { }
+//                        }
+//
+//                        moveToTop(selectedItem as Node) {
+//                            takeViews.removeAt(index)
+//                            takeViews.add(0, selectedItem)
+//                            this.selectionModel.select(0)
+//                            selectedItem?.styleClass?.remove("selected")
+//                        }
+//                    }
+
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
                 }
             }
