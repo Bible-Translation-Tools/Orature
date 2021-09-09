@@ -124,7 +124,7 @@ open class AudioConnectionFactory(var line: SourceDataLine) {
             state.file = file
             state.begin = begin
             state.end = end
-            state.position = begin
+            state.position = 0
             this@AudioConnectionFactory.load(state)
         }
 
