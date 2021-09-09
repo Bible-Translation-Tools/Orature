@@ -41,7 +41,6 @@ class AudioPlayerController(
 
     private var startAtLocation = 0
     private var disposable: Disposable? = null
-    private var dragging = false
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -92,7 +91,6 @@ class AudioPlayerController(
                 resumeAfterDrag = true
                 toggle()
             }
-            dragging = true
         }
         audioSlider.setOnMouseClicked {
             val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
@@ -121,7 +119,7 @@ class AudioPlayerController(
                 } else {
                     isPlayingProperty.set(false)
                 }
-                if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
+                if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
                     audioSlider.value = playbackPosition().toDouble()
                 }
             }
@@ -147,7 +145,6 @@ class AudioPlayerController(
     fun seek(location: Int) {
         player?.let {
             it.seek(location)
-            audioSlider.value = location.toDouble()
             if (!it.isPlaying()) {
                 startAtLocation = location
             }
