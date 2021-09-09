@@ -1,7 +1,7 @@
 .take-item {
     -fx-alignment: center;
     -fx-spacing: 10px;
-    -fx-background-color: -wa-background-light-gray;
+    -fx-background-color: rgb(243,243,243);
 }
 
 .selected {
