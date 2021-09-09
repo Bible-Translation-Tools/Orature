@@ -170,14 +170,10 @@ class AudioBufferPlayer(private val player: SourceDataLine) : IAudioPlayer {
     }
 
     override fun getLocationInFrames(): Int {
-        return frameStart + startPosition + player.framePosition
+        return startPosition + player.framePosition
     }
 
     override fun getLocationMs(): Int {
         return (getLocationInFrames() / 44.1).toInt()
-    }
-
-    fun framePosition() {
-        startPosition + player.framePosition
     }
 }

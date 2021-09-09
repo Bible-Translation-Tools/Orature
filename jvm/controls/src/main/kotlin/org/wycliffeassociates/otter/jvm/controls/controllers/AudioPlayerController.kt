@@ -54,11 +54,9 @@ class AudioPlayerController(
         disposable?.dispose()
         player?.let { _player ->
             if (_player.isPlaying()) {
-                isPlayingProperty.set(false)
                 pause()
             } else {
                 disposable = startProgressUpdate()
-                isPlayingProperty.set(true)
                 play()
                 _player.addEventListener {
                     if (
@@ -76,7 +74,6 @@ class AudioPlayerController(
                         }
                     }
                 }
-                isPlayingProperty.set(true)
             }
         }
     }
@@ -170,7 +167,7 @@ class AudioPlayerController(
 
     private fun playbackPosition(): Int {
         return player?.let {
-            it.getLocationInFrames() - it.frameStart
+            it.getLocationInFrames()
         } ?: 0
     }
 }
