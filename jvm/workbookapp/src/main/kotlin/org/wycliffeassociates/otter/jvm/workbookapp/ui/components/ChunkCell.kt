@@ -76,7 +76,7 @@ class ChunkCell(
                     compareByDescending<TakeModel> { it.selected }
                         .thenByDescending { it.take.file.lastModified() }
                 )
-//            takes.setAll(takeModels)
+            takes.setAll(takeModels)
         }
     }
 
