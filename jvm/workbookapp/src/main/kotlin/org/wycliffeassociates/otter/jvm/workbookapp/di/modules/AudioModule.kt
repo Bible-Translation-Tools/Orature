@@ -54,10 +54,13 @@ class AudioModule {
     }
 
     @Provides
-    fun providesRecorder(): IAudioRecorder = AudioRecorder()
+    fun providesRecorder(): IAudioRecorder = audioConnectionFactory.getRecorder()
 
     @Provides
     fun providesPlayer(): IAudioPlayer = audioConnectionFactory.getPlayer()
+
+    @Provides
+    fun providesConnectionFactory(): AudioConnectionFactory = audioConnectionFactory
 
     @Provides
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()

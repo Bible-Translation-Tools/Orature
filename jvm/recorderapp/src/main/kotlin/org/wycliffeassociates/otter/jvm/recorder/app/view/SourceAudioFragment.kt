@@ -26,15 +26,14 @@ import tornadofx.*
 import java.io.File
 import java.lang.Exception
 import java.text.MessageFormat
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 class SourceAudioFragment : Fragment() {
 
     override val root = initializeSourceContent()
 
     private fun initializeSourceContent(): SourceContent {
-        var sourceFile: File? = null
-        var startFrame: Int? = null
-        var endFrame: Int? = null
+
         var sourceText: String? = null
         var sourceContentTitle: String? = null
 
@@ -42,15 +41,6 @@ class SourceAudioFragment : Fragment() {
             val parameters = (scope as? ParameterizedScope)?.parameters
 
             parameters?.let {
-                val sourceAudio: String? = parameters.named["chapter_audio"]
-                sourceFile = if (sourceAudio != null && File(sourceAudio).exists()) File(sourceAudio) else null
-                try {
-                    startFrame = parameters.named["source_chunk_start"]?.toInt()
-                    endFrame = parameters.named["source_chunk_end"]?.toInt()
-                } catch (e: NumberFormatException) {
-                    startFrame = null
-                    endFrame = null
-                }
                 sourceText = parameters.named["source_text"]
 
                 sourceContentTitle = getSourceContentTitle(
@@ -61,10 +51,7 @@ class SourceAudioFragment : Fragment() {
             }
         }
 
-        val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
-
         return SourceContent().apply {
-            audioPlayerProperty.set(player)
             sourceTextProperty.set(sourceText)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
@@ -76,18 +63,43 @@ class SourceAudioFragment : Fragment() {
         }
     }
 
+    override fun onDock() {
+        super.onDock()
+        var sourceFile: File? = null
+        var startFrame: Int? = null
+        var endFrame: Int? = null
+
+        if (scope is ParameterizedScope) {
+            val parameters = (scope as? ParameterizedScope)?.parameters
+            parameters?.let {
+                val sourceAudio: String? = parameters.named["chapter_audio"]
+                sourceFile = if (sourceAudio != null && File(sourceAudio).exists()) File(sourceAudio) else null
+                try {
+                    startFrame = parameters.named["source_chunk_start"]?.toInt()
+                    endFrame = parameters.named["source_chunk_end"]?.toInt()
+                } catch (e: NumberFormatException) {
+                    startFrame = null
+                    endFrame = null
+                }
+                val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
+                root.audioPlayerProperty.set(player)
+            }
+        }
+    }
+
     private fun initializeAudioPlayer(file: File, start: Int?, end: Int?): IAudioPlayer? {
-//        val player = AudioBufferPlayer()
-//        return try {
-//            if (start != null && end != null) {
-//                player.loadSection(file, start, end)
-//            } else {
-//                player.load(file)
-//            }
-//            player
-//        } catch (e: Exception) {
-//            null
-//        }
+        val connectionFactory = workspace.params["audioConnectionFactory"] as AudioConnectionFactory
+        val player = connectionFactory.getPlayer()
+        return try {
+            if (start != null && end != null) {
+                player.loadSection(file, start, end)
+            } else {
+                player.load(file)
+            }
+            player
+        } catch (e: Exception) {
+            null
+        }
         return null
     }
 

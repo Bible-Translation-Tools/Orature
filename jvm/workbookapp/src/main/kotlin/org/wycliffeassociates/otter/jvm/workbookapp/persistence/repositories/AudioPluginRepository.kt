@@ -33,10 +33,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.AudioPluginDataMapper
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 class AudioPluginRepository @Inject constructor(
     database: AppDatabase,
     private val preferences: IAppPreferences,
+    private val audioConnectionFactory: AudioConnectionFactory,
     private val mapper: AudioPluginDataMapper
 ) : IAudioPluginRepository {
     private val logger = LoggerFactory.getLogger(AudioPluginRepository::class.java)
@@ -70,7 +72,7 @@ class AudioPluginRepository @Inject constructor(
     override fun getAllPlugins(): Single<List<IAudioPlugin>> {
         return getAll()
             .map {
-                it.map { AudioPlugin(it) }
+                it.map { AudioPlugin(audioConnectionFactory, it) }
             }
     }
 
@@ -147,7 +149,7 @@ class AudioPluginRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
 
     override fun getPlugin(type: PluginType): Maybe<IAudioPlugin> {
-        return getPluginData(type).map { AudioPlugin(it) }
+        return getPluginData(type).map { AudioPlugin(audioConnectionFactory, it) }
     }
 
     override fun getPluginData(type: PluginType): Maybe<AudioPluginData> {

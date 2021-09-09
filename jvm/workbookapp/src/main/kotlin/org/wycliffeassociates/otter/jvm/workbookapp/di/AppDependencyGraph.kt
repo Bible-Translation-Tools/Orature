@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 @Component(
     modules = [
@@ -72,4 +73,5 @@ interface AppDependencyGraph {
 
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer
+    fun injectConnectionFactory(): AudioConnectionFactory
 }
