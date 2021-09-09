@@ -82,19 +82,6 @@ class AudioPlayerController(
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
-
-        player.addEventListener {
-            if (it == AudioPlayerEvent.STOP || it == AudioPlayerEvent.COMPLETE) {
-                disposable?.dispose()
-                Platform.runLater {
-                    isPlayingProperty.set(false)
-                    if (it == AudioPlayerEvent.COMPLETE) {
-                        audioSlider.value = 0.0
-                        player.getAudioReader()?.seek(0)
-                    }
-                }
-            }
-        }
     }
 
     private fun initializeSliderActions() {
@@ -108,7 +95,6 @@ class AudioPlayerController(
             dragging = true
         }
         audioSlider.setOnMouseClicked {
-            dragging = false
             val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
             var wasPlaying = false
             if (player?.isPlaying() == true) {
@@ -117,10 +103,6 @@ class AudioPlayerController(
             }
             seek(percentageToLocation(percent))
             if (wasPlaying) {
-                toggle()
-            }
-            if (resumeAfterDrag) {
-                resumeAfterDrag = false
                 toggle()
             }
         }
@@ -157,7 +139,6 @@ class AudioPlayerController(
     fun pause() {
         isPlayingProperty.set(false)
         player?.let {
-            isPlayingProperty.set(false)
             startAtLocation = it.getLocationInFrames()
             it.pause()
         }
