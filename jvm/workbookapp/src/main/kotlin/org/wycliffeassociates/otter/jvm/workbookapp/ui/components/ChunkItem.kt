@@ -67,7 +67,6 @@ class ChunkItem : VBox() {
                         takeProperty.set(takeModel)
 
                         setOnTakeSelected {
-                            takesListView.selectionModel.select(this)
                             onTakeSelectedActionProperty.value?.handle(
                                 ActionEvent(takeModel, null)
                             )
@@ -129,37 +128,15 @@ class ChunkItem : VBox() {
             vbox {
                 addClass("chunk-item__take-items")
 
-                listview(takes) {
-//                    takesListView = this
-                    setCellFactory {
-                        TakeCell {
-                            onTakeSelectedActionProperty.value?.handle(
-                                ActionEvent(it, null)
-                            )
-                        }
-                    }
-
-//                    onMouseClicked = EventHandler {
-//                        val index = this.selectionModel.selectedIndex
-//                        if (isAnimating || selectedItem == null || index <= 0) {
-//                            return@EventHandler
-//                        }
-//                        isAnimating = true
-//
-//                        val selectedItem = this.selectedItem
-//                        selectedItem?.styleClass?.add("selected")
-//                        takeViews.forEach {
-//                            if (takeViews.indexOf(it) < index) moveDown(it as Node) { }
-//                        }
-//
-//                        moveToTop(selectedItem as Node) {
-//                            takeViews.removeAt(index)
-//                            takeViews.add(0, selectedItem)
-//                            this.selectionModel.select(0)
-//                            selectedItem?.styleClass?.remove("selected")
+                listview(takeViews) {
+                    takesListView = this
+//                    setCellFactory {
+//                        TakeCell {
+//                            onTakeSelectedActionProperty.value?.handle(
+//                                ActionEvent(it, null)
+//                            )
 //                        }
 //                    }
-
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
                 }
             }
@@ -202,7 +179,7 @@ class ChunkItem : VBox() {
             .play()
     }
 
-    private fun moveDown(node: Node, onFinish: () -> Unit) {
+    private fun moveDown(node: Node) {
         val distance = node.boundsInLocal.height + 5
         val tt = TranslateTransition(Duration.millis(600.0), node)
         tt.byY = distance

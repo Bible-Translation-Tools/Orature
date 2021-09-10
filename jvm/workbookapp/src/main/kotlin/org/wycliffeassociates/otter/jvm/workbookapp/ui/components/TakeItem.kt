@@ -18,12 +18,17 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.animation.ParallelTransition
+import javafx.animation.SequentialTransition
+import javafx.animation.TranslateTransition
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -54,7 +59,6 @@ class TakeItem : HBox() {
 
         button {
             addClass("btn", "btn--icon")
-            onActionProperty().bind(onTakeSelectedActionProperty)
             graphicProperty().bind(selectedProperty.objectBinding {
                 when (it) {
                     true -> selectedIcon
@@ -64,10 +68,48 @@ class TakeItem : HBox() {
             selectedProperty.onChange {
                 togglePseudoClass("selected", it)
             }
+            setOnAction {
+                moveToTop(this.parent as Node) {
+                    onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                }
+            }
         }
     }
 
     fun setOnTakeSelected(op: () -> Unit) {
         onTakeSelectedActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    private fun moveToTop(node: Node, onFinish: () -> Unit) {
+        val parentY = node.parent.layoutY
+
+        val ttUp = TranslateTransition(Duration.millis(600.0), node)
+        ttUp.toY = -parentY
+
+        val ttLeft = TranslateTransition(Duration.millis(400.0), node)
+        ttLeft.byX = -20.0
+        val ttRight = TranslateTransition(Duration.millis(200.0), node)
+        ttRight.byX = 20.0
+
+        val ttLR = SequentialTransition().apply {
+            children.addAll(ttLeft, ttRight)
+        }
+
+        ParallelTransition()
+            .apply {
+                children.addAll(ttUp, ttLR)
+                onFinished = EventHandler {
+                    revert(node)
+                    onFinish()
+                }
+            }
+            .play()
+    }
+
+    private fun revert(node: Node) {
+        val distance = node.translateY
+        val ttRevertUp = TranslateTransition(Duration.millis(1.0), node)
+        ttRevertUp.byY = -distance
+        ttRevertUp.play()
     }
 }
