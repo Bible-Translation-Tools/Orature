@@ -26,6 +26,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.Node
+import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.util.Duration
@@ -69,7 +70,7 @@ class TakeItem : HBox() {
                 togglePseudoClass("selected", it)
             }
             setOnAction {
-                moveToTop(this.parent as Node) {
+                animate {
                     onTakeSelectedActionProperty.value?.handle(ActionEvent())
                 }
             }
@@ -80,15 +81,20 @@ class TakeItem : HBox() {
         onTakeSelectedActionProperty.set(EventHandler { op.invoke() })
     }
 
-    private fun moveToTop(node: Node, onFinish: () -> Unit) {
-        val parentY = node.parent.layoutY
+    private fun animate(callback: () -> Unit) {
+        shiftOtherNodes()
 
-        val ttUp = TranslateTransition(Duration.millis(600.0), node)
+        val selectedNode = this
+        val parentY = this.parent.layoutY
+
+        // move selected node to top of the list
+        val ttUp = TranslateTransition(Duration.millis(600.0), selectedNode)
         ttUp.toY = -parentY
 
-        val ttLeft = TranslateTransition(Duration.millis(400.0), node)
+        // arc-like animation
+        val ttLeft = TranslateTransition(Duration.millis(400.0), selectedNode)
         ttLeft.byX = -20.0
-        val ttRight = TranslateTransition(Duration.millis(200.0), node)
+        val ttRight = TranslateTransition(Duration.millis(200.0), selectedNode)
         ttRight.byX = 20.0
 
         val ttLR = SequentialTransition().apply {
@@ -99,14 +105,35 @@ class TakeItem : HBox() {
             .apply {
                 children.addAll(ttUp, ttLR)
                 onFinished = EventHandler {
-                    revert(node)
-                    onFinish()
+                    revertAnimation(selectedNode)
+                    callback()
                 }
             }
             .play()
     }
 
-    private fun revert(node: Node) {
+    private fun shiftOtherNodes() {
+        val listView = this.parent.findParent<ListView<TakeItem>>() ?: return
+        val selectedIndex = listView.items.indexOf(this)
+
+        for (item in listView.items) {
+            if (listView.items.indexOf(item) < selectedIndex) {
+                moveDown(item)
+            }
+        }
+    }
+
+    private fun moveDown(node: Node) {
+        val distance = node.boundsInLocal.height + 5
+        val tt = TranslateTransition(Duration.millis(600.0), node)
+        tt.byY = distance
+        tt.onFinished = EventHandler {
+            revertAnimation(node)
+        }
+        tt.play()
+    }
+
+    private fun revertAnimation(node: Node) {
         val distance = node.translateY
         val ttRevertUp = TranslateTransition(Duration.millis(1.0), node)
         ttRevertUp.byY = -distance

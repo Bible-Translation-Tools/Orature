@@ -18,13 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.animation.ParallelTransition
-import javafx.animation.SequentialTransition
-import javafx.animation.TranslateTransition
-import javafx.event.EventHandler
-import javafx.scene.Node
 import javafx.scene.control.ListCell
-import javafx.util.Duration
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 
 class TakeCell(

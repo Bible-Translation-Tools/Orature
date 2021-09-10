@@ -47,7 +47,6 @@ class ChunkItem : VBox() {
     val takes = observableListOf<TakeModel>()
     val takeViews = observableListOf<TakeItem>()
     private lateinit var takesListView: ListView<TakeItem>
-    private var isAnimating = false
 
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
@@ -151,53 +150,5 @@ class ChunkItem : VBox() {
         onTakeSelectedActionProperty.set(
             EventHandler { op.invoke(it.source as TakeModel) }
         )
-    }
-
-    private fun moveToTop(node: Node, onFinish: () -> Unit) {
-        node.viewOrder = -1.0
-        val parentY = node.parent.layoutY
-        val ttUp = TranslateTransition(Duration.millis(600.0), node)
-        ttUp.toY = -parentY
-
-        val ttLeft = TranslateTransition(Duration.millis(400.0), node)
-        ttLeft.byX = -20.0
-        val ttRight = TranslateTransition(Duration.millis(200.0), node)
-        ttRight.byX = 20.0
-
-        val ttLR = SequentialTransition().apply {
-            children.addAll(ttLeft, ttRight)
-        }
-
-        ParallelTransition()
-            .apply {
-                children.addAll(ttUp, ttLR)
-                onFinished = EventHandler {
-                    onFinish()
-                    revertTransition(node)
-                }
-            }
-            .play()
-    }
-
-    private fun moveDown(node: Node) {
-        val distance = node.boundsInLocal.height + 5
-        val tt = TranslateTransition(Duration.millis(600.0), node)
-        tt.byY = distance
-        tt.onFinished = EventHandler {
-            revertTransition(node)
-        }
-        tt.play()
-    }
-
-    private fun revertTransition(node: Node) {
-        node.viewOrder = 0.0
-        val distance = node.translateY
-        val tt = TranslateTransition(Duration.millis(1.0), node)
-
-        tt.byY = -distance
-        tt.onFinished = EventHandler {
-            isAnimating = false
-        }
-        tt.play()
     }
 }
