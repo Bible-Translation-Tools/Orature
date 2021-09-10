@@ -44,24 +44,6 @@ class TakeCell(
             takeProperty.set(item)
 
             setOnTakeSelected { onTakeSelected(item) }
-            if (item.selected) move(this as Node) { }
         }
-    }
-
-    private fun move(node: Node, onFinish: () -> Unit) {
-        val ttLeft = TranslateTransition(Duration.millis(400.0), node)
-        ttLeft.byX = -20.0
-        val ttRight = TranslateTransition(Duration.millis(200.0), node)
-        ttRight.byX = 20.0
-
-        val ttLR = SequentialTransition().apply {
-            children.addAll(ttLeft, ttRight)
-        }
-
-        ParallelTransition()
-            .apply {
-                children.add(ttLR)
-            }
-            .play()
     }
 }
