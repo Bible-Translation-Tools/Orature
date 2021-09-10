@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 
 private const val TAKE_CELL_HEIGHT = 60.0
+private const val TAKE_CELL_PADDING = 7.0
 
 class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
@@ -128,15 +129,7 @@ class ChunkItem : VBox() {
                 addClass("chunk-item__take-items")
 
                 listview(takeViews) {
-                    takesListView = this
-//                    setCellFactory {
-//                        TakeCell {
-//                            onTakeSelectedActionProperty.value?.handle(
-//                                ActionEvent(it, null)
-//                            )
-//                        }
-//                    }
-                    prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
+                    prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT + TAKE_CELL_PADDING*2))
                 }
             }
         }
