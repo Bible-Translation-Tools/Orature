@@ -70,8 +70,11 @@ class TakeItem : HBox() {
                 togglePseudoClass("selected", it)
             }
             setOnAction {
-                animate {
-                    onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                if (!isAnimating) {
+                    isAnimating = true
+                    animate {
+                        onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                    }
                 }
             }
         }
@@ -105,7 +108,7 @@ class TakeItem : HBox() {
             .apply {
                 children.addAll(ttUp, ttLR)
                 onFinished = EventHandler {
-                    revertAnimation(selectedNode)
+                    revertAnimation(selectedNode) { isAnimating = false }
                     callback()
                 }
             }
@@ -133,10 +136,17 @@ class TakeItem : HBox() {
         tt.play()
     }
 
-    private fun revertAnimation(node: Node) {
+    private fun revertAnimation(node: Node, onFinish: () -> Unit = { }) {
         val distance = node.translateY
         val ttRevertUp = TranslateTransition(Duration.millis(1.0), node)
         ttRevertUp.byY = -distance
+        ttRevertUp.onFinished = EventHandler {
+            onFinish()
+        }
         ttRevertUp.play()
+    }
+
+    companion object {
+        private var isAnimating = false
     }
 }
