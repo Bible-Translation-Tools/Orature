@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.animation.ParallelTransition
-import javafx.animation.SequentialTransition
 import javafx.animation.TranslateTransition
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -89,36 +87,24 @@ class TakeItem : HBox() {
 
         val selectedNode = this
         val parentY = this.parent.layoutY
+        selectedNode.styleClass.add("selected")
 
         // move selected node to top of the list
         val ttUp = TranslateTransition(Duration.millis(600.0), selectedNode)
         ttUp.toY = -parentY
-
-        // arc-like animation
-        val ttLeft = TranslateTransition(Duration.millis(400.0), selectedNode)
-        ttLeft.byX = -20.0
-        val ttRight = TranslateTransition(Duration.millis(200.0), selectedNode)
-        ttRight.byX = 20.0
-
-        val ttLR = SequentialTransition().apply {
-            children.addAll(ttLeft, ttRight)
+        ttUp.onFinished = EventHandler {
+            selectedNode.styleClass.remove("selected")
+            revertAnimation(selectedNode) { isAnimating = false }
+            callback()
         }
-
-        ParallelTransition()
-            .apply {
-                children.addAll(ttUp, ttLR)
-                onFinished = EventHandler {
-                    revertAnimation(selectedNode) { isAnimating = false }
-                    callback()
-                }
-            }
-            .play()
+        ttUp.play()
     }
 
     private fun shiftOtherNodes() {
-        val listView = this.parent.findParent<ListView<TakeItem>>() ?: return
-        val selectedIndex = listView.items.indexOf(this)
+        val listView = this.parent.findParent<ListView<TakeItem>>()
+            ?: return
 
+        val selectedIndex = listView.items.indexOf(this)
         for (item in listView.items) {
             if (listView.items.indexOf(item) < selectedIndex) {
                 moveDown(item)
@@ -138,12 +124,12 @@ class TakeItem : HBox() {
 
     private fun revertAnimation(node: Node, onFinish: () -> Unit = { }) {
         val distance = node.translateY
-        val ttRevertUp = TranslateTransition(Duration.millis(1.0), node)
-        ttRevertUp.byY = -distance
-        ttRevertUp.onFinished = EventHandler {
+        val ttRevertY = TranslateTransition(Duration.millis(1.0), node)
+        ttRevertY.byY = -distance
+        ttRevertY.onFinished = EventHandler {
             onFinish()
         }
-        ttRevertUp.play()
+        ttRevertY.play()
     }
 
     companion object {

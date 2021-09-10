@@ -47,7 +47,6 @@ class ChunkItem : VBox() {
 
     val takes = observableListOf<TakeModel>()
     val takeViews = observableListOf<TakeItem>()
-    private lateinit var takesListView: ListView<TakeItem>
 
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
@@ -129,7 +128,9 @@ class ChunkItem : VBox() {
                 addClass("chunk-item__take-items")
 
                 listview(takeViews) {
-                    prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT + TAKE_CELL_PADDING*2))
+                    prefHeightProperty().bind(
+                        Bindings.size(takes).multiply(TAKE_CELL_HEIGHT + TAKE_CELL_PADDING*2)
+                    )
                 }
             }
         }
