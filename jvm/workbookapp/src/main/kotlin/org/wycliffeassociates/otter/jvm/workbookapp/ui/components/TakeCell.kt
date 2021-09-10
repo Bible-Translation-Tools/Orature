@@ -18,7 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.animation.ParallelTransition
+import javafx.animation.SequentialTransition
+import javafx.animation.TranslateTransition
+import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.control.ListCell
+import javafx.util.Duration
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 
 class TakeCell(
@@ -38,6 +44,24 @@ class TakeCell(
             takeProperty.set(item)
 
             setOnTakeSelected { onTakeSelected(item) }
+            if (item.selected) move(this as Node) { }
         }
+    }
+
+    private fun move(node: Node, onFinish: () -> Unit) {
+        val ttLeft = TranslateTransition(Duration.millis(400.0), node)
+        ttLeft.byX = -20.0
+        val ttRight = TranslateTransition(Duration.millis(200.0), node)
+        ttRight.byX = 20.0
+
+        val ttLR = SequentialTransition().apply {
+            children.addAll(ttLeft, ttRight)
+        }
+
+        ParallelTransition()
+            .apply {
+                children.add(ttLR)
+            }
+            .play()
     }
 }

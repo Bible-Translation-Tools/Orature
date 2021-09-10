@@ -129,34 +129,13 @@ class ChunkItem : VBox() {
             vbox {
                 addClass("chunk-item__take-items")
 
-                listview(takeViews) {
-                    takesListView = this
-//                    setCellFactory {
-//                        TakeCell {
-//                            onTakeSelectedActionProperty.value?.handle(
-//                                ActionEvent(it, null)
-//                            )
-//                        }
-//                    }
-
-                    selectionModel.selectedIndexProperty().onChange {
-                        val index = this.selectionModel.selectedIndex
-                        if (isAnimating || selectedItem == null || index <= 0) {
-                            return@onChange
-                        }
-                        isAnimating = true
-
-                        val selectedItem = this.selectedItem
-                        selectedItem?.styleClass?.add("selected")
-                        takeViews.forEach {
-                            if (takeViews.indexOf(it) < index) moveDown(it as Node) { }
-                        }
-
-                        moveToTop(selectedItem as Node) {
-                            takeViews.removeAt(index)
-                            takeViews.add(0, selectedItem)
-                            this.selectionModel.select(0)
-                            selectedItem?.styleClass?.remove("selected")
+                listview(takes) {
+//                    takesListView = this
+                    setCellFactory {
+                        TakeCell {
+                            onTakeSelectedActionProperty.value?.handle(
+                                ActionEvent(it, null)
+                            )
                         }
                     }
 
