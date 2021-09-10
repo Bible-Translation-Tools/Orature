@@ -18,20 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.animation.ParallelTransition
-import javafx.animation.SequentialTransition
-import javafx.animation.TranslateTransition
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.scene.Node
-import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
-import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
