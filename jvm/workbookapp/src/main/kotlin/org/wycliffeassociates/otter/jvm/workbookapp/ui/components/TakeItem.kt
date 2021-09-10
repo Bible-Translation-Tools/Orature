@@ -68,11 +68,12 @@ class TakeItem : HBox() {
                 togglePseudoClass("selected", it)
             }
             setOnAction {
-                if (!isAnimating) {
-                    isAnimating = true
-                    animate {
-                        onTakeSelectedActionProperty.value?.handle(ActionEvent())
-                    }
+                if (isAnimating || takeProperty.value.selected) {
+                    return@setOnAction
+                }
+                isAnimating = true
+                animate {
+                    onTakeSelectedActionProperty.value?.handle(ActionEvent())
                 }
             }
         }
