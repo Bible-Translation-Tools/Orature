@@ -31,14 +31,11 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
-import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 const val SECONDS_ON_SCREEN = 10
