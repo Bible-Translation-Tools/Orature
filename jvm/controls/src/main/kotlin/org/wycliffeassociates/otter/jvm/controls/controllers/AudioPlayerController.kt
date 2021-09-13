@@ -50,12 +50,10 @@ class AudioPlayerController(
     }
 
     fun toggle() {
-        disposable?.dispose()
         player?.let { _player ->
             if (_player.isPlaying()) {
                 pause()
             } else {
-                disposable = startProgressUpdate()
                 play()
                 _player.addEventListener {
                     if (
@@ -63,7 +61,6 @@ class AudioPlayerController(
                         it == AudioPlayerEvent.STOP ||
                         it == AudioPlayerEvent.COMPLETE
                     ) {
-                        // disposable?.dispose()
                         Platform.runLater {
                             isPlayingProperty.set(false)
                             if (it == AudioPlayerEvent.COMPLETE) {
@@ -81,6 +78,8 @@ class AudioPlayerController(
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
+        disposable?.dispose()
+        disposable = startProgressUpdate()
     }
 
     private fun initializeSliderActions() {
