@@ -34,7 +34,6 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
-        AudioModule::class,
         AppDatabaseModule::class,
         AppPreferencesModule::class,
         TestDirectoryProviderModule::class,
