@@ -2,7 +2,7 @@ ext {
     // Plugins
     javafxPluginVer = '0.0.8'
     jooqPluginVer = '4.0'
-    install4jPluginVer = '7.0.8'
+    install4jPluginVer = '9.0.2'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
     buildscanPluginVer = '2.4.2'
     detektPluginVer = '1.17.0'
@@ -44,5 +44,6 @@ ext {
     testFxVer = '4.0.15-alpha'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
+    install4jVer = '9.0.4'
     jump3rVer='1.0.5'
 }

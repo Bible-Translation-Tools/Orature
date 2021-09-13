@@ -17,6 +17,7 @@ javafx {
 }
 
 repositories {
+    maven { url 'https://maven.ej-technologies.com/repository' }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
     maven { url 'https://jitpack.io' }
 }
@@ -60,9 +61,13 @@ application {
 
 apply from: './jooq.gradle'
 
+boolean devbuild = hasProperty("devbuild")
+
 //install4j tasks for building win/nix/mac installers. Executable jar can be built without it
 install4j {
     vmParameters = ["-Dinstall4j.timestampUrl=http://timestamp.sectigo.com/"]
+    faster = devbuild
+    disableSigning = devbuild
     //pass in the install4j directory via -P if it's not in the default install location, e.q. for use with travis or arbitrary paths
     if (project.hasProperty('gradlewInstall4jDirectory')) {
         installDir = file(gradlewInstall4jDirectory)
@@ -79,7 +84,7 @@ install4j {
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
     projectFile = 'otter.install4j'
-    //Pass Travis Build ID to install4j for versioning
+    //Pass Build run # to install4j for versioning
     if (project.hasProperty('gradlewCommandVersionProp')) {
         release = gradlewCommandVersionProp
     }
@@ -165,6 +170,8 @@ dependencies {
 
     // Sentry
     implementation "io.sentry:sentry:$sentryVer"
+
+    implementation "com.install4j:install4j-runtime:$install4jVer"
 }
 
 // tell gradle what to put in the jar
