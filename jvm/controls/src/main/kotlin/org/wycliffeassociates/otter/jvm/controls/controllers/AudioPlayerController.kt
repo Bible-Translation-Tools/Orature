@@ -55,21 +55,6 @@ class AudioPlayerController(
                 pause()
             } else {
                 play()
-                _player.addEventListener {
-                    if (
-                        it == AudioPlayerEvent.PAUSE ||
-                        it == AudioPlayerEvent.STOP ||
-                        it == AudioPlayerEvent.COMPLETE
-                    ) {
-                        Platform.runLater {
-                            isPlayingProperty.set(false)
-                            if (it == AudioPlayerEvent.COMPLETE) {
-                                audioSlider.value = 0.0
-                                _player.getAudioReader()?.seek(0)
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -80,6 +65,21 @@ class AudioPlayerController(
         this.player = player
         disposable?.dispose()
         disposable = startProgressUpdate()
+        player.addEventListener {
+            if (
+                it == AudioPlayerEvent.PAUSE ||
+                it == AudioPlayerEvent.STOP ||
+                it == AudioPlayerEvent.COMPLETE
+            ) {
+                Platform.runLater {
+                    isPlayingProperty.set(false)
+                    if (it == AudioPlayerEvent.COMPLETE) {
+                        audioSlider.value = 0.0
+                        player.getAudioReader()?.seek(0)
+                    }
+                }
+            }
+        }
     }
 
     private fun initializeSliderActions() {
