@@ -32,7 +32,7 @@ class MarkerView : PluginEntrypoint() {
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
     val waveformContainer = WaveformContainer()
-    val source = SourceAudioFragment()
+    val source = SourceTextFragment()
     val playbackControls = PlaybackControlsFragment()
 
     init {

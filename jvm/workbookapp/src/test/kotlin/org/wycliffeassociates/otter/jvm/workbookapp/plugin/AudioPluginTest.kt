@@ -24,9 +24,11 @@ import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.domain.plugins.PluginParameters
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import java.io.File
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 class AudioPluginTest {
 
+    val connectionFactory = Mockito.mock(AudioConnectionFactory::class.java)
     val parameters = Mockito.mock(PluginParameters::class.java)
 
     var exe = File.createTempFile("test", ".exe").apply {
@@ -61,7 +63,7 @@ class AudioPluginTest {
     @Test
     fun testCompletableFinishesForValidCommand() {
         // Create the plugin
-        val audioPlugin = AudioPlugin(inputAudioPluginData)
+        val audioPlugin = AudioPlugin(connectionFactory, inputAudioPluginData)
         audioPlugin
             .launch(inputFile, parameters)
             .blockingAwait()
@@ -71,7 +73,7 @@ class AudioPluginTest {
     @Test
     fun testExceptionThrownWhenExecutableNotFound() {
         // Create the plugin
-        val audioPlugin = AudioPlugin(missingExecutablePlugin)
+        val audioPlugin = AudioPlugin(connectionFactory, missingExecutablePlugin)
         try {
             audioPlugin
                 .launch(inputFile, parameters)

@@ -16,17 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
+package org.wycliffeassociates.otter.jvm.device.audio
 
-import javafx.scene.Parent
-import javafx.scene.layout.Region
-import org.mockito.Mockito
-import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import tornadofx.*
+import java.io.File
+import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 
-private class TestView(override val root: Parent = Region()) : Fragment()
-
-internal class TestApp : App(TestView::class), IDependencyGraphProvider {
-    override val dependencyGraph: AppDependencyGraph = Mockito.mock(AppDependencyGraph::class.java)
-}
+internal class AudioPlayerConnectionState(
+    val id: Int,
+    var file: File = File(""),
+    var begin: Int? = null,
+    var end: Int? = null,
+    var position: Int = 0,
+    var durationInFrames: Int = 0,
+    var durationInMs: Int = 0,
+    var locationInFrames: Int = 0,
+    var locationInMs: Int = 0,
+    val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
+)

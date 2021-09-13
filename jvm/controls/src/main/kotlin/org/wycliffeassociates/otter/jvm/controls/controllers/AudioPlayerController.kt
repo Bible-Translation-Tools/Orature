@@ -41,7 +41,6 @@ class AudioPlayerController(
 
     private var startAtLocation = 0
     private var disposable: Disposable? = null
-    private var dragging = false
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -51,12 +50,10 @@ class AudioPlayerController(
     }
 
     fun toggle() {
-        disposable?.dispose()
         player?.let { _player ->
             if (_player.isPlaying()) {
                 pause()
             } else {
-                disposable = startProgressUpdate()
                 play()
             }
         }
@@ -66,10 +63,14 @@ class AudioPlayerController(
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
-
+        disposable?.dispose()
+        disposable = startProgressUpdate()
         player.addEventListener {
-            if (it == AudioPlayerEvent.STOP || it == AudioPlayerEvent.COMPLETE) {
-                disposable?.dispose()
+            if (
+                it == AudioPlayerEvent.PAUSE ||
+                it == AudioPlayerEvent.STOP ||
+                it == AudioPlayerEvent.COMPLETE
+            ) {
                 Platform.runLater {
                     isPlayingProperty.set(false)
                     if (it == AudioPlayerEvent.COMPLETE) {
@@ -89,10 +90,8 @@ class AudioPlayerController(
                 resumeAfterDrag = true
                 toggle()
             }
-            dragging = true
         }
         audioSlider.setOnMouseClicked {
-            dragging = false
             val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
             var wasPlaying = false
             if (player?.isPlaying() == true) {
@@ -101,10 +100,6 @@ class AudioPlayerController(
             }
             seek(percentageToLocation(percent))
             if (wasPlaying) {
-                toggle()
-            }
-            if (resumeAfterDrag) {
-                resumeAfterDrag = false
                 toggle()
             }
         }
@@ -118,7 +113,12 @@ class AudioPlayerController(
                 logger.error("Error in startProgressUpdate", e)
             }
             .subscribe {
-                if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
+                if (player?.isPlaying() == true){
+                    isPlayingProperty.set(true)
+                } else {
+                    isPlayingProperty.set(false)
+                }
+                if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
                     audioSlider.value = playbackPosition().toDouble()
                 }
             }
@@ -134,8 +134,8 @@ class AudioPlayerController(
     }
 
     fun pause() {
+        isPlayingProperty.set(false)
         player?.let {
-            isPlayingProperty.set(false)
             startAtLocation = it.getLocationInFrames()
             it.pause()
         }
@@ -144,7 +144,6 @@ class AudioPlayerController(
     fun seek(location: Int) {
         player?.let {
             it.seek(location)
-            audioSlider.value = location.toDouble()
             if (!it.isPlaying()) {
                 startAtLocation = location
             }
@@ -164,7 +163,7 @@ class AudioPlayerController(
 
     private fun playbackPosition(): Int {
         return player?.let {
-            it.getLocationInFrames() - it.frameStart
+            it.getLocationInFrames()
         } ?: 0
     }
 }
