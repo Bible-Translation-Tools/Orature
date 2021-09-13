@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
@@ -28,7 +27,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 
 @Module
