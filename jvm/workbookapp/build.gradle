@@ -106,7 +106,7 @@ dependencies {
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
     // ControlsFX
-    implementation 'com.github.jsarabia:javafx-gridview:-SNAPSHOT'
+    implementation "org.wycliffeassociates:javafx-gridview:$javaGridviewVer"
     implementation "org.controlsfx:controlsfx:$controlsfxVer"
 
     // Ikonli

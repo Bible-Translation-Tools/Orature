@@ -44,7 +44,7 @@ class ChunkItem : VBox() {
 
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
     private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
-    
+
     private val onChunkOpenActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
