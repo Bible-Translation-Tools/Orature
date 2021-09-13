@@ -18,12 +18,16 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.animation.TranslateTransition
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.Node
+import javafx.scene.control.ListView
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
@@ -54,7 +58,6 @@ class TakeItem : HBox() {
 
         button {
             addClass("btn", "btn--icon")
-            onActionProperty().bind(onTakeSelectedActionProperty)
             graphicProperty().bind(selectedProperty.objectBinding {
                 when (it) {
                     true -> selectedIcon
@@ -64,10 +67,73 @@ class TakeItem : HBox() {
             selectedProperty.onChange {
                 togglePseudoClass("selected", it)
             }
+            setOnAction {
+                if (isAnimating || takeProperty.value.selected) {
+                    return@setOnAction
+                }
+                isAnimating = true
+                animate {
+                    onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                }
+            }
         }
     }
 
     fun setOnTakeSelected(op: () -> Unit) {
         onTakeSelectedActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    private fun animate(callback: () -> Unit) {
+        shiftOtherNodes()
+
+        val selectedNode = this
+        val parentY = this.parent.layoutY
+        selectedNode.styleClass.add("selected")
+
+        // move selected node to top of the list
+        val ttUp = TranslateTransition(Duration.millis(600.0), selectedNode)
+        ttUp.toY = -parentY
+        ttUp.onFinished = EventHandler {
+            selectedNode.styleClass.remove("selected")
+            revertAnimation(selectedNode) { isAnimating = false }
+            callback()
+        }
+        ttUp.play()
+    }
+
+    private fun shiftOtherNodes() {
+        val listView = this.parent.findParent<ListView<TakeItem>>()
+            ?: return
+
+        val selectedIndex = listView.items.indexOf(this)
+        for (item in listView.items) {
+            if (listView.items.indexOf(item) < selectedIndex) {
+                moveDown(item)
+            }
+        }
+    }
+
+    private fun moveDown(node: Node) {
+        val distance = node.boundsInLocal.height + 5
+        val tt = TranslateTransition(Duration.millis(600.0), node)
+        tt.byY = distance
+        tt.onFinished = EventHandler {
+            revertAnimation(node)
+        }
+        tt.play()
+    }
+
+    private fun revertAnimation(node: Node, onFinish: () -> Unit = { }) {
+        val distance = node.translateY
+        val ttRevertY = TranslateTransition(Duration.millis(1.0), node)
+        ttRevertY.byY = -distance
+        ttRevertY.onFinished = EventHandler {
+            onFinish()
+        }
+        ttRevertY.play()
+    }
+
+    companion object {
+        private var isAnimating = false
     }
 }

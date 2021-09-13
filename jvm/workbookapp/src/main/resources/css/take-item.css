@@ -21,4 +21,11 @@
 .take-item {
     -fx-alignment: center;
     -fx-spacing: 10px;
+    -fx-padding: 7px;
+}
+
+.take-item.selected {
+    -fx-background-color: white;
+    -fx-background-radius: 7px;
+    -fx-effect: dropshadow(gaussian, -wa-black-30, 10, 0, 3, 3);
 }
