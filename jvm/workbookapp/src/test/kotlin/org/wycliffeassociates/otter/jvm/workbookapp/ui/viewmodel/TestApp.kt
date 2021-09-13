@@ -22,7 +22,6 @@ import javafx.scene.Parent
 import javafx.scene.layout.Region
 import org.mockito.Mockito
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 
