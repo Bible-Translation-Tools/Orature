@@ -37,6 +37,9 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioSystem
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -44,10 +47,20 @@ private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
 
+    private val defaultFormat = AudioFormat(
+        44100F,
+        16,
+        1,
+        true,
+        false
+    )
+    private val line = AudioSystem.getSourceDataLine(defaultFormat)
+    private val audioConnectionFactory = AudioConnectionFactory(line)
+
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     val markers: VerseMarkerModel
-    val audioPlayer = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getPlayer()
+    val audioPlayer = audioConnectionFactory.getPlayer()
     var audioController: AudioPlayerController? = null
     val isPlayingProperty = SimpleBooleanProperty(false)
     val markerRatioProperty = SimpleStringProperty()
