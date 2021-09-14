@@ -18,17 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.animation.TranslateTransition
-import javafx.event.EventHandler
-import javafx.scene.Node
-import javafx.scene.control.ListCell
-import javafx.util.Duration
+import org.wycliffeassociates.otter.jvm.controls.card.events.AnimatedListCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 
 class TakeCell(
     private val onTakeSelected: (TakeModel) -> Unit
-) : ListCell<TakeModel>() {
-    private val view = TakeItem()
+) : AnimatedListCell<TakeModel>() {
+    override val view = TakeItem()
 
     override fun updateItem(item: TakeModel?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -47,55 +43,10 @@ class TakeCell(
                 }
                 isAnimatingProperty.set(true)
                 animate(item) {
+                    view.isAnimatingProperty.set(false)
                     onTakeSelected(item)
                 }
             }
         }
-    }
-
-    private fun animate(takeCard: TakeModel, callback: () -> Unit) {
-        shiftOtherNodes(takeCard)
-
-        val parentY = view.parent.layoutY
-        view.styleClass.add("selected")
-
-        // move selected node to top of the list
-        val ttUp = TranslateTransition(Duration.millis(600.0), view)
-        ttUp.toY = -parentY
-        ttUp.onFinished = EventHandler {
-            view.styleClass.remove("selected")
-            revertAnimation(view) { view.isAnimatingProperty.set(false) }
-            callback()
-        }
-        ttUp.play()
-    }
-
-    private fun shiftOtherNodes(takeCard: TakeModel) {
-        val selectedIndex = listView.items.indexOf(takeCard)
-        for (item in listView.items) {
-            if (listView.items.indexOf(item) < selectedIndex) {
-                moveDown(view)
-            }
-        }
-    }
-
-    private fun moveDown(node: Node) {
-        val distance = node.boundsInLocal.height + 5
-        val tt = TranslateTransition(Duration.millis(600.0), node)
-        tt.byY = distance
-        tt.onFinished = EventHandler {
-            revertAnimation(node)
-        }
-        tt.play()
-    }
-
-    private fun revertAnimation(node: Node, onFinish: () -> Unit = { }) {
-        val distance = node.translateY
-        val ttRevertY = TranslateTransition(Duration.millis(1.0), node)
-        ttRevertY.byY = -distance
-        ttRevertY.onFinished = EventHandler {
-            onFinish()
-        }
-        ttRevertY.play()
     }
 }
