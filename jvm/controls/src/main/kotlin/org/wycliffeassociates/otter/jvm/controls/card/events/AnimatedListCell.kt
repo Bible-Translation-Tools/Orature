@@ -13,15 +13,14 @@ abstract class AnimatedListCell<T> : ListCell<T>() {
         shiftOtherNodes(takeModel)
 
         val parentY = view.parent.layoutY
-        view.styleClass.add("selected")
 
         // move selected node to top of the list
         val ttUp = TranslateTransition(Duration.millis(600.0), view)
         ttUp.toY = -parentY
         ttUp.onFinished = EventHandler {
-            view.styleClass.remove("selected")
-            revertAnimation(view)
-            callback()
+            revertAnimation(view) {
+                callback()
+            }
         }
         ttUp.play()
     }

@@ -41,9 +41,13 @@ class TakeCell(
                 if (isAnimatingProperty.value || item.selected) {
                     return@setOnTakeSelected
                 }
+
                 isAnimatingProperty.set(true)
+                view.styleClass.add("selected")
+
                 animate(item) {
                     view.isAnimatingProperty.set(false)
+                    view.styleClass.remove("selected")
                     onTakeSelected(item)
                 }
             }

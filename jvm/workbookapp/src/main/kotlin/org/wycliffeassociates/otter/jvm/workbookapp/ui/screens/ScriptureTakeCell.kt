@@ -72,6 +72,7 @@ class ScriptureTakeCell(
                 }
 
                 isAnimatingProperty.set(true)
+
                 animate(item) {
                     view.isAnimatingProperty.set(false)
                     onSelected(item.take)
