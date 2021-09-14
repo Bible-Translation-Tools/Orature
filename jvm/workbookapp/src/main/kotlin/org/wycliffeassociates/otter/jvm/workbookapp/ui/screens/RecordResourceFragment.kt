@@ -349,7 +349,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }
     }
 

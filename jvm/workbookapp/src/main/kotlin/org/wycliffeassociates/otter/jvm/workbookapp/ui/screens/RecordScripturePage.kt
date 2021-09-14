@@ -20,20 +20,17 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
-import javafx.geometry.HPos
-import javafx.geometry.VPos
-import javafx.scene.Node
 import javafx.scene.Parent
-import javafx.scene.control.Control
+import javafx.scene.control.ScrollPane
 import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.ColumnConstraints
+import javafx.scene.layout.GridPane
 import javafx.scene.layout.Priority
-import javafx.scene.layout.Region
 import javafx.scene.layout.RowConstraints
 import javafx.scene.layout.VBox
 import javafx.util.Duration
@@ -42,26 +39,25 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
+import org.wycliffeassociates.otter.jvm.controls.card.ListViewPlaceHolder
+import org.wycliffeassociates.otter.jvm.controls.card.NewRecordingCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
-import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.util.*
 
-private const val TAKES_ROW_HEIGHT = 170.0
+private const val TAKES_ROW_HEIGHT = 197.0
+private const val SCROLL_SPEED = 0.02
 
 class RecordScripturePage : View() {
     private val logger = LoggerFactory.getLogger(RecordScripturePage::class.java)
@@ -70,55 +66,29 @@ class RecordScripturePage : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    private val recordableViewModel = recordScriptureViewModel.recordableViewModel
 
-    private val mainContainer = VBox()
+    private val mainContainer = GridPane()
     private val fileDragTarget = VBox()
-    private val takesGrid = ScriptureTakesGridView(
-        workbookDataStore.activeChunkProperty.isNull,
-        recordableViewModel::recordNewTake
-    )
     private val pluginOpenedPage: PluginOpenedPage
 
-    private val isDraggingTakeProperty = SimpleBooleanProperty(false)
     private val isDraggingFileProperty = SimpleBooleanProperty(false)
-    private val draggingNodeProperty = SimpleObjectProperty<Node>()
 
     private var importProgressListener: ChangeListener<Boolean>? = null
     private var importSuccessListener: ChangeListener<Boolean>? = null
     private var importFailListener: ChangeListener<Boolean>? = null
 
-    private val dragTarget =
-        DragTargetBuilder(DragTargetBuilder.Type.SCRIPTURE_TAKE)
-            .build(isDraggingTakeProperty.toBinding())
-            .apply {
-                addClass("card--scripture-take--empty")
-                recordableViewModel.selectedTakeProperty.onChangeAndDoNow { take ->
-                    /* We can't just add the node being dragged, since the selected take might have just been
-                        loaded from the database */
-                    this.selectedNodeProperty.value = take?.let { createTakeCard(take) }
-                }
-            }
-
-    private val dragContainer = VBox().apply {
-        this.prefWidthProperty().bind(dragTarget.widthProperty())
-        draggingNodeProperty.onChange { draggingNode ->
-            clear()
-            draggingNode?.let { add(draggingNode) }
-        }
-    }
-
     private val sourceContent =
         SourceContent().apply {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            audioPlayerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
+            audioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
+            isMinimizableProperty.set(false)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             playLabelProperty.set(messages["playSource"])
             pauseLabelProperty.set(messages["pauseSource"])
 
-            contentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
+            contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }
 
     private val breadCrumb = BreadCrumb().apply {
@@ -153,66 +123,30 @@ class RecordScripturePage : View() {
                 }
             }
         )
-        add(dragContainer)
     }
 
     init {
         importStylesheet(resources.get("/css/record-scripture.css"))
-        importStylesheet(resources.get("/css/audioplayer.css"))
         importStylesheet(resources.get("/css/takecard.css"))
         importStylesheet(resources.get("/css/scripturetakecard.css"))
         importStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
-        isDraggingTakeProperty.onChange {
-            if (it) recordableViewModel.stopPlayers()
-        }
         isDraggingFileProperty.onChange {
-            if (it) recordableViewModel.stopPlayers()
+            if (it) recordScriptureViewModel.stopPlayers()
         }
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                recordableViewModel.openSourceAudioPlayer()
+                recordScriptureViewModel.openSourceAudioPlayer()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
             }
-            recordableViewModel.openPlayers()
-        }
-
-        recordableViewModel.takeCardModels.onChangeAndDoNow {
-            takesGrid.gridItems.setAll(it)
-        }
-
-        recordableViewModel.selectedTakeProperty.onChangeAndDoNow {
-            if (it != null) {
-                dragTarget.selectedNodeProperty.set(createTakeCard(it))
-            }
-        }
-
-        dragTarget.setOnDragDropped {
-            val db: Dragboard = it.dragboard
-            var success = false
-            if (db.hasString()) {
-                recordableViewModel.selectTake(db.string)
-                success = true
-            }
-            (it.source as? ScriptureTakeCard)?.let {
-                it.isDraggingProperty().value = false
-            }
-            it.isDropCompleted = success
-            it.consume()
-        }
-
-        dragTarget.setOnDragOver {
-            if (it.gestureSource != dragTarget && it.dragboard.hasString()) {
-                it.acceptTransferModes(*TransferMode.ANY)
-            }
-            it.consume()
+            recordScriptureViewModel.openPlayers()
         }
 
         fileDragTarget.setOnDragOver {
@@ -226,7 +160,7 @@ class RecordScripturePage : View() {
             val db: Dragboard = it.dragboard
             var success = false
             if (db.hasFiles()) {
-                recordableViewModel.importTakes(db.files)
+                recordScriptureViewModel.importTakes(db.files)
                 success = true
             }
             it.isDropCompleted = success
@@ -237,85 +171,88 @@ class RecordScripturePage : View() {
             addEventHandler(DragEvent.DRAG_ENTERED) {
                 if (it.dragboard.hasFiles()) {
                     isDraggingFileProperty.value = true
-                } else {
-                    isDraggingTakeProperty.value = true
                 }
-            }
-            addEventHandler(DragEvent.DRAG_EXITED) {
-                isDraggingTakeProperty.value = false
             }
 
             addClass("card--main-container")
 
-            hgrow = Priority.ALWAYS
-            // Top items above the alternate takes
-            // Drag target and/or selected take, Next Verse Button, Previous Verse Button
-            hbox {
-                addClass("record-scripture__top")
+            val rightPane = ScrollPane().apply {
+                isFitToWidth = true
+                isFitToHeight = true
 
-                // previous verse button
-                button(messages["previousVerse"]) {
-                    addClass("btn", "btn--secondary")
-                    graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
-                    action {
-                        recordScriptureViewModel.previousChunk()
-                    }
-                    enableWhen(recordScriptureViewModel.hasPrevious)
-                }
                 vbox {
-                    add(dragTarget)
-                }
+                    addClass("record-scripture__right")
 
-                // next verse button
-                button(messages["nextVerse"]) {
-                    addClass("btn", "btn--secondary")
-                    graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
-                    action {
-                        recordScriptureViewModel.nextChunk()
+                    label {
+                        addClass("record-scripture__book-title")
+                        textProperty().bind(workbookDataStore.activeChapterTitleBinding())
                     }
-                    enableWhen(recordScriptureViewModel.hasNext)
+                    label {
+                        addClass("record-scripture__chunk-title")
+                        textProperty().bind(workbookDataStore.activeChunkTitleBinding())
+                        visibleProperty().bind(workbookDataStore.activeChunkTitleBinding().isNotNull)
+                        managedProperty().bind(visibleProperty())
+                    }
+
+                    hbox {
+                        addClass("record-scripture__navigate-buttons")
+
+                        // previous verse button
+                        button(messages["previousVerse"]) {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+                            action {
+                                recordScriptureViewModel.previousChunk()
+                            }
+                            enableWhen(recordScriptureViewModel.hasPrevious)
+                        }
+
+                        // next verse button
+                        button(messages["nextVerse"]) {
+                            addClass("btn", "btn--secondary")
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                            action {
+                                recordScriptureViewModel.nextChunk()
+                            }
+                            enableWhen(recordScriptureViewModel.hasNext)
+                        }
+                    }
+
+                    add(
+                        NewRecordingCard(
+                            FX.messages["record"],
+                            recordScriptureViewModel::recordNewTake
+                        )
+                    )
+
+                    listview(recordScriptureViewModel.takeCardModels) {
+                        addClass("record-scripture__takes-list")
+                        vgrow = Priority.ALWAYS
+
+                        minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT));
+                        setCellFactory { ScriptureTakeCell() }
+
+                        placeholder = ListViewPlaceHolder()
+                    }
+                }
+
+                content.setOnScroll {
+                    val delta = it.deltaY * SCROLL_SPEED
+                    vvalue -= delta
                 }
             }
 
-            gridpane {
-                vgrow = Priority.ALWAYS
-                hgrow = Priority.ALWAYS
+            add(sourceContent, 0, 0)
+            add(rightPane, 1, 0)
 
-                add(takesGrid, 0, 0)
-                add(sourceContent, 0, 1)
+            val column = ColumnConstraints()
+            column.percentWidth = 50.0
 
-                columnConstraints.addAll(
-                    ColumnConstraints(
-                        0.0,
-                        0.0,
-                        Double.MAX_VALUE,
-                        Priority.ALWAYS,
-                        HPos.LEFT,
-                        true
-                    )
-                )
+            val row = RowConstraints()
+            row.vgrow = Priority.ALWAYS
 
-                val takesRowConstraints = RowConstraints(
-                    TAKES_ROW_HEIGHT,
-                    TAKES_ROW_HEIGHT,
-                    Double.MAX_VALUE,
-                    Priority.ALWAYS,
-                    VPos.CENTER,
-                    true
-                )
-
-                val sourceContentRowConstraints = RowConstraints(
-                    Region.USE_COMPUTED_SIZE,
-                    Region.USE_COMPUTED_SIZE,
-                    Region.USE_COMPUTED_SIZE,
-                    Priority.NEVER,
-                    VPos.CENTER,
-                    false
-                )
-
-                rowConstraints.add(takesRowConstraints)
-                rowConstraints.add(sourceContentRowConstraints)
-            }
+            columnConstraints.addAll(column, column)
+            rowConstraints.add(row)
         }
 
         fileDragTarget.apply {
@@ -331,32 +268,21 @@ class RecordScripturePage : View() {
 
     private fun Parent.addButtonEventHandlers() {
         addEventHandler(DeleteTakeEvent.DELETE_TAKE) {
-            recordableViewModel.deleteTake(it.take)
+            recordScriptureViewModel.deleteTake(it.take)
         }
         addEventHandler(TakeEvent.EDIT_TAKE) {
-            recordableViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
+            recordScriptureViewModel.processTakeWithPlugin(it, PluginType.EDITOR)
         }
         addEventHandler(TakeEvent.MARK_TAKE) {
-            recordableViewModel.processTakeWithPlugin(it, PluginType.MARKER)
+            recordScriptureViewModel.processTakeWithPlugin(it, PluginType.MARKER)
         }
-    }
-
-    private fun createTakeCard(take: TakeCardModel): Control {
-        return ScriptureTakeCard().apply {
-            audioPlayerProperty().set(take.audioPlayer)
-            deleteTextProperty().set(take.deleteText)
-            editTextProperty().set(take.editText)
-            pauseTextProperty().set(take.playText)
-            playTextProperty().set(take.playText)
-            markerTextProperty().set(take.markerText)
-            takeProperty().set(take.take)
-            takeNumberProperty().set(take.take.number.toString())
-            allowMarkerProperty().bind(recordableViewModel.workbookDataStore.activeChunkProperty.isNull)
+        addEventHandler(TakeEvent.SELECT_TAKE) {
+            recordScriptureViewModel.selectTake(it.take)
         }
     }
 
     private fun createSnackBar() {
-        recordableViewModel
+        recordScriptureViewModel
             .snackBarObservable
             .doOnError { e ->
                 logger.error("Error in creating no plugin snackbar", e)
@@ -380,12 +306,12 @@ class RecordScripturePage : View() {
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
         return PluginOpenedPage().apply {
-            dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
-            dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
-            playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
-            audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
+            dialogTitleProperty.bind(recordScriptureViewModel.dialogTitleBinding())
+            dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
+            playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
+            audioAvailableProperty.bind(recordScriptureViewModel.sourceAudioAvailableProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }
     }
 
@@ -397,7 +323,7 @@ class RecordScripturePage : View() {
             importProgressListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
             }
-            recordableViewModel.showImportProgressDialogProperty.addListener(importProgressListener)
+            recordScriptureViewModel.showImportProgressDialogProperty.addListener(importProgressListener)
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
@@ -413,10 +339,10 @@ class RecordScripturePage : View() {
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
             }
-            recordableViewModel.showImportSuccessDialogProperty.addListener(importSuccessListener)
+            recordScriptureViewModel.showImportSuccessDialogProperty.addListener(importSuccessListener)
 
-            onCloseAction { recordableViewModel.showImportSuccessDialogProperty.set(false) }
-            onCancelAction { recordableViewModel.showImportSuccessDialogProperty.set(false) }
+            onCloseAction { recordScriptureViewModel.showImportSuccessDialogProperty.set(false) }
+            onCancelAction { recordScriptureViewModel.showImportSuccessDialogProperty.set(false) }
         }
     }
 
@@ -429,29 +355,30 @@ class RecordScripturePage : View() {
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
             }
-            recordableViewModel.showImportFailDialogProperty.addListener(importFailListener)
+            recordScriptureViewModel.showImportFailDialogProperty.addListener(importFailListener)
 
-            onCloseAction { recordableViewModel.showImportFailDialogProperty.set(false) }
-            onCancelAction { recordableViewModel.showImportFailDialogProperty.set(false) }
+            onCloseAction { recordScriptureViewModel.showImportFailDialogProperty.set(false) }
+            onCancelAction { recordScriptureViewModel.showImportFailDialogProperty.set(false) }
         }
     }
 
     private fun removeDialogListeners() {
-        recordableViewModel.showImportProgressDialogProperty.removeListener(importProgressListener)
-        recordableViewModel.showImportFailDialogProperty.removeListener(importFailListener)
-        recordableViewModel.showImportSuccessDialogProperty.removeListener(importSuccessListener)
+        recordScriptureViewModel.showImportProgressDialogProperty.removeListener(importProgressListener)
+        recordScriptureViewModel.showImportFailDialogProperty.removeListener(importFailListener)
+        recordScriptureViewModel.showImportSuccessDialogProperty.removeListener(importSuccessListener)
     }
 
     override fun onUndock() {
         super.onUndock()
-        recordableViewModel.closePlayers()
+        recordScriptureViewModel.closePlayers()
         removeDialogListeners()
     }
 
     override fun onDock() {
         super.onDock()
-        recordableViewModel.openPlayers()
-        recordableViewModel.currentTakeNumberProperty.set(null)
+        recordScriptureViewModel.loadTakes()
+        recordScriptureViewModel.openPlayers()
+        recordScriptureViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()

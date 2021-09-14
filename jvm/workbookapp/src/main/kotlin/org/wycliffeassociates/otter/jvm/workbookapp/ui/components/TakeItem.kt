@@ -50,7 +50,6 @@ class TakeItem : HBox() {
 
             takeProperty.onChange { take ->
                 take?.let {
-                    fileProperty.set(take.take.file)
                     playerProperty.set(take.audioPlayer)
                 }
             }

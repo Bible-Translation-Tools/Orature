@@ -18,7 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.card
 
-import javafx.beans.property.*
+import javafx.beans.property.BooleanProperty
+import javafx.beans.property.ObjectProperty
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.StringProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -29,15 +34,9 @@ class ScriptureTakeCard : Control() {
 
     private val takeProperty = SimpleObjectProperty<Take>()
     private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    private val deleteTextProperty = SimpleStringProperty("delete")
-    private val editTextProperty = SimpleStringProperty("edit")
-    private val markerTextProperty = SimpleStringProperty("marker")
-    private val playTextProperty = SimpleStringProperty("play")
-    private val pauseTextProperty = SimpleStringProperty("pause")
-    private val takeNumberProperty = SimpleStringProperty("Take 01")
-    private val timestampProperty = SimpleStringProperty("")
-    private val isDraggingProperty = SimpleBooleanProperty(false)
-    private val allowMarkerProperty = SimpleBooleanProperty(true)
+    private val selectedProperty = SimpleBooleanProperty()
+    private val takeLabelProperty = SimpleStringProperty()
+    private val timestampProperty = SimpleStringProperty()
 
     fun takeProperty(): ObjectProperty<Take> {
         return takeProperty
@@ -47,40 +46,16 @@ class ScriptureTakeCard : Control() {
         return audioPlayerProperty
     }
 
-    fun deleteTextProperty(): StringProperty {
-        return deleteTextProperty
+    fun selectedProperty(): BooleanProperty {
+        return selectedProperty
     }
 
-    fun editTextProperty(): StringProperty {
-        return editTextProperty
+    fun takeLabelProperty(): StringProperty {
+        return takeLabelProperty
     }
 
-    fun markerTextProperty(): StringProperty {
-        return markerTextProperty
-    }
-
-    fun playTextProperty(): StringProperty {
-        return playTextProperty
-    }
-
-    fun pauseTextProperty(): StringProperty {
-        return pauseTextProperty
-    }
-
-    fun takeNumberProperty(): StringProperty {
-        return takeNumberProperty
-    }
-
-    fun timestampProperty(): StringProperty {
+    fun lastModifiedProperty(): StringProperty {
         return timestampProperty
-    }
-
-    fun isDraggingProperty(): BooleanProperty {
-        return isDraggingProperty
-    }
-
-    fun allowMarkerProperty(): BooleanProperty {
-        return allowMarkerProperty
     }
 
     override fun createDefaultSkin(): Skin<*> {

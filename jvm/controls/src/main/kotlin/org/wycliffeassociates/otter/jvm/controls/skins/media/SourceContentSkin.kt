@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.media
 
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -35,10 +36,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
-
-    companion object {
-        private const val SCROLL_TEXT_RESIZE_RATIO = 1.5
-    }
 
     private val playIcon = FontIcon("fa-play")
     private val pauseIcon = FontIcon("fa-pause")
@@ -164,12 +161,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
-
             isFitToWidth = true
-
-            maxWidthProperty().bind(
-                sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
-            )
         }
 
         sourceText.apply {
@@ -178,19 +170,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
-        }
-
-        titleContainer.apply {
-            sourceContent.isMinimizedProperty.onChangeAndDoNow {
-                if (it == true) {
-                    maxWidthProperty().unbind()
-                    maxWidthProperty().set(Double.MAX_VALUE)
-                } else {
-                    maxWidthProperty().bind(
-                        sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
-                    )
-                }
-            }
         }
 
         minimizeBtn.apply {

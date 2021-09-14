@@ -415,3 +415,18 @@
 .wa-slider .animated-thumb {
     -fx-background-color: -wa-primary;
 }
+
+/* ----------------- ListView ---------------- */
+.list-view {
+    -fx-background-color: -wa-transparent;
+}
+
+.list-view .list-cell:selected,
+.list-view .list-cell:even,
+.list-view .list-cell:odd {
+    -fx-background-color: -wa-transparent;
+}
+
+.list-view .label {
+    -fx-text-fill: -wa-gray-darker;
+}
