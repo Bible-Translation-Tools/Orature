@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.scene.control.Button
-import javafx.scene.control.Label
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
