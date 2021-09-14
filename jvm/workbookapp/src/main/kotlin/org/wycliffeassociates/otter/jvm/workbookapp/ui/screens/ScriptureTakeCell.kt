@@ -18,7 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.animation.TranslateTransition
+import javafx.event.EventHandler
+import javafx.scene.Node
 import javafx.scene.control.ListCell
+import javafx.util.Duration
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.jvm.controls.card.EmptyCardCell
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
@@ -27,7 +32,11 @@ import java.text.MessageFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ScriptureTakeCell : ListCell<TakeCardModel>() {
+class ScriptureTakeCell(
+    private val onDelete: (Take) -> Unit,
+    private val onEdit: (Take) -> Unit,
+    private val onSelected: (Take) -> Unit
+) : ListCell<TakeCardModel>() {
 
     private var takeCard = ScriptureTakeCard()
 
@@ -59,6 +68,64 @@ class ScriptureTakeCell : ListCell<TakeCardModel>() {
                     item.take.number
                 )
             )
+            setOnTakeDelete { onDelete(item.take) }
+            setOnTakeEdit { onEdit(item.take) }
+            setOnTakeSelected {
+                if (isAnimatingProperty.value || item.selected) {
+                    return@setOnTakeSelected
+                }
+
+                isAnimatingProperty.set(true)
+                animate(item) {
+                    onSelected(item.take)
+                }
+            }
         }
+    }
+
+    private fun animate(takeModel: TakeCardModel, callback: () -> Unit) {
+        shiftOtherNodes(takeModel)
+
+        val parentY = takeCard.parent.layoutY
+        takeCard.styleClass.add("selected")
+
+        // move selected node to top of the list
+        val ttUp = TranslateTransition(Duration.millis(600.0), takeCard)
+        ttUp.toY = -parentY
+        ttUp.onFinished = EventHandler {
+            takeCard.styleClass.remove("selected")
+            revertAnimation(takeCard) { takeCard.isAnimatingProperty.set(false) }
+            callback()
+        }
+        ttUp.play()
+    }
+
+    private fun shiftOtherNodes(takeModel: TakeCardModel) {
+        val selectedIndex = listView.items.indexOf(takeModel)
+        for (item in listView.items) {
+            if (listView.items.indexOf(item) < selectedIndex) {
+                moveDown(takeCard)
+            }
+        }
+    }
+
+    private fun moveDown(node: Node) {
+        val distance = node.boundsInLocal.height + 5
+        val tt = TranslateTransition(Duration.millis(600.0), node)
+        tt.byY = distance
+        tt.onFinished = EventHandler {
+            revertAnimation(node)
+        }
+        tt.play()
+    }
+
+    private fun revertAnimation(node: Node, onFinish: () -> Unit = { }) {
+        val distance = node.translateY
+        val ttRevertY = TranslateTransition(Duration.millis(1.0), node)
+        ttRevertY.byY = -distance
+        ttRevertY.onFinished = EventHandler {
+            onFinish()
+        }
+        ttRevertY.play()
     }
 }

@@ -22,14 +22,11 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Button
-import javafx.scene.control.ButtonType
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
-import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
-import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import tornadofx.*
 
@@ -89,41 +86,9 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                 }
             })
         }
-        deleteBtn.setOnAction {
-            error(
-                FX.messages["deleteTakePrompt"],
-                FX.messages["cannotBeUndone"],
-                ButtonType.YES,
-                ButtonType.NO,
-                title = FX.messages["deleteTakePrompt"]
-            ) { button: ButtonType ->
-                if (button == ButtonType.YES) {
-                    skinnable.fireEvent(
-                        DeleteTakeEvent(card.takeProperty().value)
-                    )
-                }
-            }
-        }
-        editBtn.setOnAction {
-            skinnable.fireEvent(
-                TakeEvent(
-                    card.takeProperty().value,
-                    {
-                        card.audioPlayerProperty().value.load(card.takeProperty().value.file)
-                    },
-                    TakeEvent.EDIT_TAKE
-                )
-            )
-        }
-        selectBtn.setOnAction {
-            skinnable.fireEvent(
-                TakeEvent(
-                    card.takeProperty().value,
-                    {},
-                    TakeEvent.SELECT_TAKE
-                )
-            )
-        }
+        deleteBtn.onActionProperty().bind(card.onTakeDeleteActionProperty)
+        editBtn.onActionProperty().bind(card.onTakeEditActionProperty)
+        selectBtn.onActionProperty().bind(card.onTakeSelectedActionProperty)
         player.apply {
             playerProperty.bind(card.audioPlayerProperty())
             playButtonProperty.set(playBtn)

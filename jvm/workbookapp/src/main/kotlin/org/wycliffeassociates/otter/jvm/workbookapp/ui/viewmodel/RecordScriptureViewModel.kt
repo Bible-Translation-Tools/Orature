@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.toObservable as toRxObservable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
@@ -50,6 +49,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
+import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
 
@@ -132,6 +132,7 @@ class RecordScriptureViewModel : ViewModel() {
 
         recordableProperty.onChangeAndDoNow {
             clearDisposables()
+            subscribeSelectedTakePropertyToRelay()
             loadTakes()
         }
 
@@ -263,14 +264,9 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun selectTake(take: Take) {
-        setSelectedTake(take)
-    }
-
-    fun selectTake(filename: String) {
-        val take = takeCardModels.find { it.take.name == filename }
-        take?.let {
-            selectTake(it.take)
-        }
+        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
+        workbookDataStore.updateSelectedTakesFile()
+        take.file.setLastModified(System.currentTimeMillis())
     }
 
     fun importTakes(files: List<File>) {
@@ -302,13 +298,6 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
-    private fun setSelectedTake(take: Take) {
-        recordable?.audio?.selectTake(take) ?: throw IllegalStateException("Recordable is null")
-        workbookDataStore.updateSelectedTakesFile()
-        take.file.setLastModified(System.currentTimeMillis())
-        loadTakes()
-    }
-
     fun deleteTake(take: Take) {
         stopPlayers()
         take.deletedTimestamp.accept(DateHolder.now())
@@ -318,7 +307,6 @@ class RecordScriptureViewModel : ViewModel() {
     fun dialogTitleBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
-                println(currentTakeNumberProperty.value)
                 String.format(
                     messages["sourceDialogTitle"],
                     currentTakeNumberProperty.value,
@@ -437,6 +425,21 @@ class RecordScriptureViewModel : ViewModel() {
     fun stopPlayers() {
         takeCardModels.forEach { it.audioPlayer.stop() }
         sourceAudioPlayerProperty.value?.stop()
+    }
+
+    private fun subscribeSelectedTakePropertyToRelay() {
+        recordable?.audio?.let { audio ->
+            audio
+                .selected
+                .doOnError { e ->
+                    logger.error("Error in subscribing take to relay for audio: $audio", e)
+                }
+                .observeOnFx()
+                .subscribe {
+                    loadTakes()
+                }
+                .let { disposables.add(it) }
+        }
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {

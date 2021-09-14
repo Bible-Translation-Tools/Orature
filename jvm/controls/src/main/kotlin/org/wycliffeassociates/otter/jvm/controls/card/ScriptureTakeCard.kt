@@ -24,6 +24,8 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -37,6 +39,12 @@ class ScriptureTakeCard : Control() {
     private val selectedProperty = SimpleBooleanProperty()
     private val takeLabelProperty = SimpleStringProperty()
     private val timestampProperty = SimpleStringProperty()
+
+    val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onTakeDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    val isAnimatingProperty = SimpleBooleanProperty()
 
     fun takeProperty(): ObjectProperty<Take> {
         return takeProperty
@@ -56,6 +64,18 @@ class ScriptureTakeCard : Control() {
 
     fun lastModifiedProperty(): StringProperty {
         return timestampProperty
+    }
+
+    fun setOnTakeDelete(op: () -> Unit) {
+        onTakeDeleteActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    fun setOnTakeEdit(op: () -> Unit) {
+        onTakeEditActionProperty.set(EventHandler { op.invoke() })
+    }
+
+    fun setOnTakeSelected(op: () -> Unit) {
+        onTakeSelectedActionProperty.set(EventHandler { op.invoke() })
     }
 
     override fun createDefaultSkin(): Skin<*> {

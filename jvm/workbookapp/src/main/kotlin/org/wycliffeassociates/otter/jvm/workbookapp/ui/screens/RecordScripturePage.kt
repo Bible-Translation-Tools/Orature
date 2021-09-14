@@ -24,6 +24,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.value.ChangeListener
 import javafx.scene.Parent
+import javafx.scene.control.ButtonType
 import javafx.scene.control.ScrollPane
 import javafx.scene.input.DragEvent
 import javafx.scene.input.Dragboard
@@ -37,6 +38,7 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ListViewPlaceHolder
@@ -230,7 +232,7 @@ class RecordScripturePage : View() {
                         vgrow = Priority.ALWAYS
 
                         minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT));
-                        setCellFactory { ScriptureTakeCell() }
+                        setCellFactory { ScriptureTakeCell(::onDeleteTake, ::onEditTake, ::onSelectTake) }
 
                         placeholder = ListViewPlaceHolder()
                     }
@@ -279,6 +281,32 @@ class RecordScripturePage : View() {
         addEventHandler(TakeEvent.SELECT_TAKE) {
             recordScriptureViewModel.selectTake(it.take)
         }
+    }
+
+    private fun onDeleteTake(take: Take) {
+        error(
+            messages["deleteTakePrompt"],
+            messages["cannotBeUndone"],
+            ButtonType.YES,
+            ButtonType.NO,
+            title = messages["deleteTakePrompt"]
+        ) { button: ButtonType ->
+            if (button == ButtonType.YES) {
+                root.fireEvent(DeleteTakeEvent(take))
+            }
+        }
+    }
+
+    private fun onEditTake(take: Take) {
+        root.fireEvent(
+            TakeEvent(take, {}, TakeEvent.EDIT_TAKE)
+        )
+    }
+
+    private fun onSelectTake(take: Take) {
+        root.fireEvent(
+            TakeEvent(take, {}, TakeEvent.SELECT_TAKE)
+        )
     }
 
     private fun createSnackBar() {
