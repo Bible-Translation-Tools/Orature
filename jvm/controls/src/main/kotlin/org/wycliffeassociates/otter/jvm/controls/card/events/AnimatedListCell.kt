@@ -4,13 +4,15 @@ import javafx.animation.TranslateTransition
 import javafx.event.EventHandler
 import javafx.scene.Node
 import javafx.scene.control.ListCell
+import javafx.scene.control.skin.VirtualFlow
 import javafx.util.Duration
+import tornadofx.*
 
 abstract class AnimatedListCell<T> : ListCell<T>() {
     abstract val view: Node
 
-    fun animate(takeModel: T, callback: () -> Unit) {
-        shiftOtherNodes(takeModel)
+    fun animate(callback: () -> Unit) {
+        shiftOtherNodes()
 
         val parentY = view.parent.layoutY
 
@@ -25,11 +27,11 @@ abstract class AnimatedListCell<T> : ListCell<T>() {
         ttUp.play()
     }
 
-    private fun shiftOtherNodes(takeModel: T) {
-        val selectedIndex = listView.items.indexOf(takeModel)
-        for (item in listView.items) {
-            if (listView.items.indexOf(item) < selectedIndex) {
-                moveDown(view)
+    private fun shiftOtherNodes() {
+        for (index in listView.items.indices) {
+            val viewNode = getViewNode(index)
+            if (viewNode != view) {
+                viewNode?.let { moveDown(it) }
             }
         }
     }
@@ -52,5 +54,16 @@ abstract class AnimatedListCell<T> : ListCell<T>() {
             onFinish()
         }
         ttRevertY.play()
+    }
+
+    private fun getViewNode(index: Int): Node? {
+        val virtualFlow = listView.getChildList()
+            ?.filterIsInstance<VirtualFlow<*>>()
+            ?.singleOrNull()
+
+        return virtualFlow?.let {
+            val cell = it.getCell(index)
+            (cell as? AnimatedListCell<*>)?.view
+        }
     }
 }

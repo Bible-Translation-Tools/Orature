@@ -45,7 +45,7 @@ class TakeCell(
                 isAnimatingProperty.set(true)
                 view.styleClass.add("selected")
 
-                animate(item) {
+                animate {
                     view.isAnimatingProperty.set(false)
                     view.styleClass.remove("selected")
                     onTakeSelected(item)
