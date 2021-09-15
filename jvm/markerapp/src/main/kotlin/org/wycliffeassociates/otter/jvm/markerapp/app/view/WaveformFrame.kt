@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.geometry.Pos
+import javafx.scene.image.Image
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
@@ -28,6 +29,7 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackCon
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
+import java.io.FileInputStream
 
 class WaveformFrame(
     markerTrack: MarkerTrackControl,
@@ -70,7 +72,13 @@ class WaveformFrame(
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
-                        add(mainWaveform)
+//                        add(mainWaveform)
+                        hbox{
+                            for (image in viewModel.imageList) {
+                                this@hbox.add(imageview(image))
+                            }
+                        }
+
                         viewModel.markers.highlightState.forEach {
                             add(
                                 Rectangle().apply {

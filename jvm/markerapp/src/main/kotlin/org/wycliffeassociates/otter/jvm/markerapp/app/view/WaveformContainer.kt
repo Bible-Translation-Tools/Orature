@@ -47,9 +47,10 @@ class WaveformContainer : Fragment() {
 
         object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
-                if (mainWaveform.image != null) {
-                    viewModel.calculatePosition()
-                }
+//                if (mainWaveform.image != null) {
+//                    viewModel.calculatePosition()
+//                }
+                viewModel.calculatePosition()
             }
         }.start()
     }

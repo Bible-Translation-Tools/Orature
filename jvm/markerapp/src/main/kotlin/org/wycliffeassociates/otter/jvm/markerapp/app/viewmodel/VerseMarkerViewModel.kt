@@ -73,6 +73,7 @@ class VerseMarkerViewModel : ViewModel() {
     val height = Screen.getMainScreen().platformHeight
     val padding = width / 2
     val imageWidth: Double
+    val imageList: List<Image>
 
     init {
         val scope = scope as ParameterizedScope
@@ -90,18 +91,25 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        WaveformImageBuilder(
+        val builder = WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
-        ).build(
+        )
+//        builder.build(
+//            audioPlayer.getAudioReader()!!,
+//            fitToAudioMax = false,
+//            width = imageWidth.toInt(),
+//            height = height
+//        ).subscribe { image ->
+//            waveformImageProperty.set(image)
+//            audioPlayer.getAudioReader()?.seek(0)
+//        }
+
+        imageList = builder.buildImages(
             audioPlayer.getAudioReader()!!,
-            fitToAudioMax = false,
             width = imageWidth.toInt(),
             height = height
-        ).subscribe { image ->
-            waveformImageProperty.set(image)
-            audioPlayer.getAudioReader()?.seek(0)
-        }
+        )
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {

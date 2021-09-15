@@ -40,6 +40,7 @@ class WaveformImageBuilder(
     private val paddingColor: Color = background
 ) {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
+    private val MAX_IMAGE_WIDTH = 1000
 
     fun build(
         reader: AudioFileReader,
@@ -74,6 +75,15 @@ class WaveformImageBuilder(
             .observeOnFx()
     }
 
+    fun buildImages(
+        reader: AudioFileReader,
+        padding: Int = 0,
+        width: Int = Screen.getMainScreen().platformWidth,
+        height: Int = Screen.getMainScreen().platformHeight
+    ): List<Image> {
+        return drawImages(reader, width, height, padding)
+    }
+
     fun drawWaveform(
         img: WritableImage,
         reader: AudioFileReader,
@@ -89,6 +99,7 @@ class WaveformImageBuilder(
         var globalMin = 0
         addPadding(img, 0, padding, height)
         for (i in padding until width) {
+//            if (i>1000) break
             reader.getPcmBuffer(bytes)
             val bb = ByteBuffer.wrap(bytes)
             bb.rewind()
@@ -112,6 +123,57 @@ class WaveformImageBuilder(
         }
         addPadding(img, (width + padding), (width + (padding * 2)), height)
         return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
+    }
+
+    private fun drawImages(
+        reader: AudioFileReader,
+        width: Int,
+        height: Int,
+        padding: Int
+    ): List<Image> {
+        var counter = 0
+        var img = WritableImage(MAX_IMAGE_WIDTH + 2*padding, height)
+        val images = mutableListOf(img)
+
+        val framesPerPixel = reader.totalFrames / width
+
+        val shortsArray = ShortArray(framesPerPixel)
+        val bytes = ByteArray(framesPerPixel * 2)
+        var globalMax = 1
+        var globalMin = 0
+        addPadding(img, 0, padding, height)
+
+        for (i in padding until width) {
+            reader.getPcmBuffer(bytes)
+            val bb = ByteBuffer.wrap(bytes)
+            bb.rewind()
+            bb.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortsArray)
+
+            // translate by half the total range of values (half a short)
+            // to push everything below 0; because the image top left is 0,0
+            // the absolute value will put the max values close to 0 and the
+            // min values further away to the maximum
+            val min = ((shortsArray.minOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
+            val max = ((shortsArray.maxOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
+            globalMax = max(globalMax, min)
+            globalMin = max(globalMin, max)
+            val range = scaleToHeight(max, height) until scaleToHeight(min, height)
+            for (j in 0 until height) {
+                img.pixelWriter.setColor(i%1000, j, background)
+                if (j in range) {
+                    img.pixelWriter.setColor(i%1000, j, wavColor)
+                }
+            }
+            addPadding(img, (width + padding), (width + (padding * 2)), height)
+            counter++
+            if(counter == MAX_IMAGE_WIDTH) {
+                counter = 0
+                img = WritableImage(MAX_IMAGE_WIDTH + 2*padding, height)
+                images.add(img)
+            }
+        }
+//        return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
+        return images
     }
 
     private fun addPadding(img: WritableImage, startX: Int, endX: Int, height: Int) {
