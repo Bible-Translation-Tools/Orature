@@ -26,6 +26,7 @@ import javax.inject.Inject
 class InitializeApp @Inject constructor(
     private val initializeLanguages: InitializeLanguages,
     private val initializeUlb: InitializeUlb,
+    private val initializeArtwork: InitializeArtwork,
     private val initializeRecorder: InitializeRecorder,
     private val initializeMarker: InitializeMarker,
     private val initializePlugins: InitializePlugins,
@@ -42,6 +43,7 @@ class InitializeApp @Inject constructor(
                 val initializers = listOf(
                     initializeLanguages,
                     initializeUlb,
+                    initializeArtwork,
                     initializeRecorder,
                     initializeMarker,
                     initializePlugins,

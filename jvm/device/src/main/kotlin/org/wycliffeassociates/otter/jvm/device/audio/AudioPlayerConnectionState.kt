@@ -16,12 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.enums
-//
-enum class SlugsEnum(val slug: String) {
-    ULB("ulb"),
-    TW("tw"),
-    OBS("obs"),
-    OT("bible-ot"),
-    NT("bible-nt"),
-}
+package org.wycliffeassociates.otter.jvm.device.audio
+
+import java.io.File
+import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+
+internal class AudioPlayerConnectionState(
+    val id: Int,
+    var file: File = File(""),
+    var begin: Int? = null,
+    var end: Int? = null,
+    var position: Int = 0,
+    var durationInFrames: Int = 0,
+    var durationInMs: Int = 0,
+    var locationInFrames: Int = 0,
+    var locationInMs: Int = 0,
+    val listeners: MutableList<IAudioPlayerListener> = mutableListOf()
+)

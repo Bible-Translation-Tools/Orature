@@ -90,6 +90,52 @@ class SettingsView : View() {
                     }
                 }
 
+                label(messages["audioSettings"]).apply {
+                    addClass("app-drawer__subtitle")
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["playbackSettings"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
+                        addClass("wa-combobox")
+                        fitToParentWidth()
+
+                        cellFormat {
+                            graphic = Label().apply {
+                                text = it
+                                graphic = FontIcon(MaterialDesign.MDI_VOLUME_HIGH)
+                            }
+                        }
+
+                        selectionModel.selectedItemProperty().onChange {
+                            it?.let { viewModel.updateOutputDevice(it) }
+                        }
+                    }
+
+                    label(messages["recordSettings"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
+                        addClass("wa-combobox")
+                        fitToParentWidth()
+
+                        cellFormat {
+                            graphic = Label().apply {
+                                text = it
+                                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            }
+                        }
+
+                        selectionModel.selectedItemProperty().onChange {
+                            it?.let { viewModel.updateInputDevice(it) }
+                        }
+                    }
+                }
+
                 label(messages["appSettings"]).apply {
                     addClass("app-drawer__subtitle")
                 }

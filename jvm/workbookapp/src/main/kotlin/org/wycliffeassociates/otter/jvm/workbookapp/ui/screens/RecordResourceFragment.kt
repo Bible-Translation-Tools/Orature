@@ -244,6 +244,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     init {
         importStylesheet(resources.get("/css/takecard.css"))
         importStylesheet(resources.get("/css/resourcetakecard.css"))
+        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
         isDraggingTakeProperty.onChange {
             if (it) recordableViewModel.stopPlayers()

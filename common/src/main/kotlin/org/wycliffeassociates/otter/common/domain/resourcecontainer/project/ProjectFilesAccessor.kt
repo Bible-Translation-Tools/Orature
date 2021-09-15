@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
@@ -37,6 +38,8 @@ import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
+import java.io.InputStream
+import kotlin.io.path.outputStream
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -88,7 +91,10 @@ class ProjectFilesAccessor(
     fun copySourceFiles(fileReader: IFileReader) {
         val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
-            .filter { it.endsWith(".zip", ignoreCase = true) }
+            .filter {
+                val ext = it.substringAfterLast(".")
+                OratureFileFormat.isSupported(ext)
+            }
 
         sourceFiles.forEach { path ->
             val inFile = File(path)
@@ -116,6 +122,10 @@ class ProjectFilesAccessor(
             .create(projectDir) {
                 val projectPath = "./${RcConstants.MEDIA_DIR}"
                 manifest = buildManifest(targetMetadata, sourceMetadata, project, projectPath)
+                getLicense(sourceMetadata.path)?.let {
+                    addFileToContainer(it, RcConstants.LICENSE_FILE)
+                    it.delete()
+                }
             }
             .use {
                 it.write()
@@ -127,6 +137,11 @@ class ProjectFilesAccessor(
             .create(container) {
                 val projectPath = "./${RcConstants.MEDIA_DIR}"
                 manifest = buildManifest(targetMetadata, workbook, projectPath)
+
+                getLicense(workbook.source.resourceMetadata.path)?.let {
+                    addFileToContainer(it, RcConstants.LICENSE_FILE)
+                    it.delete()
+                }
             }
             .use {
                 it.write()
@@ -264,6 +279,20 @@ class ProjectFilesAccessor(
     private fun relativeTakePath(file: File): String {
         val relativeFile = file.relativeToOrSelf(audioDir)
         return relativeFile.invariantSeparatorsPath
+    }
+
+    private fun getLicense(sourceContainer: File): File? {
+        ResourceContainer.load(sourceContainer).use { rc ->
+            if (rc.accessor.fileExists(RcConstants.LICENSE_FILE)){
+                val license = kotlin.io.path.createTempFile(suffix = ".md")
+
+                rc.accessor.getInputStream(RcConstants.LICENSE_FILE).use{ input ->
+                    license.outputStream().write(input.readAllBytes())
+                }
+                return license.toFile()
+            }
+        }
+        return null
     }
 
     private fun isAudioFile(file: String) = isAudioFile(File(file))

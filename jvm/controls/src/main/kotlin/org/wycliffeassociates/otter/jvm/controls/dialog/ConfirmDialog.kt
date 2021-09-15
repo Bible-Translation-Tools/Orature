@@ -202,14 +202,14 @@ class ConfirmDialog : OtterDialog() {
             1.0,
             true,
             true,
-            false,
-            true
+            true,
+            false
         )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
+            BackgroundPosition.CENTER,
             backgroundSize
         )
     }

@@ -33,7 +33,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewMod
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
-class HomePage : Fragment() {
+class HomePage : View() {
 
     private val viewModel: HomePageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -52,7 +52,6 @@ class HomePage : Fragment() {
     }
 
     init {
-        importStylesheet(resources.get("/css/root.css"))
         importStylesheet(resources.get("/css/control.css"))
         importStylesheet(resources.get("/css/home-page.css"))
         importStylesheet(resources.get("/css/resume-book-banner.css"))
@@ -78,7 +77,7 @@ class HomePage : Fragment() {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
                                 backgroundImageFileProperty.set(
-                                    workbook.artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+                                    workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                 )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)

@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import java.util.*
 
@@ -27,6 +28,10 @@ interface IAppPreferencesRepository {
     fun setResumeProjectId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
+    fun getOutputDevice(): Maybe<String>
+    fun setOutputDevice(mixer: String): Completable
+    fun getInputDevice(): Maybe<String>
+    fun setInputDevice(mixer: String): Completable
     fun actualLocale(): Single<Locale>
     fun setActualLocale(locale: Locale): Completable
 }

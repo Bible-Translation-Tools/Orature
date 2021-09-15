@@ -21,12 +21,16 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimpo
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.DEFAULT_RC_SLUG
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -41,7 +45,8 @@ class ProjectExporter @Inject constructor(
         directory: File,
         projectMetadataToExport: ResourceMetadata,
         workbook: Workbook,
-        projectFilesAccessor: ProjectFilesAccessor
+        projectFilesAccessor: ProjectFilesAccessor,
+        fileFormat: OratureFileFormat = OratureFileFormat.ORATURE
     ): Single<ExportResult> {
         return Single
             .fromCallable {
@@ -71,6 +76,10 @@ class ProjectExporter @Inject constructor(
                     projectFilesAccessor.writeSelectedTakesFile(fileWriter, workbook, projectToExportIsBook)
                 }
 
+                if (fileFormat != OratureFileFormat.ZIP) {
+                    restoreFileExtension(zipFile, fileFormat.extension)
+                }
+
                 return@fromCallable ExportResult.SUCCESS
             }
             .doOnError {
@@ -82,9 +91,23 @@ class ProjectExporter @Inject constructor(
 
     private fun makeExportFilename(workbook: Workbook, metadata: ResourceMetadata): String {
         val lang = workbook.target.language.slug
-        val resource = metadata.identifier
+        val resource = if (workbook.source.language.slug == workbook.target.language.slug) {
+            metadata.identifier
+        } else {
+            DEFAULT_RC_SLUG
+        }
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
         return "$lang-$resource-$project-$timestamp.zip"
+    }
+
+    private fun restoreFileExtension(file: File, extension: String) {
+        val fileName = file.nameWithoutExtension + ".$extension"
+        // using nio Files.move() instead of file.rename() for platform independent
+        Files.move(
+            file.toPath(),
+            file.parentFile.resolve(fileName).toPath(),
+            StandardCopyOption.REPLACE_EXISTING
+        )
     }
 }

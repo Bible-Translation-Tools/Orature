@@ -33,6 +33,7 @@ data class ResourceMetadataEntity(
     var type: String,
     var title: String,
     var version: String,
+    var license: String,
     var path: String,
     var derivedFromFk: Int?
 )

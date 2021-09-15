@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "root.css"
+@import "/css/root.css";
 
 .source-content {
     -fx-background-color: -wa-white;

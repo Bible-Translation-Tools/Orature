@@ -34,6 +34,10 @@ interface IAppPreferences {
     fun setResumeBookId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
+    fun audioOutputDevice(): Single<String>
+    fun setAudioOutputDevice(name: String): Completable
+    fun audioInputDevice(): Single<String>
+    fun setAudioInputDevice(name: String): Completable
     fun locale(): Single<String>
     fun setLocale(locale: String): Completable
 }

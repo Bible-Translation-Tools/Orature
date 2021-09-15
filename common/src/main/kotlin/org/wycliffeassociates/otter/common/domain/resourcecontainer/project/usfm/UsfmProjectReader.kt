@@ -51,9 +51,8 @@ class UsfmProjectReader : IProjectReader {
         project: Project,
         zipEntryTreeBuilder: IZipEntryTreeBuilder
     ): OtterTree<CollectionOrContent> {
-        // TODO 2/25/19
         return when (container.file.extension) {
-            "zip" -> constructTreeFromZip(container, project)
+            "zip", "orature" -> constructTreeFromZip(container, project)
             else -> constructTreeFromDirOrFile(container, project)
         }
     }

@@ -38,8 +38,12 @@ import java.net.URLClassLoader
 import java.text.MessageFormat
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
-class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
+class AudioPlugin(
+    private val connectionFactory: AudioConnectionFactory,
+    private val pluginData: AudioPluginData
+) : IAudioPlugin {
 
     private val logger = LoggerFactory.getLogger(AudioPlugin::class.java)
 
@@ -190,6 +194,11 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                 appWorkspace.navigateBack()
             }
         }
+        val paramsMap = appWorkspace.params
+        val oldEntries = paramsMap.entries.map { it.toPair() }.toTypedArray()
+        val newEntries = mapOf(*oldEntries, Pair("audioConnectionFactory", connectionFactory))
+        scope.workspace.paramsProperty.set(newEntries)
+
         Platform.runLater {
             val plugin = find(pluginClass, scope)
             appWorkspace.dock(plugin)

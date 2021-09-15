@@ -27,6 +27,7 @@ enum class ContainerType(val slug: String) {
     Bundle("bundle"),
     Book("book"),
     Help("help"),
+    IMAGE("img"),
 
     @Deprecated("Type not supported")
     Dictionary("dict"),

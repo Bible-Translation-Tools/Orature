@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -195,9 +196,18 @@ class DirectoryProvider(
     override fun newFileReader(file: File): IFileReader {
         return when {
             file.isDirectory -> NioDirectoryFileReader(file)
-            file.isFile && file.extension == "zip" -> NioZipFileReader(file)
+            file.isFile && file.extension in OratureFileFormat.extensionList
+                            -> NioZipFileReader(file)
             else -> throw IllegalArgumentException("File type not supported")
         }
+    }
+
+    override fun createTempFile(prefix: String, suffix: String?): File {
+        return File.createTempFile(prefix, suffix, tempDirectory)
+    }
+
+    override fun cleanTempDirectory() {
+        deleteRecursively(tempDirectory)
     }
 
     override val resourceContainerDirectory: File
@@ -217,4 +227,16 @@ class DirectoryProvider(
 
     override val cacheDirectory: File
         get() = getAppDataDirectory("cache")
+
+    override val tempDirectory: File
+        get() = getAppDataDirectory("temp")
+
+    private fun deleteRecursively(dir: File) {
+        dir.listFiles()?.forEach {
+            if (it.isDirectory) {
+                deleteRecursively(it)
+            }
+            it.delete()
+        }
+    }
 }

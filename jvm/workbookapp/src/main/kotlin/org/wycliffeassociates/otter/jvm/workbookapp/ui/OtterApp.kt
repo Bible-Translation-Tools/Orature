@@ -40,6 +40,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         initializeAppLocale()
 
         val directoryProvider = dependencyGraph.injectDirectoryProvider()
+        directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
         initializeLogger(directoryProvider)
 

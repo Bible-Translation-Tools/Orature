@@ -46,12 +46,18 @@ class TakeActions @Inject constructor(
         NO_AUDIO
     }
 
-    fun edit(take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(PluginType.EDITOR, take, pluginParameters).map { (t, r) -> r }
+    fun edit(audio: AssociatedAudio, take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.EDITOR, take, pluginParameters)
+            .map { (take, result) ->
+                handleModifyTake(audio::selectTake, take, result)
+            }
     }
 
-    fun mark(take: Take, pluginParameters: PluginParameters): Single<Result> {
-        return launchPlugin(PluginType.MARKER, take, pluginParameters).map { (t, r) -> r }
+    fun mark(audio: AssociatedAudio, take: Take, pluginParameters: PluginParameters): Single<Result> {
+        return launchPlugin(PluginType.MARKER, take, pluginParameters)
+            .map { (take, result) ->
+                handleModifyTake(audio::selectTake, take, result)
+            }
     }
 
     fun record(
@@ -182,5 +188,14 @@ class TakeActions @Inject constructor(
             take.file.delete()
             throw InvalidWavFileException("Invalid audio file")
         }
+    }
+
+    internal fun handleModifyTake(
+        selectTake: (Take) -> Unit,
+        take: Take,
+        result: Result
+    ): Result {
+        selectTake(take)
+        return result
     }
 }

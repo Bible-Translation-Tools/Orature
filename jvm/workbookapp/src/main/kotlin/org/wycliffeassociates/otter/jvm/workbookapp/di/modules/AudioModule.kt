@@ -20,21 +20,49 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
+import javax.sound.sampled.AudioFormat
+import javax.sound.sampled.AudioSystem
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
-import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.device.audio.AudioBufferPlayer
-import org.wycliffeassociates.otter.jvm.device.audio.AudioRecorder
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 
 @Module
 class AudioModule {
-    @Provides
-    fun providesRecorder(): IAudioRecorder = AudioRecorder()
+
+    companion object {
+        private val defaultFormat = AudioFormat(
+            44100F,
+            16,
+            1,
+            true,
+            false
+        )
+        private val audioDeviceProvider = AudioDeviceProvider(defaultFormat)
+        private val line = AudioSystem.getSourceDataLine(defaultFormat)
+        val audioConnectionFactory = AudioConnectionFactory(line)
+        init {
+            audioDeviceProvider.activeOutputDevice.subscribe { mixer ->
+                val newLine = AudioSystem.getSourceDataLine(defaultFormat, mixer)
+                audioConnectionFactory.replaceLine(newLine)
+            }
+        }
+    }
 
     @Provides
-    fun providesPlayer(): IAudioPlayer = AudioBufferPlayer()
+    fun providesRecorder(): IAudioRecorder = audioConnectionFactory.getRecorder()
+
+    @Provides
+    fun providesPlayer(): IAudioPlayer = audioConnectionFactory.getPlayer()
+
+    @Provides
+    fun providesConnectionFactory(): AudioConnectionFactory = audioConnectionFactory
 
     @Provides
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()
+
+    @Provides
+    fun providesAudioDevice(): AudioDeviceProvider = audioDeviceProvider
 }

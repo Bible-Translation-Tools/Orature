@@ -34,20 +34,25 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterLocale
 import tornadofx.*
 import java.util.*
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 
 class SettingsViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(SettingsViewModel::class.java)
 
     @Inject
-    lateinit var pluginRepository: IAudioPluginRepository
+    lateinit var audioDeviceProvider: AudioDeviceProvider
 
     @Inject
     lateinit var appPrefRepository: IAppPreferencesRepository
 
+    @Inject
+    lateinit var pluginRepository: IAudioPluginRepository
+
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
+    val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
 
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
@@ -58,12 +63,23 @@ class SettingsViewModel : ViewModel() {
 
     val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
 
+    val outputDevices = observableListOf<String>()
+    val selectedOutputDeviceProperty = SimpleObjectProperty<String>()
+
+    val inputDevices = observableListOf<String>()
+    val selectedInputDeviceProperty = SimpleObjectProperty<String>()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
+
+        loadOutputDevices()
+        loadInputDevices()
+        loadCurrentOutputDevice()
+        loadCurrentInputDevice()
 
         loadSupportedLocales()
         loadActualLocale()
@@ -114,6 +130,54 @@ class SettingsViewModel : ViewModel() {
     fun selectRecorder(recorderData: AudioPluginData) {
         pluginRepository.setPluginData(PluginType.RECORDER, recorderData).subscribe()
         selectedRecorderProperty.set(recorderData)
+    }
+
+    private fun loadCurrentOutputDevice() {
+        appPrefRepository.getOutputDevice()
+            .doOnError {
+                logger.error("Error in loadCurrentOutputDevice: ", it)
+            }
+            .subscribe { device ->
+                selectedOutputDeviceProperty.set(device)
+            }
+    }
+
+    private fun loadCurrentInputDevice() {
+        appPrefRepository.getInputDevice()
+            .doOnError {
+                logger.error("Error in loadCurrentInputDevice: ", it)
+            }
+            .subscribe { device ->
+                selectedInputDeviceProperty.set(device)
+            }
+    }
+
+    private fun loadOutputDevices() {
+        audioDeviceProvider.getOutputDeviceNames()
+            .doOnError {
+                logger.error("Error in loadOutputDevices: ", it)
+            }
+            .subscribe { players ->
+                outputDevices.setAll(players)
+            }
+    }
+
+    private fun loadInputDevices() {
+        audioDeviceProvider.getInputDeviceNames()
+            .doOnError {
+                logger.error("Error in loadInputDevices: ", it)
+            }
+            .subscribe { recorders ->
+                inputDevices.setAll(recorders)
+            }
+    }
+
+    fun updateOutputDevice(mixer: String) {
+        appPrefRepository.setOutputDevice(mixer).subscribe()
+    }
+
+    fun updateInputDevice(mixer: String) {
+        appPrefRepository.setInputDevice(mixer).subscribe()
     }
 
     private fun loadSupportedLocales() {

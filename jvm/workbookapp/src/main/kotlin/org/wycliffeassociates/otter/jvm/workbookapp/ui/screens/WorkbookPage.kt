@@ -56,7 +56,7 @@ import java.text.MessageFormat
  * This page contains a tab for each resource in the workbook. If the workbook only contains the book
  * itself, then no tabs will be shown.
  */
-class WorkbookPage : Fragment() {
+class WorkbookPage : View() {
     private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
     private val navigator: NavigationMediator by inject()
@@ -273,15 +273,11 @@ class WorkbookPage : Fragment() {
                             }
                         }
                     )
-                    messageTextProperty.bind(
-                        viewModel.activeProjectTitleProperty.stringBinding {
-                            it?.let {
-                                MessageFormat.format(
-                                    messages["exportProjectMessage"],
-                                    it
-                                )
-                            }
-                        }
+                    messageTextProperty.set(
+                        MessageFormat.format(
+                            messages["exportProjectMessage"],
+                            viewModel.activeProjectTitleProperty.value
+                        )
                     )
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
