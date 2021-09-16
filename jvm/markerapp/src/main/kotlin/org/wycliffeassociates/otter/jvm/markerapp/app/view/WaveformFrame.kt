@@ -65,17 +65,17 @@ class WaveformFrame(
 
             center {
                 region {
-                    mainWaveform.fitToHeight(this@region)
 
                     stackpane {
                         styleClass.add("vm-waveform-frame__center")
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
-//                        add(mainWaveform)
                         hbox{
                             this@hbox.bindChildren(viewModel.imageList) {
-                                imageview(it)
+                                imageview(it) {
+                                    this.fitToHeight(this@region)
+                                }
                             }
                         }
 
