@@ -74,8 +74,8 @@ class WaveformFrame(
                         fitToParentHeight()
 //                        add(mainWaveform)
                         hbox{
-                            for (image in viewModel.imageList) {
-                                this@hbox.add(imageview(image))
+                            this@hbox.bindChildren(viewModel.imageList.toObservable()) {
+                                imageview(it)
                             }
                         }
 
