@@ -117,7 +117,7 @@ class SettingsView : View() {
                             }
                         }
 
-                        buttonCell = DeviceComboboxCell()
+                        buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
 
                         selectionModel.selectedItemProperty().onChange {
                             it?.let { viewModel.updateOutputDevice(it) }
@@ -139,7 +139,7 @@ class SettingsView : View() {
                             }
                         }
 
-                        buttonCell = DeviceComboboxCell()
+                        buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
 
                         selectionModel.selectedItemProperty().onChange {
                             it?.let { viewModel.updateInputDevice(it) }
