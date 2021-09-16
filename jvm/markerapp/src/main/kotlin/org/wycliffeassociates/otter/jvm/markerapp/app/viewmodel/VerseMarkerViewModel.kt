@@ -71,7 +71,7 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
-    val waveformImageProperty = SimpleObjectProperty<Image>()
+    val waveformImageProperty = SimpleObjectProperty<List<Image>>()
 
     val width = Screen.getMainScreen().platformWidth
     val height = Screen.getMainScreen().platformHeight
@@ -122,6 +122,7 @@ class VerseMarkerViewModel : ViewModel() {
         .subscribeOn(Schedulers.computation())
         .observeOnFx()
         .subscribe { images ->
+            waveformImageProperty.set(images)
             imageList.setAll(images)
         }
     }
