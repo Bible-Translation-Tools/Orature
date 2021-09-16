@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
+import javafx.event.ActionEvent
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -67,13 +68,13 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
     }
 
     fun bindText() {
-        takeLabel.textProperty().bind(card.takeLabelProperty())
-        timestampLabel.textProperty().bind(card.lastModifiedProperty())
+        takeLabel.textProperty().bind(card.takeLabelProperty)
+        timestampLabel.textProperty().bind(card.lastModifiedProperty)
     }
 
     private fun initController() {
         selectBtn.apply {
-            graphicProperty().bind(card.selectedProperty().objectBinding {
+            graphicProperty().bind(card.selectedProperty.objectBinding {
                 when (it) {
                     true -> {
                         togglePseudoClass("selected", true)
@@ -88,9 +89,19 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         }
         deleteBtn.onActionProperty().bind(card.onTakeDeleteActionProperty)
         editBtn.onActionProperty().bind(card.onTakeEditActionProperty)
-        selectBtn.onActionProperty().bind(card.onTakeSelectedActionProperty)
+        selectBtn.setOnAction {
+            card.animationMediatorProperty.value?.let {
+                if (it.isAnimating || card.selectedProperty.value) {
+                    return@setOnAction
+                }
+                it.node = card
+                it.animate {
+                    card.onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                }
+            } ?: card.onTakeSelectedActionProperty.value?.handle(ActionEvent())
+        }
         player.apply {
-            playerProperty.bind(card.audioPlayerProperty())
+            playerProperty.bind(card.audioPlayerProperty)
             playButtonProperty.set(playBtn)
         }
     }

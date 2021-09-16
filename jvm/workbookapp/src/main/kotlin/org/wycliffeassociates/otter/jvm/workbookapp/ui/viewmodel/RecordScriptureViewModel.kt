@@ -32,6 +32,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
@@ -40,6 +41,9 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
+import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
+import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -49,6 +53,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
+import java.text.SimpleDateFormat
+import java.util.*
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -87,6 +93,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
     val takeCardModels: ObservableList<TakeCardModel> = FXCollections.observableArrayList()
+    val takeCardViews: ObservableList<ScriptureTakeCard> = FXCollections.observableArrayList()
 
     val showImportProgressDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
@@ -141,6 +148,57 @@ class RecordScriptureViewModel : ViewModel() {
         }
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+
+        takeCardModels.onChange {
+            val animationMediator = ListAnimationMediator<ScriptureTakeCard>()
+            takeCardViews.setAll(
+                it.list.map { takeCardModel ->
+                    ScriptureTakeCard().apply {
+                        animationMediatorProperty.set(animationMediator)
+                        takeProperty.set(takeCardModel.take)
+                        audioPlayerProperty.set(takeCardModel.audioPlayer)
+                        selectedProperty.set(takeCardModel.selected)
+                        lastModifiedProperty.set(
+                            SimpleDateFormat.getDateTimeInstance(
+                                SimpleDateFormat.SHORT,
+                                SimpleDateFormat.SHORT,
+                                Locale.getDefault()
+                            ).format(takeCardModel.take.file.lastModified())
+                        )
+                        takeLabelProperty.set(
+                            MessageFormat.format(
+                                FX.messages["takeTitle"],
+                                FX.messages["take"],
+                                takeCardModel.take.number
+                            )
+                        )
+                        setOnTakeDelete {
+                            error(
+                                messages["deleteTakePrompt"],
+                                messages["cannotBeUndone"],
+                                ButtonType.YES,
+                                ButtonType.NO,
+                                title = messages["deleteTakePrompt"]
+                            ) { button: ButtonType ->
+                                if (button == ButtonType.YES) {
+                                    fireEvent(DeleteTakeEvent(takeCardModel.take))
+                                }
+                            }
+                        }
+                        setOnTakeEdit {
+                            fireEvent(
+                                TakeEvent(takeCardModel.take, {}, TakeEvent.EDIT_TAKE)
+                            )
+                        }
+                        setOnTakeSelected {
+                            fireEvent(
+                                TakeEvent(takeCardModel.take, {}, TakeEvent.SELECT_TAKE)
+                            )
+                        }
+                    }
+                }
+            )
+        }
     }
 
     fun nextChunk() {

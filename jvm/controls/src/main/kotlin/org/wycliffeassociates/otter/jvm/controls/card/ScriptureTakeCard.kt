@@ -18,53 +18,31 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.card
 
-import javafx.beans.property.BooleanProperty
-import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.property.StringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
 
 class ScriptureTakeCard : Control() {
 
-    private val takeProperty = SimpleObjectProperty<Take>()
-    private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    private val selectedProperty = SimpleBooleanProperty()
-    private val takeLabelProperty = SimpleStringProperty()
-    private val timestampProperty = SimpleStringProperty()
+    val takeProperty = SimpleObjectProperty<Take>()
+    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val selectedProperty = SimpleBooleanProperty()
+    val takeLabelProperty = SimpleStringProperty()
+    val lastModifiedProperty = SimpleStringProperty()
+    val animationMediatorProperty =
+        SimpleObjectProperty<ListAnimationMediator<ScriptureTakeCard>>()
 
     val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-
-    val isAnimatingProperty = SimpleBooleanProperty()
-
-    fun takeProperty(): ObjectProperty<Take> {
-        return takeProperty
-    }
-
-    fun audioPlayerProperty(): ObjectProperty<IAudioPlayer> {
-        return audioPlayerProperty
-    }
-
-    fun selectedProperty(): BooleanProperty {
-        return selectedProperty
-    }
-
-    fun takeLabelProperty(): StringProperty {
-        return takeLabelProperty
-    }
-
-    fun lastModifiedProperty(): StringProperty {
-        return timestampProperty
-    }
 
     fun setOnTakeDelete(op: () -> Unit) {
         onTakeDeleteActionProperty.set(EventHandler { op.invoke() })

@@ -16,18 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.scene.control.ListCell
+import tornadofx.*
 
-class TakeCell : ListCell<TakeItem>() {
-    override fun updateItem(item: TakeItem?, empty: Boolean) {
+class ScriptureTakeCardCell : ListCell<ScriptureTakeCard>() {
+    override fun updateItem(item: ScriptureTakeCard?, empty: Boolean) {
         super.updateItem(item, empty)
 
-        if (empty || item == null) {
-            graphic = null
+        if (item == null || empty) {
+            graphic = EmptyCardCell().apply {
+                addClass("card--scripture-take--empty")
+            }
             return
         }
+
         graphic = item.apply {
             animationMediatorProperty.value?.listView = listView
         }
