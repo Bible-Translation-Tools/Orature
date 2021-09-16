@@ -81,7 +81,16 @@ class WaveformImageBuilder(
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
     ): List<Image> {
+
         return drawImages(reader, width, height, padding)
+//        return Single.fromCallable {
+//            drawImages(reader, width, height, padding)
+//        }
+//        .doOnError { e ->
+//            logger.error("Error in building WaveformImage", e)
+//        }
+//        .subscribeOn(Schedulers.computation())
+//        .observeOnFx()
     }
 
     fun drawWaveform(
@@ -132,7 +141,7 @@ class WaveformImageBuilder(
         padding: Int
     ): List<Image> {
         var counter = 0
-        var img = WritableImage(MAX_IMAGE_WIDTH + 2*padding, height)
+        var img = WritableImage(MAX_IMAGE_WIDTH + 2 * padding, height)
         val images = mutableListOf(img)
 
         val framesPerPixel = reader.totalFrames / width
@@ -159,20 +168,21 @@ class WaveformImageBuilder(
             globalMin = max(globalMin, max)
             val range = scaleToHeight(max, height) until scaleToHeight(min, height)
             for (j in 0 until height) {
-                img.pixelWriter.setColor(i%1000, j, background)
+                img.pixelWriter.setColor(i % MAX_IMAGE_WIDTH, j, background)
                 if (j in range) {
-                    img.pixelWriter.setColor(i%1000, j, wavColor)
+                    img.pixelWriter.setColor(i % MAX_IMAGE_WIDTH, j, wavColor)
                 }
             }
             addPadding(img, (width + padding), (width + (padding * 2)), height)
             counter++
-            if(counter == MAX_IMAGE_WIDTH) {
+            if (counter == MAX_IMAGE_WIDTH) {
                 counter = 0
-                img = WritableImage(MAX_IMAGE_WIDTH + 2*padding, height)
+                img = WritableImage(MAX_IMAGE_WIDTH + 2 * padding, height)
                 images.add(img)
             }
         }
 //        return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
+        val relative = Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
         return images
     }
 

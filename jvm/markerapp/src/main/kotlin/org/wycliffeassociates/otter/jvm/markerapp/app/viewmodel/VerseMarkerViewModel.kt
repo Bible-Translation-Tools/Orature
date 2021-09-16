@@ -18,8 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -73,7 +77,7 @@ class VerseMarkerViewModel : ViewModel() {
     val height = Screen.getMainScreen().platformHeight
     val padding = width / 2
     val imageWidth: Double
-    val imageList: List<Image>
+    val imageList = observableListOf<Image>()
 
     init {
         val scope = scope as ParameterizedScope
@@ -91,11 +95,11 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        val builder = WaveformImageBuilder(
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        )
-//        builder.build(
+
+//        WaveformImageBuilder(
+//            wavColor = Color.web(WAV_COLOR),
+//            background = Color.web(BACKGROUND_COLOR)
+//        ).build(
 //            audioPlayer.getAudioReader()!!,
 //            fitToAudioMax = false,
 //            width = imageWidth.toInt(),
@@ -105,11 +109,21 @@ class VerseMarkerViewModel : ViewModel() {
 //            audioPlayer.getAudioReader()?.seek(0)
 //        }
 
-        imageList = builder.buildImages(
-            audioPlayer.getAudioReader()!!,
-            width = imageWidth.toInt(),
-            height = height
-        )
+        Observable.fromCallable {
+            WaveformImageBuilder(
+                wavColor = Color.web(WAV_COLOR),
+                background = Color.web(BACKGROUND_COLOR)
+            ).buildImages(
+                audioPlayer.getAudioReader()!!,
+                width = imageWidth.toInt(),
+                height = height
+            )
+        }
+        .subscribeOn(Schedulers.computation())
+        .observeOnFx()
+        .subscribe { images ->
+            imageList.setAll(images)
+        }
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
