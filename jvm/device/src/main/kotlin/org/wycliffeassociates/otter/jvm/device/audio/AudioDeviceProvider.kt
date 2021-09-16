@@ -34,27 +34,21 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
     val activeInputDevice: Observable<Mixer.Info> = PublishSubject.create()
     val activeOutputDevice: Observable<Mixer.Info> = PublishSubject.create()
 
-    fun selectInputDevice(deviceName: String) {
-        val device = getInputDevice(deviceName)
-        device.subscribe {
-            activeInputDevice as PublishSubject
-            activeInputDevice.onNext(it)
-        }
+    fun selectInputDevice(device: Mixer.Info) {
+        activeInputDevice as PublishSubject
+        activeInputDevice.onNext(device)
     }
 
-    fun selectOutputDevice(deviceName: String) {
-        val device = getOutputDevice(deviceName)
-        device.subscribe {
-            activeOutputDevice as PublishSubject
-            activeOutputDevice.onNext(it)
-        }
+    fun selectOutputDevice(device: Mixer.Info) {
+        activeOutputDevice as PublishSubject
+        activeOutputDevice.onNext(device)
     }
 
     fun getOutputDeviceNames(): Single<List<String>> {
         return getOutputDevices().map { it.map { it.name } }
     }
 
-    private fun getOutputDevices(): Single<List<Mixer.Info>> {
+    fun getOutputDevices(): Single<List<Mixer.Info>> {
         return Single.fromCallable {
             val mixers = AudioSystem.getMixerInfo()
             mixers.filter { mixerInfo ->
@@ -66,7 +60,7 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
         }
     }
 
-    private fun getInputDevices(): Single<List<Mixer.Info>> {
+    fun getInputDevices(): Single<List<Mixer.Info>> {
         return Single.fromCallable {
             val mixers = AudioSystem.getMixerInfo()
             mixers.filter { mixerInfo ->

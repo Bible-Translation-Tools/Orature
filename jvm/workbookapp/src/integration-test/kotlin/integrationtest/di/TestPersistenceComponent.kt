@@ -28,7 +28,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppRepositoriesModule
-import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.LocaleLanguageModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import javax.inject.Singleton
 
@@ -39,7 +39,8 @@ import javax.inject.Singleton
         AppPreferencesModule::class,
         TestDirectoryProviderModule::class,
         AppRepositoriesModule::class,
-        ZipEntryTreeBuilderModule::class
+        ZipEntryTreeBuilderModule::class,
+        LocaleLanguageModule::class
     ]
 )
 @Singleton

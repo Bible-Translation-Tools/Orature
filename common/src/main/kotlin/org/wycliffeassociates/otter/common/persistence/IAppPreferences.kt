@@ -38,6 +38,6 @@ interface IAppPreferences {
     fun setAudioOutputDevice(name: String): Completable
     fun audioInputDevice(): Single<String>
     fun setAudioInputDevice(name: String): Completable
-    fun locale(): Single<String>
-    fun setLocale(locale: String): Completable
+    fun localeLanguage(): Single<String>
+    fun setLocaleLanguage(locale: String): Completable
 }

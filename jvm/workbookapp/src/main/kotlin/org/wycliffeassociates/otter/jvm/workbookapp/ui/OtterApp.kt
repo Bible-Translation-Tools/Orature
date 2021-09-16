@@ -31,18 +31,18 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScreen
 import tornadofx.*
 import tornadofx.FX.Companion.messages
+import java.util.*
 
 class OtterApp : App(RootView::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     var shouldBlockWindowCloseRequest = false
 
     init {
-        initializeAppLocale()
-
         val directoryProvider = dependencyGraph.injectDirectoryProvider()
         directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
         initializeLogger(directoryProvider)
+        initializeAppLocale()
 
         importStylesheet<AppStyles>()
     }
@@ -54,12 +54,10 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     }
 
     fun initializeAppLocale() {
-        val appPrefRepo = dependencyGraph.injectAppPreferencesRepository()
-        val localeBuilder = OtterLocale.Builder()
-            .setActualLocale(appPrefRepo.actualLocale().blockingGet())
-            .build()
-
-        FX.locale = localeBuilder.getActualLocale()
+        val localeLanguage = dependencyGraph.injectLocaleLanguage()
+        FX.locale = localeLanguage.actualLanguage?.let {
+            Locale(it.slug)
+        } ?: Locale.getDefault()
     }
 
     override fun start(stage: Stage) {

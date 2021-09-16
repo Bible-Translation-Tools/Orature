@@ -16,11 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
+package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
-import javafx.beans.property.SimpleBooleanProperty
-import tornadofx.*
+import dagger.Binds
+import dagger.Module
+import org.wycliffeassociates.otter.common.domain.ILocaleLanguage
+import org.wycliffeassociates.otter.jvm.workbookapp.domain.LocaleLanguage
+import javax.inject.Singleton
 
-class RootViewModel : ViewModel() {
-    val pluginOpenedProperty = SimpleBooleanProperty(false)
+@Module
+abstract class LocaleLanguageModule {
+    @Binds
+    @Singleton
+    abstract fun inject(localeLanguage: LocaleLanguage): ILocaleLanguage
 }

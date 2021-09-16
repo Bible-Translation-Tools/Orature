@@ -237,10 +237,10 @@ task createSentryProperties(dependsOn: processResources) {
 task createLocalesProperties(dependsOn: processResources) {
     doLast {
         FileTree resources = fileTree("$buildDir/resources/main").matching {
-            include "Messages*"
+            include "Messages_*"
         }
 
-        new File("$buildDir/resources/main/locales.properties").withWriter { w ->
+        new File("$buildDir/resources/main/languages.properties").withWriter { w ->
             Properties p = new Properties()
             resources.files.each {
                 String name = it.name.replace(".properties", "").replace("Messages_", "")
@@ -249,6 +249,12 @@ task createLocalesProperties(dependsOn: processResources) {
             p.store w, null
         }
     }
+}
+
+task copyMessages(dependsOn: processResources, type: Copy) {
+    from file("$buildDir/resources/main/Messages_en.properties")
+    into "$buildDir/resources/main"
+    rename { "Messages.properties" }
 }
 
 ///////////Customize Gradle Test Output ////////////////////////////////
@@ -303,6 +309,7 @@ compileJava.dependsOn createVersionProperties
 compileJava.dependsOn createGithubProperties
 compileJava.dependsOn createSentryProperties
 compileJava.dependsOn createLocalesProperties
+compileJava.dependsOn copyMessages
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

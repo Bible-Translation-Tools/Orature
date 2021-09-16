@@ -269,10 +269,13 @@
     -fx-border-width: 2px;
     -fx-border-color: -wa-black-40;
     -fx-border-radius: 6px;
-    -fx-text-fill: -wa-black;
     -fx-font-size: 20px;
     -fx-pref-height: 48px;
     -fx-cursor: hand;
+}
+
+.wa-combobox .list-cell .label {
+    -fx-text-fill: -wa-black;
 }
 
 .wa-combobox .ikonli-font-icon {
@@ -284,16 +287,24 @@
     -fx-background-color: -wa-black-05;
 }
 
+.wa-combobox:showing {
+    -fx-background-color: -wa-primary-10;
+}
+
+.wa-combobox:showing > .list-cell .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.wa-combobox:showing > .arrow-button .arrow {
+    -fx-background-color: -wa-primary;
+}
+
+.wa-combobox:showing .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
 .wa-combobox:pressed {
     -fx-background-color: -wa-black-10;
-}
-
-.wa-combobox .list-cell {
-    -fx-pref-height: 48px;
-}
-
-.wa-combobox .list-cell .label {
-    -fx-text-fill: -wa-black;
 }
 
 .wa-combobox .list-cell:hover {
@@ -302,6 +313,10 @@
 
 .wa-combobox .list-cell:pressed {
     -fx-background-color: -wa-black-10;
+}
+
+.wa-combobox .combo-box-popup .list-cell {
+    -fx-padding: 5px;
 }
 
 .wa-combobox .combo-box-popup .list-cell:selected {
@@ -314,6 +329,29 @@
 
 .wa-combobox .combo-box-popup .list-cell:selected .ikonli-font-icon {
     -fx-fill: -wa-primary;
+}
+
+.wa-combobox-button {
+    -fx-spacing: 10px;
+}
+
+.wa-combobox-item {
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+    -fx-pref-width: 304px;
+}
+
+.wa-combobox-item__top {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.wa-combobox .combo-box-popup .list-cell:hover .wa-combobox-item__top {
+    -fx-underline: true;
+}
+
+.wa-combobox-item__bottom {
+    -fx-font-size: 16px;
 }
 
 /* -------------- Radio button ---------------- */

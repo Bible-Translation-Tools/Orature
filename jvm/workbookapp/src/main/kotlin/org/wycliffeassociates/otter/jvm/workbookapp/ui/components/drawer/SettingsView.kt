@@ -20,13 +20,15 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
 import javafx.application.Platform
-import javafx.scene.control.Label
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceComboboxCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageComboboxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -72,20 +74,23 @@ class SettingsView : View() {
                     label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
-                    combobox(viewModel.selectedLocaleProperty, viewModel.supportedLocales) {
+
+                    combobox(viewModel.selectedLocaleLanguageProperty, viewModel.supportedLocaleLanguages) {
                         addClass("wa-combobox")
                         fitToParentWidth()
 
                         cellFormat {
-                            graphic = Label().apply {
-                                val country = if (it.country.isNotEmpty()) "_${it.country}" else ""
-                                text = "(${it.language}$country) ${it.getDisplayLanguage(it).capitalize()}"
-                                graphic = FontIcon(MaterialDesign.MDI_WEB)
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                                bottomTextProperty.set(it.anglicizedName)
                             }
                         }
 
+                        buttonCell = LanguageComboboxCell()
+
                         selectionModel.selectedItemProperty().onChange {
-                            it?.let { viewModel.updateLocale(it) }
+                            it?.let { viewModel.updateLanguage(it) }
                         }
                     }
                 }
@@ -105,11 +110,14 @@ class SettingsView : View() {
                         fitToParentWidth()
 
                         cellFormat {
-                            graphic = Label().apply {
-                                text = it
-                                graphic = FontIcon(MaterialDesign.MDI_VOLUME_HIGH)
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                                bottomTextProperty.set(it.description)
                             }
                         }
+
+                        buttonCell = DeviceComboboxCell()
 
                         selectionModel.selectedItemProperty().onChange {
                             it?.let { viewModel.updateOutputDevice(it) }
@@ -124,11 +132,14 @@ class SettingsView : View() {
                         fitToParentWidth()
 
                         cellFormat {
-                            graphic = Label().apply {
-                                text = it
-                                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                                bottomTextProperty.set(it.description)
                             }
                         }
+
+                        buttonCell = DeviceComboboxCell()
 
                         selectionModel.selectedItemProperty().onChange {
                             it?.let { viewModel.updateInputDevice(it) }
