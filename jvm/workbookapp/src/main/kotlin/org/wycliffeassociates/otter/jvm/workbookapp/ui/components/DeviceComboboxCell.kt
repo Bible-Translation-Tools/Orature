@@ -3,7 +3,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
-import org.wycliffeassociates.otter.common.data.primitives.Language
 import javax.sound.sampled.Mixer
 
 class DeviceComboboxCell : ListCell<Mixer.Info>() {
