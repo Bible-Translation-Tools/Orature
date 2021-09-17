@@ -37,7 +37,7 @@ ext {
     kotlinresourcecontainerVer = '0.9.1'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'
-    ikonliVer = '11.3.4'
+    ikonliVer = '12.2.0'
     controlsfxVer = '11.0.1'
     sentryVer = '1.7.30'
     usfmToolsVer = "1.6.0"
