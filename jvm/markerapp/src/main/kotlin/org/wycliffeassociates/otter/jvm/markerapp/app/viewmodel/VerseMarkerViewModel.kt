@@ -42,6 +42,7 @@ import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import java.lang.Integer.min
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 
@@ -74,7 +75,7 @@ class VerseMarkerViewModel : ViewModel() {
     val waveformImageProperty = SimpleObjectProperty<List<Image>>()
 
     val width = Screen.getMainScreen().platformWidth
-    val height = Screen.getMainScreen().platformHeight
+    val height = min(Screen.getMainScreen().platformHeight, 500)
     val padding = width / 2
     val imageWidth: Double
     val imageList = observableListOf<Image>()
