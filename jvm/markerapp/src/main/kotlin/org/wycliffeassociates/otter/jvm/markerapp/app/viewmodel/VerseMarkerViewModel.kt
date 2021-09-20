@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -41,7 +40,6 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import java.lang.Integer.min
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
