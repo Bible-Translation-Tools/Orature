@@ -125,6 +125,7 @@ class ChunkItem : VBox() {
                 addClass("chunk-item__take-items")
 
                 listview(takeViews) {
+                    addClass("wa-list-view")
                     setCellFactory { TakeCell() }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
                 }

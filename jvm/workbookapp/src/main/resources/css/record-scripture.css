@@ -46,6 +46,6 @@
     -fx-font-size: 36px;
 }
 
-.record-scripture__takes-list .cell {
+.wa-list-view .cell {
     -fx-padding: 15px 1px 0 1px;
 }

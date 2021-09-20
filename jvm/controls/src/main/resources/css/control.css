@@ -417,16 +417,16 @@
 }
 
 /* ----------------- ListView ---------------- */
-.list-view {
+.wa-list-view {
     -fx-background-color: -wa-transparent;
 }
 
-.list-view .list-cell:selected,
-.list-view .list-cell:even,
-.list-view .list-cell:odd {
+.wa-list-view .list-cell:selected,
+.wa-list-view .list-cell:even,
+.wa-list-view .list-cell:odd {
     -fx-background-color: -wa-transparent;
 }
 
-.list-view .label {
+.wa-list-view .label {
     -fx-text-fill: -wa-gray-darker;
 }

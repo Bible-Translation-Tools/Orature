@@ -227,7 +227,7 @@ class RecordScripturePage : View() {
                     )
 
                     listview(recordScriptureViewModel.takeCardViews) {
-                        addClass("record-scripture__takes-list")
+                        addClass("wa-list-view")
                         vgrow = Priority.ALWAYS
 
                         setCellFactory { ScriptureTakeCardCell() }
