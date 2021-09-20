@@ -26,13 +26,13 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.domain.ILocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import tornadofx.*
 import javax.inject.Inject
 
@@ -50,7 +50,7 @@ class SettingsViewModel : ViewModel() {
     lateinit var pluginRepository: IAudioPluginRepository
 
     @Inject
-    lateinit var localeLanguage: ILocaleLanguage
+    lateinit var localeLanguage: LocaleLanguage
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
@@ -84,7 +84,7 @@ class SettingsViewModel : ViewModel() {
         loadCurrentInputDevice()
 
         supportedLocaleLanguages.setAll(localeLanguage.supportedLanguages)
-        selectedLocaleLanguageProperty.set(localeLanguage.actualLanguage)
+        selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
     }
 
     fun refreshPlugins() {
@@ -183,8 +183,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     fun updateLanguage(language: Language) {
-        appPrefRepo
-            .setLocaleLanguage(language)
+        localeLanguage.setPreferredLanguage(language)
             .subscribe {
                 showChangeLanguageSuccessDialogProperty.set(true)
             }

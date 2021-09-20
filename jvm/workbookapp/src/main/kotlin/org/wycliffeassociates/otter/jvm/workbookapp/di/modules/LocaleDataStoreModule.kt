@@ -16,12 +16,15 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain
+package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import dagger.Binds
+import dagger.Module
+import org.wycliffeassociates.otter.common.persistence.ILocaleDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.domain.LocaleDataStore
 
-interface ILocaleLanguage {
-    val actualLanguage: Language?
-    val defaultLanguage: Language?
-    val supportedLanguages: List<Language>
+@Module
+abstract class LocaleDataStoreModule {
+    @Binds
+    abstract fun providesLocaleDataStore(dataStore: LocaleDataStore): ILocaleDataStore
 }

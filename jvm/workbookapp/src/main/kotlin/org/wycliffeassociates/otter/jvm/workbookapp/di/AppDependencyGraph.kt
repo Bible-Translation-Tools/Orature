@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di
 import dagger.Component
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import org.wycliffeassociates.otter.common.domain.ILocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
@@ -45,7 +44,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.LocaleLanguageModule
+import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.LocaleDataStoreModule
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 
 @Component(
     modules = [
@@ -55,11 +55,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.LocaleLanguageMod
         DirectoryProviderModule::class,
         AppRepositoriesModule::class,
         ZipEntryTreeBuilderModule::class,
-        LocaleLanguageModule::class
+        LocaleDataStoreModule::class
     ]
 )
 @Singleton
 interface AppDependencyGraph {
+    fun inject(app: OtterApp)
+
     fun inject(viewModel: SplashScreenViewModel)
     fun inject(viewModel: HomePageViewModel)
     fun inject(viewModel: AddPluginViewModel)
@@ -81,5 +83,4 @@ interface AppDependencyGraph {
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer
     fun injectConnectionFactory(): AudioConnectionFactory
-    fun injectLocaleLanguage(): ILocaleLanguage
 }

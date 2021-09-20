@@ -16,31 +16,32 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.domain
+package org.wycliffeassociates.otter.common.domain.languages
 
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.domain.ILocaleLanguage
+import org.wycliffeassociates.otter.common.persistence.ILocaleDataStore
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import java.util.*
 import javax.inject.Inject
 
 class LocaleLanguage @Inject constructor(
     private val appPrefRepo: IAppPreferencesRepository,
-    private val langRepo: ILanguageRepository
-) : ILocaleLanguage {
+    private val langRepo: ILanguageRepository,
+    private val localeDataStore: ILocaleDataStore
+) {
 
-    override val actualLanguage: Language?
-        get() = actualLanguage()
+    val preferredLanguage: Language?
+        get() = preferredLanguage()
 
-    override val defaultLanguage: Language?
+    val defaultLanguage: Language?
         get() = defaultLanguage()
 
-    override val supportedLanguages: List<Language>
+    val supportedLanguages: List<Language>
         get() = supportedLanguages()
 
-    private fun actualLanguage(): Language? {
+    private fun preferredLanguage(): Language? {
         val language = getLanguageFromPrefs()
         return when {
             supportedLanguages.contains(language) -> language
@@ -48,9 +49,13 @@ class LocaleLanguage @Inject constructor(
         }
     }
 
+    fun setPreferredLanguage(language: Language): Completable {
+        return appPrefRepo.setLocaleLanguage(language)
+    }
+
     private fun defaultLanguage(): Language? {
-        val systemLocale = Locale.getDefault()
-        val systemLanguage = getLanguageBySlug(systemLocale.language)
+        val systemLocale = localeDataStore.getDefaultLocale()
+        val systemLanguage = getLanguageBySlug(systemLocale)
         return when {
             supportedLanguages.contains(systemLanguage) -> systemLanguage
             else -> getLanguageBySlug("en")
@@ -58,17 +63,12 @@ class LocaleLanguage @Inject constructor(
     }
 
     private fun supportedLanguages(): List<Language> {
-        return javaClass.getResourceAsStream("/languages.properties").use {
-            val props = Properties()
-            it?.let {
-                props.load(it)
-                langRepo.getAll().blockingGet()
-                    .filter {
-                        props.keys.contains(it.slug)
-                    }
-                    .sortedBy { it.slug }
-            } ?: listOf()
-        }
+        val locales = localeDataStore.getSupportedLocales()
+        return langRepo.getAll().blockingGet()
+            .filter {
+                locales.contains(it.slug)
+            }
+            .sortedBy { it.slug }
     }
 
     private fun getLanguageBySlug(slug: String): Language? {

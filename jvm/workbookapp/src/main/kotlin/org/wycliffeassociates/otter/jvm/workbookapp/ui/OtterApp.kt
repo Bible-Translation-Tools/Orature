@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
@@ -32,13 +33,17 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScr
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 import java.util.*
+import javax.inject.Inject
 
 class OtterApp : App(RootView::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
     var shouldBlockWindowCloseRequest = false
 
+    @Inject lateinit var localeLanguage: LocaleLanguage
+    @Inject lateinit var directoryProvider: IDirectoryProvider
+
     init {
-        val directoryProvider = dependencyGraph.injectDirectoryProvider()
+        dependencyGraph.inject(this)
         directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
         initializeLogger(directoryProvider)
@@ -54,8 +59,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
     }
 
     fun initializeAppLocale() {
-        val localeLanguage = dependencyGraph.injectLocaleLanguage()
-        FX.locale = localeLanguage.actualLanguage?.let {
+        FX.locale = localeLanguage.preferredLanguage?.let {
             Locale(it.slug)
         } ?: Locale.getDefault()
     }
