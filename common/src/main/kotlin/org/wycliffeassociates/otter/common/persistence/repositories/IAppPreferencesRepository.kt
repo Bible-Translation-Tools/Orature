@@ -22,17 +22,16 @@ import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import javax.sound.sampled.Mixer
 
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
     fun setResumeProjectId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
-    fun getOutputDevice(): Maybe<Mixer.Info>
-    fun setOutputDevice(mixer: Mixer.Info): Completable
-    fun getInputDevice(): Maybe<Mixer.Info>
-    fun setInputDevice(mixer: Mixer.Info): Completable
+    fun getOutputDevice(): Maybe<String>
+    fun setOutputDevice(mixer: String): Completable
+    fun getInputDevice(): Maybe<String>
+    fun setInputDevice(mixer: String): Completable
     fun localeLanguage(): Maybe<Language>
     fun setLocaleLanguage(language: Language): Completable
 }

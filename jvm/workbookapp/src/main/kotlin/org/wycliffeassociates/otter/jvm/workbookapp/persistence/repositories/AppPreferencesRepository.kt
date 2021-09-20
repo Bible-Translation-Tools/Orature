@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferen
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
-import javax.sound.sampled.Mixer
 
 class AppPreferencesRepository @Inject constructor(
     private val preferences: IAppPreferences,
@@ -52,28 +51,28 @@ class AppPreferencesRepository @Inject constructor(
     }
 
 
-    override fun getInputDevice(): Maybe<Mixer.Info> {
+    override fun getInputDevice(): Maybe<String> {
         return preferences.audioInputDevice()
             .flatMapMaybe {
                 audioDeviceProvider.getInputDevice(it)
-            }
+            }.map { it.name }
     }
 
-    override fun setInputDevice(mixer: Mixer.Info): Completable {
+    override fun setInputDevice(mixer: String): Completable {
         audioDeviceProvider.selectInputDevice(mixer)
-        return preferences.setAudioInputDevice(mixer.name)
+        return preferences.setAudioInputDevice(mixer)
     }
 
-    override fun getOutputDevice(): Maybe<Mixer.Info> {
+    override fun getOutputDevice(): Maybe<String> {
         return preferences.audioOutputDevice()
             .flatMapMaybe {
                 audioDeviceProvider.getOutputDevice(it)
-            }
+            }.map { it.name }
     }
 
-    override fun setOutputDevice(mixer: Mixer.Info): Completable {
+    override fun setOutputDevice(mixer: String): Completable {
         audioDeviceProvider.selectOutputDevice(mixer)
-        return preferences.setAudioOutputDevice(mixer.name)
+        return preferences.setAudioOutputDevice(mixer)
     }
 
     override fun localeLanguage(): Maybe<Language> {

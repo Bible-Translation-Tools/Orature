@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
-import javax.sound.sampled.Mixer
 
 class SettingsViewModel : ViewModel() {
 
@@ -66,11 +65,11 @@ class SettingsViewModel : ViewModel() {
 
     val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
 
-    val outputDevices = observableListOf<Mixer.Info>()
-    val selectedOutputDeviceProperty = SimpleObjectProperty<Mixer.Info>()
+    val outputDevices = observableListOf<String>()
+    val selectedOutputDeviceProperty = SimpleObjectProperty<String>()
 
-    val inputDevices = observableListOf<Mixer.Info>()
-    val selectedInputDeviceProperty = SimpleObjectProperty<Mixer.Info>()
+    val inputDevices = observableListOf<String>()
+    val selectedInputDeviceProperty = SimpleObjectProperty<String>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -156,7 +155,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun loadOutputDevices() {
-        audioDeviceProvider.getOutputDevices()
+        audioDeviceProvider.getOutputDeviceNames()
             .doOnError {
                 logger.error("Error in loadOutputDevices: ", it)
             }
@@ -166,7 +165,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun loadInputDevices() {
-        audioDeviceProvider.getInputDevices()
+        audioDeviceProvider.getInputDeviceNames()
             .doOnError {
                 logger.error("Error in loadInputDevices: ", it)
             }
@@ -175,11 +174,11 @@ class SettingsViewModel : ViewModel() {
             }
     }
 
-    fun updateOutputDevice(mixer: Mixer.Info) {
+    fun updateOutputDevice(mixer: String) {
         appPrefRepo.setOutputDevice(mixer).subscribe()
     }
 
-    fun updateInputDevice(mixer: Mixer.Info) {
+    fun updateInputDevice(mixer: String) {
         appPrefRepo.setInputDevice(mixer).subscribe()
     }
 
