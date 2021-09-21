@@ -34,7 +34,11 @@
 
 .record-scripture__navigate-buttons {
     -fx-spacing: 30px;
-    -fx-alignment: top-center;
+    -fx-alignment: center;
+}
+
+.record-scripture__book-info {
+    -fx-alignment: center;
 }
 
 .record-scripture__book-title {

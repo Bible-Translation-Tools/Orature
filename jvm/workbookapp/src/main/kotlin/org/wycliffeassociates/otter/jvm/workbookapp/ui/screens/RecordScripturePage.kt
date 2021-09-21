@@ -184,17 +184,6 @@ class RecordScripturePage : View() {
                 vbox {
                     addClass("record-scripture__right")
 
-                    label {
-                        addClass("record-scripture__book-title")
-                        textProperty().bind(workbookDataStore.activeChapterTitleBinding())
-                    }
-                    label {
-                        addClass("record-scripture__chunk-title")
-                        textProperty().bind(workbookDataStore.activeChunkTitleBinding())
-                        visibleProperty().bind(workbookDataStore.activeChunkTitleBinding().isNotNull)
-                        managedProperty().bind(visibleProperty())
-                    }
-
                     hbox {
                         addClass("record-scripture__navigate-buttons")
 
@@ -206,6 +195,21 @@ class RecordScripturePage : View() {
                                 recordScriptureViewModel.previousChunk()
                             }
                             enableWhen(recordScriptureViewModel.hasPrevious)
+                        }
+
+                        vbox {
+                            addClass("record-scripture__book-info")
+                            hgrow = Priority.ALWAYS
+                            label {
+                                addClass("record-scripture__book-title")
+                                textProperty().bind(workbookDataStore.activeChapterTitleBinding())
+                            }
+                            label {
+                                addClass("record-scripture__chunk-title")
+                                textProperty().bind(workbookDataStore.activeChunkTitleBinding())
+                                visibleProperty().bind(workbookDataStore.activeChunkTitleBinding().isNotNull)
+                                managedProperty().bind(visibleProperty())
+                            }
                         }
 
                         // next verse button
@@ -246,13 +250,16 @@ class RecordScripturePage : View() {
             add(sourceContent, 0, 0)
             add(rightPane, 1, 0)
 
-            val column = ColumnConstraints()
-            column.percentWidth = 50.0
+            val sourceContentColumn = ColumnConstraints()
+            sourceContentColumn.percentWidth = 40.0
+
+            val rightPaneColumn = ColumnConstraints()
+            rightPaneColumn.percentWidth = 60.0
 
             val row = RowConstraints()
             row.vgrow = Priority.ALWAYS
 
-            columnConstraints.addAll(column, column)
+            columnConstraints.addAll(sourceContentColumn, rightPaneColumn)
             rowConstraints.add(row)
         }
 
