@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import javafx.geometry.Point2D
+import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -34,6 +35,7 @@ class WaveformContainer : Fragment() {
     // val timecodeHolder: TimecodeHolder
 
     var dragStart: Point2D? = null
+    private var dragContextX = 0.0
 
     init {
         markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
@@ -61,12 +63,23 @@ class WaveformContainer : Fragment() {
                 viewModel.pause()
                 val trackWidth = this@stackpane.width
                 if (trackWidth > 0) {
+                    val node = children.firstOrNull {
+                        it is WaveformFrame
+                    }
+                    dragContextX = node!!.translateX - me.sceneX
+
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                 }
             }
 
             setOnMouseDragged { me ->
+                children.firstOrNull {
+                    it is WaveformFrame
+                }?.translateX = dragContextX + me.sceneX
+            }
+
+            setOnMouseReleased { me ->
                 val trackWidth = this@stackpane.width
                 if (trackWidth > 0.0) {
                     val cur: Point2D = localToParent(me.x, me.y)

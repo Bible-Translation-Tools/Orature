@@ -42,14 +42,18 @@ class WaveformFrame(
         vgrow = Priority.ALWAYS
 
         with(this) {
-            translateXProperty().bind(
-                viewModel
-                    .positionProperty
-                    .negate()
-                    .plus(
-                        this@WaveformFrame.widthProperty().divide(2.0)
-                    )
-            )
+//            translateXProperty().bind(
+//                viewModel
+//                    .positionProperty
+//                    .negate()
+//                    .plus(
+//                        this@WaveformFrame.widthProperty().divide(2.0)
+//                    )
+//            )
+            viewModel.positionProperty.onChangeAndDoNow {
+                if (it == null) return@onChangeAndDoNow
+                translateX = -it!!.toDouble() + this.width / 2
+            }
 
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
