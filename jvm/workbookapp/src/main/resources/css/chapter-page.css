@@ -77,10 +77,30 @@
     -fx-effect: -wa-level2;
     -fx-background-color: -wa-white;
     -fx-background-radius: 16px;
-    -fx-padding: 20px 0 20px 5px;
+    -fx-padding: 0 0 20px 0;
     -fx-alignment: top-center;
     -fx-spacing: 10px;
-    -fx-pref-width: 500px;
+}
+
+.chapter-page__chunks-header {
+    -fx-background-color: -wa-primary;
+    -fx-pref-height: 80px;
+    -fx-spacing: 10px;
+    -fx-padding: 20px;
+    -fx-background-radius: 16px 16px 0 0;
+}
+
+.chapter-page__chunks-header .btn {
+    -fx-pref-width: 280px;
+}
+
+.chapter-page__compile-btn {
+    -fx-text-fill: -wa-white;
+    -fx-border-color: -wa-white;
+}
+
+.chapter-page__compile-btn .ikonli-font-icon {
+    -fx-fill: -wa-white;
 }
 
 .chapter-page__chunks .list-view {

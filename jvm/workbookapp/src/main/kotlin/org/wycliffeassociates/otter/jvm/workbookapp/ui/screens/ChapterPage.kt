@@ -171,32 +171,12 @@ class ChapterPage : Fragment() {
                     }
                     button {
                         addClass("btn", "btn--secondary")
-                        textProperty().bind(viewModel.noTakesProperty.stringBinding {
-                            when (it) {
-                                true -> messages["beginTranslation"]
-                                else -> messages["continueTranslation"]
-                            }
-                        })
-                        graphic = FontIcon(MaterialDesign.MDI_VOICE)
-                        action {
-                            viewModel.workChunkProperty.value?.let {
-                                viewModel.onCardSelection(it)
-                                navigator.dock<RecordScripturePage>()
-                            }
-                        }
-                        visibleProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
-                        managedProperty().bind(visibleProperty())
-                    }
-                    button {
-                        addClass("btn", "btn--secondary")
                         text = messages["exportChapter"]
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
                             viewModel.exportChapter()
                         }
-
-                        visibleProperty().bind(viewModel.selectedChapterTakeProperty.isNotNull)
-                        managedProperty().bind(visibleProperty())
+                        disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
                     }
                 }
             }
@@ -242,13 +222,35 @@ class ChapterPage : Fragment() {
             addClass("chapter-page__chunks")
             vgrow = Priority.ALWAYS
 
-            button {
-                addClass("btn", "btn--primary")
-                text = messages["compile"]
-                graphic = FontIcon(MaterialDesign.MDI_LAYERS)
-                enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
-                action {
-                    viewModel.compile()
+            hbox {
+                addClass("chapter-page__chunks-header")
+                button {
+                    addClass("btn", "btn--secondary", "chapter-page__compile-btn")
+                    text = messages["compile"]
+                    graphic = FontIcon(MaterialDesign.MDI_LAYERS)
+                    enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
+                    action {
+                        viewModel.compile()
+                    }
+                }
+                region { 
+                    hgrow = Priority.ALWAYS
+                }
+                button {
+                    addClass("btn", "btn--cta")
+                    textProperty().bind(viewModel.noTakesProperty.stringBinding {
+                        when (it) {
+                            true -> messages["beginTranslation"]
+                            else -> messages["continueTranslation"]
+                        }
+                    })
+                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                    action {
+                        viewModel.workChunkProperty.value?.let {
+                            viewModel.onCardSelection(it)
+                            navigator.dock<RecordScripturePage>()
+                        }
+                    }
                 }
             }
 
