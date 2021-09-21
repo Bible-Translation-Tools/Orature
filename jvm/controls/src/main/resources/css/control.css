@@ -186,6 +186,45 @@
 .btn--secondary:disabled .ikonli-font-icon {
     -fx-fill: -wa-gray-light;
 }
+
+.btn--secondary-light {
+    -fx-text-fill: -wa-white;
+    -fx-border-color: -wa-white;
+}
+
+.btn--secondary-light .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:hover {
+    -fx-background-color: -wa-white-05;
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+
+.btn--secondary-light:hover .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:pressed {
+    -fx-background-color: -wa-white-10;
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+
+.btn--secondary-light:pressed .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:disabled {
+    -fx-border-width: 0;
+    -fx-text-fill: -wa-white-80;
+}
+
+.btn--secondary-light:disabled .ikonli-font-icon {
+    -fx-fill: -wa-white-80;
+}
+
 .btn--borderless {
     -fx-border-width: 0;
 }

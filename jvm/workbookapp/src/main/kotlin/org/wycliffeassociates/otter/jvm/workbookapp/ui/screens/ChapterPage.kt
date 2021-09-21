@@ -225,7 +225,7 @@ class ChapterPage : Fragment() {
             hbox {
                 addClass("chapter-page__chunks-header")
                 button {
-                    addClass("btn", "btn--secondary", "chapter-page__compile-btn")
+                    addClass("btn", "btn--secondary", "btn--secondary-light")
                     text = messages["compile"]
                     graphic = FontIcon(MaterialDesign.MDI_LAYERS)
                     enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
