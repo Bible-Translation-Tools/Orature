@@ -36,6 +36,7 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -48,6 +49,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.Callable
 import javax.inject.Inject
@@ -88,6 +90,8 @@ class ChapterPageViewModel : ViewModel() {
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
+    val showExportProgressDialogProperty = SimpleBooleanProperty(false)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -307,6 +311,24 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .observeOnFx()
                 .subscribe()
+        }
+    }
+
+    fun exportChapter() {
+        selectedChapterTakeProperty.value?.let { take ->
+            val directory = chooseDirectory(FX.messages["exportChapter"])
+            directory?.let {
+                showExportProgressDialogProperty.set(true)
+
+                val mp3Name = take.file.nameWithoutExtension + ".mp3"
+                val mp3File = File(directory, mp3Name)
+                AudioConverter().wavToMp3(take.file, mp3File)
+                    .subscribeOn(Schedulers.io())
+                    .observeOnFx()
+                    .subscribe {
+                        showExportProgressDialogProperty.set(false)
+                    }
+            }
         }
     }
 
