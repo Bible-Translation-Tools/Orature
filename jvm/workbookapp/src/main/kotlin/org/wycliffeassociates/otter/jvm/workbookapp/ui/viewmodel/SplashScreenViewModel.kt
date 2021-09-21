@@ -23,7 +23,6 @@ import io.reactivex.Observable
 import javafx.beans.property.SimpleDoubleProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
@@ -33,9 +32,6 @@ class SplashScreenViewModel : ViewModel() {
 
     @Inject
     lateinit var initApp: InitializeApp
-
-    @Inject
-    lateinit var appPrefRepo: IAppPreferencesRepository
 
     val progressProperty = SimpleDoubleProperty(0.0)
 

@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.common.domain.languages
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.persistence.ILocaleDataStore
+import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class LocaleLanguage @Inject constructor(
     private val appPrefRepo: IAppPreferencesRepository,
     private val langRepo: ILanguageRepository,
-    private val localeDataStore: ILocaleDataStore
+    private val localeDataSource: ILocaleDataSource
 ) {
 
     val preferredLanguage: Language?
@@ -54,7 +54,7 @@ class LocaleLanguage @Inject constructor(
     }
 
     private fun defaultLanguage(): Language? {
-        val systemLocale = localeDataStore.getDefaultLocale()
+        val systemLocale = localeDataSource.getDefaultLocale()
         val systemLanguage = getLanguageBySlug(systemLocale)
         return when {
             supportedLanguages.contains(systemLanguage) -> systemLanguage
@@ -63,7 +63,7 @@ class LocaleLanguage @Inject constructor(
     }
 
     private fun supportedLanguages(): List<Language> {
-        val locales = localeDataStore.getSupportedLocales()
+        val locales = localeDataSource.getSupportedLocales()
         return langRepo.getAll().blockingGet()
             .filter {
                 locales.contains(it.slug)

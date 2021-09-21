@@ -315,6 +315,10 @@
     -fx-background-color: -wa-black-10;
 }
 
+.wa-combobox .combo-box-popup {
+    -fx-pref-height: 200px;
+}
+
 .wa-combobox .combo-box-popup .list-cell {
     -fx-padding: 5px;
 }

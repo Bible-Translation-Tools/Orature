@@ -257,6 +257,12 @@ task copyMessages(dependsOn: processResources, type: Copy) {
     rename { "Messages.properties" }
 }
 
+task copyTestResources(dependsOn: processResources, type: Copy) {
+    from "$buildDir/resources/main"
+    into "$buildDir/resources/test"
+    include "*.properties"
+}
+
 ///////////Customize Gradle Test Output ////////////////////////////////
 tasks.withType(Test) {
     testLogging {
@@ -310,6 +316,7 @@ compileJava.dependsOn createGithubProperties
 compileJava.dependsOn createSentryProperties
 compileJava.dependsOn createLocalesProperties
 compileJava.dependsOn copyMessages
+compileJava.dependsOn copyTestResources
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

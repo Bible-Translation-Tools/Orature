@@ -79,6 +79,8 @@ class SettingsView : View() {
                         addClass("wa-combobox")
                         fitToParentWidth()
 
+                        visibleRowCount = 5
+
                         cellFormat {
                             val view = ComboboxItem()
                             graphic = view.apply {

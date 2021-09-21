@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.domain
 
-import org.wycliffeassociates.otter.common.persistence.ILocaleDataStore
+import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
 import java.util.*
 import javax.inject.Inject
 
-class LocaleDataStore @Inject constructor() : ILocaleDataStore {
+class LocaleDataSource @Inject constructor() : ILocaleDataSource {
     override fun getSupportedLocales(): List<String> {
         return javaClass.getResourceAsStream("/languages.properties").use {
             it?.let {

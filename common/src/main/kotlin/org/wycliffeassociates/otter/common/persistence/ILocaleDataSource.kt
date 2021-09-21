@@ -1,6 +1,6 @@
 package org.wycliffeassociates.otter.common.persistence
 
-interface ILocaleDataStore {
+interface ILocaleDataSource {
     fun getSupportedLocales(): List<String>
     fun getDefaultLocale(): String
 }
