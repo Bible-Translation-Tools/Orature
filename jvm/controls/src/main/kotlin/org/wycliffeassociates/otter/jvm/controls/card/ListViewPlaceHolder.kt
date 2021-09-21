@@ -6,6 +6,7 @@ import tornadofx.*
 
 class ListViewPlaceHolder : ListView<Any?>() {
     init {
+        addClass("wa-list-view")
         items.add(null)
         setCellFactory {
             object: ListCell<Any?>() {
