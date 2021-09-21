@@ -46,6 +46,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val LAST_RESOURCE_KEY = "lastResource"
     private val AUDIO_PLAYBACK_DEVICE_KEY = "audioPlaybackDevice"
     private val AUDIO_RECORD_DEVICE_KEY = "audioRecordDevice"
+    private val LOCALE_LANGUAGE_KEY = "localeLanguage"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -185,5 +186,13 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setAudioInputDevice(name: String): Completable {
         return putString(AUDIO_RECORD_DEVICE_KEY, name)
+    }
+
+    override fun localeLanguage(): Single<String> {
+        return getString(LOCALE_LANGUAGE_KEY, "")
+    }
+
+    override fun setLocaleLanguage(locale: String): Completable {
+        return putString(LOCALE_LANGUAGE_KEY, locale)
     }
 }
