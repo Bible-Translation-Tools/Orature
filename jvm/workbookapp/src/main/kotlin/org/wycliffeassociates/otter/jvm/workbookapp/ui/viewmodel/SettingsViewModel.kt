@@ -35,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import tornadofx.*
 import javax.inject.Inject
+import javax.sound.sampled.Mixer
 
 class SettingsViewModel : ViewModel() {
 
@@ -65,11 +66,11 @@ class SettingsViewModel : ViewModel() {
 
     val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
 
-    val outputDevices = observableListOf<String>()
-    val selectedOutputDeviceProperty = SimpleObjectProperty<String>()
+    val outputDevices = observableListOf<Mixer.Info>()
+    val selectedOutputDeviceProperty = SimpleObjectProperty<Mixer.Info>()
 
-    val inputDevices = observableListOf<String>()
-    val selectedInputDeviceProperty = SimpleObjectProperty<String>()
+    val inputDevices = observableListOf<Mixer.Info>()
+    val selectedInputDeviceProperty = SimpleObjectProperty<Mixer.Info>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -155,7 +156,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun loadOutputDevices() {
-        audioDeviceProvider.getOutputDeviceNames()
+        audioDeviceProvider.getOutputDevices()
             .doOnError {
                 logger.error("Error in loadOutputDevices: ", it)
             }
@@ -165,7 +166,7 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun loadInputDevices() {
-        audioDeviceProvider.getInputDeviceNames()
+        audioDeviceProvider.getInputDevices()
             .doOnError {
                 logger.error("Error in loadInputDevices: ", it)
             }
@@ -174,12 +175,12 @@ class SettingsViewModel : ViewModel() {
             }
     }
 
-    fun updateOutputDevice(mixer: String) {
-        appPrefRepo.setOutputDevice(mixer).subscribe()
+    fun updateOutputDevice(mixer: Mixer.Info) {
+        appPrefRepo.setOutputDevice(mixer.name).subscribe()
     }
 
-    fun updateInputDevice(mixer: String) {
-        appPrefRepo.setInputDevice(mixer).subscribe()
+    fun updateInputDevice(mixer: Mixer.Info) {
+        appPrefRepo.setInputDevice(mixer.name).subscribe()
     }
 
     fun updateLanguage(language: Language) {

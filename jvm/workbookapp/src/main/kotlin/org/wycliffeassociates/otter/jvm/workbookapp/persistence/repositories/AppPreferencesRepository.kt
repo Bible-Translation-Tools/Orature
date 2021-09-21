@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferen
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import javax.sound.sampled.Mixer
 
 class AppPreferencesRepository @Inject constructor(
     private val preferences: IAppPreferences,
@@ -51,11 +52,11 @@ class AppPreferencesRepository @Inject constructor(
     }
 
 
-    override fun getInputDevice(): Maybe<String> {
+    override fun getInputDevice(): Maybe<Mixer.Info> {
         return preferences.audioInputDevice()
             .flatMapMaybe {
                 audioDeviceProvider.getInputDevice(it)
-            }.map { it.name }
+            }
     }
 
     override fun setInputDevice(mixer: String): Completable {
@@ -63,11 +64,11 @@ class AppPreferencesRepository @Inject constructor(
         return preferences.setAudioInputDevice(mixer)
     }
 
-    override fun getOutputDevice(): Maybe<String> {
+    override fun getOutputDevice(): Maybe<Mixer.Info> {
         return preferences.audioOutputDevice()
             .flatMapMaybe {
                 audioDeviceProvider.getOutputDevice(it)
-            }.map { it.name }
+            }
     }
 
     override fun setOutputDevice(mixer: String): Completable {

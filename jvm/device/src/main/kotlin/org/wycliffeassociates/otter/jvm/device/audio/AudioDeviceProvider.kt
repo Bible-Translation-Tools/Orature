@@ -54,7 +54,7 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
         return getOutputDevices().map { it.map { it.name } }
     }
 
-    private fun getOutputDevices(): Single<List<Mixer.Info>> {
+    fun getOutputDevices(): Single<List<Mixer.Info>> {
         return Single.fromCallable {
             val mixers = AudioSystem.getMixerInfo()
             mixers.filter { mixerInfo ->
@@ -66,7 +66,7 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
         }
     }
 
-    private fun getInputDevices(): Single<List<Mixer.Info>> {
+    fun getInputDevices(): Single<List<Mixer.Info>> {
         return Single.fromCallable {
             val mixers = AudioSystem.getMixerInfo()
             mixers.filter { mixerInfo ->

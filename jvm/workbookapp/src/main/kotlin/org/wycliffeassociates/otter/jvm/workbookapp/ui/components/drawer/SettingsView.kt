@@ -28,6 +28,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceComboboxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageComboboxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -112,11 +113,14 @@ class SettingsView : View() {
                         fitToParentWidth()
 
                         cellFormat {
-                            graphic = Label().apply {
-                                text = it
-                                graphic = FontIcon(MaterialDesign.MDI_VOLUME_HIGH)
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                                bottomTextProperty.set(it.description)
                             }
                         }
+
+                        buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
 
                         selectionModel.selectedItemProperty().onChange {
                             it?.let { viewModel.updateOutputDevice(it) }
@@ -131,11 +135,14 @@ class SettingsView : View() {
                         fitToParentWidth()
 
                         cellFormat {
-                            graphic = Label().apply {
-                                text = it
-                                graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                                bottomTextProperty.set(it.description)
                             }
                         }
+
+                        buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
 
                         selectionModel.selectedItemProperty().onChange {
                             it?.let { viewModel.updateInputDevice(it) }
