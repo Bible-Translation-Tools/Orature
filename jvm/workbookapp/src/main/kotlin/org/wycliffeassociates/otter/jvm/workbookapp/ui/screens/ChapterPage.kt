@@ -248,6 +248,7 @@ class ChapterPage : Fragment() {
 
     private fun onTakeSelected(chunk: CardData, take: TakeModel) {
         chunk.chunkSource?.audio?.selectTake(take.take)
+        workbookDataStore.updateSelectedTakesFile()
         take.take.file.setLastModified(System.currentTimeMillis())
     }
 
@@ -263,7 +264,7 @@ class ChapterPage : Fragment() {
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }
     }
 

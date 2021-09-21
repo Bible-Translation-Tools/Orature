@@ -18,8 +18,38 @@
  */
 @import "/css/root.css"
 
-.record-scripture__top {
+.card--container-dragover {
+    -fx-background-color: -wa-primary-20;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-primary;
+    -fx-border-style: segments(10, 15, 15, 15)  line-cap round;
+}
+
+.record-scripture__right {
+    -fx-spacing: 15px;
+    -fx-padding: 30px;
+    -fx-alignment: top-center;
+    -fx-background-color: #EDF1F8;
+}
+
+.record-scripture__navigate-buttons {
     -fx-spacing: 30px;
-    -fx-padding: 20px 0;
     -fx-alignment: center;
+}
+
+.record-scripture__book-info {
+    -fx-alignment: center;
+}
+
+.record-scripture__book-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.record-scripture__chunk-title {
+    -fx-font-size: 36px;
+}
+
+.wa-list-view .cell {
+    -fx-padding: 15px 1px 0 1px;
 }

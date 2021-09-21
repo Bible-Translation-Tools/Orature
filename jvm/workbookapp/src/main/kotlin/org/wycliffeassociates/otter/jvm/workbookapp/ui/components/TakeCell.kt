@@ -16,31 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-.card--main-container {
-    -fx-background-color: #F7FAFF;
-}
+import javafx.scene.control.ListCell
 
-.card--scripture-take {
-    -fx-padding: 10px;
-    -fx-effect: -wa-top-shadow;
-    -fx-background-color: -wa-white;
-    -fx-background-radius: 6px;
-    -fx-spacing: 20px;
-}
+class TakeCell : ListCell<TakeItem>() {
+    override fun updateItem(item: TakeItem?, empty: Boolean) {
+        super.updateItem(item, empty)
 
-.card--scripture-take__title-box {
-    -fx-spacing: 5px;
-}
-
-.card--scripture-take__take-label {
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-}
-
-.card--scripture-take--empty {
-    -fx-background-color: -wa-black-05;
-    -fx-background-radius: 10px;
-    -fx-pref-height: 182px;
+        if (empty || item == null) {
+            graphic = null
+            return
+        }
+        graphic = item.apply {
+            animationMediatorProperty.value?.listView = listView
+        }
+    }
 }

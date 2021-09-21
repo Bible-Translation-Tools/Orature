@@ -24,6 +24,7 @@ import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleObjectProperty
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -154,7 +155,48 @@ class WorkbookDataStore : Component(), ScopedInstance {
         )
     }
 
+    fun activeChapterTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    MessageFormat.format(
+                        messages["bookChapterTitle"],
+                        activeWorkbookProperty.value.source.title,
+                        activeChapterProperty.value.title,
+                    )
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty
+        )
+    }
+
     fun activeChunkTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    if (activeChunkProperty.value != null) {
+                        MessageFormat.format(
+                            messages["chunkTitle"],
+                            messages[ContentLabel.of(activeChunkProperty.value.contentType).value],
+                            activeChunkProperty.value.start
+                        )
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty,
+            activeChunkProperty
+        )
+    }
+
+    fun activeTitleBinding(): StringBinding {
         return Bindings.createStringBinding(
             Callable {
                 if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
