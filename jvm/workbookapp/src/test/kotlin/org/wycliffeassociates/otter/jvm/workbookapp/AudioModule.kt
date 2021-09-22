@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
+package org.wycliffeassociates.otter.jvm.workbookapp
 
 import dagger.Module
 import dagger.Provides
@@ -33,13 +33,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 class AudioModule {
 
     companion object {
-        private val defaultFormat = AudioFormat(
-            44100F,
-            16,
-            1,
-            true,
-            false
-        )
+
         private val audioDeviceProvider = AudioDeviceProvider(defaultFormat)
         private val line = AudioSystem.getSourceDataLine(defaultFormat)
         val audioConnectionFactory = AudioConnectionFactory()

@@ -67,10 +67,10 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
 
-        loadOutputDevices()
-        loadInputDevices()
-        loadCurrentOutputDevice()
-        loadCurrentInputDevice()
+//        loadOutputDevices()
+//        loadInputDevices()
+//        loadCurrentOutputDevice()
+//        loadCurrentInputDevice()
     }
 
     fun refreshPlugins() {
@@ -141,23 +141,13 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun loadOutputDevices() {
-        audioDeviceProvider.getOutputDeviceNames()
-            .doOnError {
-                logger.error("Error in loadOutputDevices: ", it)
-            }
-            .subscribe { players ->
-                outputDevices.setAll(players)
-            }
+        val devices = audioDeviceProvider.getOutputDeviceNames()
+        outputDevices.setAll(devices)
     }
 
     private fun loadInputDevices() {
-        audioDeviceProvider.getInputDeviceNames()
-            .doOnError {
-                logger.error("Error in loadInputDevices: ", it)
-            }
-            .subscribe { recorders ->
-                inputDevices.setAll(recorders)
-            }
+        val devices = audioDeviceProvider.getInputDeviceNames()
+        inputDevices.setAll(devices)
     }
 
     fun updateOutputDevice(mixer: String) {
