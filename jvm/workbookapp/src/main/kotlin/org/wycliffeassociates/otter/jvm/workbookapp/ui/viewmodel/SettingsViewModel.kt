@@ -137,6 +137,9 @@ class SettingsViewModel : ViewModel() {
 
     private fun loadCurrentOutputDevice() {
         appPrefRepo.getOutputDevice()
+            .flatMapMaybe {
+                audioDeviceProvider.getOutputDevice(it)
+            }
             .doOnError {
                 logger.error("Error in loadCurrentOutputDevice: ", it)
             }
@@ -147,6 +150,9 @@ class SettingsViewModel : ViewModel() {
 
     private fun loadCurrentInputDevice() {
         appPrefRepo.getInputDevice()
+            .flatMapMaybe {
+                audioDeviceProvider.getInputDevice(it)
+            }
             .doOnError {
                 logger.error("Error in loadCurrentInputDevice: ", it)
             }
