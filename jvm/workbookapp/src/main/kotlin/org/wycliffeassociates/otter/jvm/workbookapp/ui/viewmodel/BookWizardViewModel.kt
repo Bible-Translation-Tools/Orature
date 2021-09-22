@@ -156,7 +156,8 @@ class BookWizardViewModel : ViewModel() {
     fun loadExistingProjects() {
         val translation = Translation(
             translationProperty.value.sourceLanguage,
-            translationProperty.value.targetLanguage
+            translationProperty.value.targetLanguage,
+            translationProperty.value.modifiedTs
         )
         workbookRepo
             .getProjects(translation)

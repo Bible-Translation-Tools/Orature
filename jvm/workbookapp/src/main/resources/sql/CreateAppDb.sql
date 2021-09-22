@@ -142,5 +142,6 @@ CREATE TABLE IF NOT EXISTS translation_entity (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     source_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
     target_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
+    modified_ts      TEXT DEFAULT '' NOT NULL,
     UNIQUE (source_fk, target_fk)
 );

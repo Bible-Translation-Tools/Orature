@@ -27,8 +27,9 @@ import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
-const val SCHEMA_VERSION = 5
+const val SCHEMA_VERSION = 6
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -41,7 +42,8 @@ class DatabaseMigrator {
             currentVersion = migrate1to2(dsl, currentVersion)
             currentVersion = migrate2to3(dsl, currentVersion)
             currentVersion = migrate3to4(dsl, currentVersion)
-            currentVersion = migrate4to5(dsl ,currentVersion)
+            currentVersion = migrate4to5(dsl, currentVersion)
+            currentVersion = migrate5to6(dsl, currentVersion)
 
             updateDatabaseVersion(dsl, currentVersion)
         }
@@ -190,6 +192,36 @@ class DatabaseMigrator {
                 // be performed in sqlite.
             }
             return 5
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 6
+     * Adds a column for the modified timestamp to the translations table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate5to6(dsl: DSLContext, current: Int): Int {
+        return if (current < 6) {
+            try {
+                dsl
+                    .alterTable(TranslationEntity.TRANSLATION_ENTITY)
+                    .addColumn(TranslationEntity.TRANSLATION_ENTITY.MODIFIED_TS)
+                    .execute()
+
+                dsl
+                    .update(TranslationEntity.TRANSLATION_ENTITY)
+                    .set(TranslationEntity.TRANSLATION_ENTITY.MODIFIED_TS, LocalDateTime.now().toString())
+                    .execute()
+                logger.info("Updated database from version 5 to 6")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                println(e.message)
+            }
+            return 6
         } else {
             current
         }

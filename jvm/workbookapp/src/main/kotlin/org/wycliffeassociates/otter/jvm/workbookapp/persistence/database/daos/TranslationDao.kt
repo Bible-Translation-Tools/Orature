@@ -75,11 +75,13 @@ class TranslationDao(
             .insertInto(
                 Tables.TRANSLATION_ENTITY,
                 Tables.TRANSLATION_ENTITY.SOURCE_FK,
-                Tables.TRANSLATION_ENTITY.TARGET_FK
+                Tables.TRANSLATION_ENTITY.TARGET_FK,
+                Tables.TRANSLATION_ENTITY.MODIFIED_TS
             )
             .values(
                 entity.sourceFk,
-                entity.targetFk
+                entity.targetFk,
+                entity.modifiedTs
             )
             .execute()
 
@@ -90,5 +92,17 @@ class TranslationDao(
             .fetchOne {
                 it.getValue(DSL.max(Tables.TRANSLATION_ENTITY.ID))
             }
+    }
+
+    @Synchronized
+    fun update(entity: TranslationEntity, dsl: DSLContext = instanceDsl) {
+        // Update the translation entity
+        dsl
+            .update(Tables.TRANSLATION_ENTITY)
+            .set(Tables.TRANSLATION_ENTITY.SOURCE_FK, entity.sourceFk)
+            .set(Tables.TRANSLATION_ENTITY.TARGET_FK, entity.targetFk)
+            .set(Tables.TRANSLATION_ENTITY.MODIFIED_TS, entity.modifiedTs)
+            .where(Tables.TRANSLATION_ENTITY.ID.eq(entity.id))
+            .execute()
     }
 }

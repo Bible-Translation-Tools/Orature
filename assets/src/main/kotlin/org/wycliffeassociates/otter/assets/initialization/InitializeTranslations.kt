@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class InitializeTranslations @Inject constructor(
@@ -73,7 +74,11 @@ class InitializeTranslations @Inject constructor(
     }
 
     private fun insertTranslation(workBook: Workbook) {
-        val translation = Translation(workBook.source.language, workBook.target.language)
+        val translation = Translation(
+            workBook.source.language,
+            workBook.target.language,
+            LocalDateTime.now()
+        )
         languageRepository
             .insertTranslation(translation)
             .doOnError { e ->
