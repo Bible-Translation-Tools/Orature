@@ -18,7 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.sun.javafx.util.Utils
+import javafx.beans.binding.Bindings
+import javafx.geometry.Point2D
 import javafx.geometry.Pos
+import javafx.scene.Node
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
@@ -36,6 +40,9 @@ class WaveformFrame(
     viewModel: VerseMarkerViewModel
 ) : BorderPane() {
 
+    var dragStart: Point2D? = null
+    private var dragContextX = 0.0
+
     init {
         fitToParentSize()
         hgrow = Priority.ALWAYS
@@ -50,8 +57,9 @@ class WaveformFrame(
 //                        this@WaveformFrame.widthProperty().divide(2.0)
 //                    )
 //            )
-            viewModel.positionProperty.onChangeAndDoNow {
-                if (it == null) return@onChangeAndDoNow
+
+            viewModel.positionProperty.onChange {
+                if (it == null) return@onChange
                 translateX = -it!!.toDouble() + this.width / 2
             }
 
@@ -103,6 +111,44 @@ class WaveformFrame(
                 region {
                     styleClass.add("vm-waveform-frame__bottom-track")
     //                add(timecodeHolder)
+                }
+            }
+
+            setOnMousePressed { me ->
+                viewModel.pause()
+                val trackWidth = this.width
+                if (trackWidth > 0) {
+                    val node = me.source as Node
+                    dragContextX = node!!.translateX - me.sceneX
+
+                    dragStart = localToParent(me.x, me.y)
+                    me.consume()
+                }
+            }
+
+            setOnMouseDragged { me ->
+                val node = me.source as Node
+                node.translateX = dragContextX + me.sceneX
+            }
+
+            setOnMouseReleased { me ->
+                val trackWidth = this.width
+                if (trackWidth > 0.0) {
+                    val cur: Point2D = localToParent(me.x, me.y)
+                    if (dragStart == null) {
+                        // we're getting dragged without getting a mouse press
+                        dragStart = localToParent(me.x, me.y)
+                    }
+                    val deltaPos = cur.x - dragStart!!.x
+                    val deltaFrames = pixelsToFrames(deltaPos)
+
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    viewModel.seek(final)
+//                    viewModel.calculatePosition()
+                    dragStart = localToParent(me.x, me.y)
+                    me.consume()
                 }
             }
         }

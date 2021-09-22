@@ -30,12 +30,9 @@ import tornadofx.*
 class WaveformContainer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
-    val mainWaveform: MainWaveform
+    private val mainWaveform: MainWaveform
     val markerTrack: MarkerTrackControl
     // val timecodeHolder: TimecodeHolder
-
-    var dragStart: Point2D? = null
-    private var dragContextX = 0.0
 
     init {
         markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
@@ -59,46 +56,6 @@ class WaveformContainer : Fragment() {
 
     override val root =
         stackpane {
-            setOnMousePressed { me ->
-                viewModel.pause()
-                val trackWidth = this@stackpane.width
-                if (trackWidth > 0) {
-                    val node = children.firstOrNull {
-                        it is WaveformFrame
-                    }
-                    dragContextX = node!!.translateX - me.sceneX
-
-                    dragStart = localToParent(me.x, me.y)
-                    me.consume()
-                }
-            }
-
-            setOnMouseDragged { me ->
-                children.firstOrNull {
-                    it is WaveformFrame
-                }?.translateX = dragContextX + me.sceneX
-            }
-
-            setOnMouseReleased { me ->
-                val trackWidth = this@stackpane.width
-                if (trackWidth > 0.0) {
-                    val cur: Point2D = localToParent(me.x, me.y)
-                    if (dragStart == null) {
-                        // we're getting dragged without getting a mouse press
-                        dragStart = localToParent(me.x, me.y)
-                    }
-                    val deltaPos = cur.x - dragStart!!.x
-                    val deltaFrames = pixelsToFrames(deltaPos)
-
-                    val curFrames = viewModel.getLocationInFrames()
-                    val duration = viewModel.getDurationInFrames()
-                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    viewModel.seek(final)
-                    dragStart = localToParent(me.x, me.y)
-                    me.consume()
-                }
-            }
-
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
