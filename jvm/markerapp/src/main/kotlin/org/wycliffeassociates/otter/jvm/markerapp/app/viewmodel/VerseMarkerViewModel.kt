@@ -70,7 +70,8 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
-    val waveformImageProperty = SimpleObjectProperty<List<Image>>()
+    val waveformImageList = SimpleObjectProperty<List<Image>>()
+    val waveformMinimapImage = SimpleObjectProperty<Image>()
 
     val width = Screen.getMainScreen().platformWidth
     val height = min(Screen.getMainScreen().platformHeight, 500)
@@ -95,18 +96,17 @@ class VerseMarkerViewModel : ViewModel() {
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
 
-//        WaveformImageBuilder(
-//            wavColor = Color.web(WAV_COLOR),
-//            background = Color.web(BACKGROUND_COLOR)
-//        ).build(
-//            audioPlayer.getAudioReader()!!,
-//            fitToAudioMax = false,
-//            width = imageWidth.toInt(),
-//            height = height
-//        ).subscribe { image ->
-//            waveformImageProperty.set(image)
-//            audioPlayer.getAudioReader()?.seek(0)
-//        }
+        WaveformImageBuilder(
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
+        ).build(
+            audioPlayer.getAudioReader()!!,
+            fitToAudioMax = false,
+            width = imageWidth.toInt(),
+            height = 50
+        ).subscribe { image ->
+            waveformMinimapImage.set(image)
+        }
 
         Observable.fromCallable {
             WaveformImageBuilder(
@@ -121,7 +121,7 @@ class VerseMarkerViewModel : ViewModel() {
         .subscribeOn(Schedulers.computation())
         .observeOnFx()
         .subscribe { images ->
-            waveformImageProperty.set(images)
+            waveformImageList.set(images)
             imageList.setAll(images)
         }
     }

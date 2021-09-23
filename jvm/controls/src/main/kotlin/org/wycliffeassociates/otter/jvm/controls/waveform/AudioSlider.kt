@@ -36,7 +36,8 @@ class AudioSlider(
     value: Double = 0.0
 ) : Slider(min, max, value) {
     var imageWidth = 0.0
-    val waveformImageProperty = SimpleObjectProperty<List<Image>>()
+//    val waveformImageProperty = SimpleObjectProperty<List<Image>>()
+    val waveformImageProperty = SimpleObjectProperty<Image>()
     val thumbFillProperty = SimpleObjectProperty<Paint>(Paint.valueOf("#00000015"))
     val thumbLineColorProperty = SimpleObjectProperty<Paint>(Color.BLACK)
     val secondsToHighlightProperty = SimpleIntegerProperty(1)
