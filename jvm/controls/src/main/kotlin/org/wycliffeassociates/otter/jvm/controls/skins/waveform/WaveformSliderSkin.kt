@@ -56,12 +56,18 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 //                    fitHeightProperty().bind(root.heightProperty())
 //                    fitWidthProperty().bind(root.widthProperty())
 //                }
+
                 val hbox = HBox()
                 hbox.children.setAll(
                     images.map { img ->
                         ImageView(img).apply {
                             fitHeightProperty().bind(root.heightProperty())
-                            fitWidth = root.width / images.size
+//                            fitWidth = root.width / images.size
+                            fitWidthProperty().bind(
+                                root.widthProperty()
+                                    .divide(control.imageWidth)
+                                    .multiply(img.width)
+                            )
                         }
                     })
                 root.getChildList()?.clear()

@@ -40,7 +40,7 @@ class WaveformImageBuilder(
     private val paddingColor: Color = background
 ) {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
-    private val MAX_IMAGE_WIDTH = 1000
+    private val MAX_IMAGE_WIDTH = Screen.getMainScreen().platformWidth
 
     fun build(
         reader: AudioFileReader,
@@ -60,7 +60,8 @@ class WaveformImageBuilder(
                             img.pixelReader,
                             0,
                             globalMin - newHeight,
-                            width + (padding * 2), (newHeight) * 2
+                            width + (padding * 2),
+                            (newHeight) * 2
                         )
                         image2 as Image
                     } else img as Image
@@ -181,8 +182,20 @@ class WaveformImageBuilder(
                 images.add(img)
             }
         }
-//        return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
-        val relative = Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
+        val lastImageWidth = width % MAX_IMAGE_WIDTH
+        if (images.size > 0 && lastImageWidth != 0) {
+            // trim image width
+            val lastImage = images.last()
+            images[images.size - 1] = WritableImage(
+                img.pixelReader,
+                0,
+                0,
+                lastImageWidth + (padding * 2),
+                height
+            )
+
+        }
+
         return images
     }
 
