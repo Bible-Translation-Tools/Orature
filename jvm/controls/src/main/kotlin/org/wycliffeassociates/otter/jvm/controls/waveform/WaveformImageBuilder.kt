@@ -40,7 +40,9 @@ class WaveformImageBuilder(
     private val paddingColor: Color = background
 ) {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
-    private val MAX_IMAGE_WIDTH = Screen.getMainScreen().platformWidth
+    private val PARTIAL_IMAGE_WIDTH = Screen.getMainScreen().platformWidth
+
+    private data class MinMax(var min: Int, var max: Int)
 
     fun build(
         reader: AudioFileReader,
@@ -76,25 +78,40 @@ class WaveformImageBuilder(
             .observeOnFx()
     }
 
-    fun buildImages(
+    fun buildPartialImages(
         reader: AudioFileReader,
         padding: Int = 0,
+        fitToAudioMax: Boolean = true,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
-    ): List<Image> {
+    ): Single<List<Image>> {
+//        return drawImages(reader, width, height, padding, MinMax(0,0))
 
-        return drawImages(reader, width, height, padding)
-//        return Single.fromCallable {
-//            drawImages(reader, width, height, padding)
-//        }
-//        .doOnError { e ->
-//            logger.error("Error in building WaveformImage", e)
-//        }
-//        .subscribeOn(Schedulers.computation())
-//        .observeOnFx()
+        return Single
+            .fromCallable {
+                val minMax = MinMax(0, 1)
+                val images = drawImages(reader, width, height, padding, minMax)
+                if (fitToAudioMax) {
+                    val newHeight = minMax.max - minMax.min
+                    images.map {
+                        WritableImage(
+                            it.pixelReader,
+                            0,
+                            minMax.min - newHeight,
+                            it.width.toInt() + (padding * 2),
+                            (newHeight) * 2
+                        )
+                    }
+                } else images
+            }
+            .doOnError { e ->
+                logger.error("Error in building WaveformImage", e)
+            }
+            .subscribeOn(Schedulers.computation())
+            .observeOnFx()
     }
 
-    fun drawWaveform(
+    private fun drawWaveform(
         img: WritableImage,
         reader: AudioFileReader,
         width: Int,
@@ -109,7 +126,6 @@ class WaveformImageBuilder(
         var globalMin = 0
         addPadding(img, 0, padding, height)
         for (i in padding until width) {
-//            if (i>1000) break
             reader.getPcmBuffer(bytes)
             val bb = ByteBuffer.wrap(bytes)
             bb.rewind()
@@ -139,10 +155,11 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        padding: Int
+        padding: Int,
+        minMax: MinMax
     ): List<Image> {
         var counter = 0
-        var img = WritableImage(MAX_IMAGE_WIDTH + 2 * padding, height)
+        var img = WritableImage(PARTIAL_IMAGE_WIDTH + 2 * padding, height)
         val images = mutableListOf(img)
 
         val framesPerPixel = reader.totalFrames / width
@@ -169,23 +186,23 @@ class WaveformImageBuilder(
             globalMin = max(globalMin, max)
             val range = scaleToHeight(max, height) until scaleToHeight(min, height)
             for (j in 0 until height) {
-                img.pixelWriter.setColor(i % MAX_IMAGE_WIDTH, j, background)
+                img.pixelWriter.setColor(i % PARTIAL_IMAGE_WIDTH, j, background)
                 if (j in range) {
-                    img.pixelWriter.setColor(i % MAX_IMAGE_WIDTH, j, wavColor)
+                    img.pixelWriter.setColor(i % PARTIAL_IMAGE_WIDTH, j, wavColor)
                 }
             }
             addPadding(img, (width + padding), (width + (padding * 2)), height)
             counter++
-            if (counter == MAX_IMAGE_WIDTH) {
+            if (counter == PARTIAL_IMAGE_WIDTH) {
                 counter = 0
-                img = WritableImage(MAX_IMAGE_WIDTH + 2 * padding, height)
+                img = WritableImage(PARTIAL_IMAGE_WIDTH + 2 * padding, height)
                 images.add(img)
             }
         }
-        val lastImageWidth = width % MAX_IMAGE_WIDTH
+
+        // crop to fit last image width
+        val lastImageWidth = width % PARTIAL_IMAGE_WIDTH
         if (images.size > 0 && lastImageWidth != 0) {
-            // trim image width
-            val lastImage = images.last()
             images[images.size - 1] = WritableImage(
                 img.pixelReader,
                 0,
@@ -193,9 +210,9 @@ class WaveformImageBuilder(
                 lastImageWidth + (padding * 2),
                 height
             )
-
         }
-
+        minMax.min = scaleToHeight(globalMin, height)
+        minMax.max = scaleToHeight(globalMax, height)
         return images
     }
 

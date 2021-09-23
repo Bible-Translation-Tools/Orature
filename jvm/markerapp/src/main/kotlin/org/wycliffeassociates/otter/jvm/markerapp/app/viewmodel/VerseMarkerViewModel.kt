@@ -94,33 +94,7 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        WaveformImageBuilder(
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        ).build(
-            audioPlayer.getAudioReader()!!,
-            fitToAudioMax = false,
-            width = imageWidth.toInt(),
-            height = 50
-        ).subscribe { image ->
-            waveformMinimapImage.set(image)
-        }
-
-        Observable.fromCallable {
-            WaveformImageBuilder(
-                wavColor = Color.web(WAV_COLOR),
-                background = Color.web(BACKGROUND_COLOR)
-            ).buildImages(
-                audioPlayer.getAudioReader()!!,
-                width = imageWidth.toInt(),
-                height = height
-            )
-        }
-        .subscribeOn(Schedulers.computation())
-        .observeOnFx()
-        .subscribe { images ->
-            waveformPartialImages.setAll(images)
-        }
+        initWaveformImage()
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
@@ -150,16 +124,24 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun seekNext() {
         val wasPlaying = audioPlayer.isPlaying()
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
         seek(markers.seekNext(audioPlayer.getLocationInFrames()))
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
     }
 
     fun seekPrevious() {
         val wasPlaying = audioPlayer.isPlaying()
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
         seek(markers.seekPrevious(audioPlayer.getLocationInFrames()))
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
     }
 
     fun writeMarkers(): Completable {
@@ -198,5 +180,31 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.getDurationInFrames()
+    }
+
+    private fun initWaveformImage() {
+        WaveformImageBuilder(
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
+        ).apply {
+            build(
+                audioPlayer.getAudioReader()!!,
+                fitToAudioMax = false,
+                width = imageWidth.toInt(),
+                height = 50
+            ).subscribe { image ->
+                waveformMinimapImage.set(image)
+                audioPlayer.getAudioReader()!!.seek(0)
+
+                buildPartialImages(
+                    audioPlayer.getAudioReader()!!,
+                    fitToAudioMax = false,
+                    width = imageWidth.toInt(),
+                    height = height
+                ).subscribe { images ->
+                    waveformPartialImages.setAll(images)
+                }
+            }
+        }
     }
 }
