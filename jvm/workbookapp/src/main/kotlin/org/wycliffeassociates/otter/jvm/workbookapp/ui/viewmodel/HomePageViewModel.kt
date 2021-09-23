@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -51,7 +52,8 @@ class HomePageViewModel : ViewModel() {
     @Inject lateinit var directoryProvider: IDirectoryProvider
     @Inject lateinit var preferencesRepository: IAppPreferencesRepository
     @Inject lateinit var languageRepository: ILanguageRepository
-    @Inject lateinit var updateTranslation: UpdateTranslation
+    @Inject lateinit var updateTranslationUseCase: UpdateTranslation
+    @Inject lateinit var updateProjectUseCase: UpdateProject
 
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
@@ -120,6 +122,7 @@ class HomePageViewModel : ViewModel() {
         workbookDataStore.activeWorkbookProperty.set(workbook)
         workbook.target.resourceMetadata.let(workbookDataStore::setProjectFilesAccessor)
         updateTranslationModifiedDate(workbook)
+        updateWorkbookModifiedDate(workbook)
 
         navigator.dock<WorkbookPage>()
     }
@@ -130,7 +133,13 @@ class HomePageViewModel : ViewModel() {
             translation.source,
             translation.target,
             translation.modifiedTs,
-            projects.sortedBy { it.target.sort }.asObservable()
+            projects.sortedWith(
+                compareByDescending<Workbook> { workbook ->
+                    workbook.modifiedTs
+                }.thenComparing { workbook ->
+                    workbook.target.sort
+                }
+            ).asObservable()
         )
     }
 
@@ -171,7 +180,13 @@ class HomePageViewModel : ViewModel() {
 
         translation?.let {
             it.modifiedTs = LocalDateTime.now()
-            updateTranslation.update(it).subscribe()
+            updateTranslationUseCase.update(it).subscribe()
         }
+    }
+
+    private fun updateWorkbookModifiedDate(workbook: Workbook) {
+        val project = workbook.target.toCollection()
+        project.modifiedTs = LocalDateTime.now()
+        updateProjectUseCase.update(project).subscribe()
     }
 }

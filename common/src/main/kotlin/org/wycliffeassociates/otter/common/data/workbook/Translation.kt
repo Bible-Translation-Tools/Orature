@@ -24,6 +24,6 @@ import java.time.LocalDateTime
 data class Translation(
     var source: Language,
     var target: Language,
-    var modifiedTs: LocalDateTime,
+    var modifiedTs: LocalDateTime?,
     var id: Int = 0
 )

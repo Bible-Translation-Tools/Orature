@@ -58,6 +58,7 @@ import org.wycliffeassociates.resourcecontainer.entity.dublincore
 import org.wycliffeassociates.resourcecontainer.entity.project
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class CollectionRepository @Inject constructor(
@@ -458,6 +459,7 @@ class CollectionRepository @Inject constructor(
                 sourceFk = sourceEntity.id
             )
             .let { derivedProject ->
+                derivedProject.modifiedTs = LocalDateTime.now().toString()
                 val id = collectionDao.insert(derivedProject, dsl)
                 derivedProject.copy(id = id)
             }

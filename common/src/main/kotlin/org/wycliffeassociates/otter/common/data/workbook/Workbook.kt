@@ -42,6 +42,7 @@ class Workbook(
             source.slug
         )
     }
+    val modifiedTs = target.modifiedTs
 
     override fun hashCode(): Int {
         return Objects.hash(

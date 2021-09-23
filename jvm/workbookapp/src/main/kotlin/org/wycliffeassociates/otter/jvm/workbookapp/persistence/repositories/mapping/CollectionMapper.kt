@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.CollectionEntity
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class CollectionMapper @Inject constructor() {
@@ -31,6 +32,7 @@ class CollectionMapper @Inject constructor() {
             entity.label,
             entity.title,
             metadata,
+            entity.modifiedTs?.let(LocalDateTime::parse),
             entity.id
         )
     }
@@ -44,7 +46,8 @@ class CollectionMapper @Inject constructor() {
             obj.titleKey,
             obj.slug,
             obj.sort,
-            dublinCoreFk = obj.resourceContainer?.id
+            dublinCoreFk = obj.resourceContainer?.id,
+            obj.modifiedTs?.toString()
         )
     }
 }

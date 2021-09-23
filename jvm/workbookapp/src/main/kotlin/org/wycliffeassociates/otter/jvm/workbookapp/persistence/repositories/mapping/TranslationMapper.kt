@@ -29,17 +29,16 @@ class TranslationMapper @Inject constructor() {
         Translation(
             source,
             target,
-            type.modifiedTs.let(LocalDateTime::parse),
+            type.modifiedTs?.let(LocalDateTime::parse),
             type.id
         )
 
     fun mapToEntity(type: Translation): TranslationEntity {
-        val s = type.modifiedTs.toString()
         return TranslationEntity(
             type.id,
             type.source.id,
             type.target.id,
-            type.modifiedTs.toString()
+            type.modifiedTs?.toString()
         )
     }
 }

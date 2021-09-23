@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
+import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -55,14 +56,11 @@ class BookWizardViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(BookWizardViewModel::class.java)
 
-    @Inject
-    lateinit var collectionRepo: ICollectionRepository
-    @Inject
-    lateinit var creationUseCase: CreateProject
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
-    @Inject
-    lateinit var workbookRepo: IWorkbookRepository
+    @Inject lateinit var collectionRepo: ICollectionRepository
+    @Inject lateinit var creationUseCase: CreateProject
+    @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var workbookRepo: IWorkbookRepository
+    @Inject lateinit var updateProjectUseCase: UpdateProject
 
     private val navigator: NavigationMediator by inject()
 

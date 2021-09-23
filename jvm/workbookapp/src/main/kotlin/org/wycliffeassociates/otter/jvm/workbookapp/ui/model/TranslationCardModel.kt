@@ -26,6 +26,6 @@ import java.time.LocalDateTime
 class TranslationCardModel(
     val sourceLanguage: Language,
     val targetLanguage: Language,
-    val modifiedTs: LocalDateTime,
+    val modifiedTs: LocalDateTime?,
     val books: ObservableList<Workbook>
 )

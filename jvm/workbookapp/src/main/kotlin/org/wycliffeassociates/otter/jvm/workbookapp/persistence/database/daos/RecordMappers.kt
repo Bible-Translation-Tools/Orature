@@ -76,7 +76,8 @@ class RecordMappers {
                 record.getValue(COLLECTION_ENTITY.TITLE),
                 record.getValue(COLLECTION_ENTITY.SLUG),
                 record.getValue(COLLECTION_ENTITY.SORT),
-                record.getValue(COLLECTION_ENTITY.DUBLIN_CORE_FK)
+                record.getValue(COLLECTION_ENTITY.DUBLIN_CORE_FK),
+                record.getValue(COLLECTION_ENTITY.MODIFIED_TS)
             )
         }
 
