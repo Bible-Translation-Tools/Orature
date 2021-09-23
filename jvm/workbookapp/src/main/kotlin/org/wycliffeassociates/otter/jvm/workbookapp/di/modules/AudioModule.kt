@@ -27,28 +27,14 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 
 @Module
 class AudioModule {
 
     companion object {
-        private val defaultFormat = AudioFormat(
-            44100F,
-            16,
-            1,
-            true,
-            false
-        )
-        private val audioDeviceProvider = AudioDeviceProvider(defaultFormat)
-        private val line = AudioSystem.getSourceDataLine(defaultFormat)
         val audioConnectionFactory = AudioConnectionFactory()
-        init {
-            audioDeviceProvider.activeOutputDevice.subscribe { mixer ->
-                val newLine = AudioSystem.getSourceDataLine(defaultFormat, mixer)
-                audioConnectionFactory.setOutputLine(newLine)
-            }
-        }
     }
 
     @Provides
@@ -64,5 +50,5 @@ class AudioModule {
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()
 
     @Provides
-    fun providesAudioDevice(): AudioDeviceProvider = audioDeviceProvider
+    fun providesAudioDevice(): AudioDeviceProvider = AudioDeviceProvider(DEFAULT_AUDIO_FORMAT)
 }
