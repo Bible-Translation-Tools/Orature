@@ -66,11 +66,6 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
-
-//        loadOutputDevices()
-//        loadInputDevices()
-//        loadCurrentOutputDevice()
-//        loadCurrentInputDevice()
     }
 
     fun refreshPlugins() {
@@ -125,6 +120,7 @@ class SettingsViewModel : ViewModel() {
             .doOnError {
                 logger.error("Error in loadCurrentOutputDevice: ", it)
             }
+            .observeOnFx()
             .subscribe { device ->
                 selectedOutputDeviceProperty.set(device)
             }
@@ -135,6 +131,7 @@ class SettingsViewModel : ViewModel() {
             .doOnError {
                 logger.error("Error in loadCurrentInputDevice: ", it)
             }
+            .observeOnFx()
             .subscribe { device ->
                 selectedInputDeviceProperty.set(device)
             }
@@ -156,5 +153,12 @@ class SettingsViewModel : ViewModel() {
 
     fun updateInputDevice(mixer: String) {
         appPrefRepository.setInputDevice(mixer).subscribe()
+    }
+
+    fun refreshDevices() {
+        loadOutputDevices()
+        loadInputDevices()
+        loadCurrentOutputDevice()
+        loadCurrentInputDevice()
     }
 }

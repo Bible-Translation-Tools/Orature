@@ -1,19 +1,18 @@
 package org.wycliffeassociates.otter.jvm.device
 
-import io.reactivex.Single
 import javax.inject.Inject
-import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Mixer
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
 
 class ConfigureAudioSystem @Inject constructor(
-    val connectionFactory: AudioConnectionFactory,
-    val deviceProvider: AudioDeviceProvider,
-    val preferencesRepository: IAppPreferencesRepository
+    private val connectionFactory: AudioConnectionFactory,
+    private val deviceProvider: AudioDeviceProvider,
+    private val preferencesRepository: IAppPreferencesRepository
 ) {
     fun configure() {
         println("configuring audio system")
@@ -28,7 +27,7 @@ class ConfigureAudioSystem @Inject constructor(
 
     private fun configureListener() {
         deviceProvider.activeOutputDevice.subscribe { mixer ->
-            val newLine = AudioSystem.getSourceDataLine(defaultFormat, mixer)
+            val newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
             connectionFactory.setOutputLine(newLine)
         }
     }
@@ -46,7 +45,7 @@ class ConfigureAudioSystem @Inject constructor(
                 it
             }
             .map { deviceProvider.getOutputDevice(it) }
-            .map { AudioSystem.getSourceDataLine(defaultFormat, it) }
+            .map { AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, it) }
             .blockingGet()
     }
 
@@ -56,15 +55,5 @@ class ConfigureAudioSystem @Inject constructor(
 
     fun checkIfDeviceIsAvailable(device: String): Boolean {
         return deviceProvider.getOutputDevice(device) != null
-    }
-
-    companion object {
-        private val defaultFormat = AudioFormat(
-            44100F,
-            16,
-            1,
-            true,
-            false
-        )
     }
 }
