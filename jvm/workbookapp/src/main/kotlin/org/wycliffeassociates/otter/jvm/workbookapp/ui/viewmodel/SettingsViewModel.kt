@@ -35,8 +35,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import tornadofx.*
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
-import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 
 class SettingsViewModel : ViewModel() {
 
