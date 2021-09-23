@@ -37,7 +37,7 @@ class WaveformFrame(
     markerTrack: MarkerTrackControl,
     mainWaveform: MainWaveform,
     // timecodeHolder: TimecodeHolder,
-    viewModel: VerseMarkerViewModel
+    private val viewModel: VerseMarkerViewModel
 ) : BorderPane() {
 
     var dragStart: Point2D? = null
@@ -49,19 +49,7 @@ class WaveformFrame(
         vgrow = Priority.ALWAYS
 
         with(this) {
-//            translateXProperty().bind(
-//                viewModel
-//                    .positionProperty
-//                    .negate()
-//                    .plus(
-//                        this@WaveformFrame.widthProperty().divide(2.0)
-//                    )
-//            )
-
-            viewModel.positionProperty.onChange {
-                if (it == null) return@onChange
-                translateX = -it!!.toDouble() + this.width / 2
-            }
+            bindTranslateX()
 
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
@@ -120,7 +108,6 @@ class WaveformFrame(
                 if (trackWidth > 0) {
                     val node = me.source as Node
                     dragContextX = node!!.translateX - me.sceneX
-
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                 }
@@ -128,6 +115,7 @@ class WaveformFrame(
 
             setOnMouseDragged { me ->
                 val node = me.source as Node
+                this.translateXProperty().unbind()
                 node.translateX = dragContextX + me.sceneX
             }
 
@@ -146,11 +134,22 @@ class WaveformFrame(
                     val duration = viewModel.getDurationInFrames()
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
-//                    viewModel.calculatePosition()
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
+                    bindTranslateX() // rebind when done
                 }
             }
         }
+    }
+
+    private fun bindTranslateX() {
+        this.translateXProperty().bind(
+            viewModel
+                .positionProperty
+                .negate()
+                .plus(
+                    this@WaveformFrame.widthProperty().divide(2.0)
+                )
+        )
     }
 }
