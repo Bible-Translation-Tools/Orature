@@ -18,9 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import io.reactivex.Maybe
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem

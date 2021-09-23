@@ -69,12 +69,4 @@ class ConfigureAudioSystem @Inject constructor(
             .map { AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, it) }
             .blockingGet()
     }
-
-    private fun getDefaultAudioDevice(): Mixer.Info {
-        return AudioSystem.getMixerInfo().first()
-    }
-
-    fun checkIfDeviceIsAvailable(device: String): Boolean {
-        return deviceProvider.getOutputDevice(device) != null
-    }
 }
