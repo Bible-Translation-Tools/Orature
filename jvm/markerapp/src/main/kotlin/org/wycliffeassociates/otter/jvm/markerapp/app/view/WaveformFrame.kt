@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.sun.javafx.util.Utils
-import javafx.beans.binding.Bindings
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
@@ -27,7 +26,6 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.Priority
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MainWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -35,7 +33,6 @@ import tornadofx.*
 
 class WaveformFrame(
     markerTrack: MarkerTrackControl,
-    mainWaveform: MainWaveform,
     // timecodeHolder: TimecodeHolder,
     private val viewModel: VerseMarkerViewModel
 ) : BorderPane() {
@@ -70,7 +67,7 @@ class WaveformFrame(
 
                         fitToParentHeight()
                         hbox{
-                            this@hbox.bindChildren(viewModel.imageList) {
+                            this@hbox.bindChildren(viewModel.waveformPartialImages) {
                                 imageview(it) {
                                     this.fitToHeight(this@region)
                                 }

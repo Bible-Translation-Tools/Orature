@@ -30,7 +30,6 @@ import tornadofx.*
 class WaveformContainer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
-    private val mainWaveform: MainWaveform
     val markerTrack: MarkerTrackControl
     // val timecodeHolder: TimecodeHolder
 
@@ -42,13 +41,9 @@ class WaveformContainer : Fragment() {
             }
         }
         // timecodeHolder = TimecodeHolder(viewModel, 50.0)
-        mainWaveform = MainWaveform(viewModel)
 
         object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
-//                if (mainWaveform.image != null) {
-//                    viewModel.calculatePosition()
-//                }
                 viewModel.calculatePosition()
             }
         }.start()
@@ -65,7 +60,6 @@ class WaveformContainer : Fragment() {
             add(
                 WaveformFrame(
                     markerTrack,
-                    mainWaveform,
                   //  timecodeHolder,
                     viewModel
                 )

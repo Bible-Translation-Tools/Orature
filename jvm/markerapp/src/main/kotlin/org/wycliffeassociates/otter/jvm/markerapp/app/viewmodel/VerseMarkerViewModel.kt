@@ -70,14 +70,13 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
-    val waveformImageList = SimpleObjectProperty<List<Image>>()
     val waveformMinimapImage = SimpleObjectProperty<Image>()
 
     val width = Screen.getMainScreen().platformWidth
     val height = min(Screen.getMainScreen().platformHeight, 500)
     val padding = width / 2
     val imageWidth: Double
-    val imageList = observableListOf<Image>()
+    val waveformPartialImages = observableListOf<Image>()
 
     init {
         val scope = scope as ParameterizedScope
@@ -94,7 +93,6 @@ class VerseMarkerViewModel : ViewModel() {
         }
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
-
 
         WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
@@ -121,8 +119,7 @@ class VerseMarkerViewModel : ViewModel() {
         .subscribeOn(Schedulers.computation())
         .observeOnFx()
         .subscribe { images ->
-            waveformImageList.set(images)
-            imageList.setAll(images)
+            waveformPartialImages.setAll(images)
         }
     }
 
