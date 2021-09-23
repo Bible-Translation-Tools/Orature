@@ -28,10 +28,11 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 
-private const val TAKE_CELL_HEIGHT = 60.0
+private const val TAKE_CELL_HEIGHT = 72.0
 
 class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
@@ -39,6 +40,7 @@ class ChunkItem : VBox() {
     val hasSelectedProperty = SimpleBooleanProperty(false)
 
     val takes = observableListOf<TakeModel>()
+    val takeViews = observableListOf<TakeItem>()
 
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
     private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
@@ -49,8 +51,25 @@ class ChunkItem : VBox() {
     init {
         styleClass.setAll("chunk-item")
 
-        takes.onChange {
-            hasSelectedProperty.set(it.list?.any { it.selected } ?: false)
+        takes.onChange { model ->
+            hasSelectedProperty.set(model.list?.any { it.selected } ?: false)
+
+            val animationMediator = ListAnimationMediator<TakeItem>()
+            takeViews.setAll(
+                model.list.map { takeModel ->
+                    TakeItem().apply {
+                        selectedProperty.set(takeModel.selected)
+                        takeProperty.set(takeModel)
+                        animationMediatorProperty.set(animationMediator)
+
+                        setOnTakeSelected {
+                            onTakeSelectedActionProperty.value?.handle(
+                                ActionEvent(takeModel, null)
+                            )
+                        }
+                    }
+                }
+            )
         }
 
         hbox {
@@ -80,7 +99,7 @@ class ChunkItem : VBox() {
                     graphicProperty().bind(showTakesProperty.objectBinding {
                         when (it) {
                             true -> upIcon
-                            else ->downIcon
+                            else -> downIcon
                         }
                     })
                 }
@@ -105,14 +124,9 @@ class ChunkItem : VBox() {
             vbox {
                 addClass("chunk-item__take-items")
 
-                listview(takes) {
-                    setCellFactory {
-                        TakeCell {
-                            onTakeSelectedActionProperty.value?.handle(
-                                ActionEvent(it, null)
-                            )
-                        }
-                    }
+                listview(takeViews) {
+                    addClass("wa-list-view")
+                    setCellFactory { TakeCell() }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
                 }
             }

@@ -2,7 +2,7 @@ ext {
     // Plugins
     javafxPluginVer = '0.0.8'
     jooqPluginVer = '4.0'
-    install4jPluginVer = '7.0.8'
+    install4jPluginVer = '9.0.2'
     nebulaLintPluginVer = '16.23.0' // Gradle Linter
     buildscanPluginVer = '2.4.2'
     detektPluginVer = '1.17.0'
@@ -14,6 +14,7 @@ ext {
     // Libraries
     kotlinVer = '1.5.10'
     javafxVer = '11'
+    javaGridviewVer = '1.0.0'
     tornadofxVer = '2.0.0-SNAPSHOT'
     rxkotlinVer = '2.4.0'
     rxkotlinfxVer = '2.2.2'
@@ -36,12 +37,13 @@ ext {
     kotlinresourcecontainerVer = '0.9.1'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.12.1'
-    ikonliVer = '11.3.4'
+    ikonliVer = '12.2.0'
     controlsfxVer = '11.0.1'
     sentryVer = '1.7.30'
     usfmToolsVer = "1.6.0"
     testFxVer = '4.0.15-alpha'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
+    install4jVer = '9.0.4'
     jump3rVer='1.0.5'
 }

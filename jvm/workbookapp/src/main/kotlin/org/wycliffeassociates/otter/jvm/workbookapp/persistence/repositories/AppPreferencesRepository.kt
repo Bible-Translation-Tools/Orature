@@ -19,15 +19,19 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 
 class AppPreferencesRepository @Inject constructor(
     private val preferences: IAppPreferences,
-    private val audioDeviceProvider: AudioDeviceProvider
+    private val audioDeviceProvider: AudioDeviceProvider,
+    private val languageRepository: ILanguageRepository
 ) : IAppPreferencesRepository {
 
     override fun resumeProjectId(): Single<Int> {
@@ -71,5 +75,19 @@ class AppPreferencesRepository @Inject constructor(
     override fun setOutputDevice(mixer: String): Completable {
         audioDeviceProvider.selectOutputDevice(mixer)
         return preferences.setAudioOutputDevice(mixer)
+    }
+
+    override fun localeLanguage(): Maybe<Language> {
+        return preferences
+            .localeLanguage()
+            .flatMap {
+                languageRepository.getBySlug(it)
+            }.flatMapMaybe {
+                Maybe.just(it)
+            }
+    }
+
+    override fun setLocaleLanguage(language: Language): Completable {
+        return preferences.setLocaleLanguage(language.slug)
     }
 }

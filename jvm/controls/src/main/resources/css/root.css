@@ -48,6 +48,9 @@
     -wa-white-40: rgba(255,255,255,0.4);
     -wa-white-50: rgba(255,255,255,0.5);
     -wa-white-60: rgba(255,255,255,0.6);
+    -wa-white-70: rgba(255,255,255,0.7);
+    -wa-white-80: rgba(255,255,255,0.8);
+    -wa-white-90: rgba(255,255,255,0.9);
     -wa-black: rgb(0, 21, 51);
     -wa-black-05: rgba(0, 21, 51, 0.05);
     -wa-black-10: rgba(0, 21, 51, 0.1);
@@ -99,4 +102,5 @@
     -wa-level3: dropshadow(gaussian, rgba(0,0,0,0.23), 6, 0, 0, 6);
     -wa-level4: dropshadow(gaussian, rgba(0,0,0,0.22), 10, 0, 0, 10);
     -wa-level5: dropshadow(gaussian, rgba(0,0,0,0.22), 12, 0, 0, 15); /* Highest Priorty / Shadow */
+    -wa-top-shadow: dropshadow(gaussian, -wa-black-20, 3, 0.2, 0, 0);
 }

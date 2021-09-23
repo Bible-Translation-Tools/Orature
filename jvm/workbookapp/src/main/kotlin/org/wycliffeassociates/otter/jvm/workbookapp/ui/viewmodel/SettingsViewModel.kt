@@ -20,14 +20,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import tornadofx.*
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -46,6 +51,9 @@ class SettingsViewModel : ViewModel() {
     @Inject
     lateinit var pluginRepository: IAudioPluginRepository
 
+    @Inject
+    lateinit var localeLanguage: LocaleLanguage
+
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
@@ -53,6 +61,11 @@ class SettingsViewModel : ViewModel() {
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
+
+    val supportedLocaleLanguages = observableListOf<Language>()
+    val selectedLocaleLanguageProperty = SimpleObjectProperty<Language>()
+
+    val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
 
     val outputDevices = observableListOf<String>()
     val selectedOutputDeviceProperty = SimpleObjectProperty<String>()
@@ -66,6 +79,14 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
+
+        loadOutputDevices()
+        loadInputDevices()
+        loadCurrentOutputDevice()
+        loadCurrentInputDevice()
+
+        supportedLocaleLanguages.setAll(localeLanguage.supportedLanguages)
+        selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
     }
 
     fun refreshPlugins() {
@@ -160,5 +181,12 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
+    }
+
+    fun updateLanguage(language: Language) {
+        localeLanguage.setPreferredLanguage(language)
+            .subscribe {
+                showChangeLanguageSuccessDialogProperty.set(true)
+            }
     }
 }

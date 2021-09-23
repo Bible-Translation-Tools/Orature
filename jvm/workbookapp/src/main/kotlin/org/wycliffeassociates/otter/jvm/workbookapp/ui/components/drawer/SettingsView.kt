@@ -19,12 +19,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
+import javafx.application.Platform
 import javafx.scene.control.Label
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageComboboxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -58,6 +62,39 @@ class SettingsView : View() {
                             action { collapse() }
                         }
                     )
+                }
+
+                label(messages["interfaceSettings"]).apply {
+                    addClass("app-drawer__subtitle")
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["languageSettings"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+
+                    combobox(viewModel.selectedLocaleLanguageProperty, viewModel.supportedLocaleLanguages) {
+                        addClass("wa-combobox")
+                        fitToParentWidth()
+
+                        visibleRowCount = 5
+
+                        cellFormat {
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                                bottomTextProperty.set(it.anglicizedName)
+                            }
+                        }
+
+                        buttonCell = LanguageComboboxCell()
+
+                        selectionModel.selectedItemProperty().onChange {
+                            it?.let { viewModel.updateLanguage(it) }
+                        }
+                    }
                 }
 
                 label(messages["audioSettings"]).apply {
@@ -191,7 +228,9 @@ class SettingsView : View() {
     init {
         importStylesheet(resources.get("/css/app-drawer.css"))
         importStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
         viewModel.refreshPlugins()
+        initChangeLanguageDialog()
 
         // Devices are refreshed on dock and on drawer event otherwise it is not loaded the first time.
         subscribe<DrawerEvent<UIComponent>> {
@@ -206,5 +245,20 @@ class SettingsView : View() {
 
     private fun collapse() {
         fire(DrawerEvent(this::class, DrawerEventAction.CLOSE))
+    }
+
+    private fun initChangeLanguageDialog() {
+        val successDialog = confirmdialog {
+            titleTextProperty.set(messages["settings"])
+            messageTextProperty.set(messages["changeLanguageSuccessMessage"])
+
+            cancelButtonTextProperty.set(messages["close"])
+            onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
+            onCancelAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }
+        }
+
+        viewModel.showChangeLanguageSuccessDialogProperty.onChange {
+            Platform.runLater { if (it) successDialog.open() else successDialog.close() }
+        }
     }
 }

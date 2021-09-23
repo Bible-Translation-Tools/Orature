@@ -28,13 +28,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppRepositoriesModule
-import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import javax.inject.Singleton
 
 @Component(
     modules = [
-        AudioModule::class,
+        TestAudioModule::class,
         AppDatabaseModule::class,
         AppPreferencesModule::class,
         TestDirectoryProviderModule::class,

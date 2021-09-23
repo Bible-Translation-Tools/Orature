@@ -186,6 +186,45 @@
 .btn--secondary:disabled .ikonli-font-icon {
     -fx-fill: -wa-gray-light;
 }
+
+.btn--secondary-light {
+    -fx-text-fill: -wa-white;
+    -fx-border-color: -wa-white;
+}
+
+.btn--secondary-light .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:hover {
+    -fx-background-color: -wa-white-05;
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+
+.btn--secondary-light:hover .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:pressed {
+    -fx-background-color: -wa-white-10;
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+
+.btn--secondary-light:pressed .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:disabled {
+    -fx-border-width: 0;
+    -fx-text-fill: -wa-white-80;
+}
+
+.btn--secondary-light:disabled .ikonli-font-icon {
+    -fx-fill: -wa-white-80;
+}
+
 .btn--borderless {
     -fx-border-width: 0;
 }
@@ -269,10 +308,13 @@
     -fx-border-width: 2px;
     -fx-border-color: -wa-black-40;
     -fx-border-radius: 6px;
-    -fx-text-fill: -wa-black;
     -fx-font-size: 20px;
     -fx-pref-height: 48px;
     -fx-cursor: hand;
+}
+
+.wa-combobox .list-cell .label {
+    -fx-text-fill: -wa-black;
 }
 
 .wa-combobox .ikonli-font-icon {
@@ -284,16 +326,24 @@
     -fx-background-color: -wa-black-05;
 }
 
+.wa-combobox:showing {
+    -fx-background-color: -wa-primary-10;
+}
+
+.wa-combobox:showing > .list-cell .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.wa-combobox:showing > .arrow-button .arrow {
+    -fx-background-color: -wa-primary;
+}
+
+.wa-combobox:showing .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
 .wa-combobox:pressed {
     -fx-background-color: -wa-black-10;
-}
-
-.wa-combobox .list-cell {
-    -fx-pref-height: 48px;
-}
-
-.wa-combobox .list-cell .label {
-    -fx-text-fill: -wa-black;
 }
 
 .wa-combobox .list-cell:hover {
@@ -302,6 +352,14 @@
 
 .wa-combobox .list-cell:pressed {
     -fx-background-color: -wa-black-10;
+}
+
+.wa-combobox .combo-box-popup {
+    -fx-pref-height: 200px;
+}
+
+.wa-combobox .combo-box-popup .list-cell {
+    -fx-padding: 5px;
 }
 
 .wa-combobox .combo-box-popup .list-cell:selected {
@@ -314,6 +372,29 @@
 
 .wa-combobox .combo-box-popup .list-cell:selected .ikonli-font-icon {
     -fx-fill: -wa-primary;
+}
+
+.wa-combobox-button {
+    -fx-spacing: 10px;
+}
+
+.wa-combobox-item {
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+    -fx-pref-width: 304px;
+}
+
+.wa-combobox-item__top {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.wa-combobox .combo-box-popup .list-cell:hover .wa-combobox-item__top {
+    -fx-underline: true;
+}
+
+.wa-combobox-item__bottom {
+    -fx-font-size: 16px;
 }
 
 /* -------------- Radio button ---------------- */
@@ -414,4 +495,19 @@
 
 .wa-slider .animated-thumb {
     -fx-background-color: -wa-primary;
+}
+
+/* ----------------- ListView ---------------- */
+.wa-list-view {
+    -fx-background-color: -wa-transparent;
+}
+
+.wa-list-view .list-cell:selected,
+.wa-list-view .list-cell:even,
+.wa-list-view .list-cell:odd {
+    -fx-background-color: -wa-transparent;
+}
+
+.wa-list-view .label {
+    -fx-text-fill: -wa-gray-darker;
 }

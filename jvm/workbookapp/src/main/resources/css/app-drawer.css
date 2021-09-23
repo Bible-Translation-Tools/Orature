@@ -26,6 +26,7 @@
 
 .app-drawer-container {
     -fx-spacing: 20px;
+    -fx-pref-width: 400px;
 }
 
 .app-drawer__scroll-pane {
@@ -75,6 +76,7 @@
 
 .app-drawer__section {
     -fx-spacing: 20px;
+    -fx-pref-width: 400px;
 }
 
 .app-drawer__section--filled {
@@ -86,6 +88,11 @@
 
 .app-drawer__text {
     -fx-font-size: 20px;
+    -fx-wrap-text: true;
+}
+
+.app-drawer__text--error {
+    -fx-text-fill: -wa-red;
     -fx-wrap-text: true;
 }
 

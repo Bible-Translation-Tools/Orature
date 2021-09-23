@@ -26,6 +26,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
@@ -33,6 +34,8 @@ import tornadofx.*
 class TakeItem : HBox() {
     val takeProperty = SimpleObjectProperty<TakeModel>()
     val selectedProperty = SimpleBooleanProperty(false)
+    val animationMediatorProperty =
+        SimpleObjectProperty<ListAnimationMediator<TakeItem>>()
 
     private val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val selectedIcon = FontIcon(MaterialDesign.MDI_CHECK)
@@ -46,7 +49,6 @@ class TakeItem : HBox() {
 
             takeProperty.onChange { take ->
                 take?.let {
-                    fileProperty.set(take.take.file)
                     playerProperty.set(take.audioPlayer)
                 }
             }
@@ -54,7 +56,6 @@ class TakeItem : HBox() {
 
         button {
             addClass("btn", "btn--icon")
-            onActionProperty().bind(onTakeSelectedActionProperty)
             graphicProperty().bind(selectedProperty.objectBinding {
                 when (it) {
                     true -> selectedIcon
@@ -63,6 +64,17 @@ class TakeItem : HBox() {
             })
             selectedProperty.onChange {
                 togglePseudoClass("selected", it)
+            }
+            setOnAction {
+                animationMediatorProperty.value?.let {
+                    if (it.isAnimating || selectedProperty.value) {
+                        return@setOnAction
+                    }
+                    it.node = this@TakeItem
+                    it.animate {
+                        onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                    }
+                } ?: onTakeSelectedActionProperty.value?.handle(ActionEvent())
             }
         }
     }

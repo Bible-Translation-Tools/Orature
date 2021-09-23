@@ -32,5 +32,6 @@ class TakeEvent(
         private val ANY: EventType<TakeEvent> = EventType<TakeEvent>(InputEvent.ANY, "TAKE")
         val EDIT_TAKE: EventType<TakeEvent> = EventType(ANY, "EDIT_TAKE")
         val MARK_TAKE: EventType<TakeEvent> = EventType(ANY, "MARK_TAKE")
+        val SELECT_TAKE: EventType<TakeEvent> = EventType(ANY, "SELECT_TAKE")
     }
 }

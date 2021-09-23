@@ -23,6 +23,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
+import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view.UpdaterView
 import tornadofx.*
 
 class InfoView : View() {
@@ -76,6 +77,8 @@ class InfoView : View() {
                         addClass("app-drawer__text")
                     }
                 }
+
+                add<UpdaterView>()
             }
         }
     }

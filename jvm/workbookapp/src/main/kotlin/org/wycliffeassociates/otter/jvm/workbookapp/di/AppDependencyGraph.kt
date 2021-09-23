@@ -22,6 +22,8 @@ import dagger.Component
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppRepositoriesModule
@@ -29,6 +31,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AudioModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.DirectoryProviderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.ZipEntryTreeBuilderModule
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
@@ -56,6 +59,8 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 )
 @Singleton
 interface AppDependencyGraph {
+    fun inject(app: OtterApp)
+
     fun inject(viewModel: SplashScreenViewModel)
     fun inject(viewModel: HomePageViewModel)
     fun inject(viewModel: AddPluginViewModel)
@@ -72,6 +77,7 @@ interface AppDependencyGraph {
 
     fun injectDatabase(): AppDatabase
     fun injectDirectoryProvider(): IDirectoryProvider
+    fun injectAppPreferencesRepository(): IAppPreferencesRepository
 
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer

@@ -30,7 +30,7 @@
 <VBox styleClass="source-content" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox fx:id="titleContainer">
-            <HBox HBox.hgrow="ALWAYS">
+            <HBox HBox.hgrow="ALWAYS" alignment="CENTER">
                 <Label fx:id="title" styleClass="source-content__title">
                     <VBox.margin>
                         <Insets bottom="10.0" />

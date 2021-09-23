@@ -18,69 +18,42 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.card
 
-import javafx.beans.property.*
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
 
 class ScriptureTakeCard : Control() {
 
-    private val takeProperty = SimpleObjectProperty<Take>()
-    private val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    private val deleteTextProperty = SimpleStringProperty("delete")
-    private val editTextProperty = SimpleStringProperty("edit")
-    private val markerTextProperty = SimpleStringProperty("marker")
-    private val playTextProperty = SimpleStringProperty("play")
-    private val pauseTextProperty = SimpleStringProperty("pause")
-    private val takeNumberProperty = SimpleStringProperty("Take 01")
-    private val timestampProperty = SimpleStringProperty("")
-    private val isDraggingProperty = SimpleBooleanProperty(false)
-    private val allowMarkerProperty = SimpleBooleanProperty(true)
+    val takeProperty = SimpleObjectProperty<Take>()
+    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val selectedProperty = SimpleBooleanProperty()
+    val takeLabelProperty = SimpleStringProperty()
+    val lastModifiedProperty = SimpleStringProperty()
+    val animationMediatorProperty =
+        SimpleObjectProperty<ListAnimationMediator<ScriptureTakeCard>>()
 
-    fun takeProperty(): ObjectProperty<Take> {
-        return takeProperty
+    val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onTakeDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    fun setOnTakeDelete(op: () -> Unit) {
+        onTakeDeleteActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun audioPlayerProperty(): ObjectProperty<IAudioPlayer> {
-        return audioPlayerProperty
+    fun setOnTakeEdit(op: () -> Unit) {
+        onTakeEditActionProperty.set(EventHandler { op.invoke() })
     }
 
-    fun deleteTextProperty(): StringProperty {
-        return deleteTextProperty
-    }
-
-    fun editTextProperty(): StringProperty {
-        return editTextProperty
-    }
-
-    fun markerTextProperty(): StringProperty {
-        return markerTextProperty
-    }
-
-    fun playTextProperty(): StringProperty {
-        return playTextProperty
-    }
-
-    fun pauseTextProperty(): StringProperty {
-        return pauseTextProperty
-    }
-
-    fun takeNumberProperty(): StringProperty {
-        return takeNumberProperty
-    }
-
-    fun timestampProperty(): StringProperty {
-        return timestampProperty
-    }
-
-    fun isDraggingProperty(): BooleanProperty {
-        return isDraggingProperty
-    }
-
-    fun allowMarkerProperty(): BooleanProperty {
-        return allowMarkerProperty
+    fun setOnTakeSelected(op: () -> Unit) {
+        onTakeSelectedActionProperty.set(EventHandler { op.invoke() })
     }
 
     override fun createDefaultSkin(): Skin<*> {

@@ -19,12 +19,12 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import org.slf4j.LoggerFactory
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Slider
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import java.util.concurrent.TimeUnit
@@ -50,12 +50,10 @@ class AudioPlayerController(
     }
 
     fun toggle() {
-        disposable?.dispose()
         player?.let { _player ->
             if (_player.isPlaying()) {
                 pause()
             } else {
-                disposable = startProgressUpdate()
                 play()
                 _player.addEventListener {
                     if (
@@ -79,8 +77,24 @@ class AudioPlayerController(
 
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
-        audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
+        disposable?.dispose()
+        disposable = startProgressUpdate()
+        player.addEventListener {
+            if (
+                it == AudioPlayerEvent.PAUSE ||
+                it == AudioPlayerEvent.STOP ||
+                it == AudioPlayerEvent.COMPLETE
+            ) {
+                Platform.runLater {
+                    isPlayingProperty.set(false)
+                    if (it == AudioPlayerEvent.COMPLETE) {
+                        audioSlider.value = 0.0
+                        player.getAudioReader()?.seek(0)
+                    }
+                }
+            }
+        }
     }
 
     private fun initializeSliderActions() {
@@ -120,7 +134,7 @@ class AudioPlayerController(
                     isPlayingProperty.set(false)
                 }
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
-                    audioSlider.value = playbackPosition().toDouble()
+                    audioSlider.value = locationToPercentage()
                 }
             }
     }
@@ -154,7 +168,7 @@ class AudioPlayerController(
     }
 
     private fun percentageToLocation(percent: Double): Int {
-        var _percent = if (percent > 1.00) percent / 100F else percent
+        val _percent = if (percent > 1.00) percent / 100F else percent
         player?.let {
             return (_percent * it.getDurationInFrames()).toInt()
         } ?: run {
@@ -162,9 +176,9 @@ class AudioPlayerController(
         }
     }
 
-    private fun playbackPosition(): Int {
+    private fun locationToPercentage(): Double {
         return player?.let {
-            it.getLocationInFrames()
-        } ?: 0
+            it.getLocationInFrames() / it.getDurationInFrames().toDouble() * 100
+        } ?: 0.0
     }
 }

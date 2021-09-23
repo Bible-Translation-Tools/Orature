@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.primitives.Language
 
 interface IAppPreferencesRepository {
     fun resumeProjectId(): Single<Int>
@@ -30,4 +32,6 @@ interface IAppPreferencesRepository {
     fun setOutputDevice(mixer: String): Completable
     fun getInputDevice(): Single<String>
     fun setInputDevice(mixer: String): Completable
+    fun localeLanguage(): Maybe<Language>
+    fun setLocaleLanguage(language: Language): Completable
 }

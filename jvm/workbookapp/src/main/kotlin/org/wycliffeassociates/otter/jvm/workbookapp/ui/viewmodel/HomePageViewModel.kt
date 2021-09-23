@@ -57,9 +57,11 @@ class HomePageViewModel : ViewModel() {
 
     val translationModels = observableListOf<TranslationCardModel>()
     val resumeBookProperty = SimpleObjectProperty<Workbook>()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+        settingsViewModel.refreshPlugins()
     }
 
     fun loadResumeBook() {
