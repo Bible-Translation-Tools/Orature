@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import javax.sound.sampled.SourceDataLine
+import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
@@ -33,6 +34,11 @@ class AudioConnectionFactory {
     @Synchronized
     fun setOutputLine(newLine: SourceDataLine) {
         audioPlayerConnectionFactory.setLine(newLine)
+    }
+
+    @Synchronized
+    fun setInputLine(newLine: TargetDataLine) {
+
     }
 
     fun getPlayer(): IAudioPlayer {

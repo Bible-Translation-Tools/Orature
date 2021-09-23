@@ -4,6 +4,7 @@ import javax.inject.Inject
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Mixer
 import javax.sound.sampled.SourceDataLine
+import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
@@ -15,7 +16,6 @@ class ConfigureAudioSystem @Inject constructor(
     private val preferencesRepository: IAppPreferencesRepository
 ) {
     fun configure() {
-        println("configuring audio system")
         configureLines()
         configureListener()
     }
@@ -23,6 +23,9 @@ class ConfigureAudioSystem @Inject constructor(
     private fun configureLines() {
         val outputLine = getOutputLine()
         connectionFactory.setOutputLine(outputLine)
+
+        val inputLine = getInputLine()
+        connectionFactory.setInputLine(inputLine)
     }
 
     private fun configureListener() {
@@ -46,6 +49,23 @@ class ConfigureAudioSystem @Inject constructor(
             }
             .map { deviceProvider.getOutputDevice(it) }
             .map { AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, it) }
+            .blockingGet()
+    }
+
+    private fun getInputLine(): TargetDataLine {
+        return preferencesRepository
+            .getInputDevice()
+            .map {
+                println("Preference output line is $it")
+                if(it.isBlank()) deviceProvider.getInputDeviceNames().first() else it
+            }
+            .map {
+                println("Initialized output line is $it")
+                preferencesRepository.setInputDevice(it).blockingGet()
+                it
+            }
+            .map { deviceProvider.getInputDevice(it) }
+            .map { AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, it) }
             .blockingGet()
     }
 
