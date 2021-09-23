@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.device
 
 import javax.inject.Inject
 import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Mixer
 import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
