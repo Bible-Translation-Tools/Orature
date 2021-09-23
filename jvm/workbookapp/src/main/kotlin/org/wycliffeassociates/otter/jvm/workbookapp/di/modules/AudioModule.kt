@@ -20,8 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
+import javax.inject.Singleton
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -50,5 +49,6 @@ class AudioModule {
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()
 
     @Provides
+    @Singleton
     fun providesAudioDevice(): AudioDeviceProvider = AudioDeviceProvider(DEFAULT_AUDIO_FORMAT)
 }

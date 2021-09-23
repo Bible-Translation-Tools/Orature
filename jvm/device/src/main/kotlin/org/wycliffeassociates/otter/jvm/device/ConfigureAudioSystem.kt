@@ -33,17 +33,20 @@ class ConfigureAudioSystem @Inject constructor(
             val newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
             connectionFactory.setOutputLine(newLine)
         }
+
+        deviceProvider.activeInputDevice.subscribe { mixer ->
+            val newLine = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+            connectionFactory.setInputLine(newLine)
+        }
     }
 
     private fun getOutputLine(): SourceDataLine {
         return preferencesRepository
             .getOutputDevice()
             .map {
-                println("Preference output line is $it")
                 if(it.isBlank()) deviceProvider.getOutputDeviceNames().first() else it
             }
             .map {
-                println("Initialized output line is $it")
                 preferencesRepository.setOutputDevice(it).blockingGet()
                 it
             }
@@ -56,11 +59,9 @@ class ConfigureAudioSystem @Inject constructor(
         return preferencesRepository
             .getInputDevice()
             .map {
-                println("Preference output line is $it")
                 if(it.isBlank()) deviceProvider.getInputDeviceNames().first() else it
             }
             .map {
-                println("Initialized output line is $it")
                 preferencesRepository.setInputDevice(it).blockingGet()
                 it
             }

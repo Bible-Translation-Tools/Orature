@@ -38,6 +38,8 @@ internal class AudioPlayerConnectionFactory() {
     fun setLine(newLine: SourceDataLine) {
         if (this::player.isInitialized) {
             player.pause()
+        } else {
+            player = AudioBufferPlayer(newLine)
         }
         newLine.close()
         outputLine = newLine
