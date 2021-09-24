@@ -78,7 +78,8 @@ class CollectionDao(
                 COLLECTION_ENTITY.TITLE,
                 COLLECTION_ENTITY.LABEL,
                 COLLECTION_ENTITY.SORT,
-                COLLECTION_ENTITY.DUBLIN_CORE_FK
+                COLLECTION_ENTITY.DUBLIN_CORE_FK,
+                COLLECTION_ENTITY.MODIFIED_TS
             )
             .values(
                 entity.parentFk,
@@ -87,7 +88,8 @@ class CollectionDao(
                 entity.title,
                 entity.label,
                 entity.sort,
-                entity.dublinCoreFk
+                entity.dublinCoreFk,
+                entity.modifiedTs
             )
             .execute()
 
@@ -139,6 +141,7 @@ class CollectionDao(
             .set(COLLECTION_ENTITY.LABEL, entity.label)
             .set(COLLECTION_ENTITY.SORT, entity.sort)
             .set(COLLECTION_ENTITY.DUBLIN_CORE_FK, entity.dublinCoreFk)
+            .set(COLLECTION_ENTITY.MODIFIED_TS, entity.modifiedTs)
             .where(COLLECTION_ENTITY.ID.eq(entity.id))
             .execute()
     }

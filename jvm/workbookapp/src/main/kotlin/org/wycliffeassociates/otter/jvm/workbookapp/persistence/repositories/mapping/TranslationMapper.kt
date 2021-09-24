@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.ma
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.TranslationEntity
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class TranslationMapper @Inject constructor() {
@@ -28,6 +29,7 @@ class TranslationMapper @Inject constructor() {
         Translation(
             source,
             target,
+            type.modifiedTs?.let(LocalDateTime::parse),
             type.id
         )
 
@@ -35,7 +37,8 @@ class TranslationMapper @Inject constructor() {
         return TranslationEntity(
             type.id,
             type.source.id,
-            type.target.id
+            type.target.id,
+            type.modifiedTs?.toString()
         )
     }
 }

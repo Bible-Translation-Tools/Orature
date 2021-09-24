@@ -174,4 +174,14 @@ class LanguageRepository @Inject constructor(
             }
             .subscribeOn(Schedulers.io())
     }
+
+    override fun updateTranslation(translation: Translation): Completable {
+        return Completable.fromCallable {
+            translationDao.update(translationMapper.mapToEntity(translation))
+        }
+            .doOnError { e ->
+                logger.error("Error in update translation: $translation", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
 }

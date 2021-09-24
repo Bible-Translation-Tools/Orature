@@ -23,6 +23,7 @@ import io.reactivex.rxkotlin.cast
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import java.time.LocalDateTime
 
 data class Book(
     val collectionId: Int,
@@ -33,6 +34,7 @@ data class Book(
     val chapters: Observable<Chapter>,
     val resourceMetadata: ResourceMetadata,
     val linkedResources: List<ResourceMetadata>,
+    val modifiedTs: LocalDateTime?,
 
     override val subtreeResources: List<ResourceMetadata>
 
@@ -42,5 +44,13 @@ data class Book(
 
     override val children: Observable<BookElement> = chapters.cast()
 
-    fun toCollection(): Collection = Collection(sort, slug, label, title, resourceMetadata, collectionId)
+    fun toCollection(): Collection = Collection(
+        sort,
+        slug,
+        label,
+        title,
+        resourceMetadata,
+        modifiedTs,
+        collectionId
+    )
 }
