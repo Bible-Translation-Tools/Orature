@@ -78,19 +78,17 @@ class WaveformImageBuilder(
             .observeOnFx()
     }
 
-    fun buildPartialImages(
+    fun buildImages(
         reader: AudioFileReader,
         padding: Int = 0,
         fitToAudioMax: Boolean = true,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
     ): Single<List<Image>> {
-//        return drawImages(reader, width, height, padding, MinMax(0,0))
-
         return Single
             .fromCallable {
                 val minMax = MinMax(0, 1)
-                val images = drawImages(reader, width, height, padding, minMax)
+                val images = drawPartialImages(reader, width, height, padding, minMax)
                 if (fitToAudioMax) {
                     val newHeight = minMax.max - minMax.min
                     images.map {
@@ -151,7 +149,7 @@ class WaveformImageBuilder(
         return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
     }
 
-    private fun drawImages(
+    private fun drawPartialImages(
         reader: AudioFileReader,
         width: Int,
         height: Int,

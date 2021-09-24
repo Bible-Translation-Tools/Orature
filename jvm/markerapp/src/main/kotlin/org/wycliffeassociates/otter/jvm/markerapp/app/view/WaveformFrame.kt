@@ -67,7 +67,7 @@ class WaveformFrame(
 
                         fitToParentHeight()
                         hbox{
-                            this@hbox.bindChildren(viewModel.waveformPartialImages) {
+                            this@hbox.bindChildren(viewModel.waveformTileImages) {
                                 imageview(it) {
                                     this.fitToHeight(this@region)
                                 }

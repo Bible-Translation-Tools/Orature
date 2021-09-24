@@ -34,7 +34,6 @@ class MinimapFragment : Fragment() {
         waveformImageProperty.bind(viewModel.waveformMinimapImage)
         player.set(viewModel.audioPlayer)
         secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
-        imageWidth = viewModel.imageWidth
     }
 
     override val root = hbox {

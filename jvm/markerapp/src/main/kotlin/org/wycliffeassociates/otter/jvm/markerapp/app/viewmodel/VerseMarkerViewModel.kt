@@ -18,11 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -76,7 +73,7 @@ class VerseMarkerViewModel : ViewModel() {
     val height = min(Screen.getMainScreen().platformHeight, 500)
     val padding = width / 2
     val imageWidth: Double
-    val waveformPartialImages = observableListOf<Image>()
+    val waveformTileImages = observableListOf<Image>()
 
     init {
         val scope = scope as ParameterizedScope
@@ -94,7 +91,7 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        initWaveformImage()
+        initializeWaveformImages()
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
@@ -182,29 +179,30 @@ class VerseMarkerViewModel : ViewModel() {
         return audioPlayer.getDurationInFrames()
     }
 
-    private fun initWaveformImage() {
+    private fun initializeWaveformImages() {
         WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-            build(
+            buildImages(
                 audioPlayer.getAudioReader()!!,
                 fitToAudioMax = false,
                 width = imageWidth.toInt(),
-                height = 50
-            ).subscribe { image ->
-                waveformMinimapImage.set(image)
-                audioPlayer.getAudioReader()!!.seek(0)
+                height = height
+            ).subscribe { images ->
+                waveformTileImages.setAll(images)
+                audioPlayer.getAudioReader()!!.seek(0) // reset reader
 
-                buildPartialImages(
+                build(
                     audioPlayer.getAudioReader()!!,
                     fitToAudioMax = false,
                     width = imageWidth.toInt(),
-                    height = height
-                ).subscribe { images ->
-                    waveformPartialImages.setAll(images)
+                    height = 50
+                ).subscribe { image ->
+                    waveformMinimapImage.set(image)
                 }
             }
+
         }
     }
 }
