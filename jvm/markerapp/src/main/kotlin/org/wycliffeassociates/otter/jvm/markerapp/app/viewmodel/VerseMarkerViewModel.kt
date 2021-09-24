@@ -202,7 +202,6 @@ class VerseMarkerViewModel : ViewModel() {
                     waveformMinimapImage.set(image)
                 }
             }
-
         }
     }
 }

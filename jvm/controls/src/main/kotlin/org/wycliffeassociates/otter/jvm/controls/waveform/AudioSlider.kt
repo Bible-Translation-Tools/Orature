@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Skin

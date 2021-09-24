@@ -18,10 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
-import javafx.geometry.Point2D
-import javafx.scene.Node
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
