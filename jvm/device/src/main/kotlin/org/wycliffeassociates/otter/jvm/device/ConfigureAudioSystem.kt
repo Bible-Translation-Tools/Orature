@@ -60,30 +60,30 @@ class ConfigureAudioSystem @Inject constructor(
     private fun getOutputLine(): SourceDataLine {
         return preferencesRepository
             .getOutputDevice()
-            .map {
-                if(it.isBlank()) deviceProvider.getOutputDeviceNames().first() else it
+            .map { deviceName ->
+                if(deviceName.isBlank()) deviceProvider.getOutputDeviceNames().first() else deviceName
             }
-            .map {
-                preferencesRepository.setOutputDevice(it).blockingGet()
-                it
+            .map { deviceName ->
+                preferencesRepository.setOutputDevice(deviceName).blockingGet()
+                deviceName
             }
-            .map { deviceProvider.getOutputDevice(it) }
-            .map { AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, it) }
+            .map { deviceName -> deviceProvider.getOutputDevice(deviceName) }
+            .map { mixer -> AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer) }
             .blockingGet()
     }
 
     private fun getInputLine(): TargetDataLine {
         return preferencesRepository
             .getInputDevice()
-            .map {
-                if(it.isBlank()) deviceProvider.getInputDeviceNames().first() else it
+            .map { deviceName ->
+                if(deviceName.isBlank()) deviceProvider.getInputDeviceNames().first() else deviceName
             }
-            .map {
-                preferencesRepository.setInputDevice(it).blockingGet()
-                it
+            .map { deviceName ->
+                preferencesRepository.setInputDevice(deviceName).blockingGet()
+                deviceName
             }
-            .map { deviceProvider.getInputDevice(it) }
-            .map { AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, it) }
+            .map { deviceName -> deviceProvider.getInputDevice(deviceName) }
+            .map { mixer -> AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer) }
             .blockingGet()
     }
 }
