@@ -187,24 +187,25 @@ class VerseMarkerViewModel : ViewModel() {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-            build(
+            buildPartialImages(
                 audioPlayer.getAudioReader()!!,
                 fitToAudioMax = false,
                 width = imageWidth.toInt(),
-                height = 50
-            ).subscribe { image ->
-                waveformMinimapImage.set(image)
-                audioPlayer.getAudioReader()!!.seek(0)
+                height = height
+            ).subscribe { images ->
+                waveformPartialImages.setAll(images)
+                audioPlayer.getAudioReader()!!.seek(0) // reset reader
 
-                buildPartialImages(
+                build(
                     audioPlayer.getAudioReader()!!,
                     fitToAudioMax = false,
                     width = imageWidth.toInt(),
-                    height = height
-                ).subscribe { images ->
-                    waveformPartialImages.setAll(images)
+                    height = 50
+                ).subscribe { image ->
+                    waveformMinimapImage.set(image)
                 }
             }
+
         }
     }
 }
