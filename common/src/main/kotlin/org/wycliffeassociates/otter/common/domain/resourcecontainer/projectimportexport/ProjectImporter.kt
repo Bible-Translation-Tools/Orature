@@ -52,6 +52,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Source
 import java.io.File
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -295,7 +296,7 @@ class ProjectImporter @Inject constructor(
     }
 
     private fun createTranslation(sourceLanguage: Language, targetLanguage: Language) {
-        val translation = Translation(sourceLanguage, targetLanguage)
+        val translation = Translation(sourceLanguage, targetLanguage, LocalDateTime.now())
         languageRepository
             .insertTranslation(translation)
             .doOnError { e ->

@@ -148,7 +148,8 @@ class WorkbookRepository(
             chapters = constructBookChapters(bookCollection, disposables),
             resourceMetadata = resourceMetadata,
             linkedResources = db.getLinkedResourceMetadata(resourceMetadata),
-            subtreeResources = db.getSubtreeResourceMetadata(bookCollection)
+            subtreeResources = db.getSubtreeResourceMetadata(bookCollection),
+            modifiedTs = bookCollection.modifiedTs
         )
     }
 

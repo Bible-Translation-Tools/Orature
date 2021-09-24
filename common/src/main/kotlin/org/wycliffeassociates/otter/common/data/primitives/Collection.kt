@@ -18,11 +18,14 @@
  */
 package org.wycliffeassociates.otter.common.data.primitives
 
+import java.time.LocalDateTime
+
 data class Collection(
     var sort: Int,
     var slug: String,
     var labelKey: String,
     var titleKey: String,
     var resourceContainer: ResourceMetadata?,
+    var modifiedTs: LocalDateTime? = null,
     var id: Int = 0
 ) : CollectionOrContent

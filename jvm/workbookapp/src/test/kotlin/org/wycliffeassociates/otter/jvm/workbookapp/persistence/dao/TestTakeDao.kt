@@ -91,7 +91,19 @@ class TestTakeDao {
         val contentFkToDelete = 0
         val takes = dao.fetchAll()
         takes.forEach { if (it.contentFk % 2 == 0) dao.softDeleteTake(it) }
-        val deletedTakes = dao.fetchSoftDeletedTakes(CollectionEntity(contentFkToDelete, null, null, "", "", "", 0, null))
+        val deletedTakes = dao.fetchSoftDeletedTakes(
+            CollectionEntity(
+                contentFkToDelete,
+                null,
+                null,
+                "",
+                "",
+                "",
+                0,
+                null,
+                null
+            )
+        )
         deletedTakes.forEach {
             assertTrue("Soft deleted take matches content fk", it.contentFk == contentFkToDelete)
         }

@@ -16,21 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.persistence.repositories
+package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Completable
-import io.reactivex.Single
-import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.Translation
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import javax.inject.Inject
 
-interface ILanguageRepository : IRepository<Language> {
-    fun insert(language: Language): Single<Int>
-    fun insertAll(languages: List<Language>): Single<List<Int>>
-    fun updateRegions(languages: List<Language>): Completable
-    fun getBySlug(slug: String): Single<Language>
-    fun getGateway(): Single<List<Language>>
-    fun getTargets(): Single<List<Language>>
-    fun getAllTranslations(): Single<List<Translation>>
-    fun insertTranslation(translation: Translation): Single<Int>
-    fun updateTranslation(translation: Translation): Completable
+class UpdateTranslation @Inject constructor(
+    private val languageRepo: ILanguageRepository
+) {
+    fun update(translation: Translation): Completable {
+        return languageRepo.updateTranslation(translation)
+    }
 }

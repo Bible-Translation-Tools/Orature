@@ -26,5 +26,6 @@ data class CollectionEntity(
     var title: String,
     var slug: String,
     var sort: Int,
-    var dublinCoreFk: Int?
+    var dublinCoreFk: Int?,
+    var modifiedTs: String?
 )

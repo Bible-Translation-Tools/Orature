@@ -16,14 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.data.workbook
+package org.wycliffeassociates.otter.common.domain.collections
 
-import org.wycliffeassociates.otter.common.data.primitives.Language
-import java.time.LocalDateTime
+import io.reactivex.Completable
+import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import javax.inject.Inject
 
-data class Translation(
-    var source: Language,
-    var target: Language,
-    var modifiedTs: LocalDateTime?,
-    var id: Int = 0
-)
+class UpdateProject @Inject constructor(
+    private val collectionRepo: ICollectionRepository
+) {
+    fun update(project: Collection): Completable {
+        return collectionRepo.update(project)
+    }
+}
