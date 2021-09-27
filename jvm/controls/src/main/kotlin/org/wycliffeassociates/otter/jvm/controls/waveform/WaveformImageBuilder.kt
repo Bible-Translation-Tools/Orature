@@ -42,7 +42,7 @@ class WaveformImageBuilder(
     private val paddingColor: Color = background
 ) {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
-    private val PARTIAL_IMAGE_WIDTH = Screen.getMainScreen().platformWidth
+    private val partialImageWidth = Screen.getMainScreen().platformWidth
 
     fun build(
         reader: AudioFileReader,
@@ -141,13 +141,14 @@ class WaveformImageBuilder(
         waveform: Subject<Image>
     ) {
         var counter = 0
-        var img = WritableImage(PARTIAL_IMAGE_WIDTH, height)
+        var img = WritableImage(partialImageWidth, height)
 
         val framesPerPixel = reader.totalFrames / width
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
 
-        val lastImageWidth = width % PARTIAL_IMAGE_WIDTH
+        // render fixed width until last partial image
+        val lastImageWidth = width % partialImageWidth
         for (i in 0 until width - lastImageWidth) {
             reader.getPcmBuffer(bytes)
             val bb = ByteBuffer.wrap(bytes)
@@ -163,20 +164,21 @@ class WaveformImageBuilder(
             val range = scaleToHeight(max, height) until scaleToHeight(min, height)
 
             for (j in 0 until height) {
-                img.pixelWriter.setColor(i % PARTIAL_IMAGE_WIDTH, j, background)
+                img.pixelWriter.setColor(i % partialImageWidth, j, background)
                 if (j in range) {
-                    img.pixelWriter.setColor(i % PARTIAL_IMAGE_WIDTH, j, wavColor)
+                    img.pixelWriter.setColor(i % partialImageWidth, j, wavColor)
                 }
             }
 
             counter++
-            if (counter == PARTIAL_IMAGE_WIDTH) {
+            if (counter == partialImageWidth) {
                 counter = 0
                 waveform.onNext(img)
-                img = WritableImage(PARTIAL_IMAGE_WIDTH, height)
+                img = WritableImage(partialImageWidth, height)
             }
         }
 
+        // render last image with exact width
         if (lastImageWidth != 0) {
             img = WritableImage(
                 img.pixelReader,
