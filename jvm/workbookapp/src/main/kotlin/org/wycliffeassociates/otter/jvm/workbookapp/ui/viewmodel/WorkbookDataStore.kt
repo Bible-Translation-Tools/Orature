@@ -30,11 +30,13 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.TargetAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
@@ -70,6 +72,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
+    val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -115,6 +118,23 @@ class WorkbookDataStore : Component(), ScopedInstance {
             sourceAudioProperty.set(workbook.sourceAudioAccessor.getChapter(_chapter.sort))
         } else {
             sourceAudioProperty.set(null)
+        }
+    }
+
+    fun updateTargetAudio() {
+        val _chunk = activeChunkProperty.get()
+        val _chapter = activeChapterProperty.get()
+        when {
+            _chapter != null && _chunk == null -> {
+                val take = _chapter.audio.selected.value?.value
+                take?.let {
+                    val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+                    audioPlayer.load(it.file)
+                    val targetAudio = TargetAudio(it.file, audioPlayer)
+                    targetAudioProperty.set(targetAudio)
+                } ?: targetAudioProperty.set(null)
+            }
+            else -> targetAudioProperty.set(null)
         }
     }
 

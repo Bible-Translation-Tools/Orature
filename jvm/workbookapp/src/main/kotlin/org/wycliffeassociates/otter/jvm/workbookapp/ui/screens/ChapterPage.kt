@@ -102,14 +102,13 @@ class ChapterPage : Fragment() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                viewModel.openSourceAudioPlayer()
+                viewModel.openPlayers()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
             }
-            viewModel.openPlayers()
         }
     }
 
@@ -143,7 +142,7 @@ class ChapterPage : Fragment() {
 
                     simpleaudioplayer {
                         hgrow = Priority.ALWAYS
-                        playerProperty.bind(viewModel.chapterPlayerProperty)
+                        playerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
                         visibleWhen(playerProperty.isNotNull)
                         managedProperty().bind(visibleProperty())
                     }
@@ -154,7 +153,7 @@ class ChapterPage : Fragment() {
 
                         label(messages["draftingNotStarted"])
 
-                        visibleWhen(viewModel.chapterPlayerProperty.isNull)
+                        visibleWhen(workbookDataStore.targetAudioProperty.isNull)
                         managedProperty().bind(visibleProperty())
                     }
                 }
@@ -284,6 +283,7 @@ class ChapterPage : Fragment() {
             dialogTitleProperty.bind(viewModel.dialogTitleBinding())
             dialogTextProperty.bind(viewModel.dialogTextBinding())
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)
+            targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
             audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())

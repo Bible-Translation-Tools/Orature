@@ -475,14 +475,23 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
+    fun openTargetAudioPlayer() {
+        workbookDataStore.targetAudioProperty.value?.let { target ->
+            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            audioPlayer.load(target.file)
+        }
+    }
+
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
         sourceAudioPlayerProperty.value?.close()
+        workbookDataStore.targetAudioProperty.value?.player?.close()
     }
 
     fun stopPlayers() {
         takeCardModels.forEach { it.audioPlayer.stop() }
         sourceAudioPlayerProperty.value?.stop()
+        workbookDataStore.targetAudioProperty.value?.player?.stop()
     }
 
     private fun subscribeSelectedTakePropertyToRelay() {
@@ -495,6 +504,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe {
                     loadTakes()
+                    workbookDataStore.updateTargetAudio()
                 }
                 .let { disposables.add(it) }
         }

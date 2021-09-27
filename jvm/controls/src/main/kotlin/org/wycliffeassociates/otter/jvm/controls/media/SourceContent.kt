@@ -33,6 +33,8 @@ class SourceContent : Control() {
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
 
+    val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
 
@@ -41,6 +43,9 @@ class SourceContent : Control() {
 
     val playLabelProperty = SimpleStringProperty()
     val pauseLabelProperty = SimpleStringProperty()
+
+    val playTargetLabelProperty = SimpleStringProperty()
+    val pauseTargetLabelProperty = SimpleStringProperty()
 
     val enableAudioProperty = SimpleBooleanProperty(true)
     val isMinimizableProperty = SimpleBooleanProperty(true)

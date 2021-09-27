@@ -133,6 +133,7 @@ class AudioPlugin(
                     "--source_chunk_end=${pluginParameters.sourceChunkEnd}",
                     "--source_text=${pluginParameters.sourceText}",
                     "--action_title=${pluginParameters.actionText}",
+                    "--target_chapter_audio=${pluginParameters.targetChapterAudio?.absolutePath}",
                     "--content_title=${
                         MessageFormat.format(
                             FX.messages["bookChapterTitle"],
