@@ -34,11 +34,18 @@ class AppContent : View() {
     private val rootViewModel: RootViewModel by inject()
 
     override val root = HiddenSidesPane().apply {
-        content =  borderpane {
-            top = navigator.breadCrumbsBar.apply {
-                disableWhen(rootViewModel.pluginOpenedProperty)
+        content =  stackpane {
+            borderpane {
+                top = navigator.breadCrumbsBar.apply {
+                    disableWhen(rootViewModel.pluginOpenedProperty)
+                }
+                center<Workspace>()
             }
-            center<Workspace>()
+            pane {
+                addClass("app-drawer__overlay")
+                visibleProperty().bind(rootViewModel.drawerOpenedProperty)
+                managedProperty().bind(visibleProperty())
+            }
         }
 
         triggerDistance = 0.0
@@ -53,12 +60,14 @@ class AppContent : View() {
                     Thread {
                         Thread.sleep(animationDuration.toMillis().toLong())
                         Platform.runLater {
+                            rootViewModel.drawerOpenedProperty.set(true)
                             left = find(it.type).root
                             show(Side.LEFT)
                         }
                     }.start()
                 }
                 DrawerEventAction.CLOSE -> {
+                    rootViewModel.drawerOpenedProperty.set(false)
                     hide()
                 }
             }

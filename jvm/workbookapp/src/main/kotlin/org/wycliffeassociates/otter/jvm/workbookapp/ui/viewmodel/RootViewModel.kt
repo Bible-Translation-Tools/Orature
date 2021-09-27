@@ -23,4 +23,5 @@ import tornadofx.*
 
 class RootViewModel : ViewModel() {
     val pluginOpenedProperty = SimpleBooleanProperty(false)
+    val drawerOpenedProperty = SimpleBooleanProperty(false)
 }
