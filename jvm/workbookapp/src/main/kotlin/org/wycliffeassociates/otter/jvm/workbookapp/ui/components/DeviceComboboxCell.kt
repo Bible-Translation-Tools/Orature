@@ -4,9 +4,9 @@ import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
 import javax.sound.sampled.Mixer
 
-class DeviceComboboxCell(private val icon: FontIcon) : ListCell<Mixer.Info>() {
+class DeviceComboboxCell(private val icon: FontIcon) : ListCell<String>() {
     val view = ComboboxButton()
-    override fun updateItem(item: Mixer.Info?, empty: Boolean) {
+    override fun updateItem(item: String?, empty: Boolean) {
         super.updateItem(item, empty)
 
         if (item == null || empty) {
@@ -15,7 +15,7 @@ class DeviceComboboxCell(private val icon: FontIcon) : ListCell<Mixer.Info>() {
         }
 
         graphic = view.apply {
-            textProperty.set(item.name)
+            textProperty.set(item)
             iconProperty.set(icon)
         }
     }
