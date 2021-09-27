@@ -206,6 +206,8 @@ class VerseMarkerViewModel : ViewModel() {
                 height = height,
                 waveform = waveform
             ).subscribe {
+                audioPlayer.seek(0) // reset player after build
+
                 build(
                     audioPlayer.getAudioReader()!!,
                     width = imageWidth.toInt(),
