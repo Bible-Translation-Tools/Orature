@@ -207,7 +207,6 @@ class ChapterPage : Fragment() {
                     addClass("btn", "btn--primary")
                     text = messages["viewTakes"]
                     graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
-                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                     action {
                         viewModel.chapterCardProperty.value?.let {
                             viewModel.onCardSelection(it)
