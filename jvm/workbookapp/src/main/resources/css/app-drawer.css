@@ -197,3 +197,7 @@
     -fx-fill: -wa-primary;
     -fx-font-size: 80px;
 }
+
+.app-drawer__overlay {
+    -fx-background-color: -wa-black-60;
+}
