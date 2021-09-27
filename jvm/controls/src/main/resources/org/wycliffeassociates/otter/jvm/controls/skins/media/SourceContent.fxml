@@ -56,6 +56,9 @@
                             <content>
                                 <Label fx:id="sourceText" styleClass="source-content__text" wrapText="true" lineSpacing="5" />
                             </content>
+                            <padding>
+                                <Insets right="20.0" />
+                            </padding>
                         </ScrollPane>
                     </VBox>
                 </children>
