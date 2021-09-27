@@ -208,7 +208,6 @@ class VerseMarkerViewModel : ViewModel() {
             ).subscribe {
                 build(
                     audioPlayer.getAudioReader()!!,
-                    fitToAudioMax = false,
                     width = imageWidth.toInt(),
                     height = 50
                 ).subscribe { image ->
