@@ -19,11 +19,11 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.Subject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
@@ -68,7 +68,7 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight,
-        waveform: Subject<Image>
+        waveform: ReplayRelay<Image>
     ): Completable {
         return Completable
             .fromAction {
@@ -104,7 +104,7 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveform: Subject<Image>
+        waveform: ReplayRelay<Image>
     ) {
         var img = WritableImage(partialImageWidth, height)
         val framesPerPixel = reader.totalFrames / width
@@ -125,7 +125,7 @@ class WaveformImageBuilder(
             counter++
             if (counter == partialImageWidth) {
                 counter = 0
-                waveform.onNext(img)
+                waveform.accept(img)
                 img = WritableImage(partialImageWidth, height)
             }
         }
@@ -150,9 +150,8 @@ class WaveformImageBuilder(
                     }
                 }
             }
-            waveform.onNext(img)
+            waveform.accept(img)
         }
-        waveform.onComplete()
     }
 
     private fun scaleToHeight(value: Int, height: Int): Int {
