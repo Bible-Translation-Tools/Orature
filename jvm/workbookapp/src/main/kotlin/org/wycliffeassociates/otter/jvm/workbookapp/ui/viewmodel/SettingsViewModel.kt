@@ -44,7 +44,7 @@ class SettingsViewModel : ViewModel() {
     lateinit var audioDeviceProvider: AudioDeviceProvider
 
     @Inject
-    lateinit var appPrefRepo: IAppPreferencesRepository
+    lateinit var appPrefRepository: IAppPreferencesRepository
 
     @Inject
     lateinit var pluginRepository: IAudioPluginRepository
@@ -135,51 +135,50 @@ class SettingsViewModel : ViewModel() {
     }
 
     private fun loadCurrentOutputDevice() {
-        appPrefRepo.getOutputDevice()
+        appPrefRepository.getOutputDevice()
             .doOnError {
                 logger.error("Error in loadCurrentOutputDevice: ", it)
             }
+            .observeOnFx()
             .subscribe { device ->
                 selectedOutputDeviceProperty.set(device)
             }
     }
 
     private fun loadCurrentInputDevice() {
-        appPrefRepo.getInputDevice()
+        appPrefRepository.getInputDevice()
             .doOnError {
                 logger.error("Error in loadCurrentInputDevice: ", it)
             }
+            .observeOnFx()
             .subscribe { device ->
                 selectedInputDeviceProperty.set(device)
             }
     }
 
     private fun loadOutputDevices() {
-        audioDeviceProvider.getOutputDeviceNames()
-            .doOnError {
-                logger.error("Error in loadOutputDevices: ", it)
-            }
-            .subscribe { players ->
-                outputDevices.setAll(players)
-            }
+        val devices = audioDeviceProvider.getOutputDeviceNames()
+        outputDevices.setAll(devices)
     }
 
     private fun loadInputDevices() {
-        audioDeviceProvider.getInputDeviceNames()
-            .doOnError {
-                logger.error("Error in loadInputDevices: ", it)
-            }
-            .subscribe { recorders ->
-                inputDevices.setAll(recorders)
-            }
+        val devices = audioDeviceProvider.getInputDeviceNames()
+        inputDevices.setAll(devices)
     }
 
     fun updateOutputDevice(mixer: String) {
-        appPrefRepo.setOutputDevice(mixer).subscribe()
+        appPrefRepository.setOutputDevice(mixer).subscribe()
     }
 
     fun updateInputDevice(mixer: String) {
-        appPrefRepo.setInputDevice(mixer).subscribe()
+        appPrefRepository.setInputDevice(mixer).subscribe()
+    }
+
+    fun refreshDevices() {
+        loadOutputDevices()
+        loadInputDevices()
+        loadCurrentOutputDevice()
+        loadCurrentInputDevice()
     }
 
     fun updateLanguage(language: Language) {

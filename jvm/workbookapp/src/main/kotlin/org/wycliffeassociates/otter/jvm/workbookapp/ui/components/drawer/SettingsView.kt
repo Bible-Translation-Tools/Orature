@@ -230,8 +230,17 @@ class SettingsView : View() {
         importStylesheet(resources.get("/css/add-plugin-dialog.css"))
         importStylesheet(resources.get("/css/confirm-dialog.css"))
         viewModel.refreshPlugins()
-
         initChangeLanguageDialog()
+
+        // Devices are refreshed on dock and on drawer event otherwise it is not loaded the first time.
+        subscribe<DrawerEvent<UIComponent>> {
+            viewModel.refreshDevices()
+        }
+    }
+
+    override fun onDock() {
+        super.onDock()
+        viewModel.refreshDevices()
     }
 
     private fun collapse() {

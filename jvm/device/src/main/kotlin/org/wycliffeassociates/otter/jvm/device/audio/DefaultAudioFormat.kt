@@ -16,17 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
+package org.wycliffeassociates.otter.jvm.device.audio
 
-import javafx.scene.Parent
-import javafx.scene.layout.Region
-import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import tornadofx.*
+import javax.sound.sampled.AudioFormat
 
-private class TestView(override val root: Parent = Region()) : Fragment()
-
-internal class TestApp : App(TestView::class), IDependencyGraphProvider {
-    override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
-}
+val DEFAULT_AUDIO_FORMAT = AudioFormat(
+    44100F,
+    16,
+    1,
+    true,
+    false
+)

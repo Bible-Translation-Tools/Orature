@@ -23,8 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 
-internal class AudioPlayerConnectionFactory(var outputLine: SourceDataLine) {
-    internal var player = AudioBufferPlayer(outputLine)
+internal class AudioPlayerConnectionFactory() {
+
+    lateinit var outputLine: SourceDataLine
+
+    internal lateinit var player: AudioBufferPlayer
         private set
 
     internal val connections = ConcurrentHashMap<Int, IAudioPlayer>()
@@ -32,8 +35,12 @@ internal class AudioPlayerConnectionFactory(var outputLine: SourceDataLine) {
     internal var currentConnection: AudioPlayerConnectionState? = null
 
     @Synchronized
-    fun replaceLine(newLine: SourceDataLine) {
-        player.pause()
+    fun setLine(newLine: SourceDataLine) {
+        if (this::player.isInitialized) {
+            player.pause()
+        } else {
+            player = AudioBufferPlayer(newLine)
+        }
         newLine.close()
         outputLine = newLine
         currentConnection?.let {

@@ -51,11 +51,12 @@ class AppPreferencesRepository @Inject constructor(
     }
 
 
-    override fun getInputDevice(): Maybe<String> {
-        return preferences.audioInputDevice()
-            .flatMapMaybe {
-                audioDeviceProvider.getInputDevice(it)
-            }.map { it.name }
+    override fun getInputDevice(): Single<String> {
+        return preferences
+            .audioInputDevice()
+            .map {
+                audioDeviceProvider.getInputDevice(it)?.name ?: ""
+            }
     }
 
     override fun setInputDevice(mixer: String): Completable {
@@ -63,11 +64,12 @@ class AppPreferencesRepository @Inject constructor(
         return preferences.setAudioInputDevice(mixer)
     }
 
-    override fun getOutputDevice(): Maybe<String> {
-        return preferences.audioOutputDevice()
-            .flatMapMaybe {
-                audioDeviceProvider.getOutputDevice(it)
-            }.map { it.name }
+    override fun getOutputDevice(): Single<String> {
+        return preferences
+            .audioOutputDevice()
+            .map {
+                audioDeviceProvider.getOutputDevice(it)?.name ?: ""
+            }
     }
 
     override fun setOutputDevice(mixer: String): Completable {

@@ -28,9 +28,9 @@ interface IAppPreferencesRepository {
     fun setResumeProjectId(id: Int): Completable
     fun lastResource(): Single<String>
     fun setLastResource(resource: String): Completable
-    fun getOutputDevice(): Maybe<String>
+    fun getOutputDevice(): Single<String>
     fun setOutputDevice(mixer: String): Completable
-    fun getInputDevice(): Maybe<String>
+    fun getInputDevice(): Single<String>
     fun setInputDevice(mixer: String): Completable
     fun localeLanguage(): Maybe<Language>
     fun setLocaleLanguage(language: Language): Completable

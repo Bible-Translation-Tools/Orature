@@ -18,9 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import io.reactivex.Maybe
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
@@ -35,66 +33,56 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
     val activeOutputDevice: Observable<Mixer.Info> = PublishSubject.create()
 
     fun selectInputDevice(deviceName: String) {
-        val device = getInputDevice(deviceName)
-        device.subscribe {
+        getInputDevice(deviceName)?.let { device ->
             activeInputDevice as PublishSubject
-            activeInputDevice.onNext(it)
+            activeInputDevice.onNext(device)
         }
     }
 
     fun selectOutputDevice(deviceName: String) {
-        val device = getOutputDevice(deviceName)
-        device.subscribe {
+        getOutputDevice(deviceName)?.let { device ->
             activeOutputDevice as PublishSubject
-            activeOutputDevice.onNext(it)
+            activeOutputDevice.onNext(device)
         }
     }
 
-    fun getOutputDeviceNames(): Single<List<String>> {
-        return getOutputDevices().map { it.map { it.name } }
+    fun getOutputDeviceNames(): List<String> {
+        return getOutputDevices().map { it.name }
     }
 
-    private fun getOutputDevices(): Single<List<Mixer.Info>> {
-        return Single.fromCallable {
-            val mixers = AudioSystem.getMixerInfo()
-            mixers.filter { mixerInfo ->
+    private fun getOutputDevices(): List<Mixer.Info> {
+        return AudioSystem
+            .getMixerInfo()
+            .filter { mixerInfo ->
                 val mixer = AudioSystem.getMixer(mixerInfo)
                 val info = DataLine.Info(SourceDataLine::class.java, audioFormat)
                 val lines = mixer.getSourceLineInfo(info)
                 lines.isNotEmpty()
             }.toList().map { it }
-        }
     }
 
-    private fun getInputDevices(): Single<List<Mixer.Info>> {
-        return Single.fromCallable {
-            val mixers = AudioSystem.getMixerInfo()
-            mixers.filter { mixerInfo ->
+
+    private fun getInputDevices(): List<Mixer.Info> {
+        val mixers = AudioSystem
+            .getMixerInfo()
+            .filter { mixerInfo ->
                 val mixer = AudioSystem.getMixer(mixerInfo)
                 val info = DataLine.Info(TargetDataLine::class.java, audioFormat)
                 val lines = mixer.getTargetLineInfo(info)
                 lines.isNotEmpty()
             }.toList().map { it }
-        }
+        return mixers
     }
 
-    fun getInputDeviceNames(): Single<List<String>> {
-        return getInputDevices().map { it.map { it.name } }
+    fun getInputDeviceNames(): List<String> {
+        return getInputDevices().map { it.name }
     }
 
-    fun getOutputDevice(name: String?): Maybe<Mixer.Info> {
-        return getOutputDevices()
-            .flatMapMaybe {
-                var device = it.singleOrNull { it.name == name }
-                device?.let { Maybe.just(device) } ?: Maybe.empty()
-            }
+    fun getOutputDevice(name: String?): Mixer.Info? {
+        return getOutputDevices().find { it.name == name }
     }
 
-    fun getInputDevice(name: String?): Maybe<Mixer.Info> {
-        return getOutputDevices()
-            .flatMapMaybe {
-                val device = it.singleOrNull { it.name == name }
-                device?.let { Maybe.just(device) } ?: Maybe.empty()
-            }
+    fun getInputDevice(name: String?): Mixer.Info? {
+        return getInputDevices().find { it.name == name }
     }
 }

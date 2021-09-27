@@ -16,17 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
+package org.wycliffeassociates.otter.jvm.device.audio
 
-import javafx.scene.Parent
-import javafx.scene.layout.Region
-import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import tornadofx.*
+import javax.sound.sampled.TargetDataLine
+import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
-private class TestView(override val root: Parent = Region()) : Fragment()
+internal class AudioRecorderConnectionFactory() {
 
-internal class TestApp : App(TestView::class), IDependencyGraphProvider {
-    override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
+    private lateinit var inputLine: TargetDataLine
+
+    @Synchronized
+    fun setLine(newLine: TargetDataLine) {
+        inputLine = newLine
+    }
+
+    fun getRecorder(): IAudioRecorder {
+        return AudioRecorder(inputLine)
+    }
 }

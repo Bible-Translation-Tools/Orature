@@ -26,12 +26,16 @@ import org.wycliffeassociates.otter.assets.initialization.InitializeApp
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 
 class SplashScreenViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(SplashScreenViewModel::class.java)
 
     @Inject
     lateinit var initApp: InitializeApp
+
+    @Inject
+    lateinit var configureAudioSystem: ConfigureAudioSystem
 
     val progressProperty = SimpleDoubleProperty(0.0)
 
@@ -45,5 +49,9 @@ class SplashScreenViewModel : ViewModel() {
                 progressProperty.value = it
                 it
             }
+    }
+
+    fun initAudioSystem() {
+        configureAudioSystem.configure()
     }
 }
