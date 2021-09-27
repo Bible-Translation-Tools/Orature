@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
+import io.reactivex.subjects.ReplaySubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -56,6 +57,7 @@ class VerseMarkerViewModel : ViewModel() {
     )
     private val line = AudioSystem.getSourceDataLine(defaultFormat)
     private val audioConnectionFactory = AudioConnectionFactory(line)
+    private var isRenderingWaveform = false
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -73,7 +75,9 @@ class VerseMarkerViewModel : ViewModel() {
     val height = min(Screen.getMainScreen().platformHeight, 500)
     val padding = width / 2
     val imageWidth: Double
-    val waveformTileImages = observableListOf<Image>()
+
+    //    val waveformTileImages = observableListOf<Image>()
+    val waveform = ReplaySubject.create<Image>()
 
     init {
         val scope = scope as ParameterizedScope
@@ -120,6 +124,11 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun seekNext() {
+        // do nothing until rendering finished
+        if (isRenderingWaveform) {
+            return
+        }
+
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
@@ -131,6 +140,11 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun seekPrevious() {
+        // do nothing until rendering finished
+        if (isRenderingWaveform) {
+            return
+        }
+
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
@@ -180,18 +194,18 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     private fun initializeWaveformImages() {
+        isRenderingWaveform = true
+
         WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-            buildImages(
+            buildWaveformAsync(
                 audioPlayer.getAudioReader()!!,
                 width = imageWidth.toInt(),
-                height = height
-            ).subscribe { images ->
-                waveformTileImages.setAll(images)
-                audioPlayer.getAudioReader()!!.seek(0) // reset reader
-
+                height = height,
+                waveform = waveform
+            ).subscribe {
                 build(
                     audioPlayer.getAudioReader()!!,
                     fitToAudioMax = false,
@@ -199,6 +213,7 @@ class VerseMarkerViewModel : ViewModel() {
                     height = 50
                 ).subscribe { image ->
                     waveformMinimapImage.set(image)
+                    isRenderingWaveform = false
                 }
             }
         }

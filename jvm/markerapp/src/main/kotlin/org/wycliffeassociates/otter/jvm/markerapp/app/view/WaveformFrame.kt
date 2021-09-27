@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
@@ -66,12 +67,16 @@ class WaveformFrame(
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
-                        hbox{
-                            this@hbox.bindChildren(viewModel.waveformTileImages) {
-                                imageview(it) {
-                                    this.fitToHeight(this@region)
+                        hbox {
+                            viewModel.waveform
+                                .observeOnFx()
+                                .subscribe {
+                                    this@hbox.add(
+                                        imageview(it) {
+                                            fitToHeight(this@region)
+                                        }
+                                    )
                                 }
-                            }
                         }
 
                         viewModel.markers.highlightState.forEach {
