@@ -72,7 +72,6 @@ class ChapterPageViewModel : ViewModel() {
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(ChapterPageViewModel::loading)
 
-    val chapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val canCompileProperty = SimpleBooleanProperty()
     val isCompilingProperty = SimpleBooleanProperty()
     val selectedChapterTakeProperty = SimpleObjectProperty<Take>()
@@ -165,14 +164,10 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun openPlayers() {
-        selectedChapterTakeProperty.value?.let {
+        workbookDataStore.targetAudioProperty.value?.let { target ->
             val player = (app as OtterApp).dependencyGraph.injectPlayer()
-            player.load(it.file)
-            chapterPlayerProperty.set(player)
+            player.load(target.file)
         }
-    }
-
-    fun openSourceAudioPlayer() {
         workbookDataStore.sourceAudioProperty.value?.let { source ->
             val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
@@ -181,8 +176,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun closePlayers() {
-        chapterPlayerProperty.value?.close()
-        chapterPlayerProperty.set(null)
+        workbookDataStore.targetAudioProperty.value?.player?.close()
         sourceAudioPlayerProperty.value?.close()
         sourceAudioPlayerProperty.set(null)
     }
@@ -221,7 +215,6 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun recordChapter() {
-        closePlayers()
         chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
@@ -251,7 +244,6 @@ class ChapterPageViewModel : ViewModel() {
     fun processTakeWithPlugin(pluginType: PluginType) {
         selectedChapterTakeProperty.value?.let { take ->
             val audio = chapterCardProperty.value!!.chapterSource!!.audio
-            closePlayers()
             contextProperty.set(pluginType)
             currentTakeNumberProperty.set(take.number)
             audioPluginViewModel
@@ -276,9 +268,7 @@ class ChapterPageViewModel : ViewModel() {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                         else -> {
                             when (pluginType) {
-                                PluginType.EDITOR, PluginType.MARKER -> {
-
-                                }
+                                PluginType.EDITOR, PluginType.MARKER -> {}
                             }
                         }
                     }
@@ -416,6 +406,7 @@ class ChapterPageViewModel : ViewModel() {
             .observeOnFx()
             .subscribe { takeHolder ->
                 setSelectedChapterTake(takeHolder.value)
+                workbookDataStore.updateTargetAudio()
             }
             .let { disposables.add(it) }
     }

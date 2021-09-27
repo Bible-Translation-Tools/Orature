@@ -57,6 +57,8 @@ class SourceAudioFragment : Fragment() {
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             playLabelProperty.set(messages["playSource"])
             pauseLabelProperty.set(messages["pauseSource"])
+            playTargetLabelProperty.set(messages["playTarget"])
+            pauseTargetLabelProperty.set(messages["pauseTarget"])
 
             contentTitleProperty.set(sourceContentTitle)
         }
@@ -64,9 +66,10 @@ class SourceAudioFragment : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        var sourceFile: File? = null
-        var startFrame: Int? = null
-        var endFrame: Int? = null
+        var sourceFile: File?
+        var startFrame: Int?
+        var endFrame: Int?
+        var targetFile: File?
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -82,11 +85,16 @@ class SourceAudioFragment : Fragment() {
                 }
                 val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
                 root.audioPlayerProperty.set(player)
+
+                val targetAudio: String? = parameters.named["target_chapter_audio"]
+                targetFile = if (targetAudio != null && File(targetAudio).exists()) File(targetAudio) else null
+                val targetPlayer = targetFile?.let { initializeAudioPlayer(it) }
+                root.targetAudioPlayerProperty.set(targetPlayer)
             }
         }
     }
 
-    private fun initializeAudioPlayer(file: File, start: Int?, end: Int?): IAudioPlayer? {
+    private fun initializeAudioPlayer(file: File, start: Int? = null, end: Int? = null): IAudioPlayer? {
         val connectionFactory = workspace.params["audioConnectionFactory"] as AudioConnectionFactory
         val player = connectionFactory.getPlayer()
         return try {

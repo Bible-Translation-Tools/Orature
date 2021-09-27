@@ -141,6 +141,7 @@ class RecordScripturePage : View() {
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
                 recordScriptureViewModel.openSourceAudioPlayer()
+                recordScriptureViewModel.openTargetAudioPlayer()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
@@ -320,6 +321,7 @@ class RecordScripturePage : View() {
             audioAvailableProperty.bind(recordScriptureViewModel.sourceAudioAvailableProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
         }
     }
 

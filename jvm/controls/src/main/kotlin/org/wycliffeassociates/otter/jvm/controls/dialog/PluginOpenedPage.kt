@@ -32,6 +32,7 @@ class PluginOpenedPage : Fragment() {
     val dialogTitleProperty = SimpleStringProperty()
     val dialogTextProperty = SimpleStringProperty()
     val playerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
@@ -59,11 +60,14 @@ class PluginOpenedPage : Fragment() {
                 vgrow = Priority.ALWAYS
                 sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
                 audioPlayerProperty.bind(playerProperty)
+                targetAudioPlayerProperty.bind(this@PluginOpenedPage.targetAudioPlayerProperty)
 
                 audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
                 textNotAvailableTextProperty.set(messages["textNotAvailable"])
                 playLabelProperty.set(messages["playSource"])
                 pauseLabelProperty.set(messages["pauseSource"])
+                playTargetLabelProperty.set(messages["playTarget"])
+                pauseTargetLabelProperty.set(messages["pauseTarget"])
 
                 contentTitleProperty.bind(sourceContentTitleProperty)
                 isMinimizableProperty.set(false)
@@ -73,6 +77,7 @@ class PluginOpenedPage : Fragment() {
 
     override fun onUndock() {
         playerProperty.value?.stop()
+        targetAudioPlayerProperty.value?.close()
         super.onUndock()
     }
 }

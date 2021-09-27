@@ -27,10 +27,10 @@
 <?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.*?>
 
-<VBox styleClass="source-content" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox styleClass="source-content" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox fx:id="titleContainer">
-            <HBox HBox.hgrow="ALWAYS" alignment="CENTER">
+            <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
                 <Label fx:id="title" styleClass="source-content__title">
                     <VBox.margin>
                         <Insets bottom="10.0" />
@@ -54,45 +54,65 @@
                     <VBox fx:id="sourceTextContainer" alignment="CENTER" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
                         <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                             <content>
-                                <Label fx:id="sourceText" styleClass="source-content__text" wrapText="true" lineSpacing="5" />
+                                <Label fx:id="sourceText" lineSpacing="5" styleClass="source-content__text" wrapText="true" />
                             </content>
                         </ScrollPane>
                     </VBox>
                 </children>
             </VBox>
-            <HBox fx:id="sourceAudioBlock" styleClass="source-content__bottom">
+            <VBox fx:id="sourceAudioBlock" styleClass="source-content__bottom">
                 <children>
-                    <HBox fx:id="sourceAudioNotAvailable" managed="false" styleClass="source-content__not-available" visible="false" HBox.hgrow="ALWAYS">
+                    <HBox fx:id="targetAudio">
                         <children>
-                            <Label fx:id="audioNotAvailableText" />
-                        </children>
-                        <HBox.margin>
-                            <Insets top="16.0" />
-                        </HBox.margin>
-                    </HBox>
-                    <HBox fx:id="sourceAudioContainer" styleClass="source-content__audio_container" HBox.hgrow="ALWAYS">
-                        <children>
-                            <JFXButton fx:id="playBtn">
+                            <Button fx:id="playTargetBtn">
                                 <graphic>
-                                    <FontIcon iconLiteral="mdi-play" iconSize="10" selectionEnd="1" />
+                                    <FontIcon iconLiteral="mdi-play" iconSize="16" />
                                 </graphic>
                                 <styleClass>
                                     <String fx:value="btn" />
                                     <String fx:value="btn--primary" />
-                                    <String fx:value="source-content__play-btn" />
                                 </styleClass>
-                            </JFXButton>
-                            <JFXSlider fx:id="audioSlider" styleClass="source-content__audio-slider" HBox.hgrow="ALWAYS" />
+                            </Button>
+                            <JFXSlider fx:id="targetAudioSlider" styleClass="wa-slider" HBox.hgrow="ALWAYS" />
                         </children>
-                        <HBox.margin>
+                        <styleClass>
+                            <String fx:value="source-content__audio_container" />
+                            <String fx:value="source-content__audio_container--target" />
+                        </styleClass>
+                        <VBox.margin>
                             <Insets top="16.0" />
-                        </HBox.margin>
+                        </VBox.margin>
+                    </HBox>
+                    <HBox fx:id="sourceAudioNotAvailable" managed="false" styleClass="source-content__not-available" visible="false" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Label fx:id="audioNotAvailableText" />
+                        </children>
+                        <VBox.margin>
+                            <Insets top="16.0" />
+                        </VBox.margin>
+                    </HBox>
+                    <HBox fx:id="sourceAudioContainer" styleClass="source-content__audio_container" HBox.hgrow="ALWAYS">
+                        <children>
+                            <Button fx:id="playBtn">
+                                <graphic>
+                                    <FontIcon iconLiteral="mdi-play" iconSize="16" />
+                                </graphic>
+                                <styleClass>
+                                    <String fx:value="btn" />
+                                    <String fx:value="btn--primary" />
+                                </styleClass>
+                            </Button>
+                            <JFXSlider fx:id="audioSlider" styleClass="wa-slider" HBox.hgrow="ALWAYS" />
+                        </children>
+                        <VBox.margin>
+                            <Insets top="16.0" />
+                        </VBox.margin>
                     </HBox>
                 </children>
                 <VBox.margin>
-                    <Insets bottom="10.0" />
+                    <Insets bottom="5.0" />
                 </VBox.margin>
-            </HBox>
+            </VBox>
         </VBox>
     </children>
 </VBox>
