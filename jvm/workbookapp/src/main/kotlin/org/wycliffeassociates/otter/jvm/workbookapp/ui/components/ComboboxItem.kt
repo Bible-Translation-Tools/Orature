@@ -14,6 +14,7 @@ class ComboboxItem : VBox() {
         }
         label(bottomTextProperty).apply {
             addClass("wa-combobox-item__bottom")
+            managedProperty().bind(bottomTextProperty.isNotNull)
         }
     }
 }
