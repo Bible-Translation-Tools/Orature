@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue
-import kotlin.math.max
 
 const val SIGNED_SHORT_MAX = 32767
 
