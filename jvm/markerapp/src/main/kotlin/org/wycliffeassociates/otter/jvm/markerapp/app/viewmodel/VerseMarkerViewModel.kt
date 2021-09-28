@@ -59,6 +59,8 @@ class VerseMarkerViewModel : ViewModel() {
     private val line = AudioSystem.getSourceDataLine(defaultFormat)
     private val audioConnectionFactory = AudioConnectionFactory(line)
     private val waveformStream = ReplayRelay.create<Image>()
+    private val width = Screen.getMainScreen().platformWidth
+    private val height = min(Screen.getMainScreen().platformHeight, 500)
     private var isRenderingWaveform = false
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
@@ -73,11 +75,6 @@ class VerseMarkerViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     val waveformMinimapImage = SimpleObjectProperty<Image>()
     val waveform = waveformStream as Observable<Image>
-
-    val width = Screen.getMainScreen().platformWidth
-    val height = min(Screen.getMainScreen().platformHeight, 500)
-    val padding = width / 2
-
     val imageWidth: Double
 
     init {
