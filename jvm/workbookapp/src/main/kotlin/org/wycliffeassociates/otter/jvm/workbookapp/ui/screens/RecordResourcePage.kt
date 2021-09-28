@@ -25,14 +25,16 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class RecordResourcePage : View() {
     private val viewModel: RecordResourceViewModel by inject()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val tabPane = JFXTabPane().apply {
         importStylesheet(resources.get("/css/tab-pane.css"))
@@ -46,16 +48,20 @@ class RecordResourcePage : View() {
     )
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(viewModel.breadcrumbTitleBinding)
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+        titleProperty.bind(
+            workbookDataStore.activeChunkProperty.stringBinding { chunk ->
+                chunk?.let {
+                    MessageFormat.format(
+                        messages["chunkTitle"],
+                        messages["chunk"],
+                        chunk.start
+                    )
+                } ?: messages["chapter"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
         onClickAction {
             navigator.dock(this@RecordResourcePage)
-        }
-    }
-
-    init {
-        navigator.subscribe<PluginClosedEvent> {
-            viewModel.currentTakeNumberProperty.set(null)
         }
     }
 
@@ -74,13 +80,7 @@ class RecordResourcePage : View() {
                     if (!tabPane.tabs.contains(recordableTab)) tabPane.tabs.add(recordableTab)
                 } ?: tabPane.tabs.remove(recordableTab)
             }
-            recordableTab.currentTakeNumberProperty.onChangeAndDoNow {
-                it?.let { take ->
-                    if (take.toInt() > 0) viewModel.currentTakeNumberProperty.set(it.toInt())
-                }
-            }
         }
-        viewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
     }
 

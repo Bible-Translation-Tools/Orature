@@ -50,7 +50,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.io.File
-import java.text.MessageFormat
 import java.util.concurrent.Callable
 import javax.inject.Inject
 
@@ -85,7 +84,6 @@ class ChapterPageViewModel : ViewModel() {
 
     val chapterCardProperty = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
-    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
@@ -131,27 +129,6 @@ class ChapterPageViewModel : ViewModel() {
                 subscribeSelectedTakePropertyToRelay(chapterSource.audio)
             }
         }
-    }
-
-    fun breadcrumbTitleBinding(view: UIComponent): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                when {
-                    workbookDataStore.activeChunkProperty.value != null ->
-                        workbookDataStore.activeChunkProperty.value.let { chunk ->
-                            MessageFormat.format(
-                                messages["chunkTitle"],
-                                messages[ContentLabel.of(chunk.contentType).value],
-                                chunk.start
-                            )
-                        }
-                        navigator.workspace.dockedComponentProperty.value == view -> messages["chunk"]
-                    else -> messages["chapter"]
-                }
-            },
-            navigator.workspace.dockedComponentProperty,
-            workbookDataStore.activeChunkProperty
-        )
     }
 
     fun onCardSelection(cardData: CardData) {
@@ -219,7 +196,7 @@ class ChapterPageViewModel : ViewModel() {
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
-                    currentTakeNumberProperty.set(takeNumber)
+                    workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
@@ -245,7 +222,7 @@ class ChapterPageViewModel : ViewModel() {
         selectedChapterTakeProperty.value?.let { take ->
             val audio = chapterCardProperty.value!!.chapterSource!!.audio
             contextProperty.set(pluginType)
-            currentTakeNumberProperty.set(take.number)
+            workbookDataStore.activeTakeNumberProperty.set(take.number)
             audioPluginViewModel
                 .getPlugin(pluginType)
                 .flatMapSingle { plugin ->
@@ -262,7 +239,6 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
-                    currentTakeNumberProperty.set(null)
                     fire(PluginClosedEvent(pluginType))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
@@ -327,12 +303,12 @@ class ChapterPageViewModel : ViewModel() {
             Callable {
                 String.format(
                     messages["sourceDialogTitle"],
-                    currentTakeNumberProperty.value,
+                    workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -341,13 +317,13 @@ class ChapterPageViewModel : ViewModel() {
             Callable {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeNumberProperty.value,
+                    workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value,
                     audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 

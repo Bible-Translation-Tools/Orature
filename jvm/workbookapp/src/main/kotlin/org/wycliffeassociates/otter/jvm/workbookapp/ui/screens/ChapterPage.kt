@@ -62,8 +62,18 @@ class ChapterPage : Fragment() {
     private var exportProgressListener: ChangeListener<Boolean>? = null
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(viewModel.breadcrumbTitleBinding(this@ChapterPage))
-        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK))
+        titleProperty.bind(
+            workbookDataStore.activeChapterProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["chapterTitle"],
+                        messages["chapter"],
+                        it.sort
+                    )
+                } ?: messages["chapter"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
         onClickAction {
             navigator.dock(this@ChapterPage)
         }

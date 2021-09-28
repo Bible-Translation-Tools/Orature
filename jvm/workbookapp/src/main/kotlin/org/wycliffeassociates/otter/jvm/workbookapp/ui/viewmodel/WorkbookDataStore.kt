@@ -23,6 +23,7 @@ import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -69,6 +70,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val activeProjectFilesAccessor: ProjectFilesAccessor
         get() = activeProjectFilesAccessorProperty.value
             ?: throw IllegalStateException("ProjectFilesAccessor is null")
+
+    val activeTakeNumberProperty = SimpleIntegerProperty()
 
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }

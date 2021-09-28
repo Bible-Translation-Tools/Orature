@@ -37,6 +37,7 @@ import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ListViewPlaceHolder
@@ -55,6 +56,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 import java.util.*
 
 private const val TAKES_ROW_HEIGHT = 197.0
@@ -93,8 +95,18 @@ class RecordScripturePage : View() {
         }
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(recordScriptureViewModel.breadcrumbTitleBinding)
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+        titleProperty.bind(
+            workbookDataStore.activeChunkProperty.stringBinding { chunk ->
+                chunk?.let {
+                    MessageFormat.format(
+                        messages["chunkTitle"],
+                        messages[ContentLabel.of(chunk.contentType).value],
+                        chunk.start
+                    )
+                } ?: messages["chapter"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
         onClickAction {
             navigator.dock(this@RecordScripturePage)
         }
@@ -388,7 +400,6 @@ class RecordScripturePage : View() {
         super.onDock()
         recordScriptureViewModel.loadTakes()
         recordScriptureViewModel.openPlayers()
-        recordScriptureViewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()

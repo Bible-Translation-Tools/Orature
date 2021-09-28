@@ -40,6 +40,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
 import java.text.MessageFormat
@@ -60,6 +61,7 @@ class WorkbookPage : View() {
     private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     private var deleteListener: ChangeListener<Boolean>? = null
     private var deleteProgressListener: ChangeListener<Boolean>? = null
@@ -69,17 +71,11 @@ class WorkbookPage : View() {
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
-            viewModel.workbookDataStore.activeChapterProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(
-                        messages["chapterTitle"],
-                        messages["chapter"],
-                        it.sort
-                    )
-                } ?: messages["chapter"]
+            workbookDataStore.activeWorkbookProperty.stringBinding {
+                it?.target?.title
             }
         )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
         onClickAction {
             navigator.dock(this@WorkbookPage)
         }

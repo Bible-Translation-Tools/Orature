@@ -37,9 +37,17 @@ class ResourcePage : View() {
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
-            resourceListViewModel.breadcrumbTitleBinding(this@ResourcePage)
+            workbookDataStore.activeChapterProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["chapterTitle"],
+                        messages["chapter"],
+                        it.sort
+                    )
+                } ?: messages["chapter"]
+            }
         )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK))
+        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
         onClickAction {
             navigator.dock(this@ResourcePage)
         }
