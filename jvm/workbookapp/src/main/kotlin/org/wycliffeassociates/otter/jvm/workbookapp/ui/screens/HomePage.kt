@@ -40,12 +40,8 @@ class HomePage : View() {
     private val navigator: NavigationMediator by inject()
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(
-            workbookDataStore.activeWorkbookProperty.stringBinding {
-                it?.target?.title ?: messages["project"]
-            }
-        )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
+        titleProperty.set(messages["projects"])
+        iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
         onClickAction {
             navigator.dock(this@HomePage)
         }

@@ -86,7 +86,6 @@ class RecordScriptureViewModel : ViewModel() {
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
-    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
@@ -100,16 +99,6 @@ class RecordScriptureViewModel : ViewModel() {
     val showImportFailDialogProperty = SimpleBooleanProperty(false)
 
     private val disposables = CompositeDisposable()
-
-    val breadcrumbTitleBinding = currentTakeNumberProperty.stringBinding {
-        it?.let { take ->
-            MessageFormat.format(
-                messages["takeTitle"],
-                messages["take"],
-                take
-            )
-        } ?: messages["take"]
-    }
 
     init {
         activeChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
@@ -265,7 +254,7 @@ class RecordScriptureViewModel : ViewModel() {
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
-                    currentTakeNumberProperty.set(takeNumber)
+                    workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
@@ -292,7 +281,7 @@ class RecordScriptureViewModel : ViewModel() {
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
         closePlayers()
         contextProperty.set(pluginType)
-        currentTakeNumberProperty.set(takeEvent.take.number)
+        workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
@@ -309,7 +298,6 @@ class RecordScriptureViewModel : ViewModel() {
             }
             .onErrorReturn { TakeActions.Result.NO_PLUGIN }
             .subscribe { result: TakeActions.Result ->
-                currentTakeNumberProperty.set(null)
                 fire(PluginClosedEvent(pluginType))
                 when (result) {
                     TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
@@ -367,12 +355,12 @@ class RecordScriptureViewModel : ViewModel() {
             {
                 String.format(
                     messages["sourceDialogTitle"],
-                    currentTakeNumberProperty.value,
+                    workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -381,13 +369,13 @@ class RecordScriptureViewModel : ViewModel() {
             {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeNumberProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get()
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
