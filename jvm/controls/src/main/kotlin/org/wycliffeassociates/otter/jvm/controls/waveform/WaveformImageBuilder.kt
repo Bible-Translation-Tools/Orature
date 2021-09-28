@@ -50,9 +50,10 @@ class WaveformImageBuilder(
         return Single
             .fromCallable {
                 if (width > 0) {
+                    val framesPerPixel = reader.totalFrames / width
                     val img = WritableImage(width, height)
-                    drawWaveform(img, reader, width, height)
-                    img as Image
+                    renderImage(img, reader, width, height, framesPerPixel)
+                    img
                 } else {
                     WritableImage(1, 1) as Image
                 }
@@ -80,40 +81,22 @@ class WaveformImageBuilder(
             .subscribeOn(Schedulers.computation())
     }
 
-    private fun drawWaveform(
-        img: WritableImage,
-        reader: AudioFileReader,
-        width: Int,
-        height: Int
-    ) {
-        val framesPerPixel = reader.totalFrames / width
-
-        for (i in 0 until width) {
-            val range = computeWaveRange(reader, height, framesPerPixel)
-
-            for (j in 0 until height) {
-                img.pixelWriter.setColor(i, j, background)
-                if (j in range) {
-                    img.pixelWriter.setColor(i, j, wavColor)
-                }
-            }
-        }
-    }
-
     private fun drawPartialImages(
         reader: AudioFileReader,
         width: Int,
         height: Int,
         waveform: ReplayRelay<Image>
     ) {
-        var img = WritableImage(partialImageWidth, height)
         val framesPerPixel = reader.totalFrames / width
+        var img = WritableImage(partialImageWidth, height)
+        val shortsArray = ShortArray(framesPerPixel)
+        val bytes = ByteArray(framesPerPixel * 2)
         var counter = 0
 
         // render fixed-width images until the last one
         val lastImageWidth = width % partialImageWidth
         for (i in 0 until width - lastImageWidth) {
-            val range = computeWaveRange(reader, height, framesPerPixel)
+            val range = computeWaveRange(reader, height, shortsArray, bytes)
 
             for (j in 0 until height) {
                 img.pixelWriter.setColor(i % partialImageWidth, j, background)
@@ -139,17 +122,7 @@ class WaveformImageBuilder(
                 lastImageWidth,
                 height
             )
-
-            for (i in 0 until lastImageWidth) {
-                val range = computeWaveRange(reader, height, framesPerPixel)
-
-                for (j in 0 until height) {
-                    img.pixelWriter.setColor(i, j, background)
-                    if (j in range) {
-                        img.pixelWriter.setColor(i, j, wavColor)
-                    }
-                }
-            }
+            renderImage(img, reader, lastImageWidth, height, framesPerPixel)
             waveform.accept(img)
         }
     }
@@ -158,14 +131,39 @@ class WaveformImageBuilder(
         return ((value) / (SIGNED_SHORT_MAX * 2).toDouble() * height).toInt()
     }
 
-    private fun computeWaveRange(
+    private fun renderImage(
+        img: WritableImage,
         reader: AudioFileReader,
+        width: Int,
         height: Int,
         framesPerPixel: Int
-    ): IntRange {
+    ) {
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
 
+        for (i in 0 until width) {
+            val range = computeWaveRange(
+                reader,
+                height,
+                shortsArray,
+                bytes
+            )
+
+            for (j in 0 until height) {
+                img.pixelWriter.setColor(i, j, background)
+                if (j in range) {
+                    img.pixelWriter.setColor(i, j, wavColor)
+                }
+            }
+        }
+    }
+
+    private fun computeWaveRange(
+        reader: AudioFileReader,
+        height: Int,
+        shortsArray: ShortArray,
+        bytes: ByteArray
+    ): IntRange {
         reader.getPcmBuffer(bytes)
         val bb = ByteBuffer.wrap(bytes)
         bb.rewind()
