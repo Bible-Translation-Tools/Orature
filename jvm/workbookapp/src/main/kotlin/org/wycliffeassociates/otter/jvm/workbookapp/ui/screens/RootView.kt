@@ -18,7 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.application.Platform
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.dialog.audioerrordialog
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
@@ -46,12 +49,34 @@ class RootView : View() {
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
 
+        importStylesheet(resources.get("/css/audio-error-dialog.css"))
+
+        initAudioErrorDialog()
     }
 
     override val root = stackpane {
         borderpane {
             left<AppBar>()
             center<AppContent>()
+        }
+    }
+
+    private fun initAudioErrorDialog() {
+        println("init dialog")
+        val errorDialog = audioerrordialog {
+            titleTextProperty.set("Error")
+            messageTitleTextProperty.set("Audio Input not Found")
+            messageTextProperty.set("Orature was unable to find a working audio input. Please make sure your microphone is plugged in and enabled and try again. ")
+
+            backgroundImageProperty.set(resources.image("/images/audio_error.png"))
+            cancelButtonTextProperty.set(messages["close"])
+
+            onCloseAction { viewModel.showAudioErrorDialogProperty.set(false) }
+            onCancelAction { viewModel.showAudioErrorDialogProperty.set(false) }
+        }
+
+        viewModel.showAudioErrorDialogProperty.onChangeAndDoNow {
+            Platform.runLater { if (it!!) errorDialog.open() else errorDialog.close() }
         }
     }
 }

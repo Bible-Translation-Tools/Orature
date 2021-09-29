@@ -19,9 +19,39 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
+import javax.inject.Inject
+import javax.sound.sampled.LineUnavailableException
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 
 class RootViewModel : ViewModel() {
     val pluginOpenedProperty = SimpleBooleanProperty(false)
     val drawerOpenedProperty = SimpleBooleanProperty(false)
+
+    val showAudioErrorDialogProperty = SimpleBooleanProperty(false)
+
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
+
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+        initializeAudioErrorListener()
+    }
+
+    private fun initializeAudioErrorListener() {
+        audioConnectionFactory
+            .errorListener()
+            .subscribe {
+                showAudioErrorDialogProperty.set(true)
+                when (it) {
+                    is LineUnavailableException -> {
+                        showAudioErrorDialogProperty.set(true)
+                    }
+                    else -> {
+                        throw it
+                    }
+                }
+            }
+    }
 }
