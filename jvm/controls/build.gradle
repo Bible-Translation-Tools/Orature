@@ -45,4 +45,5 @@ dependencies {
     implementation project(':common')
     implementation project(':jvm:utils')
     implementation project(':common:audio')
+    implementation project(':jvm:device')
 }

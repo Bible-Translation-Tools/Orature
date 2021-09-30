@@ -34,14 +34,19 @@ import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
 import tornadofx.*
 
 class AudioErrorDialog : OtterDialog() {
     val titleTextProperty = SimpleStringProperty()
-    val messageTitleTextProperty = SimpleStringProperty()
-    val messageTextProperty = SimpleStringProperty()
+    val inputMessageTitleTextProperty = SimpleStringProperty()
+    val inputMessageTextProperty = SimpleStringProperty()
+    val outputMessageTitleTextProperty = SimpleStringProperty()
+    val outputMessageTextProperty = SimpleStringProperty()
     val cancelButtonTextProperty = SimpleStringProperty()
     val backgroundImageProperty = SimpleObjectProperty<Image>()
+
+    val errorTypeProperty = SimpleObjectProperty<AudioErrorType>()
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
@@ -73,12 +78,28 @@ class AudioErrorDialog : OtterDialog() {
             vgrow = Priority.ALWAYS
 
             vbox {
-                label(messageTitleTextProperty) {
+                label(inputMessageTitleTextProperty) {
                     addClass("audio-error-dialog__subtitle")
+                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.RECORDING))
+                    visibleProperty().bind(managedProperty())
                 }
 
-                label(messageTextProperty) {
+                label(inputMessageTextProperty) {
                     addClass("audio-error-dialog__message")
+                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.RECORDING))
+                    visibleProperty().bind(managedProperty())
+                }
+
+                label(outputMessageTitleTextProperty) {
+                    addClass("audio-error-dialog__subtitle")
+                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK))
+                    visibleProperty().bind(managedProperty())
+                }
+
+                label(outputMessageTextProperty) {
+                    addClass("audio-error-dialog__message")
+                    managedProperty().bind(errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK))
+                    visibleProperty().bind(managedProperty())
                 }
             }
         }
