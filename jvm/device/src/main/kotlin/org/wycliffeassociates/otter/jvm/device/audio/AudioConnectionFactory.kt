@@ -26,7 +26,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 class AudioConnectionFactory(
-    private val errorRelay: PublishRelay<Exception> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) {
 
     private val playerConnectionFactory = AudioPlayerConnectionFactory(errorRelay)
@@ -51,7 +51,7 @@ class AudioConnectionFactory(
         return recorderConnectionFactory.getRecorder()
     }
 
-    fun errorListener(): Observable<Exception> {
+    fun errorListener(): Observable<AudioError> {
         return errorRelay
     }
 }

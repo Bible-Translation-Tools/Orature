@@ -25,15 +25,13 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
 
 class AudioBufferPlayer(
     private val player: SourceDataLine,
-    private val errorRelay: PublishRelay<Exception> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioPlayer {
 
     override val frameStart: Int
@@ -117,7 +115,7 @@ class AudioBufferPlayer(
                             seek(0)
                         }
                     } catch (e: LineUnavailableException) {
-                        errorRelay.accept(e)
+                        errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                     }
                 }
                 playbackThread.start()

@@ -23,7 +23,7 @@ import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
 internal class AudioRecorderConnectionFactory(
-    private val errorRelay: PublishRelay<Exception> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) {
 
     private lateinit var inputLine: TargetDataLine

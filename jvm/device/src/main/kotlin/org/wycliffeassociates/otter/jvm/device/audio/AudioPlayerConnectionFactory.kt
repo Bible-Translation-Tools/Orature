@@ -26,7 +26,7 @@ import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 
 internal class AudioPlayerConnectionFactory(
-    private val errorRelay: PublishRelay<Exception> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) {
 
     lateinit var outputLine: SourceDataLine
@@ -106,7 +106,7 @@ internal class AudioPlayerConnectionFactory(
             loadRequestIntoPlayer(request)
             player.seek(request.position)
         } catch (e: LineUnavailableException) {
-            errorRelay.accept(e)
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
         }
     }
 }

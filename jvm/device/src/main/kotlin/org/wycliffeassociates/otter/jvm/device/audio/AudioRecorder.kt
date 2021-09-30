@@ -30,7 +30,7 @@ private const val DEFAULT_BUFFER_SIZE = 1024
 
 class AudioRecorder(
     val line: TargetDataLine,
-    private val errorRelay: PublishRelay<Exception> = PublishRelay.create()
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioRecorder {
 
     private val monitor = Object()
@@ -76,7 +76,7 @@ class AudioRecorder(
             line.open()
             line.start()
         } catch (e: LineUnavailableException) {
-            errorRelay.accept(e)
+            errorRelay.accept(AudioError(AudioErrorType.RECORDING, e))
         }
         synchronized(monitor) {
             monitor.notify()

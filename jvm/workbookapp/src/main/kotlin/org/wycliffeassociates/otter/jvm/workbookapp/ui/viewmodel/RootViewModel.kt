@@ -44,12 +44,12 @@ class RootViewModel : ViewModel() {
             .errorListener()
             .subscribe {
                 showAudioErrorDialogProperty.set(true)
-                when (it) {
+                when (it.exception) {
                     is LineUnavailableException -> {
                         showAudioErrorDialogProperty.set(true)
                     }
                     else -> {
-                        throw it
+                        throw it.exception
                     }
                 }
             }
