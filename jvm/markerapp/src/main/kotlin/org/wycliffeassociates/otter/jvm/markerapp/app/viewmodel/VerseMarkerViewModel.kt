@@ -98,9 +98,9 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
         val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
+        val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration
+        return pixelsInDuration.toDouble()
     }
 
     fun initializeAudioController(slider: Slider) {
