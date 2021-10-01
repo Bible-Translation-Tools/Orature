@@ -61,7 +61,6 @@ class VerseMarkerViewModel : ViewModel() {
     private val waveformStream = ReplayRelay.create<Image>()
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
-    private var isRenderingWaveform = false
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -77,9 +76,11 @@ class VerseMarkerViewModel : ViewModel() {
     val waveform = waveformStream as Observable<Image>
     val imageWidth: Double
 
+    private val audioFile: File
+
     init {
         val scope = scope as ParameterizedScope
-        val audioFile = File(scope.parameters.named["wav"])
+        audioFile = File(scope.parameters.named["wav"])
         val wav = AudioFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
@@ -122,11 +123,6 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun seekNext() {
-        // do nothing until rendering finished
-        if (isRenderingWaveform) {
-            return
-        }
-
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
@@ -138,11 +134,6 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun seekPrevious() {
-        // do nothing until rendering finished
-        if (isRenderingWaveform) {
-            return
-        }
-
         val wasPlaying = audioPlayer.isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
@@ -192,29 +183,24 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     private fun initializeWaveformImages() {
-        isRenderingWaveform = true
-
         WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
+            build(
+                AudioFile(audioFile).reader(),
+                width = imageWidth.toInt(),
+                height = 50
+            ).subscribe { image ->
+                waveformMinimapImage.set(image)
+            }
+
             buildWaveformAsync(
-                audioPlayer.getAudioReader()!!,
+                AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
                 height = height,
                 waveform = waveformStream
-            ).subscribe {
-                audioPlayer.getAudioReader()!!.seek(0) // reset player after build
-
-                build(
-                    audioPlayer.getAudioReader()!!,
-                    width = imageWidth.toInt(),
-                    height = 50
-                ).subscribe { image ->
-                    waveformMinimapImage.set(image)
-                    isRenderingWaveform = false
-                }
-            }
+            ).subscribe()
         }
     }
 }
