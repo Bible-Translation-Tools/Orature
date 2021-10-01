@@ -20,12 +20,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.application.Platform
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.jvm.controls.dialog.audioerrordialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 

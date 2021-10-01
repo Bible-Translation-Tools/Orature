@@ -16,8 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.dialog
+package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
@@ -33,11 +34,23 @@ import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
+import javax.inject.Inject
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class AudioErrorDialog : OtterDialog() {
+    private val logger = LoggerFactory.getLogger(AudioErrorDialog::class.java)
+
+    val settingsViewModel: SettingsViewModel by inject()
+
     val titleTextProperty = SimpleStringProperty()
     val inputMessageTitleTextProperty = SimpleStringProperty()
     val inputMessageTextProperty = SimpleStringProperty()
@@ -48,8 +61,19 @@ class AudioErrorDialog : OtterDialog() {
 
     val errorTypeProperty = SimpleObjectProperty<AudioErrorType>()
 
+    val devices = observableListOf<String>()
+    val selectedDeviceProperty = SimpleObjectProperty<String>()
+
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    init {
+        errorTypeProperty.onChange {
+            runLater {
+                settingsViewModel.refreshDevices()
+            }
+        }
+    }
 
     private val content = vbox {
         addClass("audio-error-dialog")
@@ -103,27 +127,74 @@ class AudioErrorDialog : OtterDialog() {
                 }
             }
         }
-        hbox {
+
+        vbox {
             addClass("audio-error-dialog__footer")
 
-            button(cancelButtonTextProperty) {
-                addClass("btn", "btn--primary")
-                graphic = FontIcon("gmi-close")
-                onActionProperty().bind(onCancelActionProperty())
-                visibleProperty().bind(onCancelActionProperty.isNotNull)
+            combobox(settingsViewModel.selectedOutputDeviceProperty, settingsViewModel.outputDevices) {
+                addClass("wa-combobox")
+
+                cellFormat {
+                    val view = ComboboxItem()
+                    graphic = view.apply {
+                        topTextProperty.set(it)
+                    }
+                }
+
+                buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+
+                selectionModel.selectedItemProperty().onChange {
+                    it?.let { settingsViewModel.updateOutputDevice(it) }
+                }
+
+                visibleProperty().bind(
+                    errorTypeProperty.isEqualTo(AudioErrorType.PLAYBACK)
+                )
                 managedProperty().bind(visibleProperty())
             }
 
-            region {
-                addClass("audio-error-dialog__footer-spacer")
-                hgrow = Priority.ALWAYS
-                managedProperty().bind(onCancelActionProperty.isNotNull)
+            combobox(settingsViewModel.selectedInputDeviceProperty, settingsViewModel.inputDevices) {
+                addClass("wa-combobox")
+
+                cellFormat {
+                    val view = ComboboxItem()
+                    graphic = view.apply {
+                        topTextProperty.set(it)
+                    }
+                }
+
+                buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
+
+                selectionModel.selectedItemProperty().onChange {
+                    it?.let { settingsViewModel.updateInputDevice(it) }
+                }
+
+                visibleProperty().bind(
+                    errorTypeProperty.isEqualTo(AudioErrorType.RECORDING)
+                )
+                managedProperty().bind(visibleProperty())
             }
 
-            visibleProperty().bind(
-                onCloseActionProperty.isNotNull
-            )
-            managedProperty().bind(visibleProperty())
+            hbox {
+                button(cancelButtonTextProperty) {
+                    addClass("btn", "btn--primary")
+                    graphic = FontIcon("gmi-close")
+                    onActionProperty().bind(onCancelActionProperty())
+                    visibleProperty().bind(onCancelActionProperty.isNotNull)
+                    managedProperty().bind(visibleProperty())
+                }
+
+                region {
+                    addClass("audio-error-dialog__footer-spacer")
+                    hgrow = Priority.ALWAYS
+                    managedProperty().bind(onCancelActionProperty.isNotNull)
+                }
+
+                visibleProperty().bind(
+                    onCloseActionProperty.isNotNull
+                )
+                managedProperty().bind(visibleProperty())
+            }
         }
     }
 
