@@ -63,12 +63,12 @@ class RootView : View() {
 
     private fun initAudioErrorDialog() {
         val errorDialog = audioerrordialog {
-            titleTextProperty.set("Error")
-            inputMessageTitleTextProperty.set("Audio Input Not Found")
-            inputMessageTextProperty.set("Orature was unable to find a working audio input. Please make sure your microphone is plugged in and enabled and try again. ")
+            titleTextProperty.set(messages["error"])
+            inputMessageTitleTextProperty.set(messages["unableToRecord"])
+            inputMessageTextProperty.set(messages["audioErrorMessage"])
 
-            outputMessageTitleTextProperty.set("Audio Output Not Found")
-            outputMessageTextProperty.set("Orature was unable to find a working audio output. Please make sure your speakers are plugged in and enabled and try again. ")
+            outputMessageTitleTextProperty.set(messages["unableToPlaySound"])
+            outputMessageTextProperty.set(messages["audioErrorMessage"])
 
             backgroundImageProperty.set(resources.image("/images/audio_error.png"))
             cancelButtonTextProperty.set(messages["close"])
