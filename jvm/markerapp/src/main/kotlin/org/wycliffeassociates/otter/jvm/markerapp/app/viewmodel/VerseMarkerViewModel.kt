@@ -49,15 +49,6 @@ private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
 
-    private val defaultFormat = AudioFormat(
-        44100F,
-        16,
-        1,
-        true,
-        false
-    )
-    private val line = AudioSystem.getSourceDataLine(defaultFormat)
-    private val audioConnectionFactory = AudioConnectionFactory(line)
     private val waveformStream = ReplayRelay.create<Image>()
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
@@ -65,7 +56,7 @@ class VerseMarkerViewModel : ViewModel() {
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
     val markers: VerseMarkerModel
-    val audioPlayer = audioConnectionFactory.getPlayer()
+    val audioPlayer = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getPlayer()
     var audioController: AudioPlayerController? = null
     val isPlayingProperty = SimpleBooleanProperty(false)
     val markerRatioProperty = SimpleStringProperty()
