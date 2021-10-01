@@ -50,8 +50,8 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         children.clear()
 
         control.waveformImageProperty.onChangeAndDoNow {
-            it?.let { img ->
-                val imageView = ImageView(img).apply {
+            it?.let { image ->
+                val imageView = ImageView(image).apply {
                     fitHeightProperty().bind(root.heightProperty())
                     fitWidthProperty().bind(root.widthProperty())
                 }
