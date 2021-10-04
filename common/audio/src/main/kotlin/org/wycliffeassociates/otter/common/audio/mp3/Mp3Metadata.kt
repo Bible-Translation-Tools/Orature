@@ -43,13 +43,15 @@ private const val CUE_FRAME_SIZE = 75.0
 internal class Mp3Metadata(val file: File) : AudioMetadata {
 
     private val _cues = mutableListOf<AudioCue>()
-    private var title = ""
+    private var title = file.nameWithoutExtension
 
     init {
         if (file.exists() && file.length() > 0) {
             try {
                 val cuesheet = CueParser.parse(file, Charsets.UTF_8)
-                title = cuesheet.title
+                if (cuesheet.title.isNotEmpty()) {
+                    title = cuesheet.title
+                }
                 cuesheet.allTrackData.forEach {
                     val label = it.title
                     val index = it.indices.find { it.number == 1 }
