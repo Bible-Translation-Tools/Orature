@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
@@ -68,6 +69,7 @@ class WaveformFrame(
                         fitToParentHeight()
                         hbox {
                             viewModel.waveform
+                                .observeOnFx()
                                 .subscribe {
                                     this@hbox.add(
                                         imageview(it) {

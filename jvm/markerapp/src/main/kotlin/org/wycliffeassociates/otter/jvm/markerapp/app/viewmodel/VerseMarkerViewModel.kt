@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -89,7 +90,9 @@ class VerseMarkerViewModel : ViewModel() {
                 AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
                 height = 50
-            ).subscribe { image ->
+            )
+                .observeOnFx()
+                .subscribe { image ->
                 waveformMinimapImage.set(image)
             }
 

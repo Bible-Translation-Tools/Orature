@@ -67,7 +67,6 @@ class WaveformImageBuilder(
                 reader.release()
             }
             .subscribeOn(Schedulers.computation())
-            .observeOnFx()
     }
 
     fun buildWaveformAsync(
@@ -91,7 +90,6 @@ class WaveformImageBuilder(
         .subscribe()
 
         return waveformStream
-            .observeOnFx()
     }
 
     private fun drawPartialImages(
