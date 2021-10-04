@@ -19,54 +19,11 @@
 @import "/css/root.css";
 
 .card--take--new {
-    -fx-spacing: 10px;
+    -fx-background-color: -wa-primary-gradient;
+    -fx-background-radius: 6px;
     -fx-alignment: center;
-}
-
-.card--take--new-label {
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-}
-
-.card--take--new-button {
-    -fx-background-color: -wa-red;
-    -fx-effect: -wa-level2;
-    -fx-text-fill: -wa-white;
-    -fx-border-width: 2px;
-    -fx-border-color: -wa-red-dark;
-    -fx-underline: true;
-    -fx-font-size: 20px;
-    -fx-min-width: 158px;
-}
-
-.card--take--new-button .ikonli-font-icon {
-    -fx-fill: -wa-white;
-    -fx-font-size: 20px;
-}
-
-.card--take--new-button:hover {
-    -fx-background-color: -wa-red-light;
-    -fx-effect: -wa-level1;
-    -fx-underline: false;
-}
-
-.card--take--new-button:pressed {
-    -fx-background-color: -wa-red-dark;
-    -fx-effect: -wa-level1;
-    -fx-underline: false;
-}
-
-.card--take--new-button:disabled {
-    -fx-background-color: -wa-gray-lighter;
-    -fx-border-width: 0px;
-    -fx-text-fill: -wa-black-60;
-    -fx-effect: -wa-level0;
-    -fx-cursor: disappear;
-    -fx-underline: false;
-}
-
-.card--take--new-button:disabled .ikonli-font-icon {
-    -fx-fill: -wa-black-60;
+    -fx-pref-height: 128px;
+    -fx-min-height: 128px;
 }
 
 .card--take__placeholder {

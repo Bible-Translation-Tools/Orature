@@ -19,13 +19,10 @@
 package org.wycliffeassociates.otter.common.domain.collections
 
 import io.reactivex.Single
-import io.reactivex.rxkotlin.flatMapIterable
 import org.wycliffeassociates.otter.common.data.primitives.Language
-import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Translation
-import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class CreateTranslation @Inject constructor(
@@ -38,7 +35,7 @@ class CreateTranslation @Inject constructor(
         sourceLanguage: Language,
         targetLanguage: Language
     ): Single<Int> {
-        val translation = Translation(sourceLanguage, targetLanguage)
+        val translation = Translation(sourceLanguage, targetLanguage, LocalDateTime.now())
         return languageRepo.insertTranslation(translation)
     }
 }

@@ -36,6 +36,7 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -48,7 +49,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
-import java.text.MessageFormat
+import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
 
@@ -70,7 +71,6 @@ class ChapterPageViewModel : ViewModel() {
     private var loading: Boolean by property(false)
     val loadingProperty = getProperty(ChapterPageViewModel::loading)
 
-    val chapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val canCompileProperty = SimpleBooleanProperty()
     val isCompilingProperty = SimpleBooleanProperty()
     val selectedChapterTakeProperty = SimpleObjectProperty<Take>()
@@ -84,10 +84,11 @@ class ChapterPageViewModel : ViewModel() {
 
     val chapterCardProperty = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
-    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
+    val showExportProgressDialogProperty = SimpleBooleanProperty(false)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -130,27 +131,6 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    fun breadcrumbTitleBinding(view: UIComponent): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                when {
-                    workbookDataStore.activeChunkProperty.value != null ->
-                        workbookDataStore.activeChunkProperty.value.let { chunk ->
-                            MessageFormat.format(
-                                messages["chunkTitle"],
-                                messages[ContentLabel.of(chunk.contentType).value],
-                                chunk.start
-                            )
-                        }
-                        navigator.workspace.dockedComponentProperty.value == view -> messages["chunk"]
-                    else -> messages["chapter"]
-                }
-            },
-            navigator.workspace.dockedComponentProperty,
-            workbookDataStore.activeChunkProperty
-        )
-    }
-
     fun onCardSelection(cardData: CardData) {
         cardData.chapterSource?.let {
             workbookDataStore.activeChapterProperty.set(it)
@@ -161,14 +141,10 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun openPlayers() {
-        selectedChapterTakeProperty.value?.let {
+        workbookDataStore.targetAudioProperty.value?.let { target ->
             val player = (app as OtterApp).dependencyGraph.injectPlayer()
-            player.load(it.file)
-            chapterPlayerProperty.set(player)
+            player.load(target.file)
         }
-    }
-
-    fun openSourceAudioPlayer() {
         workbookDataStore.sourceAudioProperty.value?.let { source ->
             val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
@@ -177,8 +153,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun closePlayers() {
-        chapterPlayerProperty.value?.close()
-        chapterPlayerProperty.set(null)
+        workbookDataStore.targetAudioProperty.value?.player?.close()
         sourceAudioPlayerProperty.value?.close()
         sourceAudioPlayerProperty.set(null)
     }
@@ -217,12 +192,11 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun recordChapter() {
-        closePlayers()
         chapterCardProperty.value?.chapterSource?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
-                    currentTakeNumberProperty.set(takeNumber)
+                    workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
@@ -247,9 +221,8 @@ class ChapterPageViewModel : ViewModel() {
     fun processTakeWithPlugin(pluginType: PluginType) {
         selectedChapterTakeProperty.value?.let { take ->
             val audio = chapterCardProperty.value!!.chapterSource!!.audio
-            closePlayers()
             contextProperty.set(pluginType)
-            currentTakeNumberProperty.set(take.number)
+            workbookDataStore.activeTakeNumberProperty.set(take.number)
             audioPluginViewModel
                 .getPlugin(pluginType)
                 .flatMapSingle { plugin ->
@@ -266,15 +239,12 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
-                    currentTakeNumberProperty.set(null)
                     fire(PluginClosedEvent(pluginType))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                         else -> {
                             when (pluginType) {
-                                PluginType.EDITOR, PluginType.MARKER -> {
-
-                                }
+                                PluginType.EDITOR, PluginType.MARKER -> {}
                             }
                         }
                     }
@@ -310,17 +280,35 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
+    fun exportChapter() {
+        selectedChapterTakeProperty.value?.let { take ->
+            val directory = chooseDirectory(FX.messages["exportChapter"])
+            directory?.let {
+                showExportProgressDialogProperty.set(true)
+
+                val mp3Name = take.file.nameWithoutExtension + ".mp3"
+                val mp3File = File(directory, mp3Name)
+                AudioConverter().wavToMp3(take.file, mp3File)
+                    .subscribeOn(Schedulers.io())
+                    .observeOnFx()
+                    .subscribe {
+                        showExportProgressDialogProperty.set(false)
+                    }
+            }
+        }
+    }
+
     fun dialogTitleBinding(): StringBinding {
         return Bindings.createStringBinding(
             Callable {
                 String.format(
                     messages["sourceDialogTitle"],
-                    currentTakeNumberProperty.value,
+                    workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -329,13 +317,13 @@ class ChapterPageViewModel : ViewModel() {
             Callable {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeNumberProperty.value,
+                    workbookDataStore.activeTakeNumberProperty.value,
                     audioPluginViewModel.pluginNameProperty.value,
                     audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -394,6 +382,7 @@ class ChapterPageViewModel : ViewModel() {
             .observeOnFx()
             .subscribe { takeHolder ->
                 setSelectedChapterTake(takeHolder.value)
+                workbookDataStore.updateTargetAudio()
             }
             .let { disposables.add(it) }
     }

@@ -94,7 +94,7 @@ class AddFilesView : View() {
 
                     label {
                         addClass("app-drawer__drag-drop-area__icon")
-                        graphic = FontIcon(MaterialDesign.MDI_LINK_OFF)
+                        graphic = FontIcon(MaterialDesign.MDI_FILE_MULTIPLE)
                     }
 
                     label(messages["dragToImport"]) {

@@ -21,8 +21,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.SplashScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import tornadofx.*
 
 class SplashScreen : View() {
@@ -52,6 +52,7 @@ class SplashScreen : View() {
     }
 
     private fun finish() {
+        viewModel.initAudioSystem()
         close()
         primaryStage.show()
         navigator.dock<HomePage>()

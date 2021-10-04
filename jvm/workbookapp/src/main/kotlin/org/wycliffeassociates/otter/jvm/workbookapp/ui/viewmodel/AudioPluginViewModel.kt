@@ -95,6 +95,7 @@ class AudioPluginViewModel : ViewModel() {
         val resourceLabel = workbookDataStore.activeResourceComponentProperty.value?.let {
             messages[workbookDataStore.activeResourceComponentProperty.value.label]
         }
+        val targetAudio = workbookDataStore.targetAudioProperty.value
 
         return PluginParameters(
             languageName = workbook.target.language.name,
@@ -109,7 +110,8 @@ class AudioPluginViewModel : ViewModel() {
             sourceChunkStart = sourceAudio?.start,
             sourceChunkEnd = sourceAudio?.end,
             sourceText = sourceText,
-            actionText = action
+            actionText = action,
+            targetChapterAudio = targetAudio?.file
         )
     }
 

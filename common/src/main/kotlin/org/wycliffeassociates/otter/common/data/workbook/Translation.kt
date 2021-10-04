@@ -19,9 +19,11 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import java.time.LocalDateTime
 
 data class Translation(
     var source: Language,
     var target: Language,
+    var modifiedTs: LocalDateTime?,
     var id: Int = 0
 )

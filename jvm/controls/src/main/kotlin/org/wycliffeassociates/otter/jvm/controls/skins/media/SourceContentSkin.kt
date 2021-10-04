@@ -29,6 +29,7 @@ import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -36,15 +37,11 @@ import tornadofx.*
 
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
 
-    companion object {
-        private const val SCROLL_TEXT_RESIZE_RATIO = 1.5
-    }
+    private val playIcon = MaterialDesign.MDI_PLAY
+    private val pauseIcon = MaterialDesign.MDI_PAUSE
 
-    private val playIcon = FontIcon("fa-play")
-    private val pauseIcon = FontIcon("fa-pause")
-
-    private val minimizedIcon = FontIcon("mdi-window-minimize")
-    private val maximizedIcon = FontIcon("mdi-window-maximize")
+    private val minimizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MINIMIZE)
+    private val maximizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MAXIMIZE)
 
     @FXML
     lateinit var sourceAudioContainer: HBox
@@ -53,13 +50,22 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var playBtn: Button
 
     @FXML
+    lateinit var playTargetBtn: Button
+
+    @FXML
     lateinit var audioSlider: Slider
+
+    @FXML
+    lateinit var targetAudioSlider: Slider
 
     @FXML
     lateinit var sourceAudioNotAvailable: HBox
 
     @FXML
     lateinit var audioNotAvailableText: Label
+
+    @FXML
+    lateinit var targetAudio: HBox
 
     @FXML
     lateinit var sourceTextContainer: VBox
@@ -89,9 +95,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var minimizeBtn: Button
 
     @FXML
-    lateinit var sourceAudioBlock: HBox
+    lateinit var sourceAudioBlock: VBox
 
     lateinit var audioController: AudioPlayerController
+    lateinit var targetAudioController: AudioPlayerController
 
     init {
         loadFXML()
@@ -106,6 +113,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     private fun initControllers() {
         audioController = AudioPlayerController(audioSlider)
+        targetAudioController = AudioPlayerController(targetAudioSlider)
     }
 
     private fun initAudioControls() {
@@ -119,6 +127,11 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             managedWhen(visibleProperty())
         }
 
+        targetAudio.apply {
+            visibleWhen(sourceContent.targetAudioPlayerProperty.isNotNull)
+            managedWhen(visibleProperty())
+        }
+
         audioNotAvailableText.apply {
             textProperty().bind(sourceContent.audioNotAvailableTextProperty)
         }
@@ -129,15 +142,33 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             }
         }
 
+        playTargetBtn.apply {
+            setOnMouseClicked {
+                targetAudioController.toggle()
+            }
+        }
+
         audioController.isPlayingProperty.onChangeAndDoNow {
-            togglePlayButtonIcon(it)
-            togglePlayButtonStyle(it)
+            togglePlayButtonIcon(playBtn, it)
+            togglePlayButtonStyle(playBtn, it)
             togglePlayButtonText(it)
+        }
+
+        targetAudioController.isPlayingProperty.onChangeAndDoNow {
+            togglePlayButtonIcon(playTargetBtn, it)
+            togglePlayButtonStyle(playTargetBtn, it)
+            toggleTargetPlayButtonText(it)
         }
 
         sourceContent.audioPlayerProperty.onChangeAndDoNow { player ->
             player?.let {
                 audioController.load(it)
+            }
+        }
+
+        sourceContent.targetAudioPlayerProperty.onChangeAndDoNow { player ->
+            player?.let {
+                targetAudioController.load(it)
             }
         }
 
@@ -164,12 +195,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
-
             isFitToWidth = true
-
-            maxWidthProperty().bind(
-                sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
-            )
         }
 
         sourceText.apply {
@@ -178,19 +204,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
-        }
-
-        titleContainer.apply {
-            sourceContent.isMinimizedProperty.onChangeAndDoNow {
-                if (it == true) {
-                    maxWidthProperty().unbind()
-                    maxWidthProperty().set(Double.MAX_VALUE)
-                } else {
-                    maxWidthProperty().bind(
-                        sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
-                    )
-                }
-            }
         }
 
         minimizeBtn.apply {
@@ -219,21 +232,21 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
     }
 
-    private fun togglePlayButtonIcon(isPlaying: Boolean?) {
+    private fun togglePlayButtonIcon(btn: Button, isPlaying: Boolean?) {
         if (isPlaying == true) {
-            playBtn.graphicProperty().set(pauseIcon)
+            (btn.graphic as? FontIcon)?.iconCode = pauseIcon
         } else {
-            playBtn.graphicProperty().set(playIcon)
+            (btn.graphic as? FontIcon)?.iconCode = playIcon
         }
     }
 
-    private fun togglePlayButtonStyle(isPlaying: Boolean?) {
+    private fun togglePlayButtonStyle(btn: Button, isPlaying: Boolean?) {
         if (isPlaying == true) {
-            playBtn.removeClass("btn--primary")
-            playBtn.addClass("btn--secondary")
+            btn.removeClass("btn--primary")
+            btn.addClass("btn--secondary")
         } else {
-            playBtn.removeClass("btn--secondary")
-            playBtn.addClass("btn--primary")
+            btn.removeClass("btn--secondary")
+            btn.addClass("btn--primary")
         }
     }
 
@@ -242,6 +255,14 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playBtn.text = sourceContent.pauseLabelProperty.value
         } else {
             playBtn.text = sourceContent.playLabelProperty.value
+        }
+    }
+
+    private fun toggleTargetPlayButtonText(isPlaying: Boolean?) {
+        if (isPlaying == true) {
+            playTargetBtn.text = sourceContent.pauseTargetLabelProperty.value
+        } else {
+            playTargetBtn.text = sourceContent.playTargetLabelProperty.value
         }
     }
 

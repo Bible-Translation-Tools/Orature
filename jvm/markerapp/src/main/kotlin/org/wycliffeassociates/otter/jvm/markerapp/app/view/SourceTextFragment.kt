@@ -25,6 +25,9 @@ import java.text.MessageFormat
 
 class SourceTextFragment : Fragment() {
 
+//    @Inject
+//    lateinit var player: IAudioPlayer
+
     override val root = initializeSourceContent()
 
     private fun initializeSourceContent(): SourceContent {

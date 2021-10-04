@@ -25,35 +25,23 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.jvm.utils.getNotNull
-import java.util.EnumMap
 import javafx.collections.ListChangeListener
+import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import tornadofx.*
-import java.text.MessageFormat
+import java.util.*
 
 class RecordResourceViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(RecordResourceViewModel::class.java)
-
-    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
-    val breadcrumbTitleBinding = currentTakeNumberProperty.stringBinding {
-        it?.let { take ->
-            MessageFormat.format(
-                messages["takeTitle"],
-                messages["take"],
-                take
-            )
-        } ?: messages["take"]
-    }
 
     private enum class StepDirection {
         FORWARD,
@@ -250,17 +238,17 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     private fun nextResource(): Resource? {
-        var currentResourceIndex = resourceList.indexOf(activeResource)
+        val currentResourceIndex = resourceList.indexOf(activeResource)
         return resourceList.getOrNull(currentResourceIndex + 1)
     }
 
     private fun previousResource(): Resource? {
-        var currentResourceIndex = resourceList.indexOf(activeResource)
+        val currentResourceIndex = resourceList.indexOf(activeResource)
         return resourceList.getOrNull(currentResourceIndex - 1)
     }
 
     private fun nextGroupCardItem(): ResourceGroupCardItem? {
-        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+        val currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
             resourceListViewModel.selectedGroupCardItem.get()
         )
         return resourceListViewModel.resourceGroupCardItemList.getOrNull(
@@ -269,7 +257,7 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     private fun previousGroupCardItem(): ResourceGroupCardItem? {
-        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+        val currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
             resourceListViewModel.selectedGroupCardItem.get()
         )
         return resourceListViewModel.resourceGroupCardItemList.getOrNull(

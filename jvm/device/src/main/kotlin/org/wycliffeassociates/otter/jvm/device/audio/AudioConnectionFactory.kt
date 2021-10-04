@@ -19,24 +19,31 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import javax.sound.sampled.SourceDataLine
+import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 
-class AudioConnectionFactory(var line: SourceDataLine) {
+class AudioConnectionFactory {
 
-    private val audioPlayerConnectionFactory = AudioPlayerConnectionFactory(line)
+    private val playerConnectionFactory = AudioPlayerConnectionFactory()
+    private val recorderConnectionFactory = AudioRecorderConnectionFactory()
 
-    fun getRecorder(): IAudioRecorder {
-        return AudioRecorder()
+    @Synchronized
+    fun setOutputLine(newLine: SourceDataLine) {
+        playerConnectionFactory.setLine(newLine)
     }
 
     @Synchronized
-    fun replaceLine(newLine: SourceDataLine) {
-        audioPlayerConnectionFactory.replaceLine(newLine)
+    fun setInputLine(newLine: TargetDataLine) {
+        recorderConnectionFactory.setLine(newLine)
     }
 
     fun getPlayer(): IAudioPlayer {
-        return audioPlayerConnectionFactory.getPlayer()
+        return playerConnectionFactory.getPlayer()
+    }
+
+
+    fun getRecorder(): IAudioRecorder {
+        return recorderConnectionFactory.getRecorder()
     }
 }

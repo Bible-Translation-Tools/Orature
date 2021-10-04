@@ -76,7 +76,8 @@ class RecordMappers {
                 record.getValue(COLLECTION_ENTITY.TITLE),
                 record.getValue(COLLECTION_ENTITY.SLUG),
                 record.getValue(COLLECTION_ENTITY.SORT),
-                record.getValue(COLLECTION_ENTITY.DUBLIN_CORE_FK)
+                record.getValue(COLLECTION_ENTITY.DUBLIN_CORE_FK),
+                record.getValue(COLLECTION_ENTITY.MODIFIED_TS)
             )
         }
 
@@ -145,7 +146,8 @@ class RecordMappers {
             return TranslationEntity(
                 record.getValue(TRANSLATION_ENTITY.ID),
                 record.getValue(TRANSLATION_ENTITY.SOURCE_FK),
-                record.getValue(TRANSLATION_ENTITY.TARGET_FK)
+                record.getValue(TRANSLATION_ENTITY.TARGET_FK),
+                record.getValue(TRANSLATION_ENTITY.MODIFIED_TS)
             )
         }
     }

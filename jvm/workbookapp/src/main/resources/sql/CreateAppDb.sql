@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS collection_entity (
     slug            TEXT NOT NULL,
     sort            INTEGER NOT NULL,
     dublin_core_fk  INTEGER NOT NULL REFERENCES dublin_core_entity(id),
+    modified_ts     TEXT DEFAULT NULL,
     UNIQUE (slug, dublin_core_fk, label)
 );
 
@@ -142,5 +143,6 @@ CREATE TABLE IF NOT EXISTS translation_entity (
     id               INTEGER PRIMARY KEY AUTOINCREMENT,
     source_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
     target_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
+    modified_ts      TEXT DEFAULT NULL,
     UNIQUE (source_fk, target_fk)
 );

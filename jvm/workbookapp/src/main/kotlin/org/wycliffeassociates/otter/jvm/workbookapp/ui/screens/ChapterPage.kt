@@ -20,16 +20,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
+import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -56,10 +59,21 @@ class ChapterPage : Fragment() {
     private lateinit var chunkListView: ListView<CardData>
 
     private val pluginOpenedPage: PluginOpenedPage
+    private var exportProgressListener: ChangeListener<Boolean>? = null
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(viewModel.breadcrumbTitleBinding(this@ChapterPage))
-        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK))
+        titleProperty.bind(
+            workbookDataStore.activeChapterProperty.stringBinding {
+                it?.let {
+                    MessageFormat.format(
+                        messages["chapterTitle"],
+                        messages["chapter"],
+                        it.sort
+                    )
+                } ?: messages["chapter"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
         onClickAction {
             navigator.dock(this@ChapterPage)
         }
@@ -77,11 +91,14 @@ class ChapterPage : Fragment() {
 
         viewModel.checkCanCompile()
         chunkListView.refresh()
+
+        initializeProgressDialog()
     }
 
     override fun onUndock() {
         super.onUndock()
         viewModel.closePlayers()
+        removeDialogListeners()
     }
 
     init {
@@ -89,19 +106,19 @@ class ChapterPage : Fragment() {
         importStylesheet(resources.get("/css/chunk-item.css"))
         importStylesheet(resources.get("/css/take-item.css"))
         importStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                viewModel.openSourceAudioPlayer()
+                viewModel.openPlayers()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
             }
-            viewModel.openPlayers()
         }
     }
 
@@ -135,7 +152,7 @@ class ChapterPage : Fragment() {
 
                     simpleaudioplayer {
                         hgrow = Priority.ALWAYS
-                        playerProperty.bind(viewModel.chapterPlayerProperty)
+                        playerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
                         visibleWhen(playerProperty.isNotNull)
                         managedProperty().bind(visibleProperty())
                     }
@@ -146,7 +163,7 @@ class ChapterPage : Fragment() {
 
                         label(messages["draftingNotStarted"])
 
-                        visibleWhen(viewModel.chapterPlayerProperty.isNull)
+                        visibleWhen(workbookDataStore.targetAudioProperty.isNull)
                         managedProperty().bind(visibleProperty())
                     }
                 }
@@ -163,19 +180,12 @@ class ChapterPage : Fragment() {
                     }
                     button {
                         addClass("btn", "btn--secondary")
-                        textProperty().bind(viewModel.noTakesProperty.stringBinding {
-                            when (it) {
-                                true -> messages["beginTranslation"]
-                                else -> messages["continueTranslation"]
-                            }
-                        })
-                        graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                        text = messages["exportChapter"]
+                        graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
-                            viewModel.workChunkProperty.value?.let {
-                                viewModel.onCardSelection(it)
-                                navigator.dock<RecordScripturePage>()
-                            }
+                            viewModel.exportChapter()
                         }
+                        disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
                     }
                 }
             }
@@ -206,7 +216,6 @@ class ChapterPage : Fragment() {
                     addClass("btn", "btn--primary")
                     text = messages["viewTakes"]
                     graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
-                    enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                     action {
                         viewModel.chapterCardProperty.value?.let {
                             viewModel.onCardSelection(it)
@@ -221,13 +230,35 @@ class ChapterPage : Fragment() {
             addClass("chapter-page__chunks")
             vgrow = Priority.ALWAYS
 
-            button {
-                addClass("btn", "btn--primary")
-                text = messages["compile"]
-                graphic = FontIcon(MaterialDesign.MDI_LAYERS)
-                enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
-                action {
-                    viewModel.compile()
+            hbox {
+                addClass("chapter-page__chunks-header")
+                button {
+                    addClass("btn", "btn--secondary", "btn--secondary-light")
+                    text = messages["compile"]
+                    graphic = FontIcon(MaterialDesign.MDI_LAYERS)
+                    enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
+                    action {
+                        viewModel.compile()
+                    }
+                }
+                region { 
+                    hgrow = Priority.ALWAYS
+                }
+                button {
+                    addClass("btn", "btn--cta")
+                    textProperty().bind(viewModel.noTakesProperty.stringBinding {
+                        when (it) {
+                            true -> messages["beginTranslation"]
+                            else -> messages["continueTranslation"]
+                        }
+                    })
+                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                    action {
+                        viewModel.workChunkProperty.value?.let {
+                            viewModel.onCardSelection(it)
+                            navigator.dock<RecordScripturePage>()
+                        }
+                    }
                 }
             }
 
@@ -248,6 +279,7 @@ class ChapterPage : Fragment() {
 
     private fun onTakeSelected(chunk: CardData, take: TakeModel) {
         chunk.chunkSource?.audio?.selectTake(take.take)
+        workbookDataStore.updateSelectedTakesFile()
         take.take.file.setLastModified(System.currentTimeMillis())
     }
 
@@ -261,9 +293,10 @@ class ChapterPage : Fragment() {
             dialogTitleProperty.bind(viewModel.dialogTitleBinding())
             dialogTextProperty.bind(viewModel.dialogTextBinding())
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)
+            targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
             audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            sourceContentTitleProperty.bind(workbookDataStore.activeChunkTitleBinding())
+            sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }
     }
 
@@ -288,4 +321,43 @@ class ChapterPage : Fragment() {
                 )
             }
     }
+
+    private fun initializeProgressDialog() {
+        confirmdialog {
+            exportProgressListener = ChangeListener { _, _, value ->
+                if (value) {
+                    titleTextProperty.bind(
+                        workbookDataStore.activeChapterProperty.stringBinding {
+                            it?.let {
+                                MessageFormat.format(
+                                    messages["exportChapterTitle"],
+                                    messages["export"],
+                                    messages[it.label],
+                                    it.title
+                                )
+                            }
+                        }
+                    )
+                    messageTextProperty.set(
+                        MessageFormat.format(
+                            messages["exportProjectMessage"],
+                            messages["chapter"]
+                        )
+                    )
+                    open()
+                } else {
+                    close()
+                }
+            }
+            viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
+
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
+        }
+    }
+
+    private fun removeDialogListeners() {
+        viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
+    }
+
 }

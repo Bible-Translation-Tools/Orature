@@ -22,10 +22,11 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.TargetDataLine
 
-class AudioRecorder : IAudioRecorder {
+private const val DEFAULT_BUFFER_SIZE = 1024
+
+class AudioRecorder(val line: TargetDataLine) : IAudioRecorder {
 
     private val monitor = Object()
 
@@ -34,27 +35,10 @@ class AudioRecorder : IAudioRecorder {
     @Volatile
     private var pause = false
 
-    companion object {
-        val SAMPLE_RATE = 44100F // Hz
-        val SAMPLE_SIZE = 16 // bits
-        val CHANNELS = 1
-        val SIGNED = true
-        val BIG_ENDIAN = false
-        val FORMAT = AudioFormat(
-            SAMPLE_RATE,
-            SAMPLE_SIZE,
-            CHANNELS,
-            SIGNED,
-            BIG_ENDIAN
-        )
-        val BUFFER_SIZE = 1024
-    }
-
-    private var line = AudioSystem.getTargetDataLine(FORMAT)
     private val audioByteObservable = PublishSubject.create<ByteArray>()
     private val recordingStream = Observable
         .fromCallable {
-            val byteArray = ByteArray(BUFFER_SIZE)
+            val byteArray = ByteArray(DEFAULT_BUFFER_SIZE)
             var totalRead = 0
             while (true) {
                 if (line.isOpen || line.available() > 0) {
@@ -82,7 +66,7 @@ class AudioRecorder : IAudioRecorder {
     @Synchronized // Synchronized so as to not subscribe to multiple streams on quick multipress
     override fun start() {
         pause = false
-        line.open(FORMAT)
+        line.open()
         line.start()
         synchronized(monitor) {
             monitor.notify()

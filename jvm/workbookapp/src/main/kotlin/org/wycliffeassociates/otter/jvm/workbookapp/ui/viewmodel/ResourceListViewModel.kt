@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import javafx.beans.binding.Bindings
-import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -35,10 +33,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItemList
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.resourceGroupCardItem
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
-import java.text.MessageFormat
-import java.util.concurrent.Callable
 
 class ResourceListViewModel : ViewModel() {
 
@@ -53,8 +48,6 @@ class ResourceListViewModel : ViewModel() {
 
     val completionProgressProperty = SimpleDoubleProperty(0.0)
     val isFilterOnProperty = SimpleBooleanProperty(false)
-
-    private val navigator: NavigationMediator by inject()
 
     init {
         workbookDataStore.activeChapterProperty.onChangeAndDoNow {
@@ -73,27 +66,6 @@ class ResourceListViewModel : ViewModel() {
                 filteredResourceGroupCardItemList.predicate = null
             }
         }
-    }
-
-    fun breadcrumbTitleBinding(view: UIComponent): StringBinding {
-        return Bindings.createStringBinding(
-            Callable {
-                when {
-                    workbookDataStore.activeChunkProperty.value != null ->
-                        workbookDataStore.activeChunkProperty.value.let { chunk ->
-                            MessageFormat.format(
-                                messages["chunkTitle"],
-                                messages["chunk"],
-                                chunk.start
-                            )
-                        }
-                    navigator.workspace.dockedComponentProperty.value == view -> messages["chunk"]
-                    else -> messages["chapter"]
-                }
-            },
-            navigator.workspace.dockedComponentProperty,
-            workbookDataStore.activeChunkProperty
-        )
     }
 
     private fun setSelectedResourceGroupCardItem(resource: Resource) {

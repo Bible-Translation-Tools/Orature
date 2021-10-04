@@ -21,7 +21,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.rxkotlin.toObservable as toRxObservable
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
@@ -47,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
+import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -58,8 +58,6 @@ open class RecordableViewModel(
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
-
-    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
 
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
@@ -103,7 +101,7 @@ open class RecordableViewModel(
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
-                    currentTakeNumberProperty.set(takeNumber)
+                    workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
@@ -129,7 +127,7 @@ open class RecordableViewModel(
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
         closePlayers()
         contextProperty.set(pluginType)
-        currentTakeNumberProperty.set(takeEvent.take.number)
+        workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
@@ -146,7 +144,6 @@ open class RecordableViewModel(
             }
             .onErrorReturn { TakeActions.Result.NO_PLUGIN }
             .subscribe { result: TakeActions.Result ->
-                currentTakeNumberProperty.set(null)
                 fire(PluginClosedEvent(pluginType))
                 when (result) {
                     TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
@@ -223,12 +220,12 @@ open class RecordableViewModel(
             Callable {
                 String.format(
                     messages["sourceDialogTitle"],
-                    currentTakeNumberProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get()
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -237,13 +234,13 @@ open class RecordableViewModel(
             Callable {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeNumberProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get()
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 

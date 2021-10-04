@@ -25,25 +25,44 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class NavigationMediator : Component(), ScopedInstance {
 
+    val workbookDataStore: WorkbookDataStore by inject()
     val breadCrumbsBar = BreadcrumbBar()
 
     private val recorderBreadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["recording"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_MICROPHONE))
+        titleProperty.bind(
+            workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
+                MessageFormat.format(
+                    messages["takeTitle"],
+                    messages["take"],
+                    take
+                )
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
     }
 
     private val editorBreadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["recording"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_MICROPHONE))
+        titleProperty.bind(
+            workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
+                MessageFormat.format(
+                    messages["takeTitle"],
+                    messages["take"],
+                    take
+                )
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
     }
 
     private val markerBreadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["addMarkers"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_PLUS_OUTLINE))
     }
 
     init {

@@ -23,17 +23,21 @@ import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.TargetAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
@@ -67,8 +71,11 @@ class WorkbookDataStore : Component(), ScopedInstance {
         get() = activeProjectFilesAccessorProperty.value
             ?: throw IllegalStateException("ProjectFilesAccessor is null")
 
+    val activeTakeNumberProperty = SimpleIntegerProperty()
+
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
+    val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -117,6 +124,23 @@ class WorkbookDataStore : Component(), ScopedInstance {
         }
     }
 
+    fun updateTargetAudio() {
+        val _chunk = activeChunkProperty.get()
+        val _chapter = activeChapterProperty.get()
+        when {
+            _chapter != null && _chunk == null -> {
+                val take = _chapter.audio.selected.value?.value
+                take?.let {
+                    val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+                    audioPlayer.load(it.file)
+                    val targetAudio = TargetAudio(it.file, audioPlayer)
+                    targetAudioProperty.set(targetAudio)
+                } ?: targetAudioProperty.set(null)
+            }
+            else -> targetAudioProperty.set(null)
+        }
+    }
+
     fun getSourceAudio(): SourceAudio? {
         val sourceAudio = workbook.sourceAudioAccessor
         return chunk?.let { chunk ->
@@ -154,7 +178,48 @@ class WorkbookDataStore : Component(), ScopedInstance {
         )
     }
 
+    fun activeChapterTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    MessageFormat.format(
+                        messages["bookChapterTitle"],
+                        activeWorkbookProperty.value.source.title,
+                        activeChapterProperty.value.title,
+                    )
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty
+        )
+    }
+
     fun activeChunkTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    if (activeChunkProperty.value != null) {
+                        MessageFormat.format(
+                            messages["chunkTitle"],
+                            messages[ContentLabel.of(activeChunkProperty.value.contentType).value],
+                            activeChunkProperty.value.start
+                        )
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty,
+            activeChunkProperty
+        )
+    }
+
+    fun activeTitleBinding(): StringBinding {
         return Bindings.createStringBinding(
             Callable {
                 if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {

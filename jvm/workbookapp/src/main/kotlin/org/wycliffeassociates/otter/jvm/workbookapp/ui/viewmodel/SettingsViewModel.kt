@@ -20,18 +20,21 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.schedulers.Schedulers
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import tornadofx.*
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
-import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 
 class SettingsViewModel : ViewModel() {
 
@@ -46,6 +49,9 @@ class SettingsViewModel : ViewModel() {
     @Inject
     lateinit var pluginRepository: IAudioPluginRepository
 
+    @Inject
+    lateinit var localeLanguage: LocaleLanguage
+
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
@@ -53,6 +59,11 @@ class SettingsViewModel : ViewModel() {
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedMarkerProperty = SimpleObjectProperty<AudioPluginData>()
+
+    val supportedLocaleLanguages = observableListOf<Language>()
+    val selectedLocaleLanguageProperty = SimpleObjectProperty<Language>()
+
+    val showChangeLanguageSuccessDialogProperty = SimpleBooleanProperty(false)
 
     val outputDevices = observableListOf<String>()
     val selectedOutputDeviceProperty = SimpleObjectProperty<String>()
@@ -71,6 +82,9 @@ class SettingsViewModel : ViewModel() {
         loadInputDevices()
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
+
+        supportedLocaleLanguages.setAll(localeLanguage.supportedLanguages)
+        selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
     }
 
     fun refreshPlugins() {
@@ -125,6 +139,7 @@ class SettingsViewModel : ViewModel() {
             .doOnError {
                 logger.error("Error in loadCurrentOutputDevice: ", it)
             }
+            .observeOnFx()
             .subscribe { device ->
                 selectedOutputDeviceProperty.set(device)
             }
@@ -135,29 +150,20 @@ class SettingsViewModel : ViewModel() {
             .doOnError {
                 logger.error("Error in loadCurrentInputDevice: ", it)
             }
+            .observeOnFx()
             .subscribe { device ->
                 selectedInputDeviceProperty.set(device)
             }
     }
 
     private fun loadOutputDevices() {
-        audioDeviceProvider.getOutputDeviceNames()
-            .doOnError {
-                logger.error("Error in loadOutputDevices: ", it)
-            }
-            .subscribe { players ->
-                outputDevices.setAll(players)
-            }
+        val devices = audioDeviceProvider.getOutputDeviceNames()
+        outputDevices.setAll(devices)
     }
 
     private fun loadInputDevices() {
-        audioDeviceProvider.getInputDeviceNames()
-            .doOnError {
-                logger.error("Error in loadInputDevices: ", it)
-            }
-            .subscribe { recorders ->
-                inputDevices.setAll(recorders)
-            }
+        val devices = audioDeviceProvider.getInputDeviceNames()
+        inputDevices.setAll(devices)
     }
 
     fun updateOutputDevice(mixer: String) {
@@ -166,5 +172,19 @@ class SettingsViewModel : ViewModel() {
 
     fun updateInputDevice(mixer: String) {
         appPrefRepository.setInputDevice(mixer).subscribe()
+    }
+
+    fun refreshDevices() {
+        loadOutputDevices()
+        loadInputDevices()
+        loadCurrentOutputDevice()
+        loadCurrentInputDevice()
+    }
+
+    fun updateLanguage(language: Language) {
+        localeLanguage.setPreferredLanguage(language)
+            .subscribe {
+                showChangeLanguageSuccessDialogProperty.set(true)
+            }
     }
 }

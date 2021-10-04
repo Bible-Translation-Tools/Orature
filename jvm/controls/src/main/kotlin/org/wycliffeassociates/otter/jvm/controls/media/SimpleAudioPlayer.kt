@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXSlider
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -29,14 +30,12 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import tornadofx.*
-import java.io.File
 
 class SimpleAudioPlayer(
-    file: File? = null,
     player: IAudioPlayer? = null
 ) : HBox() {
-    val fileProperty = SimpleObjectProperty<File>(file)
     val playerProperty = SimpleObjectProperty<IAudioPlayer>(player)
+    val playButtonProperty = SimpleObjectProperty<Button>()
 
     private val slider = JFXSlider()
     private val audioPlayerController = AudioPlayerController(slider)
@@ -50,8 +49,8 @@ class SimpleAudioPlayer(
         button {
             addClass("btn", "btn--icon")
             graphicProperty().bind(
-                audioPlayerController.isPlayingProperty.objectBinding {
-                    when (it) {
+                audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
+                    when (isPlaying) {
                         true -> pauseIcon
                         else -> playIcon
                     }
@@ -60,6 +59,8 @@ class SimpleAudioPlayer(
             action {
                 audioPlayerController.toggle()
             }
+            visibleProperty().bind(playButtonProperty.isNull)
+            managedProperty().bind(visibleProperty())
         }
         add(
             slider.apply {
@@ -79,11 +80,20 @@ class SimpleAudioPlayer(
             }
         }
 
-        fileProperty.onChange {
-            it?.let { file ->
-                playerProperty.value?.let { player ->
-                    player.load(file)
-                    audioPlayerController.load(player)
+        playButtonProperty.onChange {
+            it?.let { button ->
+                button.apply {
+                    graphicProperty().bind(
+                        audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
+                            when (isPlaying) {
+                                true -> pauseIcon
+                                else -> playIcon
+                            }
+                        }
+                    )
+                    action {
+                        audioPlayerController.toggle()
+                    }
                 }
             }
         }
@@ -91,7 +101,6 @@ class SimpleAudioPlayer(
 }
 
 fun EventTarget.simpleaudioplayer(
-    file: File? = null,
     player: IAudioPlayer? = null,
     op: SimpleAudioPlayer.() -> Unit = {}
-) = SimpleAudioPlayer(file, player).attachTo(this, op)
+) = SimpleAudioPlayer(player).attachTo(this, op)

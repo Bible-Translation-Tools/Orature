@@ -20,35 +20,20 @@ package org.wycliffeassociates.otter.jvm.workbookapp.di.modules
 
 import dagger.Module
 import dagger.Provides
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
+import javax.inject.Singleton
 import org.wycliffeassociates.otter.common.audio.wav.IWaveFileCreator
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
+import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
 import org.wycliffeassociates.otter.jvm.workbookapp.io.wav.WaveFileCreator
 
 @Module
 class AudioModule {
 
     companion object {
-        private val defaultFormat = AudioFormat(
-            44100F,
-            16,
-            1,
-            true,
-            false
-        )
-        private val audioDeviceProvider = AudioDeviceProvider(defaultFormat)
-        private val line = AudioSystem.getSourceDataLine(defaultFormat)
-        val audioConnectionFactory = AudioConnectionFactory(line)
-        init {
-            audioDeviceProvider.activeOutputDevice.subscribe { mixer ->
-                val newLine = AudioSystem.getSourceDataLine(defaultFormat, mixer)
-                audioConnectionFactory.replaceLine(newLine)
-            }
-        }
+        val audioConnectionFactory = AudioConnectionFactory()
     }
 
     @Provides
@@ -64,5 +49,6 @@ class AudioModule {
     fun providesWavCreator(): IWaveFileCreator = WaveFileCreator()
 
     @Provides
-    fun providesAudioDevice(): AudioDeviceProvider = audioDeviceProvider
+    @Singleton
+    fun providesAudioDevice(): AudioDeviceProvider = AudioDeviceProvider(DEFAULT_AUDIO_FORMAT)
 }
