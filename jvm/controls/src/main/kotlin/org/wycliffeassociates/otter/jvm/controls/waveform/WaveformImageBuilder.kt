@@ -20,8 +20,11 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
+import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.ReplaySubject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
@@ -30,39 +33,29 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.absoluteValue
-import kotlin.math.max
 
 const val SIGNED_SHORT_MAX = 32767
 
 class WaveformImageBuilder(
     private val wavColor: Color = Color.BLACK,
-    private val background: Color = Color.TRANSPARENT,
-    private val paddingColor: Color = background
+    private val background: Color = Color.TRANSPARENT
 ) {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
+    private val partialImageWidth = Screen.getMainScreen().platformWidth
 
     fun build(
         reader: AudioFileReader,
-        padding: Int = 0,
-        fitToAudioMax: Boolean = true,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
     ): Single<Image> {
         return Single
             .fromCallable {
                 if (width > 0) {
-                    val img = WritableImage(width + (2 * padding), height)
-                    val (globalMin, globalMax) = drawWaveform(img, reader, width, height, padding)
-                    val newHeight = globalMax - globalMin
-                    if (fitToAudioMax) {
-                        val image2 = WritableImage(
-                            img.pixelReader,
-                            0,
-                            globalMin - newHeight,
-                            width + (padding * 2), (newHeight) * 2
-                        )
-                        image2 as Image
-                    } else img as Image
+                    val framesPerPixel = reader.totalFrames / width
+                    val img = WritableImage(width, height)
+                    reader.open()
+                    renderImage(img, reader, width, height, framesPerPixel)
+                    img
                 } else {
                     WritableImage(1, 1) as Image
                 }
@@ -70,39 +63,105 @@ class WaveformImageBuilder(
             .doOnError { e ->
                 logger.error("Error in building WaveformImage", e)
             }
+            .doFinally {
+                reader.release()
+            }
             .subscribeOn(Schedulers.computation())
-            .observeOnFx()
     }
 
-    fun drawWaveform(
+    fun buildWaveformAsync(
+        reader: AudioFileReader,
+        width: Int = Screen.getMainScreen().platformWidth,
+        height: Int = Screen.getMainScreen().platformHeight
+    ): Observable<Image> {
+        val waveformStream = ReplaySubject.create<Image>()
+
+        Completable.fromAction {
+            reader.open()
+            drawPartialImages(reader, width, height, waveformStream)
+        }
+        .doOnError { e ->
+            logger.error("Error in building WaveformImage", e)
+        }
+        .doFinally {
+            reader.release()
+        }
+        .subscribeOn(Schedulers.computation())
+        .subscribe()
+
+        return waveformStream
+    }
+
+    private fun drawPartialImages(
+        reader: AudioFileReader,
+        width: Int,
+        height: Int,
+        waveformStream: ReplaySubject<Image>
+    ) {
+        val framesPerPixel = reader.totalFrames / width
+        var img = WritableImage(partialImageWidth, height)
+        val shortsArray = ShortArray(framesPerPixel)
+        val bytes = ByteArray(framesPerPixel * 2)
+        var counter = 0
+
+        // render fixed-width images until the last one
+        val lastImageWidth = width % partialImageWidth
+        for (i in 0 until width - lastImageWidth) {
+            val range = computeWaveRange(reader, height, shortsArray, bytes)
+
+            for (j in 0 until height) {
+                img.pixelWriter.setColor(i % partialImageWidth, j, background)
+                if (j in range) {
+                    img.pixelWriter.setColor(i % partialImageWidth, j, wavColor)
+                }
+            }
+
+            counter++
+            if (counter == partialImageWidth) {
+                counter = 0
+                waveformStream.onNext(img)
+                img = WritableImage(partialImageWidth, height)
+            }
+        }
+
+        // render final image with exact width
+        if (lastImageWidth != 0) {
+            img = WritableImage(
+                img.pixelReader,
+                0,
+                0,
+                lastImageWidth,
+                height
+            )
+            renderImage(img, reader, lastImageWidth, height, framesPerPixel)
+            waveformStream.onNext(img)
+        }
+
+        waveformStream.onComplete()
+    }
+
+    private fun scaleToHeight(value: Int, height: Int): Int {
+        return ((value) / (SIGNED_SHORT_MAX * 2).toDouble() * height).toInt()
+    }
+
+    private fun renderImage(
         img: WritableImage,
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        padding: Int
-    ): Pair<Int, Int> {
-        val framesPerPixel = reader.totalFrames / width
-
+        framesPerPixel: Int
+    ) {
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
-        var globalMax = 1
-        var globalMin = 0
-        addPadding(img, 0, padding, height)
-        for (i in padding until width) {
-            reader.getPcmBuffer(bytes)
-            val bb = ByteBuffer.wrap(bytes)
-            bb.rewind()
-            bb.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortsArray)
 
-            // translate by half the total range of values (half a short)
-            // to push everything below 0; because the image top left is 0,0
-            // the absolute value will put the max values close to 0 and the
-            // min values further away to the maximum
-            val min = ((shortsArray.minOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
-            val max = ((shortsArray.maxOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
-            globalMax = max(globalMax, min)
-            globalMin = max(globalMin, max)
-            val range = scaleToHeight(max, height) until scaleToHeight(min, height)
+        for (i in 0 until width) {
+            val range = computeWaveRange(
+                reader,
+                height,
+                shortsArray,
+                bytes
+            )
+
             for (j in 0 until height) {
                 img.pixelWriter.setColor(i, j, background)
                 if (j in range) {
@@ -110,19 +169,26 @@ class WaveformImageBuilder(
                 }
             }
         }
-        addPadding(img, (width + padding), (width + (padding * 2)), height)
-        return Pair(scaleToHeight(globalMin, height), scaleToHeight(globalMax, height))
     }
 
-    private fun addPadding(img: WritableImage, startX: Int, endX: Int, height: Int) {
-        for (i in startX until endX) {
-            for (j in 0 until height) {
-                img.pixelWriter.setColor(i, j, paddingColor)
-            }
-        }
-    }
+    private fun computeWaveRange(
+        reader: AudioFileReader,
+        height: Int,
+        shortsArray: ShortArray,
+        bytes: ByteArray
+    ): IntRange {
+        reader.getPcmBuffer(bytes)
+        val bb = ByteBuffer.wrap(bytes)
+        bb.rewind()
+        bb.order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shortsArray)
 
-    private fun scaleToHeight(value: Int, height: Int): Int {
-        return ((value) / (SIGNED_SHORT_MAX * 2).toDouble() * height).toInt()
+        // translate by half the total range of values (half a short)
+        // to push everything below 0; because the image top left is 0,0
+        // the absolute value will put the max values close to 0 and the
+        // min values further away to the maximum
+        val min = ((shortsArray.minOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
+        val max = ((shortsArray.maxOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
+
+        return scaleToHeight(max, height) until scaleToHeight(min, height)
     }
 }

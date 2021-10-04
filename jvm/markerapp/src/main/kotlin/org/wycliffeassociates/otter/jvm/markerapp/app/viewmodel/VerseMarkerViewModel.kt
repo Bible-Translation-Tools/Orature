@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
+import io.reactivex.Observable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -37,12 +39,16 @@ import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import java.lang.Integer.min
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
+
+    private val width = Screen.getMainScreen().platformWidth
+    private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -54,16 +60,15 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
-    val waveformImageProperty = SimpleObjectProperty<Image>()
-
-    val width = Screen.getMainScreen().platformWidth
-    val height = Screen.getMainScreen().platformHeight
-    val padding = width / 2
+    val waveformMinimapImage = SimpleObjectProperty<Image>()
+    val waveform: Observable<Image>
     val imageWidth: Double
+
+    private val audioFile: File
 
     init {
         val scope = scope as ParameterizedScope
-        val audioFile = File(scope.parameters.named["wav"])
+        audioFile = File(scope.parameters.named["wav"])
         val wav = AudioFile(audioFile)
         val initialMarkerCount = wav.metadata.getCues().size
         val totalMarkers: Int =
@@ -80,22 +85,30 @@ class VerseMarkerViewModel : ViewModel() {
         WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
-        ).build(
-            audioPlayer.getAudioReader()!!,
-            fitToAudioMax = false,
-            width = imageWidth.toInt(),
-            height = height
-        ).subscribe { image ->
-            waveformImageProperty.set(image)
-            audioPlayer.getAudioReader()?.seek(0)
+        ).apply {
+            build(
+                AudioFile(audioFile).reader(),
+                width = imageWidth.toInt(),
+                height = 50
+            )
+                .observeOnFx()
+                .subscribe { image ->
+                    waveformMinimapImage.set(image)
+                }
+
+            waveform = buildWaveformAsync(
+                AudioFile(audioFile).reader(),
+                width = imageWidth.toInt(),
+                height = height
+            )
         }
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
         val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width.toDouble()
+        val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration
+        return pixelsInDuration.toDouble()
     }
 
     fun initializeAudioController(slider: Slider) {
@@ -118,16 +131,24 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun seekNext() {
         val wasPlaying = audioPlayer.isPlaying()
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
         seek(markers.seekNext(audioPlayer.getLocationInFrames()))
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
     }
 
     fun seekPrevious() {
         val wasPlaying = audioPlayer.isPlaying()
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
         seek(markers.seekPrevious(audioPlayer.getLocationInFrames()))
-        if (wasPlaying) { audioController?.toggle() }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
     }
 
     fun writeMarkers(): Completable {
