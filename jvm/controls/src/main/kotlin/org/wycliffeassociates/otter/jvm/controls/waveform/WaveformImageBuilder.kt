@@ -22,8 +22,11 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.ReplaySubject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
@@ -72,28 +75,32 @@ class WaveformImageBuilder(
     fun buildWaveformAsync(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
-        height: Int = Screen.getMainScreen().platformHeight,
-        waveform: ReplayRelay<Image>
-    ): Completable {
-        return Completable
-            .fromAction {
-                reader.open()
-                drawPartialImages(reader, width, height, waveform)
-            }
-            .doOnError { e ->
-                logger.error("Error in building WaveformImage", e)
-            }
-            .doFinally {
-                reader.release()
-            }
-            .subscribeOn(Schedulers.computation())
+        height: Int = Screen.getMainScreen().platformHeight
+    ): Observable<Image> {
+        val waveformStream = ReplaySubject.create<Image>()
+
+        Completable.fromAction {
+            reader.open()
+            drawPartialImages(reader, width, height, waveformStream)
+        }
+        .doOnError { e ->
+            logger.error("Error in building WaveformImage", e)
+        }
+        .doFinally {
+            reader.release()
+        }
+        .subscribeOn(Schedulers.computation())
+        .subscribe()
+
+        return waveformStream
+            .observeOnFx()
     }
 
     private fun drawPartialImages(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveform: ReplayRelay<Image>
+        waveformStream: ReplaySubject<Image>
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)
@@ -116,7 +123,7 @@ class WaveformImageBuilder(
             counter++
             if (counter == partialImageWidth) {
                 counter = 0
-                waveform.accept(img)
+                waveformStream.onNext(img)
                 img = WritableImage(partialImageWidth, height)
             }
         }
@@ -131,8 +138,10 @@ class WaveformImageBuilder(
                 height
             )
             renderImage(img, reader, lastImageWidth, height, framesPerPixel)
-            waveform.accept(img)
+            waveformStream.onNext(img)
         }
+
+        waveformStream.onComplete()
     }
 
     private fun scaleToHeight(value: Int, height: Int): Int {

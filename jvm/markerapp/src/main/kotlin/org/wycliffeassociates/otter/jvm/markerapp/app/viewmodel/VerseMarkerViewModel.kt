@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
-import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -47,7 +46,6 @@ private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
 
-    private val waveformStream = ReplayRelay.create<Image>()
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
@@ -62,7 +60,7 @@ class VerseMarkerViewModel : ViewModel() {
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
     val waveformMinimapImage = SimpleObjectProperty<Image>()
-    val waveform = waveformStream as Observable<Image>
+    val waveform: Observable<Image>
     val imageWidth: Double
 
     private val audioFile: File
@@ -83,7 +81,24 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.load(audioFile)
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        initializeWaveformImages()
+        WaveformImageBuilder(
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
+        ).apply {
+            build(
+                AudioFile(audioFile).reader(),
+                width = imageWidth.toInt(),
+                height = 50
+            ).subscribe { image ->
+                waveformMinimapImage.set(image)
+            }
+
+            waveform = buildWaveformAsync(
+                AudioFile(audioFile).reader(),
+                width = imageWidth.toInt(),
+                height = height
+            )
+        }
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
@@ -169,27 +184,5 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.getDurationInFrames()
-    }
-
-    private fun initializeWaveformImages() {
-        WaveformImageBuilder(
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        ).apply {
-            build(
-                AudioFile(audioFile).reader(),
-                width = imageWidth.toInt(),
-                height = 50
-            ).subscribe { image ->
-                waveformMinimapImage.set(image)
-            }
-
-            buildWaveformAsync(
-                AudioFile(audioFile).reader(),
-                width = imageWidth.toInt(),
-                height = height,
-                waveform = waveformStream
-            ).subscribe()
-        }
     }
 }
