@@ -19,13 +19,11 @@
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.jakewharton.rxrelay2.ReplayRelay
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.ReplaySubject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
