@@ -19,9 +19,48 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
+import javax.inject.Inject
+import javax.sound.sampled.LineUnavailableException
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 
 class RootViewModel : ViewModel() {
+
+    val logger = LoggerFactory.getLogger(RootViewModel::class.java)
+
     val pluginOpenedProperty = SimpleBooleanProperty(false)
     val drawerOpenedProperty = SimpleBooleanProperty(false)
+
+    val showAudioErrorDialogProperty = SimpleBooleanProperty(false)
+    var audioErrorType = SimpleObjectProperty<AudioErrorType>()
+
+    @Inject
+    lateinit var audioConnectionFactory: AudioConnectionFactory
+
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+        initializeAudioErrorListener()
+    }
+
+    private fun initializeAudioErrorListener() {
+        audioConnectionFactory
+            .errorListener()
+            .subscribe {
+                logger.error("Audio Device Error", it.exception)
+                showAudioErrorDialogProperty.set(true)
+                when (it.exception) {
+                    is LineUnavailableException -> {
+                        audioErrorType.set(it.type)
+                        showAudioErrorDialogProperty.set(true)
+                    }
+                    else -> {
+                        throw it.exception
+                    }
+                }
+            }
+    }
 }

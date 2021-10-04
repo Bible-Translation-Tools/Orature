@@ -18,18 +18,21 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import com.jakewharton.rxrelay2.PublishRelay
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.sound.sampled.AudioFormat
-import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
 
-class AudioBufferPlayer(private val player: SourceDataLine) : IAudioPlayer {
+class AudioBufferPlayer(
+    private val player: SourceDataLine,
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+) : IAudioPlayer {
 
     override val frameStart: Int
         get() = begin
@@ -97,18 +100,22 @@ class AudioBufferPlayer(private val player: SourceDataLine) : IAudioPlayer {
                 pause.set(false)
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
-                    player.open()
-                    player.start()
-                    while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
-                        val written = _reader.getPcmBuffer(bytes)
-                        player.write(bytes, 0, written)
-                    }
-                    player.drain()
-                    if (!pause.get()) {
-                        startPosition = 0
-                        listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
-                        player.close()
-                        seek(0)
+                    try {
+                        player.open()
+                        player.start()
+                        while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
+                            val written = _reader.getPcmBuffer(bytes)
+                            player.write(bytes, 0, written)
+                        }
+                        player.drain()
+                        if (!pause.get()) {
+                            startPosition = 0
+                            listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
+                            player.close()
+                            seek(0)
+                        }
+                    } catch (e: LineUnavailableException) {
+                        errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                     }
                 }
                 playbackThread.start()

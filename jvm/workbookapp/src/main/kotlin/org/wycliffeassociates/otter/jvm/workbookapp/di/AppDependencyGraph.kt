@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 
 @Component(
     modules = [
@@ -60,6 +61,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 interface AppDependencyGraph {
     fun inject(app: OtterApp)
 
+    fun inject(viewModel: RootViewModel)
     fun inject(viewModel: SplashScreenViewModel)
     fun inject(viewModel: HomePageViewModel)
     fun inject(viewModel: AddPluginViewModel)

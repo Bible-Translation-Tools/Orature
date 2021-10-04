@@ -56,7 +56,7 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
             .filter { mixerInfo ->
                 val mixer = AudioSystem.getMixer(mixerInfo)
                 val info = DataLine.Info(SourceDataLine::class.java, audioFormat)
-                val lines = mixer.getSourceLineInfo(info)
+                val lines = if (info.isFormatSupported(audioFormat)) mixer.getSourceLineInfo(info) else arrayOf()
                 lines.isNotEmpty()
             }.toList().map { it }
     }
@@ -68,7 +68,7 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
             .filter { mixerInfo ->
                 val mixer = AudioSystem.getMixer(mixerInfo)
                 val info = DataLine.Info(TargetDataLine::class.java, audioFormat)
-                val lines = mixer.getTargetLineInfo(info)
+                val lines = if (info.isFormatSupported(audioFormat)) mixer.getTargetLineInfo(info) else arrayOf()
                 lines.isNotEmpty()
             }.toList().map { it }
         return mixers

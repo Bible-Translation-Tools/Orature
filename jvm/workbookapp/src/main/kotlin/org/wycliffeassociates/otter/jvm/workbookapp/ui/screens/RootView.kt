@@ -18,11 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.application.Platform
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
@@ -46,12 +49,38 @@ class RootView : View() {
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
 
+        importStylesheet(resources.get("/css/audio-error-dialog.css"))
+
+        initAudioErrorDialog()
     }
 
     override val root = stackpane {
         borderpane {
             left<AppBar>()
             center<AppContent>()
+        }
+    }
+
+    private fun initAudioErrorDialog() {
+        val errorDialog = audioerrordialog {
+            titleTextProperty.set(messages["error"])
+            inputMessageTitleTextProperty.set(messages["unableToRecord"])
+            inputMessageTextProperty.set(messages["audioErrorMessage"])
+
+            outputMessageTitleTextProperty.set(messages["unableToPlaySound"])
+            outputMessageTextProperty.set(messages["audioErrorMessage"])
+
+            backgroundImageProperty.set(resources.image("/images/audio_error.png"))
+            cancelButtonTextProperty.set(messages["close"])
+
+            errorTypeProperty.bind(viewModel.audioErrorType)
+
+            onCloseAction { viewModel.showAudioErrorDialogProperty.set(false) }
+            onCancelAction { viewModel.showAudioErrorDialogProperty.set(false) }
+        }
+
+        viewModel.showAudioErrorDialogProperty.onChangeAndDoNow {
+            Platform.runLater { if (it!!) errorDialog.open() else errorDialog.close() }
         }
     }
 }

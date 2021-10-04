@@ -18,20 +18,26 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import javax.sound.sampled.LineUnavailableException
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import javax.sound.sampled.TargetDataLine
 
 private const val DEFAULT_BUFFER_SIZE = 1024
 
-class AudioRecorder(val line: TargetDataLine) : IAudioRecorder {
+class AudioRecorder(
+    val line: TargetDataLine,
+    private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
+) : IAudioRecorder {
 
     private val monitor = Object()
 
     @Volatile
     private var stop = false
+
     @Volatile
     private var pause = false
 
@@ -66,8 +72,12 @@ class AudioRecorder(val line: TargetDataLine) : IAudioRecorder {
     @Synchronized // Synchronized so as to not subscribe to multiple streams on quick multipress
     override fun start() {
         pause = false
-        line.open()
-        line.start()
+        try {
+            line.open()
+            line.start()
+        } catch (e: LineUnavailableException) {
+            errorRelay.accept(AudioError(AudioErrorType.RECORDING, e))
+        }
         synchronized(monitor) {
             monitor.notify()
         }
