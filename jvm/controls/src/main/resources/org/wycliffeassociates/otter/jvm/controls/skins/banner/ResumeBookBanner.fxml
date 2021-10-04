@@ -61,7 +61,7 @@
                     </graphic>
                     <styleClass>
                         <String fx:value="btn" />
-                        <String fx:value="btn--primary" />
+                        <String fx:value="btn--cta" />
                     </styleClass>
                 </Button>
             </children>
