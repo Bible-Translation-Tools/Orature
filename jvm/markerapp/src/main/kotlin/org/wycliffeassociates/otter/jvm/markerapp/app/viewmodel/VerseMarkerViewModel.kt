@@ -93,8 +93,8 @@ class VerseMarkerViewModel : ViewModel() {
             )
                 .observeOnFx()
                 .subscribe { image ->
-                waveformMinimapImage.set(image)
-            }
+                    waveformMinimapImage.set(image)
+                }
 
             waveform = buildWaveformAsync(
                 AudioFile(audioFile).reader(),
