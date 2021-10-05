@@ -27,6 +27,7 @@ import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.media.DURATION_FORMAT
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -61,6 +62,7 @@ class AudioPlayerController(
 
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
+        audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
         disposable?.dispose()
         disposable = startProgressUpdate()
@@ -122,7 +124,7 @@ class AudioPlayerController(
                     isPlayingProperty.set(false)
                 }
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
-                    audioSlider.value = locationToPercentage()
+                    audioSlider.value = playbackPosition().toDouble()
                 }
             }
     }
@@ -145,6 +147,8 @@ class AudioPlayerController(
     }
 
     fun seek(location: Int) {
+        audioSlider.value = location.toDouble()
+        
         player?.let {
             it.seek(location)
             if (!it.isPlaying()) {
@@ -164,9 +168,15 @@ class AudioPlayerController(
         }
     }
 
-    private fun locationToPercentage(): Double {
-        return player?.let {
-            it.getLocationInFrames() / it.getDurationInFrames().toDouble() * 100
-        } ?: 0.0
+    private fun playbackPosition(): Int {
+        return player?.getLocationInFrames() ?: 0
     }
+}
+
+fun framesToTimecode(value: Double, audioSampleRate: Int): String {
+    val framesPerMs = audioSampleRate / 1000
+    val durationMs = (value / framesPerMs).toLong()
+    val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
+    val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+    return DURATION_FORMAT.format(min, sec)
 }
