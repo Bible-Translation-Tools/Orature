@@ -31,8 +31,8 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
-import java.util.concurrent.TimeUnit
 
 const val DURATION_FORMAT = "%02d:%02d"
 
@@ -78,10 +78,11 @@ class SimpleAudioPlayer(
                 hgrow = Priority.ALWAYS
                 value = 0.0
 
-
                 setValueFactory {
                     Bindings.createStringBinding(
-                        { formatSliderDuration(it.value) },
+                        {
+                            framesToTimecode(it.value, audioSampleRate.value)
+                        },
                         valueProperty()
                     )
                 }
@@ -115,14 +116,6 @@ class SimpleAudioPlayer(
                 }
             }
         }
-    }
-
-    private fun formatSliderDuration(value: Double): String {
-        val framesPerMs = audioSampleRate.value / 1000
-        val durationMs = (value / framesPerMs).toLong()
-        val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
-        val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
-        return DURATION_FORMAT.format(min, sec)
     }
 }
 

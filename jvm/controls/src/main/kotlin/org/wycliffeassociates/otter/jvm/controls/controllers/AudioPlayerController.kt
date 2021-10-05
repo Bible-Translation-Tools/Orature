@@ -27,6 +27,7 @@ import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.media.DURATION_FORMAT
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -170,4 +171,12 @@ class AudioPlayerController(
     private fun playbackPosition(): Int {
         return player?.getLocationInFrames() ?: 0
     }
+}
+
+fun framesToTimecode(value: Double, audioSampleRate: Int): String {
+    val framesPerMs = audioSampleRate / 1000
+    val durationMs = (value / framesPerMs).toLong()
+    val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
+    val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+    return DURATION_FORMAT.format(min, sec)
 }
