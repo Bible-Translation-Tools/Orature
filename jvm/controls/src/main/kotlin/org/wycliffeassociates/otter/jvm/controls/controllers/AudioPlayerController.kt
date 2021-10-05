@@ -122,7 +122,7 @@ class AudioPlayerController(
                     isPlayingProperty.set(false)
                 }
                 if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
-                    audioSlider.value = locationToPercentage()
+                    audioSlider.value = playbackPosition().toDouble()
                 }
             }
     }
@@ -164,9 +164,7 @@ class AudioPlayerController(
         }
     }
 
-    private fun locationToPercentage(): Double {
-        return player?.let {
-            it.getLocationInFrames() / it.getDurationInFrames().toDouble() * 100
-        } ?: 0.0
+    private fun playbackPosition(): Int {
+        return player?.getLocationInFrames() ?: 0
     }
 }
