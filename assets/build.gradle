@@ -3,7 +3,7 @@ version '0.0.1'
 
 repositories {
     ivy {
-        url 'https://git.door43.org'
+        url 'https://content.bibletranslationtools.org'
         patternLayout {
             artifact '[organisation]/[module]/archive/[revision].[ext]'
         }
@@ -30,7 +30,7 @@ configurations {
 }
 
 dependencies {
-    content 'wycliffeassociates:en_ulb:v19-10@zip'
+    content 'wa-catalog:en_ulb:V21-05@zip'
     content 'unfoldingword:langnames@json'
     content 'bible-translation-tools:bible_artwork@zip'
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
@@ -49,7 +49,7 @@ task copyToResources(type: Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('-(v\\d{2}-\\d{2})?\\.zip$', '.zip')
+                filename.replaceAll('-(V\\d{2}-\\d{2})?\\.zip$', '.zip')
             }
     }
 }
