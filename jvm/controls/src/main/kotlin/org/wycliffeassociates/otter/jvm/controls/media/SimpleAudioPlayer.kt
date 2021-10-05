@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.jvm.controls.media
 
 import com.jfoenix.controls.JFXSlider
+import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
 import javafx.geometry.Pos
@@ -29,7 +31,17 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import tornadofx.*
+import tornadofx.action
+import tornadofx.add
+import tornadofx.addClass
+import tornadofx.attachTo
+import tornadofx.button
+import tornadofx.hgrow
+import tornadofx.objectBinding
+import tornadofx.onChange
+import java.util.concurrent.TimeUnit
+
+const val DURATION_FORMAT = "%02d:%02d"
 
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
@@ -42,8 +54,13 @@ class SimpleAudioPlayer(
 
     private val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
     private val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+    private val audioSampleRate = SimpleIntegerProperty(0)
 
     init {
+        playerProperty.onChange {
+            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
+        }
+
         alignment = Pos.CENTER
         spacing = 10.0
         button {
@@ -67,6 +84,14 @@ class SimpleAudioPlayer(
                 addClass("wa-slider")
                 hgrow = Priority.ALWAYS
                 value = 0.0
+
+
+                setValueFactory {
+                    Bindings.createStringBinding(
+                        { formatSliderDuration(it.value) },
+                        valueProperty()
+                    )
+                }
             }
         )
 
@@ -97,6 +122,14 @@ class SimpleAudioPlayer(
                 }
             }
         }
+    }
+
+    private fun formatSliderDuration(value: Double): String {
+        val framesPerMs = audioSampleRate.value / 1000
+        val durationMs = (value / framesPerMs).toLong()
+        val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
+        val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+        return DURATION_FORMAT.format(min, sec)
     }
 }
 

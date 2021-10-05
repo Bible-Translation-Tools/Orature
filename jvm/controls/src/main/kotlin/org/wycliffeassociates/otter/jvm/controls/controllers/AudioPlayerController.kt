@@ -61,6 +61,7 @@ class AudioPlayerController(
 
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
+        audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
         disposable?.dispose()
         disposable = startProgressUpdate()
