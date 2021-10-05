@@ -146,6 +146,8 @@ class AudioPlayerController(
     }
 
     fun seek(location: Int) {
+        audioSlider.value = location.toDouble()
+        
         player?.let {
             it.seek(location)
             if (!it.isPlaying()) {
