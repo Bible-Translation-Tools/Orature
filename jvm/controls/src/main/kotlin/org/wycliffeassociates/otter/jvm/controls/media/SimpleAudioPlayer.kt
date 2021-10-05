@@ -31,14 +31,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import tornadofx.action
-import tornadofx.add
-import tornadofx.addClass
-import tornadofx.attachTo
-import tornadofx.button
-import tornadofx.hgrow
-import tornadofx.objectBinding
-import tornadofx.onChange
+import tornadofx.*
 import java.util.concurrent.TimeUnit
 
 const val DURATION_FORMAT = "%02d:%02d"
