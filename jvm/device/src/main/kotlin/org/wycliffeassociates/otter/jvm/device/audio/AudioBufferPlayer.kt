@@ -24,6 +24,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
@@ -116,7 +117,10 @@ class AudioBufferPlayer(
                         }
                     } catch (e: LineUnavailableException) {
                         errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
+                    } catch (e: IllegalArgumentException) {
+                        errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                     }
+
                 }
                 playbackThread.start()
             }

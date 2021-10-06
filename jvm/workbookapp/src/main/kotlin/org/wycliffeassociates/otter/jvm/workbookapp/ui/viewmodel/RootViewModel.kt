@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import java.lang.IllegalArgumentException
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javax.inject.Inject
@@ -53,7 +54,7 @@ class RootViewModel : ViewModel() {
                 logger.error("Audio Device Error", it.exception)
                 showAudioErrorDialogProperty.set(true)
                 when (it.exception) {
-                    is LineUnavailableException -> {
+                    is LineUnavailableException, is IllegalArgumentException -> {
                         audioErrorType.set(it.type)
                         showAudioErrorDialogProperty.set(true)
                     }
