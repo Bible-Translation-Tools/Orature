@@ -22,6 +22,7 @@ import com.jakewharton.rxrelay2.PublishRelay
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import java.lang.IllegalArgumentException
 import javax.sound.sampled.LineUnavailableException
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
 import javax.sound.sampled.TargetDataLine
@@ -76,6 +77,8 @@ class AudioRecorder(
             line.open()
             line.start()
         } catch (e: LineUnavailableException) {
+            errorRelay.accept(AudioError(AudioErrorType.RECORDING, e))
+        } catch (e: IllegalArgumentException) {
             errorRelay.accept(AudioError(AudioErrorType.RECORDING, e))
         }
         synchronized(monitor) {
