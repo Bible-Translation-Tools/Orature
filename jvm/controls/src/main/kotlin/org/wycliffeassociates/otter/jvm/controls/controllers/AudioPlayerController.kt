@@ -175,7 +175,11 @@ class AudioPlayerController(
 }
 
 fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): String {
-    val framesPerMs = sampleRate / 1000
+    val framesPerMs = if (sampleRate > 0) {
+        sampleRate / 1000
+    } else {
+        DEFAULT_SAMPLE_RATE / 1000
+    }
     val durationMs = (value / framesPerMs).toLong()
     val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
     val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
