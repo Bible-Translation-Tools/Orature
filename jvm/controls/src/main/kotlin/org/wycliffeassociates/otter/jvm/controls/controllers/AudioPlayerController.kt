@@ -60,12 +60,17 @@ class AudioPlayerController(
         }
     }
 
-    fun load(player: IAudioPlayer) {
+    fun load(player: IAudioPlayer, resetPlayback: Boolean = false) {
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()
         this.player = player
         disposable?.dispose()
         disposable = startProgressUpdate()
+
+        if (resetPlayback) {
+            startAtLocation = 0
+        }
+
         player.addEventListener {
             if (
                 it == AudioPlayerEvent.PAUSE ||

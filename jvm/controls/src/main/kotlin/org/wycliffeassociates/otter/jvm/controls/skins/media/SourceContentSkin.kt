@@ -162,13 +162,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceContent.audioPlayerProperty.onChangeAndDoNow { player ->
             player?.let {
-                audioController.load(it)
+                audioController.load(it, true)
             }
         }
 
         sourceContent.targetAudioPlayerProperty.onChangeAndDoNow { player ->
             player?.let {
-                targetAudioController.load(it)
+                targetAudioController.load(it, true)
             }
         }
 
