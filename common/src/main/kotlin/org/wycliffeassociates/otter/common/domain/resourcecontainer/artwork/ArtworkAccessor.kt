@@ -45,7 +45,7 @@ class ArtworkAccessor(
      *  @return a nullable file which contains the image or null if no match
      *  was found.
      */
-    fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): File? {
+    fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): Artwork? {
         imagesDataSources.forEach { dataSource ->
             var image = dataSource.getImage(metadata, projectSlug, imageRatio)
             if (image != null) {

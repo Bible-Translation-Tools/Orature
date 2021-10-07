@@ -40,7 +40,7 @@ class ResourceContainerImagesDataSource(
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio
-    ): File? {
+    ): Artwork? {
         val ratioString = imageRatio.getImageSuffix()
 
         getImageFromCache(
@@ -62,14 +62,15 @@ class ResourceContainerImagesDataSource(
                 ) {
                     val image = getImageFromRC(media, rc, projectSlug, imageRatio)
                     if (image != null) {
+                        val artwork = Artwork(image, rc.manifest.dublinCore.creator, rc.manifest.dublinCore.rights)
                         cacheImage(
-                            image,
+                            artwork,
                             metadata.language.slug,
                             metadata.identifier,
                             projectSlug,
                             ratioString
                         )
-                        return image
+                        return artwork
                     }
                 }
             }
@@ -129,14 +130,14 @@ class ResourceContainerImagesDataSource(
         private val mediaTypes = listOf("jpg", "jpeg", "png")
         // {languageSlug}-{resourceId}-{projectSlug}{ratio}
         private const val cacheKeyTemplate = "%s-%s-%s%s"
-        private val filesCache = ConcurrentHashMap<String, File>()
+        private val filesCache = ConcurrentHashMap<String, Artwork>()
 
         private fun getImageFromCache(
             languageSlug: String,
             resourceId: String,
             project: String,
             ratio: String
-        ): File? {
+        ): Artwork? {
             val key = cacheKeyTemplate.format(
                 languageSlug, resourceId, project, ratio
             )
@@ -144,7 +145,7 @@ class ResourceContainerImagesDataSource(
         }
 
         private fun cacheImage(
-            image: File,
+            artwork: Artwork,
             languageSlug: String,
             resourceId: String,
             project: String,
@@ -153,7 +154,7 @@ class ResourceContainerImagesDataSource(
             val key = cacheKeyTemplate.format(
                 languageSlug, resourceId, project, ratio
             )
-            filesCache[key] = image
+            filesCache[key] = artwork
         }
     }
 }

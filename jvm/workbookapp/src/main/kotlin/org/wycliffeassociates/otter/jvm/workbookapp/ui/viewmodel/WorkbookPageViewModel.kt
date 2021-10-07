@@ -160,7 +160,7 @@ class WorkbookPageViewModel : ViewModel() {
         val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
             title = workbook.target.title,
-            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE),
+            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file,
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])
@@ -207,7 +207,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
         projectExporter
@@ -238,7 +238,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
         workbookRepository.closeWorkbook(workbook)

@@ -40,7 +40,7 @@ class BibleImagesDataSource(
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio
-    ): File? {
+    ): Artwork? {
         // fetch and return from cache if any
         filesCache[projectSlug + imageRatio.getImageSuffix()]
             ?.let { return it }
@@ -60,7 +60,7 @@ class BibleImagesDataSource(
         rcFile: File,
         projectSlug: String,
         imageRatio: ImageRatio
-    ): File? {
+    ): Artwork? {
 
         ResourceContainer.load(rcFile).use { rc ->
             val contentPath = rc.manifest.projects.firstOrNull {
@@ -87,8 +87,9 @@ class BibleImagesDataSource(
                     }
                 }
 
-                filesCache[projectSlug + imageRatio.getImageSuffix()] = image
-                return image
+                val artwork = Artwork(image, rc.manifest.dublinCore.creator, rc.manifest.dublinCore.rights)
+                filesCache[projectSlug + imageRatio.getImageSuffix()] = artwork
+                return artwork
             }
         }
 
@@ -96,6 +97,6 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private val filesCache = ConcurrentHashMap<String, File>()
+        private val filesCache = ConcurrentHashMap<String, Artwork>()
     }
 }

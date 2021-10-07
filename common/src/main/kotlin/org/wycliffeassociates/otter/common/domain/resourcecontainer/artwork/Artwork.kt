@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
+package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
-import org.wycliffeassociates.otter.common.data.primitives.Collection
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import java.io.File
 
-data class BookCardData(val collection: Collection, val artwork: Artwork? = null)
-
+data class Artwork(val file: File, val attribution: String, val license: String)

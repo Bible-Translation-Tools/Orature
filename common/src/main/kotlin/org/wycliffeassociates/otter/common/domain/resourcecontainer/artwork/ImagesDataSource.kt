@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import java.io.File
 
 interface ImagesDataSource {
     /**
@@ -45,5 +44,5 @@ interface ImagesDataSource {
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio = ImageRatio.DEFAULT
-    ): File?
+    ): Artwork?
 }

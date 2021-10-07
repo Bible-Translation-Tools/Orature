@@ -51,7 +51,9 @@ class BookCell(
                 it?.let { FX.messages[it.value] }
             })
 
-            coverArtProperty.set(item.artwork)
+            coverArtProperty.set(item.artwork?.file)
+            licenseProperty.set(item.artwork?.license)
+            attributionProperty.set(item.artwork?.attribution)
 
             setOnMouseClicked {
                 onSelected(item)

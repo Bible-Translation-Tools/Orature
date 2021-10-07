@@ -32,12 +32,18 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import tornadofx.*
 import java.io.File
+import javafx.beans.binding.StringBinding
 
 class BookCardCell : HBox() {
 
     val coverArtProperty = SimpleObjectProperty<File>()
     val bookNameProperty = SimpleStringProperty()
     val projectTypeProperty = SimpleStringProperty()
+
+    val licenseProperty = SimpleStringProperty()
+    val attributionProperty = SimpleStringProperty()
+
+    private val tooltipTextProperty = StringBinding.stringExpression(licenseProperty.plus("\n\n").plus(attributionProperty))
 
     private val graphicRadius = 15.0
 
@@ -65,6 +71,7 @@ class BookCardCell : HBox() {
                     arcHeight = graphicRadius
                 }
                 clip = rect
+                tooltip { textProperty().bind(tooltipTextProperty) }
             }
         }
 

@@ -73,7 +73,7 @@ class HomePage : View() {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
                                 backgroundImageFileProperty.set(
-                                    workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+                                    workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
                                 )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)
@@ -106,7 +106,7 @@ class HomePage : View() {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
                                     coverArtProperty.set(
-                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
                                     )
 
                                     setOnPrimaryAction { viewModel.selectProject(it) }
