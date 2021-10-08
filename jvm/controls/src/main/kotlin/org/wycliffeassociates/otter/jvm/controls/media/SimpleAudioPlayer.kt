@@ -34,8 +34,6 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
 
-const val DURATION_FORMAT = "%02d:%02d"
-
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
 ) : HBox() {

@@ -25,13 +25,14 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.media.DURATION_FORMAT
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
+const val DURATION_FORMAT = "%02d:%02d" // mm:ss
 private const val ANIMATION_REFRESH_MS = 16L
 
 class AudioPlayerController(
@@ -173,8 +174,12 @@ class AudioPlayerController(
     }
 }
 
-fun framesToTimecode(value: Double, audioSampleRate: Int): String {
-    val framesPerMs = audioSampleRate / 1000
+fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): String {
+    val framesPerMs = if (sampleRate > 0) {
+        sampleRate / 1000
+    } else {
+        DEFAULT_SAMPLE_RATE / 1000
+    }
     val durationMs = (value / framesPerMs).toLong()
     val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
     val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60

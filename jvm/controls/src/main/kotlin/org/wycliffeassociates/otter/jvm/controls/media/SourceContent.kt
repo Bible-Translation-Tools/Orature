@@ -20,18 +20,21 @@ package org.wycliffeassociates.otter.jvm.controls.media
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
+import tornadofx.onChange
 
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
 
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
+    val audioSampleRate = SimpleIntegerProperty(0)
 
     val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
@@ -55,6 +58,9 @@ class SourceContent : Control() {
 
     init {
         initialize()
+        audioPlayerProperty.onChange {
+            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
+        }
     }
 
     override fun createDefaultSkin(): Skin<*> {

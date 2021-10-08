@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
+import com.jfoenix.controls.JFXSlider
+import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -25,12 +27,12 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
-import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -53,10 +55,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var playTargetBtn: Button
 
     @FXML
-    lateinit var audioSlider: Slider
+    lateinit var audioSlider: JFXSlider
 
     @FXML
-    lateinit var targetAudioSlider: Slider
+    lateinit var targetAudioSlider: JFXSlider
 
     @FXML
     lateinit var sourceAudioNotAvailable: HBox
@@ -112,6 +114,23 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initControllers() {
+        audioSlider.setValueFactory {
+            Bindings.createStringBinding(
+                {
+                    framesToTimecode(it.value, sourceContent.audioSampleRate.value)
+                },
+                it.valueProperty()
+            )
+        }
+        targetAudioSlider.setValueFactory {
+            Bindings.createStringBinding(
+                {
+                    framesToTimecode(it.value, sourceContent.audioSampleRate.value)
+                },
+                it.valueProperty()
+            )
+        }
+
         audioController = AudioPlayerController(audioSlider)
         targetAudioController = AudioPlayerController(targetAudioSlider)
     }
