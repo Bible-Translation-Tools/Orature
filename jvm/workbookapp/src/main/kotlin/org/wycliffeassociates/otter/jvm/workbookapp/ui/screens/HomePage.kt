@@ -106,7 +106,7 @@ class HomePage : View() {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
                                     coverArtProperty.set(
-                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )
 
                                     setOnPrimaryAction { viewModel.selectProject(it) }

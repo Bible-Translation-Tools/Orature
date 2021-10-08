@@ -37,10 +37,14 @@ import java.io.File
 import java.util.concurrent.Callable
 import javafx.geometry.Side
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.FX
+import tornadofx.get
 
 class ResumeBookBanner : Control() {
 
     val backgroundArtworkProperty = SimpleObjectProperty<Artwork>()
+    val attributionTextProperty = SimpleStringProperty()
     val bookTitleProperty = SimpleStringProperty()
     val sourceLanguageProperty = SimpleStringProperty()
     val targetLanguageProperty = SimpleStringProperty()
@@ -49,6 +53,16 @@ class ResumeBookBanner : Control() {
 
     init {
         styleClass.setAll("resume-book-banner")
+        backgroundArtworkProperty.onChangeAndDoNow { artwork ->
+            artwork?.let {
+                attributionTextProperty.set(
+                    it.attributionText(
+                        FX.messages["artworkAttributionTitle"],
+                        FX.messages["license"]
+                    )
+                )
+            } ?: attributionTextProperty.set(null)
+        }
     }
 
     fun onResumeAction(op: () -> Unit) {

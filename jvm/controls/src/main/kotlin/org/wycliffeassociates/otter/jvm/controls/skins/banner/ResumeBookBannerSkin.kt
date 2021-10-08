@@ -27,6 +27,7 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.banner.ResumeBookBanner
+import tornadofx.tooltip
 
 class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<ResumeBookBanner>(banner) {
 
@@ -84,6 +85,11 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
         val loader = FXMLLoader(javaClass.getResource("ResumeBookBanner.fxml"))
         loader.setController(this)
         val root: Node = loader.load()
+        root.apply {
+            tooltip {
+                textProperty().bind(banner.attributionTextProperty)
+            }
+        }
         children.add(root)
     }
 }

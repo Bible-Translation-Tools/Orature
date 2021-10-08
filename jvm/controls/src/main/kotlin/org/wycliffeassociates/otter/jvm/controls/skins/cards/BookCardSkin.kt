@@ -78,7 +78,7 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         coverArt.apply {
             backgroundProperty().bind(
                 card.coverArtProperty.objectBinding {
-                    it?.let { Background(backgroundImage(it)) }
+                    it?.let { Background(backgroundImage(it.file)) }
                 }
             )
             val rect = Rectangle().apply {
@@ -106,6 +106,7 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
             visibleProperty().bind(card.newBookProperty)
             onActionProperty().bind(card.onAddBookActionProperty)
         }
+
     }
 
     private fun backgroundImage(file: File): BackgroundImage {
@@ -131,6 +132,11 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         val loader = FXMLLoader(javaClass.getResource("BookCard.fxml"))
         loader.setController(this)
         val root: Node = loader.load()
+        root.apply {
+            tooltip {
+                textProperty().bind(card.attributionTextProperty)
+            }
+        }
         children.add(root)
     }
 }

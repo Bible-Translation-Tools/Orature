@@ -20,4 +20,8 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import java.io.File
 
-data class Artwork(val file: File, val attribution: String, val license: String)
+data class Artwork(val file: File, val attribution: String, val license: String) {
+    fun attributionText(attributionTitle: String, licenseLabel: String): String {
+        return "$attributionTitle:\n© $attribution\n\n$licenseLabel:\n$license"
+    }
+}
