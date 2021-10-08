@@ -95,7 +95,7 @@ class SimpleAudioPlayer(
     private fun initController() {
         playerProperty.onChange {
             it?.let {
-                audioPlayerController.load(it)
+                audioPlayerController.load(it, true)
             }
         }
 
