@@ -62,7 +62,7 @@ class ChapterCell : ListCell<WorkbookItemModel>() {
 
     private fun prepareWorkbookBanner(item: WorkbookBannerModel): WorkbookBanner {
         return workbookBanner.apply {
-            backgroundImageFileProperty.set(item.coverArt)
+            backgroundArtworkProperty.set(item.coverArt)
             bookTitleProperty.set(item.title)
             resourceTitleProperty.set(item.rcTitle)
             hideDeleteButtonProperty.set(item.rcMetadataProperty.value.type == ContainerType.Help)

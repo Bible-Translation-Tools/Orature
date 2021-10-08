@@ -36,10 +36,11 @@ import org.wycliffeassociates.otter.jvm.controls.skins.banner.ResumeBookBannerSk
 import java.io.File
 import java.util.concurrent.Callable
 import javafx.geometry.Side
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 
 class ResumeBookBanner : Control() {
 
-    val backgroundImageFileProperty = SimpleObjectProperty<File>()
+    val backgroundArtworkProperty = SimpleObjectProperty<Artwork>()
     val bookTitleProperty = SimpleStringProperty()
     val sourceLanguageProperty = SimpleStringProperty()
     val targetLanguageProperty = SimpleStringProperty()
@@ -57,11 +58,11 @@ class ResumeBookBanner : Control() {
     fun backgroundBinding(): ObjectBinding<Background?> {
         return Bindings.createObjectBinding(
             Callable {
-                backgroundImageFileProperty.value?.let {
-                    Background(backgroundImage(it))
+                backgroundArtworkProperty.value?.let {
+                    Background(backgroundImage(it.file))
                 }
             },
-            backgroundImageFileProperty
+            backgroundArtworkProperty
         )
     }
 

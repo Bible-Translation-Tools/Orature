@@ -72,8 +72,8 @@ class HomePage : View() {
                         viewModel.resumeBookProperty.onChange {
                             it?.let { workbook ->
                                 bookTitleProperty.set(workbook.target.title)
-                                backgroundImageFileProperty.set(
-                                    workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+                                backgroundArtworkProperty.set(
+                                    workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                 )
                                 sourceLanguageProperty.set(workbook.source.language.name)
                                 targetLanguageProperty.set(workbook.target.language.name)

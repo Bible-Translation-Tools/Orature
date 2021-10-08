@@ -37,10 +37,11 @@ import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
 import java.io.File
 import java.util.concurrent.Callable
 import javafx.geometry.Side
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 
 class WorkbookBanner : Control() {
 
-    val backgroundImageFileProperty = SimpleObjectProperty<File>()
+    val backgroundArtworkProperty = SimpleObjectProperty<Artwork>()
     val bookTitleProperty = SimpleStringProperty()
     val resourceTitleProperty = SimpleStringProperty()
     val hideDeleteButtonProperty = SimpleBooleanProperty(false)
@@ -58,11 +59,11 @@ class WorkbookBanner : Control() {
     fun backgroundBinding(): ObjectBinding<Background?> {
         return Bindings.createObjectBinding(
             Callable {
-                backgroundImageFileProperty.value?.let {
-                    Background(backgroundImage(it))
+                backgroundArtworkProperty.value?.let {
+                    Background(backgroundImage(it.file))
                 }
             },
-            backgroundImageFileProperty
+            backgroundArtworkProperty
         )
     }
 
