@@ -29,16 +29,13 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEn
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
-private const val ARTWORK_FILENAME = "bible_artwork.zip"
-private const val ARTWORK_PATH = "content/$ARTWORK_FILENAME"
-
 class InitializeArtwork @Inject constructor(
     private val installedEntityRepo: IInstalledEntityRepository,
     private val directoryProvider: IDirectoryProvider
 ) : Installable {
 
     override val name = "ARTWORK"
-    override val version = 1
+    override val version = 2
 
     private val log = LoggerFactory.getLogger(InitializeArtwork::class.java)
 
@@ -48,7 +45,8 @@ class InitializeArtwork @Inject constructor(
                 val installedVersion = installedEntityRepo.getInstalledVersion(this)
                 if (installedVersion != version) {
                     log.info("Initializing $name version: $version...")
-                    copyBibleArtworkContainer()
+                    copyBibleArtworkContainers()
+                    installedEntityRepo.install(this)
                 } else {
                     log.info("$name up to date with version: $version")
                 }
@@ -58,18 +56,20 @@ class InitializeArtwork @Inject constructor(
             }
     }
 
-    private fun copyBibleArtworkContainer() {
-        if (!File(directoryProvider.resourceContainerDirectory, ARTWORK_FILENAME).exists()) {
-            log.info("Copying bible artwork")
-            ClassLoader.getSystemResourceAsStream(ARTWORK_PATH)
-                .transferTo(
-                    File(
-                        directoryProvider.resourceContainerDirectory.absolutePath,
-                        ARTWORK_FILENAME
-                    ).outputStream()
-                )
-        } else {
-            log.info("Artwork not initialized but ${ARTWORK_FILENAME} exists in rc directory")
+    private fun copyBibleArtworkContainers(artwork: List<String> = listOf("en_art_wa.zip", "en_art_sp.zip")) {
+        for (art in artwork) {
+            if (!File(directoryProvider.resourceContainerDirectory, art).exists()) {
+                log.info("Copying bible artwork")
+                ClassLoader.getSystemResourceAsStream("content/$art")
+                    .transferTo(
+                        File(
+                            directoryProvider.resourceContainerDirectory.absolutePath,
+                            art
+                        ).outputStream()
+                    )
+            } else {
+                log.info("Artwork not initialized but $art exists in rc directory")
+            }
         }
     }
 }

@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class BibleImagesDataSource(
     private val directoryProvider: IDirectoryProvider,
-    private val imagesContainerName: String = "bible_artwork.zip"
+    private val imagesContainerNames: List<String> = listOf("en_art_sp.zip", "en_art_wa.zip")
 ) : ImagesDataSource {
 
     private val cacheDir = File(
@@ -45,15 +45,20 @@ class BibleImagesDataSource(
         filesCache[projectSlug + imageRatio.getImageSuffix()]
             ?.let { return it }
 
-        val imagesContainer = directoryProvider
-                                            .resourceContainerDirectory
-                                            .resolve(imagesContainerName)
-
-        return if (imagesContainer.exists()) {
-            getImageFromRC(imagesContainer, projectSlug, imageRatio)
-        } else {
-            null
+        var art: Artwork? = null
+        for (container in imagesContainerNames) {
+            val imagesContainer = directoryProvider
+                .resourceContainerDirectory
+                .resolve(container)
+            if (imagesContainer.exists()) {
+                val found = getImageFromRC(imagesContainer, projectSlug, imageRatio)
+                if (found != null) {
+                    art = found
+                    break
+                }
+            }
         }
+        return art
     }
 
     private fun getImageFromRC(
