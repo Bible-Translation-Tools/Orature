@@ -43,14 +43,14 @@ class TestBibleImagesDataSource {
     private val metadataMock = mock(ResourceMetadata::class.java)
 
     // this name must be valid according to BibleImagesDataSource container name
-    private val imagesContainerName = "bible_artwork"
+    private val imagesContainerName = listOf("bible_artwork")
     private val project = "jas"
 
     @Before
     fun setUp() {
         val sourceRC = getResource(testRCName)
         tempDir = createTempDirectory().toFile()
-        val tempContainer = tempDir.resolve(imagesContainerName)
+        val tempContainer = tempDir.resolve(imagesContainerName.first())
         sourceRC.copyRecursively(tempContainer)
 
         `when`(directoryProviderMock.resourceContainerDirectory)
@@ -90,7 +90,7 @@ class TestBibleImagesDataSource {
         )
         assertTrue(
             "Could not get image with ratio $ratioString for $project",
-            image!!.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
@@ -132,7 +132,7 @@ class TestBibleImagesDataSource {
         )
         assertFalse(
             "Project $project should not have image with ratio $ratioString in data source",
-            image!!.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString)
         )
     }
 

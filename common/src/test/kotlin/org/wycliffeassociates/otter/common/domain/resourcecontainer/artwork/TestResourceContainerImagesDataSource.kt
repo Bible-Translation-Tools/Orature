@@ -91,7 +91,7 @@ class TestResourceContainerImagesDataSource {
         )
         assertTrue(
             "Could not get image with ratio $ratioString for $project",
-            image!!.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
@@ -133,7 +133,7 @@ class TestResourceContainerImagesDataSource {
         )
         assertFalse(
             "Project $project should not have image with ratio $ratioString in data source",
-            image!!.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
