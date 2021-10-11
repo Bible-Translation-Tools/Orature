@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
-interface ImagesDataSource {
+interface ArtworkDataSource {
     /**
      *  Searches for the appropriate image for a given project slug.
      *  A preferred aspect ratio can be provided, which will be returned if it exists.
@@ -40,7 +40,7 @@ interface ImagesDataSource {
      *  @returns a nullable file, in which the file contains the requested image, and null if
      *  no match was found.
      */
-    fun getImage(
+    fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio = ImageRatio.DEFAULT

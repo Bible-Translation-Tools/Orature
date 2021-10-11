@@ -21,16 +21,15 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import java.io.File
 
 class ArtworkAccessor(
     val directoryProvider: IDirectoryProvider,
     val metadata: ResourceMetadata,
     val projectSlug: String
 ) {
-    private val imagesDataSources = listOf<ImagesDataSource>(
-        ResourceContainerImagesDataSource(directoryProvider),
-        BibleImagesDataSource(directoryProvider)
+    private val artworkDataSources = listOf<ArtworkDataSource>(
+        ResourceContainerArtworkDataSource(directoryProvider),
+        BibleArtworkDataSource(directoryProvider)
     )
 
     /**
@@ -46,8 +45,8 @@ class ArtworkAccessor(
      *  was found.
      */
     fun getArtwork(imageRatio: ImageRatio = ImageRatio.DEFAULT): Artwork? {
-        imagesDataSources.forEach { dataSource ->
-            var image = dataSource.getImage(metadata, projectSlug, imageRatio)
+        artworkDataSources.forEach { dataSource ->
+            var image = dataSource.getArtwork(metadata, projectSlug, imageRatio)
             if (image != null) {
                 return image
             }

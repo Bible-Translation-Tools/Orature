@@ -26,23 +26,23 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
-class BibleImagesDataSource(
+class BibleArtworkDataSource(
     private val directoryProvider: IDirectoryProvider,
     private val imagesContainerNames: List<String> = listOf("en_art_sp.zip", "en_art_wa.zip")
-) : ImagesDataSource {
+) : ArtworkDataSource {
 
     private val cacheDir = File(
         directoryProvider.cacheDirectory,
         "bible-images"
     ).apply { mkdirs() }
 
-    override fun getImage(
+    override fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio
     ): Artwork? {
         // fetch and return from cache if any
-        filesCache[projectSlug + imageRatio.getImageSuffix()]
+        artworkCache[projectSlug + imageRatio.getImageSuffix()]
             ?.let { return it }
 
         var art: Artwork? = null
@@ -51,7 +51,7 @@ class BibleImagesDataSource(
                 .resourceContainerDirectory
                 .resolve(container)
             if (imagesContainer.exists()) {
-                val found = getImageFromRC(imagesContainer, projectSlug, imageRatio)
+                val found = getArtworkFromRC(imagesContainer, projectSlug, imageRatio)
                 if (found != null) {
                     art = found
                     break
@@ -61,7 +61,7 @@ class BibleImagesDataSource(
         return art
     }
 
-    private fun getImageFromRC(
+    private fun getArtworkFromRC(
         rcFile: File,
         projectSlug: String,
         imageRatio: ImageRatio
@@ -93,7 +93,7 @@ class BibleImagesDataSource(
                 }
 
                 val artwork = Artwork(image, rc.manifest.dublinCore.creator, rc.manifest.dublinCore.rights)
-                filesCache[projectSlug + imageRatio.getImageSuffix()] = artwork
+                artworkCache[projectSlug + imageRatio.getImageSuffix()] = artwork
                 return artwork
             }
         }
@@ -102,6 +102,6 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private val filesCache = ConcurrentHashMap<String, Artwork>()
+        private val artworkCache = ConcurrentHashMap<String, Artwork>()
     }
 }
