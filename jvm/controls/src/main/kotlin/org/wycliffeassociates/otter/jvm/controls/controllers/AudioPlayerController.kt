@@ -85,7 +85,10 @@ class AudioPlayerController(
                             startAtLocation = 0
                             player.getAudioReader()?.seek(0)
                         }
-                        AudioPlayerEvent.STOP -> startAtLocation = 0
+                        AudioPlayerEvent.STOP -> {
+                            audioSlider.value = 0.0
+                            startAtLocation = 0
+                        }
                     }
                 }
             }
