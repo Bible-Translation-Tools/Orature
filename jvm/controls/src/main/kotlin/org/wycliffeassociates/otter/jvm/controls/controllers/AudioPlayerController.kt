@@ -79,9 +79,13 @@ class AudioPlayerController(
             ) {
                 Platform.runLater {
                     isPlayingProperty.set(false)
-                    if (it == AudioPlayerEvent.COMPLETE) {
-                        audioSlider.value = 0.0
-                        player.getAudioReader()?.seek(0)
+                    when (it) {
+                        AudioPlayerEvent.COMPLETE -> {
+                            audioSlider.value = 0.0
+                            startAtLocation = 0
+                            player.getAudioReader()?.seek(0)
+                        }
+                        AudioPlayerEvent.STOP -> startAtLocation = 0
                     }
                 }
             }

@@ -111,6 +111,7 @@ internal class AudioPlayerConnection(
                 connectionFactory.currentConnection = null
             }
         }
+        state.position = 0
         connectionFactory.connections.remove(state.id)
     }
 
