@@ -23,7 +23,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 
 interface ArtworkDataSource {
     /**
-     *  Searches for the appropriate image for a given project slug.
+     *  Searches for the appropriate artwork for a given project slug.
      *  A preferred aspect ratio can be provided, which will be returned if it exists.
      *  If a matching image exists, but not in the requested aspect ratio, the original image
      *  will be returned (in whichever aspect ratio it exists in).
@@ -37,8 +37,8 @@ interface ArtworkDataSource {
      *  @param projectSlug project identifier
      *  @param imageRatio (Optional) preferred aspect ratio, by default, no aspect ratio will be used
      *
-     *  @returns a nullable file, in which the file contains the requested image, and null if
-     *  no match was found.
+     *  @returns a nullable Artwork (which contains a file and attribution info). The included file returned contains the
+     *  requested image, and null if no match was found.
      */
     fun getArtwork(
         metadata: ResourceMetadata,
