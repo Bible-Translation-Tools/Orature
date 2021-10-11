@@ -106,7 +106,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
             visibleProperty().bind(card.newBookProperty)
             onActionProperty().bind(card.onAddBookActionProperty)
         }
-
     }
 
     private fun backgroundImage(file: File): BackgroundImage {
