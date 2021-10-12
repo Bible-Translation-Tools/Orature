@@ -39,7 +39,7 @@ class BookCardCell : HBox() {
     val bookNameProperty = SimpleStringProperty()
     val bookSlugProperty = SimpleStringProperty()
     val projectTypeProperty = SimpleStringProperty()
-    val projectPublicDomainProperty = SimpleStringProperty()
+    val licenseProperty = SimpleStringProperty()
 
     val attributionProperty = SimpleStringProperty()
 
@@ -91,7 +91,7 @@ class BookCardCell : HBox() {
                     fitToParentHeight()
                     graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_BLANK_CIRCLE)
                 }
-                label(projectPublicDomainProperty)
+                label(licenseProperty)
             }
         }
     }

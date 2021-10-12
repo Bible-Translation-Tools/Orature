@@ -51,7 +51,7 @@ class BookCell(
             projectTypeProperty.bind(this@BookCell.projectTypeProperty.stringBinding {
                 it?.let { FX.messages[it.value] }
             })
-            projectPublicDomainProperty.set(item.collection.resourceContainer?.license)
+            licenseProperty.set(item.collection.resourceContainer?.license)
 
             coverArtProperty.set(item.artwork?.file)
             attributionProperty.set(
