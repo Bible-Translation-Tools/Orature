@@ -27,8 +27,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
-import tornadofx.FX
-import tornadofx.get
 import tornadofx.tooltip
 
 class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<WorkbookBanner>(banner) {

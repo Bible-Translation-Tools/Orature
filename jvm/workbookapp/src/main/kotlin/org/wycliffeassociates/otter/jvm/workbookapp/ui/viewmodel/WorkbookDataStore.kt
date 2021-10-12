@@ -137,6 +137,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     targetAudioProperty.set(targetAudio)
                 } ?: targetAudioProperty.set(null)
             }
+            _chapter != null -> {} // preserve targetAudio for clean up
             else -> targetAudioProperty.set(null)
         }
     }

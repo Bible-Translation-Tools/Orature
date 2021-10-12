@@ -28,7 +28,6 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ProjectCardSkin
 import tornadofx.*
-import java.io.File
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 
 class ProjectCard(
