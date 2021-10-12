@@ -52,11 +52,11 @@ class BookCell(
             })
 
             item.artwork.subscribe{
-                val artwork = if (it.isPresent) it else null
+                val artwork = if (it.isPresent) it.get() else null
 
-                coverArtProperty.set(artwork?.get()?.file)
+                coverArtProperty.set(artwork?.file)
                 attributionProperty.set(
-                    artwork?.get()?.attributionText(
+                    artwork?.attributionText(
                         FX.messages["artworkAttributionTitle"],
                         FX.messages["license"]
                     )
