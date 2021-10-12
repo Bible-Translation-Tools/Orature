@@ -54,7 +54,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
 import java.io.File
-import java.util.Optional
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -141,7 +140,7 @@ class BookWizardViewModel : ViewModel() {
             .subscribe { retrieved ->
                 val bookViewDataList = retrieved
                     .map { collection ->
-                        val artwork = ReplaySubject.create<Optional<Artwork>>()
+                        val artwork = ReplaySubject.create<Artwork>()
                         retrieveArtworkAsync(collection, artwork)
                         BookCardData(collection, artwork)
                     }
@@ -236,7 +235,7 @@ class BookWizardViewModel : ViewModel() {
         }
     }
 
-    private fun retrieveArtworkAsync(project: Collection, artwork: Subject<Optional<Artwork>>) {
+    private fun retrieveArtworkAsync(project: Collection, artwork: Subject<Artwork>) {
         Completable.fromAction {
             if (project.resourceContainer != null) {
                 ArtworkAccessor(
@@ -244,10 +243,9 @@ class BookWizardViewModel : ViewModel() {
                     project.resourceContainer!!,
                     project.slug
                 ).getArtwork(ImageRatio.TWO_BY_ONE)?.let { art ->
-                    return@fromAction artwork.onNext(Optional.of(art))
+                    return@fromAction artwork.onNext(art)
                 }
             }
-            artwork.onNext(Optional.empty())
         }
             .doOnError {
                 logger.error("Error while retrieving artwork for project: ${project.slug}", it)
