@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Pos
 import javafx.scene.image.Image
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundImage
