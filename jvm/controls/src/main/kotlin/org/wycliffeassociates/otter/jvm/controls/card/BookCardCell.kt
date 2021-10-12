@@ -37,7 +37,9 @@ class BookCardCell : HBox() {
 
     val coverArtProperty = SimpleObjectProperty<File>()
     val bookNameProperty = SimpleStringProperty()
+    val bookSlugProperty = SimpleStringProperty()
     val projectTypeProperty = SimpleStringProperty()
+    val licenseProperty = SimpleStringProperty()
 
     val attributionProperty = SimpleStringProperty()
 
@@ -80,6 +82,16 @@ class BookCardCell : HBox() {
             }
             label(projectTypeProperty).apply {
                 addClass("book-card-cell__project-type")
+            }
+            hbox {
+                addClass("book-card-cell__info")
+                label(bookSlugProperty)
+                label {
+                    addClass("book-card-cell__dot")
+                    fitToParentHeight()
+                    graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_BLANK_CIRCLE)
+                }
+                label(licenseProperty)
             }
         }
     }

@@ -41,7 +41,7 @@
 }
 
 .book-card-cell__title {
-    -fx-spacing: 5px;
+    -fx-padding: 5px 0 5px 0;
 }
 
 .book-card-cell__name {
@@ -50,7 +50,16 @@
 }
 
 .book-card-cell__project-type {
-    -fx-font-size: 16px;
+    -fx-font-size: 14px;
+}
+
+.book-card-cell__info {
+    -fx-font-size: 14px;
+    -fx-spacing: 10px;
+}
+
+.book-card-cell__dot {
+    -fx-font-size: 8px;
 }
 
 .book-card-cell__graphic {

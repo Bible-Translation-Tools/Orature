@@ -46,10 +46,12 @@ class BookCell(
         }
 
         graphic = view.apply {
+            bookSlugProperty.set(item.collection.slug.uppercase())
             bookNameProperty.set(item.collection.titleKey)
             projectTypeProperty.bind(this@BookCell.projectTypeProperty.stringBinding {
                 it?.let { FX.messages[it.value] }
             })
+            licenseProperty.set(item.collection.resourceContainer?.license)
             coverArtProperty.bind(item.artworkFileProperty)
             attributionProperty.bind(item.attributionProperty)
 
