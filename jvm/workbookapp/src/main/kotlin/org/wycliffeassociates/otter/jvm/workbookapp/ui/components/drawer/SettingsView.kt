@@ -92,8 +92,10 @@ class SettingsView : View() {
 
                         buttonCell = LanguageComboboxCell()
 
-                        selectionModel.selectedItemProperty().onChange {
-                            it?.let { viewModel.updateLanguage(it) }
+                        selectionModel.selectedItemProperty().addListener { observable, oldValue, newValue ->
+                            if (oldValue != null) {
+                                newValue?.let { viewModel.updateLanguage(it) }
+                            }
                         }
                     }
                 }
@@ -246,6 +248,7 @@ class SettingsView : View() {
 
     override fun onDock() {
         super.onDock()
+        viewModel.bind()
         viewModel.refreshDevices()
     }
 

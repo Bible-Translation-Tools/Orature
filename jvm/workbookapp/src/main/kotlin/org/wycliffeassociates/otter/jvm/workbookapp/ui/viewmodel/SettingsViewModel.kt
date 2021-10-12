@@ -77,7 +77,9 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
+    }
 
+    fun bind() {
         loadOutputDevices()
         loadInputDevices()
         loadCurrentOutputDevice()

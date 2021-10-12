@@ -53,6 +53,7 @@ class SplashScreen : View() {
 
     private fun finish() {
         viewModel.initAudioSystem()
+        viewModel.initializeAppLocale()
         close()
         primaryStage.show()
         navigator.dock<HomePage>()
