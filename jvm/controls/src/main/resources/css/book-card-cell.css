@@ -29,6 +29,7 @@
 
 .book-card-cell:hover {
     -fx-background-color: -wa-black-05;
+    -fx-cursor: hand;
 }
 
 .book-card-cell:pressed {

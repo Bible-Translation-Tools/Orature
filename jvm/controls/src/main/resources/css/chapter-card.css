@@ -27,6 +27,10 @@
     -fx-max-width: 800px;
 }
 
+.chapter-card:hover {
+    -fx-background-color: -wa-black-05;
+}
+
 .chapter-card__graphic {
     -fx-background-radius: 10px;
     -fx-background-color: -wa-gray-lighter;
