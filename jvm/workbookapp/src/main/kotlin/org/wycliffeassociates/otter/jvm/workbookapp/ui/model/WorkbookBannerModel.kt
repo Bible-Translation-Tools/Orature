@@ -22,11 +22,11 @@ import javafx.beans.property.SimpleObjectProperty
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import tornadofx.*
-import java.io.File
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 
 class WorkbookBannerModel(
     title: String,
-    val coverArt: File?,
+    val coverArt: Artwork?,
     val onDelete: () -> Unit,
     val onExport: () -> Unit
 ) : WorkbookItemModel(sort = 0, title = title) {

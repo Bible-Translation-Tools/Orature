@@ -27,17 +27,21 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.BookCardSkin
 import java.io.File
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.FX
 import tornadofx.FX.Companion.messages
 import tornadofx.get
 
 class BookCard(
     title: String = "",
     projectType: String = "",
-    coverArt: File? = null,
+    coverArt: Artwork? = null,
     newBook: Boolean = false
 ) : Control() {
 
-    val coverArtProperty = SimpleObjectProperty<File>(coverArt)
+    val coverArtProperty = SimpleObjectProperty<Artwork>(coverArt)
+    val attributionTextProperty = SimpleStringProperty()
     val titleProperty = SimpleStringProperty(title)
     val projectTypeProperty = SimpleStringProperty(projectType)
     val newBookProperty = SimpleBooleanProperty(newBook)
@@ -48,6 +52,17 @@ class BookCard(
 
     init {
         styleClass.setAll("book-card")
+
+        coverArtProperty.onChangeAndDoNow { artwork ->
+            artwork?.let {
+                attributionTextProperty.set(
+                    it.attributionText(
+                        FX.messages["artworkAttributionTitle"],
+                        FX.messages["license"]
+                    )
+                )
+            } ?: attributionTextProperty.set(null)
+        }
     }
 
     override fun createDefaultSkin(): Skin<*> {

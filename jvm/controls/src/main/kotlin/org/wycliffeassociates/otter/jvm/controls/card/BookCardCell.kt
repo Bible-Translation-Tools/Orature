@@ -39,6 +39,8 @@ class BookCardCell : HBox() {
     val bookNameProperty = SimpleStringProperty()
     val projectTypeProperty = SimpleStringProperty()
 
+    val attributionProperty = SimpleStringProperty()
+
     private val graphicRadius = 15.0
 
     init {
@@ -65,6 +67,9 @@ class BookCardCell : HBox() {
                     arcHeight = graphicRadius
                 }
                 clip = rect
+                tooltip {
+                    textProperty().bind(attributionProperty)
+                }
             }
         }
 

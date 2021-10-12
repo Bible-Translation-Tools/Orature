@@ -142,7 +142,7 @@ class AddFilesViewModel : ViewModel() {
                             importedProjectTitleProperty.set(project.title)
                             val coverArtAccessor = ArtworkAccessor(directoryProvider, it, project.identifier)
                             importedProjectCoverProperty.set(
-                                coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+                                coverArtAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
                             )
                         }
                     }

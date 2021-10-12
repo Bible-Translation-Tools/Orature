@@ -207,7 +207,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
         projectExporter
@@ -238,7 +238,7 @@ class WorkbookPageViewModel : ViewModel() {
 
         activeProjectTitleProperty.set(workbook.target.title)
         activeProjectCoverProperty.set(
-            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
         )
 
         workbookRepository.closeWorkbook(workbook)

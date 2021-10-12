@@ -28,6 +28,7 @@ import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -35,30 +36,30 @@ import java.io.FileNotFoundException
 import kotlin.io.path.createTempDirectory
 import kotlin.jvm.Throws
 
-class TestBibleImagesDataSource {
-
-    private val testRCName = """bible_images_rc"""
+class TestResourceContainerArtworkDataSource {
+    private val rcName = """images_rc"""
+    private val language = "en"
+    private val resourceId = "ulb"
+    private val project = "jas"
+    private lateinit var rcFile: File
     private lateinit var tempDir: File
     private val directoryProviderMock = mock(IDirectoryProvider::class.java)
     private val metadataMock = mock(ResourceMetadata::class.java)
 
-    // this name must be valid according to BibleImagesDataSource container name
-    private val imagesContainerName = "bible_artwork"
-    private val project = "jas"
-
     @Before
     fun setUp() {
-        val sourceRC = getResource(testRCName)
+        rcFile = getResource(rcName)
         tempDir = createTempDirectory().toFile()
-        val tempContainer = tempDir.resolve(imagesContainerName)
-        sourceRC.copyRecursively(tempContainer)
-
-        `when`(directoryProviderMock.resourceContainerDirectory)
-            .thenReturn(tempDir)
         `when`(directoryProviderMock.cacheDirectory)
             .thenReturn(
                 tempDir.resolve("cache").apply { mkdirs() }
             )
+
+        val languageMock = mock(Language::class.java)
+        `when`(languageMock.slug).thenReturn(language)
+        `when`(metadataMock.identifier).thenReturn(resourceId)
+        `when`(metadataMock.language).thenReturn(languageMock)
+        `when`(metadataMock.path).thenReturn(rcFile)
     }
 
     @After
@@ -67,30 +68,30 @@ class TestBibleImagesDataSource {
     }
 
     @Test
-    fun testGetBibleImage() {
-        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
-        val image = dataSource.getImage(metadataMock, project)
+    fun testGetImage() {
+        val dataSource = ResourceContainerArtworkDataSource(directoryProviderMock)
+        val image = dataSource.getArtwork(metadataMock, project)
 
         assertNotNull(
-            "Could not get artwork image for $project",
+            "Could not get image for $project",
             image
         )
     }
 
     @Test
-    fun testGetBibleImageWithRatio() {
+    fun testGetImageWithRatio() {
         val ratio4x3 = ImageRatio.FOUR_BY_THREE
         val ratioString = ratio4x3.toString()
-        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
-        val image = dataSource.getImage(metadataMock, project, ratio4x3)
+        val dataSource = ResourceContainerArtworkDataSource(directoryProviderMock)
+        val image = dataSource.getArtwork(metadataMock, project, ratio4x3)
 
         assertNotNull(
-            "Could not get artwork image (${ratioString}) for $project",
+            "Could not get image for $project",
             image
         )
         assertTrue(
             "Could not get image with ratio $ratioString for $project",
-            image!!.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
@@ -98,23 +99,23 @@ class TestBibleImagesDataSource {
     fun testNotFoundImage() {
         val genSlug = "gen"
         val nonBibleProject = "unknown"
-        val remoteContentProject = "tit"
+        val remoteUrlProject = "tit"
 
-        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
-        val notFoundImage = dataSource.getImage(metadataMock, genSlug)
-        val nonBibleNotFoundImage =  dataSource.getImage(metadataMock, nonBibleProject)
-        val remoteImageNotFound =  dataSource.getImage(metadataMock, remoteContentProject)
+        val dataSource = ResourceContainerArtworkDataSource(directoryProviderMock)
+        val notFoundImage = dataSource.getArtwork(metadataMock, genSlug)
+        val nonBibleNotFoundImage = dataSource.getArtwork(metadataMock, nonBibleProject)
+        val remoteImageNotFound = dataSource.getArtwork(metadataMock, remoteUrlProject)
 
         assertNull(
-            "Project '$genSlug' should not have image in data source",
+            "Project $genSlug should not have image in data source",
             notFoundImage
         )
         assertNull(
-            "Project '$nonBibleProject' should not have image in data source",
+            "Project $nonBibleProject should not have image in data source",
             nonBibleNotFoundImage
         )
         assertNull(
-            "Project '$remoteContentProject' should not have image in data source",
+            "Project $remoteUrlProject should not have image in data source",
             remoteImageNotFound
         )
     }
@@ -123,8 +124,8 @@ class TestBibleImagesDataSource {
     fun `test fallback to default when aspect ratio not found`() {
         val ratio16x9 = ImageRatio.SIXTEEN_BY_NINE
         val ratioString = ratio16x9.toString()
-        val dataSource = BibleImagesDataSource(directoryProviderMock, imagesContainerName)
-        val image = dataSource.getImage(metadataMock, project, ratio16x9)
+        val dataSource = ResourceContainerArtworkDataSource(directoryProviderMock)
+        val image = dataSource.getArtwork(metadataMock, project, ratio16x9)
 
         assertNotNull(
             "Could not get default image (${ratioString}) for $project",
@@ -132,13 +133,13 @@ class TestBibleImagesDataSource {
         )
         assertFalse(
             "Project $project should not have image with ratio $ratioString in data source",
-            image!!.nameWithoutExtension.endsWith(ratioString)
+            image!!.file.nameWithoutExtension.endsWith(ratioString)
         )
     }
 
     @Throws(FileNotFoundException::class)
     private fun getResource(name: String): File {
-        val path = javaClass.classLoader.getResource(testRCName)?.file
+        val path = javaClass.classLoader.getResource(rcName)?.file
         if (path == null) {
             throw FileNotFoundException("Could not find resource: $name")
         }

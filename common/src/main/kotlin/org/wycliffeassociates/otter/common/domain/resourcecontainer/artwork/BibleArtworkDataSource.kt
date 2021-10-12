@@ -26,41 +26,46 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
-class BibleImagesDataSource(
+class BibleArtworkDataSource(
     private val directoryProvider: IDirectoryProvider,
-    private val imagesContainerName: String = "bible_artwork.zip"
-) : ImagesDataSource {
+    private val imagesContainerNames: List<String> = listOf("en_art_sp.zip", "en_art_wa.zip")
+) : ArtworkDataSource {
 
     private val cacheDir = File(
         directoryProvider.cacheDirectory,
         "bible-images"
     ).apply { mkdirs() }
 
-    override fun getImage(
+    override fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio
-    ): File? {
+    ): Artwork? {
         // fetch and return from cache if any
-        filesCache[projectSlug + imageRatio.getImageSuffix()]
+        artworkCache[projectSlug + imageRatio.getImageSuffix()]
             ?.let { return it }
 
-        val imagesContainer = directoryProvider
-                                            .resourceContainerDirectory
-                                            .resolve(imagesContainerName)
-
-        return if (imagesContainer.exists()) {
-            getImageFromRC(imagesContainer, projectSlug, imageRatio)
-        } else {
-            null
+        var art: Artwork? = null
+        for (container in imagesContainerNames) {
+            val imagesContainer = directoryProvider
+                .resourceContainerDirectory
+                .resolve(container)
+            if (imagesContainer.exists()) {
+                val found = getArtworkFromRC(imagesContainer, projectSlug, imageRatio)
+                if (found != null) {
+                    art = found
+                    break
+                }
+            }
         }
+        return art
     }
 
-    private fun getImageFromRC(
+    private fun getArtworkFromRC(
         rcFile: File,
         projectSlug: String,
         imageRatio: ImageRatio
-    ): File? {
+    ): Artwork? {
 
         ResourceContainer.load(rcFile).use { rc ->
             val contentPath = rc.manifest.projects.firstOrNull {
@@ -87,8 +92,9 @@ class BibleImagesDataSource(
                     }
                 }
 
-                filesCache[projectSlug + imageRatio.getImageSuffix()] = image
-                return image
+                val artwork = Artwork(image, rc.manifest.dublinCore.creator, rc.manifest.dublinCore.rights)
+                artworkCache[projectSlug + imageRatio.getImageSuffix()] = artwork
+                return artwork
             }
         }
 
@@ -96,6 +102,6 @@ class BibleImagesDataSource(
     }
 
     companion object {
-        private val filesCache = ConcurrentHashMap<String, File>()
+        private val artworkCache = ConcurrentHashMap<String, Artwork>()
     }
 }

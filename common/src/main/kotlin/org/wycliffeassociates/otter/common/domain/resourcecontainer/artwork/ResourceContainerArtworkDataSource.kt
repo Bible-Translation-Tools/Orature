@@ -27,23 +27,23 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
-class ResourceContainerImagesDataSource(
+class ResourceContainerArtworkDataSource(
     private val directoryProvider: IDirectoryProvider
-) : ImagesDataSource {
+) : ArtworkDataSource {
 
     private val cacheDir = File(
         directoryProvider.cacheDirectory,
         "bible-images-custom"
     ).apply { mkdirs() }
 
-    override fun getImage(
+    override fun getArtwork(
         metadata: ResourceMetadata,
         projectSlug: String,
         imageRatio: ImageRatio
-    ): File? {
+    ): Artwork? {
         val ratioString = imageRatio.getImageSuffix()
 
-        getImageFromCache(
+        getArtworkFromCache(
             metadata.language.slug,
             metadata.identifier,
             projectSlug,
@@ -62,14 +62,15 @@ class ResourceContainerImagesDataSource(
                 ) {
                     val image = getImageFromRC(media, rc, projectSlug, imageRatio)
                     if (image != null) {
-                        cacheImage(
-                            image,
+                        val artwork = Artwork(image, rc.manifest.dublinCore.creator, rc.manifest.dublinCore.rights)
+                        cacheArtwork(
+                            artwork,
                             metadata.language.slug,
                             metadata.identifier,
                             projectSlug,
                             ratioString
                         )
-                        return image
+                        return artwork
                     }
                 }
             }
@@ -129,22 +130,22 @@ class ResourceContainerImagesDataSource(
         private val mediaTypes = listOf("jpg", "jpeg", "png")
         // {languageSlug}-{resourceId}-{projectSlug}{ratio}
         private const val cacheKeyTemplate = "%s-%s-%s%s"
-        private val filesCache = ConcurrentHashMap<String, File>()
+        private val artworkCache = ConcurrentHashMap<String, Artwork>()
 
-        private fun getImageFromCache(
+        private fun getArtworkFromCache(
             languageSlug: String,
             resourceId: String,
             project: String,
             ratio: String
-        ): File? {
+        ): Artwork? {
             val key = cacheKeyTemplate.format(
                 languageSlug, resourceId, project, ratio
             )
-            return filesCache[key]
+            return artworkCache[key]
         }
 
-        private fun cacheImage(
-            image: File,
+        private fun cacheArtwork(
+            artwork: Artwork,
             languageSlug: String,
             resourceId: String,
             project: String,
@@ -153,7 +154,7 @@ class ResourceContainerImagesDataSource(
             val key = cacheKeyTemplate.format(
                 languageSlug, resourceId, project, ratio
             )
-            filesCache[key] = image
+            artworkCache[key] = artwork
         }
     }
 }

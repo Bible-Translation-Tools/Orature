@@ -212,7 +212,7 @@ class BookWizardViewModel : ViewModel() {
             )
             activeProjectTitleProperty.set(collection.titleKey)
             activeProjectCoverProperty.set(
-                artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)
+                artworkAccessor.getArtwork(ImageRatio.FOUR_BY_ONE)?.file
             )
 
             creationUseCase

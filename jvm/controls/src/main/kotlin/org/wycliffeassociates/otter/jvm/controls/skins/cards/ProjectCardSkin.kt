@@ -72,7 +72,7 @@ class ProjectCardSkin(private val card: ProjectCard) : SkinBase<ProjectCard>(car
 
         card.coverArtProperty().onChangeAndDoNow {
             it?.let {
-                coverArt.image = Image(it.inputStream())
+                coverArt.image = Image(it.file.inputStream())
             }
         }
         coverArt.visibleWhen { card.coverArtProperty().isNotNull }

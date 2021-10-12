@@ -29,6 +29,7 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ProjectCardSkin
 import tornadofx.*
 import java.io.File
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 
 class ProjectCard(
     title: String = "",
@@ -43,7 +44,8 @@ class ProjectCard(
     private val slugTextProperty = SimpleStringProperty(slug)
     private val languageTextProperty = SimpleStringProperty(language)
     private val actionTextProperty = SimpleStringProperty(actionText)
-    private val coverArtProperty = SimpleObjectProperty<File>()
+    private val coverArtProperty = SimpleObjectProperty<Artwork>()
+    private val attributionTextProperty = SimpleStringProperty()
     val secondaryActionsList: ObservableList<Action> = FXCollections.observableArrayList<Action>()
 
     init {
@@ -69,6 +71,8 @@ class ProjectCard(
     fun onPrimaryActionProperty() = onPrimaryAction
 
     fun coverArtProperty() = coverArtProperty
+
+    fun attributionTextProperty() = attributionTextProperty
 
     fun setOnAction(op: () -> Unit) {
         onPrimaryAction.set(op)
