@@ -85,12 +85,12 @@ class BookCardCell : HBox() {
                 addClass("book-card-cell__project-type")
             }
             hbox {
-                addClass("book-card-cell__subtitle")
+                addClass("book-card-cell__info")
                 label(bookSlugProperty)
                 label {
                     addClass("book-card-cell__dot")
+                    fitToParentHeight()
                     graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_BLANK_CIRCLE)
-                    alignment = Pos.CENTER_LEFT
                 }
                 label(projectPublicDomainProperty)
             }

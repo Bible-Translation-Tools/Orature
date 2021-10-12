@@ -49,10 +49,13 @@
     -fx-font-weight: bold;
 }
 
-.book-card-cell__project-type,
-.book-card-cell__subtitle {
-    -fx-spacing: 10px;
+.book-card-cell__project-type {
     -fx-font-size: 14px;
+}
+
+.book-card-cell__info {
+    -fx-font-size: 14px;
+    -fx-spacing: 10px;
 }
 
 .book-card-cell__dot {
