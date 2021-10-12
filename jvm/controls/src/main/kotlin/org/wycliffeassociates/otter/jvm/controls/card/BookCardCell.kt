@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Pos
 import javafx.scene.image.Image
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundImage
@@ -37,7 +38,9 @@ class BookCardCell : HBox() {
 
     val coverArtProperty = SimpleObjectProperty<File>()
     val bookNameProperty = SimpleStringProperty()
+    val bookSlugProperty = SimpleStringProperty()
     val projectTypeProperty = SimpleStringProperty()
+    val projectPublicDomainProperty = SimpleStringProperty()
 
     val attributionProperty = SimpleStringProperty()
 
@@ -80,6 +83,16 @@ class BookCardCell : HBox() {
             }
             label(projectTypeProperty).apply {
                 addClass("book-card-cell__project-type")
+            }
+            hbox {
+                addClass("book-card-cell__subtitle")
+                label(bookSlugProperty)
+                label {
+                    addClass("book-card-cell__dot")
+                    graphic = FontIcon(MaterialDesign.MDI_CHECKBOX_BLANK_CIRCLE)
+                    alignment = Pos.CENTER_LEFT
+                }
+                label(projectPublicDomainProperty)
             }
         }
     }
