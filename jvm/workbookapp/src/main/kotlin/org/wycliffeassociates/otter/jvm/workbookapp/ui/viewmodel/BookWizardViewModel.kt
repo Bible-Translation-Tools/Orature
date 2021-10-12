@@ -61,11 +61,20 @@ class BookWizardViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(BookWizardViewModel::class.java)
 
-    @Inject lateinit var collectionRepo: ICollectionRepository
-    @Inject lateinit var creationUseCase: CreateProject
-    @Inject lateinit var directoryProvider: IDirectoryProvider
-    @Inject lateinit var workbookRepo: IWorkbookRepository
-    @Inject lateinit var updateProjectUseCase: UpdateProject
+    @Inject
+    lateinit var collectionRepo: ICollectionRepository
+
+    @Inject
+    lateinit var creationUseCase: CreateProject
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var workbookRepo: IWorkbookRepository
+
+    @Inject
+    lateinit var updateProjectUseCase: UpdateProject
 
     private val navigator: NavigationMediator by inject()
 
@@ -236,17 +245,18 @@ class BookWizardViewModel : ViewModel() {
     }
 
     private fun retrieveArtworkAsync(project: Collection, artwork: Subject<Artwork>) {
-        Completable.fromAction {
-            if (project.resourceContainer != null) {
-                ArtworkAccessor(
-                    directoryProvider,
-                    project.resourceContainer!!,
-                    project.slug
-                ).getArtwork(ImageRatio.TWO_BY_ONE)?.let { art ->
-                    return@fromAction artwork.onNext(art)
+        Completable
+            .fromAction {
+                if (project.resourceContainer != null) {
+                    ArtworkAccessor(
+                        directoryProvider,
+                        project.resourceContainer!!,
+                        project.slug
+                    ).getArtwork(ImageRatio.TWO_BY_ONE)?.let { art ->
+                        return@fromAction artwork.onNext(art)
+                    }
                 }
             }
-        }
             .doOnError {
                 logger.error("Error while retrieving artwork for project: ${project.slug}", it)
             }
