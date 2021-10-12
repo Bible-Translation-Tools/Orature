@@ -26,7 +26,6 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.BookCardSkin
-import java.io.File
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.FX
