@@ -19,6 +19,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.ReplaySubject
+import io.reactivex.subjects.Subject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -35,6 +39,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -49,6 +54,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
 import java.io.File
+import java.util.Optional
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -134,18 +140,10 @@ class BookWizardViewModel : ViewModel() {
             }
             .subscribe { retrieved ->
                 val bookViewDataList = retrieved
-                    .map {
-                        val artwork = if (it.resourceContainer != null) {
-                            ArtworkAccessor(
-                                directoryProvider,
-                                it.resourceContainer!!,
-                                it.slug
-                            ).getArtwork(ImageRatio.TWO_BY_ONE)
-                        } else {
-                            null
-                        }
-
-                        BookCardData(it, artwork)
+                    .map { collection ->
+                        val artwork = ReplaySubject.create<Optional<Artwork>>()
+                        retrieveArtworkAsync(collection, artwork)
+                        BookCardData(collection, artwork)
                     }
                 books.setAll(bookViewDataList)
             }
@@ -236,6 +234,27 @@ class BookWizardViewModel : ViewModel() {
                     Platform.runLater { navigator.home() }
                 }
         }
+    }
+
+    private fun retrieveArtworkAsync(project: Collection, artwork: Subject<Optional<Artwork>>) {
+        Completable.fromAction {
+            if (project.resourceContainer != null) {
+                ArtworkAccessor(
+                    directoryProvider,
+                    project.resourceContainer!!,
+                    project.slug
+                ).getArtwork(ImageRatio.TWO_BY_ONE)?.let { art ->
+                    return@fromAction artwork.onNext(Optional.of(art))
+                }
+            }
+            artwork.onNext(Optional.empty())
+        }
+            .doOnError {
+                logger.error("Error while retrieving artwork for project: ${project.slug}", it)
+            }
+            .doFinally { artwork.onComplete() }
+            .subscribeOn(Schedulers.io())
+            .subscribe()
     }
 
     fun setFilterMenu() {

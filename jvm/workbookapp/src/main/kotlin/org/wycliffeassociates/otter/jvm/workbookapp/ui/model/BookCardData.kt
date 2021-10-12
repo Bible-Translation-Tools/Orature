@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
+import io.reactivex.Observable
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import java.util.Optional
 
-data class BookCardData(val collection: Collection, val artwork: Artwork? = null)
+data class BookCardData(val collection: Collection, val artwork: Observable<Optional<Artwork>>)
 
