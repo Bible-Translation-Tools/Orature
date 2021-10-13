@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.SplashScreen
 import tornadofx.*
 import tornadofx.FX.Companion.messages
-import java.util.*
 import javax.inject.Inject
 
 class OtterApp : App(RootView::class), IDependencyGraphProvider {
@@ -47,7 +46,6 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
         initializeLogger(directoryProvider)
-        initializeAppLocale()
 
         importStylesheet<AppStyles>()
     }
@@ -56,12 +54,6 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         ConfigureLogger(
             directoryProvider.logsDirectory
         ).configure()
-    }
-
-    fun initializeAppLocale() {
-        FX.locale = localeLanguage.preferredLanguage?.let {
-            Locale(it.slug)
-        } ?: Locale.getDefault()
     }
 
     override fun start(stage: Stage) {

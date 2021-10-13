@@ -56,9 +56,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
     lateinit var title: Label
 
     @FXML
-    lateinit var projectType: Label
-
-    @FXML
     lateinit var addBookBtn: Button
 
     private val graphicRadius = 15.0
@@ -97,9 +94,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         }
         title.apply {
             textProperty().bind(card.titleProperty)
-        }
-        projectType.apply {
-            textProperty().bind(card.projectTypeProperty)
         }
         addBookBtn.apply {
             textProperty().bind(card.addBookTextProperty)

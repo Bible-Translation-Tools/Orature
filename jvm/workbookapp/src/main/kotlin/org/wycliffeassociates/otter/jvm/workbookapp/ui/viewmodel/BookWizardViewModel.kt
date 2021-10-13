@@ -48,7 +48,6 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.enums.BookSortBy
-import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
@@ -79,7 +78,6 @@ class BookWizardViewModel : ViewModel() {
     private val navigator: NavigationMediator by inject()
 
     val translationProperty = SimpleObjectProperty<TranslationCardModel>()
-    val projectTypeProperty = SimpleObjectProperty<ProjectType>()
     val selectedBookProperty = SimpleObjectProperty<Collection>()
 
     val searchQueryProperty = SimpleStringProperty("")
@@ -181,7 +179,6 @@ class BookWizardViewModel : ViewModel() {
         searchQueryProperty.set("")
         selectedBookProperty.set(null)
         selectedSourceProperty.set(null)
-        projectTypeProperty.set(null)
     }
 
     private fun bindFilterProperties() {
