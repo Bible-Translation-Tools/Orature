@@ -55,6 +55,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     private val filter: (ErrorEvent) -> Unit = { event ->
         if (event.error is CustomException) {
             event.consume()
+            logger.info("A custom exception was reported: ${event.error.message}")
             runLater {
                 sendReport(event.error)
                     .subscribeOn(Schedulers.io())

@@ -19,14 +19,14 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.beans.property.SimpleStringProperty
-import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.CustomException
 import tornadofx.ViewModel
+import kotlin.jvm.Throws
 
 class AppInfoViewModel : ViewModel() {
-    private val logger = LoggerFactory.getLogger(SettingsViewModel::class.java)
     val errorDescription = SimpleStringProperty()
 
+    @Throws(CustomException::class)
     fun submitErrorReport() {
         if (errorDescription.isNotEmpty.value) {
             val ex = CustomException(errorDescription.value)
