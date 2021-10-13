@@ -97,8 +97,8 @@ class InfoView : View() {
                         addClass("app-drawer__subtitle--small")
                     }
                     textarea {
+                        addClass("app-drawer__report-message")
                         textProperty().bindBidirectional(viewModel.errorDescription)
-                        addClass("app-drawer__input-description")
                     }
                     add(
                         JFXButton(messages["sendErrorReport"]).apply {

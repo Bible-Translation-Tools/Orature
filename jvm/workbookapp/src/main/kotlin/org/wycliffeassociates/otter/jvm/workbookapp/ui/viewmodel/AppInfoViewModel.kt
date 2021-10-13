@@ -29,7 +29,6 @@ class AppInfoViewModel : ViewModel() {
 
     fun submitErrorReport() {
         if (errorDescription.isNotEmpty.value) {
-            println("submitting error: ${errorDescription.value}")
             val ex = CustomException(errorDescription.value)
             errorDescription.set("")
             throw ex
