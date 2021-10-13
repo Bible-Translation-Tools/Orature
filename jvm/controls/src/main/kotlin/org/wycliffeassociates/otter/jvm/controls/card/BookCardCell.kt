@@ -38,7 +38,6 @@ class BookCardCell : HBox() {
     val coverArtProperty = SimpleObjectProperty<File>()
     val bookNameProperty = SimpleStringProperty()
     val bookSlugProperty = SimpleStringProperty()
-    val projectTypeProperty = SimpleStringProperty()
     val licenseProperty = SimpleStringProperty()
 
     val attributionProperty = SimpleStringProperty()
@@ -79,9 +78,6 @@ class BookCardCell : HBox() {
             addClass("book-card-cell__title")
             label(bookNameProperty).apply {
                 addClass("book-card-cell__name")
-            }
-            label(projectTypeProperty).apply {
-                addClass("book-card-cell__project-type")
             }
             hbox {
                 addClass("book-card-cell__info")

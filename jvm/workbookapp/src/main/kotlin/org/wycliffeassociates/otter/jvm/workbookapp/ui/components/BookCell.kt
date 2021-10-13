@@ -19,18 +19,15 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.binding.Bindings
-import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
-import org.wycliffeassociates.otter.jvm.workbookapp.enums.ProjectType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import tornadofx.*
 import java.util.concurrent.Callable
 
 class BookCell(
-    private val projectTypeProperty: SimpleObjectProperty<ProjectType>,
     private val existingBooks: ObservableList<Workbook> = observableListOf(),
     private val onSelected: (BookCardData) -> Unit
 ) : ListCell<BookCardData>() {
@@ -48,9 +45,6 @@ class BookCell(
         graphic = view.apply {
             bookSlugProperty.set(item.collection.slug.uppercase())
             bookNameProperty.set(item.collection.titleKey)
-            projectTypeProperty.bind(this@BookCell.projectTypeProperty.stringBinding {
-                it?.let { FX.messages[it.value] }
-            })
             licenseProperty.set(item.collection.resourceContainer?.license)
             coverArtProperty.bind(item.artworkFileProperty)
             attributionProperty.bind(item.attributionProperty)
