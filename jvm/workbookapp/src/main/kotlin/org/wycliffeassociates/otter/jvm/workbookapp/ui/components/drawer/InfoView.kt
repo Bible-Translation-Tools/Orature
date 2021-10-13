@@ -23,11 +23,13 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view.UpdaterView
 import tornadofx.*
 
 class InfoView : View() {
     val info = AppInfo()
+    private val viewModel: AppInfoViewModel by inject()
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -95,13 +97,15 @@ class InfoView : View() {
                         addClass("app-drawer__subtitle--small")
                     }
                     textarea {
+                        textProperty().bindBidirectional(viewModel.errorDescription)
                         addClass("app-drawer__input-description")
                     }
                     add(
                         JFXButton(messages["sendErrorReport"]).apply {
                             styleClass.addAll("btn", "btn--secondary")
+                            disableProperty().bind(viewModel.errorDescription.isEmpty)
                             setOnAction {
-
+                                viewModel.submitErrorReport()
                             }
                         }
                     )
