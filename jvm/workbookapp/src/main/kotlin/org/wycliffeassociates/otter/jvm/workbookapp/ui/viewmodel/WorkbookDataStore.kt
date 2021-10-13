@@ -81,6 +81,12 @@ class WorkbookDataStore : Component(), ScopedInstance {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         activeChapterProperty.onChange { updateSourceAudio() }
         activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
+        activeWorkbookProperty.onChange {
+            if (it == null) {
+                activeChapterProperty.set(null)
+                activeChunkProperty.set(null)
+            }
+        }
     }
 
     fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {
