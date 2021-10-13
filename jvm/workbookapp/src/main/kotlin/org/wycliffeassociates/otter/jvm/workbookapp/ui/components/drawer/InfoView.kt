@@ -57,10 +57,10 @@ class InfoView : View() {
 
                 vbox {
                     addClass("app-drawer__section")
+
                     label(messages["aboutOrature"]).apply {
                         addClass("app-drawer__subtitle")
                     }
-
                     label(messages["aboutOratureDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
@@ -79,6 +79,33 @@ class InfoView : View() {
                 }
 
                 add<UpdaterView>()
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["errorReport"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+                    label(messages["errorReportDescription"]).apply {
+                        fitToParentWidth()
+                        addClass("app-drawer__text")
+                    }
+
+                    label(messages["description"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    textarea {
+                        addClass("app-drawer__input-description")
+                    }
+                    add(
+                        JFXButton(messages["sendErrorReport"]).apply {
+                            styleClass.addAll("btn", "btn--secondary")
+                            setOnAction {
+
+                            }
+                        }
+                    )
+                }
             }
         }
     }

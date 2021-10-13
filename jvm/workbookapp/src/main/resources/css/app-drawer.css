@@ -86,6 +86,19 @@
     -fx-padding: 10px;
 }
 
+.app-drawer__input-description {
+    -fx-font-size: 16px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-border-color: -wa-gray;
+    -fx-border-width: 2px;
+}
+
+.app-drawer__input-description:focused {
+    -fx-focus-color: -wa-gray;
+    -fx-background-fill: transparent;
+}
+
 .app-drawer__text {
     -fx-font-size: 20px;
     -fx-wrap-text: true;
