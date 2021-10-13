@@ -53,7 +53,6 @@
                 <VBox fx:id="bookCardInfo" styleClass="book-card__info">
                     <children>
                         <Label fx:id="title" styleClass="book-card__title" />
-                        <Label fx:id="projectType" styleClass="book-card__type" />
                     </children>
                 </VBox>
                 <Button fx:id="addBookBtn">
