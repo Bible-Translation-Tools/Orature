@@ -22,7 +22,7 @@ import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.CustomException
 import tornadofx.ViewModel
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 
 class AppInfoViewModel : ViewModel() {
