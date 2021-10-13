@@ -31,7 +31,6 @@
 
 .app-drawer__scroll-pane {
     -fx-padding: 40px;
-    -fx-pref-width: 400px;
     -fx-background-color: -wa-white;
 }
 
@@ -89,6 +88,7 @@
 
 .app-drawer__report-message {
     -fx-font-size: 16px;
+    -fx-pref-height: 110px;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
     -fx-border-color: -wa-gray;

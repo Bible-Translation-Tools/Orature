@@ -39,7 +39,6 @@ class InfoView : View() {
 
             vbox {
                 isFitToWidth = true
-                isFitToHeight = true
 
                 addClass("app-drawer-container")
 
