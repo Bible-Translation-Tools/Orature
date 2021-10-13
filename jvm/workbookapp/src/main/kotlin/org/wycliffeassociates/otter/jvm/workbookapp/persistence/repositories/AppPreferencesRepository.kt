@@ -80,10 +80,14 @@ class AppPreferencesRepository @Inject constructor(
     override fun localeLanguage(): Maybe<Language> {
         return preferences
             .localeLanguage()
-            .flatMap {
-                languageRepository.getBySlug(it)
-            }.flatMapMaybe {
-                Maybe.just(it)
+            .flatMapMaybe {
+                if (it.isNotEmpty()) {
+                    languageRepository
+                        .getBySlug(it)
+                        .toMaybe()
+                } else {
+                    null
+                }
             }
     }
 
