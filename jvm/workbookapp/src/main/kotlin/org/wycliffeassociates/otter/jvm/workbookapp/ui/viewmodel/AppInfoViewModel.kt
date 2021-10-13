@@ -21,24 +21,27 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.CustomException
 import tornadofx.ViewModel
+import tornadofx.runLater
 import java.text.SimpleDateFormat
 import java.util.Date
-
 
 class AppInfoViewModel : ViewModel() {
     val errorDescription = SimpleStringProperty()
     val reportTimeStamp = SimpleStringProperty()
 
+    private val timestampFormatter = SimpleDateFormat("HH:mm:ss - yyyy/MM/dd")
+
     @Throws(CustomException::class)
     fun submitErrorReport() {
         if (errorDescription.isNotEmpty.value) {
-            val formatter = SimpleDateFormat("HH:mm:ss - yyyy/MM/dd")
-            val timestamp = formatter.format(Date())
+            val timestamp = timestampFormatter.format(Date())
             reportTimeStamp.set(timestamp)
-            println(timestamp)
+
             val ex = CustomException(errorDescription.value)
             errorDescription.set("")
-            throw ex
+            runLater {
+                throw ex
+            }
         }
     }
 }
