@@ -100,6 +100,12 @@
     -fx-background-fill: transparent;
 }
 
+.app-drawer__report-status {
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+    -fx-text-fill: -wa-gray;
+}
+
 .app-drawer__text {
     -fx-font-size: 20px;
     -fx-wrap-text: true;

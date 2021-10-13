@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view.UpdaterView
 import tornadofx.*
+import java.text.MessageFormat
 
 class InfoView : View() {
     val info = AppInfo()
@@ -36,6 +37,7 @@ class InfoView : View() {
 
         scrollpane {
             addClass("app-drawer__scroll-pane")
+
 
             vbox {
                 isFitToWidth = true
@@ -98,6 +100,14 @@ class InfoView : View() {
                     textarea {
                         addClass("app-drawer__report-message")
                         textProperty().bindBidirectional(viewModel.errorDescription)
+                    }
+                    label {
+                        addClass("app-drawer__report-status")
+                        visibleWhen(viewModel.reportTimeStamp.isNotNull)
+                        managedWhen(visibleProperty())
+                        textProperty().bind(viewModel.reportTimeStamp.stringBinding {
+                            MessageFormat.format(messages["errorReportSent"], it)
+                        })
                     }
                     add(
                         JFXButton(messages["sendErrorReport"]).apply {
