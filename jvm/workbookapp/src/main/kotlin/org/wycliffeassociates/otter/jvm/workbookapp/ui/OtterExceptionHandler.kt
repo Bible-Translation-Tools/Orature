@@ -25,6 +25,7 @@ import javafx.application.Platform
 import javafx.application.Platform.runLater
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
+import org.wycliffeassociates.otter.common.data.ErrorReportException
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
@@ -49,15 +50,22 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
         Sentry.init()
     }
 
-    companion object {
-        // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
-        // Call consume to avoid error dialog.
-        var filter: (ErrorEvent) -> Unit = { }
+    // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
+    // Call consume to avoid error dialog.
+    private val filter: (ErrorEvent) -> Unit = { event ->
+        if (event.error is ErrorReportException) {
+            event.consume()
+            logger.info("A custom exception was reported: ${event.error.message}")
+            runLater {
+                sendReport(event.error)
+                    .subscribeOn(Schedulers.io())
+                    .doOnError { e -> logger.error("Error while processing custom exception", e) }
+                    .subscribe()
+            }
+        }
     }
 
     override fun uncaughtException(t: Thread, error: Throwable) {
-        logger.error("Uncaught error", error)
-
         if (isCycle(error)) {
             logger.info("Detected cycle handling error, aborting.", error)
         } else {
@@ -65,6 +73,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
             filter(event)
 
             if (!event.consumed) {
+                logger.error("Uncaught error", error)
                 event.consume()
                 runLater {
                     showErrorDialog(error)

@@ -25,7 +25,7 @@
 }
 
 .app-drawer-container {
-    -fx-spacing: 20px;
+    -fx-spacing: 30px;
     -fx-pref-width: 400px;
 }
 
@@ -84,6 +84,26 @@
     -fx-background-radius: 6px;
     -fx-spacing: 10px;
     -fx-padding: 10px;
+}
+
+.app-drawer__report-message {
+    -fx-font-size: 16px;
+    -fx-pref-height: 110px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-border-color: -wa-gray;
+    -fx-border-width: 2px;
+}
+
+.app-drawer__report-message:focused {
+    -fx-focus-color: -wa-gray;
+    -fx-background-fill: transparent;
+}
+
+.app-drawer__report-status {
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+    -fx-text-fill: -wa-gray;
 }
 
 .app-drawer__text {

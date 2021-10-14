@@ -23,11 +23,14 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view.UpdaterView
 import tornadofx.*
+import java.text.MessageFormat
 
 class InfoView : View() {
     val info = AppInfo()
+    private val viewModel: AppInfoViewModel by inject()
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -35,9 +38,9 @@ class InfoView : View() {
         scrollpane {
             addClass("app-drawer__scroll-pane")
 
+
             vbox {
                 isFitToWidth = true
-                isFitToHeight = true
 
                 addClass("app-drawer-container")
 
@@ -57,10 +60,10 @@ class InfoView : View() {
 
                 vbox {
                     addClass("app-drawer__section")
+
                     label(messages["aboutOrature"]).apply {
                         addClass("app-drawer__subtitle")
                     }
-
                     label(messages["aboutOratureDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
@@ -79,6 +82,59 @@ class InfoView : View() {
                 }
 
                 add<UpdaterView>()
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["applicationLogs"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+                    add(
+                        JFXButton(messages["viewLogs"]).apply {
+                            styleClass.addAll("btn", "btn--secondary")
+                            setOnAction {
+                                viewModel.browseApplicationLog()
+                            }
+                        }
+                    )
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
+                    label(messages["errorReport"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+                    label(messages["errorReportDescription"]).apply {
+                        fitToParentWidth()
+                        addClass("app-drawer__text")
+                    }
+
+                    label(messages["description"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+                    textarea {
+                        addClass("app-drawer__report-message")
+                        textProperty().bindBidirectional(viewModel.errorDescription)
+                    }
+                    label {
+                        addClass("app-drawer__report-status")
+                        visibleWhen(viewModel.reportTimeStamp.isNotNull)
+                        managedWhen(visibleProperty())
+                        textProperty().bind(viewModel.reportTimeStamp.stringBinding {
+                            MessageFormat.format(messages["errorReportSent"], it)
+                        })
+                    }
+                    add(
+                        JFXButton(messages["sendErrorReport"]).apply {
+                            styleClass.addAll("btn", "btn--secondary")
+                            disableProperty().bind(viewModel.errorDescription.isEmpty)
+                            setOnAction {
+                                viewModel.submitErrorReport()
+                            }
+                        }
+                    )
+                }
             }
         }
     }
