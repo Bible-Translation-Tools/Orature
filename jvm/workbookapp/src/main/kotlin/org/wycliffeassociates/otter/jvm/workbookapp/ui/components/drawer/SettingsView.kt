@@ -237,9 +237,8 @@ class SettingsView : View() {
 
                     label(messages["addApp"]).apply {
                         addClass("app-drawer__text--link")
-                        val labelText = textProperty()
                         tooltip {
-                            textProperty().bind(labelText)
+                            textProperty().bind(this@apply.textProperty())
                         }
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
                         setOnMouseClicked {

@@ -67,9 +67,8 @@ class InfoView : View() {
                     label(messages["aboutOratureDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
-                        val labelText = textProperty()
                         tooltip {
-                            textProperty().bind(labelText)
+                            textProperty().bind(this@apply.textProperty())
                         }
                     }
                 }
@@ -97,9 +96,8 @@ class InfoView : View() {
                         JFXButton(messages["viewLogs"]).apply {
                             styleClass.addAll("btn", "btn--secondary")
 
-                            val labelText = textProperty()
                             tooltip {
-                                textProperty().bind(labelText)
+                                textProperty().bind(this@apply.textProperty())
                             }
 
                             setOnAction {
@@ -118,9 +116,8 @@ class InfoView : View() {
                     label(messages["errorReportDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
-                        val labelText = textProperty()
                         tooltip {
-                            textProperty().bind(labelText)
+                            textProperty().bind(this@apply.textProperty())
                         }
                     }
 
@@ -144,9 +141,8 @@ class InfoView : View() {
                             styleClass.addAll("btn", "btn--secondary")
                             disableProperty().bind(viewModel.errorDescription.isEmpty)
 
-                            val labelText = textProperty()
                             tooltip {
-                                textProperty().bind(labelText)
+                                textProperty().bind(this@apply.textProperty())
                             }
 
                             setOnAction {
