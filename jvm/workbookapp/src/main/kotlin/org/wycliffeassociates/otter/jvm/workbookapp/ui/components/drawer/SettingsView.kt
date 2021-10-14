@@ -80,6 +80,12 @@ class SettingsView : View() {
                         addClass("wa-combobox")
                         fitToParentWidth()
 
+                        tooltip {
+                            textProperty().bind(
+                                this@combobox.selectionModel.selectedItemProperty().stringBinding { it?.name }
+                            )
+                        }
+
                         visibleRowCount = 5
 
                         cellFormat {
@@ -115,6 +121,10 @@ class SettingsView : View() {
                         addClass("wa-combobox")
                         fitToParentWidth()
 
+                        tooltip {
+                            textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
+                        }
+
                         cellFormat {
                             val view = ComboboxItem()
                             graphic = view.apply {
@@ -135,6 +145,10 @@ class SettingsView : View() {
                     combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
                         addClass("wa-combobox")
                         fitToParentWidth()
+
+                        tooltip {
+                            textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
+                        }
 
                         cellFormat {
                             val view = ComboboxItem()
@@ -223,6 +237,10 @@ class SettingsView : View() {
 
                     label(messages["addApp"]).apply {
                         addClass("app-drawer__text--link")
+                        val labelText = textProperty()
+                        tooltip {
+                            textProperty().bind(labelText)
+                        }
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
                         setOnMouseClicked {
                             addPluginDialog.open()

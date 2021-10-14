@@ -67,6 +67,10 @@ class InfoView : View() {
                     label(messages["aboutOratureDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
+                        val labelText = textProperty()
+                        tooltip {
+                            textProperty().bind(labelText)
+                        }
                     }
                 }
 
@@ -92,6 +96,12 @@ class InfoView : View() {
                     add(
                         JFXButton(messages["viewLogs"]).apply {
                             styleClass.addAll("btn", "btn--secondary")
+
+                            val labelText = textProperty()
+                            tooltip {
+                                textProperty().bind(labelText)
+                            }
+
                             setOnAction {
                                 viewModel.browseApplicationLog()
                             }
@@ -108,6 +118,10 @@ class InfoView : View() {
                     label(messages["errorReportDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
+                        val labelText = textProperty()
+                        tooltip {
+                            textProperty().bind(labelText)
+                        }
                     }
 
                     label(messages["description"]).apply {
@@ -129,6 +143,12 @@ class InfoView : View() {
                         JFXButton(messages["sendErrorReport"]).apply {
                             styleClass.addAll("btn", "btn--secondary")
                             disableProperty().bind(viewModel.errorDescription.isEmpty)
+
+                            val labelText = textProperty()
+                            tooltip {
+                                textProperty().bind(labelText)
+                            }
+
                             setOnAction {
                                 viewModel.submitErrorReport()
                             }

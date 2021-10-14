@@ -77,6 +77,10 @@ class AddFilesView : View() {
                     textflow {
                         text(messages["dragAndDropDescription"]).apply {
                             addClass("app-drawer__text")
+                            val messageText = textProperty()
+                            tooltip {
+                                textProperty().bind(messageText)
+                            }
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
                             addClass("app-drawer__text--link")
@@ -107,6 +111,9 @@ class AddFilesView : View() {
                             "btn",
                             "btn--primary"
                         )
+                        tooltip {
+                            textProperty().bind(this@button.textProperty())
+                        }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
                             viewModel.onChooseFile()
