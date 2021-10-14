@@ -460,7 +460,7 @@ class RecordScriptureViewModel : ViewModel() {
             val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
-        }
+        } ?: sourceAudioPlayerProperty.set(null)
     }
 
     fun openTargetAudioPlayer() {
