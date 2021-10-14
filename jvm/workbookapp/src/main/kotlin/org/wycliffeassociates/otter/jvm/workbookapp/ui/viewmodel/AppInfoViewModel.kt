@@ -20,16 +20,26 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.ErrorReportException
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.ViewModel
 import tornadofx.runLater
+import java.awt.Desktop
 import java.text.SimpleDateFormat
 import java.util.Date
+import javax.inject.Inject
 
 class AppInfoViewModel : ViewModel() {
     val errorDescription = SimpleStringProperty()
     val reportTimeStamp = SimpleStringProperty()
 
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
     private val timestampFormatter = SimpleDateFormat("HH:mm:ss - yyyy/MM/dd")
+
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
 
     @Throws(ErrorReportException::class)
     fun submitErrorReport() {
@@ -42,6 +52,12 @@ class AppInfoViewModel : ViewModel() {
             runLater {
                 throw ex
             }
+        }
+    }
+
+    fun browseApplicationLog() {
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().open(directoryProvider.logsDirectory)
         }
     }
 }

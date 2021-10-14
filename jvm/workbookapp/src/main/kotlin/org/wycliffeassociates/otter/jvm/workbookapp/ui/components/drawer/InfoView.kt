@@ -86,6 +86,22 @@ class InfoView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
+                    label(messages["applicationLogs"]).apply {
+                        addClass("app-drawer__subtitle")
+                    }
+                    add(
+                        JFXButton(messages["viewLogs"]).apply {
+                            styleClass.addAll("btn", "btn--secondary")
+                            setOnAction {
+                                viewModel.browseApplicationLog()
+                            }
+                        }
+                    )
+                }
+
+                vbox {
+                    addClass("app-drawer__section")
+
                     label(messages["errorReport"]).apply {
                         addClass("app-drawer__subtitle")
                     }
