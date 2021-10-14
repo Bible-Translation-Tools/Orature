@@ -41,6 +41,8 @@ class SourceContent : Control() {
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
 
+    val licenseProperty = SimpleStringProperty()
+
     val audioNotAvailableTextProperty = SimpleStringProperty()
     val textNotAvailableTextProperty = SimpleStringProperty()
 

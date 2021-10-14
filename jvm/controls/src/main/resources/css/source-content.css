@@ -88,6 +88,14 @@
     -fx-fill: -wa-gray-darker;
 }
 
+.source-content__license-text {
+    -fx-font-size: 1.25em;
+    -fx-alignment: center;
+    -fx-text-alignment: justify;
+    -fx-font-style: italic;
+    -fx-text-fill: -wa-black-40;
+}
+
 .source-content__title {
     -fx-font-size: 1.5em;
     -fx-font-weight: bold;
