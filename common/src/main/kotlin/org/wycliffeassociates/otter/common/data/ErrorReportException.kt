@@ -18,4 +18,11 @@
  */
 package org.wycliffeassociates.otter.common.data
 
-class CustomException(message: String) : Throwable(message)
+/**
+ * A custom exception to override the existing exception handler.
+ * Throwing this will submit an error report to the remote server
+ * and bypass the application's exception handler.
+ *
+ * @param message description of the error report to be submitted.
+ */
+class ErrorReportException(message: String) : Throwable(message)

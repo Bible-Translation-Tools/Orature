@@ -25,7 +25,7 @@ import javafx.application.Platform
 import javafx.application.Platform.runLater
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
-import org.wycliffeassociates.otter.common.data.CustomException
+import org.wycliffeassociates.otter.common.data.ErrorReportException
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
@@ -53,7 +53,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
     // Call consume to avoid error dialog.
     private val filter: (ErrorEvent) -> Unit = { event ->
-        if (event.error is CustomException) {
+        if (event.error is ErrorReportException) {
             event.consume()
             logger.info("A custom exception was reported: ${event.error.message}")
             runLater {
