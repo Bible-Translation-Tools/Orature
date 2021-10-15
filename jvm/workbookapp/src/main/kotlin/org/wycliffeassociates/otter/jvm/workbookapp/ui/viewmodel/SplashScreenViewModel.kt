@@ -39,9 +39,6 @@ class SplashScreenViewModel : ViewModel() {
     @Inject
     lateinit var configureAudioSystem: ConfigureAudioSystem
 
-    @Inject
-    lateinit var localeLanguage: LocaleLanguage
-
     val progressProperty = SimpleDoubleProperty(0.0)
 
     fun initApp(): Observable<Double> {
@@ -58,11 +55,5 @@ class SplashScreenViewModel : ViewModel() {
 
     fun initAudioSystem() {
         configureAudioSystem.configure()
-    }
-
-    fun initializeAppLocale() {
-        FX.locale = localeLanguage.preferredLanguage?.let {
-            Locale(it.slug)
-        } ?: Locale.getDefault()
     }
 }
