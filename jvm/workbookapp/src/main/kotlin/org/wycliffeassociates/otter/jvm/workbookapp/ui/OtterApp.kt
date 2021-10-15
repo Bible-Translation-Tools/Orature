@@ -64,6 +64,8 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     override fun start(stage: Stage) {
         super.start(stage)
+        stage.width = 800.0
+        stage.height = 600.0
         stage.isMaximized = true
         stage.scene.window.setOnCloseRequest {
             if (shouldBlockWindowCloseRequest) {
