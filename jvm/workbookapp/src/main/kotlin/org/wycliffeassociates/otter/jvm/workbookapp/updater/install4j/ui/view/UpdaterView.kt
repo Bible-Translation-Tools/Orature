@@ -14,10 +14,6 @@ class UpdaterView : View() {
     override val root = borderpane {
         styleClass.add("app-drawer__section")
 
-        top = label(messages["update"]) {
-            styleClass.add("app-drawer__title")
-        }
-
         center = stackpane {
             add<NoUpdatesAvailable>()
             add<UpdateWillCompleteLaterFragment>()
@@ -25,11 +21,6 @@ class UpdaterView : View() {
             add<UpdateDownloadingFragment>()
             add<UpdateAvailableFragment>()
             add<CheckForUpdatesFragment>()
-
-            style {
-                paddingTop = 20.0
-                paddingBottom = 10.0
-            }
         }
     }
 }
