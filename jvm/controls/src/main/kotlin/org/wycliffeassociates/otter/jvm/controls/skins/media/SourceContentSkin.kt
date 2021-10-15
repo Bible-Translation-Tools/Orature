@@ -85,6 +85,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var sourceText: Label
 
     @FXML
+    lateinit var licenseText: Label
+
+    @FXML
     lateinit var title: Label
 
     @FXML
@@ -219,6 +222,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceText.apply {
             textProperty().bind(sourceContent.sourceTextProperty)
+        }
+
+        licenseText.apply {
+            textProperty().bind(sourceContent.licenseProperty)
         }
 
         title.apply {
