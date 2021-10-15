@@ -48,9 +48,10 @@ class LocaleLanguage @Inject constructor(
         if (prefLocale.isNotEmpty()) {
             return Locale(prefLocale)
         } else {
-            if (localeDataSource.getSupportedLocales().contains(localeDataSource.getDefaultLocale())) {
-                appPrefRepo.setLocaleLanguage(localeDataSource.getDefaultLocale())
-                return Locale(localeDataSource.getDefaultLocale())
+            val defaultLocale = localeDataSource.getDefaultLocale()
+            if (localeDataSource.getSupportedLocales().contains(defaultLocale)) {
+                appPrefRepo.setLocaleLanguage(defaultLocale)
+                return Locale(defaultLocale)
             } else {
                 appPrefRepo.setLocaleLanguage(DEFAULT_LANGUAGE_SLUG)
                 return Locale(DEFAULT_LANGUAGE_SLUG)
