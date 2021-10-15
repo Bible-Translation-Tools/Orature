@@ -55,6 +55,8 @@ class RootView : View() {
     }
 
     override val root = stackpane {
+        prefWidth = 800.0
+        prefHeight = 600.0
         borderpane {
             left<AppBar>()
             center<AppContent>()
