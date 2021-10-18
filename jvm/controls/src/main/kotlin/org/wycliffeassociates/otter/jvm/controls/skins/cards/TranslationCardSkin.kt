@@ -101,6 +101,7 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
             })
             managedProperty().bind(visibleProperty())
             textProperty().bind(seeMoreLessTextBinding())
+            tooltip { textProperty().bind(seeMoreLessTextBinding()) }
             graphicProperty().bind(
                 Bindings.`when`(card.seeAllProperty)
                     .then(upIcon)
