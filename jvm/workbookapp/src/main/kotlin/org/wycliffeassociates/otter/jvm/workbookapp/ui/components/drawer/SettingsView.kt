@@ -251,7 +251,7 @@ class SettingsView : View() {
         }
     }
 
-    init {throw Exception()
+    init {
         importStylesheet(resources.get("/css/app-drawer.css"))
         importStylesheet(resources.get("/css/add-plugin-dialog.css"))
         importStylesheet(resources.get("/css/confirm-dialog.css"))
