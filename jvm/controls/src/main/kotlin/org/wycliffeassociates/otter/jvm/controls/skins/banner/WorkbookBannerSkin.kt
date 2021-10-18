@@ -73,7 +73,13 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
         resourceTitle.textProperty().bind(banner.resourceTitleProperty)
 
         deleteBtn.textProperty().bind(banner.deleteTitleProperty)
+        deleteBtn.tooltip {
+            textProperty().bind(deleteBtn.textProperty())
+        }
         exportBtn.textProperty().bind(banner.exportTitleProperty)
+        exportBtn.tooltip {
+            textProperty().bind(exportBtn.textProperty())
+        }
     }
 
     private fun bindAction() {
