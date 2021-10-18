@@ -159,12 +159,14 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         playBtn.apply {
+            tooltip { textProperty().bind(this@apply.textProperty()) }
             setOnMouseClicked {
                 audioController.toggle()
             }
         }
 
         playTargetBtn.apply {
+            tooltip { textProperty().bind(this@apply.textProperty()) }
             setOnMouseClicked {
                 targetAudioController.toggle()
             }

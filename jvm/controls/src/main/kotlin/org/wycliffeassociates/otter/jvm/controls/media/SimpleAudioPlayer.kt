@@ -106,6 +106,11 @@ class SimpleAudioPlayer(
         playButtonProperty.onChange {
             it?.let { button ->
                 button.apply {
+                    tooltip {
+                        textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding{
+                            if (it == true) messages["pause"] else messages["play"]
+                        })
+                    }
                     graphicProperty().bind(
                         audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
                             when (isPlaying) {

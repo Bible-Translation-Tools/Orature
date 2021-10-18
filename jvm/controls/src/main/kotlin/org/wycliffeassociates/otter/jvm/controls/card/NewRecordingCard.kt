@@ -22,6 +22,7 @@ import javafx.scene.control.Button
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import tornadofx.tooltip
 
 class NewRecordingCard(
     val buttonText: String,
@@ -37,6 +38,7 @@ class NewRecordingCard(
                         "btn",
                         "btn--cta"
                     )
+                    tooltip(buttonText)
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                     setOnAction { action() }
                 }

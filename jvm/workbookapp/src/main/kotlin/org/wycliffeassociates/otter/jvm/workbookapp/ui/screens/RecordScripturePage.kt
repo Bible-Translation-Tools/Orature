@@ -203,6 +203,7 @@ class RecordScripturePage : View() {
                         // previous verse button
                         button(messages["previousVerse"]) {
                             addClass("btn", "btn--secondary")
+                            tooltip(text)
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
                             action {
                                 recordScriptureViewModel.previousChunk()
@@ -228,6 +229,7 @@ class RecordScripturePage : View() {
                         // next verse button
                         button(messages["nextVerse"]) {
                             addClass("btn", "btn--secondary")
+                            tooltip(text)
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                             action {
                                 recordScriptureViewModel.nextChunk()
