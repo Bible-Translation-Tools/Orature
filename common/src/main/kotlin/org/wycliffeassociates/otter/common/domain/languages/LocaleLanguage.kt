@@ -19,15 +19,17 @@
 package org.wycliffeassociates.otter.common.domain.languages
 
 import io.reactivex.Completable
-import io.reactivex.Maybe
+import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.persistence.IAppPreferences
+
+private const val DEFAULT_LANGUAGE_SLUG = "en"
 
 class LocaleLanguage @Inject constructor(
-    private val appPrefRepo: IAppPreferencesRepository,
+    private val appPrefRepo: IAppPreferences,
     private val langRepo: ILanguageRepository,
     private val localeDataSource: ILocaleDataSource
 ) {
@@ -41,24 +43,40 @@ class LocaleLanguage @Inject constructor(
     val supportedLanguages: List<Language>
         get() = supportedLanguages()
 
+    fun preferredLocale(): Locale {
+        val prefLocale = getLanguageFromPrefs()
+        if (prefLocale.isNotEmpty()) {
+            return Locale(prefLocale)
+        } else {
+            val defaultLocale = localeDataSource.getDefaultLocale()
+            if (localeDataSource.getSupportedLocales().contains(defaultLocale)) {
+                appPrefRepo.setLocaleLanguage(defaultLocale)
+                return Locale(defaultLocale)
+            } else {
+                appPrefRepo.setLocaleLanguage(DEFAULT_LANGUAGE_SLUG)
+                return Locale(DEFAULT_LANGUAGE_SLUG)
+            }
+        }
+    }
+
     private fun preferredLanguage(): Language? {
-        val language = getLanguageFromPrefs()
+        val language = preferredLocale().language
         return when {
-            supportedLanguages.contains(language) -> language
+            supportedLanguages.map { it.slug }.contains(language) -> langRepo.getBySlug(language).blockingGet()
             else -> defaultLanguage
         }
     }
 
     fun setPreferredLanguage(language: Language): Completable {
-        return appPrefRepo.setLocaleLanguage(language)
+        return appPrefRepo.setLocaleLanguage(language.slug)
     }
 
     private fun defaultLanguage(): Language? {
         val systemLocale = localeDataSource.getDefaultLocale()
-        val systemLanguage = getLanguageBySlug(systemLocale)
+        val systemLanguage = langRepo.getBySlug(systemLocale).blockingGet()
         return when {
             supportedLanguages.contains(systemLanguage) -> systemLanguage
-            else -> getLanguageBySlug("en")
+            else -> langRepo.getBySlug(DEFAULT_LANGUAGE_SLUG).blockingGet()
         }
     }
 
@@ -71,16 +89,7 @@ class LocaleLanguage @Inject constructor(
             .sortedBy { it.slug }
     }
 
-    private fun getLanguageBySlug(slug: String): Language? {
-        return langRepo.getBySlug(slug)
-            .flatMapMaybe { Maybe.just(it) }
-            .onErrorComplete()
-            .blockingGet()
-    }
-
-    private fun getLanguageFromPrefs(): Language? {
-        return appPrefRepo.localeLanguage()
-            .onErrorComplete()
-            .blockingGet()
+    private fun getLanguageFromPrefs(): String {
+        return appPrefRepo.localeLanguage().blockingGet()
     }
 }

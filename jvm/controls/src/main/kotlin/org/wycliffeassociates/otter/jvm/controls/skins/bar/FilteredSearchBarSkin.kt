@@ -43,7 +43,7 @@ class FilteredSearchBarSkin(private val bar: FilteredSearchBar) : SkinBase<Filte
     private fun initializeControl() {
         searchField.leftProperty().bind(bar.leftIconProperty)
         searchField.rightProperty().bind(bar.rightIconProperty)
-        searchField.promptTextProperty().bind(bar.promptTextProperty)
+        searchField.promptTextProperty().set(bar.promptTextProperty.value)
 
         filterMenu.items.bind(bar.filterItems) { it }
 

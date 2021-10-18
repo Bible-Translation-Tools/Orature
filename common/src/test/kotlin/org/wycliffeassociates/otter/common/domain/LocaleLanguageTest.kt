@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.common.domain
 
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
-import io.reactivex.Maybe
 import io.reactivex.Single
 import org.junit.Assert
 import org.junit.Before
@@ -10,8 +9,8 @@ import org.junit.Test
 import org.mockito.Mockito
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
+import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.ILocaleDataSource
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 
 class LocaleLanguageTest {
@@ -21,7 +20,7 @@ class LocaleLanguageTest {
     private val french = Language("fr", "", "", "", true, "")
     private val supportedLanguages = listOf(english, spanish, french)
 
-    private val appPref = mock<IAppPreferencesRepository>()
+    private val appPref = mock<IAppPreferences>()
     private val langRepo = mock<ILanguageRepository>()
     private val localeDataSource = mock<ILocaleDataSource>()
     private val localeLanguage = LocaleLanguage(appPref, langRepo, localeDataSource)
@@ -45,7 +44,7 @@ class LocaleLanguageTest {
     @Test
     fun `test preferred language defaults to system locale when not set`() {
         Mockito.`when`(localeDataSource.getDefaultLocale()).thenReturn(french.slug)
-        Mockito.`when`(appPref.localeLanguage()).thenReturn(Maybe.empty())
+        Mockito.`when`(appPref.localeLanguage()).thenReturn(Single.just(""))
 
         Assert.assertEquals(localeLanguage.preferredLanguage, french)
     }
@@ -53,7 +52,7 @@ class LocaleLanguageTest {
     @Test
     fun `test preferred language`() {
         Mockito.`when`(localeDataSource.getDefaultLocale()).thenReturn(english.slug)
-        Mockito.`when`(appPref.localeLanguage()).thenReturn(Maybe.just(spanish))
+        Mockito.`when`(appPref.localeLanguage()).thenReturn(Single.just(spanish.slug))
 
         Assert.assertEquals(localeLanguage.preferredLanguage, spanish)
 

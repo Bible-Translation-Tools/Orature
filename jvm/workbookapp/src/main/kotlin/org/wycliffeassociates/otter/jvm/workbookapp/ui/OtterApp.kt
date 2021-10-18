@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
+import java.util.*
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
@@ -46,6 +47,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         directoryProvider.cleanTempDirectory()
         Thread.setDefaultUncaughtExceptionHandler(OtterExceptionHandler(directoryProvider))
         initializeLogger(directoryProvider)
+        initializeAppLocale()
 
         importStylesheet<AppStyles>()
     }
@@ -54,6 +56,10 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
         ConfigureLogger(
             directoryProvider.logsDirectory
         ).configure()
+    }
+
+    fun initializeAppLocale() {
+        FX.locale = localeLanguage.preferredLocale()
     }
 
     override fun start(stage: Stage) {
