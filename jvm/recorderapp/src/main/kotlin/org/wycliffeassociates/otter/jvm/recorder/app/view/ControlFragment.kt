@@ -78,6 +78,7 @@ class ControlFragment : Fragment() {
 
         continueBtn.apply {
             addClass("continue-button")
+            tooltip(text)
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
             setOnMouseClicked {
@@ -87,6 +88,7 @@ class ControlFragment : Fragment() {
 
         cancelBtn.apply {
             addClass("continue-button")
+            tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             setOnMouseClicked {

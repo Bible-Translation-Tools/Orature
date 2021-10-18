@@ -58,12 +58,13 @@
     -fx-font-size: 14px;
 }
 
-.continue-button * {
+.continue-button > .text{
     -fx-fill: #282CBD;
 }
 
 .continue-button > .ikonli-font-icon {
     -fx-icon-size: 28px;
+    -fx-fill: #282CBD;
 }
 
 .waveform-container {
