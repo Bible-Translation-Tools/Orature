@@ -63,6 +63,7 @@ class AddFilesView : View() {
                         JFXButton().apply {
                             addClass("app-drawer__btn--close")
                             graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
                             action { collapse() }
                         }
                     )
