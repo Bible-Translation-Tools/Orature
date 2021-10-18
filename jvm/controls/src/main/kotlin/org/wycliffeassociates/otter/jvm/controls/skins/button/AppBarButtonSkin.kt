@@ -46,11 +46,12 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
     private fun initializeControl() {
         button.setOnMouseClicked { button.fire() }
 
+        root.tooltip {
+            textProperty().bind(button.textProperty())
+        }
         btnLabel.apply {
             textProperty().bind(button.textProperty())
-            tooltip {
-                textProperty().bind(button.textProperty())
-            }
+
         }
         btnIcon.apply {
             graphicProperty().bind(button.graphicProperty())
