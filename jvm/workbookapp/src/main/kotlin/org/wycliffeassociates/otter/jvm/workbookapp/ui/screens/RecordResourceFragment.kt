@@ -348,7 +348,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordableViewModel.sourceAudioAvailableProperty)
-            licenseTextProperty.bind(workbookDataStore.sourceLicenseProperty)
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }

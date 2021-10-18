@@ -332,7 +332,7 @@ class RecordScripturePage : View() {
             dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
             playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordScriptureViewModel.sourceAudioAvailableProperty)
-            licenseTextProperty.bind(workbookDataStore.sourceLicenseProperty)
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })

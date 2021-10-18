@@ -225,7 +225,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         }
 
         licenseText.apply {
-            textProperty().bind(sourceContent.licenseProperty)
+            textProperty().bind(sourceContent.licenseTextProperty)
         }
 
         title.apply {
