@@ -47,7 +47,7 @@ class FilteredSearchBarSkin(private val bar: FilteredSearchBar) : SkinBase<Filte
         searchField.promptTextProperty().set(bar.promptTextProperty.value)
 
         filterMenu.items.bind(bar.filterItems) { it }
-        filterMenu.tooltip(messages["searchFilter"])
+        filterMenu.tooltip(messages["display"])
 
         bar.textProperty.bindBidirectional(searchField.textProperty())
     }
