@@ -78,7 +78,6 @@ class AddFilesView : View() {
                     textflow {
                         text(messages["dragAndDropDescription"]).apply {
                             addClass("app-drawer__text")
-                            val messageText = textProperty()
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
                             addClass("app-drawer__text--link")
