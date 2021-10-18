@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class TakeItem : HBox() {
     val takeProperty = SimpleObjectProperty<TakeModel>()
@@ -56,6 +57,7 @@ class TakeItem : HBox() {
 
         button {
             addClass("btn", "btn--icon")
+            tooltip(messages["select"])
             graphicProperty().bind(selectedProperty.objectBinding {
                 when (it) {
                     true -> selectedIcon

@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
@@ -56,6 +57,11 @@ class SimpleAudioPlayer(
         spacing = 10.0
         button {
             addClass("btn", "btn--icon")
+            tooltip {
+                textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding{
+                    if (it == true) messages["pause"] else messages["play"]
+                })
+            }
             graphicProperty().bind(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
                     when (isPlaying) {
