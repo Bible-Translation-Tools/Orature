@@ -295,6 +295,7 @@ class ChapterPage : Fragment() {
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
             audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
+            licenseTextProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }

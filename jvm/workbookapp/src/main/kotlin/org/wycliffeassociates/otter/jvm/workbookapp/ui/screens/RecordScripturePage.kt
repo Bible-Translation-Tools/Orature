@@ -84,6 +84,7 @@ class RecordScripturePage : View() {
         SourceContent().apply {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             audioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             isMinimizableProperty.set(false)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
@@ -331,6 +332,7 @@ class RecordScripturePage : View() {
             dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
             playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
             audioAvailableProperty.bind(recordScriptureViewModel.sourceAudioAvailableProperty)
+            licenseTextProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })

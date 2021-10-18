@@ -31,6 +31,7 @@ class PluginOpenedPage : Fragment() {
 
     val dialogTitleProperty = SimpleStringProperty()
     val dialogTextProperty = SimpleStringProperty()
+    val licenseTextProperty = SimpleStringProperty()
     val playerProperty = SimpleObjectProperty<IAudioPlayer>()
     val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val audioAvailableProperty = SimpleBooleanProperty(false)
@@ -61,6 +62,7 @@ class PluginOpenedPage : Fragment() {
                 sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
                 audioPlayerProperty.bind(playerProperty)
                 targetAudioPlayerProperty.bind(this@PluginOpenedPage.targetAudioPlayerProperty)
+                licenseProperty.bind(licenseTextProperty)
 
                 audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
                 textNotAvailableTextProperty.set(messages["textNotAvailable"])

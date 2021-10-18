@@ -34,12 +34,14 @@ class SourceTextFragment : Fragment() {
 
         var sourceText: String? = null
         var sourceContentTitle: String? = null
+        var license: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
 
             parameters?.let {
                 sourceText = parameters.named["source_text"]
+                license = parameters.named["license"]
 
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],
@@ -53,7 +55,7 @@ class SourceTextFragment : Fragment() {
             sourceTextProperty.set(sourceText)
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             contentTitleProperty.set(sourceContentTitle)
-
+            licenseProperty.set(license)
             enableAudioProperty.set(false)
         }
     }
