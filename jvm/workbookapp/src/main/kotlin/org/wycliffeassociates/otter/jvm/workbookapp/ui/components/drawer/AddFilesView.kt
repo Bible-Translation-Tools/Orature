@@ -78,9 +78,6 @@ class AddFilesView : View() {
                         text(messages["dragAndDropDescription"]).apply {
                             addClass("app-drawer__text")
                             val messageText = textProperty()
-                            tooltip {
-                                textProperty().bind(messageText)
-                            }
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
                             addClass("app-drawer__text--link")

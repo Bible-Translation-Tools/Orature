@@ -67,9 +67,6 @@ class InfoView : View() {
                     label(messages["aboutOratureDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
-                        tooltip {
-                            textProperty().bind(this@apply.textProperty())
-                        }
                     }
                 }
 
@@ -116,9 +113,6 @@ class InfoView : View() {
                     label(messages["errorReportDescription"]).apply {
                         fitToParentWidth()
                         addClass("app-drawer__text")
-                        tooltip {
-                            textProperty().bind(this@apply.textProperty())
-                        }
                     }
 
                     label(messages["description"]).apply {
