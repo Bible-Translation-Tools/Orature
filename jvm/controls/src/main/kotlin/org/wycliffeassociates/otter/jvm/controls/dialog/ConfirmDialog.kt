@@ -88,6 +88,7 @@ class ConfirmDialog : OtterDialog() {
                 }
                 button {
                     addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
+                    tooltip(messages["close"])
                     graphic = FontIcon("gmi-close")
                     onActionProperty().bind(onCloseActionProperty())
                     visibleProperty().bind(onCloseActionProperty().isNotNull)
@@ -120,6 +121,7 @@ class ConfirmDialog : OtterDialog() {
 
             button(cancelButtonTextProperty) {
                 addClass("btn", "btn--primary")
+                tooltip { textProperty().bind(this@button.textProperty()) }
                 graphic = FontIcon("gmi-close")
                 onActionProperty().bind(onCancelActionProperty())
                 visibleProperty().bind(onCancelActionProperty.isNotNull)
@@ -134,6 +136,7 @@ class ConfirmDialog : OtterDialog() {
 
             button(confirmButtonTextProperty) {
                 addClass("btn", "btn--secondary", "btn--borderless")
+                tooltip { textProperty().bind(this@button.textProperty()) }
                 graphic = FontIcon("gmi-remove")
                 onActionProperty().bind(onConfirmActionProperty())
                 visibleProperty().bind(onConfirmActionProperty.isNotNull)

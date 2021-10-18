@@ -52,6 +52,7 @@ class RemovePluginsDialog : View() {
                     }
                     add(JFXButton().apply {
                         graphic = RemovePluginsStyles.deleteIcon(20)
+                        tooltip(messages["remove"])
                         isDisableVisualFocus = true
                         addClass(RemovePluginsStyles.deleteButton)
                         action {

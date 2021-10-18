@@ -41,6 +41,7 @@ class AddPluginDialog : OtterDialog() {
             region { hgrow = Priority.ALWAYS }
             button {
                 addClass("add-plugin-dialog__btn--close")
+                tooltip(messages["close"])
                 graphic = FontIcon("gmi-close")
                 action { close() }
             }
@@ -76,6 +77,7 @@ class AddPluginDialog : OtterDialog() {
                 }
                 button(messages["browse"]) {
                     addClass("btn", "btn--secondary")
+                    tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                     action {
                         val files = chooseFile(
@@ -99,6 +101,7 @@ class AddPluginDialog : OtterDialog() {
 
                     graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                     text = messages["record"]
+                    tooltip(text)
                     viewModel.canRecordProperty.bindBidirectional(selectedProperty())
                 }
             )
@@ -108,12 +111,14 @@ class AddPluginDialog : OtterDialog() {
 
                     graphic = FontIcon(MaterialDesign.MDI_PENCIL)
                     text = messages["edit"]
+                    tooltip(text)
                     viewModel.canEditProperty.bindBidirectional(selectedProperty())
                 }
             )
         }
         button(messages["addApp"]) {
             addClass("btn", "btn--primary")
+            tooltip(text)
             graphic = FontIcon(MaterialDesign.MDI_PLUS)
             disableProperty().bind(viewModel.validProperty.not())
 
