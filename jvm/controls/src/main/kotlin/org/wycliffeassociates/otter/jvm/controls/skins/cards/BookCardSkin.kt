@@ -78,6 +78,9 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
                     it?.let { Background(backgroundImage(it.file)) }
                 }
             )
+            tooltip {
+                textProperty().bind(card.attributionTextProperty)
+            }
             val rect = Rectangle().apply {
                 widthProperty().bind(coverArt.widthProperty())
                 heightProperty().bind(coverArt.heightProperty())
@@ -128,11 +131,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         val loader = FXMLLoader(javaClass.getResource("BookCard.fxml"))
         loader.setController(this)
         val root: Node = loader.load()
-        root.apply {
-            tooltip {
-                textProperty().bind(card.attributionTextProperty)
-            }
-        }
         children.add(root)
     }
 }
