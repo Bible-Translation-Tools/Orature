@@ -98,12 +98,6 @@ class SettingsView : View() {
                         }
 
                         buttonCell = LanguageComboboxCell()
-
-                        selectionModel.selectedItemProperty().addListener { observable, oldValue, newValue ->
-                            if (oldValue != null) {
-                                newValue?.let { viewModel.updateLanguage(it) }
-                            }
-                        }
                     }
                 }
 
