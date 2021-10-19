@@ -22,33 +22,40 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
 
 <?import java.lang.String?>
+
 <StackPane fx:id="root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <HBox fx:id="bgGraphic" StackPane.alignment="CENTER" />
-        <HBox styleClass="resume-book-banner__overlay" StackPane.alignment="CENTER" />
-        <VBox styleClass="resume-book-banner__content" StackPane.alignment="CENTER_LEFT">
+        <HBox fx:id="bgGraphic" StackPane.alignment="CENTER">
+            <Region HBox.hgrow="ALWAYS"></Region>
+            <ImageView fx:id="bookCoverImage" pickOnBounds="true" preserveRatio="true"></ImageView>
+        </HBox>
+        <HBox styleClass="resume-book-banner__overlay" StackPane.alignment="CENTER" mouseTransparent="true"/>
+        <VBox styleClass="resume-book-banner__content" StackPane.alignment="CENTER_LEFT" pickOnBounds="false">
             <children>
-                <VBox>
+                <VBox pickOnBounds="false">
                     <children>
-                        <Label fx:id="bookTitle" styleClass="resume-book-banner__book-title" text="book" />
-                        <HBox styleClass="resume-book-banner__language-container">
+                        <Label fx:id="bookTitle" styleClass="resume-book-banner__book-title" text="book"/>
+                        <HBox styleClass="resume-book-banner__language-container" pickOnBounds="false">
                             <children>
-                                <Label fx:id="sourceLanguageText" graphicTextGap="8.0" styleClass="resume-book-banner__language" text="source">
+                                <Label fx:id="sourceLanguageText" graphicTextGap="8.0"
+                                       styleClass="resume-book-banner__language" text="source">
                                     <graphic>
-                                        <FontIcon iconLiteral="gmi-hearing" />
+                                        <FontIcon iconLiteral="gmi-hearing"/>
                                     </graphic>
                                 </Label>
                                 <Label styleClass="resume-book-banner__divider">
                                     <graphic>
-                                        <FontIcon iconLiteral="mdi-play" />
+                                        <FontIcon iconLiteral="mdi-play"/>
                                     </graphic>
                                 </Label>
-                                <Label fx:id="targetLanguageText" graphicTextGap="8.0" styleClass="resume-book-banner__language" text="target">
+                                <Label fx:id="targetLanguageText" graphicTextGap="8.0"
+                                       styleClass="resume-book-banner__language" text="target">
                                     <graphic>
-                                        <FontIcon iconLiteral="mdi-voice" />
+                                        <FontIcon iconLiteral="mdi-voice"/>
                                     </graphic>
                                 </Label>
                             </children>
@@ -57,11 +64,11 @@
                 </VBox>
                 <Button fx:id="resumeButton">
                     <graphic>
-                        <FontIcon iconLiteral="mdi-arrow-right" />
+                        <FontIcon iconLiteral="mdi-arrow-right"/>
                     </graphic>
                     <styleClass>
-                        <String fx:value="btn" />
-                        <String fx:value="btn--cta" />
+                        <String fx:value="btn"/>
+                        <String fx:value="btn--cta"/>
                     </styleClass>
                 </Button>
             </children>

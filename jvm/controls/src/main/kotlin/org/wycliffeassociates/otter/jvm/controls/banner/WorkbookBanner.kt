@@ -28,15 +28,7 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundImage
-import javafx.scene.layout.BackgroundPosition
-import javafx.scene.layout.BackgroundRepeat
-import javafx.scene.layout.BackgroundSize
 import org.wycliffeassociates.otter.jvm.controls.skins.banner.WorkbookBannerSkin
-import java.io.File
-import java.util.concurrent.Callable
-import javafx.geometry.Side
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.FX
@@ -70,33 +62,14 @@ class WorkbookBanner : Control() {
         }
     }
 
-    fun backgroundBinding(): ObjectBinding<Background?> {
+    fun coverImageBinding(): ObjectBinding<Image> {
         return Bindings.createObjectBinding(
-            Callable {
+            {
                 backgroundArtworkProperty.value?.let {
-                    Background(backgroundImage(it.file))
+                    Image(it.file.inputStream())
                 }
             },
             backgroundArtworkProperty
-        )
-    }
-
-    private fun backgroundImage(file: File): BackgroundImage {
-        val image = Image(file.inputStream())
-        val backgroundSize = BackgroundSize(
-            1.0,
-            1.0,
-            true,
-            true,
-            true,
-            false
-        )
-        return BackgroundImage(
-            image,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition(Side.RIGHT, 0.0, false, Side.TOP, 0.0, false),
-            backgroundSize
         )
     }
 

@@ -24,6 +24,7 @@ import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
+import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
@@ -33,6 +34,9 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
 
     @FXML
     lateinit var bgGraphic: HBox
+
+    @FXML
+    lateinit var bookCoverImage: ImageView
 
     @FXML
     lateinit var bookTitle: Label
@@ -53,7 +57,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
 
     private fun initializeControl() {
         bgGraphic.apply {
-            backgroundProperty().bind(banner.backgroundBinding())
             val rect = Rectangle().apply {
                 widthProperty().bind(bgGraphic.widthProperty())
                 heightProperty().bind(bgGraphic.heightProperty())
@@ -63,7 +66,14 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
             }
             clip = rect
         }
-
+        bookCoverImage.apply {
+            imageProperty().bind(banner.coverImageBinding())
+            fitHeightProperty().bind(banner.maxHeightProperty())
+            // tooltip hover for underlay node is set in .fxml (pickOnBounds)
+            tooltip {
+                textProperty().bind(banner.attributionTextProperty)
+            }
+        }
         bindText()
         bindAction()
     }
@@ -97,11 +107,6 @@ class WorkbookBannerSkin(private val banner: WorkbookBanner) : SkinBase<Workbook
         val loader = FXMLLoader(javaClass.getResource("WorkbookBanner.fxml"))
         loader.setController(this)
         val root: Node = loader.load()
-        root.apply {
-            tooltip {
-                textProperty().bind(banner.attributionTextProperty)
-            }
-        }
         children.add(root)
     }
 }

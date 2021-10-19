@@ -20,6 +20,7 @@
 
 .workbook-banner {
     -fx-max-width: 800px;
+    -fx-max-height: 215px;
     -fx-background-color: -wa-primary;
     -fx-background-radius: 15px;
 }
