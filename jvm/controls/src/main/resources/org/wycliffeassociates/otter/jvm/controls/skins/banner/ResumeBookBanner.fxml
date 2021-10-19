@@ -22,10 +22,11 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
 
 <?import java.lang.String?>
-<?import javafx.scene.image.ImageView?>
+
 <StackPane fx:id="root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <HBox fx:id="bgGraphic" StackPane.alignment="CENTER">
             <Region HBox.hgrow="ALWAYS"></Region>

@@ -70,33 +70,14 @@ class WorkbookBanner : Control() {
         }
     }
 
-    fun backgroundBinding(): ObjectBinding<Background?> {
+    fun coverImageBinding(): ObjectBinding<Image> {
         return Bindings.createObjectBinding(
-            Callable {
+            {
                 backgroundArtworkProperty.value?.let {
-                    Background(backgroundImage(it.file))
+                    Image(it.file.inputStream())
                 }
             },
             backgroundArtworkProperty
-        )
-    }
-
-    private fun backgroundImage(file: File): BackgroundImage {
-        val image = Image(file.inputStream())
-        val backgroundSize = BackgroundSize(
-            1.0,
-            1.0,
-            true,
-            true,
-            true,
-            false
-        )
-        return BackgroundImage(
-            image,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition(Side.RIGHT, 0.0, false, Side.TOP, 0.0, false),
-            backgroundSize
         )
     }
 

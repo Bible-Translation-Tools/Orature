@@ -24,21 +24,25 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
 
 <StackPane fx:id="root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <HBox fx:id="bgGraphic" StackPane.alignment="CENTER" />
-        <HBox styleClass="workbook-banner__overlay" StackPane.alignment="CENTER" />
-        <VBox alignment="CENTER_LEFT" spacing="20.0" StackPane.alignment="CENTER_LEFT">
+        <HBox fx:id="bgGraphic" StackPane.alignment="CENTER">
+            <Region HBox.hgrow="ALWAYS"></Region>
+            <ImageView fx:id="bookCoverImage" pickOnBounds="true" preserveRatio="true"></ImageView>
+        </HBox>
+        <HBox styleClass="workbook-banner__overlay" StackPane.alignment="CENTER" mouseTransparent="true"/>
+        <VBox alignment="CENTER_LEFT" spacing="20.0" StackPane.alignment="CENTER_LEFT" pickOnBounds="false">
             <children>
-                <VBox spacing="10.0">
+                <VBox spacing="10.0" pickOnBounds="false">
                     <children>
                         <Label fx:id="bookTitle" styleClass="workbook-banner__book-title" text="book" />
                         <Label fx:id="resourceTitle"  styleClass="workbook-banner__resource-title" text="resource" />
                     </children>
                 </VBox>
-                <HBox spacing="15.0">
+                <HBox spacing="15.0" pickOnBounds="false">
                     <children>
                         <JFXButton fx:id="deleteBtn" styleClass="btn, btn--secondary, workbook-banner__btn--delete" text="delete" underline="true">
                             <graphic>

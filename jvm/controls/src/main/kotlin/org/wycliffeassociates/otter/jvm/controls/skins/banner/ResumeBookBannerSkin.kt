@@ -70,7 +70,7 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
         }
         bookCoverImage.apply {
             imageProperty().bind(banner.coverImageBinding())
-            fitHeightProperty().bind(bgGraphic.heightProperty())
+            fitHeightProperty().bind(banner.maxHeightProperty())
             // tooltip hover for underlay node is set in .fxml (pickOnBounds)
             tooltip {
                 textProperty().bind(banner.attributionTextProperty)
