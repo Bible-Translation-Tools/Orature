@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.media
 
+import java.text.MessageFormat
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -27,6 +28,8 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
+import tornadofx.FX
+import tornadofx.get
 import tornadofx.onChange
 
 class SourceContent : Control() {
@@ -42,6 +45,7 @@ class SourceContent : Control() {
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
 
     val licenseProperty = SimpleStringProperty()
+    val licenseTextProperty = SimpleStringProperty()
 
     val audioNotAvailableTextProperty = SimpleStringProperty()
     val textNotAvailableTextProperty = SimpleStringProperty()
@@ -62,6 +66,11 @@ class SourceContent : Control() {
         initialize()
         audioPlayerProperty.onChange {
             audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
+        }
+        licenseProperty.onChange {
+            licenseTextProperty.set(
+                MessageFormat.format(FX.messages["licenseStatement"], it)
+            )
         }
     }
 
