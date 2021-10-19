@@ -302,6 +302,7 @@ class ChapterPage : Fragment() {
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
             audioAvailableProperty.bind(viewModel.sourceAudioAvailableProperty)
+            licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
         }
@@ -366,5 +367,4 @@ class ChapterPage : Fragment() {
     private fun removeDialogListeners() {
         viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
     }
-
 }

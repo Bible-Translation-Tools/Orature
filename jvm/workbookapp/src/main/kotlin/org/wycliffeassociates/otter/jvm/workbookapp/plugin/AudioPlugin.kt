@@ -140,7 +140,8 @@ class AudioPlugin(
                             pluginParameters.bookTitle,
                             pluginParameters.chapterNumber
                         )
-                    }"
+                    }",
+                    "--license=${pluginParameters.license}"
                 )
             }
         return ParametersImpl(insertedArgs)

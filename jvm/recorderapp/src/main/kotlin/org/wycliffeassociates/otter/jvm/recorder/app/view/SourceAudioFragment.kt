@@ -35,12 +35,14 @@ class SourceAudioFragment : Fragment() {
 
         var sourceText: String? = null
         var sourceContentTitle: String? = null
+        var license: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
 
             parameters?.let {
                 sourceText = parameters.named["source_text"]
+                license = parameters.named["license"]
 
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],
@@ -59,6 +61,7 @@ class SourceAudioFragment : Fragment() {
             pauseLabelProperty.set(messages["pauseSource"])
             playTargetLabelProperty.set(messages["playTarget"])
             pauseTargetLabelProperty.set(messages["pauseTarget"])
+            licenseProperty.set(license)
 
             contentTitleProperty.set(sourceContentTitle)
         }

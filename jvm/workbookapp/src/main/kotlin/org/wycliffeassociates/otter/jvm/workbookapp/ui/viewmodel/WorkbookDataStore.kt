@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
+import javafx.beans.property.SimpleStringProperty
 import javax.inject.Inject
 
 class WorkbookDataStore : Component(), ScopedInstance {
@@ -77,6 +78,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
     val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
 
+    val sourceLicenseProperty = SimpleStringProperty()
+
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         activeChapterProperty.onChange { updateSourceAudio() }
@@ -85,6 +88,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
             if (it == null) {
                 activeChapterProperty.set(null)
                 activeChunkProperty.set(null)
+            } else {
+                sourceLicenseProperty.set(it.source.resourceMetadata.license)
             }
         }
     }
