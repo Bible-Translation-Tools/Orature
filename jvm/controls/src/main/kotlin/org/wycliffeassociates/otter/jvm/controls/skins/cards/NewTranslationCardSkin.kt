@@ -25,6 +25,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
+import tornadofx.tooltip
 
 class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<NewTranslationCard>(card) {
 
@@ -51,6 +52,9 @@ class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<Ne
         sourceLanguageText.textProperty().bind(card.sourceLanguageProperty)
         targetLanguageText.textProperty().bind(card.targetLanguageProperty)
         newTranslationBtn.textProperty().bind(card.newTranslationTextProperty)
+        newTranslationBtn.tooltip {
+            textProperty().bind(newTranslationBtn.textProperty())
+        }
     }
 
     private fun bindAction() {

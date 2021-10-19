@@ -26,6 +26,7 @@ import javafx.scene.control.SkinBase
 import org.controlsfx.control.textfield.CustomTextField
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class FilteredSearchBarSkin(private val bar: FilteredSearchBar) : SkinBase<FilteredSearchBar>(bar) {
 
@@ -46,6 +47,7 @@ class FilteredSearchBarSkin(private val bar: FilteredSearchBar) : SkinBase<Filte
         searchField.promptTextProperty().set(bar.promptTextProperty.value)
 
         filterMenu.items.bind(bar.filterItems) { it }
+        filterMenu.tooltip(messages["display"])
 
         bar.textProperty.bindBidirectional(searchField.textProperty())
     }

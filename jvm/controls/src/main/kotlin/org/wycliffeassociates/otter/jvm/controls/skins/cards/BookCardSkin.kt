@@ -98,6 +98,9 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         addBookBtn.apply {
             textProperty().bind(card.addBookTextProperty)
             visibleProperty().bind(card.newBookProperty)
+            tooltip {
+                textProperty().bind(card.addBookTextProperty)
+            }
             onActionProperty().bind(card.onAddBookActionProperty)
         }
     }

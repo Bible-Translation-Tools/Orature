@@ -43,6 +43,7 @@ class BreadCrumb : HBox() {
         label {
             graphicProperty().bind(iconProperty)
             textProperty().bind(titleProperty)
+            tooltip { textProperty().bind(titleProperty) }
 
             addClass("breadcrumb__content")
 

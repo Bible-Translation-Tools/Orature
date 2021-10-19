@@ -25,6 +25,7 @@ import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.control.ToggleButton
 import javafx.scene.layout.VBox
+import tornadofx.tooltip
 
 class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton>(button) {
 
@@ -45,8 +46,12 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
     private fun initializeControl() {
         button.setOnMouseClicked { button.fire() }
 
+        root.tooltip {
+            textProperty().bind(button.textProperty())
+        }
         btnLabel.apply {
             textProperty().bind(button.textProperty())
+
         }
         btnIcon.apply {
             graphicProperty().bind(button.graphicProperty())

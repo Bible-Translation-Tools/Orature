@@ -40,6 +40,7 @@
 
 .app-drawer__title {
     -fx-font-size: 36px;
+    -fx-wrap-text: true;
 }
 
 .app-drawer__btn--close {

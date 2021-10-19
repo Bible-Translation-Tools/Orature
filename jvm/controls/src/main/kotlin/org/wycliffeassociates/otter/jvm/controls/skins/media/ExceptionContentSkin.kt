@@ -75,6 +75,7 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
         headerLabel.textProperty().bind(content.headerTextProperty())
         sendReportCheckbox.apply {
             textProperty().bind(content.sendReportTextProperty())
+            tooltip { textProperty().bind(this@apply.textProperty()) }
             content.sendReportProperty().bind(selectedProperty())
         }
         stacktraceText.textProperty().bind(content.stackTraceProperty())
@@ -84,11 +85,15 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
                     .then(content.showLessTextProperty())
                     .otherwise(content.showMoreTextProperty())
             )
+            tooltip { textProperty().bind(this@apply.textProperty()) }
             graphicProperty().bind(
                 Bindings.`when`(content.showMoreProperty())
                     .then(showLessIcon)
                     .otherwise(showMoreIcon)
             )
+        }
+        closeButton.apply {
+            tooltip { textProperty().bind(content.closeTextProperty()) }
         }
     }
 

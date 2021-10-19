@@ -173,6 +173,7 @@ class ChapterPage : Fragment() {
                     button {
                         addClass("btn", "btn--secondary")
                         text = messages["recordChapter"]
+                        tooltip(text)
                         graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
                         action {
                             viewModel.recordChapter()
@@ -181,6 +182,7 @@ class ChapterPage : Fragment() {
                     button {
                         addClass("btn", "btn--secondary")
                         text = messages["exportChapter"]
+                        tooltip(text)
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
                             viewModel.exportChapter()
@@ -197,6 +199,7 @@ class ChapterPage : Fragment() {
                 button {
                     addClass("btn", "btn--primary")
                     text = messages["editChapter"]
+                    tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_PENCIL)
                     enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                     action {
@@ -206,6 +209,7 @@ class ChapterPage : Fragment() {
                 button {
                     addClass("btn", "btn--primary")
                     text = messages["markAction"]
+                    tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_BOOKMARK)
                     enableWhen(viewModel.selectedChapterTakeProperty.isNotNull)
                     action {
@@ -215,6 +219,7 @@ class ChapterPage : Fragment() {
                 button {
                     addClass("btn", "btn--primary")
                     text = messages["viewTakes"]
+                    tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC)
                     action {
                         viewModel.chapterCardProperty.value?.let {
@@ -235,6 +240,7 @@ class ChapterPage : Fragment() {
                 button {
                     addClass("btn", "btn--secondary", "btn--secondary-light")
                     text = messages["compile"]
+                    tooltip(text)
                     graphic = FontIcon(MaterialDesign.MDI_LAYERS)
                     enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
                     action {
@@ -252,6 +258,7 @@ class ChapterPage : Fragment() {
                             else -> messages["continueTranslation"]
                         }
                     })
+                    tooltip { textProperty().bind(this@button.textProperty()) }
                     graphic = FontIcon(MaterialDesign.MDI_VOICE)
                     action {
                         viewModel.workChunkProperty.value?.let {

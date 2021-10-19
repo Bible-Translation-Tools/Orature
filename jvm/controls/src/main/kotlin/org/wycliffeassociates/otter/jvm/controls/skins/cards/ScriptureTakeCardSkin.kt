@@ -30,6 +30,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import tornadofx.*
+import tornadofx.FX.Companion.messages
 
 class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTakeCard>(card) {
 
@@ -74,6 +75,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
 
     private fun initController() {
         selectBtn.apply {
+            tooltip(messages["select"])
             graphicProperty().bind(card.selectedProperty.objectBinding {
                 when (it) {
                     true -> {
@@ -86,20 +88,25 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                     }
                 }
             })
+            setOnAction {
+                card.animationMediatorProperty.value?.let {
+                    if (it.isAnimating || card.selectedProperty.value) {
+                        return@setOnAction
+                    }
+                    it.node = card
+                    it.animate {
+                        card.onTakeSelectedActionProperty.value?.handle(ActionEvent())
+                    }
+                } ?: card.onTakeSelectedActionProperty.value?.handle(ActionEvent())
+            }
         }
+
+        deleteBtn.tooltip(messages["delete"])
         deleteBtn.onActionProperty().bind(card.onTakeDeleteActionProperty)
+
+        editBtn.tooltip(messages["edit"])
         editBtn.onActionProperty().bind(card.onTakeEditActionProperty)
-        selectBtn.setOnAction {
-            card.animationMediatorProperty.value?.let {
-                if (it.isAnimating || card.selectedProperty.value) {
-                    return@setOnAction
-                }
-                it.node = card
-                it.animate {
-                    card.onTakeSelectedActionProperty.value?.handle(ActionEvent())
-                }
-            } ?: card.onTakeSelectedActionProperty.value?.handle(ActionEvent())
-        }
+
         player.apply {
             playerProperty.bind(card.audioPlayerProperty)
             playButtonProperty.set(playBtn)

@@ -60,6 +60,7 @@ class SettingsView : View() {
                         JFXButton().apply {
                             addClass("app-drawer__btn--close")
                             graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
                             action { collapse() }
                         }
                     )
@@ -79,6 +80,12 @@ class SettingsView : View() {
                     combobox(viewModel.selectedLocaleLanguageProperty, viewModel.supportedLocaleLanguages) {
                         addClass("wa-combobox")
                         fitToParentWidth()
+
+                        tooltip {
+                            textProperty().bind(
+                                this@combobox.selectionModel.selectedItemProperty().stringBinding { it?.name }
+                            )
+                        }
 
                         visibleRowCount = 5
 
@@ -115,6 +122,10 @@ class SettingsView : View() {
                         addClass("wa-combobox")
                         fitToParentWidth()
 
+                        tooltip {
+                            textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
+                        }
+
                         cellFormat {
                             val view = ComboboxItem()
                             graphic = view.apply {
@@ -135,6 +146,10 @@ class SettingsView : View() {
                     combobox(viewModel.selectedInputDeviceProperty, viewModel.inputDevices) {
                         addClass("wa-combobox")
                         fitToParentWidth()
+
+                        tooltip {
+                            textProperty().bind(this@combobox.selectionModel.selectedItemProperty())
+                        }
 
                         cellFormat {
                             val view = ComboboxItem()
@@ -223,6 +238,9 @@ class SettingsView : View() {
 
                     label(messages["addApp"]).apply {
                         addClass("app-drawer__text--link")
+                        tooltip {
+                            textProperty().bind(this@apply.textProperty())
+                        }
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
                         setOnMouseClicked {
                             addPluginDialog.open()

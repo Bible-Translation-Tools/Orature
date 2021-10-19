@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
+import com.jfoenix.controls.JFXButton
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
@@ -36,7 +37,7 @@ class ControlFragment : Fragment() {
     }
     val continueBtn = button(messages["continue"], FontIcon("fas-check"))
     val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
-    val recordBtn = FontIcon("gmi-mic")
+    val recordBtn = JFXButton()
 
     override val root = borderpane {
         addClass("controls")
@@ -69,8 +70,16 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
-            iconSize = 48
-            fill = Color.WHITE
+            graphic = FontIcon("gmi-mic").apply {
+                iconSize = 48
+                fill = Color.WHITE
+            }
+            tooltip {
+                textProperty().bind(
+                    vm.recordingProperty.stringBinding {
+                        if (it == true) messages["pause"] else messages["record"]
+                })
+            }
             setOnMouseClicked {
                 toggleRecording()
             }
@@ -78,6 +87,7 @@ class ControlFragment : Fragment() {
 
         continueBtn.apply {
             addClass("continue-button")
+            tooltip(text)
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
             setOnMouseClicked {
@@ -87,6 +97,7 @@ class ControlFragment : Fragment() {
 
         cancelBtn.apply {
             addClass("continue-button")
+            tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             setOnMouseClicked {
@@ -97,9 +108,9 @@ class ControlFragment : Fragment() {
 
     private fun toggleRecording() {
         if (!vm.isRecording) {
-            recordBtn.iconLiteral = "gmi-pause-circle-outline"
+            (recordBtn.graphic as FontIcon).iconLiteral = "gmi-pause-circle-outline"
         } else {
-            recordBtn.iconLiteral = "gmi-mic"
+            (recordBtn.graphic as FontIcon).iconLiteral = "gmi-mic"
         }
         vm.toggle()
     }

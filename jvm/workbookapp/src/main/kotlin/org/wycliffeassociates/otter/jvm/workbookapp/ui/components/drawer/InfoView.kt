@@ -53,6 +53,7 @@ class InfoView : View() {
                         JFXButton().apply {
                             addClass("app-drawer__btn--close")
                             graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
                             action { collapse() }
                         }
                     )
@@ -92,6 +93,11 @@ class InfoView : View() {
                     add(
                         JFXButton(messages["viewLogs"]).apply {
                             styleClass.addAll("btn", "btn--secondary")
+
+                            tooltip {
+                                textProperty().bind(this@apply.textProperty())
+                            }
+
                             setOnAction {
                                 viewModel.browseApplicationLog()
                             }
@@ -129,6 +135,11 @@ class InfoView : View() {
                         JFXButton(messages["sendErrorReport"]).apply {
                             styleClass.addAll("btn", "btn--secondary")
                             disableProperty().bind(viewModel.errorDescription.isEmpty)
+
+                            tooltip {
+                                textProperty().bind(this@apply.textProperty())
+                            }
+
                             setOnAction {
                                 viewModel.submitErrorReport()
                             }

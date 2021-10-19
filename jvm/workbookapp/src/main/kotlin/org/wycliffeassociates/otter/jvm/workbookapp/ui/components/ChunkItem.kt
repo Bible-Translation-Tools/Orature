@@ -117,6 +117,7 @@ class ChunkItem : VBox() {
             button {
                 addClass("btn", "btn--secondary")
                 text = FX.messages["openVerse"]
+                tooltip(text)
                 graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                 onActionProperty().bind(onChunkOpenActionProperty)
             }

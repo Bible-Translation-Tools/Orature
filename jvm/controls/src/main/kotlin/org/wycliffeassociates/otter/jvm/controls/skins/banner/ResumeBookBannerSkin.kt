@@ -75,6 +75,9 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
         sourceLanguageText.textProperty().bind(banner.sourceLanguageProperty)
         targetLanguageText.textProperty().bind(banner.targetLanguageProperty)
         resumeButton.textProperty().bind(banner.resumeTextProperty)
+        resumeButton.tooltip {
+            textProperty().bind(resumeButton.textProperty())
+        }
     }
 
     private fun bindAction() {
