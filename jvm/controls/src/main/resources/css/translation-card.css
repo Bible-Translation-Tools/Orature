@@ -20,9 +20,13 @@
 .translation-card__root {
     -fx-max-width: 800px;
     -fx-spacing: 10px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-secondary;
     -fx-background-radius: 15px;
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+}
+
+.translation-card__root * {
+    -fx-text-fill: -wa-regular-text;
 }
 
 .translation-card__header {
@@ -47,7 +51,7 @@
 
 .translation-card__book--no-bg:hover,
 .translation-card__book--no-bg:pressed {
-    -fx-background-color: -wa-white !important;
+    -fx-background-color: transparent !important;
 }
 
 .translation-card__see-more-content {
