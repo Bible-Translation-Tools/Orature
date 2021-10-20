@@ -25,6 +25,12 @@
     -wa-primary-light: #CEE6FF;
     -wa-primary-dark: #00377C;
 
+    -wa-theme-background: #f4f4f4;
+    -wa-secondary: white;
+    -wa-secondary-hover: #e6e6e6;
+    -wa-theme-background-2: white;
+    -wa-regular-text: black;
+
     /*Accent Color */
     -wa-accent: #FFB100;
     -wa-accent-light: #FFD671;

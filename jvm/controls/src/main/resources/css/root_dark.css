@@ -24,9 +24,12 @@
     -wa-primary-20: #015AD933;
     -wa-primary-light: #CEE6FF;
     -wa-primary-dark: #232b50;
-    -wa-primary-background: #1c2031;
-    -wa-secondary-background: #496783;
-    -wa-secondary-background-hover: #7593ad;
+
+    -wa-theme-background: #1c2031;
+    -wa-secondary: #496783;
+    -wa-secondary-hover: #7593ad;
+    -wa-theme-background-2: #5d568f;
+    -wa-regular-text: #f0f4f8;
 
     /*Accent Color */
     -wa-accent: #F39422;
@@ -43,7 +46,6 @@
     -wa-gray: rgba(26,26,26,0.6);  /* Disabled button text */
     -wa-gray-light: rgba(26,26,26,0.4);
     -wa-gray-lighter: rgba(26,26,26,0.1); /* used for disabled backgrounds, light borders */
-    -wa-regular-text: #f0f4f8;
     -wa-white: #ffffff;
     -wa-white-05: rgba(255,255,255,0.05);
     -wa-white-10: rgba(255,255,255,0.1);
