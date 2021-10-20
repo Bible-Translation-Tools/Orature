@@ -29,6 +29,7 @@ class CheckForUpdatesFragment : Fragment() {
         add(
             JFXButton(messages["checkForUpdates"]).apply {
                 styleClass.addAll("btn", "btn--secondary")
+                tooltip(text)
                 setOnAction {
                     vm.checkForUpdates()
                 }
