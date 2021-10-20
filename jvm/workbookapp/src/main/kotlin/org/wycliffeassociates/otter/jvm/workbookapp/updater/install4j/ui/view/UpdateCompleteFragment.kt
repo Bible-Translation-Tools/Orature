@@ -34,6 +34,7 @@ class UpdateCompleteFragment : Fragment() {
                 wrapTextProperty().set(true)
                 graphic = restartLaterIcon
                 styleClass.addAll("btn", "btn--secondary")
+                tooltip(text)
                 setOnAction {
                     vm.updateLater()
                 }
@@ -44,6 +45,7 @@ class UpdateCompleteFragment : Fragment() {
                 wrapTextProperty().set(true)
                 graphic = restartNowIcon
                 styleClass.addAll("btn", "btn--secondary")
+                tooltip(text)
                 setOnAction {
                     vm.updateAndRestart()
                 }

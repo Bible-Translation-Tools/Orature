@@ -58,6 +58,7 @@ class UpdateAvailableFragment : Fragment() {
         add(
             JFXButton(messages["updateNow"]).apply {
                 styleClass.addAll("btn", "btn--secondary")
+                tooltip(text)
                 setOnAction {
                     vm.downloadUpdate()
                 }
