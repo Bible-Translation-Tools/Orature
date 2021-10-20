@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
 import javafx.application.Platform
-import javafx.scene.control.Label
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -72,6 +71,13 @@ class SettingsView : View() {
 
                 vbox {
                     addClass("app-drawer__section")
+
+                    togglebutton("Dark Mode", null, false) {
+                        setOnAction {
+                            if (isSelected) fire(ThemeColorEvent(this@SettingsView::class, ChangeThemeEventAction.DARK))
+                            else fire(ThemeColorEvent(this@SettingsView::class, ChangeThemeEventAction.LIGHT))
+                        }
+                    }
 
                     label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")

@@ -26,6 +26,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ChangeThemeEventAction
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
@@ -53,6 +55,17 @@ class RootView : View() {
         importStylesheet(resources.get("/css/root.css"))
 
         initAudioErrorDialog()
+
+        subscribe<ThemeColorEvent<UIComponent>> {
+            if (it.action == ChangeThemeEventAction.DARK) {
+                currentStage!!.scene.stylesheets.remove("/css/root.css")
+                currentStage!!.scene.stylesheets.add("/css/root_dark.css")
+            }
+            else {
+                currentStage!!.scene.stylesheets.remove("/css/root_dark.css")
+                currentStage!!.scene.stylesheets.add("/css/root.css")
+            }
+        }
     }
 
     override val root = stackpane {
