@@ -100,6 +100,12 @@ class AppBar : Fragment() {
             add(addButton)
             add(settingsButton)
             add(infoButton)
+
+            subscribe<DrawerEvent<UIComponent>> {
+                if (it.action == DrawerEventAction.CLOSE) {
+                    buttonsToggleGroup.toggles.forEach { it.isSelected = false }
+                }
+            }
         }
     }
 

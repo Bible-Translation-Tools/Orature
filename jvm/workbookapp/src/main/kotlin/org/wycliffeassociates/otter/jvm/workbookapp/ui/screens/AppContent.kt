@@ -45,6 +45,9 @@ class AppContent : View() {
                 addClass("app-drawer__overlay")
                 visibleProperty().bind(rootViewModel.drawerOpenedProperty)
                 managedProperty().bind(visibleProperty())
+                setOnMouseClicked {
+                    fire(DrawerEvent(this@AppContent::class, DrawerEventAction.CLOSE))
+                }
             }
         }
 
