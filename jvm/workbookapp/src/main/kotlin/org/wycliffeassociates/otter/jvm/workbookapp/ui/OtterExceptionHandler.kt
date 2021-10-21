@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import io.sentry.Attachment
 import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
@@ -47,7 +48,9 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     init {
-        Sentry.init()
+        Sentry.init {
+            it.dsn = this.javaClass.classLoader.getResource("sentry.properties").toExternalForm()
+        }
     }
 
     // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
@@ -141,15 +144,15 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
 
     private fun sendSentryReport(error: Throwable) {
         val environment = getEnvironment()
-        val sentryContext = Sentry.getContext()
+        Sentry.withScope { scope ->
+            scope.setTag("app version", environment.getVersion() ?: "")
+            environment.getSystemData().forEach {
+                scope.setTag(it.first, it.second)
+            }
+            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory,"orature.log").absolutePath))
 
-        sentryContext.addTag("app version", environment.getVersion())
-        environment.getSystemData().forEach {
-            sentryContext.addTag(it.first, it.second)
+            Sentry.captureException(error)
         }
-
-        Sentry.capture(error)
-        Sentry.clearContext()
     }
 
     private fun getEnvironment(): AppInfo {
