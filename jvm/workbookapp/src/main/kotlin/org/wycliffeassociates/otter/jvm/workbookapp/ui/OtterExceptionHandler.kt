@@ -48,9 +48,14 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     init {
-        Sentry.init {
-            it.dsn = ResourceBundle.getBundle("sentry.properties").get("dsn")
-        }
+        //try {
+            val sentryProperties = ResourceBundle.getBundle("sentry")
+            Sentry.init {
+                it.dsn = sentryProperties.get("dsn")
+            }
+//        } catch (e: MissingResourceException) {
+//        }
+
     }
 
     // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
