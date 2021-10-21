@@ -49,7 +49,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
 
     init {
         Sentry.init {
-            it.dsn = this.javaClass.classLoader.getResource("/sentry.properties").toExternalForm()
+            it.dsn = ResourceBundle.getBundle("sentry.properties").get("dsn")
         }
     }
 
