@@ -104,6 +104,13 @@
     -fx-background-color: -wa-secondary;
 }
 
-.chapter-page__chunks .list-view .label {
+.chapter-page__chunks .list-view .label,
+.chapter-page__chapter-info .label {
     -fx-text-fill: -wa-regular-text;
+    -fx-fill: -wa-regular-text;
+}
+
+.chapter-page__chapter-box .ikonli-font-icon,
+.chapter-page__chunks .label .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
 }

@@ -37,7 +37,6 @@
 
     -wa-secondary: white;
     -wa-secondary-hover: #e6e6e6;
-    -wa-regular-text: black;
 
     /*Accent Color */
     -wa-accent: #FFB100;
@@ -118,5 +117,11 @@
     -wa-top-shadow: dropshadow(gaussian, -wa-black-20, 3, 0.2, 0, 0);
 
 /* -------------------- Components mappings --------------------*/
+    -wa-regular-text: -wa-black;
     -card-image-placeholder-background: -wa-gray-lighter;
+    -secondary-btn-text-fill: -wa-primary;
+    -secondary-btn-text-fill-hover: -wa-primary-dark;
+    -secondary-btn-background: transparent;
+    -secondary-btn-background-hover: -wa-primary-05;
+    -btn-icon-border-color: -wa-black-20;
 }

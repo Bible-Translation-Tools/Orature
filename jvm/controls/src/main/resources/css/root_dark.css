@@ -25,7 +25,7 @@
     -wa-primary-light: #8b94c1;
     -wa-primary-dark: #273059;
 
-    -wa-primary-variant: #794dff;
+    -wa-primary-variant: #5d37cd;
     -wa-primary-variant-light: #b399ff;
     -wa-primary-variant-dark: #47367d;
 
@@ -117,5 +117,11 @@
     -wa-top-shadow: dropshadow(gaussian, -wa-black-20, 3, 0.2, 0, 0);
 
 /* -------------------- Components mappings --------------------*/
+    -wa-regular-text: #e6e6e6;
     -card-image-placeholder-background: #b3b3b3;
+    -secondary-btn-text-fill: -wa-regular-text;
+    -secondary-btn-text-fill-hover: -wa-primary-dark;
+    -secondary-btn-background: transparent;
+    -secondary-btn-background-hover: -wa-secondary-hover;
+    -btn-icon-border-color: transparent;
 }
