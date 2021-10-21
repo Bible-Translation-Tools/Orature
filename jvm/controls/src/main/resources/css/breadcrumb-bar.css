@@ -20,7 +20,7 @@
 .breadcrumb-bar {
     -fx-padding: 15px 40px;
     -fx-spacing: 5px;
-    -fx-background-color: -wa-theme-background-2;
+    -fx-background-color: -wa-surface;
     -fx-border-width: 1px;
     -fx-border-color: -wa-gray-lighter;
 }
@@ -48,11 +48,11 @@
 }
 
 .breadcrumb__content:hover {
-    -fx-background-color: -wa-theme-background-2-hover;
+    -fx-background-color: -wa-surface-hover;
 }
 
 .breadcrumb__content:pressed {
-    -fx-background-color: -wa-theme-background-2-pressed;
+    -fx-background-color: -wa-surface-pressed;
 }
 
 .breadcrumb__content .ikonli-font-icon {

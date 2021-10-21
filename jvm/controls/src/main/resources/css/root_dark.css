@@ -25,10 +25,15 @@
     -wa-primary-light: #8b94c1;
     -wa-primary-dark: #273059;
 
-    -wa-theme-background: #1c2031;
-    -wa-theme-background-2: #5d568f;
-    -wa-theme-background-2-hover: #948fbc;
-    -wa-theme-background-2-pressed: -wa-primary;
+    -wa-primary-variant: #794dff;
+    -wa-primary-variant-light: #b399ff;
+    -wa-primary-variant-dark: #47367d;
+
+    -wa-background: #1c2031;
+
+    -wa-surface: #5d568f;
+    -wa-surface-hover: #948fbc;
+    -wa-surface-pressed: -wa-primary;
 
     -wa-secondary: #496783;
     -wa-secondary-hover: #7593ad;
@@ -40,7 +45,7 @@
     -wa-accent-dark: #9E6600;
 
     /* Gradients */
-    -wa-primary-gradient: linear-gradient(to top, -wa-primary-dark, #755eba);
+    -wa-primary-gradient: linear-gradient(to top, -wa-primary-dark, -wa-primary-variant);
     -wa-cta-gradient: linear-gradient(to bottom, -wa-accent-light, -wa-accent);
 
     /* Neutral Colors */
@@ -73,7 +78,6 @@
     -wa-black-80: rgba(0, 21, 51, 0.8);
     -wa-black-90: rgba(0, 21, 51, 0.9);
     -wa-transparent: rgba(255,255,255,0);
-    -wa-background: #F7FAFF;
 
     /* Extra Colors */
     -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */

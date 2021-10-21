@@ -19,13 +19,13 @@
 
 .workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
-    -fx-background-color: -wa-theme-background;
+    -fx-background-color: -wa-background;
 }
 
 .workbook-page__chapter-list .list-cell:selected,
 .workbook-page__chapter-list .list-cell:even,
 .workbook-page__chapter-list .list-cell:odd {
-    -fx-background-color: -wa-theme-background;
+    -fx-background-color: -wa-background;
 }
 
 .workbook-page__chapter-list .label {

@@ -25,10 +25,15 @@
     -wa-primary-light: #CEE6FF;
     -wa-primary-dark: #00377C;
 
-    -wa-theme-background: #f4f4f4;
-    -wa-theme-background-2: white;
-    -wa-theme-background-2-hover: #e6e6e6;
-    -wa-theme-background-2-pressed: #D9DDE4;
+    -wa-primary-variant: -wa-primary;
+    -wa-primary-variant-light: -wa-primary;
+    -wa-primary-variant-dark: -wa-primary;
+
+    -wa-background: #f4f4f4;
+
+    -wa-surface: white;
+    -wa-surface-hover: #e6e6e6;
+    -wa-surface-pressed: #D9DDE4;
 
     -wa-secondary: white;
     -wa-secondary-hover: #e6e6e6;
@@ -73,7 +78,6 @@
     -wa-black-80: rgba(0, 21, 51, 0.8);
     -wa-black-90: rgba(0, 21, 51, 0.9);
     -wa-transparent: rgba(255,255,255,0);
-    -wa-background: #F7FAFF;
 
     /* Extra Colors */
     -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */
