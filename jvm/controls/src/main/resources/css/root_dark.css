@@ -40,7 +40,7 @@
     -wa-accent-dark: #9E6600;
 
     /* Gradients */
-    -wa-primary-gradient: linear-gradient(to top, -wa-primary, #267CF7);
+    -wa-primary-gradient: linear-gradient(to top, -wa-primary-dark, #755eba);
     -wa-cta-gradient: linear-gradient(to bottom, -wa-accent-light, -wa-accent);
 
     /* Neutral Colors */
