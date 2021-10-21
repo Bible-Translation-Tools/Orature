@@ -48,14 +48,22 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     init {
-        //try {
-            val sentryProperties = ResourceBundle.getBundle("sentry")
-            Sentry.init {
-                it.dsn = sentryProperties.get("dsn")
-            }
-//        } catch (e: MissingResourceException) {
-//        }
+        initializeSentry()
+    }
 
+    private fun initializeSentry() {
+        // Empty string for dsn disables the sentry SDK, used for running in the IDE
+        var sentryDsn = ""
+        try {
+            // This file is configured in build.gradle, set via github actions
+            val sentryProperties = ResourceBundle.getBundle("sentry")
+            sentryDsn = sentryProperties["dsn"]
+        } catch (e: MissingResourceException) {
+            logger.info("Sentry disabled due to missing sentry.properties file")
+        }
+        Sentry.init {
+            it.dsn = sentryDsn
+        }
     }
 
     // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
