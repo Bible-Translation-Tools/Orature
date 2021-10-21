@@ -109,4 +109,7 @@
     -wa-level4: dropshadow(gaussian, rgba(0,0,0,0.22), 10, 0, 0, 10);
     -wa-level5: dropshadow(gaussian, rgba(0,0,0,0.22), 12, 0, 0, 15); /* Highest Priorty / Shadow */
     -wa-top-shadow: dropshadow(gaussian, -wa-black-20, 3, 0.2, 0, 0);
+
+/* -------------------- Components mappings --------------------*/
+    -card-image-placeholder-background: #b3b3b3;
 }
