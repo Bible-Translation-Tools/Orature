@@ -27,6 +27,9 @@
 
     -wa-theme-background: #1c2031;
     -wa-theme-background-2: #5d568f;
+    -wa-theme-background-2-hover: #948fbc;
+    -wa-theme-background-2-pressed: -wa-primary;
+
     -wa-secondary: #496783;
     -wa-secondary-hover: #7593ad;
     -wa-regular-text: #e6e6e6;

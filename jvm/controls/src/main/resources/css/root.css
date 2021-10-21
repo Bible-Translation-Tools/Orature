@@ -27,6 +27,9 @@
 
     -wa-theme-background: #f4f4f4;
     -wa-theme-background-2: white;
+    -wa-theme-background-2-hover: #e6e6e6;
+    -wa-theme-background-2-pressed: #D9DDE4;
+
     -wa-secondary: white;
     -wa-secondary-hover: #e6e6e6;
     -wa-regular-text: black;
@@ -111,5 +114,5 @@
     -wa-top-shadow: dropshadow(gaussian, -wa-black-20, 3, 0.2, 0, 0);
 
 /* -------------------- Components mappings --------------------*/
-    -card-image-placeholder-background: -wa-black-05;
+    -card-image-placeholder-background: -wa-gray-lighter;
 }

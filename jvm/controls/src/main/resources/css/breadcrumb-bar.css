@@ -37,7 +37,7 @@
     -fx-padding: 5px 10px;
     -fx-cursor: hand;
     -fx-pref-height: 48px;
-    -fx-text-fill: #001533;
+    -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
 }
@@ -48,15 +48,15 @@
 }
 
 .breadcrumb__content:hover {
-    -fx-background-color: #E6E9ED;
+    -fx-background-color: -wa-theme-background-2-hover;
 }
 
 .breadcrumb__content:pressed {
-    -fx-background-color: #D9DDE4;
+    -fx-background-color: -wa-theme-background-2-pressed;
 }
 
 .breadcrumb__content .ikonli-font-icon {
-    -fx-icon-color: #001533;
+    -fx-icon-color: -wa-regular-text;
     -fx-icon-size: 24px;
 }
 
