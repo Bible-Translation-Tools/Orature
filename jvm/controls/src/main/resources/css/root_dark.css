@@ -35,6 +35,8 @@
     -wa-foreground-hover: #9097bb;
     -wa-foreground-pressed: -wa-primary-dark;
 
+    -wa-surface: #363636;
+
     /*Accent Color */
     -wa-accent: #F39422;
     -wa-accent-light: #FFD671;
@@ -115,6 +117,7 @@
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: #e6e6e6;
+    -wa-note-text: #c0bfbf;
 
     -breadcrumb-background: #5d568f;
     -breadcrumb-background-hover: #948fbc;

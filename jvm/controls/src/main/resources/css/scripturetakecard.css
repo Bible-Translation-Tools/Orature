@@ -24,13 +24,17 @@
 .card--scripture-take {
     -fx-padding: 10px;
     -fx-effect: -wa-top-shadow;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-spacing: 20px;
 }
 
 .card--scripture-take__title-box {
     -fx-spacing: 5px;
+}
+
+.card--scripture-take__title-box .label{
+    -fx-text-fill: -wa-regular-text;
 }
 
 .card--scripture-take__take-label {
