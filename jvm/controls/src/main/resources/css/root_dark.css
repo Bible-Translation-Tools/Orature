@@ -135,3 +135,7 @@
     -text-field-background-hover: -wa-regular-text;
     -text-field-background-focused: -wa-regular-text;
 }
+
+.workspace {
+    -fx-background-color: -wa-background;
+}

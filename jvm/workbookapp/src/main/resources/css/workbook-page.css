@@ -29,5 +29,5 @@
 }
 
 .workbook-page__chapter-list .label {
-    -fx-text-fill: -wa-gray-darker;
+    -fx-text-fill: -wa-regular-text;
 }

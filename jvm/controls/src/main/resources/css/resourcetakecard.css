@@ -25,7 +25,7 @@
 }
 
 .card--main-container {
-    -fx-background-color: #F7FAFF;
+    -fx-background-color: -wa-background;
 }
 
 .card--resource-take {
@@ -74,7 +74,7 @@
 
 .card--left-region-container {
     -fx-padding: 30px 0 0 0;
-    -fx-background-color: #e7ecf5;
+    -fx-background-color: -wa-background;
 }
 
 .card__right-region {
