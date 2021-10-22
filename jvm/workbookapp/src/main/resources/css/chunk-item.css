@@ -46,13 +46,13 @@
 }
 
 .chunk-item__selected-status {
-    -fx-fill: -wa-white;
-    -fx-stroke: -wa-black-10;
+    -fx-fill: transparent;
+    -fx-stroke: -wa-black-20;
     -fx-stroke-width: 2px;
 }
 
 .chunk-item__selected-status--active {
-    -fx-fill: -wa-green;
+    -fx-fill: -wa-status-active;
     -fx-stroke: null;
 }
 

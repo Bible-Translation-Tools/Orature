@@ -118,6 +118,7 @@
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: -wa-black;
     -wa-note-text: -wa-black-40;
+    -wa-status-active: -wa-green;
 
     -breadcrumb-background: white;
     -breadcrumb-background-hover: #e6e6e6;
