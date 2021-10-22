@@ -25,7 +25,7 @@
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
 }
 
-.new-translation-card * {
+.new-translation-card .label {
     -fx-text-fill: -wa-regular-text;
 }
 
@@ -41,15 +41,16 @@
 
 .new-translation-card__language {
     -fx-font-size: 20px;
-    -fx-text-fill: -wa-black-60;
 }
 
 .new-translation-card__language .ikonli-font-icon {
     -fx-font-size: 24px;
-    -fx-fill: -wa-black-60;
 }
 
 .new-translation-card__divider .ikonli-font-icon {
     -fx-font-size: 24px;
-    -fx-fill: -wa-black-60;
+}
+
+.new-translation-card__languages .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
 }
