@@ -33,6 +33,7 @@
 
     -wa-foreground: white;
     -wa-foreground-hover: #e6e6e6;
+    -wa-foreground-pressed: -wa-black-10;
 
     /*Accent Color */
     -wa-accent: #FFB100;
@@ -125,4 +126,8 @@
     -secondary-btn-background: transparent;
     -secondary-btn-background-hover: -wa-primary-05;
     -btn-icon-border-color: -wa-black-20;
+
+    -text-field-background: -wa-white;
+    -text-field-background-hover: #d9d9d9;
+    -text-field-background-focused: white;
 }

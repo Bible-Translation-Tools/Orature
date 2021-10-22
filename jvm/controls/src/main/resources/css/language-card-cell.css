@@ -21,17 +21,17 @@
     -fx-padding: 10px;
     -fx-spacing: 20px;
     -fx-alignment: center-left;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
 }
 
 .language-card-cell:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .language-card-cell:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .language-card-cell:disabled {
@@ -45,6 +45,7 @@
 
 .language-card-cell__icon .ikonli-font-icon {
     -fx-font-size: 24px;
+    -fx-icon-color: -wa-regular-text;
 }
 
 .language-card-cell__title {

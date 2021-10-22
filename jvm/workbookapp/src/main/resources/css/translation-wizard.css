@@ -20,7 +20,7 @@
 .translation-wizard__root {
     -fx-pref-width: 800px;
     -fx-padding: 40px 10px 0 30px;
-    -fx-background-color: #EDF1F8;
+    -fx-background-color: -wa-background;
     -fx-spacing: 30px;
 }
 
@@ -41,8 +41,9 @@
     -fx-padding: 5px 0;
 }
 
+.translation-wizard__title,
 .translation-wizard__list .list-cell .label {
-    -fx-text-fill: inherit;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .translation-wizard__root .list-cell .language-card-cell {
