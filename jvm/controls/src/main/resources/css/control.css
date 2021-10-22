@@ -145,7 +145,7 @@
 
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
-    -fx-background-color: -wa-secondary-btn-background;
+    -fx-background-color: -secondary-btn-background;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
     -fx-text-fill: -secondary-btn-text-fill;

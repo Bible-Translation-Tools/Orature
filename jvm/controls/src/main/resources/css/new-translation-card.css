@@ -20,7 +20,7 @@
 .new-translation-card {
     -fx-max-width: 800px;
     -fx-padding: 5px;
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 15px;
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
 }

@@ -27,7 +27,7 @@
 }
 
 .book-card-cell:hover {
-    -fx-background-color: -wa-secondary-hover;
+    -fx-background-color: -wa-foreground-hover;
     -fx-cursor: hand;
 }
 

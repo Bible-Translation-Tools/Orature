@@ -31,12 +31,8 @@
 
     -wa-background: #f4f4f4;
 
-    -wa-surface: white;
-    -wa-surface-hover: #e6e6e6;
-    -wa-surface-pressed: #D9DDE4;
-
-    -wa-secondary: white;
-    -wa-secondary-hover: #e6e6e6;
+    -wa-foreground: white;
+    -wa-foreground-hover: #e6e6e6;
 
     /*Accent Color */
     -wa-accent: #FFB100;
@@ -118,6 +114,11 @@
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: -wa-black;
+
+    -breadcrumb-background: white;
+    -breadcrumb-background-hover: #e6e6e6;
+    -breadcrumb-background-pressed: #D9DDE4;
+
     -card-image-placeholder-background: -wa-gray-lighter;
     -secondary-btn-text-fill: -wa-primary;
     -secondary-btn-text-fill-hover: -wa-primary-dark;

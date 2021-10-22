@@ -19,7 +19,7 @@
 
 .chapter-card {
     -fx-background-radius: 10px;
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level1;
     -fx-cursor: hand;
     -fx-pref-height: 96px;
@@ -27,7 +27,7 @@
 }
 
 .chapter-card:hover {
-    -fx-background-color: -wa-secondary-hover;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .chapter-card__graphic {

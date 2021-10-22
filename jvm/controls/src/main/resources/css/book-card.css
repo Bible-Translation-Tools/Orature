@@ -22,7 +22,7 @@
 }
 
 .book-card:hover {
-    -fx-background-color: -wa-secondary-hover;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .book-card:pressed {

@@ -31,12 +31,8 @@
 
     -wa-background: #1c2031;
 
-    -wa-surface: #5d568f;
-    -wa-surface-hover: #948fbc;
-    -wa-surface-pressed: -wa-primary;
-
-    -wa-secondary: #4e567e;
-    -wa-secondary-hover: #9097bb;
+    -wa-foreground: #4e567e;
+    -wa-foreground-hover: #9097bb;
 
     /*Accent Color */
     -wa-accent: #F39422;
@@ -118,10 +114,15 @@
 
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: #e6e6e6;
+
+    -breadcrumb-background: #5d568f;
+    -breadcrumb-background-hover: #948fbc;
+    -breadcrumb-background-pressed: -wa-primary;
+
     -card-image-placeholder-background: #b3b3b3;
     -secondary-btn-text-fill: -wa-regular-text;
     -secondary-btn-text-fill-hover: -wa-primary-dark;
     -secondary-btn-background: transparent;
-    -secondary-btn-background-hover: -wa-secondary-hover;
+    -secondary-btn-background-hover: -wa-foreground-hover;
     -btn-icon-border-color: transparent;
 }

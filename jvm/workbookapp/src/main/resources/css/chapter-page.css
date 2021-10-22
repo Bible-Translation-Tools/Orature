@@ -32,7 +32,7 @@
     -fx-spacing: 20px;
     -fx-padding: 30px;
     -fx-effect: -wa-level2;
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 16px;
 }
 
@@ -65,7 +65,7 @@
     -fx-spacing: 20px;
     -fx-padding: 30px;
     -fx-effect: -wa-level2;
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 16px;
 }
 
@@ -75,7 +75,7 @@
 
 .chapter-page__chunks {
     -fx-effect: -wa-level2;
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 16px;
     -fx-padding: 0 0 20px 0;
     -fx-alignment: top-center;
@@ -95,13 +95,13 @@
 }
 
 .chapter-page__chunks .list-view {
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
 }
 
 .chapter-page__chunks .list-view .list-cell:selected,
 .chapter-page__chunks .list-view .list-cell:even,
 .chapter-page__chunks .list-view .list-cell:odd {
-    -fx-background-color: -wa-secondary;
+    -fx-background-color: -wa-foreground;
 }
 
 .chapter-page__chunks .list-view .label,
