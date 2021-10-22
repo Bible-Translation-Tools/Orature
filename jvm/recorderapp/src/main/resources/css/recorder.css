@@ -17,11 +17,11 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 .controls {
-    -fx-background-color: #282CBD;
+    -fx-background-color: -recorder-controls-background;
 }
 
 .info {
-    -fx-background-color: white;
+    -fx-background-color: -wa-foreground;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 0, 0.3, 0.0, 1);
     -fx-min-height: 80px;
     -fx-alignment: center-left;
@@ -33,20 +33,20 @@
 }
 
 .info__item__major {
-    -fx-text-fill: #1A1A1A;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 14pt;
     -fx-font-family: 'noto sans';
 }
 
 .info__item__major__icon {
-    -fx-fill: #282CBD;
+    -fx-fill: -wa-highlight-text;
     -fx-icon-size: 28px;
 }
 
 .info__item__minor {
     -fx-font-size: 14pt;
     -fx-alignment: center;
-    -fx-text-fill: #1A1A1A;
+    -fx-text-fill: -wa-note-text;
     -fx-padding: 0 0 0 5px;
 }
 
@@ -72,5 +72,5 @@
 }
 
 .waveform {
-    -fx-background-color: #F7FAFF;
+    -fx-background-color: -waveform-background;
 }

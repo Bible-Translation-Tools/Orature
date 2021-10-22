@@ -302,7 +302,7 @@
 /* -------------- Combobox ---------------- */
 
 .wa-combobox {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -combobox-background;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
     -fx-border-color: -wa-black-40;

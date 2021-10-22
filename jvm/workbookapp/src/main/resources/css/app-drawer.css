@@ -19,18 +19,19 @@
 
 .app-drawer__content {
     -fx-pref-width: 400px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level5;
 }
 
 .app-drawer-container {
     -fx-spacing: 30px;
     -fx-pref-width: 400px;
+    -fx-background-color: -wa-foreground;
 }
 
 .app-drawer__scroll-pane {
     -fx-padding: 40px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
 }
 
 .app-drawer__scroll-pane > .viewport {
@@ -40,6 +41,7 @@
 .app-drawer__title {
     -fx-font-size: 36px;
     -fx-wrap-text: true;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__btn--close {
@@ -67,11 +69,13 @@
 .app-drawer__subtitle {
     -fx-font-weight: bold;
     -fx-font-size: 26px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__subtitle--small {
     -fx-font-weight: bold;
     -fx-font-size: 20px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__section {
@@ -103,12 +107,14 @@
 .app-drawer__report-status {
     -fx-font-size: 14px;
     -fx-font-style: italic;
-    -fx-text-fill: -wa-gray;
+    -fx-text-fill: -wa-note-text;
 }
 
 .app-drawer__text {
     -fx-font-size: 20px;
     -fx-wrap-text: true;
+    -fx-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__text--error {
@@ -118,7 +124,7 @@
 
 .app-drawer__text--link {
     -fx-font-size: 20px;
-    -fx-text-fill: -wa-primary;
+    -fx-text-fill: -wa-highlight-text;
     -fx-underline: true;
     -fx-cursor: hand;
 }
@@ -134,7 +140,7 @@
 }
 
 .app-drawer__text--link .ikonli-font-icon {
-    -fx-fill: -wa-primary;
+    -fx-fill: -wa-highlight-text;
     -fx-font-size: 24px;
 }
 
@@ -153,7 +159,7 @@
 }
 
 .app-drawer__plugin-header .app-drawer__text {
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-note-text;
     -fx-font-size: 16px;
 }
 

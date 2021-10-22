@@ -119,6 +119,9 @@
     -wa-regular-text: #e6e6e6;
     -wa-note-text: #c0bfbf;
     -wa-status-active: #2ec144;
+    -wa-highlight-text: -wa-accent-light;
+
+    -waveform-background: #616e7c;
 
     -breadcrumb-background: #5d568f;
     -breadcrumb-background-hover: #948fbc;
@@ -134,6 +137,10 @@
     -text-field-background: -wa-regular-text;
     -text-field-background-hover: -wa-regular-text;
     -text-field-background-focused: -wa-regular-text;
+
+    -recorder-controls-background: #0c0033;
+
+    -combobox-background: -wa-regular-text;
 }
 
 .workspace {
