@@ -34,18 +34,18 @@ sourceSets {
             runtimeClasspath += main.output + test.output
             srcDir file('src/integration-test/kotlin')
         }
-        resources{
-            srcDirs += [ file('src/integration-test/resources'), assets.resources ]
+        resources {
+            srcDirs += [file('src/integration-test/resources'), assets.resources]
         }
     }
     main {
         resources {
-            srcDirs += [ assets.resources ]
+            srcDirs += [assets.resources]
         }
     }
     test {
         resources {
-            srcDirs += [ assets.resources ]
+            srcDirs += [assets.resources]
         }
     }
 }
@@ -211,7 +211,7 @@ task createVersionProperties(dependsOn: processResources) {
 
 task createGithubProperties(dependsOn: processResources) {
     doLast {
-        if(project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
+        if (project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
             new File("$buildDir/resources/main/github.properties").withWriter { w ->
                 Properties p = new Properties()
                 p['repo-url'] = githubRepoUrl
@@ -224,7 +224,7 @@ task createGithubProperties(dependsOn: processResources) {
 
 task createSentryProperties(dependsOn: processResources) {
     doLast {
-        if(project.hasProperty('sentryDsn')) {
+        if (project.hasProperty('sentryDsn')) {
             new File("$buildDir/resources/main/sentry.properties").withWriter { w ->
                 Properties p = new Properties()
                 p['dsn'] = sentryDsn
