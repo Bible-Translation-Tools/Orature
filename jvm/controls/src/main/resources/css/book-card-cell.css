@@ -58,8 +58,9 @@
     -fx-spacing: 10px;
 }
 
-.book-card-cell__dot {
-    -fx-font-size: 8px;
+.book-card-cell__dot .ikonli-font-icon {
+    -fx-icon-size: 8px;
+    -fx-icon-color: -wa-regular-text;
 }
 
 .book-card-cell__graphic {
