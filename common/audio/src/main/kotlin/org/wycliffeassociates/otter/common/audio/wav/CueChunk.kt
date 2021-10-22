@@ -78,6 +78,7 @@ private const val DONT_CARE_CUE_DATA_SIZE = 16
  */
 internal class CueChunk : RiffChunk {
 
+    private val extraCues: List<AudioCue> = mutableListOf()
     val cues: List<AudioCue> = mutableListOf()
 
     val cueChunkSize: Int
@@ -105,22 +106,29 @@ internal class CueChunk : RiffChunk {
         cues.addAll(cues)
     }
 
+    private fun getCueChunkSize(cues: List<AudioCue>): Int {
+        return CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
+    }
+
     override fun toByteArray(): ByteArray {
         if (cues.isEmpty()) {
             return ByteArray(0)
         }
 
-        cues as MutableList
-        cues.sortBy { it.location }
-        val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + cueChunkSize)
+        val outputCues = mutableListOf<AudioCue>()
+        outputCues.addAll(cues.map { AudioCue(it.location, "orature-vm-${it.label}") })
+        outputCues.addAll(extraCues)
+        outputCues.sortBy { it.location }
+
+        val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + getCueChunkSize(outputCues))
         cueChunkBuffer.order(ByteOrder.LITTLE_ENDIAN)
         cueChunkBuffer.put(CUE_LABEL.toByteArray(Charsets.US_ASCII))
-        cueChunkBuffer.putInt(CUE_DATA_SIZE * cues.size + CUE_COUNT_SIZE)
-        cueChunkBuffer.putInt(cues.size)
-        for (i in cues.indices) {
-            cueChunkBuffer.put(createCueData(i, cues[i]))
+        cueChunkBuffer.putInt(CUE_DATA_SIZE * outputCues.size + CUE_COUNT_SIZE)
+        cueChunkBuffer.putInt(outputCues.size)
+        for (i in outputCues.indices) {
+            cueChunkBuffer.put(createCueData(i, outputCues[i]))
         }
-        val labelChunkArray = createLabelChunk(cues)
+        val labelChunkArray = createLabelChunk(outputCues)
         val combinedBuffer = ByteBuffer.allocate(cueChunkBuffer.capacity() + labelChunkArray.size)
         combinedBuffer.put(cueChunkBuffer.array())
         combinedBuffer.put(labelChunkArray)
@@ -209,7 +217,55 @@ internal class CueChunk : RiffChunk {
         }
         cues as MutableList
         cues.clear()
-        cues.addAll(cueListBuilder.build())
+        val allCues = cueListBuilder.build()
+        separateOratureCues(allCues)
+    }
+
+    private fun separateOratureCues(allCues: List<AudioCue>) {
+        val oratureCues = allCues.filter { it.label.matches(Regex("^orature-vm-(\\d+)$")) }
+        val leftoverCues = allCues.filter { !oratureCues.contains(it) }
+        val loneDigits = leftoverCues.filter { it.label.matches(Regex("^\\d+$")) }
+        val potentialCues = leftoverCues
+            .filter { !loneDigits.contains(it) }
+            .filter { it.label.matches(Regex(".*(\\d+).*")) }
+            .map {
+                val match = Regex(".*(\\d+).*").find(it.label)
+                val label = match!!.groupValues.first()!!
+                AudioCue(it.location, label)
+            }
+
+        if (oratureCues.isNotEmpty()) {
+            cues as MutableList
+            val mapped = oratureCues.map {
+                val match = Regex("^orature-vm-(\\d+)$").find(it.label)
+                val label = match!!.groupValues.get(1)!!
+                AudioCue(it.location, label)
+            }
+            cues.addAll(mapped)
+            extraCues as MutableList
+            extraCues.addAll(leftoverCues)
+        } else if (loneDigits.isNotEmpty()) {
+            cues as MutableList
+            cues.addAll(loneDigits.map {
+                val match = Regex("^\\d+$").find(it.label)
+                val label = match!!.groupValues.first()
+                AudioCue(it.location, label)
+            })
+            extraCues as MutableList
+            extraCues.addAll(leftoverCues)
+        } else if(potentialCues.isNotEmpty()){
+            cues as MutableList
+            cues.addAll(potentialCues.map {
+                val match = Regex(".*(\\d+).*").find(it.label)
+                val label = match!!.groupValues.get(1)!!
+                AudioCue(it.location, label)
+            })
+            extraCues as MutableList
+            extraCues.addAll(leftoverCues)
+        } else {
+            extraCues as MutableList
+            extraCues.addAll(leftoverCues)
+        }
     }
 
     /**
