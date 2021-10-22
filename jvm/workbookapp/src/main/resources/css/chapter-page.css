@@ -110,7 +110,11 @@
     -fx-fill: -wa-regular-text;
 }
 
-.chapter-page__chapter-box .ikonli-font-icon,
+.btn--icon .ikonli-font-icon,
 .chapter-page__chunks .label .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
+}
+
+.btn--icon:selected .ikonli-font-icon {
+    -fx-icon-color: -wa-primary !important;
 }
