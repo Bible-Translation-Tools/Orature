@@ -222,14 +222,18 @@ internal class CueChunk : RiffChunk {
     }
 
     private fun separateOratureCues(allCues: List<AudioCue>) {
-        val oratureCues = allCues.filter { it.label.matches(Regex("^orature-vm-(\\d+)$")) }
+        val oratureRegex = Regex("^orature-vm-(\\d+)$")
+        val loneDigitRegex = Regex("^\\d+$")
+        val numberRegex = Regex(".*(\\d+).*")
+
+        val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
         val leftoverCues = allCues.filter { !oratureCues.contains(it) }
-        val loneDigits = leftoverCues.filter { it.label.matches(Regex("^\\d+$")) }
+        val loneDigits = leftoverCues.filter { it.label.matches(loneDigitRegex) }
         val potentialCues = leftoverCues
             .filter { !loneDigits.contains(it) }
-            .filter { it.label.matches(Regex(".*(\\d+).*")) }
+            .filter { it.label.matches(numberRegex) }
             .map {
-                val match = Regex(".*(\\d+).*").find(it.label)
+                val match = numberRegex.find(it.label)
                 val label = match!!.groupValues.first()!!
                 AudioCue(it.location, label)
             }
@@ -237,7 +241,7 @@ internal class CueChunk : RiffChunk {
         if (oratureCues.isNotEmpty()) {
             cues as MutableList
             val mapped = oratureCues.map {
-                val match = Regex("^orature-vm-(\\d+)$").find(it.label)
+                val match = oratureRegex.find(it.label)
                 val label = match!!.groupValues.get(1)!!
                 AudioCue(it.location, label)
             }
@@ -247,7 +251,7 @@ internal class CueChunk : RiffChunk {
         } else if (loneDigits.isNotEmpty()) {
             cues as MutableList
             cues.addAll(loneDigits.map {
-                val match = Regex("^\\d+$").find(it.label)
+                val match = loneDigitRegex.find(it.label)
                 val label = match!!.groupValues.first()
                 AudioCue(it.location, label)
             })
@@ -256,7 +260,7 @@ internal class CueChunk : RiffChunk {
         } else if(potentialCues.isNotEmpty()){
             cues as MutableList
             cues.addAll(potentialCues.map {
-                val match = Regex(".*(\\d+).*").find(it.label)
+                val match = numberRegex.find(it.label)
                 val label = match!!.groupValues.get(1)!!
                 AudioCue(it.location, label)
             })
