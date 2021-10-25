@@ -29,7 +29,7 @@
 }
 
 .card--resource-take {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
     -fx-border-color: -wa-black-20;
@@ -39,25 +39,27 @@
 
 .card--resource-take__take-drag .ikonli-font-icon {
     -fx-font-size: 26px;
+    -fx-fill: -wa-regular-text;
 }
 
 .card--resource-take__btn {
-    -fx-background-color: -wa-white;
-    -fx-border-color: -wa-white;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 
 .card--resource-take__btn .ikonli-font-icon {
     -fx-font-size: 20px;
-    -fx-fill: -wa-black;
+    -fx-fill: -wa-regular-text;
 }
 
 .card--resource-take__take-label {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .card--resource-take--empty {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -card-placeholder-empty;
     -fx-background-radius: 10px;
     -fx-max-width: 500px;
     -fx-pref-height: 90px;
@@ -79,11 +81,13 @@
 
 .card__right-region {
     -fx-padding: 30px 70px 30px 30px;
-    -fx-border-color: -wa-transparent, #E6E8E9;
+    -fx-background-color: -wa-background;
+    -fx-border-color: transparent transparent transparent -wa-border-light;
 }
 
 .card__content-text {
     -fx-font-size: 24px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .card__new-takes-region {
@@ -120,4 +124,5 @@
 .card__button-cell {
     -fx-alignment: center;
     -fx-padding: 0 15px;
+    -fx-background-color: -breadcrumb-background;
 }

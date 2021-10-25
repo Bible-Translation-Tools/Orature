@@ -59,7 +59,7 @@
 }
 
 .card--take__slider--active .thumb {
-    -fx-background-color: -wa-primary;
+    -fx-background-color: -wa-highlight-text;
 }
 
 .card--take__slider .animated-thumb {

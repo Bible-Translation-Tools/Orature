@@ -20,7 +20,7 @@
 .workbook-header {
     -fx-padding: 10 100 20 70;
     -fx-background-color: -wa-background;
-    -fx-border-color: transparent transparent -wa-light-border transparent;
+    -fx-border-color: transparent transparent -wa-border-light transparent;
     -fx-border-width: 1;
 }
 

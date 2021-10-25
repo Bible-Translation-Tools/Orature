@@ -128,6 +128,8 @@
     -breadcrumb-background-pressed: -wa-primary;
 
     -card-image-placeholder-background: #b3b3b3;
+    -card-placeholder-empty: -card-image-placeholder-background;
+
     -secondary-btn-text-fill: -wa-regular-text;
     -secondary-btn-text-fill-hover: -wa-primary-dark;
     -secondary-btn-background: transparent;
@@ -144,7 +146,7 @@
     -combobox-background: -wa-regular-text;
 
     -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
-    -wa-light-border: gray;
+    -wa-border-light: gray;
 }
 
 .workspace {
