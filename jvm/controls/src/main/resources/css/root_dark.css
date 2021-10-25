@@ -142,6 +142,9 @@
     -tab-region-background: -wa-surface;
 
     -combobox-background: -wa-regular-text;
+
+    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -wa-light-border: gray;
 }
 
 .workspace {

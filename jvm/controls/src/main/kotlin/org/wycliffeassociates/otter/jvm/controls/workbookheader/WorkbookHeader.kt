@@ -47,8 +47,7 @@ class WorkbookHeader : VBox() {
     var workbookProgress by workbookProgressProperty
 
     init {
-        importStylesheet<WorkbookHeaderStyles>()
-        addClass(WorkbookHeaderStyles.workbookHeader)
+        addClass("workbook-header")
         spacing = 10.0
         hbox {
             label(labelTextProperty) {
