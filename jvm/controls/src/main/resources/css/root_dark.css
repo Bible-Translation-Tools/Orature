@@ -39,7 +39,7 @@
 
     /*Accent Color */
     -wa-accent: #F39422;
-    -wa-accent-light: #FFD671;
+    -wa-accent-light: #fdbf5b;
     -wa-accent-dark: #9E6600;
 
     /* Gradients */
@@ -139,6 +139,7 @@
     -text-field-background-focused: -wa-regular-text;
 
     -recorder-controls-background: #0c0033;
+    -tab-region-background: -wa-surface;
 
     -combobox-background: -wa-regular-text;
 }
