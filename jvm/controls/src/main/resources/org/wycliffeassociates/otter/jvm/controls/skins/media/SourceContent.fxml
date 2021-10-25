@@ -55,8 +55,8 @@
                         <ScrollPane fx:id="sourceTextScroll" styleClass="source-content__scroll-pane" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                             <content>
                                 <VBox styleClass="source-content__text-wrapper" spacing="20.0">
-                                <Label fx:id="sourceText" lineSpacing="5" styleClass="source-content__text" wrapText="true" />
-                                <Label fx:id="licenseText" lineSpacing="5" styleClass="source-content__license-text" wrapText="true" />
+                                    <Label fx:id="sourceText" lineSpacing="5" styleClass="source-content__text" wrapText="true" />
+                                    <Label fx:id="licenseText" lineSpacing="5" styleClass="source-content__license-text" wrapText="true" />
                                 </VBox>
                             </content>
                             <padding>

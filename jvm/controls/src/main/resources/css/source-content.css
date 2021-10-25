@@ -18,7 +18,7 @@
  */
 
 .source-content {
-    -fx-background-color: -wa-foreground;
+    -fx-background-color: -wa-background;
     -fx-padding: 10px 20px;
     -fx-alignment: center;
 }
@@ -41,7 +41,7 @@
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
-    -fx-background-color: #e7ecf5;
+    -fx-background-color: -card-image-placeholder-background;
     -fx-font-weight: bold;
     -fx-background-radius: 10px;
     -fx-pref-height: 45px;
@@ -69,9 +69,11 @@
 
 .source-content__audio_container {
     -fx-alignment: center-left;
-    -fx-padding: 5px 0;
+    -fx-padding: 8;
     -fx-min-height: 60px;
     -fx-spacing: 20px;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 5;
 }
 
 .source-content__audio_container--target {
@@ -81,8 +83,8 @@
 }
 
 .source-content__scroll-pane,
-.source-content__scroll-pane * {
-    -fx-background-color: -wa-surface;
+.source-content__text-wrapper {
+    -fx-background-color: -wa-background;
 }
 
 .source-content__text-wrapper {
