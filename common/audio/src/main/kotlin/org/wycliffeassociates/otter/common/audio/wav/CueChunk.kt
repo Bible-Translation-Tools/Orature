@@ -239,37 +239,29 @@ internal class CueChunk : RiffChunk {
             }
 
         if (oratureCues.isNotEmpty()) {
-            cues as MutableList
-            val mapped = oratureCues.map {
-                val match = oratureRegex.find(it.label)
-                val label = match!!.groupValues.get(1)!!
-                AudioCue(it.location, label)
-            }
-            cues.addAll(mapped)
-            extraCues as MutableList
-            extraCues.addAll(leftoverCues)
+            addMatchingCues(oratureCues, oratureRegex)
         } else if (loneDigits.isNotEmpty()) {
-            cues as MutableList
-            cues.addAll(loneDigits.map {
-                val match = loneDigitRegex.find(it.label)
-                val label = match!!.groupValues.first()
-                AudioCue(it.location, label)
-            })
-            extraCues as MutableList
-            extraCues.addAll(leftoverCues)
-        } else if(potentialCues.isNotEmpty()){
-            cues as MutableList
-            cues.addAll(potentialCues.map {
-                val match = numberRegex.find(it.label)
-                val label = match!!.groupValues.get(1)!!
-                AudioCue(it.location, label)
-            })
-            extraCues as MutableList
-            extraCues.addAll(leftoverCues)
-        } else {
-            extraCues as MutableList
-            extraCues.addAll(leftoverCues)
+            addMatchingCues(loneDigits, loneDigitRegex)
+        } else if (potentialCues.isNotEmpty()) {
+            addMatchingCues(potentialCues, numberRegex)
         }
+        extraCues as MutableList
+        extraCues.addAll(leftoverCues)
+    }
+
+    fun addMatchingCues(baseCueList: List<AudioCue>, regex: Regex) {
+        cues as MutableList
+        val mapped = baseCueList.map {
+            val match = regex.find(it.label)
+            val groups = match!!.groupValues
+            val label = if (groups.size > 1) {
+                match!!.groupValues.get(1)!!
+            } else {
+                match!!.groupValues.first()!!
+            }
+            AudioCue(it.location, label)
+        }
+        cues.addAll(mapped)
     }
 
     /**
