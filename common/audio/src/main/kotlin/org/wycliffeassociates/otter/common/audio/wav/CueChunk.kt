@@ -22,19 +22,19 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-private const val CUE_LABEL = "cue "
-private const val DATA_LABEL = "data"
-private const val LIST_LABEL = "LIST"
-private const val ADTL_LABEL = "adtl"
-private const val LABEL_LABEL = "labl"
+internal const val CUE_LABEL = "cue "
+internal const val DATA_LABEL = "data"
+internal const val LIST_LABEL = "LIST"
+internal const val ADTL_LABEL = "adtl"
+internal const val LABEL_LABEL = "labl"
 
-private const val CUE_HEADER_SIZE = 4
-private const val CUE_COUNT_SIZE = 4
-private const val CUE_ID_SIZE = 4
-private const val CUE_DATA_SIZE = 24
+internal const val CUE_HEADER_SIZE = 4
+internal const val CUE_COUNT_SIZE = 4
+internal const val CUE_ID_SIZE = 4
+internal const val CUE_DATA_SIZE = 24
 
 // We only care to read the cue id and location, seek over the next 16 bytes
-private const val DONT_CARE_CUE_DATA_SIZE = 16
+internal const val DONT_CARE_CUE_DATA_SIZE = 16
 
 /**
  * Cue Chunk
@@ -76,9 +76,8 @@ private const val DONT_CARE_CUE_DATA_SIZE = 16
  * 4 - cue point id (matching the id from the cue chunk)
  * _ - text of the label (should be word aligned, but technically we double word align
  */
-internal class CueChunk : RiffChunk {
+internal open class CueChunk : RiffChunk {
 
-    private val extraCues: List<AudioCue> = mutableListOf()
     val cues: List<AudioCue> = mutableListOf()
 
     val cueChunkSize: Int
@@ -106,36 +105,29 @@ internal class CueChunk : RiffChunk {
         cues.addAll(cues)
     }
 
-    private fun getCueChunkSize(cues: List<AudioCue>): Int {
-        return CUE_HEADER_SIZE + (CUE_DATA_SIZE * cues.size)
-    }
-
     override fun toByteArray(): ByteArray {
         if (cues.isEmpty()) {
             return ByteArray(0)
         }
 
-        val outputCues = mutableListOf<AudioCue>()
-        outputCues.addAll(cues.map { AudioCue(it.location, "orature-vm-${it.label}") })
-        outputCues.addAll(extraCues)
-        outputCues.sortBy { it.location }
-
-        val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + getCueChunkSize(outputCues))
+        cues as MutableList
+        cues.sortBy { it.location }
+        val cueChunkBuffer = ByteBuffer.allocate(CHUNK_HEADER_SIZE + cueChunkSize)
         cueChunkBuffer.order(ByteOrder.LITTLE_ENDIAN)
         cueChunkBuffer.put(CUE_LABEL.toByteArray(Charsets.US_ASCII))
-        cueChunkBuffer.putInt(CUE_DATA_SIZE * outputCues.size + CUE_COUNT_SIZE)
-        cueChunkBuffer.putInt(outputCues.size)
-        for (i in outputCues.indices) {
-            cueChunkBuffer.put(createCueData(i, outputCues[i]))
+        cueChunkBuffer.putInt(CUE_DATA_SIZE * cues.size + CUE_COUNT_SIZE)
+        cueChunkBuffer.putInt(cues.size)
+        for (i in cues.indices) {
+            cueChunkBuffer.put(createCueData(i, cues[i]))
         }
-        val labelChunkArray = createLabelChunk(outputCues)
+        val labelChunkArray = createLabelChunk(cues)
         val combinedBuffer = ByteBuffer.allocate(cueChunkBuffer.capacity() + labelChunkArray.size)
         combinedBuffer.put(cueChunkBuffer.array())
         combinedBuffer.put(labelChunkArray)
         return combinedBuffer.array()
     }
 
-    private fun createCueData(cueNumber: Int, cue: AudioCue): ByteArray {
+    protected fun createCueData(cueNumber: Int, cue: AudioCue): ByteArray {
         val buffer = ByteBuffer.allocate(CUE_DATA_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putInt(cueNumber)
@@ -147,7 +139,7 @@ internal class CueChunk : RiffChunk {
         return buffer.array()
     }
 
-    private fun createLabelChunk(cues: List<AudioCue>): ByteArray {
+    internal fun createLabelChunk(cues: List<AudioCue>): ByteArray {
         // size = (8 for labl header, 4 for cue id) * num cues + all strings
         val size = (CHUNK_HEADER_SIZE + CHUNK_LABEL_SIZE) * cues.size + computeTextSize(cues)
         // adds LIST header which is a standard chunk header and a "adtl" label
@@ -217,51 +209,7 @@ internal class CueChunk : RiffChunk {
         }
         cues as MutableList
         cues.clear()
-        val allCues = cueListBuilder.build()
-        separateOratureCues(allCues)
-    }
-
-    private fun separateOratureCues(allCues: List<AudioCue>) {
-        val oratureRegex = Regex("^orature-vm-(\\d+)$")
-        val loneDigitRegex = Regex("^\\d+$")
-        val numberRegex = Regex(".*(\\d+).*")
-
-        val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
-        val leftoverCues = allCues.filter { !oratureCues.contains(it) }
-        val loneDigits = leftoverCues.filter { it.label.matches(loneDigitRegex) }
-        val potentialCues = leftoverCues
-            .filter { !loneDigits.contains(it) }
-            .filter { it.label.matches(numberRegex) }
-            .map {
-                val match = numberRegex.find(it.label)
-                val label = match!!.groupValues.first()!!
-                AudioCue(it.location, label)
-            }
-
-        if (oratureCues.isNotEmpty()) {
-            addMatchingCues(oratureCues, oratureRegex)
-        } else if (loneDigits.isNotEmpty()) {
-            addMatchingCues(loneDigits, loneDigitRegex)
-        } else if (potentialCues.isNotEmpty()) {
-            addMatchingCues(potentialCues, numberRegex)
-        }
-        extraCues as MutableList
-        extraCues.addAll(leftoverCues)
-    }
-
-    fun addMatchingCues(baseCueList: List<AudioCue>, regex: Regex) {
-        cues as MutableList
-        val mapped = baseCueList.map {
-            val match = regex.find(it.label)
-            val groups = match!!.groupValues
-            val label = if (groups.size > 1) {
-                match!!.groupValues.get(1)!!
-            } else {
-                match!!.groupValues.first()!!
-            }
-            AudioCue(it.location, label)
-        }
-        cues.addAll(mapped)
+        cues.addAll(cueListBuilder.build())
     }
 
     /**
