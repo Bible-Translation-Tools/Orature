@@ -31,7 +31,7 @@
 
 .resource-list-view {
     -fx-background-color: -wa-background;
-    -fx-padding: 10 40 0 80;
+    -fx-padding: 10 0 0 80;
 }
 
 .resource-list-view .scroll-bar {
