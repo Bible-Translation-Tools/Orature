@@ -19,7 +19,7 @@
 
 .vm-header {
     -fx-padding: 20px;
-    -fx-border-color: "#00000020";
+    -fx-border-color: -wa-border-light transparent -wa-border-light transparent;
     -fx-border-width: 1px;
     -fx-border-style: solid;
 }
@@ -27,10 +27,23 @@
 .vm-header__title {
     -fx-font-size: 2em;
     -fx-font-weight: bold;
+    -fx-fill: -wa-regular-text;
 }
 
 .vm-header__subtitle {
     -fx-font-size: 1.2em;
+    -fx-fill: -wa-regular-text;
+}
+
+.vm-minimap-container {
+    -fx-font-size: 1.2em;
+    -fx-padding: 24px;
+    -fx-spacing: 22px;
+    -fx-background-color: -wa-foreground;
+}
+
+.vm-minimap-container .label {
+    -fx-text-fill: -wa-regular-text;
 }
 
 .vm-marker-count__icon {
@@ -42,12 +55,6 @@
     -fx-pref-height: 40px;
 }
 
-.vm-minimap-container {
-    -fx-font-size: 1.2em;
-    -fx-padding: 24px;
-    -fx-spacing: 22px;
-}
-
 .vm-marker-count__icon .ikonli-font-icon {
     -fx-icon-size: 20px;
     -fx-icon-color: "#FFFFFF";
@@ -56,7 +63,7 @@
 .vm-play-controls {
     -fx-pref-height: 88px;
     -fx-min-height: 88px;
-    -fx-background-color: "#00377C";
+    -fx-background-color: -recorder-controls-background;
     -fx-padding: 0px 16px 0px 16px;
     -fx-spacing: 22px;
 }
@@ -68,11 +75,11 @@
 }
 
 .vm-play-controls__btn--rounded .ikonli-font-icon {
-    -fx-fill: "#000000";
+    -fx-fill: #000000;
 }
 
 .vm-play-controls__play-btn {
-    -fx-background-color: "#FFFFFFCC";
+    -fx-background-color: #FFFFFFCC;
     -fx-pref-width: 60px;
     -fx-pref-height: 60px;
 }
@@ -130,6 +137,7 @@
 
 .vm-waveform-container {
     -fx-min-height: 200px;
+    -fx-background-color: -waveform-background;
 }
 
 .vm-waveform-holder {
@@ -151,7 +159,7 @@
 
 .vm-waveform-frame__top-track {
     -fx-pref-height: 40px;
-    -fx-background-color: #a2b2cd;
+    -fx-background-color: -waveform-background-dark;
 }
 
 .vm-waveform-frame__center {
@@ -160,15 +168,15 @@
 
 .vm-waveform-frame__bottom-track {
     -fx-pref-height: 50px;
-    -fx-background-color: #ced6e3;
+    -fx-background-color: -waveform-background-dark;
     -fx-border-width: 1px;
     -fx-border-color: null null #a7b6cf null;
 }
 
 .vm-highlight-primary {
-    -fx-fill: #1edd7633;
+    -fx-fill: -marker-overlay-primary;
 }
 
 .vm-highlight-secondary {
-    -fx-fill: #015ad933;
+    -fx-fill: -marker-overlay-secondary;
 }
