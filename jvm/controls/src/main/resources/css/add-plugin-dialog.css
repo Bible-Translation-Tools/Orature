@@ -18,7 +18,7 @@
  */
 
 .add-plugin-dialog {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-background;
     -fx-pref-width: 600px;
     -fx-padding: 15px;
     -fx-spacing: 20px;
@@ -31,7 +31,7 @@
 .add-plugin-dialog__title {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-text-fill: -wa-primary;
+    -fx-text-fill: -wa-highlight-text;
 }
 
 .add-plugin-dialog__btn--close {
@@ -57,6 +57,10 @@
     -fx-fill: -wa-gray-dark;
 }
 
+.add-plugin-dialog__info .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
 .add-plugin-dialog__subtitle {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
@@ -72,6 +76,7 @@
 
 .add-plugin-dialog__label {
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .add-plugin-dialog__bottom-controls {
@@ -80,4 +85,19 @@
 
 .add-plugin-dialog__checkboxes {
     -fx-spacing: 15px;
+}
+
+.add-plugin-dialog__checkboxes .checkbox-button {
+    -fx-background-color: -wa-foreground;
+}
+
+.add-plugin-dialog__checkboxes .checkbox-button:hover {
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.add-plugin-dialog__checkboxes .checkbox-button .label {
+    -fx-text-fill: -wa-regular-text;
+}
+.add-plugin-dialog__checkboxes .checkbox-button .label .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
 }
