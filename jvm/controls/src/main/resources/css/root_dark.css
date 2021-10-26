@@ -61,6 +61,11 @@
     -breadcrumb-background-hover: #948fbc;
     -breadcrumb-background-pressed: -wa-primary;
 
+    -tab-background: gray;
+    -selected-tab-background: -wa-primary;
+    -selected-tab-line: -wa-accent;
+    -selected-tab-label: -wa-accent-light;
+
     -card-image-placeholder-background: #b3b3b3;
     -card-placeholder-empty: -card-image-placeholder-background;
 

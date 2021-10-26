@@ -61,6 +61,11 @@
     -breadcrumb-background-hover: #e6e6e6;
     -breadcrumb-background-pressed: #D9DDE4;
 
+    -tab-background: #b6b6b6;
+    -selected-tab-background: white;
+    -selected-tab-line: #CC4141;
+    -selected-tab-label: rgba(255,0,0, .87);
+
     -card-image-placeholder-background: -wa-gray-lighter;
     -card-placeholder-empty: -wa-black-05;
 
