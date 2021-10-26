@@ -18,7 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -26,14 +28,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ChangeThemeEventAction
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
 
 class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
+    private val osThemeDetector = OsThemeDetector.getDetector()
+    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -52,20 +54,10 @@ class RootView : View() {
         workspace.root.vgrow = Priority.ALWAYS
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
-        importStylesheet(resources.get("/css/root.css"))
 
+        initThemeStylesheet()
+        bindAppThemeToSystem()
         initAudioErrorDialog()
-
-        subscribe<ThemeColorEvent<UIComponent>> {
-            if (it.action == ChangeThemeEventAction.DARK) {
-                currentStage!!.scene.stylesheets.remove("/css/root.css")
-                currentStage!!.scene.stylesheets.add("/css/root_dark.css")
-            }
-            else {
-                currentStage!!.scene.stylesheets.remove("/css/root_dark.css")
-                currentStage!!.scene.stylesheets.add("/css/root.css")
-            }
-        }
     }
 
     override val root = stackpane {
@@ -74,6 +66,30 @@ class RootView : View() {
         borderpane {
             left<AppBar>()
             center<AppContent>()
+        }
+    }
+
+    private fun initThemeStylesheet() {
+        if (osThemeDetector.isDark) {
+            importStylesheet(resources.get("/css/root_dark.css"))
+        } else {
+            importStylesheet(resources.get("/css/root.css"))
+        }
+    }
+
+    private fun bindAppThemeToSystem() {
+        isOSDarkMode.onChange {
+            if (it) {
+                currentStage!!.scene.stylesheets.remove("/css/root.css")
+                currentStage!!.scene.stylesheets.add("/css/root_dark.css")
+            } else {
+                currentStage!!.scene.stylesheets.remove("/css/root_dark.css")
+                currentStage!!.scene.stylesheets.add("/css/root.css")
+            }
+        }
+
+        osThemeDetector.registerListener {
+            runLater { isOSDarkMode.set(it) }
         }
     }
 
