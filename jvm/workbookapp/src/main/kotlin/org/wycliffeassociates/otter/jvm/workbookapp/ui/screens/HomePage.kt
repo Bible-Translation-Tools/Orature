@@ -64,7 +64,7 @@ class HomePage : View() {
             hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             vbox {
                 addClass("home-page__container")
-                fitToHeight(this@stackpane)
+                minHeightProperty().bind(this@stackpane.heightProperty())
 
                 add(
                     ResumeBookBanner().apply {
