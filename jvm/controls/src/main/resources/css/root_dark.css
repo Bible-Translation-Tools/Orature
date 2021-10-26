@@ -88,3 +88,18 @@
 .workspace {
     -fx-background-color: -wa-background;
 }
+
+.scroll-bar {
+    -fx-background-color: -wa-background;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: derive(black, 60%);
+    -fx-background-insets: 0, 2, 0;
+    -fx-background-radius: 0;
+}
+
+.scroll-bar .increment-button:hover,
+.scroll-bar .decrement-button:hover {
+    -fx-background-color: transparent;
+}
