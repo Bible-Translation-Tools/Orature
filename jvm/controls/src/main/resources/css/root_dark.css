@@ -90,11 +90,11 @@
 }
 
 .scroll-bar {
-    -fx-background-color: -wa-background;
+    -fx-background-color: #00000020;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: derive(black, 60%);
+    -fx-background-color: #768198;
     -fx-background-insets: 0, 2, 0;
     -fx-background-radius: 0;
 }
