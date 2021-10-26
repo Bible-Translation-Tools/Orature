@@ -83,7 +83,7 @@ class CueChunkTest {
             for (cues in testEnv) {
                 val file = File.createTempFile("test", "wav")
                 file.deleteOnExit()
-                val wav = WavFile(file, 1, 44100, 16)
+                val wav = WavFile(file, 1, 44100, 16, WavMetadata(listOf(CueChunk())))
                 for (cue in cues) {
                     wav.metadata.addCue(cue.location, cue.label)
                 }
