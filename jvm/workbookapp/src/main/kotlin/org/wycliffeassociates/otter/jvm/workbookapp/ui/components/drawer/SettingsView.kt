@@ -72,13 +72,6 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
-                    togglebutton("Dark Mode", null, false) {
-                        setOnAction {
-                            if (isSelected) fire(ThemeColorEvent(this@SettingsView::class, ChangeThemeEventAction.DARK))
-                            else fire(ThemeColorEvent(this@SettingsView::class, ChangeThemeEventAction.LIGHT))
-                        }
-                    }
-
                     label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
