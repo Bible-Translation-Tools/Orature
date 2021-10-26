@@ -83,6 +83,7 @@
 }
 
 .source-content__scroll-pane,
+.source-content__scroll-pane .viewport, /* this region belongs to scroll bar skin */
 .source-content__text-wrapper {
     -fx-background-color: -wa-background;
 }
