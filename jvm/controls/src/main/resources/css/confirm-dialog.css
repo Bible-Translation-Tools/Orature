@@ -40,10 +40,11 @@
     -fx-padding: 15px;
     -fx-text-alignment: justify;
     -fx-min-height: 100px;
+    -fx-background-color: -wa-background;
 }
 
 .confirm-dialog__message {
-    -fx-text-fill: -wa-gray-darker;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 18px;
     -fx-wrap-text: true;
 }
@@ -52,6 +53,7 @@
     -fx-alignment: center-left;
     -fx-padding: 20px;
     -fx-spacing: 6px;
+    -fx-background-color: -wa-foreground;
 }
 
 .confirm-dialog__progress .progress-bar {
@@ -73,13 +75,14 @@
 
 .confirm-dialog__progress-title {
     -fx-font-size: 16px;
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .confirm-dialog__footer {
     -fx-padding: 20px 15px;
     -fx-border-width: 2px 0 0 0;
     -fx-border-color: #ccc;
+    -fx-background-color: -wa-background;
 }
 
 .confirm-dialog__btn--close,

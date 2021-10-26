@@ -28,7 +28,16 @@
 
 /* Exception dialog style */
 .exception-content {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-background;
+}
+
+.exception-content > .label,
+.exception-content__send-report {
+    -fx-text-fill: -wa-regular-text;
+}
+.exception-content__show-more-btn * {
+    -fx-fill: -secondary-btn-text-fill;
+    -fx-icon-color: -secondary-btn-text-fill;
 }
 
 .exception-content__send-report {
