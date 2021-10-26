@@ -207,6 +207,10 @@ internal open class CueChunk : RiffChunk {
             // move on to the next chunk
             chunk.seek(wordAlign(subchunkSize))
         }
+        addParsedCues(cueListBuilder)
+    }
+
+    open protected fun addParsedCues(cueListBuilder: CueListBuilder) {
         cues as MutableList
         cues.clear()
         cues.addAll(cueListBuilder.build())
@@ -287,7 +291,7 @@ internal open class CueChunk : RiffChunk {
     }
 }
 
-private class CueListBuilder {
+internal class CueListBuilder {
 
     private data class TempCue(var location: Int?, var label: String?)
 

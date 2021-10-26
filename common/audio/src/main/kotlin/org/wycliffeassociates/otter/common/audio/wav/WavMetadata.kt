@@ -40,7 +40,7 @@ internal class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetad
         if (cue != null) {
             cueChunk = cue as CueChunk
         } else {
-            cueChunk = CueChunk()
+            cueChunk = VerseMarkerChunk()
             chunks.add(cueChunk)
         }
     }

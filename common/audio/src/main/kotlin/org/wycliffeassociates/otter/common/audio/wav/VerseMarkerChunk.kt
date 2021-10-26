@@ -7,6 +7,11 @@ import org.wycliffeassociates.otter.common.audio.AudioCue
 internal class VerseMarkerChunk : CueChunk() {
     private val extraCues: List<AudioCue> = mutableListOf()
 
+   override fun addParsedCues(cueListBuilder: CueListBuilder) {
+       val allCues = cueListBuilder.build()
+       separateOratureCues(allCues)
+   }
+
     override fun toByteArray(): ByteArray {
         if (cues.isEmpty()) {
             return ByteArray(0)
