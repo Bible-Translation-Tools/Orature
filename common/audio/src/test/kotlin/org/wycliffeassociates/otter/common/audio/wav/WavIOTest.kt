@@ -39,7 +39,8 @@ class WavIOTest {
             file,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
         for (cue in cues) {
             wav.metadata.addCue(cue.location, cue.label)
@@ -118,13 +119,15 @@ class WavIOTest {
             temp,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
         val wav2 = WavFile(
             temp2,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
 
         val audioSamples = 700_000
@@ -170,13 +173,15 @@ class WavIOTest {
             temp,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
         val wav2 = WavFile(
             temp2,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
 
         val audioSamples = 700_000
