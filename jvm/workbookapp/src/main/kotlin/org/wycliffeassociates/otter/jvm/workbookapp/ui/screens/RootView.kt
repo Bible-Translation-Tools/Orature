@@ -22,6 +22,7 @@ import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -30,12 +31,15 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import tornadofx.*
+import javax.inject.Inject
 
 class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
     private val osThemeDetector = OsThemeDetector.getDetector()
     private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+
+    @Inject lateinit var appPref: IAppPreferencesRepository
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -55,7 +59,6 @@ class RootView : View() {
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
 
-        initThemeStylesheet()
         bindAppThemeToSystem()
         initAudioErrorDialog()
     }
@@ -66,14 +69,6 @@ class RootView : View() {
         borderpane {
             left<AppBar>()
             center<AppContent>()
-        }
-    }
-
-    private fun initThemeStylesheet() {
-        if (osThemeDetector.isDark) {
-            importStylesheet(resources.get("/css/root_dark.css"))
-        } else {
-            importStylesheet(resources.get("/css/root.css"))
         }
     }
 

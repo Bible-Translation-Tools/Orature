@@ -54,6 +54,7 @@ class SplashScreen : View() {
     private fun finish() {
         viewModel.initAudioSystem()
         close()
+        viewModel.initThemeStyleSheets()
         primaryStage.show()
         navigator.dock<HomePage>()
     }

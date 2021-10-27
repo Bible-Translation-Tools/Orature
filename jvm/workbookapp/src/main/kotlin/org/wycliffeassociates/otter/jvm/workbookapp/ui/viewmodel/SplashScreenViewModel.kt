@@ -19,15 +19,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jthemedetecor.OsThemeDetector
 import io.reactivex.Observable
-import java.util.*
 import javafx.beans.property.SimpleDoubleProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
+import org.wycliffeassociates.otter.common.domain.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 
 class SplashScreenViewModel : ViewModel() {
@@ -39,10 +40,14 @@ class SplashScreenViewModel : ViewModel() {
     @Inject
     lateinit var configureAudioSystem: ConfigureAudioSystem
 
+    @Inject
+    lateinit var theme: AppTheme
+
     val progressProperty = SimpleDoubleProperty(0.0)
 
     fun initApp(): Observable<Double> {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
 
         return initApp.initApp()
             .observeOnFx()
@@ -55,5 +60,19 @@ class SplashScreenViewModel : ViewModel() {
 
     fun initAudioSystem() {
         configureAudioSystem.configure()
+    }
+
+    fun initThemeStyleSheets() {
+        val themeColor = if (theme.preferredTheme == ColorTheme.SYSTEM) {
+            if (OsThemeDetector.getDetector().isDark)
+                ColorTheme.DARK
+            else
+                ColorTheme.LIGHT
+        } else theme.preferredTheme
+
+        when (themeColor) {
+            ColorTheme.LIGHT -> importStylesheet(resources["/css/root.css"])
+            ColorTheme.DARK -> importStylesheet(resources["/css/root_dark.css"])
+        }
     }
 }
