@@ -91,7 +91,7 @@ class CueChunkTest {
                 os.use {
                     os.write(ByteArray(writeSize))
                 }
-                val validator = WavFile(file)
+                val validator = WavFile(file, WavMetadata(listOf(CueChunk())))
                 val resultMetadata = validator.metadata
                 assertEquals(cues.size, resultMetadata.getCues().size)
                 for (cue in cues) {
