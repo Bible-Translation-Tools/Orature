@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-internal class VerseMarkerChunk : CueChunk() {
+class VerseMarkerChunk : CueChunk() {
     private val extraCues: List<AudioCue> = mutableListOf()
 
    override fun addParsedCues(cueListBuilder: CueListBuilder) {

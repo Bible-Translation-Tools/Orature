@@ -76,7 +76,7 @@ internal const val DONT_CARE_CUE_DATA_SIZE = 16
  * 4 - cue point id (matching the id from the cue chunk)
  * _ - text of the label (should be word aligned, but technically we double word align
  */
-internal open class CueChunk : RiffChunk {
+open class CueChunk : RiffChunk {
 
     val cues: List<AudioCue> = mutableListOf()
 
@@ -210,7 +210,7 @@ internal open class CueChunk : RiffChunk {
         addParsedCues(cueListBuilder)
     }
 
-    open protected fun addParsedCues(cueListBuilder: CueListBuilder) {
+    open internal fun addParsedCues(cueListBuilder: CueListBuilder) {
         cues as MutableList
         cues.clear()
         cues.addAll(cueListBuilder.build())

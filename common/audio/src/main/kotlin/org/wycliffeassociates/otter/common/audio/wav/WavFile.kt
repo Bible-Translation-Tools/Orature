@@ -52,7 +52,7 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
-internal class WavFile private constructor() : AudioFormatStrategy {
+class WavFile private constructor() : AudioFormatStrategy {
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 
