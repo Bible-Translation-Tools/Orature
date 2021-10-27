@@ -94,4 +94,12 @@ class AppPreferencesRepository @Inject constructor(
     override fun setLocaleLanguage(language: Language): Completable {
         return preferences.setLocaleLanguage(language.slug)
     }
+
+    override fun appTheme(): Single<String> {
+        return preferences.appTheme()
+    }
+
+    override fun setAppTheme(theme: String): Completable {
+        return preferences.setAppTheme(theme)
+    }
 }

@@ -34,4 +34,6 @@ interface IAppPreferencesRepository {
     fun setInputDevice(mixer: String): Completable
     fun localeLanguage(): Maybe<Language>
     fun setLocaleLanguage(language: Language): Completable
+    fun appTheme(): Single<String>
+    fun setAppTheme(theme: String): Completable
 }

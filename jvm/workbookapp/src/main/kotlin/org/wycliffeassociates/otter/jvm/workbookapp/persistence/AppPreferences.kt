@@ -47,6 +47,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val AUDIO_PLAYBACK_DEVICE_KEY = "audioPlaybackDevice"
     private val AUDIO_RECORD_DEVICE_KEY = "audioRecordDevice"
     private val LOCALE_LANGUAGE_KEY = "localeLanguage"
+    private val APP_THEME_KEY = "appTheme"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -194,5 +195,13 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setLocaleLanguage(locale: String): Completable {
         return putString(LOCALE_LANGUAGE_KEY, locale)
+    }
+
+    override fun appTheme(): Single<String> {
+        return getString(APP_THEME_KEY, "")
+    }
+
+    override fun setAppTheme(theme: String): Completable {
+        return putString(APP_THEME_KEY, theme)
     }
 }
