@@ -56,7 +56,7 @@ class MainScreenStyles : Stylesheet() {
 
         s(tabPane and singleTab) {
             tabHeaderArea {
-                visibility = FXVisibility.HIDDEN
+                prefHeight = 0.px
             }
         }
     }
