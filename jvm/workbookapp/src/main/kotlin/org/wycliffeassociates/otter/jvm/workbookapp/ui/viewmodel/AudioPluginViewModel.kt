@@ -112,7 +112,8 @@ class AudioPluginViewModel : ViewModel() {
             sourceText = sourceText,
             actionText = action,
             targetChapterAudio = targetAudio?.file,
-            license = workbook.source.resourceMetadata.license
+            license = workbook.source.resourceMetadata.license,
+            sourceDirection = workbook.source.language.direction
         )
     }
 

@@ -25,7 +25,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
-import tornadofx.tooltip
+import tornadofx.*
 
 class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<NewTranslationCard>(card) {
 
@@ -37,6 +37,9 @@ class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<Ne
 
     @FXML
     lateinit var newTranslationBtn: Button
+
+    @FXML
+    lateinit var divider: Label
 
     init {
         loadFXML()
@@ -54,6 +57,9 @@ class NewTranslationCardSkin(private val card: NewTranslationCard) : SkinBase<Ne
         newTranslationBtn.textProperty().bind(card.newTranslationTextProperty)
         newTranslationBtn.tooltip {
             textProperty().bind(newTranslationBtn.textProperty())
+        }
+        divider.apply {
+            graphic.scaleXProperty().bind(card.orientationScaleProperty)
         }
     }
 

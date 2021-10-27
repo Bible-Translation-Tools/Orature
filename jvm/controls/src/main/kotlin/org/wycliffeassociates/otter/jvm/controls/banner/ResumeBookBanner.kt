@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.banner
 
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -27,8 +28,8 @@ import javafx.event.EventHandler
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
-import org.wycliffeassociates.otter.jvm.controls.skins.banner.ResumeBookBannerSkin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import org.wycliffeassociates.otter.jvm.controls.skins.banner.ResumeBookBannerSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -40,6 +41,7 @@ class ResumeBookBanner : Control() {
     val sourceLanguageProperty = SimpleStringProperty()
     val targetLanguageProperty = SimpleStringProperty()
     val resumeTextProperty = SimpleStringProperty("Resume")
+    val orientationScaleProperty = SimpleDoubleProperty()
     val onResumeActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {

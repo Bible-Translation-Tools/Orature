@@ -25,6 +25,8 @@ import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -32,6 +34,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.TargetAudio
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -41,12 +44,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.concurrent.Callable
-import javafx.beans.property.SimpleStringProperty
 import javax.inject.Inject
 
 class WorkbookDataStore : Component(), ScopedInstance {
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var localeLanguage: LocaleLanguage
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -79,6 +84,19 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
 
     val sourceLicenseProperty = SimpleStringProperty()
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val orientationScaleProperty = orientationProperty.doubleBinding {
+        when (it) {
+            NodeOrientation.RIGHT_TO_LEFT -> -1.0
+            else -> 1.0
+        }
+    }
+    val sourceOrientationProperty = activeWorkbookProperty.objectBinding {
+        when (it?.source?.language?.direction) {
+            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+            else -> NodeOrientation.LEFT_TO_RIGHT
+        }
+    }
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -92,6 +110,12 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
             }
         }
+        orientationProperty.set(
+            when (localeLanguage.preferredLanguage?.direction) {
+                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                else -> NodeOrientation.LEFT_TO_RIGHT
+            }
+        )
     }
 
     fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {

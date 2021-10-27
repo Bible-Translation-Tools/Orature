@@ -93,6 +93,7 @@ class RecordScripturePage : View() {
             pauseLabelProperty.set(messages["pauseSource"])
 
             contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
         }
 
     private val breadCrumb = BreadCrumb().apply {
@@ -205,7 +206,9 @@ class RecordScripturePage : View() {
                         button(messages["previousVerse"]) {
                             addClass("btn", "btn--secondary")
                             tooltip(text)
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+                                scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+                            }
                             action {
                                 recordScriptureViewModel.previousChunk()
                             }
@@ -231,7 +234,9 @@ class RecordScripturePage : View() {
                         button(messages["nextVerse"]) {
                             addClass("btn", "btn--secondary")
                             tooltip(text)
-                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                                scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+                            }
                             action {
                                 recordScriptureViewModel.nextChunk()
                             }
@@ -338,6 +343,7 @@ class RecordScripturePage : View() {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
+            sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
         }
     }
 

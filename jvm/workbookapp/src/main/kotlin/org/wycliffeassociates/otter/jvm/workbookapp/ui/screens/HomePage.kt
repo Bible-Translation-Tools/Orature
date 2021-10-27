@@ -68,6 +68,7 @@ class HomePage : View() {
                 add(
                     ResumeBookBanner().apply {
                         resumeTextProperty.set(messages["resume"])
+                        orientationScaleProperty.bind(workbookDataStore.orientationScaleProperty)
 
                         viewModel.resumeBookProperty.onChange {
                             it?.let { workbook ->
@@ -91,6 +92,7 @@ class HomePage : View() {
                 add(
                     NewTranslationCard().apply {
                         newTranslationTextProperty.set(messages["createTranslation"])
+                        orientationScaleProperty.bind(workbookDataStore.orientationScaleProperty)
                         setOnAction {
                             viewModel.createTranslation()
                         }
@@ -115,6 +117,7 @@ class HomePage : View() {
 
                             showMoreTextProperty.set(messages["showMore"])
                             showLessTextProperty.set(messages["showLess"])
+                            orientationScaleProperty.bind(workbookDataStore.orientationScaleProperty)
 
                             setOnNewBookAction {
                                 viewModel.createProject(it)

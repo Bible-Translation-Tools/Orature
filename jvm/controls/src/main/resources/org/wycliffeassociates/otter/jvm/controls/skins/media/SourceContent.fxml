@@ -51,12 +51,12 @@
                             <Label fx:id="textNotAvailableText" />
                         </children>
                     </HBox>
-                    <VBox fx:id="sourceTextContainer" alignment="CENTER" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="sourceTextContainer" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
                         <ScrollPane fx:id="sourceTextScroll" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                             <content>
                                 <VBox spacing="20.0">
-                                <Label fx:id="sourceText" lineSpacing="5" styleClass="source-content__text" wrapText="true" />
-                                <Label fx:id="licenseText" lineSpacing="5" styleClass="source-content__license-text" wrapText="true" />
+                                    <Label fx:id="sourceText" lineSpacing="5" styleClass="source-content__text" wrapText="true" />
+                                    <Label fx:id="licenseText" lineSpacing="5" styleClass="source-content__license-text" wrapText="true" />
                                 </VBox>
                             </content>
                             <padding>

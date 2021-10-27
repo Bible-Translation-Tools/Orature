@@ -133,7 +133,8 @@ class WorkbookPageViewModel : ViewModel() {
                 ChapterCardModel(
                     title = MessageFormat.format(
                         FX.messages["chapterTitle"],
-                        FX.messages["chapter"], chapter.sort
+                        FX.messages["chapter"],
+                        chapter.sort
                     ),
                     chapter = chapter,
                     onClick = { navigate(chapter) }

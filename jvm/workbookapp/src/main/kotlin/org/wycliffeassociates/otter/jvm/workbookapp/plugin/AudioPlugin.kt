@@ -141,7 +141,8 @@ class AudioPlugin(
                             pluginParameters.chapterNumber
                         )
                     }",
-                    "--license=${pluginParameters.license}"
+                    "--license=${pluginParameters.license}",
+                    "--source_direction=${pluginParameters.sourceDirection}"
                 )
             }
         return ParametersImpl(insertedArgs)

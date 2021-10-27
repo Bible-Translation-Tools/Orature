@@ -18,15 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.text.MessageFormat
 
 class SourceTextFragment : Fragment() {
-
-//    @Inject
-//    lateinit var player: IAudioPlayer
 
     override val root = initializeSourceContent()
 
@@ -35,6 +33,7 @@ class SourceTextFragment : Fragment() {
         var sourceText: String? = null
         var sourceContentTitle: String? = null
         var license: String? = null
+        var sourceDirection: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -42,6 +41,7 @@ class SourceTextFragment : Fragment() {
             parameters?.let {
                 sourceText = parameters.named["source_text"]
                 license = parameters.named["license"]
+                sourceDirection = parameters.named["source_direction"]
 
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],
@@ -57,6 +57,12 @@ class SourceTextFragment : Fragment() {
             contentTitleProperty.set(sourceContentTitle)
             licenseProperty.set(license)
             enableAudioProperty.set(false)
+            sourceOrientationProperty.set(
+                when (sourceDirection) {
+                    "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                    else -> NodeOrientation.LEFT_TO_RIGHT
+                }
+            )
         }
     }
 

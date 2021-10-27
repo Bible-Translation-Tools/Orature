@@ -273,7 +273,12 @@ class ChapterPage : Fragment() {
                 chunkListView = this
                 fitToParentHeight()
                 setCellFactory {
-                    ChunkCell(::getPlayer, ::onChunkOpen, ::onTakeSelected)
+                    ChunkCell(
+                        workbookDataStore.orientationScaleProperty.value,
+                        ::getPlayer,
+                        ::onChunkOpen,
+                        ::onTakeSelected
+                    )
                 }
             }
         }
@@ -305,6 +310,7 @@ class ChapterPage : Fragment() {
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
         }
     }
 

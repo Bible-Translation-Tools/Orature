@@ -151,7 +151,7 @@ class RecordScriptureViewModel : ViewModel() {
                             SimpleDateFormat.getDateTimeInstance(
                                 SimpleDateFormat.SHORT,
                                 SimpleDateFormat.SHORT,
-                                Locale.getDefault()
+                                workbookDataStore.localeLanguage.preferredLocale()
                             ).format(takeCardModel.take.file.lastModified())
                         )
                         takeLabelProperty.set(

@@ -83,8 +83,6 @@
 
 .source-content__text {
     -fx-font-size: 1.5em;
-    -fx-alignment: center;
-    -fx-text-alignment: justify;
     -fx-fill: -wa-gray-darker;
 }
 

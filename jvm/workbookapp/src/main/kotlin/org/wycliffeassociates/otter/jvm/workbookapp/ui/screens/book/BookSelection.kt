@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.BookCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -37,6 +38,7 @@ class BookSelection : Fragment() {
 
     private val viewModel: BookWizardViewModel by inject()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["selectBook"])
@@ -65,7 +67,9 @@ class BookSelection : Fragment() {
                     }
                     label {
                         addClass("book-wizard__divider")
-                        graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT)
+                        graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT).apply {
+                            scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+                        }
                     }
                     label {
                         addClass("book-wizard__language")
