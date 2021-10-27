@@ -26,6 +26,7 @@ import org.wycliffeassociates.otter.common.persistence.IAppPreferences
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.PreferenceEntity
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import javax.inject.Inject
 
 // preferences object that stores user-independent preference data
@@ -198,7 +199,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     }
 
     override fun appTheme(): Single<String> {
-        return getString(APP_THEME_KEY, "")
+        return getString(APP_THEME_KEY, ColorTheme.SYSTEM.name)
     }
 
     override fun setAppTheme(theme: String): Completable {

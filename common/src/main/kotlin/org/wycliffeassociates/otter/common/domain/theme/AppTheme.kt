@@ -16,25 +16,24 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.persistence.repositories
+package org.wycliffeassociates.otter.common.domain.theme
 
 import io.reactivex.Completable
-import io.reactivex.Maybe
-import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.ColorTheme
-import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
+import javax.inject.Inject
 
-interface IAppPreferencesRepository {
-    fun resumeProjectId(): Single<Int>
-    fun setResumeProjectId(id: Int): Completable
-    fun lastResource(): Single<String>
-    fun setLastResource(resource: String): Completable
-    fun getOutputDevice(): Single<String>
-    fun setOutputDevice(mixer: String): Completable
-    fun getInputDevice(): Single<String>
-    fun setInputDevice(mixer: String): Completable
-    fun localeLanguage(): Maybe<Language>
-    fun setLocaleLanguage(language: Language): Completable
-    fun appTheme(): Single<ColorTheme>
-    fun setAppTheme(theme: ColorTheme): Completable
+class AppTheme @Inject constructor(
+    private val appPrefRepo: IAppPreferencesRepository
+) {
+    val preferredTheme: ColorTheme
+        get() = preferredTheme()
+
+    private fun preferredTheme(): ColorTheme {
+        return appPrefRepo.appTheme().blockingGet()
+    }
+
+    fun setPreferredThem(theme: ColorTheme): Completable {
+        return appPrefRepo.setAppTheme(theme)
+    }
 }
