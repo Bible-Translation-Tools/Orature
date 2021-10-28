@@ -71,20 +71,20 @@ class RootView : View() {
 
     private fun initThemeStylesheet() {
         if (osThemeDetector.isDark) {
-            importStylesheet(resources.get("/css/root_dark.css"))
+            importStylesheet(resources["/css/root_dark.css"])
         } else {
-            importStylesheet(resources.get("/css/root.css"))
+            importStylesheet(resources["/css/root.css"])
         }
     }
 
     private fun bindAppThemeToSystem() {
         isOSDarkMode.onChange {
             if (it) {
-                currentStage!!.scene.stylesheets.remove("/css/root.css")
-                currentStage!!.scene.stylesheets.add("/css/root_dark.css")
+                FX.stylesheets.remove(resources["/css/root.css"])
+                importStylesheet("/css/root_dark.css")
             } else {
-                currentStage!!.scene.stylesheets.remove("/css/root_dark.css")
-                currentStage!!.scene.stylesheets.add("/css/root.css")
+                FX.stylesheets.remove(resources["/css/root_dark.css"])
+                importStylesheet("/css/root.css")
             }
         }
 
