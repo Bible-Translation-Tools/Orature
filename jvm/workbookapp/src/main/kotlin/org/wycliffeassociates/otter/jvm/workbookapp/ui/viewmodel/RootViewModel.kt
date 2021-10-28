@@ -80,18 +80,6 @@ class RootViewModel : ViewModel() {
             }
     }
 
-    fun updateTheme(selectedTheme: ColorTheme) {
-        if (selectedTheme == ColorTheme.SYSTEM) {
-            bindSystemTheme()
-        } else {
-            unBindSystemTheme()
-            appColorMode.set(selectedTheme)
-        }
-
-        theme.setPreferredThem(selectedTheme)
-            .subscribe()
-    }
-
     private fun initThemeColorChangeListener() {
         appColorMode.onChange {
             when (it) {
@@ -103,6 +91,18 @@ class RootViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    fun updateTheme(selectedTheme: ColorTheme) {
+        if (selectedTheme == ColorTheme.SYSTEM) {
+            bindSystemTheme()
+        } else {
+            unBindSystemTheme()
+            appColorMode.set(selectedTheme)
+        }
+
+        theme.setPreferredThem(selectedTheme)
+            .subscribe()
     }
 
     private fun bindSystemTheme() {
