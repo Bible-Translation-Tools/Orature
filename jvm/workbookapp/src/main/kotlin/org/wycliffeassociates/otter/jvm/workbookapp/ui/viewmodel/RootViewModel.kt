@@ -31,7 +31,6 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
-import java.util.function.Consumer
 
 class RootViewModel : ViewModel() {
 

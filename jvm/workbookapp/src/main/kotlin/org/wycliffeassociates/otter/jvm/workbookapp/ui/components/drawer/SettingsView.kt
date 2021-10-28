@@ -19,9 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
-import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon

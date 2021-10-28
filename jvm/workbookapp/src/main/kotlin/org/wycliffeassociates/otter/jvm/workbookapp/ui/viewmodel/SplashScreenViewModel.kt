@@ -19,12 +19,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.jthemedetecor.OsThemeDetector
 import io.reactivex.Observable
 import javafx.beans.property.SimpleDoubleProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.assets.initialization.InitializeApp
-import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
