@@ -54,7 +54,6 @@ import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
-import java.util.*
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {

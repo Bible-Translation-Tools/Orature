@@ -75,6 +75,7 @@ class ResourcePage : View() {
             ResourceListView(
                 resourceListViewModel.filteredResourceGroupCardItemList,
                 resourceListViewModel.isFilterOnProperty,
+                workbookDataStore.sourceOrientationProperty,
                 navigator
             ).apply {
                 whenDocked {

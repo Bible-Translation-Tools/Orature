@@ -138,7 +138,10 @@ class AudioPluginViewModel : ViewModel() {
     }
 
     fun addPlugin(record: Boolean, edit: Boolean) {
-        find<AddPluginDialog>().open()
+        find<AddPluginDialog>().apply {
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            open()
+        }
         find<AddPluginViewModel>().apply {
             canRecordProperty.value = record
             canEditProperty.value = edit

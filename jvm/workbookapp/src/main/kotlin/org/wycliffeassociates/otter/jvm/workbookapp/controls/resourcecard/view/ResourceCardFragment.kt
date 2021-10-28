@@ -21,6 +21,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ObservableValue
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -37,12 +39,12 @@ import tornadofx.*
 class ResourceCardFragment(
     private val item: ResourceCardItem,
     private val filterCompletedCardsProperty: BooleanProperty,
+    private val sourceOrientationProperty: ObservableValue<NodeOrientation?>,
     private val navigator: NavigationMediator
 ) : Fragment() {
     override val root = HBox()
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
-    var primaryColorProperty = SimpleObjectProperty<Color>(Color.ORANGE)
-    var primaryColor: Color by primaryColorProperty
+    var primaryColorProperty = SimpleObjectProperty(Color.ORANGE)
 
     init {
         root.apply {
@@ -71,6 +73,7 @@ class ResourceCardFragment(
                 }
                 text(item.title) {
                     wrappingWidthProperty().bind(root.widthProperty().divide(1.5))
+                    nodeOrientationProperty().bind(sourceOrientationProperty)
                 }
             }
 
@@ -106,6 +109,12 @@ class ResourceCardFragment(
 fun resourceCardFragment(
     resource: ResourceCardItem,
     filterCompletedCardsProperty: BooleanProperty,
+    sourceOrientationProperty: ObservableValue<NodeOrientation?>,
     navigator: NavigationMediator,
     init: ResourceCardFragment.() -> Unit = {}
-) = ResourceCardFragment(resource, filterCompletedCardsProperty, navigator).apply { init.invoke(this) }
+) = ResourceCardFragment(
+    resource,
+    filterCompletedCardsProperty,
+    sourceOrientationProperty,
+    navigator
+).apply { init.invoke(this) }

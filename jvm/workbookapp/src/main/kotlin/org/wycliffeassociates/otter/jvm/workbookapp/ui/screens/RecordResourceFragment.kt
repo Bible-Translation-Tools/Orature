@@ -149,7 +149,9 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val previousButton = Button().apply {
         addClass("btn", "btn--secondary", "card__navigate-button")
         text = messages["previousChunk"]
-        graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+        graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+            scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+        }
         action {
             recordableViewModel.stopPlayers()
             recordResourceViewModel.previousChunk()
@@ -160,7 +162,9 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val nextButton = Button().apply {
         addClass("btn", "btn--secondary", "card__navigate-button")
         text = messages["nextChunk"]
-        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+            scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+        }
         action {
             recordableViewModel.stopPlayers()
             recordResourceViewModel.nextChunk()
@@ -184,6 +188,8 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             addClass("card__content-scrollpane")
             isFitToWidth = true
             vgrow = Priority.ALWAYS
+            nodeOrientationProperty().bind(workbookDataStore.sourceOrientationProperty)
+
             label(formattedTextProperty) {
                 isWrapText = true
                 addClass("card__content-text")
@@ -389,6 +395,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
         }
     }
 
@@ -397,6 +404,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesSuccessMessage"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
 
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
@@ -413,6 +421,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesFailMessage"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
 
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()

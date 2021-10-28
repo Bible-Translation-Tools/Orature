@@ -359,6 +359,8 @@ class RecordScripturePage : View() {
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
         }
     }
 
@@ -367,6 +369,7 @@ class RecordScripturePage : View() {
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesSuccessMessage"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
 
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
@@ -383,6 +386,7 @@ class RecordScripturePage : View() {
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesFailMessage"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
 
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()

@@ -32,10 +32,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceCombobox
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageComboboxCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class SettingsView : View() {
     private val viewModel: SettingsViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     private val addPluginDialog: AddPluginDialog = find()
 
@@ -272,6 +274,7 @@ class SettingsView : View() {
         val successDialog = confirmdialog {
             titleTextProperty.set(messages["settings"])
             messageTextProperty.set(messages["changeLanguageSuccessMessage"])
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }

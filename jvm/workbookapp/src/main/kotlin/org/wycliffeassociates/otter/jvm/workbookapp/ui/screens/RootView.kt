@@ -79,6 +79,7 @@ class RootView : View() {
 
             backgroundImageProperty.set(resources.image("/images/audio_error.png"))
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(workbookDataStore.orientationProperty.value)
 
             errorTypeProperty.bind(viewModel.audioErrorType)
 
