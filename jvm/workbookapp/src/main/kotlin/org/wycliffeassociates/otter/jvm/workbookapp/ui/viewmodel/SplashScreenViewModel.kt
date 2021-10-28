@@ -45,8 +45,7 @@ class SplashScreenViewModel : ViewModel() {
 
     fun initApp(): Observable<Double> {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-
-
+        
         return initApp.initApp()
             .observeOnFx()
             .doOnError { logger.error("Error initializing app: ", it) }
