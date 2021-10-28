@@ -134,6 +134,39 @@ class VerseMarkerChunkTest {
                 AudioCue(Int.MAX_VALUE, " stuff5 "),
             )
         ),
+        TestData(
+            listOf(
+                AudioCue(0, "1"),
+                AudioCue(12, "2 "),
+                AudioCue(149, " 3"),
+                AudioCue(259, " 4 "),
+                AudioCue(1000, "\t5"),
+                AudioCue(2450, "6\n"),
+                AudioCue(3212, " 7\t"),
+                AudioCue(4112, " 8\t"),
+                AudioCue(5112, " 9\t\n"),
+            ),
+            listOf(
+                AudioCue(0, "1"),
+                AudioCue(12, "2 "),
+                AudioCue(149, " 3"),
+                AudioCue(259, " 4 "),
+                AudioCue(1000, "\t5"),
+                AudioCue(2450, "6\n"),
+                AudioCue(3212, " 7\t"),
+                AudioCue(4112, " 8\t"),
+                AudioCue(5112, " 9\t\n"),
+                AudioCue(0, "orature-vm-1"),
+                AudioCue(12, "orature-vm-2"),
+                AudioCue(149, "orature-vm-3"),
+                AudioCue(259, "orature-vm-4"),
+                AudioCue(1000, "orature-vm-5"),
+                AudioCue(2450, "orature-vm-6"),
+                AudioCue(3212, "orature-vm-7"),
+                AudioCue(4112, "orature-vm-8"),
+                AudioCue(5112, "orature-vm-9"),
+            )
+        )
     )
 
     @Test
