@@ -118,12 +118,12 @@ class RootViewModel : ViewModel() {
     }
 
     private fun setLightMode() {
-        primaryStage.scene.stylesheets.remove("/css/root_dark.css")
-        primaryStage.scene.stylesheets.add("/css/root.css")
+        FX.stylesheets.remove(resources["/css/root_dark.css"])
+        importStylesheet(resources["/css/root.css"])
     }
 
     private fun setDarkMode() {
-        primaryStage.scene.stylesheets.remove("/css/root.css")
-        primaryStage.scene.stylesheets.add("/css/root_dark.css")
+        FX.stylesheets.remove(resources["/css/root.css"])
+        importStylesheet(resources["/css/root_dark.css"])
     }
 }
