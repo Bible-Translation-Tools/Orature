@@ -42,7 +42,7 @@ class BookCard(
     val coverArtProperty = SimpleObjectProperty<Artwork>(coverArt)
     val attributionTextProperty = SimpleStringProperty()
     val titleProperty = SimpleStringProperty(title)
-    val slugProperty = SimpleStringProperty()
+    val slugProperty = SimpleStringProperty(slug)
     val newBookProperty = SimpleBooleanProperty(newBook)
 
     val addBookTextProperty = SimpleStringProperty(messages["createProject"])
