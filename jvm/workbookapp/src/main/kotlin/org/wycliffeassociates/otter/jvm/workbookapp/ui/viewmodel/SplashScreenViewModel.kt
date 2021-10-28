@@ -61,18 +61,4 @@ class SplashScreenViewModel : ViewModel() {
     fun initAudioSystem() {
         configureAudioSystem.configure()
     }
-
-    fun initThemeStyleSheets() {
-        val themeColor = if (theme.preferredTheme == ColorTheme.SYSTEM) {
-            if (OsThemeDetector.getDetector().isDark)
-                ColorTheme.DARK
-            else
-                ColorTheme.LIGHT
-        } else theme.preferredTheme
-
-        when (themeColor) {
-            ColorTheme.LIGHT -> importStylesheet(resources["/css/root.css"])
-            ColorTheme.DARK -> importStylesheet(resources["/css/root_dark.css"])
-        }
-    }
 }

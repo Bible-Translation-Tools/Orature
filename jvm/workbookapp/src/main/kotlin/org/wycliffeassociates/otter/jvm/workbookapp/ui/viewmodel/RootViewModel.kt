@@ -18,16 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.jthemedetecor.OsThemeDetector
 import java.lang.IllegalArgumentException
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javax.inject.Inject
 import javax.sound.sampled.LineUnavailableException
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.common.domain.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
+import java.util.function.Consumer
 
 class RootViewModel : ViewModel() {
 
@@ -39,12 +43,23 @@ class RootViewModel : ViewModel() {
     val showAudioErrorDialogProperty = SimpleBooleanProperty(false)
     var audioErrorType = SimpleObjectProperty<AudioErrorType>()
 
+    private val osThemeDetector = OsThemeDetector.getDetector()
+    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+
+    private val onSystemColorModeChanged = Consumer<Boolean> {
+        runLater { isOSDarkMode.set(it) }
+    }
+
+    @Inject
+    lateinit var theme: AppTheme
+
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         initializeAudioErrorListener()
+        initSystemThemeListener()
     }
 
     private fun initializeAudioErrorListener() {
@@ -63,5 +78,56 @@ class RootViewModel : ViewModel() {
                     }
                 }
             }
+    }
+
+    fun updateTheme(selectedTheme: ColorTheme) {
+        val themeColor: ColorTheme = if (selectedTheme == ColorTheme.SYSTEM) {
+            bindSystemTheme()
+            if (osThemeDetector.isDark)
+                ColorTheme.DARK
+            else
+                ColorTheme.LIGHT
+        } else {
+            unBindSystemTheme()
+            selectedTheme
+        }
+
+        when (themeColor) {
+            ColorTheme.DARK -> setDarkMode()
+            ColorTheme.LIGHT -> setLightMode()
+        }
+
+        theme.setPreferredThem(selectedTheme)
+            .subscribe()
+    }
+
+    private fun initSystemThemeListener() {
+        isOSDarkMode.onChange {
+            if (it) {
+                setDarkMode()
+            } else {
+                setLightMode()
+            }
+        }
+    }
+
+    private fun bindSystemTheme() {
+        osThemeDetector.registerListener(onSystemColorModeChanged)
+    }
+
+    private fun unBindSystemTheme() {
+        try {
+            osThemeDetector.removeListener(onSystemColorModeChanged)
+        } catch(ex: Exception) { }
+    }
+
+    private fun setLightMode() {
+        primaryStage.scene.stylesheets.remove("/css/root_dark.css")
+        primaryStage.scene.stylesheets.add("/css/root.css")
+    }
+
+    private fun setDarkMode() {
+        primaryStage.scene.stylesheets.remove("/css/root.css")
+        primaryStage.scene.stylesheets.add("/css/root_dark.css")
     }
 }

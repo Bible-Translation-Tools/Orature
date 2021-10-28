@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
+import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -71,6 +73,23 @@ class SettingsView : View() {
 
                 vbox {
                     addClass("app-drawer__section")
+
+                    combobox(viewModel.selectedThemeProperty, viewModel.supportedThemes) {
+                        addClass("wa-combobox")
+
+                        cellFormat {
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(it.name)
+                            }
+                        }
+
+                        viewModel.selectedThemeProperty.addListener { _, oldValue, newValue ->
+                            if (oldValue != null && newValue != null) {
+                                fire(ThemeColorEvent(this@SettingsView::class, newValue))
+                            }
+                        }
+                    }
 
                     label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")

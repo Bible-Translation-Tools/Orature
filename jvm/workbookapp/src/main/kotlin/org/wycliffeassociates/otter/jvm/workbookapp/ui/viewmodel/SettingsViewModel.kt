@@ -25,14 +25,16 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.domain.theme.AppTheme
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import tornadofx.*
 import javax.inject.Inject
 
@@ -52,9 +54,15 @@ class SettingsViewModel : ViewModel() {
     @Inject
     lateinit var localeLanguage: LocaleLanguage
 
+    @Inject
+    lateinit var theme: AppTheme
+
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
     val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
+
+    val supportedThemes = observableListOf<ColorTheme>()
+    val selectedThemeProperty = SimpleObjectProperty<ColorTheme>()
 
     val selectedEditorProperty = SimpleObjectProperty<AudioPluginData>()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
@@ -90,6 +98,8 @@ class SettingsViewModel : ViewModel() {
         loadCurrentOutputDevice()
         loadCurrentInputDevice()
 
+        supportedThemes.setAll(ColorTheme.values().asList())
+        selectedThemeProperty.set(theme.preferredTheme)
         supportedLocaleLanguages.setAll(localeLanguage.supportedLanguages)
         selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
     }

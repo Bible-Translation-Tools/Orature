@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.SplashScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
@@ -54,7 +55,8 @@ class SplashScreen : View() {
     private fun finish() {
         viewModel.initAudioSystem()
         close()
-        viewModel.initThemeStyleSheets()
+
+        fire(ThemeColorEvent(this::class, viewModel.theme.preferredTheme))
         primaryStage.show()
         navigator.dock<HomePage>()
     }
