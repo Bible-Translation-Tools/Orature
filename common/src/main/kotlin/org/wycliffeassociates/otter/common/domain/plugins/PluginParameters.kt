@@ -36,5 +36,6 @@ data class PluginParameters(
     val actionText: String = "",
     val targetChapterAudio: File? = null,
     val license: String? = null,
+    val direction: String? = null,
     val sourceDirection: String? = null
 )

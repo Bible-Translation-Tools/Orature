@@ -59,6 +59,7 @@ class SourceContent : Control() {
     val isMinimizableProperty = SimpleBooleanProperty(true)
     val isMinimizedProperty = SimpleBooleanProperty(false)
 
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()

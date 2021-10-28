@@ -93,6 +93,7 @@ class RecordScripturePage : View() {
             pauseLabelProperty.set(messages["pauseSource"])
 
             contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            orientationProperty.bind(workbookDataStore.orientationProperty)
             sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
         }
 
@@ -343,6 +344,7 @@ class RecordScripturePage : View() {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
+            orientationProperty.bind(workbookDataStore.orientationProperty)
             sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
         }
     }

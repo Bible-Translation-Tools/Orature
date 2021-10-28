@@ -29,6 +29,7 @@ import org.wycliffeassociates.otter.common.domain.content.FileNamer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.content.WorkbookFileNamerBuilder
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.plugins.LaunchPlugin
@@ -45,6 +46,7 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var pluginRepository: IAudioPluginRepository
     @Inject lateinit var launchPlugin: LaunchPlugin
     @Inject lateinit var takeActions: TakeActions
+    @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
 
@@ -113,6 +115,7 @@ class AudioPluginViewModel : ViewModel() {
             actionText = action,
             targetChapterAudio = targetAudio?.file,
             license = workbook.source.resourceMetadata.license,
+            direction = localeLanguage.preferredLanguage?.direction,
             sourceDirection = workbook.source.language.direction
         )
     }

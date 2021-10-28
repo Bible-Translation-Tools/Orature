@@ -357,6 +357,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            orientationProperty.bind(workbookDataStore.orientationProperty)
             sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
         }
     }

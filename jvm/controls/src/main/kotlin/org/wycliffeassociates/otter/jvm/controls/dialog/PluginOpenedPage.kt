@@ -38,6 +38,7 @@ class PluginOpenedPage : Fragment() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     init {
@@ -73,6 +74,7 @@ class PluginOpenedPage : Fragment() {
                 playTargetLabelProperty.set(messages["playTarget"])
                 pauseTargetLabelProperty.set(messages["pauseTarget"])
 
+                orientationProperty.bind(this@PluginOpenedPage.orientationProperty)
                 sourceOrientationProperty.bind(this@PluginOpenedPage.sourceOrientationProperty)
                 contentTitleProperty.bind(sourceContentTitleProperty)
                 isMinimizableProperty.set(false)

@@ -142,6 +142,7 @@ class AudioPlugin(
                         )
                     }",
                     "--license=${pluginParameters.license}",
+                    "--direction=${pluginParameters.direction}",
                     "--source_direction=${pluginParameters.sourceDirection}"
                 )
             }

@@ -232,6 +232,12 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         licenseText.apply {
             textProperty().bind(sourceContent.licenseTextProperty)
+            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
+                when (it) {
+                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                    else -> ""
+                }
+            })
         }
 
         title.apply {

@@ -37,6 +37,7 @@ class SourceAudioFragment : Fragment() {
         var sourceText: String? = null
         var sourceContentTitle: String? = null
         var license: String? = null
+        var direction: String? = null
         var sourceDirection: String? = null
 
         if (scope is ParameterizedScope) {
@@ -45,6 +46,7 @@ class SourceAudioFragment : Fragment() {
             parameters?.let {
                 sourceText = parameters.named["source_text"]
                 license = parameters.named["license"]
+                direction = parameters.named["direction"]
                 sourceDirection = parameters.named["source_direction"]
 
                 sourceContentTitle = getSourceContentTitle(
@@ -67,6 +69,12 @@ class SourceAudioFragment : Fragment() {
             licenseProperty.set(license)
 
             contentTitleProperty.set(sourceContentTitle)
+            orientationProperty.set(
+                when (direction) {
+                    "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                    else -> NodeOrientation.LEFT_TO_RIGHT
+                }
+            )
             sourceOrientationProperty.set(
                 when (sourceDirection) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
