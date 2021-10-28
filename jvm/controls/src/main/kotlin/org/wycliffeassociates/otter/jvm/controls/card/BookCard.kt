@@ -34,6 +34,7 @@ import tornadofx.get
 
 class BookCard(
     title: String = "",
+    slug: String = "",
     coverArt: Artwork? = null,
     newBook: Boolean = false
 ) : Control() {
@@ -41,6 +42,7 @@ class BookCard(
     val coverArtProperty = SimpleObjectProperty<Artwork>(coverArt)
     val attributionTextProperty = SimpleStringProperty()
     val titleProperty = SimpleStringProperty(title)
+    val slugProperty = SimpleStringProperty()
     val newBookProperty = SimpleBooleanProperty(newBook)
 
     val addBookTextProperty = SimpleStringProperty(messages["createProject"])
