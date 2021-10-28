@@ -4,13 +4,13 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-internal class VerseMarkerChunk : CueChunk() {
+class VerseMarkerChunk : CueChunk() {
     private val extraCues: List<AudioCue> = mutableListOf()
 
-   override fun addParsedCues(cueListBuilder: CueListBuilder) {
-       val allCues = cueListBuilder.build()
-       separateOratureCues(allCues)
-   }
+    override fun addParsedCues(cueListBuilder: CueListBuilder) {
+        val allCues = cueListBuilder.build()
+        separateOratureCues(allCues)
+    }
 
     override fun toByteArray(): ByteArray {
         if (cues.isEmpty()) {
@@ -48,7 +48,7 @@ internal class VerseMarkerChunk : CueChunk() {
 
         val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
         val leftoverCues = allCues.filter { !oratureCues.contains(it) }
-        val loneDigits = leftoverCues.filter { it.label.matches(loneDigitRegex) }
+        val loneDigits = leftoverCues.filter { it.label.trim().matches(loneDigitRegex) }
         val potentialCues = leftoverCues
             .filter { !loneDigits.contains(it) }
             .filter { it.label.matches(numberRegex) }
@@ -61,7 +61,7 @@ internal class VerseMarkerChunk : CueChunk() {
         if (oratureCues.isNotEmpty()) {
             addMatchingCues(oratureCues, oratureRegex)
         } else if (loneDigits.isNotEmpty()) {
-            addMatchingCues(loneDigits, loneDigitRegex)
+            addMatchingCues(loneDigits.map { AudioCue(it.location, it.label.trim()) }, loneDigitRegex)
         } else if (potentialCues.isNotEmpty()) {
             addMatchingCues(potentialCues, numberRegex)
         }
