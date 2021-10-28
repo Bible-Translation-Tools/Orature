@@ -27,7 +27,12 @@
 }
 
 .filtered-search-bar__input .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
+}
+
+.filtered-search-bar__input:focused .ikonli-font-icon {
+    -fx-fill: -text-input-fill;
 }
 
 .filtered-search-bar__menu {
