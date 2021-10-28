@@ -99,7 +99,12 @@ class SettingsViewModel : ViewModel() {
         loadCurrentInputDevice()
 
         supportedThemes.setAll(ColorTheme.values().asList())
-        selectedThemeProperty.set(theme.preferredTheme)
+        theme.preferredTheme
+            .observeOnFx()
+            .subscribe { theme ->
+                selectedThemeProperty.set(theme)
+            }
+
         supportedLocaleLanguages.setAll(localeLanguage.supportedLanguages)
         selectedLocaleLanguageProperty.set(localeLanguage.preferredLanguage)
     }

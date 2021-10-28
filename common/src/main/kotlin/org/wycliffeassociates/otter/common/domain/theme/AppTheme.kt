@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.theme
 
 import io.reactivex.Completable
+import io.reactivex.Single
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import javax.inject.Inject
@@ -26,11 +27,11 @@ import javax.inject.Inject
 class AppTheme @Inject constructor(
     private val appPrefRepo: IAppPreferencesRepository
 ) {
-    val preferredTheme: ColorTheme
+    val preferredTheme: Single<ColorTheme>
         get() = preferredTheme()
 
-    private fun preferredTheme(): ColorTheme {
-        return appPrefRepo.appTheme().blockingGet()
+    private fun preferredTheme(): Single<ColorTheme> {
+        return appPrefRepo.appTheme()
     }
 
     fun setPreferredThem(theme: ColorTheme): Completable {
