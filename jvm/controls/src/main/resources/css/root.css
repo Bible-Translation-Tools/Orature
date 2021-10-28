@@ -75,9 +75,12 @@
     -secondary-btn-background-hover: -wa-primary-05;
     -btn-icon-border-color: -wa-black-20;
 
+    -text-input-fill: -wa-black;
+    -text-field-border: -wa-gray-light;
     -text-field-background: -wa-white;
     -text-field-background-hover: #d9d9d9;
-    -text-field-background-focused: white;
+    -text-field-background-focused: -wa-white;
+    -text-field-background-focused-hover: -wa-white;
 
     -recorder-controls-background: #282CBD;
     -tab-region-background: #e0e0e0;

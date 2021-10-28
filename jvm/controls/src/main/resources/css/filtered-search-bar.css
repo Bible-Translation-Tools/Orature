@@ -21,18 +21,6 @@
     -fx-spacing: 10px;
 }
 
-.filtered-search-bar__input {
-    -fx-background-color: -text-field-background;
-}
-
-.filtered-search-bar__input:hover {
-    -fx-background-color: -text-field-background-hover;
-}
-
-.filtered-search-bar__input:focused {
-    -fx-background-color: -text-field-background-focused;
-}
-
 .filtered-search-bar__input .left-pane,
 .filtered-search-bar__input .right-pane {
     -fx-padding: 0 10px;

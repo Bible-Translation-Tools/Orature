@@ -254,19 +254,23 @@
 .txt-input {
     -fx-pref-height: 48px;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-gray-light;
+    -fx-border-color: -text-field-border;
     -fx-border-radius: 6px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -text-field-background;
     -fx-background-radius: 8px;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
 }
 .txt-input:hover {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -text-field-background-hover;
 }
 .txt-input:focused:hover {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -text-field-background-focused-hover;
 }
 .txt-input:focused {
+    -fx-text-fill: -text-input-fill;
+    -fx-font-size: 20px;
+    -fx-background-color: -text-field-background-focused;
     -fx-border-color: -wa-primary;
     -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
 }
