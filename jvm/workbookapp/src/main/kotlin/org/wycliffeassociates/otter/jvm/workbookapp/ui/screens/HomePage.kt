@@ -106,6 +106,7 @@ class HomePage : View() {
                             setConverter {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
+                                    slugProperty.set(it.target.slug.uppercase())
                                     coverArtProperty.set(
                                         it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )
