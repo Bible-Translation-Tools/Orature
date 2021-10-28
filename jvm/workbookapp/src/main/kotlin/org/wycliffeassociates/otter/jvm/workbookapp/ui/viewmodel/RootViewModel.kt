@@ -45,10 +45,7 @@ class RootViewModel : ViewModel() {
 
     private val osThemeDetector = OsThemeDetector.getDetector()
     private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
-
-    private val onSystemColorModeChanged = Consumer<Boolean> {
-        runLater { isOSDarkMode.set(it) }
-    }
+    private val appColorMode = SimpleObjectProperty<ColorTheme>()
 
     @Inject
     lateinit var theme: AppTheme
@@ -59,7 +56,10 @@ class RootViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         initializeAudioErrorListener()
-        initSystemThemeListener()
+        initThemeColorChangeListener()
+        osThemeDetector.registerListener {
+            runLater { isOSDarkMode.set(it) }
+        }
     }
 
     private fun initializeAudioErrorListener() {
@@ -81,44 +81,41 @@ class RootViewModel : ViewModel() {
     }
 
     fun updateTheme(selectedTheme: ColorTheme) {
-        val themeColor: ColorTheme = if (selectedTheme == ColorTheme.SYSTEM) {
+        if (selectedTheme == ColorTheme.SYSTEM) {
             bindSystemTheme()
-            if (osThemeDetector.isDark)
-                ColorTheme.DARK
-            else
-                ColorTheme.LIGHT
         } else {
             unBindSystemTheme()
-            selectedTheme
-        }
-
-        when (themeColor) {
-            ColorTheme.DARK -> setDarkMode()
-            ColorTheme.LIGHT -> setLightMode()
+            appColorMode.set(selectedTheme)
         }
 
         theme.setPreferredThem(selectedTheme)
             .subscribe()
     }
 
-    private fun initSystemThemeListener() {
-        isOSDarkMode.onChange {
-            if (it) {
-                setDarkMode()
-            } else {
-                setLightMode()
+    private fun initThemeColorChangeListener() {
+        appColorMode.onChange {
+            when (it) {
+                ColorTheme.LIGHT -> {
+                    setLightMode()
+                }
+                ColorTheme.DARK -> {
+                    setDarkMode()
+                }
             }
         }
     }
 
     private fun bindSystemTheme() {
-        osThemeDetector.registerListener(onSystemColorModeChanged)
+        appColorMode.bind(isOSDarkMode.objectBinding {
+            if (it == true)
+                ColorTheme.DARK
+            else
+                ColorTheme.LIGHT
+        })
     }
 
     private fun unBindSystemTheme() {
-        try {
-            osThemeDetector.removeListener(onSystemColorModeChanged)
-        } catch(ex: Exception) { }
+        appColorMode.unbind()
     }
 
     private fun setLightMode() {

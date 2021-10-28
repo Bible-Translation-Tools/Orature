@@ -55,7 +55,6 @@ class SplashScreen : View() {
     private fun finish() {
         viewModel.initAudioSystem()
         close()
-
         fire(ThemeColorEvent(this::class, viewModel.theme.preferredTheme))
         primaryStage.show()
         navigator.dock<HomePage>()
