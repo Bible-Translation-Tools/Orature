@@ -80,11 +80,11 @@ class RootView : View() {
     private fun bindAppThemeToSystem() {
         isOSDarkMode.onChange {
             if (it) {
-                FX.stylesheets.remove(resources["/css/root.css"])
-                importStylesheet("/css/root_dark.css")
+                FX.stylesheets.remove("/css/root.css")
+                FX.stylesheets.add("/css/root_dark.css")
             } else {
-                FX.stylesheets.remove(resources["/css/root_dark.css"])
-                importStylesheet("/css/root.css")
+                FX.stylesheets.remove("/css/root_dark.css")
+                FX.stylesheets.add("/css/root.css")
             }
         }
 
