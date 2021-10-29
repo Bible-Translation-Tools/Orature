@@ -55,7 +55,8 @@
     -wa-highlight-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
-    -wa-neutral-border: -wa-gray;
+    -wa-border-neutral: -wa-gray;
+    -wa-border-light: -wa-gray-lighter;
 
     -waveform-background: #F7FAFF;
     -waveform-background-dark: #ced6e3;
@@ -99,8 +100,8 @@
 
     -combo-box-background: -wa-white;
 
-    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
-    -wa-border-light: -wa-gray-lighter;
+    -card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -slider-track-color: -wa-black-05;
 
     -marker-overlay-primary: #1edd7633;
     -marker-overlay-secondary: #015ad933;

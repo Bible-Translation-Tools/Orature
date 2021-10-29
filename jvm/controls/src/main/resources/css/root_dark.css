@@ -55,9 +55,10 @@
     -wa-highlight-text: -wa-accent-light;
     -wa-disabled-text: gray;
     -wa-disabled-background: #ffffff20;
-    -wa-neutral-border: #cccccc;
+    -wa-border-neutral: #cccccc;
+    -wa-border-light: gray;
 
-    -waveform-background: #616e7c;
+    -waveform-background: #999999;
     -waveform-background-dark: #4f5964;
 
     -breadcrumb-background: -wa-foreground;
@@ -99,8 +100,8 @@
 
     -combo-box-background: -wa-foreground;
 
-    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
-    -wa-border-light: gray;
+    -card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -slider-track-color: gray;
 
     -marker-overlay-primary: #0f32a542;
     -marker-overlay-secondary: #224e7150;

@@ -486,7 +486,7 @@
 /* -------------- Slider ---------------- */
 
 .wa-slider .track {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -slider-track-color;
     -fx-background-radius: 6px;
     -fx-border-color: -wa-black-20;
     -fx-border-radius: 6px;

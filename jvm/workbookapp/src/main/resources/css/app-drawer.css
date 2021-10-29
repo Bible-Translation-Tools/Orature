@@ -46,7 +46,7 @@
 
 .app-drawer__btn--close {
     -fx-background-color: -btn-icon-background;
-    -fx-border-color: -wa-neutral-border;
+    -fx-border-color: -wa-border-neutral;
     -fx-border-width: 2px;
     -fx-border-radius: 4px;
     -fx-pref-width: 48px;
@@ -59,7 +59,7 @@
 
 .app-drawer__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-neutral-border;
+    -fx-fill: -wa-border-neutral;
 }
 
 .app-drawer__subtitle {
