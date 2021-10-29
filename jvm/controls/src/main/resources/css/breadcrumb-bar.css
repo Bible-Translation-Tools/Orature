@@ -34,6 +34,7 @@
     -fx-border-color: #BFC5CC;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
     -fx-padding: 5px 10px;
     -fx-cursor: hand;
     -fx-pref-height: 48px;

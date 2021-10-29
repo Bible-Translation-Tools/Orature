@@ -70,7 +70,7 @@
 }
 
 .jfx-tab-pane .headers-region .tab .tab-container .tab-label {
-    -fx-text-fill: rgba(58,58,58, 1.0);
+    -fx-text-fill: -wa-regular-text;
     -fx-font-family: "Noto Sans";
     -fx-font-weight: NORMAL;
     -fx-padding: 6 10 6 10;
