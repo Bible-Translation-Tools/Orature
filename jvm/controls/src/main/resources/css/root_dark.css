@@ -85,10 +85,12 @@
 
     -text-input-fill: -wa-black;
     -text-field-border: gray;
+    -text-field-border-focused: gray;
     -text-field-background: transparent;
     -text-field-background-hover: transparent;
     -text-field-background-focused: -wa-regular-text;
     -text-field-background-focused-hover: -wa-regular-text;
+    -text-field-focused-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);
 
     -recorder-controls-background: #0c0033;
     -tab-region-background: #363636;

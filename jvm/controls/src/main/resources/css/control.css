@@ -271,8 +271,8 @@
     -fx-text-fill: -text-input-fill;
     -fx-font-size: 20px;
     -fx-background-color: -text-field-background-focused;
-    -fx-border-color: -wa-primary;
-    -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
+    -fx-border-color: -text-field-border-focused;
+    -fx-effect: -text-field-focused-effect;
 }
 .txt-input:disabled {
     -fx-border-width: 0px;
