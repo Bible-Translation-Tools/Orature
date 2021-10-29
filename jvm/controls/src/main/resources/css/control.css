@@ -61,12 +61,12 @@
 }
 
 .btn--icon:selected {
-    -fx-background-color: -wa-primary-10;
+    -fx-background-color: -btn-icon-background-selected;
     -fx-border-width: 0;
 }
 
 .btn--icon:selected .ikonli-font-icon {
-    -fx-fill: -wa-primary;
+    -fx-fill: -btn-icon-background-selected;
 }
 
 /* -------------- Primary Button -------------- */

@@ -20,12 +20,12 @@
 
 * {
     /*Primary Color */
-    -wa-primary: #2d3353;
-    -wa-primary-05: #ced1e3;
-    -wa-primary-10: #aeb3d0;
-    -wa-primary-20: #8e95be;
-    -wa-primary-light: #8b94c1;
-    -wa-primary-dark: #273059;
+    -wa-primary: #015AD9;
+    -wa-primary-05: #015AD90D;
+    -wa-primary-10: #015AD91A;
+    -wa-primary-20: #015AD933;
+    -wa-primary-light: #CEE6FF;
+    -wa-primary-dark: #00377C;
 
     -wa-primary-variant: #5d37cd;
     -wa-primary-variant-light: #b399ff;
@@ -45,7 +45,7 @@
     -wa-accent-dark: #9E6600;
 
     /* Gradients */
-    -wa-primary-gradient: linear-gradient(to top, -wa-primary-dark, -wa-primary-variant);
+    -wa-primary-gradient: linear-gradient(to top, -wa-primary, #267CF7);
     -wa-cta-gradient: linear-gradient(to bottom, -wa-accent-light, -wa-accent);
 
 /* -------------------- Components mappings --------------------*/
@@ -78,6 +78,7 @@
     -secondary-btn-background-pressed: -wa-foreground-pressed;
     -secondary-btn-border: -wa-regular-text;
     -btn-icon-border-color: -wa-regular-text;
+    -btn-icon-background-selected: #9bbcdd;
 
     -text-input-fill: -wa-black;
     -text-field-border: gray;
