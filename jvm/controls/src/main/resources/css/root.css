@@ -54,6 +54,7 @@
     -wa-status-active: -wa-green;
     -wa-highlight-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
+    -wa-neutral-border: -wa-gray;
 
     -waveform-background: #F7FAFF;
     -waveform-background-dark: #ced6e3;
@@ -63,6 +64,7 @@
     -breadcrumb-background-pressed: #D9DDE4;
 
     -tab-background: #b6b6b6;
+    -drag-drop-area: -wa-primary-05;
     -selected-tab-background: white;
     -selected-tab-line: #CC4141;
     -selected-tab-label: rgba(255,0,0, .87);
@@ -77,6 +79,7 @@
     -secondary-btn-background-hover: -wa-primary-05;
     -secondary-btn-background-pressed: -wa-primary-10;
     -secondary-btn-border: -wa-primary;
+    -btn-icon-background: -wa-transparent;
     -btn-icon-border-color: -wa-black-20;
     -btn-icon-background-selected: -wa-primary-10;
 
@@ -89,7 +92,8 @@
 
     -recorder-controls-background: #282CBD;
     -tab-region-background: #e0e0e0;
-    -combobox-background: -wa-white;
+
+    -combo-box-background: -wa-white;
 
     -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
     -wa-border-light: -wa-gray-lighter;

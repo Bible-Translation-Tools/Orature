@@ -41,7 +41,7 @@
 .btn--icon {
     -fx-border-width: 2px;
     -fx-border-color: -btn-icon-border-color;
-    -fx-background-color: -wa-transparent;
+    -fx-background-color: -btn-icon-background;
     -fx-pref-width: 48px;
     -fx-pref-height: 48px;
     -fx-padding: 0;
@@ -306,7 +306,7 @@
 /* -------------- Combobox ---------------- */
 
 .wa-combobox {
-    -fx-background-color: -combobox-background;
+    -fx-background-color: -combo-box-background;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
     -fx-border-color: -wa-black-40;
@@ -363,6 +363,7 @@
 
 .wa-combobox .combo-box-popup .list-cell {
     -fx-padding: 5px;
+    -fx-background-color: -combo-box-background;
 }
 
 .wa-combobox .combo-box-popup .list-cell:selected {
