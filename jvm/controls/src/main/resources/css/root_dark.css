@@ -58,9 +58,9 @@
     -waveform-background: #616e7c;
     -waveform-background-dark: #4f5964;
 
-    -breadcrumb-background: #5d568f;
-    -breadcrumb-background-hover: #948fbc;
-    -breadcrumb-background-pressed: -wa-primary;
+    -breadcrumb-background: -wa-foreground;
+    -breadcrumb-background-hover: -wa-foreground-hover;
+    -breadcrumb-background-pressed: -wa-foreground-pressed;
 
     -tab-background: gray;
     -selected-tab-background: -wa-primary;
