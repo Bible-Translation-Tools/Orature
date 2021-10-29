@@ -93,7 +93,7 @@
     -recorder-controls-background: #0c0033;
     -tab-region-background: #363636;
 
-    -combo-box-background: #797f9e;
+    -combo-box-background: -wa-foreground;
 
     -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
     -wa-border-light: gray;

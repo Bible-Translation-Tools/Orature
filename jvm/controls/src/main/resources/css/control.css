@@ -309,7 +309,7 @@
     -fx-background-color: -combo-box-background;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-black-40;
+    -fx-border-color: -text-field-border;
     -fx-border-radius: 6px;
     -fx-font-size: 20px;
     -fx-pref-height: 48px;
@@ -326,7 +326,7 @@
 }
 
 .wa-combobox:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .wa-combobox:showing {
@@ -363,7 +363,11 @@
 
 .wa-combobox .combo-box-popup .list-cell {
     -fx-padding: 5px;
-    -fx-background-color: -combo-box-background;
+    -fx-background-color: -wa-foreground;
+}
+
+.wa-combobox .combo-box-popup .list-cell .label {
+    -fx-text-fill: -wa-regular-text;
 }
 
 .wa-combobox .combo-box-popup .list-cell:selected {
@@ -380,6 +384,12 @@
 
 .wa-combobox-button {
     -fx-spacing: 10px;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-combobox-button .text,
+.wa-combobox-button .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }
 
 .wa-combobox-item {
