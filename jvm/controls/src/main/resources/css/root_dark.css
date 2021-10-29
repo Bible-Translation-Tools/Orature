@@ -54,6 +54,7 @@
     -wa-status-active: #2ec144;
     -wa-highlight-text: -wa-accent-light;
     -wa-disabled-text: gray;
+    -wa-disabled-background: #ffffff20;
     -wa-neutral-border: #cccccc;
 
     -waveform-background: #616e7c;
@@ -82,6 +83,7 @@
     -btn-icon-background: -wa-transparent;
     -btn-icon-border-color: -wa-regular-text;
     -btn-icon-background-selected: #9bbcdd;
+    -checkbox-button-background: #39457c;
 
     -text-input-fill: -wa-black;
     -text-field-border: gray;
@@ -90,7 +92,7 @@
     -text-field-background-hover: transparent;
     -text-field-background-focused: -wa-regular-text;
     -text-field-background-focused-hover: -wa-regular-text;
-    -text-field-focused-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);
+    -text-field-focused-effect: -wa-level-0;
 
     -recorder-controls-background: #0c0033;
     -tab-region-background: #363636;

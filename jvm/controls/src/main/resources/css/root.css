@@ -54,6 +54,7 @@
     -wa-status-active: -wa-green;
     -wa-highlight-text: -wa-primary;
     -wa-disabled-text: -wa-gray-light;
+    -wa-disabled-background: -wa-black-15;
     -wa-neutral-border: -wa-gray;
 
     -waveform-background: #F7FAFF;
@@ -82,6 +83,7 @@
     -btn-icon-background: -wa-transparent;
     -btn-icon-border-color: -wa-black-20;
     -btn-icon-background-selected: -wa-primary-10;
+    -checkbox-button-background: -wa-foreground;
 
     -text-input-fill: -wa-black;
     -text-field-border-focused: -wa-primary;
