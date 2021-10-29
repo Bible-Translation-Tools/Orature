@@ -30,6 +30,10 @@
     -fx-background-color: -wa-foreground-hover;
 }
 
+.chapter-card:pressed {
+    -fx-background-color: -wa-foreground-pressed;
+}
+
 .chapter-card__graphic {
     -fx-background-radius: 10px;
     -fx-background-color: -card-image-placeholder-background;

@@ -177,13 +177,13 @@
 }
 .btn--secondary:disabled {
     -fx-cursor: disappear;
-    -fx-text-fill: -wa-gray;
-    -fx-border-color: -wa-gray-light;
+    -fx-text-fill: -wa-disabled-text;
+    -fx-border-color: -wa-disabled-text;
     -fx-border-width: 2px;
     -fx-underline: false;
 }
 .btn--secondary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-gray-light;
+    -fx-fill: -wa-disabled-text;
 }
 
 .btn--secondary-light {

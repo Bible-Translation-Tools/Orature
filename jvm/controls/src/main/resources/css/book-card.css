@@ -26,7 +26,7 @@
 }
 
 .book-card:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .book-card__root {

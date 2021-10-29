@@ -53,6 +53,7 @@
     -wa-note-text: -wa-black-40;
     -wa-status-active: -wa-green;
     -wa-highlight-text: -wa-primary;
+    -wa-disabled-text: -wa-gray-light;
 
     -waveform-background: #F7FAFF;
     -waveform-background-dark: #ced6e3;
