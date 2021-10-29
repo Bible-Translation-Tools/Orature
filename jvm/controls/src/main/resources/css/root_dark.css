@@ -33,9 +33,9 @@
 
     -wa-background: #1c2031;
 
-    -wa-foreground: #4e567e;
-    -wa-foreground-hover: #9097bb;
-    -wa-foreground-pressed: -wa-primary-dark;
+    -wa-foreground:  #373949;
+    -wa-foreground-hover: #585b74;
+    -wa-foreground-pressed: #21212c;
 
     -wa-surface: #363636;
 
@@ -70,10 +70,13 @@
     -card-placeholder-empty: -card-image-placeholder-background;
 
     -secondary-btn-text-fill: -wa-regular-text;
-    -secondary-btn-text-fill-hover: -wa-primary-dark;
+    -secondary-btn-text-fill-hover: -wa-regular-text;
+    -secondary-btn-text-fill-pressed: -wa-regular-text;
     -secondary-btn-background: transparent;
     -secondary-btn-background-hover: -wa-foreground-hover;
-    -btn-icon-border-color: transparent;
+    -secondary-btn-background-pressed: -wa-foreground-pressed;
+    -secondary-btn-border: -wa-regular-text;
+    -btn-icon-border-color: -wa-regular-text;
 
     -text-input-fill: -wa-black;
     -text-field-border: gray;

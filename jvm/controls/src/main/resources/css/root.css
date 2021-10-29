@@ -71,8 +71,11 @@
 
     -secondary-btn-text-fill: -wa-primary;
     -secondary-btn-text-fill-hover: -wa-primary-dark;
+    -secondary-btn-text-fill-pressed: -wa-primary-dark;
     -secondary-btn-background: transparent;
     -secondary-btn-background-hover: -wa-primary-05;
+    -secondary-btn-background-pressed: -wa-primary-10;
+    -secondary-btn-border: -wa-primary;
     -btn-icon-border-color: -wa-black-20;
 
     -text-input-fill: -wa-black;

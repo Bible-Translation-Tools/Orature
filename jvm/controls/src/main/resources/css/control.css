@@ -147,7 +147,7 @@
 .btn--secondary {
     -fx-background-color: -secondary-btn-background;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-primary;
+    -fx-border-color: -secondary-btn-border;
     -fx-text-fill: -secondary-btn-text-fill;
     -fx-font-size: 20px;
     -fx-underline: true;
@@ -167,13 +167,13 @@
     -fx-fill: -secondary-btn-text-fill-hover;
 }
 .btn--secondary:pressed {
-    -fx-background-color: -wa-primary-10;
-    -fx-border-color: -wa-primary-dark;
-    -fx-text-fill: -wa-primary-dark;
+    -fx-background-color: -secondary-btn-background-pressed;
+    -fx-border-color: -secondary-btn-text-fill-pressed;
+    -fx-text-fill: -secondary-btn-text-fill-pressed;
     -fx-underline: false;
 }
 .btn--secondary:pressed .ikonli-font-icon {
-    -fx-fill: -wa-primary-dark;
+    -fx-fill: -secondary-btn-text-fill-pressed;
 }
 .btn--secondary:disabled {
     -fx-cursor: disappear;
