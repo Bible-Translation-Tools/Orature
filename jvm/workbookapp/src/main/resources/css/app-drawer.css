@@ -181,11 +181,11 @@
 }
 
 .app-drawer__plugin .radio-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .app-drawer__plugin .radio-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .app-drawer__plugin .radio-button .radio {
