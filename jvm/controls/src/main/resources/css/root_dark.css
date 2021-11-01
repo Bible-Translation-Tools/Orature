@@ -114,6 +114,9 @@
 
     -marker-overlay-primary: #0f32a542;
     -marker-overlay-secondary: #224e7150;
+
+    /* others */
+    -wa-dialog-overlay: -wa-black-80;
 }
 
 .workspace {

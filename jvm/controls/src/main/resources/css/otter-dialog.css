@@ -18,7 +18,7 @@
  */
 
 .otter-dialog-overlay {
-    -fx-background-color: -wa-black-60;
+    -fx-background-color: -wa-dialog-overlay;
     -fx-alignment: center;
     -fx-padding: 50px;
 }
