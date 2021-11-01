@@ -84,7 +84,9 @@
     -btn-icon-background: -wa-transparent;
     -btn-icon-border-color: -wa-regular-text;
     -btn-icon-background-selected: #9bbcdd;
-    -checkbox-button-background: #39457c;
+    -checkbox-button-background: #4d4f66;
+    -checkbox-button-background-selected: #bdd8ff;
+    -filter-button-background: #4d4f66;
 
     -text-input-fill: -wa-black;
     -text-field-border: gray;
@@ -93,7 +95,7 @@
     -text-field-background-hover: transparent;
     -text-field-background-focused: -wa-regular-text;
     -text-field-background-focused-hover: -wa-regular-text;
-    -text-field-focused-effect: -wa-level-0;
+    -text-field-focused-effect: -wa-level0;
 
     -recorder-controls-background: #0c0033;
     -tab-region-background: #363636;

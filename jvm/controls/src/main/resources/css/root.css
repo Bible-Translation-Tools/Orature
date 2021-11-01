@@ -85,6 +85,8 @@
     -btn-icon-border-color: -wa-black-20;
     -btn-icon-background-selected: -wa-primary-10;
     -checkbox-button-background: -wa-foreground;
+    -checkbox-button-background-selected: -wa-primary-10;
+    -filter-button-background: -wa-black-10;
 
     -text-input-fill: -wa-black;
     -text-field-border-focused: -wa-primary;

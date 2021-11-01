@@ -82,18 +82,3 @@
 .add-plugin-dialog__checkboxes {
     -fx-spacing: 15px;
 }
-
-.add-plugin-dialog__checkboxes .checkbox-button {
-    -fx-background-color: -checkbox-button-background;
-}
-
-.add-plugin-dialog__checkboxes .checkbox-button:hover {
-    -fx-background-color: -wa-foreground-hover;
-}
-
-.add-plugin-dialog__checkboxes .checkbox-button .label {
-    -fx-text-fill: -wa-regular-text;
-}
-.add-plugin-dialog__checkboxes .checkbox-button .label .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
-}

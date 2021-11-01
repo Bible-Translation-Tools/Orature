@@ -23,7 +23,7 @@
 }
 
 .checkbox-button {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -checkbox-button-background;
     -fx-background-radius: 6px;
     -fx-pref-height: 48px;
     -fx-cursor: hand;
@@ -38,12 +38,12 @@
 }
 
 .checkbox-button:selected {
-    -fx-background-color: -wa-primary-10;
+    -fx-background-color: -checkbox-button-background-selected;
     -fx-text-fill: -wa-primary;
 }
 
 .checkbox-button__title {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
 }
@@ -60,7 +60,7 @@
 }
 
 .checkbox-button__icon .ikonli-font-icon {
-    -fx-icon-color: -wa-black;
+    -fx-icon-color: -wa-regular-text;
     -fx-icon-size: 30px;
 }
 
