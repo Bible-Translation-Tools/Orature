@@ -116,5 +116,5 @@
 }
 
 .btn--icon:selected .ikonli-font-icon {
-    -fx-icon-color: -wa-primary !important;
+    -fx-icon-color: -wa-primary;
 }
