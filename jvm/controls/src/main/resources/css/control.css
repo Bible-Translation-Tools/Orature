@@ -349,8 +349,9 @@
     -fx-background-color: -wa-black-10;
 }
 
-.wa-combobox .list-cell:hover {
-    -fx-background-color: -wa-black-05;
+.wa-combobox .list-cell:hover,
+.wa-combobox .combo-box-popup .list-cell:hover {
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .wa-combobox .list-cell:pressed {
@@ -384,10 +385,12 @@
 
 .wa-combobox-button {
     -fx-spacing: 10px;
+}
+
+.wa-combobox .wa-combobox-button .label {
     -fx-text-fill: -wa-regular-text;
 }
 
-.wa-combobox-button .text,
 .wa-combobox-button .ikonli-font-icon {
     -fx-fill: -wa-regular-text;
 }
