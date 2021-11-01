@@ -72,13 +72,17 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
+                    label(messages["colorTheme"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+
                     combobox(viewModel.selectedThemeProperty, viewModel.supportedThemes) {
                         addClass("wa-combobox")
 
                         cellFormat {
                             val view = ComboboxItem()
                             graphic = view.apply {
-                                topTextProperty.set(it.name)
+                                topTextProperty.set(messages[it.titleKey])
                             }
                         }
 

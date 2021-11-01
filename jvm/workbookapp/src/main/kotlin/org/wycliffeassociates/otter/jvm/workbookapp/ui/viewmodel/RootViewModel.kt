@@ -118,12 +118,12 @@ class RootViewModel : ViewModel() {
     }
 
     private fun setLightMode() {
+        FX.stylesheets.add(resources["/css/root.css"])
         FX.stylesheets.remove(resources["/css/root_dark.css"])
-        importStylesheet(resources["/css/root.css"])
     }
 
     private fun setDarkMode() {
+        FX.stylesheets.add(resources["/css/root_dark.css"])
         FX.stylesheets.remove(resources["/css/root.css"])
-        importStylesheet(resources["/css/root_dark.css"])
     }
 }
