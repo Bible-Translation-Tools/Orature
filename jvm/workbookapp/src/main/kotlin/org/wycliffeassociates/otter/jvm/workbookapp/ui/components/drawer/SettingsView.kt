@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
+import com.sun.prism.Material
 import javafx.application.Platform
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
@@ -85,6 +86,8 @@ class SettingsView : View() {
                                 topTextProperty.set(messages[it.titleKey])
                             }
                         }
+
+                        buttonCell = ThemeComboboxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6))
 
                         viewModel.selectedThemeProperty.addListener { _, oldValue, newValue ->
                             if (oldValue != null && newValue != null) {
