@@ -58,22 +58,24 @@
     -wa-border-neutral: -wa-gray;
     -wa-border-light: -wa-gray-lighter;
 
-    -waveform-background: #F7FAFF;
-    -waveform-background-dark: #ced6e3;
-
+    /* breadcrumb, navigation */
     -breadcrumb-background: white;
     -breadcrumb-background-hover: #e6e6e6;
     -breadcrumb-background-pressed: #D9DDE4;
 
+    /* tab pane */
     -tab-background: #b6b6b6;
-    -drag-drop-area: -wa-primary-05;
+    -tab-region-background: #e0e0e0;
     -selected-tab-background: white;
     -selected-tab-line: #CC4141;
     -selected-tab-label: rgba(255,0,0, .87);
 
+    /* place holder, empty area */
+    -drag-drop-area: -wa-primary-05;
     -card-image-placeholder-background: -wa-gray-lighter;
     -card-placeholder-empty: -wa-black-05;
 
+    /* buttons */
     -secondary-btn-text-fill: -wa-primary;
     -secondary-btn-text-fill-hover: -wa-primary-dark;
     -secondary-btn-text-fill-pressed: -wa-primary-dark;
@@ -88,6 +90,7 @@
     -checkbox-button-background-selected: -wa-primary-10;
     -filter-button-background: -wa-black-10;
 
+    /* text field input */
     -text-input-fill: -wa-black;
     -text-field-border-focused: -wa-primary;
     -text-field-border: -wa-gray-light;
@@ -97,13 +100,17 @@
     -text-field-background-focused-hover: -wa-white;
     -text-field-focused-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
 
-    -recorder-controls-background: #282CBD;
-    -tab-region-background: #e0e0e0;
-
+    /* combo box, drop down */
     -combo-box-background: -wa-white;
 
+    /* shadow effects */
     -card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+
+    /* audio player */
     -slider-track-color: -wa-black-05;
+    -recorder-controls-background: #282CBD;
+    -waveform-background: #F7FAFF;
+    -waveform-background-dark: #ced6e3;
 
     -marker-overlay-primary: #1edd7633;
     -marker-overlay-secondary: #015ad933;

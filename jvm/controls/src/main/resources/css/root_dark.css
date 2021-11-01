@@ -58,22 +58,24 @@
     -wa-border-neutral: #cccccc;
     -wa-border-light: gray;
 
-    -waveform-background: #999999;
-    -waveform-background-dark: #4f5964;
-
+    /* breadcrumb, navigation */
     -breadcrumb-background: -wa-foreground;
     -breadcrumb-background-hover: -wa-foreground-hover;
     -breadcrumb-background-pressed: -wa-foreground-pressed;
 
+    /* tab pane */
     -tab-background: gray;
-    -drag-drop-area: -wa-background;
+    -tab-region-background: #363636;
     -selected-tab-background: -wa-primary;
     -selected-tab-line: -wa-accent;
     -selected-tab-label: -wa-accent-light;
 
+    /* place holder, empty area */
+    -drag-drop-area: -wa-background;
     -card-image-placeholder-background: #b3b3b3;
     -card-placeholder-empty: -card-image-placeholder-background;
 
+    /* buttons */
     -secondary-btn-text-fill: -wa-regular-text;
     -secondary-btn-text-fill-hover: -wa-regular-text;
     -secondary-btn-text-fill-pressed: -wa-regular-text;
@@ -88,6 +90,7 @@
     -checkbox-button-background-selected: #bdd8ff;
     -filter-button-background: #4d4f66;
 
+    /* text field input */
     -text-input-fill: -wa-black;
     -text-field-border: gray;
     -text-field-border-focused: gray;
@@ -97,13 +100,17 @@
     -text-field-background-focused-hover: -wa-regular-text;
     -text-field-focused-effect: -wa-level0;
 
-    -recorder-controls-background: #0c0033;
-    -tab-region-background: #363636;
-
+    /* combo box, drop down */
     -combo-box-background: -wa-foreground;
 
+    /* shadow effects */
     -card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+
+    /* audio player */
     -slider-track-color: gray;
+    -recorder-controls-background: #0c0033;
+    -waveform-background: #999999;
+    -waveform-background-dark: #4f5964;
 
     -marker-overlay-primary: #0f32a542;
     -marker-overlay-secondary: #224e7150;
