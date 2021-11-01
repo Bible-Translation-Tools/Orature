@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
-import com.sun.prism.Material
 import javafx.application.Platform
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
