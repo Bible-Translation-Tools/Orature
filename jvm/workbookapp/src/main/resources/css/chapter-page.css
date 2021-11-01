@@ -46,7 +46,7 @@
 }
 
 .chapter-page__not-started {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 8px;
     -fx-alignment: center;
 }
@@ -116,5 +116,5 @@
 }
 
 .btn--icon:selected .ikonli-font-icon {
-    -fx-icon-color: -wa-primary !important;
+    -fx-icon-color: -wa-primary;
 }

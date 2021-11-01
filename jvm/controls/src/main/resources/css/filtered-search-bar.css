@@ -21,32 +21,25 @@
     -fx-spacing: 10px;
 }
 
-.filtered-search-bar__input {
-    -fx-background-color: -text-field-background;
-}
-
-.filtered-search-bar__input:hover {
-    -fx-background-color: -text-field-background-hover;
-}
-
-.filtered-search-bar__input:focused {
-    -fx-background-color: -text-field-background-focused;
-}
-
 .filtered-search-bar__input .left-pane,
 .filtered-search-bar__input .right-pane {
     -fx-padding: 0 10px;
 }
 
 .filtered-search-bar__input .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
+}
+
+.filtered-search-bar__input:focused .ikonli-font-icon {
+    -fx-fill: -wa-text-input-fill;
 }
 
 .filtered-search-bar__menu {
     -fx-pref-width: 88px;
     -fx-pref-height: 48px;
     -fx-padding: 0 10px;
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-filter-button-background;
     -fx-background-radius: 6px;
     -fx-alignment: center;
     -fx-spacing: 7px;
@@ -54,7 +47,7 @@
 }
 
 .filtered-search-bar__menu .context-menu {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
 }
 
@@ -64,7 +57,7 @@
 }
 
 .filtered-search-bar__menu .menu-item {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
 }
 
 .filtered-search-bar__menu .label {
@@ -72,7 +65,7 @@
 }
 
 .filtered-search-bar__menu__separator .label {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-font-family: 'sans-serif';

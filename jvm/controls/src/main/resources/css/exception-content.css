@@ -36,8 +36,8 @@
     -fx-text-fill: -wa-regular-text;
 }
 .exception-content__show-more-btn * {
-    -fx-fill: -secondary-btn-text-fill;
-    -fx-icon-color: -secondary-btn-text-fill;
+    -fx-fill: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 
 .exception-content__send-report {

@@ -45,7 +45,7 @@
 }
 
 .card--take__slider .track {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-slider-track-color;
 }
 
 .card--take__slider .colored-track {

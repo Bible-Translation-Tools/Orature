@@ -20,7 +20,7 @@
 .breadcrumb-bar {
     -fx-padding: 15px 40px;
     -fx-spacing: 5px;
-    -fx-background-color: -breadcrumb-background;
+    -fx-background-color: -wa-breadcrumb-background;
     -fx-border-width: 1px;
     -fx-border-color: -wa-gray-lighter;
 }
@@ -34,6 +34,7 @@
     -fx-border-color: #BFC5CC;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
     -fx-padding: 5px 10px;
     -fx-cursor: hand;
     -fx-pref-height: 48px;
@@ -48,11 +49,11 @@
 }
 
 .breadcrumb__content:hover {
-    -fx-background-color: -breadcrumb-background-hover;
+    -fx-background-color: -wa-breadcrumb-background-hover;
 }
 
 .breadcrumb__content:pressed {
-    -fx-background-color: -breadcrumb-background-pressed;
+    -fx-background-color: -wa-breadcrumb-background-pressed;
 }
 
 .breadcrumb__content .ikonli-font-icon {

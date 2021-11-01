@@ -45,8 +45,8 @@
 }
 
 .app-drawer__btn--close {
-    -fx-background-color: -wa-white;
-    -fx-border-color: -wa-gray;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-border-color: -wa-border-neutral;
     -fx-border-width: 2px;
     -fx-border-radius: 4px;
     -fx-pref-width: 48px;
@@ -54,16 +54,12 @@
 }
 
 .app-drawer__btn--close:hover {
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .app-drawer__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-gray;
-}
-
-.app-drawer__btn--close:hover .ikonli-font-icon {
-    -fx-fill: -wa-gray-dark;
+    -fx-fill: -wa-border-neutral;
 }
 
 .app-drawer__subtitle {
@@ -138,6 +134,7 @@
     -fx-font-size: 20px;
     -fx-wrap-text: true;
     -fx-text-alignment: center;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__text--link .ikonli-font-icon {
@@ -171,7 +168,7 @@
 }
 
 .app-drawer__plugin-header .ikonli-font-icon {
-    -fx-fill: -wa-black-60;
+    -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
 }
 
@@ -185,11 +182,11 @@
 }
 
 .app-drawer__plugin .radio-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .app-drawer__plugin .radio-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .app-drawer__plugin .radio-button .radio {
@@ -214,7 +211,7 @@
     -fx-border-radius: 6px;
     -fx-border-color: -wa-primary;
     -fx-border-style: segments(20, 10);
-    -fx-background-color: -wa-primary-05;
+    -fx-background-color: -wa-drag-drop-area;
     -fx-background-radius: 6px;
     -fx-padding: 25px;
     -fx-spacing: 10px;

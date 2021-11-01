@@ -41,7 +41,7 @@
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
-    -fx-background-color: -card-image-placeholder-background;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-font-weight: bold;
     -fx-background-radius: 10px;
     -fx-pref-height: 45px;
@@ -52,13 +52,14 @@
 }
 
 .source-content__minimize-btn {
-    -fx-border-color: -wa-gray;
+    -fx-border-color: -wa-btn-icon-border-color;
     -fx-border-radius: 3px;
     -fx-background-radius: 3px;
 }
 
 .source-content__minimize-btn .ikonli-font-icon {
     -fx-icon-size: 20px;
+    -fx-fill: -wa-regular-text;
 }
 
 .source-content__text-container {
@@ -79,7 +80,7 @@
 .source-content__audio_container--target {
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: -wa-gray-light;
-    -fx-padding: 5px 0 16px 0;
+    -fx-padding: 15 5;
 }
 
 .source-content__scroll-pane,

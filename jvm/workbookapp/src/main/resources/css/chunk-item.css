@@ -61,7 +61,7 @@
 }
 
 .chunk-item__takes {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 16px;
     -fx-spacing: 10px;
     -fx-alignment: top-center;
