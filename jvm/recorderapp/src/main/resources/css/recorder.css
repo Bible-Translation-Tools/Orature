@@ -17,7 +17,7 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 .controls {
-    -fx-background-color: -recorder-controls-background;
+    -fx-background-color: -wa-recorder-controls-background;
 }
 
 .info {
@@ -72,5 +72,5 @@
 }
 
 .waveform {
-    -fx-background-color: -waveform-background;
+    -fx-background-color: -wa-waveform-background;
 }

@@ -38,7 +38,7 @@
     -fx-pref-width: 160px;
     -fx-pref-height: 80px;
     -fx-alignment: center;
-    -fx-background-color: -card-image-placeholder-background;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-background-radius: 10px;
 }
 

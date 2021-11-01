@@ -59,7 +59,7 @@
 }
 
 .card--resource-take--empty {
-    -fx-background-color: -card-placeholder-empty;
+    -fx-background-color: -wa-card-placeholder-empty;
     -fx-background-radius: 10px;
     -fx-max-width: 500px;
     -fx-pref-height: 90px;
@@ -124,5 +124,5 @@
 .card__button-cell {
     -fx-alignment: center;
     -fx-padding: 0 15px;
-    -fx-background-color: -breadcrumb-background;
+    -fx-background-color: -wa-breadcrumb-background;
 }

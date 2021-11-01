@@ -18,7 +18,7 @@
  */
 
 .jfx-tab-pane .tab-header-background {
-    -fx-background-color: -tab-region-background;
+    -fx-background-color: -wa-tab-region-background;
 }
 
 .jfx-tab-pane .tab-header-area .tab-down-button {
@@ -43,7 +43,7 @@
 }
 
 .jfx-tab-pane .headers-region .tab {
-    -fx-background-color: -tab-background;
+    -fx-background-color: -wa-tab-background;
     -fx-pref-width: 157px;
     -fx-pref-height: 57px;
     -fx-border-color: rgba(224,224,224, .87);
@@ -52,11 +52,11 @@
 }
 
 .jfx-tab-pane .headers-region .tab:selected {
-    -fx-background-color: -selected-tab-background;
+    -fx-background-color: -wa-selected-tab-background;
 }
 
 .jfx-tab-pane .headers-region .tab-selected-line {
-    -fx-background-color: -selected-tab-line;
+    -fx-background-color: -wa-selected-tab-line;
     -fx-pref-width: 1px !important;
     -fx-pref-height: 2px;
 }
@@ -81,5 +81,5 @@
 }
 
 .jfx-tab-pane .headers-region .tab:selected .tab-container .tab-label {
-    -fx-text-fill: -selected-tab-label;
+    -fx-text-fill: -wa-selected-tab-label;
 }

@@ -40,8 +40,8 @@
 
 .btn--icon {
     -fx-border-width: 2px;
-    -fx-border-color: -btn-icon-border-color;
-    -fx-background-color: -btn-icon-background;
+    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-background-color: -wa-btn-icon-background;
     -fx-pref-width: 48px;
     -fx-pref-height: 48px;
     -fx-padding: 0;
@@ -61,12 +61,12 @@
 }
 
 .btn--icon:selected {
-    -fx-background-color: -btn-icon-background-selected;
+    -fx-background-color: -wa-btn-icon-background-selected;
     -fx-border-width: 0;
 }
 
 .btn--icon:selected .ikonli-font-icon {
-    -fx-fill: -btn-icon-background-selected;
+    -fx-fill: -wa-btn-icon-background-selected;
 }
 
 /* -------------- Primary Button -------------- */
@@ -145,35 +145,35 @@
 
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
-    -fx-background-color: -secondary-btn-background;
+    -fx-background-color: -wa-secondary-btn-background;
     -fx-border-width: 2px;
-    -fx-border-color: -secondary-btn-border;
-    -fx-text-fill: -secondary-btn-text-fill;
+    -fx-border-color: -wa-secondary-btn-border;
+    -fx-text-fill: -wa-secondary-btn-text-fill;
     -fx-font-size: 20px;
     -fx-underline: true;
     -jfx-disable-visual-focus: true;
 }
 .btn--secondary .ikonli-font-icon {
     -fx-font-size: 20px;
-    -fx-fill: -secondary-btn-text-fill;
+    -fx-fill: -wa-secondary-btn-text-fill;
 }
 .btn--secondary:hover {
-    -fx-background-color: -secondary-btn-background-hover;
-    -fx-border-color: -secondary-btn-text-fill-hover;
-    -fx-text-fill: -secondary-btn-text-fill-hover;
+    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-border-color: -wa-secondary-btn-text-fill-hover;
+    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
     -fx-underline: false;
 }
 .btn--secondary:hover .ikonli-font-icon {
-    -fx-fill: -secondary-btn-text-fill-hover;
+    -fx-fill: -wa-secondary-btn-text-fill-hover;
 }
 .btn--secondary:pressed {
-    -fx-background-color: -secondary-btn-background-pressed;
-    -fx-border-color: -secondary-btn-text-fill-pressed;
-    -fx-text-fill: -secondary-btn-text-fill-pressed;
+    -fx-background-color: -wa-secondary-btn-background-pressed;
+    -fx-border-color: -wa-secondary-btn-text-fill-pressed;
+    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
     -fx-underline: false;
 }
 .btn--secondary:pressed .ikonli-font-icon {
-    -fx-fill: -secondary-btn-text-fill-pressed;
+    -fx-fill: -wa-secondary-btn-text-fill-pressed;
 }
 .btn--secondary:disabled {
     -fx-cursor: disappear;
@@ -254,25 +254,25 @@
 .txt-input {
     -fx-pref-height: 48px;
     -fx-border-width: 2px;
-    -fx-border-color: -text-field-border;
+    -fx-border-color: -wa-text-field-border;
     -fx-border-radius: 6px;
-    -fx-background-color: -text-field-background;
+    -fx-background-color: -wa-text-field-background;
     -fx-background-radius: 8px;
     -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
 }
 .txt-input:hover {
-    -fx-background-color: -text-field-background-hover;
+    -fx-background-color: -wa-text-field-background-hover;
 }
 .txt-input:focused:hover {
-    -fx-background-color: -text-field-background-focused-hover;
+    -fx-background-color: -wa-text-field-background-focused-hover;
 }
 .txt-input:focused {
-    -fx-text-fill: -text-input-fill;
+    -fx-text-fill: -wa-text-input-fill;
     -fx-font-size: 20px;
-    -fx-background-color: -text-field-background-focused;
-    -fx-border-color: -text-field-border-focused;
-    -fx-effect: -text-field-focused-effect;
+    -fx-background-color: -wa-text-field-background-focused;
+    -fx-border-color: -wa-text-field-border-focused;
+    -fx-effect: -wa-text-field-focused-effect;
 }
 .txt-input:disabled {
     -fx-border-width: 0px;
@@ -306,10 +306,10 @@
 /* -------------- Combobox ---------------- */
 
 .wa-combobox {
-    -fx-background-color: -combo-box-background;
+    -fx-background-color: -wa-combo-box-background;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
-    -fx-border-color: -text-field-border;
+    -fx-border-color: -wa-text-field-border;
     -fx-border-radius: 6px;
     -fx-font-size: 20px;
     -fx-pref-height: 48px;
@@ -489,7 +489,7 @@
 /* -------------- Slider ---------------- */
 
 .wa-slider .track {
-    -fx-background-color: -slider-track-color;
+    -fx-background-color: -wa-slider-track-color;
     -fx-background-radius: 6px;
     -fx-border-color: -wa-black-20;
     -fx-border-radius: 6px;

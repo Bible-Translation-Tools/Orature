@@ -59,61 +59,61 @@
     -wa-border-light: gray;
 
     /* breadcrumb, navigation */
-    -breadcrumb-background: -wa-foreground;
-    -breadcrumb-background-hover: -wa-foreground-hover;
-    -breadcrumb-background-pressed: -wa-foreground-pressed;
+    -wa-breadcrumb-background: -wa-foreground;
+    -wa-breadcrumb-background-hover: -wa-foreground-hover;
+    -wa-breadcrumb-background-pressed: -wa-foreground-pressed;
 
     /* tab pane */
-    -tab-background: gray;
-    -tab-region-background: #363636;
-    -selected-tab-background: -wa-primary;
-    -selected-tab-line: -wa-accent;
-    -selected-tab-label: -wa-accent-light;
+    -wa-tab-background: gray;
+    -wa-tab-region-background: #363636;
+    -wa-selected-tab-background: -wa-primary;
+    -wa-selected-tab-line: -wa-accent;
+    -wa-selected-tab-label: -wa-accent-light;
 
     /* place holder, empty area */
-    -drag-drop-area: -wa-background;
-    -card-image-placeholder-background: #b3b3b3;
-    -card-placeholder-empty: -card-image-placeholder-background;
+    -wa-drag-drop-area: -wa-background;
+    -wa-card-image-placeholder-background: #b3b3b3;
+    -wa-card-placeholder-empty: -wa-card-image-placeholder-background;
 
     /* buttons */
-    -secondary-btn-text-fill: -wa-regular-text;
-    -secondary-btn-text-fill-hover: -wa-regular-text;
-    -secondary-btn-text-fill-pressed: -wa-regular-text;
-    -secondary-btn-background: transparent;
-    -secondary-btn-background-hover: -wa-foreground-hover;
-    -secondary-btn-background-pressed: -wa-foreground-pressed;
-    -secondary-btn-border: -wa-regular-text;
-    -btn-icon-background: -wa-transparent;
-    -btn-icon-border-color: -wa-regular-text;
-    -btn-icon-background-selected: #9bbcdd;
-    -checkbox-button-background: #4d4f66;
-    -checkbox-button-background-selected: #bdd8ff;
-    -filter-button-background: #4d4f66;
+    -wa-secondary-btn-text-fill: -wa-regular-text;
+    -wa-secondary-btn-text-fill-hover: -wa-regular-text;
+    -wa-secondary-btn-text-fill-pressed: -wa-regular-text;
+    -wa-secondary-btn-background: transparent;
+    -wa-secondary-btn-background-hover: -wa-foreground-hover;
+    -wa-secondary-btn-background-pressed: -wa-foreground-pressed;
+    -wa-secondary-btn-border: -wa-regular-text;
+    -wa-btn-icon-background: -wa-transparent;
+    -wa-btn-icon-border-color: -wa-regular-text;
+    -wa-btn-icon-background-selected: #9bbcdd;
+    -wa-checkbox-button-background: #4d4f66;
+    -wa-checkbox-button-background-selected: #bdd8ff;
+    -wa-filter-button-background: #4d4f66;
 
     /* text field input */
-    -text-input-fill: -wa-black;
-    -text-field-border: gray;
-    -text-field-border-focused: gray;
-    -text-field-background: transparent;
-    -text-field-background-hover: transparent;
-    -text-field-background-focused: -wa-regular-text;
-    -text-field-background-focused-hover: -wa-regular-text;
-    -text-field-focused-effect: -wa-level0;
+    -wa-text-input-fill: -wa-black;
+    -wa-text-field-border: gray;
+    -wa-text-field-border-focused: gray;
+    -wa-text-field-background: transparent;
+    -wa-text-field-background-hover: transparent;
+    -wa-text-field-background-focused: -wa-regular-text;
+    -wa-text-field-background-focused-hover: -wa-regular-text;
+    -wa-text-field-focused-effect: -wa-level0;
 
     /* combo box, drop down */
-    -combo-box-background: -wa-foreground;
+    -wa-combo-box-background: -wa-foreground;
 
     /* shadow effects */
-    -card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
 
     /* audio player */
-    -slider-track-color: gray;
-    -recorder-controls-background: #0c0033;
-    -waveform-background: #999999;
-    -waveform-background-dark: #4f5964;
+    -wa-slider-track-color: gray;
+    -wa-recorder-controls-background: #0c0033;
+    -wa-waveform-background: #999999;
+    -wa-waveform-background-dark: #4f5964;
 
-    -marker-overlay-primary: #0f32a542;
-    -marker-overlay-secondary: #224e7150;
+    -wa-marker-overlay-primary: #0f32a542;
+    -wa-marker-overlay-secondary: #224e7150;
 
     /* others */
     -wa-dialog-overlay: -wa-black-80;

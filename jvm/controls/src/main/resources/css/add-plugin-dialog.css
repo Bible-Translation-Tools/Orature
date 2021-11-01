@@ -35,7 +35,7 @@
 }
 
 .add-plugin-dialog__btn--close {
-    -fx-background-color: -btn-icon-background;
+    -fx-background-color: -wa-btn-icon-background;
     -fx-border-color: -wa-border-neutral;
     -fx-border-width: 2px;
     -fx-border-radius: 4px;

@@ -50,7 +50,7 @@
     -fx-padding: 15;
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 5;
-    -fx-effect: -card-shadow-lower-right;
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .resource-group-card__title {

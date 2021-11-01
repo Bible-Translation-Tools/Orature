@@ -59,61 +59,61 @@
     -wa-border-light: -wa-gray-lighter;
 
     /* breadcrumb, navigation */
-    -breadcrumb-background: white;
-    -breadcrumb-background-hover: #e6e6e6;
-    -breadcrumb-background-pressed: #D9DDE4;
+    -wa-breadcrumb-background: white;
+    -wa-breadcrumb-background-hover: #e6e6e6;
+    -wa-breadcrumb-background-pressed: #D9DDE4;
 
     /* tab pane */
-    -tab-background: #b6b6b6;
-    -tab-region-background: #e0e0e0;
-    -selected-tab-background: white;
-    -selected-tab-line: #CC4141;
-    -selected-tab-label: rgba(255,0,0, .87);
+    -wa-tab-background: #b6b6b6;
+    -wa-tab-region-background: #e0e0e0;
+    -wa-selected-tab-background: white;
+    -wa-selected-tab-line: #CC4141;
+    -wa-selected-tab-label: rgba(255,0,0, .87);
 
     /* place holder, empty area */
-    -drag-drop-area: -wa-primary-05;
-    -card-image-placeholder-background: -wa-gray-lighter;
-    -card-placeholder-empty: -wa-black-05;
+    -wa-drag-drop-area: -wa-primary-05;
+    -wa-card-image-placeholder-background: -wa-gray-lighter;
+    -wa-card-placeholder-empty: -wa-black-05;
 
     /* buttons */
-    -secondary-btn-text-fill: -wa-primary;
-    -secondary-btn-text-fill-hover: -wa-primary-dark;
-    -secondary-btn-text-fill-pressed: -wa-primary-dark;
-    -secondary-btn-background: transparent;
-    -secondary-btn-background-hover: -wa-primary-05;
-    -secondary-btn-background-pressed: -wa-primary-10;
-    -secondary-btn-border: -wa-primary;
-    -btn-icon-background: -wa-transparent;
-    -btn-icon-border-color: -wa-black-20;
-    -btn-icon-background-selected: -wa-primary-10;
-    -checkbox-button-background: -wa-foreground;
-    -checkbox-button-background-selected: -wa-primary-10;
-    -filter-button-background: -wa-black-10;
+    -wa-secondary-btn-text-fill: -wa-primary;
+    -wa-secondary-btn-text-fill-hover: -wa-primary-dark;
+    -wa-secondary-btn-text-fill-pressed: -wa-primary-dark;
+    -wa-secondary-btn-background: transparent;
+    -wa-secondary-btn-background-hover: -wa-primary-05;
+    -wa-secondary-btn-background-pressed: -wa-primary-10;
+    -wa-secondary-btn-border: -wa-primary;
+    -wa-btn-icon-background: -wa-transparent;
+    -wa-btn-icon-border-color: -wa-black-20;
+    -wa-btn-icon-background-selected: -wa-primary-10;
+    -wa-checkbox-button-background: -wa-foreground;
+    -wa-checkbox-button-background-selected: -wa-primary-10;
+    -wa-filter-button-background: -wa-black-10;
 
     /* text field input */
-    -text-input-fill: -wa-black;
-    -text-field-border-focused: -wa-primary;
-    -text-field-border: -wa-gray-light;
-    -text-field-background: -wa-white;
-    -text-field-background-hover: #d9d9d9;
-    -text-field-background-focused: -wa-white;
-    -text-field-background-focused-hover: -wa-white;
-    -text-field-focused-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
+    -wa-text-input-fill: -wa-black;
+    -wa-text-field-border-focused: -wa-primary;
+    -wa-text-field-border: -wa-gray-light;
+    -wa-text-field-background: -wa-white;
+    -wa-text-field-background-hover: #d9d9d9;
+    -wa-text-field-background-focused: -wa-white;
+    -wa-text-field-background-focused-hover: -wa-white;
+    -wa-text-field-focused-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
 
     /* combo box, drop down */
-    -combo-box-background: -wa-white;
+    -wa-combo-box-background: -wa-white;
 
     /* shadow effects */
-    -card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
 
     /* audio player */
-    -slider-track-color: -wa-black-05;
-    -recorder-controls-background: #282CBD;
-    -waveform-background: #F7FAFF;
-    -waveform-background-dark: #ced6e3;
+    -wa-slider-track-color: -wa-black-05;
+    -wa-recorder-controls-background: #282CBD;
+    -wa-waveform-background: #F7FAFF;
+    -wa-waveform-background-dark: #ced6e3;
 
-    -marker-overlay-primary: #1edd7633;
-    -marker-overlay-secondary: #015ad933;
+    -wa-marker-overlay-primary: #1edd7633;
+    -wa-marker-overlay-secondary: #015ad933;
 
     /* others */
     -wa-dialog-overlay: -wa-black-60;

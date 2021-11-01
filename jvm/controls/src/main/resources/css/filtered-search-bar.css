@@ -32,14 +32,14 @@
 }
 
 .filtered-search-bar__input:focused .ikonli-font-icon {
-    -fx-fill: -text-input-fill;
+    -fx-fill: -wa-text-input-fill;
 }
 
 .filtered-search-bar__menu {
     -fx-pref-width: 88px;
     -fx-pref-height: 48px;
     -fx-padding: 0 10px;
-    -fx-background-color: -filter-button-background;
+    -fx-background-color: -wa-filter-button-background;
     -fx-background-radius: 6px;
     -fx-alignment: center;
     -fx-spacing: 7px;

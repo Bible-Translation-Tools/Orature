@@ -41,7 +41,7 @@
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
-    -fx-background-color: -card-image-placeholder-background;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-font-weight: bold;
     -fx-background-radius: 10px;
     -fx-pref-height: 45px;
@@ -52,7 +52,7 @@
 }
 
 .source-content__minimize-btn {
-    -fx-border-color: -btn-icon-border-color;
+    -fx-border-color: -wa-btn-icon-border-color;
     -fx-border-radius: 3px;
     -fx-background-radius: 3px;
 }
