@@ -40,7 +40,7 @@
     -fx-padding: 15px;
     -fx-text-alignment: justify;
     -fx-min-height: 100px;
-    -fx-background-color: -wa-background;
+    -fx-background-color: -wa-dialog-background;
 }
 
 .confirm-dialog__message {
@@ -82,7 +82,7 @@
     -fx-padding: 20px 15px;
     -fx-border-width: 2px 0 0 0;
     -fx-border-color: #ccc;
-    -fx-background-color: -wa-background;
+    -fx-background-color: -wa-dialog-background;
 }
 
 .confirm-dialog__btn--close,
