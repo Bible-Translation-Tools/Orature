@@ -56,6 +56,7 @@
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
     -wa-border-neutral: -wa-gray;
+    -wa-fill-neutral: -wa-gray;
     -wa-border-light: -wa-gray-lighter;
 
     /* breadcrumb, navigation */

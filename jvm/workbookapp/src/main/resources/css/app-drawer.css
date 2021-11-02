@@ -59,7 +59,7 @@
 
 .app-drawer__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-border-neutral;
+    -fx-fill: -wa-fill-neutral;
 }
 
 .app-drawer__subtitle {

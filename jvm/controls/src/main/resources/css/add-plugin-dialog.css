@@ -50,7 +50,7 @@
 
 .add-plugin-dialog__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-border-neutral;
+    -fx-fill: -wa-fill-neutral;
 }
 
 .add-plugin-dialog__info .label {
