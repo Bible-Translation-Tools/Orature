@@ -37,6 +37,7 @@ class ScriptureTakeCard : Control() {
     val selectedProperty = SimpleBooleanProperty()
     val takeLabelProperty = SimpleStringProperty()
     val lastModifiedProperty = SimpleStringProperty()
+    val deletedProperty = SimpleBooleanProperty()
     val animationMediatorProperty =
         SimpleObjectProperty<ListAnimationMediator<ScriptureTakeCard>>()
 

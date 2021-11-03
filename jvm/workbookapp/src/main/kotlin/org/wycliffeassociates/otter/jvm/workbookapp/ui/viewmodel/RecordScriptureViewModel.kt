@@ -170,7 +170,11 @@ class RecordScriptureViewModel : ViewModel() {
                                 title = messages["deleteTakePrompt"]
                             ) { button: ButtonType ->
                                 if (button == ButtonType.YES) {
-                                    fireEvent(DeleteTakeEvent(takeCardModel.take))
+                                    deletedProperty.set(true)
+                                    // trigger delete process after animation
+                                    deletedProperty.onChangeOnce { isAnimating ->
+                                        if (isAnimating == false) fireEvent(DeleteTakeEvent(takeCardModel.take))
+                                    }
                                 }
                             }
                         }
@@ -440,6 +444,9 @@ class RecordScriptureViewModel : ViewModel() {
             }
             .subscribe {
                 removeFromTakes(take)
+                takeCardModels.firstOrNull()?.let {
+                    selectTake(it.take)
+                }
             }
             .let { disposables.add(it) }
     }

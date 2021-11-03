@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls
 
+import javafx.animation.FadeTransition
 import javafx.animation.TranslateTransition
 import javafx.event.EventHandler
 import javafx.scene.Node
@@ -52,6 +53,20 @@ class ListAnimationMediator<T: Node> {
                 }
                 ttUp.play()
             }
+        }
+    }
+
+    fun fade(callback: () -> Unit) {
+        node?.let { _node ->
+            isAnimating = true
+            val ft = FadeTransition(Duration.millis(600.0), _node)
+            ft.fromValue = _node.opacity
+            ft.toValue = 0.0
+            ft.onFinished = EventHandler {
+                callback()
+                isAnimating = false
+            }
+            ft.play()
         }
     }
 

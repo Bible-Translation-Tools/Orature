@@ -103,6 +103,16 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
 
         deleteBtn.tooltip(messages["delete"])
         deleteBtn.onActionProperty().bind(card.onTakeDeleteActionProperty)
+        card.deletedProperty.onChangeOnce { deleteRequested ->
+            if (deleteRequested == true) {
+                card.animationMediatorProperty.value?.let {
+                    it.node = card
+                    it.fade {
+                        card.deletedProperty.set(false)
+                    }
+                }
+            }
+        }
 
         editBtn.tooltip(messages["edit"])
         editBtn.onActionProperty().bind(card.onTakeEditActionProperty)
