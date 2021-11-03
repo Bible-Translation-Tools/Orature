@@ -28,13 +28,18 @@
 
 /* Exception dialog style */
 .exception-content {
-    -fx-background-color: -wa-background;
+    -fx-background-color: -wa-dialog-background;
 }
 
 .exception-content > .label,
 .exception-content__send-report {
     -fx-text-fill: -wa-regular-text;
 }
+
+.exception-content__show-more-btn:hover {
+    -fx-background-color: -wa-secondary-btn-background-hover;
+}
+
 .exception-content__show-more-btn * {
     -fx-fill: -wa-secondary-btn-text-fill;
     -fx-icon-color: -wa-secondary-btn-text-fill;

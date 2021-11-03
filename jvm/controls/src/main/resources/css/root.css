@@ -56,6 +56,7 @@
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
     -wa-border-neutral: -wa-gray;
+    -wa-fill-neutral: -wa-gray;
     -wa-border-light: -wa-gray-lighter;
 
     /* breadcrumb, navigation */
@@ -115,10 +116,17 @@
     -wa-marker-overlay-primary: #1edd7633;
     -wa-marker-overlay-secondary: #015ad933;
 
-    /* others */
+    /* dialog */
     -wa-dialog-overlay: -wa-black-60;
+    -wa-dialog-background: -wa-background;
 }
 
 .workspace {
     -fx-background-color: -wa-background;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #b3b3b3;
+    -fx-background-insets: 0, 2, 0;
+    -fx-background-radius: 0;
 }

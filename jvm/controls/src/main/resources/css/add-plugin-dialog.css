@@ -18,7 +18,7 @@
  */
 
 .add-plugin-dialog {
-    -fx-background-color: -wa-background;
+    -fx-background-color: -wa-dialog-background;
     -fx-pref-width: 600px;
     -fx-padding: 15px;
     -fx-spacing: 20px;
@@ -50,7 +50,7 @@
 
 .add-plugin-dialog__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-border-neutral;
+    -fx-fill: -wa-fill-neutral;
 }
 
 .add-plugin-dialog__info .label {
