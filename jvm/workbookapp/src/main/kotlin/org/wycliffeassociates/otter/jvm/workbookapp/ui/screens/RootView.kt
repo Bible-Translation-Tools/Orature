@@ -51,6 +51,7 @@ class RootView : View() {
         workspace.root.vgrow = Priority.ALWAYS
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
+        importStylesheet(resources["/css/root.css"])
 
         initAudioErrorDialog()
     }
