@@ -32,7 +32,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.card
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -45,7 +44,6 @@ class BookPage : Fragment() {
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
     override val root = JFXTabPane().apply {
-        importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
@@ -55,9 +53,9 @@ class BookPage : Fragment() {
         // Using a size property binding and toggleClass() did not work consistently. This does.
         tabs.onChange {
             if (it.list.size == 1) {
-                addClass(MainScreenStyles.singleTab)
+                addClass("singleTab")
             } else {
-                removeClass(MainScreenStyles.singleTab)
+                removeClass("singleTab")
             }
         }
     }

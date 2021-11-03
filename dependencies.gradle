@@ -46,4 +46,5 @@ ext {
     cuelibVer = '2.0.0'
     install4jVer = '9.0.4'
     jump3rVer='1.0.5'
+    systemThemeDectectorVer='3.7'
 }

@@ -56,7 +56,7 @@
         </Label>
         <VBox maxHeight="180.0">
             <children>
-                <JFXButton fx:id="showMoreButton" contentDisplay="RIGHT" focusTraversable="false" styleClass="btn, btn--tertiary">
+                <JFXButton fx:id="showMoreButton" contentDisplay="RIGHT" focusTraversable="false" styleClass="btn, btn--tertiary, exception-content__show-more-btn">
                     <graphic>
                         <FontIcon styleClass="btn__icon" />
                     </graphic>
