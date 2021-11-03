@@ -124,3 +124,9 @@
 .workspace {
     -fx-background-color: -wa-background;
 }
+
+.scroll-bar .thumb {
+    -fx-background-color: #b3b3b3;
+    -fx-background-insets: 0, 2, 0;
+    -fx-background-radius: 0;
+}
