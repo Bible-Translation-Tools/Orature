@@ -84,6 +84,7 @@
 .source-content__text {
     -fx-font-size: 1.5em;
     -fx-fill: -wa-gray-darker;
+    -fx-padding: 0 15px;
 }
 
 .source-content__license-text {

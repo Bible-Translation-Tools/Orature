@@ -110,12 +110,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
             }
         }
-        orientationProperty.set(
-            when (localeLanguage.preferredLanguage?.direction) {
-                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
-                else -> NodeOrientation.LEFT_TO_RIGHT
-            }
-        )
     }
 
     fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {
@@ -135,6 +129,15 @@ class WorkbookDataStore : Component(), ScopedInstance {
         activeProjectFilesAccessor.initializeResourceContainerInDir()
         activeProjectFilesAccessor.copySourceFiles(linkedResource)
         activeProjectFilesAccessor.createSelectedTakesFile()
+    }
+
+    fun setAppOrientation() {
+        orientationProperty.set(
+            when (localeLanguage.preferredLanguage?.direction) {
+                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                else -> NodeOrientation.LEFT_TO_RIGHT
+            }
+        )
     }
 
     fun updateSelectedTakesFile() {
