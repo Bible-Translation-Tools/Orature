@@ -18,6 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
+import be.tarsos.dsp.AudioDispatcher
+import be.tarsos.dsp.AudioEvent
+import be.tarsos.dsp.AudioProcessor
+import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter
+import be.tarsos.dsp.io.TarsosDSPAudioFormat
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory
 import com.jakewharton.rxrelay2.PublishRelay
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -95,18 +101,45 @@ class AudioBufferPlayer(
     }
 
     override fun play() {
+
         reader?.let { _reader ->
             if (!player.isActive) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
                 pause.set(false)
+                val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     try {
+                        val event = AudioEvent(processorFormat)
+                        val processDone = AtomicBoolean(false)
+                        val callback = { processDone.set(true) }
+                        val processor = object : AudioProcessor {
+                            var inc = 0
+                            override fun process(p0: AudioEvent?): Boolean {
+                                println("here: $inc")
+                                inc++
+                                processDone.set(true)
+                                return true
+                            }
+
+                            override fun processingFinished() {
+                                println("setting process done")
+                                processDone.set(true)
+                            }
+                        }
                         player.open()
                         player.start()
                         while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                             val written = _reader.getPcmBuffer(bytes)
-                            player.write(bytes, 0, written)
+                            val floats = FloatArray(bytes.size / 2)
+                            TarsosDSPAudioFloatConverter.getConverter(processorFormat).toFloatArray(
+                                bytes,
+                                floats
+                            )
+                            event.floatBuffer = floats
+                            processor.process(event)
+                            while (!processDone.get()) {}
+                            player.write(event.byteBuffer, 0, event.byteBuffer.size)
                         }
                         player.drain()
                         if (!pause.get()) {

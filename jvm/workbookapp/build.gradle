@@ -172,6 +172,8 @@ dependencies {
     implementation "io.sentry:sentry:$sentryVer"
 
     implementation "com.install4j:install4j-runtime:$install4jVer"
+
+    implementation "be.taros:tarosdsp:2.3"
 }
 
 // tell gradle what to put in the jar
