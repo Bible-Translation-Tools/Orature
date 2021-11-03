@@ -42,6 +42,10 @@
     -fx-shape: "m 1099,704 q 0,-52 -37,-91 L 410,-38 q -37,-37 -90,-37 -53,0 -90,37 l -76,75 q -37,39 -37,91 0,53 37,90 l 486,486 -486,485 q -37,39 -37,91 0,53 37,90 l 76,75 q 36,38 90,38 54,0 90,-38 l 652,-651 q 37,-37 37,-90 z"
 }
 
+.jfx-tab-pane.singleTab .tab-header-area {
+    -fx-pref-height: 0;
+}
+
 .jfx-tab-pane .headers-region .tab {
     -fx-background-color: -wa-tab-background;
     -fx-pref-width: 157px;
