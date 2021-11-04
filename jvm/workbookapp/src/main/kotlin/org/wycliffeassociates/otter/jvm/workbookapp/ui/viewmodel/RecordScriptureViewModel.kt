@@ -147,13 +147,6 @@ class RecordScriptureViewModel : ViewModel() {
                         takeProperty.set(takeCardModel.take)
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
                         selectedProperty.set(takeCardModel.selected)
-                        lastModifiedProperty.set(
-                            SimpleDateFormat.getDateTimeInstance(
-                                SimpleDateFormat.SHORT,
-                                SimpleDateFormat.SHORT,
-                                Locale.getDefault()
-                            ).format(takeCardModel.take.file.lastModified())
-                        )
                         takeLabelProperty.set(
                             MessageFormat.format(
                                 FX.messages["takeTitle"],
