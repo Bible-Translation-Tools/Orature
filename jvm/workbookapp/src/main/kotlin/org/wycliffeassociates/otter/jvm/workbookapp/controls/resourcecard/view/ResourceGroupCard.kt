@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
 import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
-import javafx.beans.property.ObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.geometry.NodeOrientation
 import javafx.scene.layout.VBox

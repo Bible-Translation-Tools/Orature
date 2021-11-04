@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
 import javafx.beans.property.BooleanProperty
-import javafx.beans.property.ObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.geometry.NodeOrientation
