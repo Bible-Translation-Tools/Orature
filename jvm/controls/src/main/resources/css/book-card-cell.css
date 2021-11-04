@@ -16,24 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .book-card-cell {
     -fx-padding: 10px;
     -fx-spacing: 20px;
     -fx-alignment: center-left;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
 }
 
 .book-card-cell:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
     -fx-cursor: hand;
 }
 
 .book-card-cell:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .book-card-cell:disabled {
@@ -59,8 +58,9 @@
     -fx-spacing: 10px;
 }
 
-.book-card-cell__dot {
-    -fx-font-size: 8px;
+.book-card-cell__dot .ikonli-font-icon {
+    -fx-icon-size: 8px;
+    -fx-icon-color: -wa-regular-text;
 }
 
 .book-card-cell__graphic {

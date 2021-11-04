@@ -1,0 +1,88 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+* {
+    /* Neutral Colors */
+    -wa-gray-darker: rgba(26,26,26,1); /* Base text color and icon hover color */
+    -wa-gray-dark: rgba(26,26,26,0.8); /* active icon */
+    -wa-gray: rgba(26,26,26,0.6);  /* Disabled button text */
+    -wa-gray-light: rgba(26,26,26,0.4);
+    -wa-gray-lighter: rgba(26,26,26,0.1); /* used for disabled backgrounds, light borders */
+    -wa-white: #ffffff;
+    -wa-white-05: rgba(255,255,255,0.05);
+    -wa-white-10: rgba(255,255,255,0.1);
+    -wa-white-20: rgba(255,255,255,0.2);
+    -wa-white-30: rgba(255,255,255,0.3);
+    -wa-white-40: rgba(255,255,255,0.4);
+    -wa-white-50: rgba(255,255,255,0.5);
+    -wa-white-60: rgba(255,255,255,0.6);
+    -wa-white-70: rgba(255,255,255,0.7);
+    -wa-white-80: rgba(255,255,255,0.8);
+    -wa-white-90: rgba(255,255,255,0.9);
+    -wa-black: rgb(0, 21, 51);
+    -wa-black-05: rgba(0, 21, 51, 0.05);
+    -wa-black-10: rgba(0, 21, 51, 0.1);
+    -wa-black-15: rgba(0, 21, 51, 0.15);
+    -wa-black-20: rgba(0, 21, 51, 0.2);
+    -wa-black-30: rgba(0, 21, 51, 0.3);
+    -wa-black-40: rgba(0, 21, 51, 0.4);
+    -wa-black-50: rgba(0, 21, 51, 0.5);
+    -wa-black-60: rgba(0, 21, 51, 0.6);
+    -wa-black-70: rgba(0, 21, 51, 0.7);
+    -wa-black-80: rgba(0, 21, 51, 0.8);
+    -wa-black-90: rgba(0, 21, 51, 0.9);
+    -wa-transparent: rgba(255,255,255,0);
+
+    /* Extra Colors */
+    -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */
+    -wa-green-dark: rgb(0, 69, 37);
+    -wa-green-light: rgb(30, 221, 119);
+    -wa-green-05: rgba(0, 134, 75, 0.05);
+    -wa-green-05-noalpha: rgb(240, 250, 245);
+    -wa-green-10: rgba(0, 134, 75, 0.1);
+    -wa-green-10-noalpha: rgb(226, 242, 232);
+    -wa-green-20: rgba(0, 134, 75, 0.2);
+    -wa-green-30: rgba(0, 134, 75, 0.3);
+
+    -wa-red: rgb(227, 42, 42);    /* this is used as a error indicator */
+    -wa-red-dark: rgb(158, 34, 34);
+    -wa-red-light: rgb(255, 61, 61);
+    -wa-red-05: rgba(227, 42, 42, 0.05);
+    -wa-red-05-noalpha: rgb(255, 245, 245);
+    -wa-red-10: rgba(227, 42, 42, 0.1);
+    -wa-red-10-noalpha: rgb(255, 232, 232);
+    -wa-red-20: rgba(227, 42, 42, 0.2);
+    -wa-red-30: rgba(227, 42, 42, 0.3);
+
+    -wa-purple: #8B00DE;
+    -wa-purple-dark: #430193;
+    -wa-purple-light: rgba(141, 0, 222, 0.3);
+
+    -wa-orange: #FF342E;   /* this color is used as an error indicator */
+    -wa-orange-dark: #900300;
+    -wa-orange-light: rgba(255, 53, 46, 0.3);
+
+/* -------------------- Shadows --------------------*/
+    -wa-level0: dropshadow(gaussian, rgba(0, 0, 0, 0.0), 0, 0, 0, 0); /* No Shadow */
+    -wa-level1: dropshadow(gaussian, rgba(0, 0, 0, 0.24), 2, 0, 0, 1); /* [blur], [color], [radius], [choke], [x], [y] */
+    -wa-level2: dropshadow(gaussian, rgba(0,0,0,0.23), 6, 0, 0, 3);
+    -wa-level3: dropshadow(gaussian, rgba(0,0,0,0.23), 6, 0, 0, 6);
+    -wa-level4: dropshadow(gaussian, rgba(0,0,0,0.22), 10, 0, 0, 10);
+    -wa-level5: dropshadow(gaussian, rgba(0,0,0,0.22), 12, 0, 0, 15); /* Highest Priorty / Shadow */
+    -wa-top-shadow: dropshadow(gaussian, -wa-black-20, 3, 0.2, 0, 0);
+}

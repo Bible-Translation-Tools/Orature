@@ -26,7 +26,6 @@ import javafx.geometry.NodeOrientation
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.styles.ResourceListStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
 
@@ -45,6 +44,6 @@ class ResourceListView(
 
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
-        addClass(ResourceListStyles.resourceGroupList)
+        addClass("resource-list-view")
     }
 }

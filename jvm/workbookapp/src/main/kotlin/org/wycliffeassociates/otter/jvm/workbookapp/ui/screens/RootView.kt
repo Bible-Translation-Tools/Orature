@@ -18,7 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -33,6 +35,8 @@ import tornadofx.*
 class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
+    private val osThemeDetector = OsThemeDetector.getDetector()
+    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
     private val workbookDataStore: WorkbookDataStore by inject()
 
     init {
@@ -53,6 +57,8 @@ class RootView : View() {
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
 
+        initThemeStylesheet()
+        bindAppThemeToSystem()
         initAudioErrorDialog()
     }
 
@@ -65,6 +71,30 @@ class RootView : View() {
         borderpane {
             left<AppBar>()
             center<AppContent>()
+        }
+    }
+
+    private fun initThemeStylesheet() {
+        if (osThemeDetector.isDark) {
+            importStylesheet(resources["/css/root_dark.css"])
+        } else {
+            importStylesheet(resources["/css/root.css"])
+        }
+    }
+
+    private fun bindAppThemeToSystem() {
+        isOSDarkMode.onChange {
+            if (it) {
+                FX.stylesheets.remove("/css/root.css")
+                FX.stylesheets.add("/css/root_dark.css")
+            } else {
+                FX.stylesheets.remove("/css/root_dark.css")
+                FX.stylesheets.add("/css/root.css")
+            }
+        }
+
+        osThemeDetector.registerListener {
+            runLater { isOSDarkMode.set(it) }
         }
     }
 

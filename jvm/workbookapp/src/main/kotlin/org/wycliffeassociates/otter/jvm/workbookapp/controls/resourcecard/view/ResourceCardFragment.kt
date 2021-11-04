@@ -72,6 +72,7 @@ class ResourceCardFragment(
                     )
                 }
                 text(item.title) {
+                    addClass("text-content")
                     wrappingWidthProperty().bind(root.widthProperty().divide(1.5))
                     nodeOrientationProperty().bind(sourceOrientationProperty)
                 }

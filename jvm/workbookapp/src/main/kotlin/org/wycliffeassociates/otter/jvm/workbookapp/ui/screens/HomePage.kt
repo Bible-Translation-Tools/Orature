@@ -64,6 +64,7 @@ class HomePage : View() {
             hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             vbox {
                 addClass("home-page__container")
+                minHeightProperty().bind(this@stackpane.heightProperty())
 
                 add(
                     ResumeBookBanner().apply {
@@ -107,6 +108,7 @@ class HomePage : View() {
                             setConverter {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
+                                    slugProperty.set(it.target.slug.uppercase())
                                     coverArtProperty.set(
                                         it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )

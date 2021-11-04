@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 /* Dialog style */
 .dialog-pane > .button-bar > .container {
@@ -29,7 +28,21 @@
 
 /* Exception dialog style */
 .exception-content {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-dialog-background;
+}
+
+.exception-content > .label,
+.exception-content__send-report {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.exception-content__show-more-btn:hover {
+    -fx-background-color: -wa-secondary-btn-background-hover;
+}
+
+.exception-content__show-more-btn * {
+    -fx-fill: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 
 .exception-content__send-report {

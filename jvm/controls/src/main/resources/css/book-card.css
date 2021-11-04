@@ -16,18 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .book-card {
     -fx-background-radius: 10px;
 }
 
 .book-card:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .book-card:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .book-card__root {
@@ -39,7 +38,7 @@
     -fx-pref-width: 160px;
     -fx-pref-height: 80px;
     -fx-alignment: center;
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-background-radius: 10px;
 }
 
@@ -55,7 +54,7 @@
 
 .book-card__info {
     -fx-alignment: center-left;
-    -fx-spacing: 10px;
+    -fx-spacing: 5px;
 }
 
 .book-card__title {

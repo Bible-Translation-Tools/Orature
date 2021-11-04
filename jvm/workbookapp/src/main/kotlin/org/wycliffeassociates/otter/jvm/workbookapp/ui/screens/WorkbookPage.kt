@@ -39,7 +39,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
@@ -135,14 +134,13 @@ class WorkbookPage : View() {
     override val root = JFXTabPane().apply {
         importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
-        importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
         tabs.onChange {
             when (it.list.size) {
-                1 -> addClass(MainScreenStyles.singleTab)
-                else -> removeClass(MainScreenStyles.singleTab)
+                1 -> addClass("singleTab")
+                else -> removeClass("singleTab")
             }
         }
     }
