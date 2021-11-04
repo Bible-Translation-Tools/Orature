@@ -343,8 +343,9 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun deleteTake(take: Take) {
         stopPlayers()
+        val isTakeSelected = takeCardModels.any { it.take == take && it.selected }
         take.deletedTimestamp.accept(DateHolder.now())
-        removeOnDeleted(take)
+        removeOnDeleted(take, isTakeSelected)
     }
 
     fun dialogTitleBinding(): StringBinding {
@@ -429,24 +430,26 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
-    private fun removeOnDeleted(take: Take) {
+    private fun removeOnDeleted(take: Take, isTakeSelected: Boolean = false) {
         take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
             .doOnError { e ->
                 logger.error("Error in removing deleted take: $take", e)
             }
             .subscribe {
-                removeFromTakes(take)
-                takeCardModels.firstOrNull()?.let {
-                    selectTake(it.take)
-                }
+                removeFromTakes(take, isTakeSelected)
             }
             .let { disposables.add(it) }
     }
 
-    private fun removeFromTakes(take: Take) {
+    private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
         Platform.runLater {
             takeCardModels.removeAll { it.take == take }
+            if (autoSelect){
+                takeCardModels.firstOrNull()?.let {
+                    selectTake(it.take)
+                }
+            }
         }
     }
 
