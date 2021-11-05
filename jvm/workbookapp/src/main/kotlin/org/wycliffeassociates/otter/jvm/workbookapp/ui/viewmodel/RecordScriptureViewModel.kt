@@ -278,6 +278,7 @@ class RecordScriptureViewModel : ViewModel() {
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
         closePlayers()
         contextProperty.set(pluginType)
+        takeEvent.take.file.setLastModified(System.currentTimeMillis())
         workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
             .getPlugin(pluginType)
