@@ -18,23 +18,23 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import be.tarsos.dsp.AudioDispatcher
 import be.tarsos.dsp.AudioEvent
 import be.tarsos.dsp.AudioProcessor
+import be.tarsos.dsp.PitchShifter
+import be.tarsos.dsp.WaveformSimilarityBasedOverlapAdd
 import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter
 import be.tarsos.dsp.io.TarsosDSPAudioFormat
-import be.tarsos.dsp.io.jvm.AudioDispatcherFactory
 import com.jakewharton.rxrelay2.PublishRelay
-import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+
 
 class AudioBufferPlayer(
     private val player: SourceDataLine,
@@ -77,7 +77,7 @@ class AudioBufferPlayer(
         reader = AudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
-            bytes = ByteArray(_reader.sampleRate * _reader.channels)
+            bytes = ByteArray(1024 * 6)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -106,27 +106,22 @@ class AudioBufferPlayer(
             if (!player.isActive) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
                 pause.set(false)
+
+
                 val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     try {
                         val event = AudioEvent(processorFormat)
                         val processDone = AtomicBoolean(false)
-                        val callback = { processDone.set(true) }
-                        val processor = object : AudioProcessor {
-                            var inc = 0
-                            override fun process(p0: AudioEvent?): Boolean {
-                                println("here: $inc")
-                                inc++
-                                processDone.set(true)
-                                return true
-                            }
-
-                            override fun processingFinished() {
-                                println("setting process done")
-                                processDone.set(true)
-                            }
-                        }
+                        val callback = { processDone.set(true)
+                            println("called back")}
+                        val wsola = WaveformSimilarityBasedOverlapAdd(
+                            WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
+                                .6,
+                                44100.toDouble()
+                            )
+                        )
                         player.open()
                         player.start()
                         while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
@@ -137,8 +132,7 @@ class AudioBufferPlayer(
                                 floats
                             )
                             event.floatBuffer = floats
-                            processor.process(event)
-                            while (!processDone.get()) {}
+                            wsola.process(event)
                             player.write(event.byteBuffer, 0, event.byteBuffer.size)
                         }
                         player.drain()

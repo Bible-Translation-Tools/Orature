@@ -8,5 +8,5 @@ dependencies {
     implementation "javazoom.jl:SeekableJlayer:$jlayerVer"
     implementation "org.digitalmediaserver:cuelib-core:$cuelibVer"
 
-    implementation "be.taros:tarosdsp:2.3"
+    implementation "be.tarsos:tarsosdsp:2.4"
 }

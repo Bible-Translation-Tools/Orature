@@ -7,7 +7,7 @@ dependencies {
 
     implementation "com.google.dagger:dagger:$daggerVer"
 
-    implementation "be.taros:tarosdsp:2.3"
+    implementation "be.tarsos:tarsosdsp:2.4"
 
     implementation project(':common')
     implementation project(':common:audio')
