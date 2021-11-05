@@ -32,7 +32,7 @@ import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 
-private const val TAKE_CELL_HEIGHT = 72.0
+private const val TAKE_CELL_HEIGHT = 80.0
 
 class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
