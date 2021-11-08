@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
+import com.jthemedetecor.OsThemeDetector
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Bounds
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
@@ -33,6 +35,9 @@ abstract class OtterDialog : Fragment() {
 
     private val roundRadius = 15.0
 
+    private val osThemeDetector = OsThemeDetector.getDetector()
+    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+
     private val mainContainer = VBox().apply {
         addClass("otter-dialog-container")
     }
@@ -40,10 +45,20 @@ abstract class OtterDialog : Fragment() {
     override val root = VBox().apply {
         addClass("otter-dialog-overlay")
         add(mainContainer)
+
+        if (osThemeDetector.isDark) {
+            addClass("dark-theme")
+        } else {
+            addClass("light-theme")
+        }
     }
 
     init {
         importStylesheet(resources.get("/css/otter-dialog.css"))
+        importStylesheet(resources["/css/theme/light-theme.css"])
+        importStylesheet(resources["/css/theme/dark-theme.css"])
+
+        bindThemeToSystem()
     }
 
     fun open() {
@@ -85,5 +100,21 @@ abstract class OtterDialog : Fragment() {
         rect.arcWidth = roundRadius
         rect.arcHeight = roundRadius
         region.clip = rect
+    }
+
+    private fun bindThemeToSystem() {
+        isOSDarkMode.onChange {
+            if (it) {
+                root.removeClass("light-theme")
+                root.addClass("dark-theme")
+            } else {
+                root.removeClass("dark-theme")
+                root.addClass("light-theme")
+            }
+        }
+
+        osThemeDetector.registerListener {
+            runLater { isOSDarkMode.set(it) }
+        }
     }
 }
