@@ -143,8 +143,13 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 val take = _chapter.audio.selected.value?.value
                 take?.let {
                     val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                    audioPlayer.load(it.file)
-                    val targetAudio = TargetAudio(it.file, audioPlayer)
+                    val tempFile = directoryProvider.createTempFile(
+                        it.file.nameWithoutExtension,
+                        ".${it.file.extension}"
+                    )
+                    it.file.copyTo(tempFile, true)
+                    audioPlayer.load(tempFile)
+                    val targetAudio = TargetAudio(tempFile, audioPlayer)
                     targetAudioProperty.set(targetAudio)
                 } ?: targetAudioProperty.set(null)
             }
