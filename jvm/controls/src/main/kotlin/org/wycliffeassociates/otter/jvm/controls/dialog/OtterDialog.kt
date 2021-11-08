@@ -55,6 +55,9 @@ abstract class OtterDialog : Fragment() {
 
     init {
         importStylesheet(resources.get("/css/otter-dialog.css"))
+        /* the dialog component does not derive from root view;
+         * it needs its own style class theme manipulation
+         */
         importStylesheet(resources["/css/theme/light-theme.css"])
         importStylesheet(resources["/css/theme/dark-theme.css"])
 
