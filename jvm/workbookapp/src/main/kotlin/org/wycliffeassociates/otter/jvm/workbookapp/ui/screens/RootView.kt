@@ -67,24 +67,27 @@ class RootView : View() {
             left<AppBar>()
             center<AppContent>()
         }
+
+        if (osThemeDetector.isDark) {
+            addClass("dark-theme")
+        } else {
+            addClass("light-theme")
+        }
     }
 
     private fun initThemeStylesheet() {
-        if (osThemeDetector.isDark) {
-            importStylesheet(resources["/css/root_dark.css"])
-        } else {
-            importStylesheet(resources["/css/root.css"])
-        }
+        importStylesheet(resources["/css/theme/light-theme.css"])
+        importStylesheet(resources["/css/theme/dark-theme.css"])
     }
 
     private fun bindAppThemeToSystem() {
         isOSDarkMode.onChange {
             if (it) {
-                FX.stylesheets.remove("/css/root.css")
-                FX.stylesheets.add("/css/root_dark.css")
+                root.removeClass("light-theme")
+                root.addClass("dark-theme")
             } else {
-                FX.stylesheets.remove("/css/root_dark.css")
-                FX.stylesheets.add("/css/root.css")
+                root.removeClass("dark-theme")
+                root.addClass("light-theme")
             }
         }
 
