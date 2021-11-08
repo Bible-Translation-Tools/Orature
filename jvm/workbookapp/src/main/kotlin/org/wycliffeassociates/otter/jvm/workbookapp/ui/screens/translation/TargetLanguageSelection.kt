@@ -22,7 +22,6 @@ import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
@@ -31,15 +30,15 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.LanguageSelectionViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class TargetLanguageSelection : Fragment() {
     private val translationViewModel: TranslationViewModel by inject()
     private val viewModel = LanguageSelectionViewModel(translationViewModel.targetLanguages)
     private val navigator: NavigationMediator by inject()
-    private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["targetLanguage"])
@@ -105,7 +104,7 @@ class TargetLanguageSelection : Fragment() {
             messageTextProperty.set(messages["pleaseWaitCreatingTranslation"])
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             translationViewModel.showProgressProperty.onChange {
                 Platform.runLater { if (it) open() else close() }

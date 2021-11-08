@@ -26,7 +26,6 @@ import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -84,19 +83,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
 
     val sourceLicenseProperty = SimpleStringProperty()
-    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
-    val orientationScaleProperty = orientationProperty.doubleBinding {
-        when (it) {
-            NodeOrientation.RIGHT_TO_LEFT -> -1.0
-            else -> 1.0
-        }
-    }
-    val sourceOrientationProperty = activeWorkbookProperty.objectBinding {
-        when (it?.source?.language?.direction) {
-            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
-            else -> NodeOrientation.LEFT_TO_RIGHT
-        }
-    }
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -129,15 +115,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
         activeProjectFilesAccessor.initializeResourceContainerInDir()
         activeProjectFilesAccessor.copySourceFiles(linkedResource)
         activeProjectFilesAccessor.createSelectedTakesFile()
-    }
-
-    fun setAppOrientation() {
-        orientationProperty.set(
-            when (localeLanguage.preferredLanguage?.direction) {
-                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
-                else -> NodeOrientation.LEFT_TO_RIGHT
-            }
-        )
     }
 
     fun updateSelectedTakesFile() {

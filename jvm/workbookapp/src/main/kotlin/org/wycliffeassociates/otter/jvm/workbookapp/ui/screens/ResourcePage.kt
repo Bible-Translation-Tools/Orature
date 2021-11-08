@@ -25,12 +25,14 @@ import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ResourceListViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
 class ResourcePage : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
@@ -74,7 +76,7 @@ class ResourcePage : View() {
             ResourceListView(
                 resourceListViewModel.filteredResourceGroupCardItemList,
                 resourceListViewModel.isFilterOnProperty,
-                workbookDataStore.sourceOrientationProperty,
+                settingsViewModel.sourceOrientationProperty,
                 navigator
             ).apply {
                 whenDocked {

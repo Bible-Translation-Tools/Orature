@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
@@ -53,6 +54,7 @@ class ChapterPage : Fragment() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
 
     private val viewModel: ChapterPageViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val navigator: NavigationMediator by inject()
@@ -274,7 +276,7 @@ class ChapterPage : Fragment() {
                 fitToParentHeight()
                 setCellFactory {
                     ChunkCell(
-                        workbookDataStore.orientationScaleProperty.value,
+                        settingsViewModel.orientationScaleProperty.value,
                         ::getPlayer,
                         ::onChunkOpen,
                         ::onTakeSelected
@@ -310,8 +312,8 @@ class ChapterPage : Fragment() {
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
-            orientationProperty.bind(workbookDataStore.orientationProperty)
-            sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
         }
     }
 
@@ -368,7 +370,7 @@ class ChapterPage : Fragment() {
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
     }
 

@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
@@ -37,6 +38,7 @@ class HomePage : View() {
 
     private val viewModel: HomePageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
     private val breadCrumb = BreadCrumb().apply {
@@ -69,7 +71,7 @@ class HomePage : View() {
                 add(
                     ResumeBookBanner().apply {
                         resumeTextProperty.set(messages["resume"])
-                        orientationScaleProperty.bind(workbookDataStore.orientationScaleProperty)
+                        orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
                         viewModel.resumeBookProperty.onChange {
                             it?.let { workbook ->
@@ -93,7 +95,7 @@ class HomePage : View() {
                 add(
                     NewTranslationCard().apply {
                         newTranslationTextProperty.set(messages["createTranslation"])
-                        orientationScaleProperty.bind(workbookDataStore.orientationScaleProperty)
+                        orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
                         setOnAction {
                             viewModel.createTranslation()
                         }
@@ -119,7 +121,7 @@ class HomePage : View() {
 
                             showMoreTextProperty.set(messages["showMore"])
                             showLessTextProperty.set(messages["showLess"])
-                            orientationScaleProperty.bind(workbookDataStore.orientationScaleProperty)
+                            orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
                             setOnNewBookAction {
                                 viewModel.createProject(it)

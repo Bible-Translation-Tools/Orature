@@ -49,6 +49,7 @@ class AudioPluginViewModel : ViewModel() {
     @Inject lateinit var localeLanguage: LocaleLanguage
 
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     val pluginNameProperty = SimpleStringProperty()
     val selectedRecorderProperty = SimpleObjectProperty<AudioPluginData>()
@@ -142,7 +143,7 @@ class AudioPluginViewModel : ViewModel() {
 
     fun addPlugin(record: Boolean, edit: Boolean) {
         find<AddPluginDialog>().apply {
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
             open()
         }
         find<AddPluginViewModel>().apply {

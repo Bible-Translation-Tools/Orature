@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -41,7 +41,7 @@ class AddFilesView : View() {
     private val logger = LoggerFactory.getLogger(AddFilesView::class.java)
 
     private val viewModel: AddFilesViewModel by inject()
-    private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -153,7 +153,7 @@ class AddFilesView : View() {
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
 
         viewModel.showImportDialogProperty.onChange {
@@ -176,7 +176,7 @@ class AddFilesView : View() {
             )
             messageTextProperty.set(messages["importResourceSuccessMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
@@ -203,7 +203,7 @@ class AddFilesView : View() {
             )
             messageTextProperty.set(messages["importResourceFailMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }

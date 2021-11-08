@@ -54,6 +54,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordScriptureViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
@@ -66,6 +67,7 @@ class RecordScripturePage : View() {
     private val logger = LoggerFactory.getLogger(RecordScripturePage::class.java)
 
     private val recordScriptureViewModel: RecordScriptureViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
     private val navigator: NavigationMediator by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
@@ -93,8 +95,8 @@ class RecordScripturePage : View() {
             pauseLabelProperty.set(messages["pauseSource"])
 
             contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
-            orientationProperty.bind(workbookDataStore.orientationProperty)
-            sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
         }
 
     private val breadCrumb = BreadCrumb().apply {
@@ -208,7 +210,7 @@ class RecordScripturePage : View() {
                             addClass("btn", "btn--secondary")
                             tooltip(text)
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
-                                scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
                             }
                             action {
                                 recordScriptureViewModel.previousChunk()
@@ -236,7 +238,7 @@ class RecordScripturePage : View() {
                             addClass("btn", "btn--secondary")
                             tooltip(text)
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
-                                scaleXProperty().bind(workbookDataStore.orientationScaleProperty)
+                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
                             }
                             action {
                                 recordScriptureViewModel.nextChunk()
@@ -344,8 +346,8 @@ class RecordScripturePage : View() {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
-            orientationProperty.bind(workbookDataStore.orientationProperty)
-            sourceOrientationProperty.bind(workbookDataStore.sourceOrientationProperty)
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
         }
     }
 
@@ -362,7 +364,7 @@ class RecordScripturePage : View() {
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
 
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
     }
 
@@ -371,7 +373,7 @@ class RecordScripturePage : View() {
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesSuccessMessage"])
             cancelButtonTextProperty.set(messages["close"])
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
@@ -388,7 +390,7 @@ class RecordScripturePage : View() {
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesFailMessage"])
             cancelButtonTextProperty.set(messages["close"])
-            orientationProperty.set(workbookDataStore.orientationProperty.value)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
