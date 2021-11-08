@@ -48,11 +48,11 @@
 }
 
 .btn--icon:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-btn-icon-background-hover;
 }
 
 .btn--icon:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-btn-icon-background-pressed;
 }
 
 .btn--icon:disabled {
@@ -73,7 +73,7 @@
 .btn--primary {
     -fx-background-color: -wa-primary-gradient;
     -fx-effect: -wa-level2;
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-primary-btn-text-fill;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary-dark;
     -fx-underline: true;
@@ -81,7 +81,7 @@
 }
 
 .btn--primary .ikonli-font-icon {
-    -fx-fill: -wa-white;
+    -fx-fill: -wa-primary-btn-text-fill;
     -fx-font-size: 20px;
 }
 
@@ -234,18 +234,18 @@
 .btn--tertiary {
     -fx-background-color: transparent;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-primary;
-    -fx-icon-color: -wa-primary;
+    -fx-text-fill: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 .btn--tertiary:hover {
-    -fx-background-color: -wa-primary-light;
-    -fx-text-fill: -wa-primary-dark;
-    -fx-icon-color: -wa-primary-dark;
+    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
+    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
 }
 .btn--tertiary:disabled {
     -fx-cursor: disappear;
-    -fx-text-fill: -wa-gray;
-    -fx-icon-color: -wa-gray;
+    -fx-text-fill: -wa-disabled-text;
+    -fx-icon-color: -wa-disabled-text;
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }

@@ -77,6 +77,7 @@
     -wa-card-placeholder-empty: -wa-card-image-placeholder-background;
 
     /* buttons */
+    -wa-primary-btn-text-fill: -wa-white;
     -wa-secondary-btn-text-fill: -wa-regular-text;
     -wa-secondary-btn-text-fill-hover: -wa-regular-text;
     -wa-secondary-btn-text-fill-pressed: -wa-regular-text;
@@ -85,8 +86,10 @@
     -wa-secondary-btn-background-pressed: -wa-foreground-pressed;
     -wa-secondary-btn-border: -wa-regular-text;
     -wa-btn-icon-background: -wa-transparent;
-    -wa-btn-icon-border-color: -wa-regular-text;
+    -wa-btn-icon-background-hover: -wa-foreground-hover;
+    -wa-btn-icon-background-pressed: -wa-foreground-pressed;
     -wa-btn-icon-background-selected: #9bbcdd;
+    -wa-btn-icon-border-color: -wa-regular-text;
     -wa-checkbox-button-background: #4d4f66;
     -wa-checkbox-button-background-selected: #bdd8ff;
     -wa-filter-button-background: #4d4f66;
