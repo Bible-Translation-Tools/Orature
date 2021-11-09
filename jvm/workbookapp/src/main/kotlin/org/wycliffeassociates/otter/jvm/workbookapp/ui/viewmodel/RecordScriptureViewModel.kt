@@ -465,8 +465,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun openTargetAudioPlayer() {
         workbookDataStore.targetAudioProperty.value?.let { target ->
-            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-            audioPlayer.load(target.file)
+            target.player.load(target.file)
         }
     }
 
@@ -492,7 +491,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe {
                     loadTakes()
-                    workbookDataStore.updateTargetAudio()
+                    workbookDataStore.updateSelectedChapterPlayer()
                 }
                 .let { disposables.add(it) }
         }

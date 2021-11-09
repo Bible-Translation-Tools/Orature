@@ -25,12 +25,14 @@ import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.TargetAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
@@ -39,9 +41,9 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.Callable
-import javafx.beans.property.SimpleStringProperty
 import javax.inject.Inject
 
 class WorkbookDataStore : Component(), ScopedInstance {
@@ -77,6 +79,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
     val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
+    val selectedChapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val sourceLicenseProperty = SimpleStringProperty()
 
@@ -135,27 +138,59 @@ class WorkbookDataStore : Component(), ScopedInstance {
         }
     }
 
-    fun updateTargetAudio() {
+    fun updateSelectedChapterPlayer() {
         val _chunk = activeChunkProperty.get()
         val _chapter = activeChapterProperty.get()
         when {
             _chapter != null && _chunk == null -> {
                 val take = _chapter.audio.selected.value?.value
                 take?.let {
+                    updateTargetAudio(it.file)
+
                     val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                    val tempFile = directoryProvider.createTempFile(
-                        it.file.nameWithoutExtension,
-                        ".${it.file.extension}"
-                    )
-                    it.file.copyTo(tempFile, true)
-                    audioPlayer.load(tempFile)
-                    val targetAudio = TargetAudio(tempFile, audioPlayer)
-                    targetAudioProperty.set(targetAudio)
-                } ?: targetAudioProperty.set(null)
+                    audioPlayer.load(it.file)
+                    selectedChapterPlayerProperty.set(audioPlayer)
+                } ?: run {
+                    selectedChapterPlayerProperty.set(null)
+                    targetAudioProperty.set(null)
+                }
             }
             _chapter != null -> {} // preserve targetAudio for clean up
-            else -> targetAudioProperty.set(null)
+            else -> {
+                selectedChapterPlayerProperty.set(null)
+                targetAudioProperty.set(null)
+            }
         }
+    }
+
+    private fun updateTargetAudio(file: File) {
+        when (targetAudioProperty.value?.file?.nameWithoutExtension?.startsWith(file.nameWithoutExtension)) {
+            true -> {}
+            else -> {
+                cleanUpTargetAudio()
+
+                val tempFile = directoryProvider.createTempFile(
+                    file.nameWithoutExtension,
+                    ".${file.extension}"
+                )
+                tempFile.deleteOnExit()
+                file.copyTo(tempFile, true)
+
+                val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+                audioPlayer.load(tempFile)
+                val targetAudio = TargetAudio(tempFile, audioPlayer)
+
+                targetAudioProperty.set(targetAudio)
+            }
+        }
+    }
+
+    private fun cleanUpTargetAudio() {
+        targetAudioProperty.value?.let {
+            it.player.close()
+            it.file.delete()
+        }
+        targetAudioProperty.set(null)
     }
 
     fun getSourceAudio(): SourceAudio? {
