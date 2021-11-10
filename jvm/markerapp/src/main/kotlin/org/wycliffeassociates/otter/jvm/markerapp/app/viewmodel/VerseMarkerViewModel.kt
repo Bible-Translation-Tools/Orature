@@ -19,18 +19,19 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.github.thomasnield.rxkotlinfx.subscribeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -64,6 +65,8 @@ class VerseMarkerViewModel : ViewModel() {
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
     val compositeDisposable = CompositeDisposable()
+    lateinit var imagesContainerNode: Node
+    val disposableImages = mutableListOf<ImageView>()
     val waveformMinimapImage = SimpleObjectProperty<Image>()
     val waveform: PublishSubject<Image>
     val imageWidth: Double
@@ -162,16 +165,15 @@ class VerseMarkerViewModel : ViewModel() {
     }
     var isQuitting = false
     fun saveAndQuit() {
-        runLater {
-            waveform.onComplete()
-            compositeDisposable.clear()
-        }
-
         if (!isQuitting) {
+            runLater {
+                imagesContainerNode?.getChildList()?.clear()
+            }
             isQuitting = true
             return
         }
 
+        compositeDisposable.clear()
 
         (scope as ParameterizedScope).let {
             writeMarkers()
