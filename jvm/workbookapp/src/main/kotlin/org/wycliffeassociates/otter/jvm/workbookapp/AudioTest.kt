@@ -28,13 +28,15 @@ class AudioTestView : View() {
             }
         }
         add(vm.slider)
-        combobox(values = listOf("Slow", "Normal", "Fast")) {  }
+        combobox(values = listOf("Slow", "Normal", "Fast")) {
+
+        }
     }
 }
 
 class AudioTestViewModel: ViewModel() {
 
-    val audioFile = File("/Users/joe/Desktop/recording.wav")
+    val audioFile = File("/Users/joe/Desktop/recording.mp3")
     val acf = AudioConnectionFactory()
     val player: IAudioPlayer
     val audioController: AudioPlayerController
@@ -53,6 +55,7 @@ class AudioTestViewModel: ViewModel() {
         if (isPlaying.get()) {
             isPlaying.set(false)
             player.pause()
+            player.changeRate(.5)
         } else {
             isPlaying.set(true)
             player.play()

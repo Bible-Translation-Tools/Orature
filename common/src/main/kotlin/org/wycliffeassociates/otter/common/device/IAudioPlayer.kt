@@ -29,6 +29,7 @@ interface IAudioPlayer {
     fun load(file: File)
     fun loadSection(file: File, frameStart: Int, frameEnd: Int)
     fun getAudioReader(): AudioFileReader?
+    fun changeRate(rate: Double)
     fun play()
     fun pause()
     fun stop()

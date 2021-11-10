@@ -19,8 +19,6 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import be.tarsos.dsp.AudioEvent
-import be.tarsos.dsp.AudioProcessor
-import be.tarsos.dsp.PitchShifter
 import be.tarsos.dsp.WaveformSimilarityBasedOverlapAdd
 import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter
 import be.tarsos.dsp.io.TarsosDSPAudioFormat
@@ -56,12 +54,7 @@ class AudioBufferPlayer(
     private var begin = 0
     private var end = 0
 
-    val wsola = WaveformSimilarityBasedOverlapAdd(
-        WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
-            1.25,
-            44100.toDouble()
-        )
-    )
+    val processor = AudioProcessor()
 
     private val listeners = mutableListOf<IAudioPlayerListener>()
 
@@ -84,7 +77,7 @@ class AudioBufferPlayer(
         reader = AudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
-            bytes = ByteArray(wsola.inputBufferSize * 2)
+            bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -108,34 +101,22 @@ class AudioBufferPlayer(
     }
 
     override fun play() {
-
         reader?.let { _reader ->
             if (!player.isActive) {
                 listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
                 pause.set(false)
-                val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     try {
-                        val event = AudioEvent(processorFormat)
-                        val processDone = AtomicBoolean(false)
-                        val callback = { processDone.set(true)
-                            println("called back")}
                         player.open()
                         player.start()
                         while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                             if (_reader.framePosition > bytes.size / 2) {
-                                _reader.seek(_reader.framePosition - wsola.overlap)
+                                _reader.seek(_reader.framePosition - processor.overlap)
                             }
                             val written = _reader.getPcmBuffer(bytes)
-                            val floats = FloatArray(bytes.size / 2)
-                            TarsosDSPAudioFloatConverter.getConverter(processorFormat).toFloatArray(
-                                bytes,
-                                floats
-                            )
-                            event.floatBuffer = floats
-                            wsola.process(event)
-                            player.write(event.byteBuffer, 0, event.byteBuffer.size)
+                            val output = processor.process(bytes)
+                            player.write(output, 0, output.size)
                         }
                         player.drain()
                         if (!pause.get()) {
@@ -183,6 +164,10 @@ class AudioBufferPlayer(
         }
     }
 
+    override fun changeRate(rate: Double) {
+        processor.updatePlaybackRate(rate)
+    }
+
     override fun seek(position: Int) {
         val resume = player.isActive
         player.stop()
@@ -215,5 +200,40 @@ class AudioBufferPlayer(
 
     override fun getLocationMs(): Int {
         return (getLocationInFrames() / 44.1).toInt()
+    }
+}
+
+
+class AudioProcessor {
+    val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
+    val event = AudioEvent(processorFormat)
+    var playbackRate = .85
+
+    val wsola = WaveformSimilarityBasedOverlapAdd(
+        WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
+            playbackRate,
+            processorFormat.sampleRate.toDouble()
+        )
+    )
+
+    val overlap: Int
+        get() = wsola.overlap
+
+    val inputBufferSize: Int
+        get() = wsola.inputBufferSize
+
+    fun updatePlaybackRate(rate: Double) {
+        playbackRate = rate
+    }
+
+    fun process(bytes: ByteArray): ByteArray {
+        val floats = FloatArray(bytes.size / 2)
+        TarsosDSPAudioFloatConverter.getConverter(processorFormat).toFloatArray(
+            bytes,
+            floats
+        )
+        event.floatBuffer = floats
+        wsola.process(event)
+        return event.byteBuffer
     }
 }
