@@ -163,16 +163,11 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.close()
         return markers.writeMarkers()
     }
-    var isQuitting = false
+    
     fun saveAndQuit() {
-        if (!isQuitting) {
-            runLater {
-                imagesContainerNode?.getChildList()?.clear()
-            }
-            isQuitting = true
-            return
+        runLater {
+            imagesContainerNode?.getChildList()?.clear()
         }
-
         compositeDisposable.clear()
 
         (scope as ParameterizedScope).let {
@@ -181,7 +176,10 @@ class VerseMarkerViewModel : ViewModel() {
                     logger.error("Error in closing the maker app", e)
                 }
                 .subscribe {
-                    it.navigateBack()
+                    runLater {
+                        it.navigateBack()
+                        System.gc()
+                    }
                 }
         }
     }
