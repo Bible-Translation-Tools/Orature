@@ -22,6 +22,9 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -60,8 +63,9 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
+    val compositeDisposable = CompositeDisposable()
     val waveformMinimapImage = SimpleObjectProperty<Image>()
-    val waveform: Observable<Image>
+    val waveform: PublishSubject<Image>
     val imageWidth: Double
 
     private val audioFile: File
@@ -86,15 +90,15 @@ class VerseMarkerViewModel : ViewModel() {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-            build(
-                AudioFile(audioFile).reader(),
-                width = imageWidth.toInt(),
-                height = 50
-            )
-                .observeOnFx()
-                .subscribe { image ->
-                    waveformMinimapImage.set(image)
-                }
+//            build(
+//                AudioFile(audioFile).reader(),
+//                width = imageWidth.toInt(),
+//                height = 50
+//            )
+//                .observeOnFx()
+//                .subscribe { image ->
+//                    waveformMinimapImage.set(image)
+//                }
 
             waveform = buildWaveformAsync(
                 AudioFile(audioFile).reader(),
@@ -156,8 +160,19 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.close()
         return markers.writeMarkers()
     }
-
+    var isQuitting = false
     fun saveAndQuit() {
+        runLater {
+            waveform.onComplete()
+            compositeDisposable.clear()
+        }
+
+        if (!isQuitting) {
+            isQuitting = true
+            return
+        }
+
+
         (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->

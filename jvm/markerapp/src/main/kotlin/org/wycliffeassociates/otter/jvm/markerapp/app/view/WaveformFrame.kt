@@ -61,22 +61,28 @@ class WaveformFrame(
 
             center {
                 region {
-
                     stackpane {
                         styleClass.add("vm-waveform-frame__center")
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
                         hbox {
-                            viewModel.waveform
+                            val container = this@hbox
+                            val disposable  = viewModel.waveform
                                 .observeOnFx()
+                                .doOnComplete {
+                                    runLater {
+                                        container.clear()
+                                    }
+                                }
                                 .subscribe {
-                                    this@hbox.add(
+                                    container.add(
                                         imageview(it) {
                                             fitToHeight(this@region)
                                         }
                                     )
                                 }
+                            viewModel.compositeDisposable.add(disposable)
                         }
 
                         viewModel.markers.highlightState.forEach {

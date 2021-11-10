@@ -24,6 +24,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.ReplaySubject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
@@ -73,8 +74,8 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
-    ): Observable<Image> {
-        val waveformStream = ReplaySubject.create<Image>()
+    ): PublishSubject<Image> {
+        val waveformStream = PublishSubject.create<Image>()
 
         Completable.fromAction {
             reader.open()
@@ -96,7 +97,7 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveformStream: ReplaySubject<Image>
+        waveformStream: PublishSubject<Image>
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)
@@ -137,7 +138,7 @@ class WaveformImageBuilder(
             waveformStream.onNext(img)
         }
 
-        waveformStream.onComplete()
+//        waveformStream.onComplete()
     }
 
     private fun scaleToHeight(value: Int, height: Int): Int {
