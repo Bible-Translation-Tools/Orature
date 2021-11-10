@@ -152,6 +152,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun closePlayers() {
+        workbookDataStore.selectedChapterPlayerProperty.value?.close()
         workbookDataStore.targetAudioProperty.value?.player?.close()
         sourceAudioPlayerProperty.value?.close()
         sourceAudioPlayerProperty.set(null)

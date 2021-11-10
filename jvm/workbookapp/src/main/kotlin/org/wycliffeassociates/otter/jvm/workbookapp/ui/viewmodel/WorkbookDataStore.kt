@@ -164,25 +164,20 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     private fun updateTargetAudio(file: File) {
-        when (targetAudioProperty.value?.file?.nameWithoutExtension?.startsWith(file.nameWithoutExtension)) {
-            true -> {}
-            else -> {
-                cleanUpTargetAudio()
+        cleanUpTargetAudio()
 
-                val tempFile = directoryProvider.createTempFile(
-                    file.nameWithoutExtension,
-                    ".${file.extension}"
-                )
-                tempFile.deleteOnExit()
-                file.copyTo(tempFile, true)
+        val tempFile = directoryProvider.createTempFile(
+            file.nameWithoutExtension,
+            ".${file.extension}"
+        )
+        tempFile.deleteOnExit()
+        file.copyTo(tempFile, true)
 
-                val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                audioPlayer.load(tempFile)
-                val targetAudio = TargetAudio(tempFile, audioPlayer)
+        val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+        audioPlayer.load(tempFile)
+        val targetAudio = TargetAudio(tempFile, audioPlayer)
 
-                targetAudioProperty.set(targetAudio)
-            }
-        }
+        targetAudioProperty.set(targetAudio)
     }
 
     private fun cleanUpTargetAudio() {
