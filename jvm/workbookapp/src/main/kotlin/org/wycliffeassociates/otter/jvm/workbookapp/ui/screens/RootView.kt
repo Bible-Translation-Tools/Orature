@@ -35,7 +35,7 @@ class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
     private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
 
     init {
         // Configure the Workspace: sets up the window menu and external app open events
@@ -81,7 +81,7 @@ class RootView : View() {
     }
 
     private fun bindAppThemeToSystem() {
-        isOSDarkMode.onChange {
+        isOSDarkTheme.onChange {
             if (it) {
                 root.removeClass("light-theme")
                 root.addClass("dark-theme")
@@ -92,7 +92,7 @@ class RootView : View() {
         }
 
         osThemeDetector.registerListener {
-            runLater { isOSDarkMode.set(it) }
+            runLater { isOSDarkTheme.set(it) }
         }
     }
 

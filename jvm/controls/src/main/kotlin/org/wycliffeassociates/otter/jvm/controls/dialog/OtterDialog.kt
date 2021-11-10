@@ -36,7 +36,7 @@ abstract class OtterDialog : Fragment() {
     private val roundRadius = 15.0
 
     private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
 
     private val mainContainer = VBox().apply {
         addClass("otter-dialog-container")
@@ -106,7 +106,7 @@ abstract class OtterDialog : Fragment() {
     }
 
     private fun bindThemeToSystem() {
-        isOSDarkMode.onChange {
+        isOSDarkTheme.onChange {
             if (it) {
                 root.removeClass("light-theme")
                 root.addClass("dark-theme")
@@ -117,7 +117,7 @@ abstract class OtterDialog : Fragment() {
         }
 
         osThemeDetector.registerListener {
-            runLater { isOSDarkMode.set(it) }
+            runLater { isOSDarkTheme.set(it) }
         }
     }
 }
