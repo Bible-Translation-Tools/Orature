@@ -182,7 +182,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     private fun cleanUpTargetAudio() {
         targetAudioProperty.value?.let {
-            it.player.close()
+            it.player.release()
             it.file.delete()
         }
         targetAudioProperty.set(null)
