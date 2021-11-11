@@ -19,11 +19,10 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.github.thomasnield.rxkotlinfx.subscribeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -44,6 +43,7 @@ import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
+import java.util.concurrent.TimeUnit
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -66,9 +66,8 @@ class VerseMarkerViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     val compositeDisposable = CompositeDisposable()
     lateinit var imagesContainerNode: Node
-    val disposableImages = mutableListOf<ImageView>()
     val waveformMinimapImage = SimpleObjectProperty<Image>()
-    val waveform: PublishSubject<Image>
+    val waveform: Observable<Image>
     val imageWidth: Double
 
     private val audioFile: File
@@ -93,15 +92,15 @@ class VerseMarkerViewModel : ViewModel() {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-//            build(
-//                AudioFile(audioFile).reader(),
-//                width = imageWidth.toInt(),
-//                height = 50
-//            )
-//                .observeOnFx()
-//                .subscribe { image ->
-//                    waveformMinimapImage.set(image)
-//                }
+            build(
+                AudioFile(audioFile).reader(),
+                width = imageWidth.toInt(),
+                height = 50
+            )
+                .observeOnFx()
+                .subscribe { image ->
+                    waveformMinimapImage.set(image)
+                }
 
             waveform = buildWaveformAsync(
                 AudioFile(audioFile).reader(),
@@ -175,10 +174,10 @@ class VerseMarkerViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
+                .delay(500, TimeUnit.MILLISECONDS)
                 .subscribe {
                     runLater {
                         it.navigateBack()
-                        System.gc()
                     }
                 }
         }
