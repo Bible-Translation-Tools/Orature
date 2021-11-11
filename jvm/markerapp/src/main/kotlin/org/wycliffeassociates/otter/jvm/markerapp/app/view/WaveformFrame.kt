@@ -67,15 +67,13 @@ class WaveformFrame(
 
                         fitToParentHeight()
                         hbox {
-                            val container = this@hbox
-                            viewModel.imagesContainerNode = container
+                            viewModel.imagesContainerNode = this@hbox
                             val disposable  = viewModel.waveform
                                 .observeOnFx()
                                 .subscribe {
-                                    container.add(
+                                    this@hbox.add(
                                         imageview(it) {
                                             fitToHeight(this@region)
-//                                            viewModel.disposableImages.add(this)
                                         }
                                     )
                                 }

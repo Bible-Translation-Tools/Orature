@@ -18,14 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.ReplaySubject
+import io.reactivex.subjects.Subject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
@@ -33,6 +32,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
 
 const val SIGNED_SHORT_MAX = 32767
@@ -74,8 +74,11 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
-    ): PublishSubject<Image> {
-        val waveformStream = PublishSubject.create<Image>()
+    ): Subject<Image> {
+        // creating replay with lifespan to avoid memory leak
+        val waveformStream = ReplaySubject.createWithTime<Image>(
+            1, TimeUnit.SECONDS, JavaFxScheduler.platform()
+        )
 
         Completable.fromAction {
             reader.open()
@@ -97,7 +100,7 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveformStream: PublishSubject<Image>
+        waveformStream: Subject<Image>
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)

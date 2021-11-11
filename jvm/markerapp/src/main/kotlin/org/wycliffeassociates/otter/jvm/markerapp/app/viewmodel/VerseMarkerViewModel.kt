@@ -30,7 +30,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -164,17 +163,19 @@ class VerseMarkerViewModel : ViewModel() {
     }
     
     fun saveAndQuit() {
+        compositeDisposable.clear()
+        waveformMinimapImage.set(null)
+
         runLater {
             imagesContainerNode?.getChildList()?.clear()
         }
-        compositeDisposable.clear()
 
         (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(300, TimeUnit.MILLISECONDS)
+                .delay(300, TimeUnit.MILLISECONDS)  // exec after UI clean up
                 .subscribe {
                     runLater {
                         it.navigateBack()
