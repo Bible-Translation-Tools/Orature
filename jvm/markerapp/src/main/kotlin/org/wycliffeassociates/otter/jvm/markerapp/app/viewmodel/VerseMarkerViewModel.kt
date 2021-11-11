@@ -174,7 +174,7 @@ class VerseMarkerViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(500, TimeUnit.MILLISECONDS)
+                .delay(300, TimeUnit.MILLISECONDS)
                 .subscribe {
                     runLater {
                         it.navigateBack()
