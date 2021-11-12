@@ -61,6 +61,22 @@ class AudioPlayerController(
         }
     }
 
+    fun setPlaybackRate(rate: Double) {
+        println("playback rate seeking")
+        player?.let { _player ->
+            var wasPlaying = false
+            if (_player.isPlaying()) {
+                _player.pause()
+                _player.seek(Integer.max(_player.getLocationInFrames() - 1000, 0))
+                wasPlaying = true
+            }
+            _player.changeRate(rate)
+            if (wasPlaying) {
+                _player.play()
+            }
+        }
+    }
+
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()

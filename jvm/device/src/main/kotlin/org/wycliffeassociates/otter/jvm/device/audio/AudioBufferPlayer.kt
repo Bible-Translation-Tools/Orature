@@ -39,6 +39,8 @@ class AudioBufferPlayer(
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioPlayer {
 
+    val monitor = Object()
+
     override val frameStart: Int
         get() = begin
     override val frameEnd: Int
@@ -89,7 +91,7 @@ class AudioBufferPlayer(
         begin = frameStart
         end = frameEnd
         reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
-            bytes = ByteArray(_reader.sampleRate * _reader.channels)
+            bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -108,15 +110,18 @@ class AudioBufferPlayer(
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     try {
+                        println("playing with rate ${processor.playbackRate}")
                         player.open()
                         player.start()
                         while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
-                            if (_reader.framePosition > bytes.size / 2) {
-                                _reader.seek(_reader.framePosition - processor.overlap)
+                            synchronized(monitor) {
+                                if (_reader.framePosition > bytes.size / 2) {
+                                    _reader.seek(_reader.framePosition - processor.overlap)
+                                }
+                                val written = _reader.getPcmBuffer(bytes)
+                                val output = processor.process(bytes)
+                                player.write(output, 0, output.size)
                             }
-                            val written = _reader.getPcmBuffer(bytes)
-                            val output = processor.process(bytes)
-                            player.write(output, 0, output.size)
                         }
                         player.drain()
                         if (!pause.get()) {
@@ -165,7 +170,10 @@ class AudioBufferPlayer(
     }
 
     override fun changeRate(rate: Double) {
-        processor.updatePlaybackRate(rate)
+        synchronized(monitor) {
+            processor.updatePlaybackRate(rate)
+            bytes = ByteArray(processor.inputBufferSize * 2)
+        }
     }
 
     override fun seek(position: Int) {
@@ -205,11 +213,14 @@ class AudioBufferPlayer(
 
 
 class AudioProcessor {
+
+    val monitor = Object()
+
     val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
     val event = AudioEvent(processorFormat)
-    var playbackRate = .85
+    var playbackRate = 1.0
 
-    val wsola = WaveformSimilarityBasedOverlapAdd(
+    var wsola = WaveformSimilarityBasedOverlapAdd(
         WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
             playbackRate,
             processorFormat.sampleRate.toDouble()
@@ -217,13 +228,21 @@ class AudioProcessor {
     )
 
     val overlap: Int
-        get() = wsola.overlap
+        get() = synchronized(monitor) { wsola.overlap }
 
     val inputBufferSize: Int
-        get() = wsola.inputBufferSize
+        get() = synchronized(monitor) { wsola.inputBufferSize }
 
     fun updatePlaybackRate(rate: Double) {
         playbackRate = rate
+        synchronized(monitor) {
+            wsola = WaveformSimilarityBasedOverlapAdd(
+                WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
+                    playbackRate,
+                    processorFormat.sampleRate.toDouble()
+                )
+            )
+        }
     }
 
     fun process(bytes: ByteArray): ByteArray {
@@ -233,7 +252,9 @@ class AudioProcessor {
             floats
         )
         event.floatBuffer = floats
-        wsola.process(event)
+        synchronized(monitor) {
+            wsola.process(event)
+        }
         return event.byteBuffer
     }
 }

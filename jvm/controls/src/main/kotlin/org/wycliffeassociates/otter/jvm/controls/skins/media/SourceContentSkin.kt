@@ -24,6 +24,7 @@ import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.ComboBox
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
@@ -102,6 +103,12 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     @FXML
     lateinit var sourceAudioBlock: VBox
 
+    @FXML
+    lateinit var sourceAudioPlaybackRate: ComboBox<String>
+
+    @FXML
+    lateinit var targetAudioPlaybackRate: ComboBox<String>
+
     lateinit var audioController: AudioPlayerController
     lateinit var targetAudioController: AudioPlayerController
 
@@ -136,6 +143,28 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         audioController = AudioPlayerController(audioSlider)
         targetAudioController = AudioPlayerController(targetAudioSlider)
+
+        skinnable.sourceAudioPlaybackRate.onChange {
+            audioController.setPlaybackRate(
+                when(it!!) {
+                    "Slow" -> .8
+                    "Normal" -> 1.0
+                    "Fast" -> 1.25
+                    else -> 1.0
+                }
+            )
+        }
+
+        skinnable.targetAudioPlaybackRate.onChange {
+            targetAudioController.setPlaybackRate(
+                when(it!!) {
+                    "Slow" -> .8
+                    "Normal" -> 1.0
+                    "Fast" -> 1.25
+                    else -> 1.0
+                }
+            )
+        }
     }
 
     private fun initAudioControls() {
@@ -199,6 +228,20 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceAudioBlock.apply {
             visibleWhen(sourceContent.enableAudioProperty)
             managedWhen(visibleProperty())
+        }
+
+        sourceAudioPlaybackRate.apply {
+            items = skinnable.playbackRateOptions
+            selectionModel.selectedItemProperty().onChange {
+                it?.let { skinnable.sourceAudioPlaybackRate.set(it) }
+            }
+        }
+
+        targetAudioPlaybackRate.apply {
+            items = skinnable.playbackRateOptions
+            selectionModel.selectedItemProperty().onChange {
+                it?.let { skinnable.targetAudioPlaybackRate.set(it) }
+            }
         }
     }
 

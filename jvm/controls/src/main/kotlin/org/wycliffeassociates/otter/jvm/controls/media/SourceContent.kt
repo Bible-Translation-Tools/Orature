@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.media
 import java.text.MessageFormat
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -30,6 +31,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
 import tornadofx.FX
 import tornadofx.get
+import tornadofx.observableListOf
 import tornadofx.onChange
 
 class SourceContent : Control() {
@@ -59,6 +61,10 @@ class SourceContent : Control() {
     val enableAudioProperty = SimpleBooleanProperty(true)
     val isMinimizableProperty = SimpleBooleanProperty(true)
     val isMinimizedProperty = SimpleBooleanProperty(false)
+
+    val playbackRateOptions = observableListOf("Slow", "Normal", "Fast")
+    val sourceAudioPlaybackRate = SimpleStringProperty("Normal")
+    val targetAudioPlaybackRate = SimpleStringProperty("Normal")
 
     private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 
