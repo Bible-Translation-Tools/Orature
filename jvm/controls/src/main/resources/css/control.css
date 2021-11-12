@@ -316,13 +316,8 @@
     -fx-cursor: hand;
 }
 
-.wa-combobox .list-cell .label {
-    -fx-text-fill: -wa-black;
-}
-
-.wa-combobox .ikonli-font-icon {
-    -fx-font-size: 20px;
-    -fx-fill: -wa-black;
+.wa-combobox .arrow {
+    -fx-background-color: -wa-regular-text;
 }
 
 .wa-combobox:hover {
@@ -355,7 +350,7 @@
 }
 
 .wa-combobox .list-cell:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .wa-combobox .combo-box-popup {
@@ -372,7 +367,7 @@
 }
 
 .wa-combobox .combo-box-popup .list-cell:selected {
-    -fx-background-color: -wa-primary-10;
+    -fx-background-color: -wa-combo-box-background-selected;
 }
 
 .wa-combobox .combo-box-popup .list-cell:selected .label {

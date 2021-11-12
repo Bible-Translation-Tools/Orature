@@ -106,6 +106,7 @@
 
     /* combo box, drop down */
     -wa-combo-box-background: -wa-foreground;
+    -wa-combo-box-background-selected: -wa-primary-10;
 
     /* shadow effects */
     -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
