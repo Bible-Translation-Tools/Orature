@@ -146,23 +146,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         skinnable.sourceAudioPlaybackRate.onChange {
             audioController.setPlaybackRate(
-                when(it!!) {
-                    "Slow" -> .8
-                    "Normal" -> 1.0
-                    "Fast" -> 1.25
-                    else -> 1.0
-                }
+                it?.toDouble() ?: 1.0
             )
         }
 
         skinnable.targetAudioPlaybackRate.onChange {
             targetAudioController.setPlaybackRate(
-                when(it!!) {
-                    "Slow" -> .8
-                    "Normal" -> 1.0
-                    "Fast" -> 1.25
-                    else -> 1.0
-                }
+                it?.toDouble() ?: 1.0
             )
         }
     }
@@ -235,6 +225,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             selectionModel.selectedItemProperty().onChange {
                 it?.let { skinnable.sourceAudioPlaybackRate.set(it) }
             }
+            value = "1.0"
         }
 
         targetAudioPlaybackRate.apply {
@@ -242,6 +233,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             selectionModel.selectedItemProperty().onChange {
                 it?.let { skinnable.targetAudioPlaybackRate.set(it) }
             }
+            value = "1.0"
         }
     }
 
