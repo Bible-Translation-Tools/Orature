@@ -39,7 +39,7 @@ class InitializeMarker @Inject constructor(
 ) : Installable {
 
     override val name = "MARKER"
-    override val version = 14
+    override val version = 15
 
     val log = LoggerFactory.getLogger(InitializeMarker::class.java)
 

@@ -271,6 +271,7 @@ class SettingsView : View() {
         val successDialog = confirmdialog {
             titleTextProperty.set(messages["settings"])
             messageTextProperty.set(messages["changeLanguageSuccessMessage"])
+            orientationProperty.set(viewModel.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }

@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.media
 import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.NodeOrientation
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.CheckBox
@@ -65,6 +66,7 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
         stacktraceScrollPane.apply {
             visibleProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
             managedProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
 
         importStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())

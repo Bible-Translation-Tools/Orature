@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -41,6 +42,7 @@ class TranslationCard<T>(
     val itemsProperty = SimpleListProperty<T>(items)
     val showMoreTextProperty = SimpleStringProperty()
     val showLessTextProperty = SimpleStringProperty()
+    val orientationScaleProperty = SimpleDoubleProperty()
 
     val onNewBookActionProperty = SimpleObjectProperty<() -> Unit>()
     val shownItemsNumberProperty = SimpleIntegerProperty(3)

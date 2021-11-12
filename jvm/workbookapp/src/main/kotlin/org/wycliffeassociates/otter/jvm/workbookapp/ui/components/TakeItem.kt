@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.geometry.NodeOrientation
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -44,6 +45,8 @@ class TakeItem : HBox() {
 
     init {
         styleClass.setAll("take-item")
+
+        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         simpleaudioplayer {
             hgrow = Priority.ALWAYS

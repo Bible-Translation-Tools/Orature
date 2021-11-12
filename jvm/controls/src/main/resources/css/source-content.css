@@ -70,7 +70,7 @@
 
 .source-content__audio_container {
     -fx-alignment: center-left;
-    -fx-padding: 8;
+    -fx-padding: 8px;
     -fx-min-height: 60px;
     -fx-spacing: 20px;
     -fx-background-color: -wa-foreground;
@@ -80,7 +80,7 @@
 .source-content__audio_container--target {
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: -wa-gray-light;
-    -fx-padding: 15 5;
+    -fx-padding: 15px 5px;
 }
 
 .source-content__scroll-pane,
@@ -95,16 +95,12 @@
 
 .source-content__text {
     -fx-font-size: 1.5em;
-    -fx-alignment: center;
-    -fx-text-alignment: justify;
     -fx-fill: -wa-gray-darker;
+    -fx-padding: 0 15px;
 }
 
 .source-content__license-text {
     -fx-font-size: 1.25em;
-    -fx-alignment: center;
-    -fx-text-alignment: justify;
-    -fx-font-style: italic;
     -fx-text-fill: -wa-note-text;
 }
 

@@ -53,16 +53,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
 import tornadofx.*
 
 class RecordResourceFragment(private val recordableViewModel: RecordableViewModel) : Fragment() {
     private val logger = LoggerFactory.getLogger(RecordResourceFragment::class.java)
 
     private val recordResourceViewModel: RecordResourceViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
 
@@ -149,7 +147,9 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val previousButton = Button().apply {
         addClass("btn", "btn--secondary", "card__navigate-button")
         text = messages["previousChunk"]
-        graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT)
+        graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+            scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+        }
         action {
             recordableViewModel.stopPlayers()
             recordResourceViewModel.previousChunk()
@@ -160,7 +160,9 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     private val nextButton = Button().apply {
         addClass("btn", "btn--secondary", "card__navigate-button")
         text = messages["nextChunk"]
-        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+        graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+            scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+        }
         action {
             recordableViewModel.stopPlayers()
             recordResourceViewModel.nextChunk()
@@ -184,6 +186,8 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             addClass("card__content-scrollpane")
             isFitToWidth = true
             vgrow = Priority.ALWAYS
+            nodeOrientationProperty().bind(settingsViewModel.sourceOrientationProperty)
+
             label(formattedTextProperty) {
                 isWrapText = true
                 addClass("card__content-text")
@@ -351,6 +355,8 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
+            orientationProperty.bind(settingsViewModel.orientationProperty)
+            sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
         }
     }
 
@@ -388,6 +394,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
     }
 
@@ -396,6 +403,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesSuccessMessage"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
@@ -412,6 +420,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             titleTextProperty.set(messages["importTakesTitle"])
             messageTextProperty.set(messages["importTakesFailMessage"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
