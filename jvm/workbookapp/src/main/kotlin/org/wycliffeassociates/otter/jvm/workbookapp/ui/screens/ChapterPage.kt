@@ -152,7 +152,7 @@ class ChapterPage : Fragment() {
 
                     simpleaudioplayer {
                         hgrow = Priority.ALWAYS
-                        playerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
+                        playerProperty.bind(workbookDataStore.selectedChapterPlayerProperty)
                         visibleWhen(playerProperty.isNotNull)
                         managedProperty().bind(visibleProperty())
                     }
@@ -163,7 +163,7 @@ class ChapterPage : Fragment() {
 
                         label(messages["draftingNotStarted"])
 
-                        visibleWhen(workbookDataStore.targetAudioProperty.isNull)
+                        visibleWhen(workbookDataStore.selectedChapterPlayerProperty.isNull)
                         managedProperty().bind(visibleProperty())
                     }
                 }
