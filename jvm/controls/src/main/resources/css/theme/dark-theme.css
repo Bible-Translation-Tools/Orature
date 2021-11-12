@@ -138,7 +138,7 @@
 
 .dark-theme .scroll-bar .thumb {
     -fx-background-color: #768198;
-    -fx-background-insets: 0, 2, 0;
+    -fx-background-insets: 0;
     -fx-background-radius: 0;
 }
 

@@ -128,12 +128,26 @@
     -wa-dialog-background: -wa-background;
 }
 
+.scroll-bar {
+    -fx-font-size: 10px;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 8 4;
+}
+
 .light-theme .workspace {
     -fx-background-color: -wa-background;
 }
 
 .light-theme .scroll-bar .thumb {
     -fx-background-color: #b3b3b3;
-    -fx-background-insets: 0, 2, 0;
+    -fx-background-insets: 0;
     -fx-background-radius: 0;
+}
+
+.light-theme .scroll-bar .increment-button:hover,
+.light-theme .scroll-bar .decrement-button:hover {
+    -fx-background-color: -wa-foreground-hover;
 }
