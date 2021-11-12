@@ -18,19 +18,18 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.media
 
-import java.text.MessageFormat
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.NodeOrientation
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
-import tornadofx.FX
-import tornadofx.get
-import tornadofx.onChange
+import tornadofx.*
+import java.text.MessageFormat
 
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
@@ -59,6 +58,9 @@ class SourceContent : Control() {
     val enableAudioProperty = SimpleBooleanProperty(true)
     val isMinimizableProperty = SimpleBooleanProperty(true)
     val isMinimizedProperty = SimpleBooleanProperty(false)
+
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 

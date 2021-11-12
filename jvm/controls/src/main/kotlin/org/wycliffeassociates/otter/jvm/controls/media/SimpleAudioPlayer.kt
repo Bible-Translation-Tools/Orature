@@ -23,6 +23,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.EventTarget
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.HBox
@@ -49,6 +50,8 @@ class SimpleAudioPlayer(
     private val audioSampleRate = SimpleIntegerProperty(0)
 
     init {
+        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
+
         playerProperty.onChange {
             audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
         }

@@ -18,16 +18,15 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import java.lang.IllegalArgumentException
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
-import javax.inject.Inject
-import javax.sound.sampled.LineUnavailableException
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
+import javax.inject.Inject
+import javax.sound.sampled.LineUnavailableException
 
 class RootViewModel : ViewModel() {
 

@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXSlider
 import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.NodeOrientation
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -142,6 +143,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceAudioContainer.apply {
             visibleWhen(sourceContent.sourceAudioAvailableProperty)
             managedWhen(visibleProperty())
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
 
         sourceAudioNotAvailable.apply {
@@ -152,6 +154,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         targetAudio.apply {
             visibleWhen(sourceContent.targetAudioPlayerProperty.isNotNull)
             managedWhen(visibleProperty())
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
 
         audioNotAvailableText.apply {
@@ -220,6 +223,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
             isFitToWidth = true
+            nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
         }
 
         sourceText.apply {
@@ -228,6 +232,12 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         licenseText.apply {
             textProperty().bind(sourceContent.licenseTextProperty)
+            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
+                when (it) {
+                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                    else -> ""
+                }
+            })
         }
 
         title.apply {

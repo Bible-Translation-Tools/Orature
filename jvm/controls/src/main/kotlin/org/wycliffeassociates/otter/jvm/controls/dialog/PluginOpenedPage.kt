@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.dialog
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -37,6 +38,8 @@ class PluginOpenedPage : Fragment() {
     val audioAvailableProperty = SimpleBooleanProperty(false)
     val sourceTextProperty = SimpleStringProperty()
     val sourceContentTitleProperty = SimpleStringProperty()
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     init {
         importStylesheet(resources["/css/plugin-opened-page.css"])
@@ -71,6 +74,8 @@ class PluginOpenedPage : Fragment() {
                 playTargetLabelProperty.set(messages["playTarget"])
                 pauseTargetLabelProperty.set(messages["pauseTarget"])
 
+                orientationProperty.bind(this@PluginOpenedPage.orientationProperty)
+                sourceOrientationProperty.bind(this@PluginOpenedPage.sourceOrientationProperty)
                 contentTitleProperty.bind(sourceContentTitleProperty)
                 isMinimizableProperty.set(false)
             }

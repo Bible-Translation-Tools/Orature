@@ -20,7 +20,9 @@ package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import com.jthemedetecor.OsThemeDetector
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Bounds
+import javafx.geometry.NodeOrientation
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -34,6 +36,7 @@ import tornadofx.*
 abstract class OtterDialog : Fragment() {
 
     private val roundRadius = 15.0
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     private val osThemeDetector = OsThemeDetector.getDetector()
     private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
@@ -44,6 +47,8 @@ abstract class OtterDialog : Fragment() {
 
     override val root = VBox().apply {
         addClass("otter-dialog-overlay")
+        nodeOrientationProperty().bind(orientationProperty)
+
         add(mainContainer)
 
         if (osThemeDetector.isDark) {

@@ -50,6 +50,9 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
     @FXML
     lateinit var resumeButton: Button
 
+    @FXML
+    lateinit var divider: Label
+
     private val cornerRadius = 20.0
 
     init {
@@ -90,6 +93,10 @@ class ResumeBookBannerSkin(private val banner: ResumeBookBanner) : SkinBase<Resu
             tooltip {
                 textProperty().bind(this@apply.textProperty())
             }
+            graphic.scaleXProperty().bind(banner.orientationScaleProperty)
+        }
+        divider.apply {
+            graphic.scaleXProperty().bind(banner.orientationScaleProperty)
         }
     }
 
