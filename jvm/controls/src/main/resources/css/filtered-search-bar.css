@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .filtered-search-bar__root {
     -fx-spacing: 10px;
@@ -28,14 +27,19 @@
 }
 
 .filtered-search-bar__input .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
+}
+
+.filtered-search-bar__input:focused .ikonli-font-icon {
+    -fx-fill: -wa-text-input-fill;
 }
 
 .filtered-search-bar__menu {
     -fx-pref-width: 88px;
     -fx-pref-height: 48px;
     -fx-padding: 0 10px;
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-filter-button-background;
     -fx-background-radius: 6px;
     -fx-alignment: center;
     -fx-spacing: 7px;
@@ -43,7 +47,7 @@
 }
 
 .filtered-search-bar__menu .context-menu {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
 }
 
@@ -53,7 +57,7 @@
 }
 
 .filtered-search-bar__menu .menu-item {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
 }
 
 .filtered-search-bar__menu .label {
@@ -61,7 +65,7 @@
 }
 
 .filtered-search-bar__menu__separator .label {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-font-family: 'sans-serif';
@@ -69,4 +73,5 @@
 
 .filtered-search-bar__menu.menu-button .ikonli-font-icon {
     -fx-font-size: 24px;
+    -fx-icon-color: -wa-regular-text;
 }

@@ -18,21 +18,19 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.media
 
-import java.text.MessageFormat
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.NodeOrientation
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
-import tornadofx.FX
-import tornadofx.get
-import tornadofx.observableListOf
-import tornadofx.onChange
+import tornadofx.*
+import java.text.MessageFormat
 
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
@@ -65,6 +63,9 @@ class SourceContent : Control() {
     val playbackRateOptions = observableListOf("0.25", "0.30", "0.35", "0.40", "0.45", "0.50", "0.55", "0.60", "0.65", "0.70", "0.75", "0.80", "0.85", "0.90", "0.95", "1.0", "1.25", "1.5", "1.75", "2.0")
     val sourceAudioPlaybackRate = SimpleStringProperty("1.0")
     val targetAudioPlaybackRate = SimpleStringProperty("1.0")
+    
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 

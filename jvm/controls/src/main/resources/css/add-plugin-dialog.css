@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .add-plugin-dialog {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-dialog-background;
     -fx-pref-width: 600px;
     -fx-padding: 15px;
     -fx-spacing: 20px;
@@ -32,12 +31,12 @@
 .add-plugin-dialog__title {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-text-fill: -wa-primary;
+    -fx-text-fill: -wa-highlight-text;
 }
 
 .add-plugin-dialog__btn--close {
-    -fx-background-color: -wa-white;
-    -fx-border-color: -wa-gray;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-border-color: -wa-border-neutral;
     -fx-border-width: 2px;
     -fx-border-radius: 4px;
     -fx-pref-width: 48px;
@@ -46,16 +45,16 @@
 }
 
 .add-plugin-dialog__btn--close:hover {
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .add-plugin-dialog__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-gray;
+    -fx-fill: -wa-fill-neutral;
 }
 
-.add-plugin-dialog__btn--close:hover .ikonli-font-icon {
-    -fx-fill: -wa-gray-dark;
+.add-plugin-dialog__info .label {
+    -fx-text-fill: -wa-regular-text;
 }
 
 .add-plugin-dialog__subtitle {
@@ -73,6 +72,7 @@
 
 .add-plugin-dialog__label {
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .add-plugin-dialog__bottom-controls {

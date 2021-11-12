@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css"
 
 .card--container-dragover {
     -fx-background-color: -wa-primary-20;
@@ -29,7 +28,7 @@
     -fx-spacing: 15px;
     -fx-padding: 30px;
     -fx-alignment: top-center;
-    -fx-background-color: #EDF1F8;
+    -fx-background-color: -wa-background;
 }
 
 .record-scripture__navigate-buttons {
@@ -39,6 +38,10 @@
 
 .record-scripture__book-info {
     -fx-alignment: center;
+}
+
+.record-scripture__book-info .label {
+    -fx-text-fill: -wa-regular-text;
 }
 
 .record-scripture__book-title {

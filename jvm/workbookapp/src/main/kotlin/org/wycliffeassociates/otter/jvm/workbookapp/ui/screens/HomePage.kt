@@ -30,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
@@ -37,6 +38,7 @@ class HomePage : View() {
 
     private val viewModel: HomePageViewModel by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
     private val breadCrumb = BreadCrumb().apply {
@@ -64,10 +66,12 @@ class HomePage : View() {
             hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
             vbox {
                 addClass("home-page__container")
+                minHeightProperty().bind(this@stackpane.heightProperty())
 
                 add(
                     ResumeBookBanner().apply {
                         resumeTextProperty.set(messages["resume"])
+                        orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
                         viewModel.resumeBookProperty.onChange {
                             it?.let { workbook ->
@@ -91,6 +95,7 @@ class HomePage : View() {
                 add(
                     NewTranslationCard().apply {
                         newTranslationTextProperty.set(messages["createTranslation"])
+                        orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
                         setOnAction {
                             viewModel.createTranslation()
                         }
@@ -105,6 +110,7 @@ class HomePage : View() {
                             setConverter {
                                 BookCard().apply {
                                     titleProperty.set(it.target.title)
+                                    slugProperty.set(it.target.slug.uppercase())
                                     coverArtProperty.set(
                                         it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )
@@ -115,6 +121,7 @@ class HomePage : View() {
 
                             showMoreTextProperty.set(messages["showMore"])
                             showLessTextProperty.set(messages["showLess"])
+                            orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
                             setOnNewBookAction {
                                 viewModel.createProject(it)

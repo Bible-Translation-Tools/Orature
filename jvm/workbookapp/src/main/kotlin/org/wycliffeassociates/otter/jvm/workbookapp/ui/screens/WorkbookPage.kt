@@ -39,7 +39,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
@@ -62,6 +62,7 @@ class WorkbookPage : View() {
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
     private val navigator: NavigationMediator by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     private var deleteListener: ChangeListener<Boolean>? = null
     private var deleteProgressListener: ChangeListener<Boolean>? = null
@@ -135,14 +136,13 @@ class WorkbookPage : View() {
     override val root = JFXTabPane().apply {
         importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
-        importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
         tabs.onChange {
             when (it.list.size) {
-                1 -> addClass(MainScreenStyles.singleTab)
-                else -> removeClass(MainScreenStyles.singleTab)
+                1 -> addClass("singleTab")
+                else -> removeClass("singleTab")
             }
         }
     }
@@ -152,6 +152,7 @@ class WorkbookPage : View() {
             messageTextProperty.set(messages["deleteProjectConfirmation"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["keepProject"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
@@ -183,6 +184,7 @@ class WorkbookPage : View() {
             messageTextProperty.set(messages["deleteProjectSuccess"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["goHome"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
@@ -210,6 +212,7 @@ class WorkbookPage : View() {
             messageTextProperty.set(messages["deleteProjectFail"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
@@ -289,6 +292,7 @@ class WorkbookPage : View() {
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
     }
 

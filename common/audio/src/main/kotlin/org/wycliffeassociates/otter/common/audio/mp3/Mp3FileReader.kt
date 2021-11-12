@@ -37,10 +37,10 @@ internal class MP3FileReader(
     val file: File, start: Int? = null, end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
 
-    private var decoder: RandomAccessDecoder = RandomAccessDecoder(file.absolutePath)
+    private var decoder: RandomAccessDecoder? = RandomAccessDecoder(file.absolutePath)
 
     val start = start ?: 0
-    val end = end ?: decoder.sampleCount
+    val end = end ?: decoder!!.sampleCount
     private var pos = min(max(0, this.start), this.end)
 
     override val sampleRate: Int = DEFAULT_SAMPLE_RATE
@@ -81,10 +81,10 @@ internal class MP3FileReader(
     }
 
     private fun fillBuffers(pos: Int, leftRight: ShortArray) {
-        val sourceAudio = decoder.audioShorts
+        val sourceAudio = decoder!!.audioShorts
         var sourceIdx = 0
         try {
-            sourceIdx = decoder.seek(pos, leftRight.size / 2) and RandomAccessDecoder.BUFFER_LAST
+            sourceIdx = decoder!!.seek(pos, leftRight.size / 2) and RandomAccessDecoder.BUFFER_LAST
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -95,7 +95,7 @@ internal class MP3FileReader(
     }
 
     override fun hasRemaining(): Boolean {
-        return pos < min(decoder.sampleCount, end)
+        return pos < min(decoder!!.sampleCount, end)
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
@@ -118,7 +118,9 @@ internal class MP3FileReader(
     }
 
     override fun release() {
-        decoder.stop()
+        decoder!!.stop()
+        decoder = null
         pos = 0
+        System.gc()
     }
 }

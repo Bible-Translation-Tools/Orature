@@ -17,23 +17,6 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 * {
-    /*Primary Color */
-    -wa-primary: #015AD9;
-    -wa-primary-05: #015AD90D;
-    -wa-primary-10: #015AD91A;
-    -wa-primary-20: #015AD933;
-    -wa-primary-light: #CEE6FF;
-    -wa-primary-dark: #00377C;
-
-    /*Accent Color */
-    -wa-accent: #FFB100;
-    -wa-accent-light: #FFD671;
-    -wa-accent-dark: #9E6600;
-
-    /* Gradients */
-    -wa-primary-gradient: linear-gradient(to top, -wa-primary, #267CF7);
-    -wa-cta-gradient: linear-gradient(to bottom, -wa-accent-light, -wa-accent);
-
     /* Neutral Colors */
     -wa-gray-darker: rgba(26,26,26,1); /* Base text color and icon hover color */
     -wa-gray-dark: rgba(26,26,26,0.8); /* active icon */
@@ -64,7 +47,6 @@
     -wa-black-80: rgba(0, 21, 51, 0.8);
     -wa-black-90: rgba(0, 21, 51, 0.9);
     -wa-transparent: rgba(255,255,255,0);
-    -wa-background: #F7FAFF;
 
     /* Extra Colors */
     -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */

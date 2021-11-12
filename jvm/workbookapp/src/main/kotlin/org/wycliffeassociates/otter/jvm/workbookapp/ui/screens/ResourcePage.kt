@@ -22,16 +22,17 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.styles.ResourceListStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ResourceListViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 import java.text.MessageFormat
 
 class ResourcePage : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
@@ -54,7 +55,7 @@ class ResourcePage : View() {
     }
 
     init {
-        importStylesheet<ResourceListStyles>()
+        importStylesheet(resources.get("/css/resource-page.css"))
     }
 
     override val root = vbox {
@@ -75,6 +76,7 @@ class ResourcePage : View() {
             ResourceListView(
                 resourceListViewModel.filteredResourceGroupCardItemList,
                 resourceListViewModel.isFilterOnProperty,
+                settingsViewModel.sourceOrientationProperty,
                 navigator
             ).apply {
                 whenDocked {

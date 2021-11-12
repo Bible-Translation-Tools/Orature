@@ -29,6 +29,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
+import tornadofx.stringBinding
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ScriptureTakeCard : Control() {
 
@@ -37,12 +40,25 @@ class ScriptureTakeCard : Control() {
     val selectedProperty = SimpleBooleanProperty()
     val takeLabelProperty = SimpleStringProperty()
     val lastModifiedProperty = SimpleStringProperty()
+    val deletedProperty = SimpleBooleanProperty()
     val animationMediatorProperty =
         SimpleObjectProperty<ListAnimationMediator<ScriptureTakeCard>>()
 
     val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    init {
+        lastModifiedProperty.bind(takeProperty.stringBinding {
+            it?.let {
+                SimpleDateFormat.getDateTimeInstance(
+                    SimpleDateFormat.SHORT,
+                    SimpleDateFormat.SHORT,
+                    Locale.getDefault()
+                ).format(it.file.lastModified())
+            }
+        })
+    }
 
     fun setOnTakeDelete(op: () -> Unit) {
         onTakeDeleteActionProperty.set(EventHandler { op.invoke() })

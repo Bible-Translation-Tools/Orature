@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
 import javafx.application.Platform
-import javafx.scene.control.Label
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -272,6 +271,7 @@ class SettingsView : View() {
         val successDialog = confirmdialog {
             titleTextProperty.set(messages["settings"])
             messageTextProperty.set(messages["changeLanguageSuccessMessage"])
+            orientationProperty.set(viewModel.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }

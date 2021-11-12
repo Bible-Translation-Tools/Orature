@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .card--take--new {
     -fx-background-color: -wa-primary-gradient;
@@ -43,26 +42,4 @@
 
 .card--take__border-glow {
     -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 5, 5);
-}
-
-.card--take__slider .track {
-    -fx-background-color: -wa-black-10;
-}
-
-.card--take__slider .colored-track {
-    -fx-background-color: -wa-primary;
-}
-
-.card--take__slider .thumb {
-    -fx-background-color: #edf1f8;
-    -fx-padding: 5 7.6;
-    -fx-effect: -wa-level2;
-}
-
-.card--take__slider--active .thumb {
-    -fx-background-color: -wa-primary;
-}
-
-.card--take__slider .animated-thumb {
-    visibility: hidden;
 }

@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.animation.AnimationTimer
+import javafx.geometry.NodeOrientation
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -52,6 +53,8 @@ class WaveformContainer : Fragment() {
             vgrow = Priority.ALWAYS
 
             styleClass.add("vm-waveform-container")
+
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())
             add(

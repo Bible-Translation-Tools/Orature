@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css"
 
 .chunk-item {
     -fx-border-color: -wa-black-10;
@@ -47,13 +46,13 @@
 }
 
 .chunk-item__selected-status {
-    -fx-fill: -wa-white;
-    -fx-stroke: -wa-black-10;
+    -fx-fill: transparent;
+    -fx-stroke: -wa-black-20;
     -fx-stroke-width: 2px;
 }
 
 .chunk-item__selected-status--active {
-    -fx-fill: -wa-green;
+    -fx-fill: -wa-status-active;
     -fx-stroke: null;
 }
 
@@ -62,7 +61,7 @@
 }
 
 .chunk-item__takes {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-background;
     -fx-background-radius: 16px;
     -fx-spacing: 10px;
     -fx-alignment: top-center;

@@ -16,12 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .breadcrumb-bar {
     -fx-padding: 15px 40px;
     -fx-spacing: 5px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-breadcrumb-background;
     -fx-border-width: 1px;
     -fx-border-color: -wa-gray-lighter;
 }
@@ -35,10 +34,11 @@
     -fx-border-color: #BFC5CC;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
     -fx-padding: 5px 10px;
     -fx-cursor: hand;
     -fx-pref-height: 48px;
-    -fx-text-fill: #001533;
+    -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
 }
@@ -49,15 +49,15 @@
 }
 
 .breadcrumb__content:hover {
-    -fx-background-color: #E6E9ED;
+    -fx-background-color: -wa-breadcrumb-background-hover;
 }
 
 .breadcrumb__content:pressed {
-    -fx-background-color: #D9DDE4;
+    -fx-background-color: -wa-breadcrumb-background-pressed;
 }
 
 .breadcrumb__content .ikonli-font-icon {
-    -fx-icon-color: #001533;
+    -fx-icon-color: -wa-regular-text;
     -fx-icon-size: 24px;
 }
 
@@ -81,7 +81,7 @@
 
 .breadcrumb__separator .ikonli-font-icon {
     -fx-icon-color: #667385;
-    -fx-icon-size: 10px;
+    -fx-icon-size: 24px;
 }
 
 .breadcrumb__help .ikonli-font-icon {

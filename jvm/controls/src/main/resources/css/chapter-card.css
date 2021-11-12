@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css";
 
 .chapter-card {
     -fx-background-radius: 10px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level1;
     -fx-cursor: hand;
     -fx-pref-height: 96px;
@@ -28,17 +27,22 @@
 }
 
 .chapter-card:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.chapter-card:pressed {
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .chapter-card__graphic {
     -fx-background-radius: 10px;
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-card-image-placeholder-background;
 }
 
-.chapter-card__title {
+.chapter-card__title, .chapter-card__title .text {
     -fx-font-weight: bold;
     -fx-font-size: 18px;
+    -fx-fill: -wa-regular-text;
 }
 
 .chapter-card__recorded-icon .ikonli-font-icon {

@@ -195,6 +195,7 @@ class TakeActions @Inject constructor(
         take: Take,
         result: Result
     ): Result {
+        take.file.setLastModified(System.currentTimeMillis())
         selectTake(take)
         return result
     }

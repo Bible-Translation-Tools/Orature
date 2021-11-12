@@ -47,7 +47,7 @@
                                         <FontIcon iconLiteral="gmi-hearing"/>
                                     </graphic>
                                 </Label>
-                                <Label styleClass="resume-book-banner__divider">
+                                <Label fx:id="divider" styleClass="resume-book-banner__divider">
                                     <graphic>
                                         <FontIcon iconLiteral="mdi-play"/>
                                     </graphic>

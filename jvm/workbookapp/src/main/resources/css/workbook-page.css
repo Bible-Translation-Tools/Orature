@@ -16,19 +16,18 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-@import "/css/root.css"
 
 .workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
-    -fx-background-color: #f7faff;
+    -fx-background-color: -wa-background;
 }
 
 .workbook-page__chapter-list .list-cell:selected,
 .workbook-page__chapter-list .list-cell:even,
 .workbook-page__chapter-list .list-cell:odd {
-    -fx-background-color: #f7faff;
+    -fx-background-color: -wa-background;
 }
 
 .workbook-page__chapter-list .label {
-    -fx-text-fill: -wa-gray-darker;
+    -fx-text-fill: -wa-regular-text;
 }

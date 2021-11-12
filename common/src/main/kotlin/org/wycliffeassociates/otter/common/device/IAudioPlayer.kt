@@ -34,6 +34,7 @@ interface IAudioPlayer {
     fun pause()
     fun stop()
     fun close()
+    fun release()
     fun seek(position: Int)
     fun isPlaying(): Boolean
     fun getDurationInFrames(): Int
