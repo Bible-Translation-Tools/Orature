@@ -146,13 +146,6 @@ class RecordScriptureViewModel : ViewModel() {
                         takeProperty.set(takeCardModel.take)
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
                         selectedProperty.set(takeCardModel.selected)
-                        lastModifiedProperty.set(
-                            SimpleDateFormat.getDateTimeInstance(
-                                SimpleDateFormat.SHORT,
-                                SimpleDateFormat.SHORT,
-                                workbookDataStore.localeLanguage.preferredLocale()
-                            ).format(takeCardModel.take.file.lastModified())
-                        )
                         takeLabelProperty.set(
                             MessageFormat.format(
                                 FX.messages["takeTitle"],
@@ -169,7 +162,11 @@ class RecordScriptureViewModel : ViewModel() {
                                 title = messages["deleteTakePrompt"]
                             ) { button: ButtonType ->
                                 if (button == ButtonType.YES) {
-                                    fireEvent(DeleteTakeEvent(takeCardModel.take))
+                                    deletedProperty.set(true)
+                                    // trigger delete process after animation
+                                    deletedProperty.onChangeOnce { isAnimating ->
+                                        if (isAnimating == false) fireEvent(DeleteTakeEvent(takeCardModel.take))
+                                    }
                                 }
                             }
                         }
@@ -345,8 +342,9 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun deleteTake(take: Take) {
         stopPlayers()
+        val isTakeSelected = takeCardModels.any { it.take == take && it.selected }
         take.deletedTimestamp.accept(DateHolder.now())
-        removeOnDeleted(take)
+        removeOnDeleted(take, isTakeSelected)
     }
 
     fun dialogTitleBinding(): StringBinding {
@@ -431,21 +429,26 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
-    private fun removeOnDeleted(take: Take) {
+    private fun removeOnDeleted(take: Take, isTakeSelected: Boolean = false) {
         take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
             .doOnError { e ->
                 logger.error("Error in removing deleted take: $take", e)
             }
             .subscribe {
-                removeFromTakes(take)
+                removeFromTakes(take, isTakeSelected)
             }
             .let { disposables.add(it) }
     }
 
-    private fun removeFromTakes(take: Take) {
+    private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
         Platform.runLater {
             takeCardModels.removeAll { it.take == take }
+            if (autoSelect){
+                takeCardModels.firstOrNull()?.let {
+                    selectTake(it.take)
+                }
+            }
         }
     }
 
