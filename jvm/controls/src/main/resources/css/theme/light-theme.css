@@ -90,8 +90,6 @@
     -wa-btn-icon-background-pressed: -wa-black-10;
     -wa-btn-icon-background-selected: -wa-primary-10;
     -wa-btn-icon-border-color: -wa-black-20;
-    -wa-checkbox-button-background: -wa-foreground;
-    -wa-checkbox-button-background-selected: -wa-primary-10;
     -wa-filter-button-background: -wa-black-10;
 
     /* text field input */
@@ -107,6 +105,11 @@
     /* combo box, drop down */
     -wa-combo-box-background: -wa-white;
     -wa-combo-box-background-selected: -wa-primary-10;
+
+    /* check box, radio */
+    -wa-checkbox-background: -wa-white;
+    -wa-checkbox-button-background: -wa-foreground;
+    -wa-checkbox-button-background-selected: -wa-primary-10;
 
     /* shadow effects */
     -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */

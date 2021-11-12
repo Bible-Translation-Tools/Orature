@@ -453,9 +453,9 @@
 
 .wa-checkbox .box {
     -fx-border-width: 2px;
-    -fx-border-color: -wa-black;
+    -fx-border-color: -wa-border-neutral;
     -fx-border-radius: 2px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-checkbox-background;
 }
 
 .wa-checkbox:selected .box {
