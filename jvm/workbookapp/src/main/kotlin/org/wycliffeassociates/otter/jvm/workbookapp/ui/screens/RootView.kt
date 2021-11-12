@@ -36,7 +36,7 @@ class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
     private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
     private val settingsViewModel: SettingsViewModel by inject()
 
     init {
@@ -72,29 +72,32 @@ class RootView : View() {
             left<AppBar>()
             center<AppContent>()
         }
-    }
 
-    private fun initThemeStylesheet() {
         if (osThemeDetector.isDark) {
-            importStylesheet(resources["/css/root_dark.css"])
+            addClass("dark-theme")
         } else {
-            importStylesheet(resources["/css/root.css"])
+            addClass("light-theme")
         }
     }
 
+    private fun initThemeStylesheet() {
+        importStylesheet(resources["/css/theme/light-theme.css"])
+        importStylesheet(resources["/css/theme/dark-theme.css"])
+    }
+
     private fun bindAppThemeToSystem() {
-        isOSDarkMode.onChange {
+        isOSDarkTheme.onChange {
             if (it) {
-                FX.stylesheets.remove("/css/root.css")
-                FX.stylesheets.add("/css/root_dark.css")
+                root.removeClass("light-theme")
+                root.addClass("dark-theme")
             } else {
-                FX.stylesheets.remove("/css/root_dark.css")
-                FX.stylesheets.add("/css/root.css")
+                root.removeClass("dark-theme")
+                root.addClass("light-theme")
             }
         }
 
         osThemeDetector.registerListener {
-            runLater { isOSDarkMode.set(it) }
+            runLater { isOSDarkTheme.set(it) }
         }
     }
 
