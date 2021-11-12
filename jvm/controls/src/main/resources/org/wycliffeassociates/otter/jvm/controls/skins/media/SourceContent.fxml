@@ -86,8 +86,13 @@
                                     <String fx:value="btn--primary"/>
                                 </styleClass>
                             </Button>
-                            <ComboBox fx:id="targetAudioPlaybackRate"/>
                             <JFXSlider fx:id="targetAudioSlider" styleClass="wa-slider" HBox.hgrow="ALWAYS"/>
+                            <Label styleClass="wa-combobox-button">
+                                <graphic>
+                                    <FontIcon iconLiteral="mdi-gauge" iconSize="22" />
+                                </graphic>
+                            </Label>
+                            <ComboBox fx:id="targetAudioPlaybackRate"/>
                         </children>
                         <styleClass>
                             <String fx:value="source-content__audio_container"/>
@@ -117,8 +122,13 @@
                                     <String fx:value="btn--primary"/>
                                 </styleClass>
                             </Button>
-                            <ComboBox fx:id="sourceAudioPlaybackRate"/>
                             <JFXSlider fx:id="audioSlider" styleClass="wa-slider" HBox.hgrow="ALWAYS"/>
+                            <Label styleClass="wa-combobox-button">
+                                <graphic>
+                                    <FontIcon iconLiteral="mdi-gauge" iconSize="22"/>
+                                </graphic>
+                            </Label>
+                            <ComboBox fx:id="sourceAudioPlaybackRate"/>
                         </children>
                         <VBox.margin>
                             <Insets top="16.0"/>
