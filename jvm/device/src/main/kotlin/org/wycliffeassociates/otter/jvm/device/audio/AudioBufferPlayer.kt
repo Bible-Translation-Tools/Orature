@@ -147,6 +147,10 @@ class AudioBufferPlayer(
     }
 
     override fun close() {
+
+    }
+
+    override fun release() {
         stop()
         if (reader != null) {
             reader?.release()

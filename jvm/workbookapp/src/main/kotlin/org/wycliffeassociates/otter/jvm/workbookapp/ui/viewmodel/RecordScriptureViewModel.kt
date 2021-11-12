@@ -54,7 +54,6 @@ import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
 import java.text.SimpleDateFormat
-import java.util.*
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -468,8 +467,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun openTargetAudioPlayer() {
         workbookDataStore.targetAudioProperty.value?.let { target ->
-            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-            audioPlayer.load(target.file)
+            target.player.load(target.file)
         }
     }
 
@@ -477,6 +475,7 @@ class RecordScriptureViewModel : ViewModel() {
         takeCardModels.forEach { it.audioPlayer.close() }
         sourceAudioPlayerProperty.value?.close()
         workbookDataStore.targetAudioProperty.value?.player?.close()
+        workbookDataStore.selectedChapterPlayerProperty.value?.close()
     }
 
     fun stopPlayers() {
@@ -495,7 +494,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe {
                     loadTakes()
-                    workbookDataStore.updateTargetAudio()
+                    workbookDataStore.updateSelectedChapterPlayer()
                 }
                 .let { disposables.add(it) }
         }

@@ -107,10 +107,16 @@ internal class AudioPlayerConnection(
     override fun close() {
         connectionFactory.currentConnection?.id?.let {
             if (it == id) {
-                connectionFactory.player.close()
+                connectionFactory.player.release()
                 connectionFactory.currentConnection = null
             }
         }
+        state.position = 0
+        connectionFactory.connections.remove(state.id)
+    }
+
+    override fun release() {
+        connectionFactory.player.release()
         state.position = 0
         connectionFactory.connections.remove(state.id)
     }

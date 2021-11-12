@@ -24,9 +24,11 @@ import io.sentry.Attachment
 import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
+import javafx.geometry.NodeOrientation
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.ErrorReportException
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
@@ -37,7 +39,10 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.*
 
-class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.UncaughtExceptionHandler {
+class OtterExceptionHandler(
+    val directoryProvider: IDirectoryProvider,
+    val localeLanguage: LocaleLanguage
+) : Thread.UncaughtExceptionHandler {
     val logger = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
@@ -103,6 +108,11 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     private fun showErrorDialog(error: Throwable) {
+        val orientation = when (localeLanguage.preferredLanguage?.direction) {
+            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+            else -> NodeOrientation.LEFT_TO_RIGHT
+        }
+
         ExceptionDialog().apply {
             titleTextProperty.set(FX.messages["needsRestart"])
             headerTextProperty.set(FX.messages["yourWorkSaved"])
@@ -111,6 +121,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
             sendReportTextProperty.set(FX.messages["sendErrorReport"])
             stackTraceProperty.set(stringFromError(error))
             closeTextProperty.set(FX.messages["closeApp"])
+            orientationProperty.set(orientation)
 
             onCloseAction {
                 if (sendReportProperty.value) {

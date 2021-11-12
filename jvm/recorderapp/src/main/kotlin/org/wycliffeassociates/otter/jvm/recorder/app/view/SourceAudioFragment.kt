@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
+import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
@@ -36,6 +37,8 @@ class SourceAudioFragment : Fragment() {
         var sourceText: String? = null
         var sourceContentTitle: String? = null
         var license: String? = null
+        var direction: String? = null
+        var sourceDirection: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -43,6 +46,8 @@ class SourceAudioFragment : Fragment() {
             parameters?.let {
                 sourceText = parameters.named["source_text"]
                 license = parameters.named["license"]
+                direction = parameters.named["direction"]
+                sourceDirection = parameters.named["source_direction"]
 
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],
@@ -64,6 +69,18 @@ class SourceAudioFragment : Fragment() {
             licenseProperty.set(license)
 
             contentTitleProperty.set(sourceContentTitle)
+            orientationProperty.set(
+                when (direction) {
+                    "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                    else -> NodeOrientation.LEFT_TO_RIGHT
+                }
+            )
+            sourceOrientationProperty.set(
+                when (sourceDirection) {
+                    "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                    else -> NodeOrientation.LEFT_TO_RIGHT
+                }
+            )
         }
     }
 
