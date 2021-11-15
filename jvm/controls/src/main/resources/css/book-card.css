@@ -31,7 +31,6 @@
 
 .book-card__root {
     -fx-spacing: 20px;
-    -fx-cursor: hand;
 }
 
 .book-card__placeholder {
