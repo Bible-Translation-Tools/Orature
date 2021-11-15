@@ -264,8 +264,11 @@ class ChapterPageViewModel : ViewModel() {
                 chunk.chunkSource?.audio?.selected?.value?.value?.file
             }
 
+            var compiled: File? = null
+
             ConcatenateAudio(directoryProvider).execute(takes)
                 .flatMapCompletable { file ->
+                    compiled = file
                     audioPluginViewModel.import(chapter, file)
                 }
                 .subscribeOn(Schedulers.io())
@@ -274,6 +277,7 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .doFinally {
                     isCompilingProperty.set(false)
+                    compiled?.delete()
                 }
                 .observeOnFx()
                 .subscribe()
