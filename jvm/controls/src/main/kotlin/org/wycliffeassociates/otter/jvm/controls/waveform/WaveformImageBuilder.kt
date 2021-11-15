@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
 import io.reactivex.schedulers.Schedulers
@@ -74,7 +75,7 @@ class WaveformImageBuilder(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
         height: Int = Screen.getMainScreen().platformHeight
-    ): Subject<Image> {
+    ): Observable<Image> {
         // creating replay with lifespan to avoid memory leak
         val waveformStream = ReplaySubject.createWithTime<Image>(
             1, TimeUnit.SECONDS, JavaFxScheduler.platform()
