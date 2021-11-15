@@ -62,12 +62,11 @@ class AudioPlayerController(
     }
 
     fun setPlaybackRate(rate: Double) {
-        println("playback rate seeking")
         player?.let { _player ->
             var wasPlaying = false
             if (_player.isPlaying()) {
                 _player.pause()
-                _player.seek(Integer.max(_player.getLocationInFrames() - 1000, 0))
+                _player.seek(Integer.max(_player.getLocationInFrames(), 0))
                 wasPlaying = true
             }
             _player.changeRate(rate)

@@ -175,7 +175,10 @@ class AudioBufferPlayer(
 
     override fun changeRate(rate: Double) {
         synchronized(monitor) {
+            val resume = player.isActive
+            pause()
             processor.updatePlaybackRate(rate)
+            if (resume) { play() }
             bytes = ByteArray(processor.inputBufferSize * 2)
         }
     }
@@ -207,7 +210,7 @@ class AudioBufferPlayer(
     }
 
     override fun getLocationInFrames(): Int {
-        return startPosition + player.framePosition
+        return (startPosition + (player.framePosition * processor.playbackRate)).toInt()
     }
 
     override fun getLocationMs(): Int {
