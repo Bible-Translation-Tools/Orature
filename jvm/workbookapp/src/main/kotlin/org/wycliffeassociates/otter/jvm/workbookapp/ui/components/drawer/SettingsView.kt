@@ -36,7 +36,9 @@ import tornadofx.*
 class SettingsView : View() {
     private val viewModel: SettingsViewModel by inject()
 
-    private val addPluginDialog: AddPluginDialog = find()
+    private val addPluginDialog: AddPluginDialog = find<AddPluginDialog>().apply {
+        orientationProperty.set(viewModel.orientationProperty.value)
+    }
 
     override val root = vbox {
         addClass("app-drawer__content")
