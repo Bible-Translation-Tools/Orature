@@ -166,6 +166,10 @@ class VerseMarkerChunkTest {
                 AudioCue(4112, "orature-vm-8"),
                 AudioCue(5112, "orature-vm-9"),
             )
+        ),
+        TestData(
+            listOf(AudioCue(10, "verse 10")),
+            listOf(AudioCue(10, "verse 10"), AudioCue(10, "orature-vm-10"))
         )
     )
 
