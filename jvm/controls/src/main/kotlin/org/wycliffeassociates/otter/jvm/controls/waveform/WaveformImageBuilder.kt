@@ -24,7 +24,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.rxjavafx.schedulers.JavaFxScheduler
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.ReplaySubject
+import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
@@ -74,14 +74,12 @@ class WaveformImageBuilder(
     fun buildWaveformAsync(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
-        height: Int = Screen.getMainScreen().platformHeight
-    ): Observable<Image> {
+        height: Int = Screen.getMainScreen().platformHeight,
+        waveformStream: Subject<Image>
+    ): Completable {
         // creating replay with lifespan to avoid memory leak
-        val waveformStream = ReplaySubject.createWithTime<Image>(
-            1, TimeUnit.SECONDS, JavaFxScheduler.platform()
-        )
 
-        Completable.fromAction {
+        return Completable.fromAction {
             reader.open()
             drawPartialImages(reader, width, height, waveformStream)
         }
@@ -92,9 +90,9 @@ class WaveformImageBuilder(
             reader.release()
         }
         .subscribeOn(Schedulers.computation())
-        .subscribe()
+//        .subscribe()
 
-        return waveformStream
+//        return waveformStream
     }
 
     private fun drawPartialImages(

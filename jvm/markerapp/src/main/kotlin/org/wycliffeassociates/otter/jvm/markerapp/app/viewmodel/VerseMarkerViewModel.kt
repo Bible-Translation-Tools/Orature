@@ -23,6 +23,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -66,7 +67,8 @@ class VerseMarkerViewModel : ViewModel() {
     val compositeDisposable = CompositeDisposable()
     lateinit var imagesContainerNode: Node
     val waveformMinimapImage = SimpleObjectProperty<Image>()
-    val waveform: Observable<Image>
+    val waveformBuilder: Completable
+    val waveform = PublishSubject.create<Image>()
     val imageWidth: Double
 
     private val audioFile: File
@@ -101,10 +103,11 @@ class VerseMarkerViewModel : ViewModel() {
                     waveformMinimapImage.set(image)
                 }
 
-            waveform = buildWaveformAsync(
+            waveformBuilder = buildWaveformAsync(
                 AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
-                height = height
+                height = height,
+                waveform
             )
         }
     }
@@ -175,7 +178,7 @@ class VerseMarkerViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(200, TimeUnit.MILLISECONDS)  // exec after UI clean up
+                .delay(300, TimeUnit.MILLISECONDS)  // exec after UI clean up
                 .subscribe {
                     runLater {
                         it.navigateBack()

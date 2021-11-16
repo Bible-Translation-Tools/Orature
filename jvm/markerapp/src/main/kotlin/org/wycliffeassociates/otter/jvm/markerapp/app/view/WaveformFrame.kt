@@ -77,7 +77,11 @@ class WaveformFrame(
                                         }
                                     )
                                 }
-                            viewModel.compositeDisposable.add(disposable)
+                            val disposableBuilder = viewModel.waveformBuilder
+                                .observeOnFx()
+                                .subscribe()
+
+                            viewModel.compositeDisposable.addAll(disposable, disposableBuilder)
                         }
 
                         viewModel.markers.highlightState.forEach {
