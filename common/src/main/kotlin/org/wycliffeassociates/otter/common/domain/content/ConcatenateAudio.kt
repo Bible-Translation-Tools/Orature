@@ -28,7 +28,7 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
     fun execute(files: List<File>): Single<File> {
         return Single.fromCallable {
             val inputFile = AudioFile(files.first())
-            val tempFile = directoryProvider.createTempFile("output", ".${inputFile.file.extension}")
+            val tempFile = directoryProvider.createTempFile("output", ".wav")
             val outputFile = AudioFile(
                 tempFile,
                 inputFile.channels,
