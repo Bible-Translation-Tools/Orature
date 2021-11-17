@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
+import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -46,19 +47,26 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     val root = Region()
 
+    private var imageViewDisposable: ImageView? = null
+
     init {
         children.clear()
 
-        control.waveformImageProperty.onChangeAndDoNow {
-            it?.let { image ->
+        control.waveformImageProperty.addListener { observable, old, new  ->
+            new?.let { it ->
+                val image = Image("file:" + it.path)
                 val imageView = ImageView(image).apply {
                     fitHeightProperty().bind(root.heightProperty())
                     fitWidthProperty().bind(root.widthProperty())
                 }
+                imageViewDisposable = imageView
                 root.getChildList()?.clear()
                 root.add(imageView)
                 root.add(thumb)
                 root.add(playbackLine)
+            }
+            if (old != null && new == null) {
+                imageViewDisposable?.image = null
             }
         }
 

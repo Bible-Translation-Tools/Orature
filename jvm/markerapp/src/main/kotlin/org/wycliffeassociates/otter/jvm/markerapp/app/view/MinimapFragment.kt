@@ -31,7 +31,9 @@ class MinimapFragment : Fragment() {
     val viewModel: VerseMarkerViewModel by inject()
 
     val slider = AudioSlider().apply {
-        waveformImageProperty.bind(viewModel.waveformMinimapImage)
+        viewModel.waveformMinimapImage.addListener { it, old, img ->
+            waveformImageProperty.set(img)
+        }
         player.set(viewModel.audioPlayer)
         secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
     }
@@ -39,6 +41,7 @@ class MinimapFragment : Fragment() {
     override val root = hbox {
         alignment = Pos.CENTER_LEFT
         styleClass.add("vm-minimap-container")
+
         hbox {
             alignment = Pos.CENTER_LEFT
             spacing = 10.0

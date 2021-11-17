@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -66,7 +67,7 @@ class VerseMarkerViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     val compositeDisposable = CompositeDisposable()
     lateinit var imagesContainerNode: Node
-    val waveformMinimapImage = SimpleObjectProperty<Image>()
+    val waveformMinimapImage = SimpleObjectProperty<File>()
     val waveformBuilder: Completable
     val waveform = PublishSubject.create<Image>()
     val imageWidth: Double
@@ -93,7 +94,7 @@ class VerseMarkerViewModel : ViewModel() {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-            build(
+            buildToFile(
                 AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
                 height = 50
@@ -101,6 +102,8 @@ class VerseMarkerViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe { image ->
                     waveformMinimapImage.set(image)
+                }.also {
+                    compositeDisposable.add(it)
                 }
 
             waveformBuilder = buildWaveformAsync(
@@ -167,10 +170,11 @@ class VerseMarkerViewModel : ViewModel() {
     
     fun saveAndQuit() {
         compositeDisposable.clear()
-        waveformMinimapImage.set(null)
 
         runLater {
-            imagesContainerNode?.getChildList()?.clear()
+            waveformMinimapImage.set(null)
+//            minimap?.getChildList()?.clear()
+            imagesContainerNode.getChildList()?.clear()
         }
 
         (scope as ParameterizedScope).let {
@@ -182,6 +186,7 @@ class VerseMarkerViewModel : ViewModel() {
                 .subscribe {
                     runLater {
                         it.navigateBack()
+                        System.gc()
                     }
                 }
         }

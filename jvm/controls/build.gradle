@@ -4,7 +4,7 @@ plugins {
 
 javafx {
     version = "$javafxVer"
-    modules = ['javafx.controls', 'javafx.fxml']
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing']
 }
 
 repositories {
