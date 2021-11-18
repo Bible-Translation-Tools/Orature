@@ -51,7 +51,7 @@
                             <Label fx:id="textNotAvailableText" />
                         </children>
                     </HBox>
-                    <VBox fx:id="sourceTextContainer" alignment="CENTER" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="sourceTextContainer" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
                         <ScrollPane fx:id="sourceTextScroll" styleClass="source-content__scroll-pane" hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
                             <content>
                                 <VBox styleClass="source-content__text-wrapper" spacing="20.0">

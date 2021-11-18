@@ -36,7 +36,7 @@
                         <FontIcon iconLiteral="gmi-hearing" />
                     </graphic>
                 </Label>
-                <Label styleClass="translation-card__divider">
+                <Label fx:id="divider" styleClass="translation-card__divider">
                     <graphic>
                         <FontIcon iconLiteral="mdi-menu-right" />
                     </graphic>

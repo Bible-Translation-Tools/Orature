@@ -36,7 +36,9 @@ import tornadofx.*
 class SettingsView : View() {
     private val viewModel: SettingsViewModel by inject()
 
-    private val addPluginDialog: AddPluginDialog = find()
+    private val addPluginDialog: AddPluginDialog = find<AddPluginDialog>().apply {
+        orientationProperty.set(viewModel.orientationProperty.value)
+    }
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -271,6 +273,7 @@ class SettingsView : View() {
         val successDialog = confirmdialog {
             titleTextProperty.set(messages["settings"])
             messageTextProperty.set(messages["changeLanguageSuccessMessage"])
+            orientationProperty.set(viewModel.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }

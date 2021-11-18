@@ -18,13 +18,16 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
+import javafx.animation.FadeTransition
 import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
+import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
@@ -103,6 +106,13 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
 
         deleteBtn.tooltip(messages["delete"])
         deleteBtn.onActionProperty().bind(card.onTakeDeleteActionProperty)
+        card.deletedProperty.onChangeOnce { deleteRequested ->
+            if (deleteRequested == true) {
+                fade(card) {
+                    card.deletedProperty.set(false)
+                }
+            }
+        }
 
         editBtn.tooltip(messages["edit"])
         editBtn.onActionProperty().bind(card.onTakeEditActionProperty)
@@ -118,5 +128,15 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
+    }
+
+    private fun fade(node: Node, callback: () -> Unit) {
+        val ft = FadeTransition(Duration.millis(600.0), node)
+        ft.fromValue = node.opacity
+        ft.toValue = 0.0
+        ft.onFinished = EventHandler {
+            callback()
+        }
+        ft.play()
     }
 }

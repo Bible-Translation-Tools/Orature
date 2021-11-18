@@ -18,7 +18,7 @@
  */
  @import "/css/base-colors.css"
 
-* {
+.dark-theme {
     /*Primary Color */
     -wa-primary: #015AD9;
     -wa-primary-05: #015AD90D;
@@ -121,21 +121,21 @@
     -wa-dialog-background: -wa-background;
 }
 
-.workspace {
+.dark-theme .workspace {
     -fx-background-color: -wa-background;
 }
 
-.scroll-bar {
+.dark-theme .scroll-bar {
     -fx-background-color: #00000020;
 }
 
-.scroll-bar .thumb {
+.dark-theme .scroll-bar .thumb {
     -fx-background-color: #768198;
     -fx-background-insets: 0, 2, 0;
     -fx-background-radius: 0;
 }
 
-.scroll-bar .increment-button:hover,
-.scroll-bar .decrement-button:hover {
+.dark-theme .scroll-bar .increment-button:hover,
+.dark-theme .scroll-bar .decrement-button:hover {
     -fx-background-color: transparent;
 }

@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.beans.value.ChangeListener
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.image.Image
 import javafx.scene.layout.Priority
@@ -47,6 +48,7 @@ class MinimapFragment : Fragment() {
     override val root = hbox {
         alignment = Pos.CENTER_LEFT
         styleClass.add("vm-minimap-container")
+        nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         hbox {
             alignment = Pos.CENTER_LEFT
