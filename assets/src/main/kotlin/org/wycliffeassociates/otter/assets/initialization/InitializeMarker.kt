@@ -47,7 +47,7 @@ class InitializeMarker @Inject constructor(
         return Completable
             .fromCallable {
                 var installedVersion = installedEntityRepo.getInstalledVersion(this)
-                if (installedVersion != null) {
+                if (installedVersion != version) {
                     log.info("Initializing $name version: $version...")
                     importOtterMarker()
                         .doOnComplete {
