@@ -75,7 +75,7 @@ class AudioBufferPlayer(
         reader = AudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
-            bytes = ByteArray(processor.inputBufferSize * _reader.channels)
+            bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -87,7 +87,7 @@ class AudioBufferPlayer(
         begin = frameStart
         end = frameEnd
         reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
-            bytes = ByteArray(processor.inputBufferSize * _reader.channels)
+            bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -106,11 +106,12 @@ class AudioBufferPlayer(
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     try {
+                        println("playing with rate ${processor.playbackRate}")
                         player.open()
                         player.start()
                         while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                             synchronized(monitor) {
-                                if (_reader.framePosition > bytes.size / _reader.channels) {
+                                if (_reader.framePosition > bytes.size / 2) {
                                     _reader.seek(_reader.framePosition - processor.overlap)
                                 }
                                 val written = _reader.getPcmBuffer(bytes)
