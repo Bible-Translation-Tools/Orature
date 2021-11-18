@@ -18,10 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.device.audio
 
-import be.tarsos.dsp.AudioEvent
-import be.tarsos.dsp.WaveformSimilarityBasedOverlapAdd
-import be.tarsos.dsp.io.TarsosDSPAudioFloatConverter
-import be.tarsos.dsp.io.TarsosDSPAudioFormat
 import com.jakewharton.rxrelay2.PublishRelay
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
@@ -215,53 +211,5 @@ class AudioBufferPlayer(
 
     override fun getLocationMs(): Int {
         return (getLocationInFrames() / 44.1).toInt()
-    }
-}
-
-
-class AudioProcessor {
-
-    val monitor = Object()
-
-    val processorFormat = TarsosDSPAudioFormat(44100f, 16, 1, true, false)
-    val event = AudioEvent(processorFormat)
-    var playbackRate = 1.0
-
-    var wsola = WaveformSimilarityBasedOverlapAdd(
-        WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
-            playbackRate,
-            processorFormat.sampleRate.toDouble()
-        )
-    )
-
-    val overlap: Int
-        get() = synchronized(monitor) { wsola.overlap }
-
-    val inputBufferSize: Int
-        get() = synchronized(monitor) { wsola.inputBufferSize }
-
-    fun updatePlaybackRate(rate: Double) {
-        playbackRate = rate
-        synchronized(monitor) {
-            wsola = WaveformSimilarityBasedOverlapAdd(
-                WaveformSimilarityBasedOverlapAdd.Parameters.speechDefaults(
-                    playbackRate,
-                    processorFormat.sampleRate.toDouble()
-                )
-            )
-        }
-    }
-
-    fun process(bytes: ByteArray): ByteArray {
-        val floats = FloatArray(bytes.size / 2)
-        TarsosDSPAudioFloatConverter.getConverter(processorFormat).toFloatArray(
-            bytes,
-            floats
-        )
-        event.floatBuffer = floats
-        synchronized(monitor) {
-            wsola.process(event)
-        }
-        return event.byteBuffer
     }
 }
