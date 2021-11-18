@@ -40,7 +40,7 @@
                 <FontIcon iconLiteral="mdi-magnify" />
             </right>
         </CustomTextField>
-        <MenuButton fx:id="filterMenu" styleClass="filtered-search-bar__menu">
+        <MenuButton fx:id="filterMenu" styleClass="wa-menu-button">
             <graphic>
                 <FontIcon iconLiteral="mdi-filter-variant" />
             </graphic>

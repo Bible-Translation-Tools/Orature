@@ -63,14 +63,14 @@ class PluginOpenedPage : Fragment() {
             SourceContent().apply {
                 vgrow = Priority.ALWAYS
                 sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
-                audioPlayerProperty.bind(playerProperty)
+                sourceAudioPlayerProperty.bind(playerProperty)
                 targetAudioPlayerProperty.bind(this@PluginOpenedPage.targetAudioPlayerProperty)
                 licenseProperty.bind(this@PluginOpenedPage.licenseProperty)
 
                 audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
                 textNotAvailableTextProperty.set(messages["textNotAvailable"])
-                playLabelProperty.set(messages["playSource"])
-                pauseLabelProperty.set(messages["pauseSource"])
+                playSourceLabelProperty.set(messages["playSource"])
+                pauseSourceLabelProperty.set(messages["pauseSource"])
                 playTargetLabelProperty.set(messages["playTarget"])
                 pauseTargetLabelProperty.set(messages["pauseTarget"])
 

@@ -85,14 +85,14 @@ class RecordScripturePage : View() {
     private val sourceContent =
         SourceContent().apply {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            audioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
+            sourceAudioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             isMinimizableProperty.set(false)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
-            playLabelProperty.set(messages["playSource"])
-            pauseLabelProperty.set(messages["pauseSource"])
+            playSourceLabelProperty.set(messages["playSource"])
+            pauseSourceLabelProperty.set(messages["pauseSource"])
 
             contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)

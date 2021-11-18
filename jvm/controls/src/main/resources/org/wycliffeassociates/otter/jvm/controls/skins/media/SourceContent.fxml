@@ -21,18 +21,16 @@
 
 -->
 
-<?import java.lang.String?>
+<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
-<?import com.jfoenix.controls.JFXButton?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
-<?import com.jfoenix.controls.JFXSlider?>
+<?import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer?>
+<?import java.lang.String?>
 <VBox styleClass="source-content" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox fx:id="titleContainer">
@@ -86,13 +84,7 @@
                                     <String fx:value="btn--primary"/>
                                 </styleClass>
                             </Button>
-                            <JFXSlider fx:id="targetAudioSlider" styleClass="wa-slider" HBox.hgrow="ALWAYS"/>
-                            <Label styleClass="wa-combobox-button">
-                                <graphic>
-                                    <FontIcon iconLiteral="mdi-gauge" iconSize="22" />
-                                </graphic>
-                            </Label>
-                            <ComboBox fx:id="targetAudioPlaybackRate"/>
+                            <SimpleAudioPlayer fx:id="targetPlayer" HBox.hgrow="ALWAYS" />
                         </children>
                         <styleClass>
                             <String fx:value="source-content__audio_container"/>
@@ -113,22 +105,16 @@
                     </HBox>
                     <HBox fx:id="sourceAudioContainer" styleClass="source-content__audio_container" HBox.hgrow="ALWAYS">
                         <children>
-                            <Button fx:id="playBtn">
+                            <Button fx:id="playSourceBtn">
                                 <graphic>
-                                    <FontIcon iconLiteral="mdi-play" iconSize="16"/>
+                                    <FontIcon iconLiteral="mdi-play" />
                                 </graphic>
                                 <styleClass>
                                     <String fx:value="btn"/>
                                     <String fx:value="btn--primary"/>
                                 </styleClass>
                             </Button>
-                            <JFXSlider fx:id="audioSlider" styleClass="wa-slider" HBox.hgrow="ALWAYS"/>
-                            <Label styleClass="wa-combobox-button">
-                                <graphic>
-                                    <FontIcon iconLiteral="mdi-gauge" iconSize="22"/>
-                                </graphic>
-                            </Label>
-                            <ComboBox fx:id="sourceAudioPlaybackRate"/>
+                            <SimpleAudioPlayer fx:id="sourcePlayer" HBox.hgrow="ALWAYS" />
                         </children>
                         <VBox.margin>
                             <Insets top="16.0"/>
