@@ -44,14 +44,14 @@ class VerseMarkerChunk : CueChunk() {
     private fun separateOratureCues(allCues: List<AudioCue>) {
         val oratureRegex = Regex("^orature-vm-(\\d+)$")
         val loneDigitRegex = Regex("^\\d+$")
-        val numberRegex = Regex(".*(\\d+).*")
+        val numberRegex = Regex("(\\d+)")
 
         val oratureCues = allCues.filter { it.label.matches(oratureRegex) }
         val leftoverCues = allCues.filter { !oratureCues.contains(it) }
         val loneDigits = leftoverCues.filter { it.label.trim().matches(loneDigitRegex) }
         val potentialCues = leftoverCues
             .filter { !loneDigits.contains(it) }
-            .filter { it.label.matches(numberRegex) }
+            .filter { numberRegex.containsMatchIn(it.label) }
             .map {
                 val match = numberRegex.find(it.label)
                 val label = match!!.groupValues.first()!!
