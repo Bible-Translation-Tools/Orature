@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
@@ -51,7 +52,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     init {
         children.clear()
 
-        control.waveformMinimapListener = javafx.beans.value.ChangeListener { _, oldValue, newValue ->
+        control.waveformMinimapListener = ChangeListener { _, oldValue, newValue ->
             newValue?.let { it ->
                 val imageView = ImageView(it).apply {
                     fitHeightProperty().bind(root.heightProperty())

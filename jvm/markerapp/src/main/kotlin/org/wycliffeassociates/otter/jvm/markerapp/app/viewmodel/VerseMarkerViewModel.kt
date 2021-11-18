@@ -67,7 +67,7 @@ class VerseMarkerViewModel : ViewModel() {
     val compositeDisposable = CompositeDisposable()
     val imageWidth: Double
 
-    lateinit var imagesContainerNode: Node
+    lateinit var waveformContainerNode: Node
     val waveformMinimapImage = SimpleObjectProperty<Image>()
     val waveformAsyncBuilder: Completable
     val waveform: Observable<Image>
@@ -173,9 +173,10 @@ class VerseMarkerViewModel : ViewModel() {
     fun saveAndQuit() {
         compositeDisposable.clear()
 
+        // clear the UI images to free up memory
         runLater {
             waveformMinimapImage.set(null)
-            imagesContainerNode.getChildList()?.clear()
+            waveformContainerNode.getChildList()?.clear()
         }
 
         (scope as ParameterizedScope).let {
