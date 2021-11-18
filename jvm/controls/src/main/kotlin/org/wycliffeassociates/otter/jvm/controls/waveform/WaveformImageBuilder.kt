@@ -108,7 +108,6 @@ class WaveformImageBuilder(
         height: Int = Screen.getMainScreen().platformHeight,
         waveformStream: Subject<Image>
     ): Completable {
-        // creating replay with lifespan to avoid memory leak
         return Completable.fromAction {
             reader.open()
             drawPartialImages(reader, width, height, waveformStream)

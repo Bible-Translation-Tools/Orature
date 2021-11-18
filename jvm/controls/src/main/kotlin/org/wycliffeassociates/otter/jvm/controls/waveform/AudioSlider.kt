@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.Skin
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
@@ -41,6 +42,8 @@ class AudioSlider(
     val thumbLineColorProperty = SimpleObjectProperty<Paint>(Color.BLACK)
     val secondsToHighlightProperty = SimpleIntegerProperty(1)
 
+    var waveformMinimapListener: ChangeListener<File>? = null
+
     val player = SimpleObjectProperty<IAudioPlayer>()
 
     init {
@@ -58,5 +61,15 @@ class AudioSlider(
 
     override fun createDefaultSkin(): Skin<*> {
         return WaveformSliderSkin(this)
+    }
+
+    /**
+     * Cleans up listeners to release memory usage.
+     * Calls this method when leaving/undocking the view.
+     */
+    fun clearListeners() {
+        if (waveformMinimapListener != null) {
+            waveformImageProperty.removeListener(waveformMinimapListener)
+        }
     }
 }

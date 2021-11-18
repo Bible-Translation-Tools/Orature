@@ -31,7 +31,6 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
-import javafx.scene.image.ImageView
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
@@ -66,11 +65,12 @@ class VerseMarkerViewModel : ViewModel() {
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
     val compositeDisposable = CompositeDisposable()
+    val imageWidth: Double
+
     lateinit var imagesContainerNode: Node
     val waveformMinimapImage = SimpleObjectProperty<File>()
-    val waveformBuilder: Completable
-    val waveform = PublishSubject.create<Image>()
-    val imageWidth: Double
+    val waveformAsyncBuilder: Completable
+    val waveform: Observable<Image>
 
     private val audioFile: File
 
@@ -106,11 +106,13 @@ class VerseMarkerViewModel : ViewModel() {
                     compositeDisposable.add(it)
                 }
 
-            waveformBuilder = buildWaveformAsync(
+            val waveformSubject = PublishSubject.create<Image>()
+            waveform = waveformSubject
+            waveformAsyncBuilder = buildWaveformAsync(
                 AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
                 height = height,
-                waveform
+                waveformSubject
             )
         }
     }
@@ -173,7 +175,6 @@ class VerseMarkerViewModel : ViewModel() {
 
         runLater {
             waveformMinimapImage.set(null)
-//            minimap?.getChildList()?.clear()
             imagesContainerNode.getChildList()?.clear()
         }
 

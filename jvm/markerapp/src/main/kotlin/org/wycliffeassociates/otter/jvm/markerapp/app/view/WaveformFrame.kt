@@ -77,7 +77,9 @@ class WaveformFrame(
                                         }
                                     )
                                 }
-                            val disposableBuilder = viewModel.waveformBuilder
+
+                            // ready to receive images, start building waveform
+                            val disposableBuilder = viewModel.waveformAsyncBuilder
                                 .observeOnFx()
                                 .subscribe()
 
