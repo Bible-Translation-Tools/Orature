@@ -32,20 +32,17 @@ import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.CustomMenuItem
-import javafx.scene.control.Label
 import javafx.scene.control.MenuButton
 import javafx.scene.control.MenuItem
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
-import javafx.scene.paint.Paint
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
-import java.awt.Color
 
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
@@ -128,7 +125,6 @@ class SimpleAudioPlayer(
                 String.format("%.2fx", it)
             })
 
-            setOnHidden {  }
             setOnShown {
                 menuItems.setAll(createPlaybackRateMenu())
             }
