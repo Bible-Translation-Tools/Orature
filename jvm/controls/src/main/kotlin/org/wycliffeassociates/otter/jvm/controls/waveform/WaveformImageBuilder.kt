@@ -68,7 +68,7 @@ class WaveformImageBuilder(
             .doOnError { e ->
                 logger.error("Error in building WaveformImage", e)
             }
-            .doFinally {
+            .doAfterTerminate {
                 reader.release()
             }
             .subscribeOn(Schedulers.computation())
@@ -96,7 +96,7 @@ class WaveformImageBuilder(
             .doOnError { e ->
                 logger.error("Error in building WaveformImage", e)
             }
-            .doFinally {
+            .doAfterTerminate {
                 reader.release()
             }
             .subscribeOn(Schedulers.computation())
@@ -116,7 +116,7 @@ class WaveformImageBuilder(
         .doOnError { e ->
             logger.error("Error in building WaveformImage", e)
         }
-        .doFinally {
+        .doAfterTerminate {
             reader.release()
         }
         .subscribeOn(Schedulers.computation())
