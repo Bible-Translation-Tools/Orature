@@ -530,3 +530,62 @@
 .wa-list-view .label {
     -fx-text-fill: -wa-gray-darker;
 }
+
+/* ------------------- Menu Button --------------- */
+.wa-menu-button {
+    -fx-pref-height: 48px;
+    -fx-padding: 0 10px;
+    -fx-background-color: -wa-filter-button-background;
+    -fx-background-radius: 6px;
+    -fx-alignment: center;
+    -fx-spacing: 7px;
+    -fx-cursor: hand;
+}
+
+.wa-menu-button .context-menu {
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 6px;
+}
+
+.wa-menu-button .menu-item {
+    -fx-background-color: -wa-foreground;
+}
+
+.wa-menu-button .label {
+    -fx-font-family: 'sans-serif';
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-menu-button.menu-button .ikonli-font-icon {
+    -fx-font-size: 24px;
+    -fx-icon-color: -wa-regular-text;
+}
+
+.wa-menu-button__separator .label {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-font-family: 'sans-serif';
+}
+
+.wa-menu-button__large-text {
+    -fx-font-size: 36px;
+}
+
+.wa-menu-button__list-item {
+    -fx-pref-width: 400px;
+    -fx-padding: 15px 20px;
+}
+
+.wa-menu-button__list-item:hover {
+    -fx-background-color: -wa-btn-icon-background-selected;
+    -fx-background-radius: 6px;
+}
+
+.wa-menu-button__list-item:hover .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.wa-menu-button__list-item .label {
+    -fx-font-size: 20px;
+}

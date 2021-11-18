@@ -35,43 +35,7 @@
     -fx-fill: -wa-text-input-fill;
 }
 
-.filtered-search-bar__menu {
-    -fx-pref-width: 88px;
-    -fx-pref-height: 48px;
-    -fx-padding: 0 10px;
-    -fx-background-color: -wa-filter-button-background;
-    -fx-background-radius: 6px;
-    -fx-alignment: center;
-    -fx-spacing: 7px;
-    -fx-cursor: hand;
-}
-
-.filtered-search-bar__menu .context-menu {
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 6px;
-}
-
-.filtered-search-bar__menu .checkbox-button,
-.filtered-search-bar__menu .select-button {
+.wa-menu-button .checkbox-button,
+.wa-menu-button .select-button {
     -fx-pref-width: 300px;
-}
-
-.filtered-search-bar__menu .menu-item {
-    -fx-background-color: -wa-foreground;
-}
-
-.filtered-search-bar__menu .label {
-    -fx-font-family: 'sans-serif';
-}
-
-.filtered-search-bar__menu__separator .label {
-    -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-    -fx-font-family: 'sans-serif';
-}
-
-.filtered-search-bar__menu.menu-button .ikonli-font-icon {
-    -fx-font-size: 24px;
-    -fx-icon-color: -wa-regular-text;
 }

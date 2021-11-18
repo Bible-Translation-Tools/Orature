@@ -20,8 +20,6 @@ package org.wycliffeassociates.otter.jvm.controls.media
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
@@ -35,10 +33,8 @@ import java.text.MessageFormat
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
 
-    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
-    val audioSampleRate = SimpleIntegerProperty(0)
-
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val sourceAudioAvailableProperty: BooleanBinding = sourceAudioPlayerProperty.isNotNull
     val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val sourceTextProperty = SimpleStringProperty()
@@ -50,8 +46,8 @@ class SourceContent : Control() {
     val audioNotAvailableTextProperty = SimpleStringProperty()
     val textNotAvailableTextProperty = SimpleStringProperty()
 
-    val playLabelProperty = SimpleStringProperty()
-    val pauseLabelProperty = SimpleStringProperty()
+    val playSourceLabelProperty = SimpleStringProperty()
+    val pauseSourceLabelProperty = SimpleStringProperty()
 
     val playTargetLabelProperty = SimpleStringProperty()
     val pauseTargetLabelProperty = SimpleStringProperty()
@@ -60,10 +56,6 @@ class SourceContent : Control() {
     val isMinimizableProperty = SimpleBooleanProperty(true)
     val isMinimizedProperty = SimpleBooleanProperty(false)
 
-    val playbackRateOptions = observableListOf("0.25", "0.30", "0.35", "0.40", "0.45", "0.50", "0.55", "0.60", "0.65", "0.70", "0.75", "0.80", "0.85", "0.90", "0.95", "1.0", "1.25", "1.5", "1.75", "2.0")
-    val sourceAudioPlaybackRate = SimpleStringProperty("1.0")
-    val targetAudioPlaybackRate = SimpleStringProperty("1.0")
-    
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
@@ -71,9 +63,6 @@ class SourceContent : Control() {
 
     init {
         initialize()
-        audioPlayerProperty.onChange {
-            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
-        }
         licenseProperty.onChange {
             licenseTextProperty.set(
                 MessageFormat.format(FX.messages["licenseStatement"], it)
