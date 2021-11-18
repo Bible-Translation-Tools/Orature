@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
-import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
@@ -54,7 +53,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
         control.waveformMinimapListener = javafx.beans.value.ChangeListener { _, oldValue, newValue ->
             newValue?.let { it ->
-                val imageView = ImageView(Image("file:" + it.path)).apply {
+                val imageView = ImageView(it).apply {
                     fitHeightProperty().bind(root.heightProperty())
                     fitWidthProperty().bind(root.widthProperty())
                 }

@@ -68,7 +68,7 @@ class VerseMarkerViewModel : ViewModel() {
     val imageWidth: Double
 
     lateinit var imagesContainerNode: Node
-    val waveformMinimapImage = SimpleObjectProperty<File>()
+    val waveformMinimapImage = SimpleObjectProperty<Image>()
     val waveformAsyncBuilder: Completable
     val waveform: Observable<Image>
 
@@ -94,7 +94,7 @@ class VerseMarkerViewModel : ViewModel() {
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
         ).apply {
-            buildToFile(
+            build(
                 AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
                 height = 50

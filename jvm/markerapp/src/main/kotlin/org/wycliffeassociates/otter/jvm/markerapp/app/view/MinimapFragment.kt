@@ -33,7 +33,7 @@ class MinimapFragment : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    lateinit var waveformMinimapListener: ChangeListener<File>
+    lateinit var waveformMinimapListener: ChangeListener<Image>
 
     val slider = AudioSlider().apply {
         waveformMinimapListener = ChangeListener { _, _, it ->

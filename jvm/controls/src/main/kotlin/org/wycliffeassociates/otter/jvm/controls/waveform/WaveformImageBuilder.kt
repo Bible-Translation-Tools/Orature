@@ -23,21 +23,16 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.Subject
-import javafx.embed.swing.SwingFXUtils
 import javafx.scene.image.Image
-import javafx.scene.image.PixelWriter
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
-import java.io.File
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
 
 const val SIGNED_SHORT_MAX = 32767
-private const val TEMP_IMAGE_FORMAT = "png"
 
 class WaveformImageBuilder(
     private val wavColor: Color = Color.BLACK,
@@ -45,7 +40,6 @@ class WaveformImageBuilder(
 ) {
     private val logger = LoggerFactory.getLogger(WaveformImageBuilder::class.java)
     private val partialImageWidth = Screen.getMainScreen().platformWidth
-    private val tempDir = File("E:\\miscs\\temp\\orature")
 
     fun build(
         reader: AudioFileReader,
@@ -59,38 +53,9 @@ class WaveformImageBuilder(
                     val img = WritableImage(width, height)
                     reader.open()
                     renderImage(img, reader, width, height, framesPerPixel)
-                    saveImageToFile(img, tempDir.resolve("minimap.$TEMP_IMAGE_FORMAT"))
                     img
                 } else {
                     WritableImage(1, 1) as Image
-                }
-            }
-            .doOnError { e ->
-                logger.error("Error in building WaveformImage", e)
-            }
-            .doAfterTerminate {
-                reader.release()
-            }
-            .subscribeOn(Schedulers.computation())
-    }
-
-    fun buildToFile(
-        reader: AudioFileReader,
-        width: Int = Screen.getMainScreen().platformWidth,
-        height: Int = Screen.getMainScreen().platformHeight
-    ): Single<File> {
-        return Single
-            .fromCallable {
-                if (width > 0) {
-                    val framesPerPixel = reader.totalFrames / width
-                    val img = WritableImage(width, height)
-                    reader.open()
-                    renderImage(img, reader, width, height, framesPerPixel)
-                    val imageFile = tempDir.resolve("minimap.$TEMP_IMAGE_FORMAT")
-                    saveImageToFile(img, imageFile)
-                    imageFile
-                } else {
-                    File("")
                 }
             }
             .doOnError { e ->
@@ -132,7 +97,6 @@ class WaveformImageBuilder(
         val shortsArray = ShortArray(framesPerPixel)
         val bytes = ByteArray(framesPerPixel * 2)
         var counter = 0
-        var index = 0
 
         // render fixed-width images until the last one
         val lastImageWidth = width % partialImageWidth
@@ -220,14 +184,5 @@ class WaveformImageBuilder(
         val max = ((shortsArray.maxOrNull()?.toInt() ?: 0) - SIGNED_SHORT_MAX).absoluteValue
 
         return scaleToHeight(max, height) until scaleToHeight(min, height)
-    }
-
-    fun saveImageToFile(image: Image, file: File) {
-        val bufferedImage = SwingFXUtils.fromFXImage(image, null)
-        try {
-            ImageIO.write(bufferedImage, TEMP_IMAGE_FORMAT, file)
-        } catch (e: Exception) {
-            logger.error("Error saving image to file", e)
-        }
     }
 }
