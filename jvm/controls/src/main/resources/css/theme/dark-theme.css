@@ -63,6 +63,7 @@
     -wa-breadcrumb-background: -wa-foreground;
     -wa-breadcrumb-background-hover: -wa-foreground-hover;
     -wa-breadcrumb-background-pressed: -wa-foreground-pressed;
+    -wa-breadcrumb-item-background-active: #CDDDF4;
 
     /* tab pane */
     -wa-tab-background: gray;
