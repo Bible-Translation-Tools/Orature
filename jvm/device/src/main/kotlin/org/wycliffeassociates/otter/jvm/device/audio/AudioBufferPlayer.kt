@@ -76,6 +76,9 @@ class AudioBufferPlayer(
             _reader.open()
             _reader
         }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
@@ -87,6 +90,9 @@ class AudioBufferPlayer(
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
+        }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
     }
 
@@ -125,7 +131,7 @@ class AudioBufferPlayer(
                     }
                     playbackThread.start()
                 }
-            }
+            } ?: errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
     }
 

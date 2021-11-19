@@ -78,6 +78,9 @@ class AudioRecorder(
         try {
             line?.open()
             line?.start()
+            if (line == null) {
+                errorRelay.accept(AudioError(AudioErrorType.RECORDING, LineUnavailableException()))
+            }
         } catch (e: LineUnavailableException) {
             errorRelay.accept(AudioError(AudioErrorType.RECORDING, e))
         } catch (e: IllegalArgumentException) {
