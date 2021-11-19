@@ -116,6 +116,7 @@
 
     /* audio player */
     -wa-slider-track-color: -wa-black-05;
+    -wa-slider-border-color: -wa-black-20;
     -wa-recorder-controls-background: #282CBD;
     -wa-waveform-background: #F7FAFF;
     -wa-waveform-background-dark: #ced6e3;

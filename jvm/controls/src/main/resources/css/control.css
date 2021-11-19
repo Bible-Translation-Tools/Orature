@@ -486,7 +486,7 @@
 .wa-slider .track {
     -fx-background-color: -wa-slider-track-color;
     -fx-background-radius: 6px;
-    -fx-border-color: -wa-black-20;
+    -fx-border-color: -wa-slider-border-color;
     -fx-border-radius: 6px;
     -fx-pref-height: 8px;
 }
@@ -520,8 +520,4 @@
 .wa-list-view .list-cell:even,
 .wa-list-view .list-cell:odd {
     -fx-background-color: -wa-transparent;
-}
-
-.wa-list-view .label {
-    -fx-text-fill: -wa-gray-darker;
 }
