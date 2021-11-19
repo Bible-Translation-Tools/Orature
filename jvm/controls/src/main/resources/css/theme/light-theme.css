@@ -91,6 +91,7 @@
     -wa-btn-icon-background-selected: -wa-primary-10;
     -wa-btn-icon-border-color: -wa-black-20;
     -wa-filter-button-background: -wa-black-10;
+    -wa-app-bar-btn-text: -wa-white;
 
     /* text field input */
     -wa-text-input-fill: -wa-black;
