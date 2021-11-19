@@ -106,7 +106,6 @@ class AudioBufferPlayer(
                 startPosition = _reader.framePosition
                 playbackThread = Thread {
                     try {
-                        println("playing with rate ${processor.playbackRate}")
                         player.open()
                         player.start()
                         while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
