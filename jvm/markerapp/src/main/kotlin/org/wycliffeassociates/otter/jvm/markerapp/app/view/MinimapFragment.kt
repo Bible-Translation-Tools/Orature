@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.beans.value.ChangeListener
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
+import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
@@ -31,8 +33,14 @@ class MinimapFragment : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
+    lateinit var waveformMinimapListener: ChangeListener<Image>
+
     val slider = AudioSlider().apply {
-        waveformImageProperty.bind(viewModel.waveformMinimapImage)
+        waveformMinimapListener = ChangeListener { _, _, it ->
+            waveformImageProperty.set(it)
+        }
+        viewModel.waveformMinimapImage.addListener(waveformMinimapListener)
+
         player.set(viewModel.audioPlayer)
         secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
     }
@@ -60,5 +68,11 @@ class MinimapFragment : Fragment() {
                 hgrow = Priority.ALWAYS
             }
         )
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        viewModel.waveformMinimapImage.removeListener(waveformMinimapListener)
+        slider.clearListeners()
     }
 }
