@@ -56,7 +56,7 @@ class ConfigureAudioSystem @Inject constructor(
             try {
                 newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
             } catch (e: Exception) {
-                logger.error("Error in changing active input device.", e)
+                logger.error("Error in changing active output device.", e)
             }
             if (newLine != null) {
                 connectionFactory.setOutputLine(newLine)
