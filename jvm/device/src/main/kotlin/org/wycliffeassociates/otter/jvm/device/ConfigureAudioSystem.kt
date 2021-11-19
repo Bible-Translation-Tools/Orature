@@ -18,14 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.device
 
+import io.reactivex.Maybe
 import javax.inject.Inject
-import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
-import javax.sound.sampled.Control
-import javax.sound.sampled.Line
-import javax.sound.sampled.LineListener
 import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.TargetDataLine
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
@@ -36,6 +34,9 @@ class ConfigureAudioSystem @Inject constructor(
     private val deviceProvider: AudioDeviceProvider,
     private val preferencesRepository: IAppPreferencesRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(ConfigureAudioSystem::class.java)
+
     fun configure() {
         configureLines()
         configureListener()
@@ -51,13 +52,27 @@ class ConfigureAudioSystem @Inject constructor(
 
     private fun configureListener() {
         deviceProvider.activeOutputDevice.subscribe { mixer ->
-            val newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-            connectionFactory.setOutputLine(newLine)
+            var newLine: SourceDataLine? = null
+            try {
+                newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+            } catch (e: Exception) {
+                logger.error("Error in changing active input device.", e)
+            }
+            if (newLine != null) {
+                connectionFactory.setOutputLine(newLine)
+            }
         }
 
         deviceProvider.activeInputDevice.subscribe { mixer ->
-            val newLine = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-            connectionFactory.setInputLine(newLine)
+            var newLine: TargetDataLine? = null
+            try {
+                newLine = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+            } catch (e: Exception) {
+                logger.error("Error in changing active input device.", e)
+            }
+            if (newLine != null) {
+                connectionFactory.setInputLine(newLine)
+            }
         }
     }
 
@@ -76,11 +91,12 @@ class ConfigureAudioSystem @Inject constructor(
             .map { mixer ->
                 var line: SourceDataLine? = null
                 try {
-                    AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-                } catch (e: Exception) { }
-                line
-            }
-            .blockingGet()
+                    line = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                } catch (e: Exception) {
+                }
+                if (line != null) Maybe.just(line) else Maybe.empty()
+                Maybe.empty<SourceDataLine>()
+            }.flatMapMaybe { it }.blockingGet()
     }
 
     private fun getInputLine(): TargetDataLine? {
@@ -98,11 +114,11 @@ class ConfigureAudioSystem @Inject constructor(
             .map { mixer ->
                 var line: TargetDataLine? = null
                 try {
-                    AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                    line = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
                 } catch (e: Exception) {
                 }
-                line
-            }
-            .blockingGet()
+                if (line != null) Maybe.just(line) else Maybe.empty()
+                Maybe.empty<TargetDataLine>()
+            }.flatMapMaybe { it }.blockingGet()
     }
 }
