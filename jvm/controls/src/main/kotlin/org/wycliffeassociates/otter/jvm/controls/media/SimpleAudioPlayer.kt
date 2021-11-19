@@ -30,6 +30,7 @@ import javafx.collections.ObservableList
 import javafx.event.EventTarget
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
+import javafx.geometry.Side
 import javafx.scene.control.Button
 import javafx.scene.control.CustomMenuItem
 import javafx.scene.control.MenuButton
@@ -43,6 +44,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
+import java.text.MessageFormat
 
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
@@ -51,6 +53,7 @@ class SimpleAudioPlayer(
     val playButtonProperty = SimpleObjectProperty<Button>()
     val enablePlaybackRateProperty = SimpleBooleanProperty()
     val audioPlaybackRateProperty = SimpleDoubleProperty(1.0)
+    val menuSideProperty = SimpleObjectProperty<Side>()
 
     val playTextProperty = SimpleStringProperty()
     val pauseTextProperty = SimpleStringProperty()
@@ -64,6 +67,7 @@ class SimpleAudioPlayer(
     private val customPauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
     private val audioSampleRate = SimpleIntegerProperty(0)
     private val playbackRateOptions = observableListOf(0.25, 0.50, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
+    private var customRateProperty = SimpleDoubleProperty(1.0)
     private val menuItems: ObservableList<MenuItem> = observableListOf()
 
     private lateinit var rateSlider: Slider
@@ -120,13 +124,16 @@ class SimpleAudioPlayer(
             graphic = FontIcon(MaterialDesign.MDI_SPEEDOMETER)
 
             menuButton = this
+            popupSideProperty().bind(menuSideProperty)
+
             items.bind(menuItems) { it }
             textProperty().bind(audioPlaybackRateProperty.stringBinding {
                 String.format("%.2fx", it)
             })
 
-            setOnShown {
+            setOnMouseClicked {
                 menuItems.setAll(createPlaybackRateMenu())
+                show()
             }
 
             visibleProperty().bind(enablePlaybackRateProperty)
@@ -205,7 +212,9 @@ class SimpleAudioPlayer(
                             addClass("btn", "btn--secondary", "btn--borderless")
                             text = FX.messages["custom"]
                             action {
+                                menuButton.hide()
                                 menuItems.setAll(createCustomRateMenu())
+                                menuButton.show()
                             }
                         }
                     }
@@ -214,6 +223,16 @@ class SimpleAudioPlayer(
         )
 
         items.addAll(playbackRateMenuItems())
+
+        customRateProperty.value.let { speed ->
+            if (playbackRateOptions.contains(speed).not()) {
+                items.add(
+                    createPlaybackSpeedItem(speed, true) {
+                        audioPlaybackRateProperty.set(speed)
+                    }
+                )
+            }
+        }
 
         return items
     }
@@ -274,6 +293,7 @@ class SimpleAudioPlayer(
                         alignment = Pos.CENTER
                         text = FX.messages["setCustom"]
                         action {
+                            customRateProperty.set(rateSlider.value)
                             audioPlaybackRateProperty.set(rateSlider.value)
                             menuButton.hide()
                         }
@@ -296,17 +316,28 @@ class SimpleAudioPlayer(
 
     private fun createPlaybackSpeedItem(
         speed: Double,
+        isCustom: Boolean = false,
         onSelected: () -> Unit
     ): MenuItem {
         return CustomMenuItem().apply {
+            val formattedValue = String.format("%.2fx", speed)
+            val title = when (isCustom) {
+                true -> MessageFormat.format(
+                    FX.messages["customSpeedRate"],
+                    FX.messages["custom"],
+                    formattedValue
+                )
+                else ->formattedValue
+            }
+
             content = HBox().apply {
                 addClass("wa-menu-button__list-item")
                 label {
                     hgrow = Priority.ALWAYS
-                    text = String.format("%.2fx", speed)
+                    text = title
 
                 }
-                tooltip(String.format("%.2fx", speed))
+                tooltip(title)
             }
             setOnAction {
                 onSelected()
