@@ -87,12 +87,14 @@ class ConfigureAudioSystem @Inject constructor(
                 preferencesRepository.setOutputDevice(deviceName).blockingGet()
                 deviceName
             }
-            .map { deviceName -> deviceProvider.getOutputDevice(deviceName) }
-            .map { mixer ->
+            .map { deviceName ->
+                val mixer = deviceProvider.getOutputDevice(deviceName)
                 var line: SourceDataLine? = null
-                try {
-                    line = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-                } catch (e: Exception) {
+                mixer?.let {
+                    try {
+                        line = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                    } catch (e: Exception) {
+                    }
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()
             }.flatMapMaybe { it }.blockingGet()
@@ -109,12 +111,14 @@ class ConfigureAudioSystem @Inject constructor(
                 preferencesRepository.setInputDevice(deviceName).blockingGet()
                 deviceName
             }
-            .map { deviceName -> deviceProvider.getInputDevice(deviceName) }
-            .map { mixer ->
+            .map { deviceName ->
+                val mixer = deviceProvider.getInputDevice(deviceName)
                 var line: TargetDataLine? = null
-                try {
-                    line = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-                } catch (e: Exception) {
+                mixer?.let {
+                    try {
+                        line = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                    } catch (e: Exception) {
+                    }
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()
             }.flatMapMaybe { it }.blockingGet()
