@@ -23,7 +23,7 @@
     -fx-alignment: center-left;
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
-    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .book-card-cell:hover {
@@ -73,7 +73,7 @@
 }
 
 .book-card-cell__bg {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-background-radius: 6px;
     -fx-alignment: center;
 }

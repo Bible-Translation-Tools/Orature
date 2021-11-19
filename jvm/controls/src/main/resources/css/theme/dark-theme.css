@@ -113,7 +113,7 @@
     -wa-checkbox-button-background-selected: #bdd8ff;
 
     /* shadow effects */
-    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -wa-card-shadow-lower-right: -wa-level0;
 
     /* audio player */
     -wa-slider-track-color: gray;
