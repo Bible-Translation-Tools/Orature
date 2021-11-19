@@ -95,7 +95,6 @@ class ConfigureAudioSystem @Inject constructor(
                 } catch (e: Exception) {
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()
-                Maybe.empty<SourceDataLine>()
             }.flatMapMaybe { it }.blockingGet()
     }
 
@@ -118,7 +117,6 @@ class ConfigureAudioSystem @Inject constructor(
                 } catch (e: Exception) {
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()
-                Maybe.empty<TargetDataLine>()
             }.flatMapMaybe { it }.blockingGet()
     }
 }
