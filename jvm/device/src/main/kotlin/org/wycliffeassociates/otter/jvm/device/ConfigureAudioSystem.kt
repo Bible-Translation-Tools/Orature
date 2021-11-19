@@ -19,7 +19,11 @@
 package org.wycliffeassociates.otter.jvm.device
 
 import javax.inject.Inject
+import javax.sound.sampled.AudioFormat
 import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.Control
+import javax.sound.sampled.Line
+import javax.sound.sampled.LineListener
 import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.TargetDataLine
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -57,33 +61,48 @@ class ConfigureAudioSystem @Inject constructor(
         }
     }
 
-    private fun getOutputLine(): SourceDataLine {
+    private fun getOutputLine(): SourceDataLine? {
         return preferencesRepository
             .getOutputDevice()
             .map { deviceName ->
-                if(deviceName.isBlank()) deviceProvider.getOutputDeviceNames().first() else deviceName
+                val names = deviceProvider.getOutputDeviceNames()
+                if (deviceName.isBlank() && names.isNotEmpty()) names.first() else deviceName
             }
             .map { deviceName ->
                 preferencesRepository.setOutputDevice(deviceName).blockingGet()
                 deviceName
             }
             .map { deviceName -> deviceProvider.getOutputDevice(deviceName) }
-            .map { mixer -> AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer) }
+            .map { mixer ->
+                var line: SourceDataLine? = null
+                try {
+                    AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                } catch (e: Exception) { }
+                line
+            }
             .blockingGet()
     }
 
-    private fun getInputLine(): TargetDataLine {
+    private fun getInputLine(): TargetDataLine? {
         return preferencesRepository
             .getInputDevice()
             .map { deviceName ->
-                if(deviceName.isBlank()) deviceProvider.getInputDeviceNames().first() else deviceName
+                val names = deviceProvider.getInputDeviceNames()
+                if (deviceName.isBlank() && names.isNotEmpty()) names.first() else deviceName
             }
             .map { deviceName ->
                 preferencesRepository.setInputDevice(deviceName).blockingGet()
                 deviceName
             }
             .map { deviceName -> deviceProvider.getInputDevice(deviceName) }
-            .map { mixer -> AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer) }
+            .map { mixer ->
+                var line: TargetDataLine? = null
+                try {
+                    AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                } catch (e: Exception) {
+                }
+                line
+            }
             .blockingGet()
     }
 }
