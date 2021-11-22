@@ -18,7 +18,7 @@
  */
 
 .plugin-opened-page {
-    -fx-background-color: white;
+    -fx-background-color: -wa-background;
 }
 
 .plugin-opened-page__label {
@@ -28,6 +28,7 @@
     -fx-alignment: center;
     -fx-text-alignment: center;
     -fx-wrap-text: true;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .plugin-opened-page__title {
@@ -39,7 +40,7 @@
     -fx-font-weight: normal;
     -fx-padding: 0 20px 20px 20px;
     -fx-text-alignment: justify;
-    -fx-text-fill: -wa-gray-darker;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 1.5em;
 }
 
@@ -57,4 +58,9 @@
 
 .plugin-opened-page__close-button * {
     -fx-fill: -wa-primary;
+}
+
+.plugin-opened-page__source {
+    -fx-border-width: 1px;
+    -fx-border-color: -wa-border-light transparent transparent transparent;
 }
