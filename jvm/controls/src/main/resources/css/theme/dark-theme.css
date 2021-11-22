@@ -115,6 +115,7 @@
 
     /* shadow effects */
     -wa-card-shadow-lower-right: -wa-level0;
+    -wa-card-shadow-lower-right-dark: -wa-level0;
 
     /* audio player */
     -wa-slider-track-color: gray;
