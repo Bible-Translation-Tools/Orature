@@ -34,6 +34,10 @@
     -fx-cursor: hand;
 }
 
+.book-card__new {
+    -fx-cursor: default !important;
+}
+
 .book-card__placeholder {
     -fx-pref-width: 160px;
     -fx-pref-height: 80px;
