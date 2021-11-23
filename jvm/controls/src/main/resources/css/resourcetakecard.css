@@ -82,7 +82,8 @@
 .card__right-region {
     -fx-padding: 30px 70px 30px 30px;
     -fx-background-color: -wa-background;
-    -fx-border-color: transparent transparent transparent -wa-border-light;
+    -fx-border-width: 0 0 0 1px;
+    -fx-border-color: -wa-border-light;
 }
 
 .card__content-text {

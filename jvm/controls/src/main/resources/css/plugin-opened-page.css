@@ -61,6 +61,6 @@
 }
 
 .plugin-opened-page__source {
-    -fx-border-width: 1px;
-    -fx-border-color: -wa-border-light transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -wa-border-light;
 }

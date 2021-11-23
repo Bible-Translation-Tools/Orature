@@ -19,8 +19,8 @@
 
 .vm-header {
     -fx-padding: 20px;
-    -fx-border-color: -wa-border-light transparent -wa-border-light transparent;
-    -fx-border-width: 1px;
+    -fx-border-color: -wa-border-light;
+    -fx-border-width: 1px 0 1px 0;
     -fx-border-style: solid;
 }
 
