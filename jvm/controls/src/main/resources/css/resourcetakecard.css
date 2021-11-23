@@ -59,7 +59,7 @@
 }
 
 .card--resource-take--empty {
-    -fx-background-color: -wa-card-placeholder-empty;
+    -fx-background-color: -wa-card-drag-drop-placeholder;
     -fx-background-radius: 10px;
     -fx-max-width: 500px;
     -fx-pref-height: 90px;

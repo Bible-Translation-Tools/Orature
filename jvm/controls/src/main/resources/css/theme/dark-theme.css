@@ -75,7 +75,8 @@
     /* place holder, empty area */
     -wa-drag-drop-area: -wa-background;
     -wa-card-image-placeholder-background: #b3b3b3;
-    -wa-card-placeholder-empty: -wa-card-image-placeholder-background;
+    -wa-card-drag-drop-placeholder: -wa-card-image-placeholder-background;
+    -wa-take-card-placeholder: -wa-white-05;
 
     /* buttons */
     -wa-primary-btn-text-fill: -wa-white;
