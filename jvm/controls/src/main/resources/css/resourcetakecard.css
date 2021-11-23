@@ -32,7 +32,7 @@
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-black-20;
+    -fx-border-color: -wa-border-light;
     -fx-border-radius: 6px;
     -fx-max-width: 500px;
 }
