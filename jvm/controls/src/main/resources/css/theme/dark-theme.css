@@ -51,10 +51,13 @@
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: #e6e6e6;
     -wa-note-text: #c0bfbf;
-    -wa-status-active: #2ec144;
     -wa-highlight-text: -wa-accent-light;
     -wa-disabled-text: gray;
     -wa-disabled-background: #ffffff20;
+    -wa-status-active: #2ec144;
+    -wa-inverse-text: -wa-gray-dark;
+
+    /* borders */
     -wa-border-neutral: #cccccc;
     -wa-fill-neutral: #cccccc;
     -wa-border-light: gray;

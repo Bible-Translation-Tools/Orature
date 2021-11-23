@@ -48,7 +48,7 @@
 }
 
 .source-content__not-available .label {
-    -fx-text-fill: -wa-gray-dark;
+    -fx-text-fill: -wa-inverse-text;
 }
 
 .source-content__minimize-btn {
