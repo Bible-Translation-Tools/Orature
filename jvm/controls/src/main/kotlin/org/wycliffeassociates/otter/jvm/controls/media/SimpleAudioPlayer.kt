@@ -33,7 +33,6 @@ import javafx.geometry.Pos
 import javafx.geometry.Side
 import javafx.scene.control.Button
 import javafx.scene.control.CustomMenuItem
-import javafx.scene.control.MenuButton
 import javafx.scene.control.MenuItem
 import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
@@ -41,6 +40,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.button.WaMenuButton
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
@@ -71,7 +71,7 @@ class SimpleAudioPlayer(
     private val menuItems: ObservableList<MenuItem> = observableListOf()
 
     private lateinit var rateSlider: Slider
-    private lateinit var menuButton: MenuButton
+    private val menuButton = WaMenuButton()
 
     init {
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
@@ -119,26 +119,18 @@ class SimpleAudioPlayer(
             }
         )
 
-        menubutton {
-            addClass("wa-menu-button")
-            graphic = FontIcon(MaterialDesign.MDI_SPEEDOMETER)
+        add(
+            menuButton.apply {
+                buttonTextProperty.bind(audioPlaybackRateProperty.stringBinding {
+                    String.format("%.2fx", it)
+                })
+                sideProperty.bind(menuSideProperty)
+                items.bind(menuItems) { it }
 
-            menuButton = this
-            popupSideProperty().bind(menuSideProperty)
-
-            items.bind(menuItems) { it }
-            textProperty().bind(audioPlaybackRateProperty.stringBinding {
-                String.format("%.2fx", it)
-            })
-
-            setOnMouseClicked {
-                menuItems.setAll(createPlaybackRateMenu())
-                show()
+                visibleProperty().bind(enablePlaybackRateProperty)
+                managedProperty().bind(visibleProperty())
             }
-
-            visibleProperty().bind(enablePlaybackRateProperty)
-            managedProperty().bind(visibleProperty())
-        }
+        )
 
         initController()
     }
@@ -212,7 +204,6 @@ class SimpleAudioPlayer(
                             addClass("btn", "btn--secondary", "btn--borderless")
                             text = FX.messages["custom"]
                             action {
-                                menuButton.hide()
                                 menuItems.setAll(createCustomRateMenu())
                                 menuButton.show()
                             }
@@ -258,6 +249,7 @@ class SimpleAudioPlayer(
                             text = FX.messages["cancel"]
                             action {
                                 menuItems.setAll(createPlaybackRateMenu())
+                                menuButton.show()
                             }
                         }
                     }
@@ -265,8 +257,8 @@ class SimpleAudioPlayer(
                         addClass("wa-slider")
 
                         rateSlider = this
-                        min = 0.25
-                        max = 2.0
+                        min = playbackRateOptions.first()
+                        max = playbackRateOptions.last()
 
                         value = audioPlaybackRateProperty.value
 
@@ -295,6 +287,7 @@ class SimpleAudioPlayer(
                         action {
                             customRateProperty.set(rateSlider.value)
                             audioPlaybackRateProperty.set(rateSlider.value)
+                            menuItems.setAll(createPlaybackRateMenu())
                             menuButton.hide()
                         }
                         fitToParentWidth()

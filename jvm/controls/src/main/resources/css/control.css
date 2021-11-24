@@ -542,6 +542,11 @@
     -fx-cursor: hand;
 }
 
+.wa-menu-button__content {
+    -fx-alignment: center;
+    -fx-spacing: 6px;
+}
+
 .wa-menu-button .context-menu {
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
@@ -556,8 +561,8 @@
     -fx-text-fill: -wa-regular-text;
 }
 
-.wa-menu-button.menu-button .ikonli-font-icon {
-    -fx-font-size: 24px;
+.wa-menu-button.button .ikonli-font-icon {
+    -fx-icon-size: 34;
     -fx-icon-color: -wa-regular-text;
 }
 
@@ -588,4 +593,9 @@
 
 .wa-menu-button__list-item .label {
     -fx-font-size: 20px;
+}
+
+.wa-menu-button__arrow .ikonli-font-icon {
+   -fx-icon-size: 12 !important;
+   -fx-icon-color: -wa-regular-text;
 }

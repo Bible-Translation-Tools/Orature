@@ -140,7 +140,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playButtonProperty.set(playSourceBtn)
             playTextProperty.bind(sourceContent.playSourceLabelProperty)
             pauseTextProperty.bind(sourceContent.pauseSourceLabelProperty)
-            menuSideProperty.set(Side.RIGHT)
+            menuSideProperty.set(Side.TOP)
         }
 
         targetPlayer.apply {
@@ -149,7 +149,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playButtonProperty.set(playTargetBtn)
             playTextProperty.bind(sourceContent.playTargetLabelProperty)
             pauseTextProperty.bind(sourceContent.pauseTargetLabelProperty)
-            menuSideProperty.set(Side.RIGHT)
+            menuSideProperty.set(Side.TOP)
         }
 
         sourceAudioBlock.apply {
