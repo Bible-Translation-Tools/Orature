@@ -76,8 +76,9 @@
     -wa-selected-tab-line: -wa-accent;
     -wa-selected-tab-label: -wa-accent-light;
 
-    /* place holder, empty area */
+    /* place holder, drag drop */
     -wa-drag-drop-area: -wa-background;
+    -wa-drag-drop-target-overlay: #b3ccff30;
     -wa-card-image-placeholder-background: #b3b3b3;
     -wa-card-drag-drop-placeholder: -wa-card-image-placeholder-background;
     -wa-take-card-placeholder: -wa-white-05;
