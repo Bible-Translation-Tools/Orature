@@ -112,7 +112,7 @@ class RootView : View() {
 
             backgroundImageProperty.set(resources.image("/images/audio_error.png"))
             cancelButtonTextProperty.set(messages["close"])
-            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            orientationProperty.bind(settingsViewModel.orientationProperty)
 
             errorTypeProperty.bind(viewModel.audioErrorType)
 
