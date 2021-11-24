@@ -61,6 +61,7 @@
     -wa-border-neutral: -wa-gray;
     -wa-fill-neutral: -wa-gray;
     -wa-border-light: -wa-gray-lighter;
+    -wa-list-item-border-light: -wa-black-10;
 
     /* breadcrumb, navigation */
     -wa-breadcrumb-background: white;
