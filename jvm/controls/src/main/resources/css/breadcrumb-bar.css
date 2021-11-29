@@ -71,10 +71,6 @@
     -fx-underline: false;
 }
 
-.breadcrumb--active:disabled {
-    -fx-background-color: transparent;
-}
-
 .breadcrumb--active .ikonli-font-icon {
     -fx-icon-color: -wa-primary-dark;
 }
