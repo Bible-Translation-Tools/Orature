@@ -26,10 +26,10 @@ internal class AudioRecorderConnectionFactory(
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) {
 
-    private lateinit var inputLine: TargetDataLine
+    private var inputLine: TargetDataLine? = null
 
     @Synchronized
-    fun setLine(newLine: TargetDataLine) {
+    fun setLine(newLine: TargetDataLine?) {
         inputLine = newLine
     }
 

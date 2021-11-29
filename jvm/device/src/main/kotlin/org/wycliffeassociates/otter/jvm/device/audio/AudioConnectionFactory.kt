@@ -33,12 +33,12 @@ class AudioConnectionFactory(
     private val recorderConnectionFactory = AudioRecorderConnectionFactory(errorRelay)
 
     @Synchronized
-    fun setOutputLine(newLine: SourceDataLine) {
+    fun setOutputLine(newLine: SourceDataLine?) {
         playerConnectionFactory.setLine(newLine)
     }
 
     @Synchronized
-    fun setInputLine(newLine: TargetDataLine) {
+    fun setInputLine(newLine: TargetDataLine?) {
         recorderConnectionFactory.setLine(newLine)
     }
 
