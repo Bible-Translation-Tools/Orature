@@ -125,6 +125,10 @@ class AudioBufferPlayer(
                                     player.write(output, 0, output.size)
                                 }
                             }
+                        } catch (e: LineUnavailableException) {
+                            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
+                        } catch (e: IllegalArgumentException) {
+                            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                         }
                     }
                     playbackThread.start()
@@ -168,10 +172,12 @@ class AudioBufferPlayer(
 
     override fun changeRate(rate: Double) {
         synchronized(monitor) {
-            val resume = player.isActive
+            val resume = player?.isActive ?: false
             pause()
             processor.updatePlaybackRate(rate)
-            if (resume) { play() }
+            if (resume) {
+                play()
+            }
             bytes = ByteArray(processor.inputBufferSize * 2)
         }
     }
