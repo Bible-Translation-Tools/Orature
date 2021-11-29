@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
@@ -46,21 +47,30 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     val root = Region()
 
+    private var imageViewDisposable: ImageView? = null
+
     init {
         children.clear()
 
-        control.waveformImageProperty.onChangeAndDoNow {
-            it?.let { image ->
-                val imageView = ImageView(image).apply {
+        control.waveformMinimapListener = ChangeListener { _, oldValue, newValue ->
+            newValue?.let { it ->
+                val imageView = ImageView(it).apply {
                     fitHeightProperty().bind(root.heightProperty())
                     fitWidthProperty().bind(root.widthProperty())
                 }
+                imageViewDisposable = imageView
                 root.getChildList()?.clear()
                 root.add(imageView)
                 root.add(thumb)
                 root.add(playbackLine)
             }
+
+            // clear minimap image when exiting marker app - free up memory
+            if (newValue == null && oldValue != null) {
+                imageViewDisposable?.image = null
+            }
         }
+        control.waveformImageProperty.addListener(control.waveformMinimapListener)
 
         children.add(root)
 

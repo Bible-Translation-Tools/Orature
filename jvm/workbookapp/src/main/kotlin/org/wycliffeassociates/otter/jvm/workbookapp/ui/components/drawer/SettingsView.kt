@@ -181,11 +181,13 @@ class SettingsView : View() {
                         label {
                             addClass("app-drawer__plugin-header__icon")
                             graphic = FontIcon(MaterialDesign.MDI_MICROPHONE)
+                            tooltip(messages["record"])
                         }
 
                         label {
                             addClass("app-drawer__plugin-header__icon")
                             graphic = FontIcon(MaterialDesign.MDI_PENCIL)
+                            tooltip(messages["edit"])
                         }
                     }
 

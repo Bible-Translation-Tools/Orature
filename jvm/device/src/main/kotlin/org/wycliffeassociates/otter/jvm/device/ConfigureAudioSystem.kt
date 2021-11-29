@@ -18,10 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.device
 
+import io.reactivex.Maybe
 import javax.inject.Inject
 import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.SourceDataLine
 import javax.sound.sampled.TargetDataLine
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
@@ -32,6 +34,9 @@ class ConfigureAudioSystem @Inject constructor(
     private val deviceProvider: AudioDeviceProvider,
     private val preferencesRepository: IAppPreferencesRepository
 ) {
+
+    private val logger = LoggerFactory.getLogger(ConfigureAudioSystem::class.java)
+
     fun configure() {
         configureLines()
         configureListener()
@@ -47,43 +52,75 @@ class ConfigureAudioSystem @Inject constructor(
 
     private fun configureListener() {
         deviceProvider.activeOutputDevice.subscribe { mixer ->
-            val newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-            connectionFactory.setOutputLine(newLine)
+            var newLine: SourceDataLine? = null
+            try {
+                newLine = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+            } catch (e: Exception) {
+                logger.error("Error in changing active output device.", e)
+            }
+            if (newLine != null) {
+                connectionFactory.setOutputLine(newLine)
+            }
         }
 
         deviceProvider.activeInputDevice.subscribe { mixer ->
-            val newLine = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
-            connectionFactory.setInputLine(newLine)
+            var newLine: TargetDataLine? = null
+            try {
+                newLine = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+            } catch (e: Exception) {
+                logger.error("Error in changing active input device.", e)
+            }
+            if (newLine != null) {
+                connectionFactory.setInputLine(newLine)
+            }
         }
     }
 
-    private fun getOutputLine(): SourceDataLine {
+    private fun getOutputLine(): SourceDataLine? {
         return preferencesRepository
             .getOutputDevice()
             .map { deviceName ->
-                if(deviceName.isBlank()) deviceProvider.getOutputDeviceNames().first() else deviceName
+                val names = deviceProvider.getOutputDeviceNames()
+                if (deviceName.isBlank() && names.isNotEmpty()) names.first() else deviceName
             }
             .map { deviceName ->
                 preferencesRepository.setOutputDevice(deviceName).blockingGet()
                 deviceName
             }
-            .map { deviceName -> deviceProvider.getOutputDevice(deviceName) }
-            .map { mixer -> AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer) }
-            .blockingGet()
+            .map { deviceName ->
+                val mixer = deviceProvider.getOutputDevice(deviceName)
+                var line: SourceDataLine? = null
+                mixer?.let {
+                    try {
+                        line = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                    } catch (e: Exception) {
+                    }
+                }
+                if (line != null) Maybe.just(line) else Maybe.empty()
+            }.flatMapMaybe { it }.blockingGet()
     }
 
-    private fun getInputLine(): TargetDataLine {
+    private fun getInputLine(): TargetDataLine? {
         return preferencesRepository
             .getInputDevice()
             .map { deviceName ->
-                if(deviceName.isBlank()) deviceProvider.getInputDeviceNames().first() else deviceName
+                val names = deviceProvider.getInputDeviceNames()
+                if (deviceName.isBlank() && names.isNotEmpty()) names.first() else deviceName
             }
             .map { deviceName ->
                 preferencesRepository.setInputDevice(deviceName).blockingGet()
                 deviceName
             }
-            .map { deviceName -> deviceProvider.getInputDevice(deviceName) }
-            .map { mixer -> AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer) }
-            .blockingGet()
+            .map { deviceName ->
+                val mixer = deviceProvider.getInputDevice(deviceName)
+                var line: TargetDataLine? = null
+                mixer?.let {
+                    try {
+                        line = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
+                    } catch (e: Exception) {
+                    }
+                }
+                if (line != null) Maybe.just(line) else Maybe.empty()
+            }.flatMapMaybe { it }.blockingGet()
     }
 }

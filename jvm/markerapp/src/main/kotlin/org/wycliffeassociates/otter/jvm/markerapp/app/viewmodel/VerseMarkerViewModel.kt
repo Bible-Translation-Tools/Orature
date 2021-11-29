@@ -22,10 +22,13 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
@@ -40,6 +43,7 @@ import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
+import java.util.concurrent.TimeUnit
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -60,9 +64,13 @@ class VerseMarkerViewModel : ViewModel() {
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
     val positionProperty = SimpleDoubleProperty(0.0)
-    val waveformMinimapImage = SimpleObjectProperty<Image>()
-    val waveform: Observable<Image>
+    val compositeDisposable = CompositeDisposable()
     val imageWidth: Double
+
+    lateinit var waveformContainerNode: Node
+    val waveformMinimapImage = SimpleObjectProperty<Image>()
+    val waveformAsyncBuilder: Completable
+    val waveform: Observable<Image>
 
     private val audioFile: File
 
@@ -94,12 +102,17 @@ class VerseMarkerViewModel : ViewModel() {
                 .observeOnFx()
                 .subscribe { image ->
                     waveformMinimapImage.set(image)
+                }.also {
+                    compositeDisposable.add(it)
                 }
 
-            waveform = buildWaveformAsync(
+            val waveformSubject = PublishSubject.create<Image>()
+            waveform = waveformSubject
+            waveformAsyncBuilder = buildWaveformAsync(
                 AudioFile(audioFile).reader(),
                 width = imageWidth.toInt(),
-                height = height
+                height = height,
+                waveformSubject
             )
         }
     }
@@ -156,15 +169,27 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.close()
         return markers.writeMarkers()
     }
-
+    
     fun saveAndQuit() {
+        compositeDisposable.clear()
+
+        // clear the UI images to free up memory
+        runLater {
+            waveformMinimapImage.set(null)
+            waveformContainerNode.getChildList()?.clear()
+        }
+
         (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
+                .delay(300, TimeUnit.MILLISECONDS)  // exec after UI clean up
                 .subscribe {
-                    it.navigateBack()
+                    runLater {
+                        it.navigateBack()
+                        System.gc()
+                    }
                 }
         }
     }

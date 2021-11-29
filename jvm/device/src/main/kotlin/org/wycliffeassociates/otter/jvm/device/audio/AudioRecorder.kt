@@ -30,7 +30,7 @@ import javax.sound.sampled.TargetDataLine
 private const val DEFAULT_BUFFER_SIZE = 1024
 
 class AudioRecorder(
-    val line: TargetDataLine,
+    val line: TargetDataLine?,
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioRecorder {
 
@@ -47,22 +47,24 @@ class AudioRecorder(
         .fromCallable {
             val byteArray = ByteArray(DEFAULT_BUFFER_SIZE)
             var totalRead = 0
-            while (true) {
-                if (line.isOpen || line.available() > 0) {
-                    totalRead += line.read(byteArray, 0, byteArray.size)
-                    audioByteObservable.onNext(byteArray)
-                } else {
-                    try {
-                        synchronized(monitor) {
-                            monitor.wait()
+            line?.let {
+                while (true) {
+                    if (line.isOpen || line.available() > 0) {
+                        totalRead += line.read(byteArray, 0, byteArray.size)
+                        audioByteObservable.onNext(byteArray)
+                    } else {
+                        try {
+                            synchronized(monitor) {
+                                monitor.wait()
+                            }
+                        } catch (e: InterruptedException) {
+                            stop()
                         }
-                    } catch (e: InterruptedException) {
-                        stop()
                     }
-                }
-                if (stop || pause) {
-                    line.close()
-                    if (stop) break
+                    if (stop || pause) {
+                        line.close()
+                        if (stop) break
+                    }
                 }
             }
             stop = false
@@ -74,8 +76,11 @@ class AudioRecorder(
     override fun start() {
         pause = false
         try {
-            line.open()
-            line.start()
+            line?.open()
+            line?.start()
+            if (line == null) {
+                errorRelay.accept(AudioError(AudioErrorType.RECORDING, LineUnavailableException()))
+            }
         } catch (e: LineUnavailableException) {
             errorRelay.accept(AudioError(AudioErrorType.RECORDING, e))
         } catch (e: IllegalArgumentException) {
@@ -87,12 +92,12 @@ class AudioRecorder(
     }
 
     override fun pause() {
-        line.stop()
+        line?.stop()
         pause = true
     }
 
     override fun stop() {
-        line.stop()
+        line?.stop()
         stop = true
 
         // wakes up the recording thread to allow it to close

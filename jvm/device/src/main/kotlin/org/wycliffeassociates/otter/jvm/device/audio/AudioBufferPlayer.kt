@@ -31,7 +31,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 
 
 class AudioBufferPlayer(
-    private val player: SourceDataLine,
+    private val player: SourceDataLine?,
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioPlayer {
 
@@ -80,6 +80,9 @@ class AudioBufferPlayer(
             _reader.open()
             _reader
         }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
     }
 
     override fun loadSection(file: File, frameStart: Int, frameEnd: Int) {
@@ -92,6 +95,9 @@ class AudioBufferPlayer(
             _reader.open()
             _reader
         }
+        if (player == null) {
+            errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
+        }
     }
 
     override fun getAudioReader(): AudioFileReader? {
@@ -100,40 +106,30 @@ class AudioBufferPlayer(
 
     override fun play() {
         reader?.let { _reader ->
-            if (!player.isActive) {
-                listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
-                pause.set(false)
-                startPosition = _reader.framePosition
-                playbackThread = Thread {
-                    try {
-                        player.open()
-                        player.start()
-                        while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
-                            synchronized(monitor) {
-                                if (_reader.framePosition > bytes.size / 2) {
-                                    _reader.seek(_reader.framePosition - processor.overlap)
+            player?.let {
+                if (!player.isActive) {
+                    listeners.forEach { it.onEvent(AudioPlayerEvent.PLAY) }
+                    pause.set(false)
+                    startPosition = _reader.framePosition
+                    playbackThread = Thread {
+                        try {
+                            player.open()
+                            player.start()
+                            while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
+                                synchronized(monitor) {
+                                    if (_reader.framePosition > bytes.size / 2) {
+                                        _reader.seek(_reader.framePosition - processor.overlap)
+                                    }
+                                    val written = _reader.getPcmBuffer(bytes)
+                                    val output = processor.process(bytes)
+                                    player.write(output, 0, output.size)
                                 }
-                                val written = _reader.getPcmBuffer(bytes)
-                                val output = processor.process(bytes)
-                                player.write(output, 0, output.size)
                             }
                         }
-                        player.drain()
-                        if (!pause.get()) {
-                            startPosition = 0
-                            listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
-                            player.close()
-                            seek(0)
-                        }
-                    } catch (e: LineUnavailableException) {
-                        errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
-                    } catch (e: IllegalArgumentException) {
-                        errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                     }
-
+                    playbackThread.start()
                 }
-                playbackThread.start()
-            }
+            } ?: errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, LineUnavailableException()))
         }
     }
 
@@ -142,9 +138,11 @@ class AudioBufferPlayer(
             val stoppedAt = getLocationInFrames()
             startPosition = stoppedAt
             pause.set(true)
-            player.stop()
-            player.flush()
-            player.close()
+            player?.let {
+                player.stop()
+                player.flush()
+                player.close()
+            }
             listeners.forEach { it.onEvent(AudioPlayerEvent.PAUSE) }
             _reader.seek(stoppedAt)
         }
@@ -179,12 +177,12 @@ class AudioBufferPlayer(
     }
 
     override fun seek(position: Int) {
-        val resume = player.isActive
-        player.stop()
+        val resume = player?.isActive ?: false
+        player?.stop()
         if (::playbackThread.isInitialized) {
             playbackThread.interrupt()
         }
-        player.flush()
+        player?.flush()
         startPosition = position
         reader?.seek(position)
         if (resume) {
@@ -193,7 +191,7 @@ class AudioBufferPlayer(
     }
 
     override fun isPlaying(): Boolean {
-        return player.isRunning
+        return player?.isRunning ?: false
     }
 
     override fun getDurationInFrames(): Int {
@@ -205,7 +203,7 @@ class AudioBufferPlayer(
     }
 
     override fun getLocationInFrames(): Int {
-        return (startPosition + (player.framePosition * processor.playbackRate)).toInt()
+        return (startPosition + ((player?.framePosition ?: 0) * processor.playbackRate)).toInt()
     }
 
     override fun getLocationMs(): Int {
