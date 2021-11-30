@@ -86,7 +86,7 @@ class SimpleAudioPlayer(
             addClass("btn", "btn--icon")
             textProperty().bind(playPauseTextBinding())
             tooltip {
-                textProperty().bind(playPauseTextBinding())
+                textProperty().bind(playPauseTextBinding(true))
             }
             graphicProperty().bind(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
@@ -144,7 +144,7 @@ class SimpleAudioPlayer(
                 button.apply {
                     textProperty().bind(playPauseTextBinding())
                     tooltip {
-                        textProperty().bind(playPauseTextBinding())
+                        textProperty().bind(playPauseTextBinding(true))
                     }
                     graphicProperty().bind(
                         audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
@@ -165,12 +165,19 @@ class SimpleAudioPlayer(
         menuItems.setAll(createPlaybackRateMenu())
     }
 
-    private fun playPauseTextBinding(): StringBinding {
+    private fun playPauseTextBinding(tooltip: Boolean = false): StringBinding {
         return Bindings.createStringBinding(
             {
-                if (audioPlayerController.isPlayingProperty.value == true) {
-                    pauseTextProperty.value
-                } else playTextProperty.value
+                val isPlaying = audioPlayerController.isPlayingProperty.value ?: false
+                var pauseText = pauseTextProperty.value
+                var playText = playTextProperty.value
+
+                if (tooltip) {
+                    pauseText = pauseText ?: FX.messages["pause"]
+                    playText = playText ?: FX.messages["play"]
+                }
+
+                if (isPlaying) pauseText else playText
             },
             audioPlayerController.isPlayingProperty,
             playTextProperty
