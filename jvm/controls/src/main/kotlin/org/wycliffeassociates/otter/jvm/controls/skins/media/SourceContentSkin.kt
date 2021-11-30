@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.media
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
+import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
@@ -139,6 +140,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playButtonProperty.set(playSourceBtn)
             playTextProperty.bind(sourceContent.playSourceLabelProperty)
             pauseTextProperty.bind(sourceContent.pauseSourceLabelProperty)
+            menuSideProperty.set(Side.TOP)
         }
 
         targetPlayer.apply {
@@ -147,6 +149,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playButtonProperty.set(playTargetBtn)
             playTextProperty.bind(sourceContent.playTargetLabelProperty)
             pauseTextProperty.bind(sourceContent.pauseTargetLabelProperty)
+            menuSideProperty.set(Side.TOP)
         }
 
         sourceAudioBlock.apply {
