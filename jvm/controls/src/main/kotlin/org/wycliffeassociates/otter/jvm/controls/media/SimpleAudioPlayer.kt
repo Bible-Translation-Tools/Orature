@@ -90,10 +90,7 @@ class SimpleAudioPlayer(
             }
             graphicProperty().bind(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
-                    when (isPlaying) {
-                        true -> pauseIcon
-                        else -> playIcon
-                    }
+                    if (isPlaying == true) pauseIcon else playIcon
                 }
             )
             action {
@@ -151,10 +148,7 @@ class SimpleAudioPlayer(
                     }
                     graphicProperty().bind(
                         audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
-                            when (isPlaying) {
-                                true -> customPauseIcon
-                                else -> customPlayIcon
-                            }
+                            if (isPlaying == true) customPauseIcon else customPlayIcon
                         }
                     )
                     action {
@@ -174,10 +168,9 @@ class SimpleAudioPlayer(
     private fun playPauseTextBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
-                when (audioPlayerController.isPlayingProperty.value) {
-                    true -> pauseTextProperty.value
-                    else -> playTextProperty.value
-                }
+                if (audioPlayerController.isPlayingProperty.value == true) {
+                    pauseTextProperty.value
+                } else playTextProperty.value
             },
             audioPlayerController.isPlayingProperty,
             playTextProperty
@@ -314,14 +307,13 @@ class SimpleAudioPlayer(
     ): MenuItem {
         return CustomMenuItem().apply {
             val formattedValue = String.format("%.2fx", speed)
-            val title = when (isCustom) {
-                true -> MessageFormat.format(
+            val title = if (isCustom) {
+                MessageFormat.format(
                     FX.messages["customSpeedRate"],
                     FX.messages["custom"],
                     formattedValue
                 )
-                else ->formattedValue
-            }
+            } else formattedValue
 
             content = HBox().apply {
                 addClass("wa-menu-button__list-item")
