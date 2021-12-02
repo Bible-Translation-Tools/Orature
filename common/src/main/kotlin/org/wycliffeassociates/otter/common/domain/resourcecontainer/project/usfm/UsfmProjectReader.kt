@@ -181,8 +181,13 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
 fun VMarker.getText(): String {
     val text = this.getChildMarkers(TextBlock::class.java)
     val sb = StringBuilder()
+    var previousEndsInWhitespace = false
     for (txt in text) {
         sb.append(txt.text)
+        if (!previousEndsInWhitespace) {
+            sb.append(" ")
+        }
+        previousEndsInWhitespace = txt.text.last().isWhitespace()
     }
     return sb.toString()
 }
