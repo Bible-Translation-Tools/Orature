@@ -7,14 +7,13 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import tornadofx.*
 
 class LanguageSelectionViewModelTest : ViewModel() {
-    private val testApp: TestApp = TestApp()
     private val vm: LanguageSelectionViewModel
     private val languages = initLanguages()
 
     init {
         FxToolkit.registerPrimaryStage()
         FxToolkit.setupApplication {
-            testApp
+            TestApp()
         }
         vm = LanguageSelectionViewModel(languages.toObservable())
     }
@@ -86,44 +85,46 @@ class LanguageSelectionViewModelTest : ViewModel() {
         assertEquals(menuItemCount, vm.menuItems.size)
     }
 
-    private fun initLanguages(): List<Language> {
-        return listOf(
-            Language(
-                "en",
-                "English",
-                "English",
-                "ltr",
-                true,
-                "NA",
-                0
-            ),
-            Language(
-                "en-test",
-                "English-test",
-                "English-test",
-                "ltr",
-                true,
-                "NA",
-                1
-            ),
-            Language(
-                "ar-test",
-                "Arabic-test",
-                "Arabic-test",
-                "rtl",
-                true,
-                "AS",
-                2
-            ),
-            Language(
-                "vi-test",
-                "Vietnamese",
-                "Vietnamese",
-                "ltr",
-                true,
-                "AS",
-                3
+    companion object {
+        fun initLanguages(): List<Language> {
+            return listOf(
+                Language(
+                    "en",
+                    "English",
+                    "English",
+                    "ltr",
+                    true,
+                    "NA",
+                    0
+                ),
+                Language(
+                    "en-test",
+                    "English-test",
+                    "English-test",
+                    "ltr",
+                    true,
+                    "NA",
+                    1
+                ),
+                Language(
+                    "ar-test",
+                    "Arabic-test",
+                    "Arabic-test",
+                    "rtl",
+                    true,
+                    "AS",
+                    2
+                ),
+                Language(
+                    "vi-test",
+                    "Vietnamese",
+                    "Vietnamese",
+                    "ltr",
+                    true,
+                    "AS",
+                    3
+                )
             )
-        )
+        }
     }
 }
