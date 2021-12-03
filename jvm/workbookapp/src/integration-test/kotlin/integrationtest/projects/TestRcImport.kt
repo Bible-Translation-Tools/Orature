@@ -18,11 +18,26 @@
  */
 package integrationtest.projects
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import com.fasterxml.jackson.databind.MappingIterator
+import com.fasterxml.jackson.dataformat.csv.CsvMapper
+import com.fasterxml.jackson.dataformat.csv.CsvSchema
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
-import org.junit.Test
-import org.wycliffeassociates.otter.common.data.primitives.ContentType.*
 import javax.inject.Inject
 import javax.inject.Provider
+import org.junit.Test
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
+
+@JsonPropertyOrder("chapter, verses")
+data class ChapterVerse(
+    @JsonProperty("Chapter") var chapter: String,
+    @JsonProperty("Verses") val verses: Int
+)
 
 class TestRcImport {
 
@@ -152,15 +167,38 @@ class TestRcImport {
             )
     }
 
+
+
     @Test
     fun ulbSlugs() {
-        dbEnvProvider.get()
+
+        val books = javaClass.getResource("/verse-count/books.txt").readText().split("\n")
+        val tests = mutableListOf<ChapterVerse>()
+        for (book in books) {
+            val csv = javaClass.getResource("/verse-count/$book.csv").readText()
+            val mapper = CsvMapper().registerModule(KotlinModule())
+            val schema = CsvSchema.builder().addColumn("Chapter").addColumn("Verses").setUseHeader(true).build()
+            val reader: MappingIterator<ChapterVerse> = mapper
+                .readerFor(ChapterVerse::class.java)
+                .with(schema)
+                .readValues(csv)
+            val data = reader.readAll()
+
+            for (test in data) {
+                test.chapter = "${book}_${test.chapter}"
+            }
+            tests.addAll(data)
+        }
+
+        val db = dbEnvProvider.get()
             .import("en_ulb.zip")
-            .assertSlugs(
+
+            db.assertSlugs(
                 "ulb",
                 CollectionDescriptor(label = "bundle", slug = "ulb"),
                 CollectionDescriptor(label = "project", slug = "gen"),
                 CollectionDescriptor(label = "chapter", slug = "gen_1")
             )
+            db.assertChapters("ulb", *tests.toTypedArray())
     }
 }

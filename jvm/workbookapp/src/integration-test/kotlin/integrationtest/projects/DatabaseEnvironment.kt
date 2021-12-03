@@ -106,6 +106,26 @@ class DatabaseEnvironment @Inject constructor(
         return this
     }
 
+    fun assertChapters(
+        rcSlug: String,
+        vararg chapter: ChapterVerse
+    ): DatabaseEnvironment {
+        val rc = db.resourceMetadataDao.fetchAll().firstOrNull { it.identifier == rcSlug }
+        Assert.assertNotNull("Retrieving resource container info", rc)
+
+        chapter.forEach { (slug, verseCount) ->
+            val entity = db.collectionDao.fetch(containerId = rc!!.id, label = "chapter", slug = slug)
+            Assert.assertNotNull("Retrieving chapter $slug", entity)
+            val content = db.contentDao.fetchByCollectionId(entity!!.id)
+            val verses = content.filter { it.type_fk == 1 }.count()
+            val meta = content.filter { it.type_fk == 2 }.count()
+            Assert.assertEquals("Verses for $slug", verseCount, verses)
+            Assert.assertEquals("Meta for $slug", 1, meta)
+        }
+
+        return this
+    }
+
     private fun setUpDatabase() {
         val langNames = ClassLoader.getSystemResourceAsStream("content/langnames.json")!!
         importLanguagesProvider.get()

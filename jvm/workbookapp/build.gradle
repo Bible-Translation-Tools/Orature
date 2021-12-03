@@ -129,6 +129,7 @@ dependencies {
     // Jackson YAML
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
 
     //Dagger2
     implementation "com.google.dagger:dagger:$daggerVer"
