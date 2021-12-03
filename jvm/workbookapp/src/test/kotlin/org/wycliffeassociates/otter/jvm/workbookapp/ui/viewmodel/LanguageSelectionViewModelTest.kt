@@ -13,7 +13,9 @@ class LanguageSelectionViewModelTest : ViewModel() {
 
     init {
         FxToolkit.registerPrimaryStage()
-        FX.setApplication(FX.defaultScope, testApp)
+        FxToolkit.setupApplication {
+            testApp
+        }
         vm = LanguageSelectionViewModel(languages.toObservable())
     }
 
