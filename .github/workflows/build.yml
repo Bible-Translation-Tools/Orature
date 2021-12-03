@@ -15,7 +15,7 @@ jobs:
       - name: set DISPLAY for javafx test
         run: echo "DISPLAY=:99.0" >> $GITHUB_ENV
       - name: init xvfb
-        run: sh -e /etc/init.d/xvfb start
+        run: xvfb start
       - name: Build with Gradle
         run: ./gradlew build detekt sonarqube "-Dorg.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m"
         env:
