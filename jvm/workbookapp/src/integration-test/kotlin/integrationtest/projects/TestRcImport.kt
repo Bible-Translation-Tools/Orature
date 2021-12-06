@@ -33,12 +33,6 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 
-@JsonPropertyOrder("chapter, verses")
-data class ChapterVerse(
-    @JsonProperty("Chapter") var chapter: String,
-    @JsonProperty("Verses") val verses: Int
-)
-
 class TestRcImport {
 
     @Inject
@@ -77,7 +71,7 @@ class TestRcImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        TEXT to 31104,
+                        TEXT to 31102,
                         META to 1189
                     ),
                     collections = 1256,
@@ -171,7 +165,18 @@ class TestRcImport {
 
     @Test
     fun ulbSlugs() {
+        dbEnvProvider.get()
+            .import("en_ulb.zip")
+            .assertSlugs(
+                "ulb",
+                CollectionDescriptor(label = "bundle", slug = "ulb"),
+                CollectionDescriptor(label = "project", slug = "gen"),
+                CollectionDescriptor(label = "chapter", slug = "gen_1")
+            )
+    }
 
+    @Test
+    fun ulbVerseCount() {
         val books = javaClass.getResource("/verse-count/books.txt").readText().split("\n")
         val tests = mutableListOf<ChapterVerse>()
         for (book in books) {
@@ -190,15 +195,8 @@ class TestRcImport {
             tests.addAll(data)
         }
 
-        val db = dbEnvProvider.get()
+        dbEnvProvider.get()
             .import("en_ulb.zip", true)
-
-            db.assertSlugs(
-                "ulb",
-                CollectionDescriptor(label = "bundle", slug = "ulb"),
-                CollectionDescriptor(label = "project", slug = "gen"),
-                CollectionDescriptor(label = "chapter", slug = "gen_1")
-            )
-            db.assertChapters("ulb", *tests.toTypedArray())
+            .assertChapters("ulb", *tests.toTypedArray())
     }
 }

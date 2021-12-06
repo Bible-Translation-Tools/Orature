@@ -18,6 +18,8 @@
  */
 package integrationtest.projects
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -162,4 +164,10 @@ class DatabaseEnvironment @Inject constructor(
 data class CollectionDescriptor(
     val label: String,
     val slug: String
+)
+
+@JsonPropertyOrder("chapter, verses")
+data class ChapterVerse(
+    @JsonProperty("Chapter") var chapter: String,
+    @JsonProperty("Verses") val verses: Int
 )
