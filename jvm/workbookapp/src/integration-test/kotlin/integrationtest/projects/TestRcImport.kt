@@ -177,7 +177,7 @@ class TestRcImport {
 
     @Test
     fun ulbVerseCount() {
-        val books = javaClass.getResource("/verse-count/books.txt").readText().split("\n")
+        val books = javaClass.getResource("/verse-count-en_ulb-v21-05/books.txt").readText().split("\n")
         val tests = mutableListOf<ChapterVerse>()
         for (book in books) {
             val csv = javaClass.getResource("/verse-count/$book.csv").readText()
