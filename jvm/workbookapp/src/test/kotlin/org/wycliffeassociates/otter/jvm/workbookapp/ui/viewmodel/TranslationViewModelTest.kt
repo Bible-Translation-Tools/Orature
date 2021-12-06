@@ -17,12 +17,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateTranslation
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
-import tornadofx.ViewModel
-import tornadofx.onChange
-import tornadofx.onChangeOnce
-import tornadofx.onChangeTimes
+import tornadofx.*
 
-class TranslationViewModelTest : ViewModel() {
+class TranslationViewModelTest {
     private val vm: TranslationViewModel
 
     private val sourceLanguage = Language(

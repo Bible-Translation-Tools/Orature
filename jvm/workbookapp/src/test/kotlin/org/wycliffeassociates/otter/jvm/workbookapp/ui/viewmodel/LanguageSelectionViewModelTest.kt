@@ -6,7 +6,7 @@ import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import tornadofx.*
 
-class LanguageSelectionViewModelTest : ViewModel() {
+class LanguageSelectionViewModelTest {
     private val vm: LanguageSelectionViewModel
     private val languages = initLanguages()
 
