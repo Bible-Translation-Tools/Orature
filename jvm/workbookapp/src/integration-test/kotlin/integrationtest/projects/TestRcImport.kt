@@ -191,7 +191,7 @@ class TestRcImport {
         }
 
         val db = dbEnvProvider.get()
-            .import("en_ulb.zip")
+            .import("en_ulb.zip", true)
 
             db.assertSlugs(
                 "ulb",
