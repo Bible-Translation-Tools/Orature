@@ -41,13 +41,13 @@ import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
 import java.util.concurrent.Semaphore
-import javax.inject.Inject
 
 class ChapterPageViewModelTest {
 
@@ -106,14 +106,19 @@ class ChapterPageViewModelTest {
         "Europe"
     )
 
+    private val takeFile = File(javaClass.getResource("/files/test.wav")!!.file)
+    private val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.MIN)
+
     private val resourceMetadata = mock<ResourceMetadata>()
 
     private val book = mock<Book> {
         on { resourceMetadata } doReturn resourceMetadata
+        on { chapters } doReturn Observable.fromIterable(listOf(chapter1, chapter2))
+        on { language } doReturn english
     }
 
     private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-        on { getChapter(any()) } doReturn null
+        on { getChapter(any()) } doReturn SourceAudio(takeFile, 0, 1)
     }
 
     private val workbook = mock<Workbook> {
@@ -121,9 +126,6 @@ class ChapterPageViewModelTest {
         on { target } doReturn book
         on { sourceAudioAccessor } doReturn sourceAudioAccessor
     }
-
-    private val takeFile = File(javaClass.getResource("/files/test.wav")!!.file)
-    private val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.MIN)
 
     private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
 
@@ -158,8 +160,8 @@ class ChapterPageViewModelTest {
         chapterPageViewModel.onCardSelection(chapterCard)
 
         Assert.assertEquals(
-            chapterPageViewModel.workbookDataStore.activeChapterProperty.value,
-            chapterCard.chapterSource
+            chapterCard.chapterSource,
+            chapterPageViewModel.workbookDataStore.activeChapterProperty.value
         )
 
         Assert.assertNull(chapterPageViewModel.workbookDataStore.activeChunkProperty.value)
@@ -171,26 +173,33 @@ class ChapterPageViewModelTest {
         chapterPageViewModel.onCardSelection(chunkCard)
 
         Assert.assertEquals(
-            chapterPageViewModel.workbookDataStore.activeChunkProperty.value,
-            chunkCard.chunkSource
+            chunkCard.chunkSource,
+            chapterPageViewModel.workbookDataStore.activeChunkProperty.value
         )
     }
 
     @Test
-    fun checkCanCompile_unselectedChunks() {
+    fun checkCanCompile_someSelected() {
+        chunk1.audio.selectTake(take)
+        chunk2.audio.selectTake(null)
+
+        waitForRunLater()
+
         chapterPageViewModel.checkCanCompile()
 
-        Assert.assertEquals(chapterPageViewModel.canCompileProperty.value, false)
+        Assert.assertEquals(false, chapterPageViewModel.canCompileProperty.value)
     }
 
     @Test
-    fun checkCanCompile_selectedChunks() {
+    fun checkCanCompile_allSelected() {
         chunk1.audio.selectTake(take)
         chunk2.audio.selectTake(take)
 
+        waitForRunLater()
+
         chapterPageViewModel.checkCanCompile()
 
-        Assert.assertEquals(chapterPageViewModel.canCompileProperty.value, true)
+        Assert.assertTrue(chapterPageViewModel.canCompileProperty.value == true)
     }
 
     @Test
@@ -198,8 +207,8 @@ class ChapterPageViewModelTest {
         val chunkCard = CardData(chunk1)
         chapterPageViewModel.setWorkChunk()
 
-        Assert.assertEquals(chapterPageViewModel.noTakesProperty.value, true)
-        Assert.assertEquals(chapterPageViewModel.workChunkProperty.value, chunkCard)
+        Assert.assertTrue(chapterPageViewModel.noTakesProperty.value == true)
+        Assert.assertEquals(chunkCard.sort, chapterPageViewModel.workChunkProperty.value.sort)
     }
 
     @Test
@@ -208,18 +217,28 @@ class ChapterPageViewModelTest {
         chunk1.audio.insertTake(take)
         chunk1.audio.selectTake(take)
 
+        waitForRunLater()
+
         chapterPageViewModel.setWorkChunk()
 
-        Assert.assertEquals(chapterPageViewModel.noTakesProperty.value, false)
-        Assert.assertEquals(chapterPageViewModel.workChunkProperty.value, chunkCard)
+        Assert.assertTrue(chapterPageViewModel.noTakesProperty.value == false)
+        Assert.assertEquals(chunkCard, chapterPageViewModel.workChunkProperty.value)
     }
 
     @Test
-    fun setSelectedChapterTake_result() {
+    fun setSelectedChapterTake_takeSelected() {
         chapter1.audio.selectTake(take)
 
         waitForRunLater()
 
-        Assert.assertEquals(chapterPageViewModel.selectedChapterTakeProperty.value, take)
+        Assert.assertEquals(take, chapterPageViewModel.selectedChapterTakeProperty.value)
+    }
+
+    @Test
+    fun recordChapter_recordsTake1() {
+        chapterPageViewModel.recordChapter()
+
+        Assert.assertEquals(PluginType.RECORDER, chapterPageViewModel.contextProperty.value)
+        Assert.assertEquals(1, workbookDataStore.activeTakeNumberProperty.value)
     }
 }
