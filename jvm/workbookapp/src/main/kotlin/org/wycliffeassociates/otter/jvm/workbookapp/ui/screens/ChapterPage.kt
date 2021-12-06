@@ -35,10 +35,10 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
@@ -298,7 +298,7 @@ class ChapterPage : Fragment() {
     }
 
     private fun getPlayer(): IAudioPlayer {
-        return (app as OtterApp).dependencyGraph.injectPlayer()
+        return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {

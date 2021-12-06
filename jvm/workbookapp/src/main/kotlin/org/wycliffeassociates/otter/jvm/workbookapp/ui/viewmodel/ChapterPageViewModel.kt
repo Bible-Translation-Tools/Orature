@@ -93,7 +93,6 @@ class ChapterPageViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val disposables = CompositeDisposable()
-    private val navigator: NavigationMediator by inject()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -145,7 +144,7 @@ class ChapterPageViewModel : ViewModel() {
             target.player.load(target.file)
         }
         workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
         }
@@ -159,25 +158,23 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun checkCanCompile() {
-        val hasUnselected = filteredContent
-            .filter { chunk ->
-                chunk.chunkSource?.audio?.selected?.value?.value == null
-            }
-            .any()
+        val hasUnselected = filteredContent.any { chunk ->
+            chunk.chunkSource?.audio?.selected?.value?.value == null
+        }
         canCompileProperty.set(hasUnselected.not())
     }
 
     fun setWorkChunk() {
         if (filteredContent.isEmpty()) return
 
-        val hasTakes = filteredContent.filter { chunk ->
+        val hasTakes = filteredContent.any { chunk ->
             chunk.chunkSource?.audio?.getAllTakes()?.isNotEmpty() ?: false
-        }.any()
+        }
 
         if (hasTakes) {
-            val notSelected = filteredContent.filter { chunk ->
+            val notSelected = filteredContent.firstOrNull { chunk ->
                 chunk.chunkSource?.audio?.selected?.value?.value == null
-            }.firstOrNull() ?: filteredContent.last()
+            } ?: filteredContent.last()
             noTakesProperty.set(false)
             workChunkProperty.set(notSelected)
         } else {
@@ -385,8 +382,10 @@ class ChapterPageViewModel : ViewModel() {
             }
             .observeOnFx()
             .subscribe { takeHolder ->
-                setSelectedChapterTake(takeHolder.value)
-                workbookDataStore.updateSelectedChapterPlayer()
+                takeHolder.value?.let {
+                    setSelectedChapterTake(takeHolder.value)
+                    workbookDataStore.updateSelectedChapterPlayer()
+                }
             }
             .let { disposables.add(it) }
     }

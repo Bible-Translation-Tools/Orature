@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import javax.inject.Singleton
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 
@@ -85,4 +86,5 @@ interface AppDependencyGraph {
     fun injectRecorder(): IAudioRecorder
     fun injectPlayer(): IAudioPlayer
     fun injectConnectionFactory(): AudioConnectionFactory
+    fun injectAudioDeviceProvider(): AudioDeviceProvider
 }
