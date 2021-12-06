@@ -127,6 +127,12 @@ class ChapterPageViewModelTest {
 
     private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
 
+    private fun waitForRunLater() {
+        val semaphore = Semaphore(0)
+        Platform.runLater { semaphore.release() }
+        semaphore.acquire()
+    }
+
     @Before
     fun setup() {
         FxToolkit.registerPrimaryStage()
@@ -212,9 +218,7 @@ class ChapterPageViewModelTest {
     fun setSelectedChapterTake_result() {
         chapter1.audio.selectTake(take)
 
-        val semaphore = Semaphore(0)
-        Platform.runLater { semaphore.release() }
-        semaphore.acquire()
+        waitForRunLater()
 
         Assert.assertEquals(chapterPageViewModel.selectedChapterTakeProperty.value, take)
     }
