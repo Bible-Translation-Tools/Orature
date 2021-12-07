@@ -4,8 +4,10 @@ class Utilities {
     companion object {
         /**
          * Suspends the current thread until the interruption
-         * - notify() - of the lock object occurs or timeout,
+         * of the lock object occurs or timeout,
          * whichever comes first.
+         * @param lockObject resource to receive notification from
+         * @param timeout max wait time in milliseconds
          */
         fun waitForListenerExecution(
             lockObject: Object,
