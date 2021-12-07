@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -39,7 +40,7 @@ class LanguageSelectionViewModelTest {
     }
 
     private val regionFilterTestCases = mapOf<List<String>, Int>(
-//        listOf<String>() to 4,
+        listOf<String>() to 4,
         listOf("NA", "AS") to 4,
         listOf("NA") to 2,
         listOf("AS") to 2,
@@ -63,13 +64,12 @@ class LanguageSelectionViewModelTest {
     fun resetFilter() {
         vm.searchQueryProperty.set("en")
         vm.selectedRegions.setAll("NA", "AS")
-        assertEquals(2, vm.filteredLanguages.size)
 
         vm.resetFilter()
-        assertEquals(0, vm.filteredLanguages.size)
         assertEquals(0, vm.selectedRegions.size)
+        assertEquals(0, vm.regions.size)
         assertEquals("", vm.searchQueryProperty.value)
-        assertEquals(false, vm.anglicizedProperty.value)
+        assertFalse(vm.anglicizedProperty.value)
     }
 
     @Test

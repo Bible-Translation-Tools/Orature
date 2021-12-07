@@ -47,7 +47,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     init {
         selectedRegions.onChange {
             regionPredicate = if (it.list.isEmpty()) {
-                Predicate { false }
+                Predicate { true }
             } else {
                 Predicate { language -> selectedRegions.contains(language.region) }
             }
