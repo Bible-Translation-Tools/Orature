@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import io.reactivex.Observable
 import javafx.beans.property.SimpleObjectProperty
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.testfx.api.FxToolkit
@@ -70,7 +71,9 @@ class BookPageViewModelTest {
             assertEquals(
                 "Loaded chapters count is incorrect.",
                 2,
-                vm.allContent.size)
+                vm.allContent.size
+            )
+            assertNotEquals(vm.allContent[0].sort, vm.allContent[1].sort)
         }
 
         verify(mockWorkbook).target
