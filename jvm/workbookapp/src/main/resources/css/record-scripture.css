@@ -18,7 +18,7 @@
  */
 
 .card--container-dragover {
-    -fx-background-color: -wa-primary-20;
+    -fx-background-color: -wa-drag-drop-target-overlay;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
     -fx-border-style: segments(10, 15, 15, 15)  line-cap round;

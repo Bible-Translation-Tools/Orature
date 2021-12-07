@@ -23,7 +23,7 @@
     -fx-alignment: center-left;
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
-    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .language-card-cell:hover {
