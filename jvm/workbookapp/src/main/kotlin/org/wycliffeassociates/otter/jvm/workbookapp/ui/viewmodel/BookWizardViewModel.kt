@@ -20,9 +20,9 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.ReplaySubject
-import io.reactivex.subjects.Subject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -87,8 +87,8 @@ class BookWizardViewModel : ViewModel() {
     val activeProjectCoverProperty = SimpleObjectProperty<File>()
 
     private val books = observableListOf<BookCardData>()
-    private val sourceCollections = observableListOf<Collection>()
-    private val selectedSourceProperty = SimpleObjectProperty<Collection>()
+    val sourceCollections = observableListOf<Collection>()
+    val selectedSourceProperty = SimpleObjectProperty<Collection>()
     val filteredBooks = FilteredList(books)
     val existingBooks = observableListOf<Workbook>()
     val menuItems = observableListOf<MenuItem>()
@@ -147,8 +147,7 @@ class BookWizardViewModel : ViewModel() {
             .subscribe { retrieved ->
                 val bookViewDataList = retrieved
                     .map { collection ->
-                        val artwork = ReplaySubject.create<Artwork>()
-                        retrieveArtworkAsync(collection, artwork)
+                        val artwork = retrieveArtworkAsync(collection)
                         BookCardData(collection, artwork)
                     }
                 books.setAll(bookViewDataList)
@@ -241,7 +240,8 @@ class BookWizardViewModel : ViewModel() {
         }
     }
 
-    private fun retrieveArtworkAsync(project: Collection, artwork: Subject<Artwork>) {
+    private fun retrieveArtworkAsync(project: Collection): Observable<Artwork> {
+        val artwork = ReplaySubject.create<Artwork>(1)
         Completable
             .fromAction {
                 if (project.resourceContainer != null) {
@@ -250,7 +250,7 @@ class BookWizardViewModel : ViewModel() {
                         project.resourceContainer!!,
                         project.slug
                     ).getArtwork(ImageRatio.TWO_BY_ONE)?.let { art ->
-                        return@fromAction artwork.onNext(art)
+                        artwork.onNext(art)
                     }
                 }
             }
@@ -260,6 +260,8 @@ class BookWizardViewModel : ViewModel() {
             .doFinally { artwork.onComplete() }
             .subscribeOn(Schedulers.io())
             .subscribe()
+
+        return artwork
     }
 
     fun setFilterMenu() {
