@@ -86,7 +86,9 @@ class SimpleAudioPlayer(
             addClass("btn", "btn--icon")
             textProperty().bind(playPauseTextBinding())
             tooltip {
-                textProperty().bind(playPauseTextBinding(true))
+                textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding{
+                    if (it == true) FX.messages["pause"] else FX.messages["play"]
+                })
             }
             graphicProperty().bind(
                 audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
@@ -144,7 +146,9 @@ class SimpleAudioPlayer(
                 button.apply {
                     textProperty().bind(playPauseTextBinding())
                     tooltip {
-                        textProperty().bind(playPauseTextBinding(true))
+                        textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding{
+                            if (it == true) FX.messages["pause"] else FX.messages["play"]
+                        })
                     }
                     graphicProperty().bind(
                         audioPlayerController.isPlayingProperty.objectBinding { isPlaying ->
@@ -165,19 +169,14 @@ class SimpleAudioPlayer(
         menuItems.setAll(createPlaybackRateMenu())
     }
 
-    private fun playPauseTextBinding(tooltip: Boolean = false): StringBinding {
+    private fun playPauseTextBinding(): StringBinding {
         return Bindings.createStringBinding(
             {
-                val isPlaying = audioPlayerController.isPlayingProperty.value ?: false
-                var pauseText = pauseTextProperty.value
-                var playText = playTextProperty.value
-
-                if (tooltip) {
-                    pauseText = pauseText ?: FX.messages["pause"]
-                    playText = playText ?: FX.messages["play"]
+                if (audioPlayerController.isPlayingProperty.value == true) {
+                    pauseTextProperty.value
+                } else {
+                    playTextProperty.value
                 }
-
-                if (isPlaying) pauseText else playText
             },
             audioPlayerController.isPlayingProperty,
             playTextProperty
