@@ -13,6 +13,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
 
 class BookWizardViewModelTest {
@@ -61,13 +63,11 @@ class BookWizardViewModelTest {
         assertEquals(0, vm.filteredBooks.size)
 
         vm.filteredBooks.onChange {
-            synchronized(lockObject) {
-                lockObject.notify()
-            }
+            notifyListenerExecuted(lockObject)
         }
         vm.selectedSourceProperty.set(simpleResource)
 
-        waitForOnChangeExecuted(lockObject) {
+        waitForListenerExecution(lockObject) {
             assertEquals(1, vm.filteredBooks.size)
         }
 
@@ -117,13 +117,11 @@ class BookWizardViewModelTest {
         assertEquals(0, vm.existingBooks.size)
 
         vm.existingBooks.onChange {
-            synchronized(lockObject) {
-                lockObject.notify()
-            }
+            notifyListenerExecuted(lockObject)
         }
         vm.loadExistingProjects()
 
-        waitForOnChangeExecuted(lockObject) {
+        waitForListenerExecution(lockObject) {
             assertEquals(1, vm.existingBooks.size)
         }
 
@@ -184,17 +182,5 @@ class BookWizardViewModelTest {
             1,
             spyVM.sourceCollections.size
         )
-    }
-
-    private fun waitForOnChangeExecuted(
-        lockObject: Object,
-        timeout: Int = 5000,
-        callback: () -> Unit
-    ) {
-        synchronized(lockObject) {
-            // wait until notify() is called (interrupt) or reaching timeout ... milliseconds
-            lockObject.wait(timeout.toLong())
-            callback()
-        }
     }
 }

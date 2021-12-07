@@ -17,6 +17,8 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateTranslation
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
 
 class TranslationViewModelTest {
@@ -57,23 +59,28 @@ class TranslationViewModelTest {
 
         vm.creationUseCase = mockCreateTranslation
 
+        val lockObject = Object()
         val progressStatus = mutableListOf<Boolean>()
         // progress should be true and then false
         vm.showProgressProperty.onChangeTimes(2) {
             it?.let {
                 progressStatus.add(it)
+                if (progressStatus.size == 2) {
+                    notifyListenerExecuted(lockObject)
+                }
             }
         }
 
-        vm.selectedTargetLanguageProperty.onChangeOnce {
-            verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
-            assertTrue(progressStatus[0])
-            assertFalse(progressStatus[1])
-        }
         vm.selectedSourceLanguageProperty.onChangeOnce {
             vm.selectedTargetLanguageProperty.set(targetLanguage)
         }
         vm.selectedSourceLanguageProperty.set(sourceLanguage)
+
+        waitForListenerExecution(lockObject) {
+            verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
+            assertTrue(progressStatus[0])
+            assertFalse(progressStatus[1])
+        }
     }
 
     private val rcMetadata = mock(ResourceMetadata::class.java).apply {
@@ -104,11 +111,15 @@ class TranslationViewModelTest {
 
         assertEquals(0, vm.sourceLanguages.size)
 
+        val lockObject = Object()
         vm.sourceLanguages.onChange {
-            assertEquals(1, vm.sourceLanguages.size)
+            notifyListenerExecuted(lockObject)
         }
         vm.loadSourceLanguages()
 
+        waitForListenerExecution(lockObject) {
+            assertEquals(1, vm.sourceLanguages.size)
+        }
         verify(mockCollectionRepo).getRootSources()
         verify(rcMetadata, atLeastOnce()).language
     }
@@ -127,12 +138,15 @@ class TranslationViewModelTest {
 
         assertEquals(0, vm.targetLanguages.size)
 
+        val lockObject = Object()
         vm.targetLanguages.onChange {
-            if (vm.targetLanguages.size > 0) {
-                assertEquals(languages.size, vm.targetLanguages.size)
-            }
+            notifyListenerExecuted(lockObject)
         }
         vm.loadTargetLanguages()
+
+        waitForListenerExecution(lockObject) {
+            assertEquals(languages.size, vm.targetLanguages.size)
+        }
 
         verify(mockLanguageRepo).getAll()
         verify(mockLanguageRepo).getAllTranslations()
