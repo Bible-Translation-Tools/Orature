@@ -42,9 +42,9 @@ class RootViewModel : ViewModel() {
     val showAudioErrorDialogProperty = SimpleBooleanProperty(false)
     var audioErrorType = SimpleObjectProperty<AudioErrorType>()
 
+    val appColorMode = SimpleObjectProperty<ColorTheme>()
     private val osThemeDetector = OsThemeDetector.getDetector()
     private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
-    private val appColorMode = SimpleObjectProperty<ColorTheme>()
 
     @Inject
     lateinit var theme: AppTheme
@@ -55,7 +55,7 @@ class RootViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         initializeAudioErrorListener()
-        initThemeColorChangeListener()
+
         osThemeDetector.registerListener {
             runLater { isOSDarkMode.set(it) }
         }
@@ -79,24 +79,11 @@ class RootViewModel : ViewModel() {
             }
     }
 
-    private fun initThemeColorChangeListener() {
-        appColorMode.onChange {
-            when (it) {
-                ColorTheme.LIGHT -> {
-                    setLightMode()
-                }
-                ColorTheme.DARK -> {
-                    setDarkMode()
-                }
-            }
-        }
-    }
-
     fun updateTheme(selectedTheme: ColorTheme) {
         if (selectedTheme == ColorTheme.SYSTEM) {
             bindSystemTheme()
         } else {
-            unBindSystemTheme()
+            appColorMode.unbind()
             appColorMode.set(selectedTheme)
         }
 
@@ -111,19 +98,5 @@ class RootViewModel : ViewModel() {
             else
                 ColorTheme.LIGHT
         })
-    }
-
-    private fun unBindSystemTheme() {
-        appColorMode.unbind()
-    }
-
-    private fun setLightMode() {
-        FX.stylesheets.add("/css/root.css")
-        FX.stylesheets.remove("/css/root_dark.css")
-    }
-
-    private fun setDarkMode() {
-        FX.stylesheets.add("/css/root_dark.css")
-        FX.stylesheets.remove("/css/root.css")
     }
 }

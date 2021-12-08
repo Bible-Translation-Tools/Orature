@@ -18,10 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -36,8 +35,6 @@ import tornadofx.*
 class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
-    private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
     private val settingsViewModel: SettingsViewModel by inject()
 
     init {
@@ -57,10 +54,10 @@ class RootView : View() {
         workspace.root.vgrow = Priority.ALWAYS
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
-        importStylesheet(resources["/css/root.css"])
+        importStylesheet(resources["/css/base-colors.css"])
+        initThemeStylesheets()
+        bindThemeClass()
 
-        initThemeStylesheet()
-        bindAppThemeToSystem()
         initAudioErrorDialog()
     }
 
@@ -78,6 +75,11 @@ class RootView : View() {
         subscribe<ThemeColorEvent<UIComponent>> {
             viewModel.updateTheme(it.data)
         }
+    }
+
+    private fun initThemeStylesheets() {
+        importStylesheet(resources["/css/theme/light-theme.css"])
+        importStylesheet(resources["/css/theme/dark-theme.css"])
     }
 
     private fun initAudioErrorDialog() {
@@ -101,6 +103,21 @@ class RootView : View() {
 
         viewModel.showAudioErrorDialogProperty.onChangeAndDoNow {
             Platform.runLater { if (it!!) errorDialog.open() else errorDialog.close() }
+        }
+    }
+
+    fun bindThemeClass() {
+        viewModel.appColorMode.onChange {
+            when (it) {
+                ColorTheme.LIGHT -> {
+                    root.addClass("light-theme")
+                    root.removeClass("dark-theme")
+                }
+                ColorTheme.DARK -> {
+                    root.addClass("dark-theme")
+                    root.removeClass("light-theme")
+                }
+            }
         }
     }
 }
