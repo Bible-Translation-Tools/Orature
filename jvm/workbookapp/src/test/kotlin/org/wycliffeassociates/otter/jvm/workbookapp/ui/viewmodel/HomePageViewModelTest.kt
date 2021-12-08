@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import io.reactivex.Maybe
 import io.reactivex.Single
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.testfx.api.FxToolkit
@@ -11,6 +12,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
 
@@ -19,13 +21,18 @@ class HomePageViewModelTest {
     private val mockPreferenceRepo = mock(IAppPreferencesRepository::class.java)
     private val mockCollectionRepo = mock(ICollectionRepository::class.java)
     private val mockWorkbookRepo = mock(IWorkbookRepository::class.java)
+    private val mockSettingsVM = mock(SettingsViewModel::class.java)
 
     init {
         FxToolkit.registerPrimaryStage()
         FxToolkit.setupApplication {
             TestApp()
         }
-        vm = find()
+
+        `when`(mockSettingsVM.refreshPlugins()).then { }
+        setInScope(mockSettingsVM, FX.defaultScope)
+
+        vm = find(FX.defaultScope)
         vm.preferencesRepository = mockPreferenceRepo
         vm.collectionRepo = mockCollectionRepo
         vm.workbookRepo = mockWorkbookRepo
@@ -59,13 +66,16 @@ class HomePageViewModelTest {
 
         val lockObject = Object()
         vm.resumeBookProperty.onChange {
-            Utilities.notifyListenerExecuted(lockObject)
+            notifyListenerExecuted(lockObject)
         }
         vm.loadResumeBook()
 
         waitForListenerExecution(lockObject) {
+            assertNotNull(vm.resumeBookProperty.value)
             assertEquals(mockWorkbook, vm.resumeBookProperty.value)
         }
+
+        verify(mockSettingsVM).refreshPlugins()
         verify(mockWorkbook)
     }
 }
