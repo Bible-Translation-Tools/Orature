@@ -24,7 +24,6 @@ import io.sentry.Attachment
 import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
-import javafx.geometry.NodeOrientation
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.ErrorReportException
