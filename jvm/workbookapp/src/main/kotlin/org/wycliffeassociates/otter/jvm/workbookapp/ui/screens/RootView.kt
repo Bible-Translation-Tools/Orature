@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.AppBar
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.audioerrordialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -54,9 +53,8 @@ class RootView : View() {
         workspace.root.vgrow = Priority.ALWAYS
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
-        importStylesheet(resources["/css/base-colors.css"])
         initThemeStylesheets()
-        bindThemeClass()
+        bindThemeClassToRoot()
 
         initAudioErrorDialog()
     }
@@ -102,7 +100,7 @@ class RootView : View() {
         }
     }
 
-    private fun bindThemeClass() {
+    private fun bindThemeClassToRoot() {
         settingsViewModel.appColorMode.onChange {
             when (it) {
                 ColorTheme.LIGHT -> {

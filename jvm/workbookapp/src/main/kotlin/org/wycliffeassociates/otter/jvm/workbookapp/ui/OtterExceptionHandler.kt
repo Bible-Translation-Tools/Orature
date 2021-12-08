@@ -110,11 +110,6 @@ class OtterExceptionHandler(
     }
 
     private fun showErrorDialog(error: Throwable) {
-        val orientation = when (localeLanguage.preferredLanguage?.direction) {
-            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
-            else -> NodeOrientation.LEFT_TO_RIGHT
-        }
-
         ExceptionDialog().apply {
             titleTextProperty.set(FX.messages["needsRestart"])
             headerTextProperty.set(FX.messages["yourWorkSaved"])
@@ -123,7 +118,7 @@ class OtterExceptionHandler(
             sendReportTextProperty.set(FX.messages["sendErrorReport"])
             stackTraceProperty.set(stringFromError(error))
             closeTextProperty.set(FX.messages["closeApp"])
-            orientationProperty.set(orientation)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
 
             onCloseAction {
