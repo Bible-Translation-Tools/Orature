@@ -23,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.controls.media.ExceptionContent
 
 class ExceptionDialog : OtterDialog() {
@@ -55,6 +56,7 @@ class ExceptionDialog : OtterDialog() {
 
     init {
         setContent(exceptionContent)
+        themeProperty.set(ColorTheme.LIGHT)
     }
 
     fun onCloseAction(op: () -> Unit) {
