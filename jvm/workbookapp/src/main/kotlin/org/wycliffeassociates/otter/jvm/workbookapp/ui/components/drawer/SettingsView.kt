@@ -299,6 +299,7 @@ class SettingsView : View() {
             titleTextProperty.set(messages["settings"])
             messageTextProperty.set(messages["changeLanguageSuccessMessage"])
             orientationProperty.set(viewModel.orientationProperty.value)
+            themeProperty.set(viewModel.appColorMode.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }

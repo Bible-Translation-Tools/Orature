@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -42,8 +43,9 @@ import java.util.*
 class OtterExceptionHandler(
     val directoryProvider: IDirectoryProvider,
     val localeLanguage: LocaleLanguage
-) : Thread.UncaughtExceptionHandler {
+) : Component(), Thread.UncaughtExceptionHandler {
     val logger = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
+    private val settingsViewModel: SettingsViewModel by inject()
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
         internal var consumed = false
@@ -122,6 +124,7 @@ class OtterExceptionHandler(
             stackTraceProperty.set(stringFromError(error))
             closeTextProperty.set(FX.messages["closeApp"])
             orientationProperty.set(orientation)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             onCloseAction {
                 if (sendReportProperty.value) {

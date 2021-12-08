@@ -248,6 +248,11 @@ class AudioErrorDialog : OtterDialog() {
     fun onCancelActionProperty(): ObjectProperty<EventHandler<ActionEvent>> {
         return onCancelActionProperty
     }
+
+    override fun onDock() {
+        super.onDock()
+        themeProperty.set(settingsViewModel.appColorMode.value)
+    }
 }
 
 fun audioerrordialog(setup: AudioErrorDialog.() -> Unit = {}): AudioErrorDialog {

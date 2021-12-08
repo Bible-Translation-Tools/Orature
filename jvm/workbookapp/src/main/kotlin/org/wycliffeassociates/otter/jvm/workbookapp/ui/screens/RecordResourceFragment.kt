@@ -395,6 +395,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
         }
     }
 
@@ -404,6 +405,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             messageTextProperty.set(messages["importTakesSuccessMessage"])
             cancelButtonTextProperty.set(messages["close"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
@@ -421,6 +423,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
             messageTextProperty.set(messages["importTakesFailMessage"])
             cancelButtonTextProperty.set(messages["close"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
