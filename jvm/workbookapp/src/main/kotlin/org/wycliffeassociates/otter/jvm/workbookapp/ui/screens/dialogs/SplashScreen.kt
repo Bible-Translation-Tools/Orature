@@ -61,6 +61,7 @@ class SplashScreen : View() {
             .observeOnFx()
             .doFinally {
                 close()
+                settingsViewModel.setAppOrientation()
                 primaryStage.show()
                 navigator.dock<HomePage>()
             }
