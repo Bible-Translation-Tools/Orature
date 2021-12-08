@@ -60,7 +60,7 @@
 }
 
 .chapter-card__recorded-progress .track, .chapter-card__selected-progress .track {
-    -fx-background-color: -wa-slide-track-color;
+    -fx-background-color: -wa-slider-track-color;
     -fx-background-radius: 3px;
     -fx-border-size: 1px;
     -fx-border-radius: 3px;
