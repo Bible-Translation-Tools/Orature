@@ -24,11 +24,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.SplashScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SplashScreenViewModel
 import tornadofx.*
 
 class SplashScreen : View() {
     private val viewModel: SplashScreenViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
     override val root = stackpane {

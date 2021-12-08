@@ -29,20 +29,12 @@
     -fx-text-fill: -wa-regular-text;
 }
 
-.translation-card__root .label {
-    -fx-text-fill: -wa-regular-text;
-}
-
 .translation-card__header {
     -fx-spacing: 15px;
     -fx-padding: 15px;
     -fx-alignment: center-left;
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: -wa-border-light;
-}
-
-.translation-card__header .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
 }
 
 .translation-card__header .ikonli-font-icon {

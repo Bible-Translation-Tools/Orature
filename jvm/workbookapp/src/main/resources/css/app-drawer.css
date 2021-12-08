@@ -34,10 +34,6 @@
     -fx-background-color: -wa-foreground;
 }
 
-.app-drawer__scroll-pane > .viewport {
-    -fx-background-color: -wa-foreground;
-}
-
 .app-drawer__title {
     -fx-font-size: 36px;
     -fx-wrap-text: true;

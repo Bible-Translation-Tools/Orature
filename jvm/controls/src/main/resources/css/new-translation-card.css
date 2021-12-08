@@ -29,10 +29,6 @@
     -fx-text-fill: -wa-regular-text;
 }
 
-.new-translation-card .label {
-    -fx-text-fill: -wa-regular-text;
-}
-
 .new-translation-card__root {
     -fx-alignment: center-left;
 }
