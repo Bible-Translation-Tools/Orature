@@ -20,11 +20,11 @@
 .app-bar-button {
     -fx-background-color: -wa-primary-dark;
     -fx-border-width: 1px;
-    -fx-border-color: #678BC2;
+    -fx-border-color: -wa-primary-light;
     -fx-border-radius: 6px;
     -fx-pref-width: 80px;
     -fx-pref-height: 80px;
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-app-bar-btn-text;
     -fx-cursor: hand;
 }
 
@@ -51,7 +51,7 @@
 }
 
 .app-bar-button__title {
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-app-bar-btn-text;
     -fx-underline: true;
     -fx-font-size: 16px;
 }
@@ -65,7 +65,7 @@
 }
 
 .app-bar-button__icon .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
+    -fx-icon-color: -wa-app-bar-btn-text;
     -fx-icon-size: 30px;
 }
 

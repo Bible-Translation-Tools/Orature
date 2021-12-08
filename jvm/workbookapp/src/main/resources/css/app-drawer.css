@@ -34,10 +34,6 @@
     -fx-background-color: -wa-foreground;
 }
 
-.app-drawer__scroll-pane > .viewport {
-    -fx-background-color: -wa-white;
-}
-
 .app-drawer__title {
     -fx-font-size: 36px;
     -fx-wrap-text: true;
@@ -80,7 +76,7 @@
 }
 
 .app-drawer__section--filled {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-take-card-placeholder;
     -fx-background-radius: 6px;
     -fx-spacing: 10px;
     -fx-padding: 10px;
@@ -91,12 +87,11 @@
     -fx-pref-height: 110px;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
-    -fx-border-color: -wa-gray;
+    -fx-border-color: -wa-border-light;
     -fx-border-width: 2px;
 }
 
 .app-drawer__report-message:focused {
-    -fx-focus-color: -wa-gray;
     -fx-background-fill: transparent;
 }
 
@@ -222,5 +217,5 @@
 }
 
 .app-drawer__overlay {
-    -fx-background-color: -wa-black-60;
+    -fx-background-color: -wa-dialog-overlay;
 }

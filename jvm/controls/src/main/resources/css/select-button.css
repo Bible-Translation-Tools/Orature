@@ -25,7 +25,7 @@
 
 .select-button {
     -fx-background-radius: 6px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-checkbox-button-background;
     -fx-pref-height: 48px;
     -fx-cursor: hand;
 }
@@ -35,19 +35,19 @@
 }
 
 .select-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-secondary-btn-background-hover;
 }
 
 .select-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-checkbox-button-background-pressed;
 }
 
 .select-button:selected {
-    -fx-background-color: -wa-primary-light;
+    -fx-background-color: -wa-checkbox-button-background-selected;
 }
 
 .select-button__title {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
 }

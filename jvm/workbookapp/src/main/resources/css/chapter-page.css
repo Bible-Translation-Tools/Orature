@@ -38,6 +38,7 @@
 
 .chapter-page__chapter-title {
     -fx-font-size: 36px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .chapter-page__chapter-audio {
@@ -53,11 +54,15 @@
 
 .chapter-page__not-started > .label {
     -fx-font-size: 20px;
-    -fx-text-fill: -wa-black-40;
+    -fx-text-fill: -wa-note-text;
 }
 
 .chapter-page__chapter-actions {
     -fx-spacing: 20px;
+}
+
+.chapter-page__chapter-actions .label {
+    -fx-text-fill: -wa-regular-text;
 }
 
 .chapter-page__actions {
@@ -104,14 +109,7 @@
     -fx-background-color: -wa-foreground;
 }
 
-.chapter-page__chunks .list-view .label,
-.chapter-page__chapter-info .label {
-    -fx-text-fill: -wa-regular-text;
-    -fx-fill: -wa-regular-text;
-}
-
-.btn--icon .ikonli-font-icon,
-.chapter-page__chunks .label .ikonli-font-icon {
+.btn--icon .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
 }
 

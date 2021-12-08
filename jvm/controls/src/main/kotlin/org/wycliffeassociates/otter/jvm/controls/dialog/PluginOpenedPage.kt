@@ -61,6 +61,7 @@ class PluginOpenedPage : Fragment() {
         }
         add(
             SourceContent().apply {
+                addClass("plugin-opened-page__source")
                 vgrow = Priority.ALWAYS
                 sourceTextProperty.bind(this@PluginOpenedPage.sourceTextProperty)
                 sourceAudioPlayerProperty.bind(playerProperty)
