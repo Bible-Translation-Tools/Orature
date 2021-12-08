@@ -1,10 +1,27 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import javafx.application.Platform
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
@@ -13,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageType
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.LanguageSelectionViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.TranslationViewModel
 import tornadofx.*
 
@@ -20,6 +38,7 @@ class TargetLanguageSelection : Fragment() {
     private val translationViewModel: TranslationViewModel by inject()
     private val viewModel = LanguageSelectionViewModel(translationViewModel.targetLanguages)
     private val navigator: NavigationMediator by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["targetLanguage"])
@@ -85,6 +104,7 @@ class TargetLanguageSelection : Fragment() {
             messageTextProperty.set(messages["pleaseWaitCreatingTranslation"])
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             translationViewModel.showProgressProperty.onChange {
                 Platform.runLater { if (it) open() else close() }

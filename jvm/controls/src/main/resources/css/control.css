@@ -1,4 +1,21 @@
-@import "root.css"
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 /* -------------- Todo List -------------- */
 /* TODO: .btn class should have a `0.2s Ease-in-out` transition for all effects applied.
@@ -21,11 +38,42 @@
     -fx-space: 10px;
 }
 
+.btn--icon {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-btn-icon-border-color;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -fx-padding: 0;
+}
+
+.btn--icon:hover {
+    -fx-background-color: -wa-btn-icon-background-hover;
+}
+
+.btn--icon:pressed {
+    -fx-background-color: -wa-btn-icon-background-pressed;
+}
+
+.btn--icon:disabled {
+    -fx-background-color: -wa-transparent;
+    -fx-border-width: 0;
+}
+
+.btn--icon:selected {
+    -fx-background-color: -wa-btn-icon-background-selected;
+    -fx-border-width: 0;
+}
+
+.btn--icon:selected .ikonli-font-icon {
+    -fx-fill: -wa-btn-icon-background-selected;
+}
+
 /* -------------- Primary Button -------------- */
 .btn--primary {
     -fx-background-color: -wa-primary-gradient;
     -fx-effect: -wa-level2;
-    -fx-text-fill: -wa-white;
+    -fx-text-fill: -wa-primary-btn-text-fill;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary-dark;
     -fx-underline: true;
@@ -33,7 +81,7 @@
 }
 
 .btn--primary .ikonli-font-icon {
-    -fx-fill: -wa-white;
+    -fx-fill: -wa-primary-btn-text-fill;
     -fx-font-size: 20px;
 }
 
@@ -50,16 +98,16 @@
 }
 
 .btn--primary:disabled {
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-disabled-background;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-disabled-text;
     -fx-effect: -wa-level0;
     -fx-cursor: disappear;
     -fx-underline: false;
 }
 
 .btn--primary:disabled .ikonli-font-icon {
-    -fx-fill: -wa-black-60;
+    -fx-fill: -wa-disabled-text;
 }
 
 /* -------------- Call to Action Button -------------- */
@@ -97,43 +145,85 @@
 
 /* -------------- Secondary Button -------------- */
 .btn--secondary {
-    -fx-background-color: transparent;
+    -fx-background-color: -wa-secondary-btn-background;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-primary;
-    -fx-text-fill: -wa-primary;
+    -fx-border-color: -wa-secondary-btn-border;
+    -fx-text-fill: -wa-secondary-btn-text-fill;
     -fx-font-size: 20px;
     -fx-underline: true;
     -jfx-disable-visual-focus: true;
 }
 .btn--secondary .ikonli-font-icon {
     -fx-font-size: 20px;
-    -fx-fill: -wa-primary;
+    -fx-fill: -wa-secondary-btn-text-fill;
 }
 .btn--secondary:hover {
-    -fx-background-color: -wa-primary-05;
-    -fx-border-color: -wa-primary-dark;
-    -fx-text-fill: -wa-primary-dark;
+    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-border-color: -wa-secondary-btn-text-fill-hover;
+    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
     -fx-underline: false;
 }
 .btn--secondary:hover .ikonli-font-icon {
-    -fx-fill: -wa-primary-dark;
+    -fx-fill: -wa-secondary-btn-text-fill-hover;
 }
 .btn--secondary:pressed {
-    -fx-background-color: -wa-primary-10;
-    -fx-border-color: -wa-primary-dark;
-    -fx-text-fill: -wa-primary-dark;
+    -fx-background-color: -wa-secondary-btn-background-pressed;
+    -fx-border-color: -wa-secondary-btn-text-fill-pressed;
+    -fx-text-fill: -wa-secondary-btn-text-fill-pressed;
     -fx-underline: false;
 }
 .btn--secondary:pressed .ikonli-font-icon {
-    -fx-fill: -wa-primary-dark;
+    -fx-fill: -wa-secondary-btn-text-fill-pressed;
 }
 .btn--secondary:disabled {
     -fx-cursor: disappear;
-    -fx-text-fill: -wa-gray;
-    -fx-border-color: -wa-gray-light;
+    -fx-text-fill: -wa-disabled-text;
+    -fx-border-color: -wa-disabled-text;
     -fx-border-width: 2px;
     -fx-underline: false;
 }
+.btn--secondary:disabled .ikonli-font-icon {
+    -fx-fill: -wa-disabled-text;
+}
+
+.btn--secondary-light {
+    -fx-text-fill: -wa-white;
+    -fx-border-color: -wa-white;
+}
+
+.btn--secondary-light .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:hover {
+    -fx-background-color: -wa-white-05;
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+
+.btn--secondary-light:hover .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:pressed {
+    -fx-background-color: -wa-white-10;
+    -fx-border-color: -wa-white;
+    -fx-text-fill: -wa-white;
+}
+
+.btn--secondary-light:pressed .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.btn--secondary-light:disabled {
+    -fx-border-width: 0;
+    -fx-text-fill: -wa-white-80;
+}
+
+.btn--secondary-light:disabled .ikonli-font-icon {
+    -fx-fill: -wa-white-80;
+}
+
 .btn--borderless {
     -fx-border-width: 0;
 }
@@ -144,18 +234,18 @@
 .btn--tertiary {
     -fx-background-color: transparent;
     -fx-border-width: 0px;
-    -fx-text-fill: -wa-primary;
-    -fx-icon-color: -wa-primary;
+    -fx-text-fill: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
 }
 .btn--tertiary:hover {
-    -fx-background-color: -wa-primary-light;
-    -fx-text-fill: -wa-primary-dark;
-    -fx-icon-color: -wa-primary-dark;
+    -fx-background-color: -wa-secondary-btn-background-hover;
+    -fx-text-fill: -wa-secondary-btn-text-fill-hover;
+    -fx-icon-color: -wa-secondary-btn-text-fill-hover;
 }
 .btn--tertiary:disabled {
     -fx-cursor: disappear;
-    -fx-text-fill: -wa-gray;
-    -fx-icon-color: -wa-gray;
+    -fx-text-fill: -wa-disabled-text;
+    -fx-icon-color: -wa-disabled-text;
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }
@@ -164,21 +254,25 @@
 .txt-input {
     -fx-pref-height: 48px;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-gray-light;
+    -fx-border-color: -wa-text-field-border;
     -fx-border-radius: 6px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-text-field-background;
     -fx-background-radius: 8px;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
 }
 .txt-input:hover {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-text-field-background-hover;
 }
 .txt-input:focused:hover {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-text-field-background-focused-hover;
 }
 .txt-input:focused {
-    -fx-border-color: -wa-primary;
-    -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 0, 0);
+    -fx-text-fill: -wa-text-input-fill;
+    -fx-font-size: 20px;
+    -fx-background-color: -wa-text-field-background-focused;
+    -fx-border-color: -wa-text-field-border-focused;
+    -fx-effect: -wa-text-field-focused-effect;
 }
 .txt-input:disabled {
     -fx-border-width: 0px;
@@ -209,3 +303,221 @@
     -fx-effect: dropshadow(gaussian, -wa-red, 10, 0, 0, 0);
 }
 
+/* -------------- Combobox ---------------- */
+
+.wa-combobox {
+    -fx-background-color: -wa-combo-box-background;
+    -fx-background-radius: 6px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-text-field-border;
+    -fx-border-radius: 6px;
+    -fx-font-size: 20px;
+    -fx-pref-height: 48px;
+    -fx-cursor: hand;
+}
+
+.wa-combobox .arrow {
+    -fx-background-color: -wa-regular-text;
+}
+
+.wa-combobox:hover {
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.wa-combobox:showing {
+    -fx-background-color: -wa-primary-10;
+}
+
+.wa-combobox:showing > .list-cell .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.wa-combobox:showing > .arrow-button .arrow {
+    -fx-background-color: -wa-primary;
+}
+
+.wa-combobox:showing .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
+.wa-combobox:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+.wa-combobox .list-cell:hover,
+.wa-combobox .combo-box-popup .list-cell:hover {
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.wa-combobox .list-cell:pressed {
+    -fx-background-color: -wa-foreground-pressed;
+}
+
+.wa-combobox .combo-box-popup {
+    -fx-pref-height: 200px;
+}
+
+.wa-combobox .combo-box-popup .list-cell {
+    -fx-padding: 5px;
+    -fx-background-color: -wa-foreground;
+}
+
+.wa-combobox .combo-box-popup .list-cell .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-combobox .combo-box-popup .list-cell:selected {
+    -fx-background-color: -wa-combo-box-background-selected;
+}
+
+.wa-combobox .combo-box-popup .list-cell:selected .label {
+    -fx-text-fill: -wa-primary;
+}
+
+.wa-combobox .combo-box-popup .list-cell:selected .ikonli-font-icon {
+    -fx-fill: -wa-primary;
+}
+
+.wa-combobox-button {
+    -fx-spacing: 10px;
+}
+
+.wa-combobox .wa-combobox-button .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.wa-combobox-button .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
+}
+
+.wa-combobox-item {
+    -fx-padding: 5px;
+    -fx-spacing: 5px;
+    -fx-pref-width: 304px;
+}
+
+.wa-combobox-item__top {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+.wa-combobox .combo-box-popup .list-cell:hover .wa-combobox-item__top {
+    -fx-underline: true;
+}
+
+.wa-combobox-item__bottom {
+    -fx-font-size: 16px;
+}
+
+/* -------------- Radio button ---------------- */
+
+.wa-radio .radio {
+    -fx-background-color: -wa-white;
+    -fx-border-width: 2px;
+    -fx-border-radius: 1.0em;
+    -fx-border-color: -wa-gray-darker;
+}
+
+.wa-radio:selected .radio {
+    -fx-border-color: -wa-primary;
+}
+
+.wa-radio:selected .dot {
+    -fx-background-color: -wa-primary;
+    -fx-background-insets: -2, 0;
+}
+
+.wa-radio--bordered {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black-30;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.wa-radio:selected.wa-radio--bordered {
+    -fx-border-width: 0px;
+    -fx-background-color: -wa-primary-10;
+    -fx-padding: 14px;
+}
+
+.wa-radio--bordered:hover {
+    -fx-background-color: -wa-black-05;
+}
+
+.wa-radio--bordered:pressed {
+    -fx-background-color: -wa-black-10;
+}
+
+/* -------------- Checkbox ---------------- */
+
+.wa-checkbox .box {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-border-neutral;
+    -fx-border-radius: 2px;
+    -fx-background-color: -wa-checkbox-background;
+}
+
+.wa-checkbox:selected .box {
+    -fx-border-color: -wa-primary;
+    -fx-background-color: -wa-primary;
+}
+
+.wa-checkbox:selected .mark {
+    -fx-background-color: -wa-white;
+}
+
+.wa-checkbox--bordered {
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-black-30;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 8px;
+    -fx-padding: 12px;
+}
+
+.wa-checkbox:selected.wa-checkbox--bordered {
+    -fx-border-width: 0px;
+    -fx-background-color: -wa-primary-10;
+    -fx-padding: 14px;
+}
+
+/* -------------- Slider ---------------- */
+
+.wa-slider .track {
+    -fx-background-color: -wa-slider-track-color;
+    -fx-background-radius: 6px;
+    -fx-border-color: -wa-slider-border-color;
+    -fx-border-radius: 6px;
+    -fx-pref-height: 8px;
+}
+
+.wa-slider .colored-track {
+    -fx-background-color: -wa-primary;
+}
+
+.wa-slider .thumb {
+    -fx-background-color: -wa-primary;
+    -fx-background-radius: 10px;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-white;
+    -fx-border-radius: 10px;
+    -fx-pref-width: 20px;
+    -fx-pref-height: 20px;
+}
+
+.wa-slider .animated-thumb {
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+    -fx-background-color: -wa-primary;
+}
+
+/* ----------------- ListView ---------------- */
+.wa-list-view {
+    -fx-background-color: -wa-transparent;
+}
+
+.wa-list-view .list-cell:selected,
+.wa-list-view .list-cell:even,
+.wa-list-view .list-cell:odd {
+    -fx-background-color: -wa-transparent;
+}

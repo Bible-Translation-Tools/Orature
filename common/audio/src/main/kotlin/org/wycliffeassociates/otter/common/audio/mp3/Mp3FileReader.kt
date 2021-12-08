@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.audio.mp3
 
 import java.io.File
@@ -19,10 +37,10 @@ internal class MP3FileReader(
     val file: File, start: Int? = null, end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
 
-    private var decoder: RandomAccessDecoder = RandomAccessDecoder(file.absolutePath)
+    private var decoder: RandomAccessDecoder? = RandomAccessDecoder(file.absolutePath)
 
     val start = start ?: 0
-    val end = end ?: decoder.sampleCount
+    val end = end ?: decoder!!.sampleCount
     private var pos = min(max(0, this.start), this.end)
 
     override val sampleRate: Int = DEFAULT_SAMPLE_RATE
@@ -63,10 +81,10 @@ internal class MP3FileReader(
     }
 
     private fun fillBuffers(pos: Int, leftRight: ShortArray) {
-        val sourceAudio = decoder.audioShorts
+        val sourceAudio = decoder!!.audioShorts
         var sourceIdx = 0
         try {
-            sourceIdx = decoder.seek(pos, leftRight.size / 2) and RandomAccessDecoder.BUFFER_LAST
+            sourceIdx = decoder!!.seek(pos, leftRight.size / 2) and RandomAccessDecoder.BUFFER_LAST
         } catch (e: IOException) {
             e.printStackTrace()
         }
@@ -77,7 +95,7 @@ internal class MP3FileReader(
     }
 
     override fun hasRemaining(): Boolean {
-        return pos < min(decoder.sampleCount, end)
+        return pos < min(decoder!!.sampleCount, end)
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {
@@ -100,7 +118,9 @@ internal class MP3FileReader(
     }
 
     override fun release() {
-        decoder.stop()
+        decoder!!.stop()
+        decoder = null
         pos = 0
+        System.gc()
     }
 }

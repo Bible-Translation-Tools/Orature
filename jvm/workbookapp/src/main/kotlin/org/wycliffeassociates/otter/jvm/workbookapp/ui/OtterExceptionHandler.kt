@@ -1,12 +1,34 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import io.sentry.Attachment
 import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
+import javafx.geometry.NodeOrientation
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
+import org.wycliffeassociates.otter.common.data.ErrorReportException
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
@@ -17,7 +39,10 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.*
 
-class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.UncaughtExceptionHandler {
+class OtterExceptionHandler(
+    val directoryProvider: IDirectoryProvider,
+    val localeLanguage: LocaleLanguage
+) : Thread.UncaughtExceptionHandler {
     val logger = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
@@ -28,18 +53,40 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     init {
-        Sentry.init()
+        initializeSentry()
     }
 
-    companion object {
-        // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
-        // Call consume to avoid error dialog.
-        var filter: (ErrorEvent) -> Unit = { }
+    private fun initializeSentry() {
+        // Empty string for dsn disables the sentry SDK, used for running in the IDE
+        var sentryDsn = ""
+        try {
+            // This file is configured in build.gradle, set via github actions
+            val sentryProperties = ResourceBundle.getBundle("sentry")
+            sentryDsn = sentryProperties["dsn"]
+        } catch (e: MissingResourceException) {
+            logger.info("Sentry disabled due to missing sentry.properties file")
+        }
+        Sentry.init {
+            it.dsn = sentryDsn
+        }
+    }
+
+    // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
+    // Call consume to avoid error dialog.
+    private val filter: (ErrorEvent) -> Unit = { event ->
+        if (event.error is ErrorReportException) {
+            event.consume()
+            logger.info("A custom exception was reported: ${event.error.message}")
+            runLater {
+                sendReport(event.error)
+                    .subscribeOn(Schedulers.io())
+                    .doOnError { e -> logger.error("Error while processing custom exception", e) }
+                    .subscribe()
+            }
+        }
     }
 
     override fun uncaughtException(t: Thread, error: Throwable) {
-        logger.error("Uncaught error", error)
-
         if (isCycle(error)) {
             logger.info("Detected cycle handling error, aborting.", error)
         } else {
@@ -47,6 +94,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
             filter(event)
 
             if (!event.consumed) {
+                logger.error("Uncaught error", error)
                 event.consume()
                 runLater {
                     showErrorDialog(error)
@@ -60,6 +108,11 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     private fun showErrorDialog(error: Throwable) {
+        val orientation = when (localeLanguage.preferredLanguage?.direction) {
+            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+            else -> NodeOrientation.LEFT_TO_RIGHT
+        }
+
         ExceptionDialog().apply {
             titleTextProperty.set(FX.messages["needsRestart"])
             headerTextProperty.set(FX.messages["yourWorkSaved"])
@@ -68,6 +121,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
             sendReportTextProperty.set(FX.messages["sendErrorReport"])
             stackTraceProperty.set(stringFromError(error))
             closeTextProperty.set(FX.messages["closeApp"])
+            orientationProperty.set(orientation)
 
             onCloseAction {
                 if (sendReportProperty.value) {
@@ -114,15 +168,15 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
 
     private fun sendSentryReport(error: Throwable) {
         val environment = getEnvironment()
-        val sentryContext = Sentry.getContext()
+        Sentry.withScope { scope ->
+            scope.setTag("app version", environment.getVersion() ?: "")
+            environment.getSystemData().forEach {
+                scope.setTag(it.first, it.second)
+            }
+            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory,"orature.log").absolutePath))
 
-        sentryContext.addTag("app version", environment.getVersion())
-        environment.getSystemData().forEach {
-            sentryContext.addTag(it.first, it.second)
+            Sentry.captureException(error)
         }
-
-        Sentry.capture(error)
-        Sentry.clearContext()
     }
 
     private fun getEnvironment(): AppInfo {

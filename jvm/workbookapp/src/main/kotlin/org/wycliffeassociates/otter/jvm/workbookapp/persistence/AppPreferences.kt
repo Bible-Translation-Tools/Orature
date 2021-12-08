@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
 import io.reactivex.Completable
@@ -26,6 +44,9 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val MARKER_PLUGIN_ID_KEY = "markerPluginId"
     private val RESUME_BOOK_ID_KEY = "resumeBookId"
     private val LAST_RESOURCE_KEY = "lastResource"
+    private val AUDIO_PLAYBACK_DEVICE_KEY = "audioPlaybackDevice"
+    private val AUDIO_RECORD_DEVICE_KEY = "audioRecordDevice"
+    private val LOCALE_LANGUAGE_KEY = "localeLanguage"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -149,5 +170,29 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setLastResource(resource: String): Completable {
         return putString(LAST_RESOURCE_KEY, resource)
+    }
+
+    override fun audioOutputDevice(): Single<String> {
+        return getString(AUDIO_PLAYBACK_DEVICE_KEY, "")
+    }
+
+    override fun setAudioOutputDevice(name: String): Completable {
+        return putString(AUDIO_PLAYBACK_DEVICE_KEY, name)
+    }
+
+    override fun audioInputDevice(): Single<String> {
+        return getString(AUDIO_RECORD_DEVICE_KEY, "")
+    }
+
+    override fun setAudioInputDevice(name: String): Completable {
+        return putString(AUDIO_RECORD_DEVICE_KEY, name)
+    }
+
+    override fun localeLanguage(): Single<String> {
+        return getString(LOCALE_LANGUAGE_KEY, "")
+    }
+
+    override fun setLocaleLanguage(locale: String): Completable {
+        return putString(LOCALE_LANGUAGE_KEY, locale)
     }
 }

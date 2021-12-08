@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 .filtered-search-bar__root {
     -fx-spacing: 10px;
 }
@@ -8,14 +27,19 @@
 }
 
 .filtered-search-bar__input .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
+}
+
+.filtered-search-bar__input:focused .ikonli-font-icon {
+    -fx-fill: -wa-text-input-fill;
 }
 
 .filtered-search-bar__menu {
     -fx-pref-width: 88px;
     -fx-pref-height: 48px;
     -fx-padding: 0 10px;
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-filter-button-background;
     -fx-background-radius: 6px;
     -fx-alignment: center;
     -fx-spacing: 7px;
@@ -23,7 +47,7 @@
 }
 
 .filtered-search-bar__menu .context-menu {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
 }
 
@@ -33,7 +57,7 @@
 }
 
 .filtered-search-bar__menu .menu-item {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
 }
 
 .filtered-search-bar__menu .label {
@@ -41,7 +65,7 @@
 }
 
 .filtered-search-bar__menu__separator .label {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-font-family: 'sans-serif';
@@ -49,4 +73,5 @@
 
 .filtered-search-bar__menu.menu-button .ikonli-font-icon {
     -fx-font-size: 24px;
+    -fx-icon-color: -wa-regular-text;
 }

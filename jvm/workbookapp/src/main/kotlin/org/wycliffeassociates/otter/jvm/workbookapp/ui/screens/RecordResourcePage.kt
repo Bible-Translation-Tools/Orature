@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
@@ -7,14 +25,16 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
-class RecordResourcePage : Fragment() {
+class RecordResourcePage : View() {
     private val viewModel: RecordResourceViewModel by inject()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val tabPane = JFXTabPane().apply {
         importStylesheet(resources.get("/css/tab-pane.css"))
@@ -28,16 +48,20 @@ class RecordResourcePage : Fragment() {
     )
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.bind(viewModel.breadcrumbTitleBinding)
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+        titleProperty.bind(
+            workbookDataStore.activeChunkProperty.stringBinding { chunk ->
+                chunk?.let {
+                    MessageFormat.format(
+                        messages["chunkTitle"],
+                        messages["chunk"],
+                        chunk.start
+                    )
+                } ?: messages["chapter"]
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
         onClickAction {
             navigator.dock(this@RecordResourcePage)
-        }
-    }
-
-    init {
-        navigator.subscribe<PluginClosedEvent> {
-            viewModel.currentTakeNumberProperty.set(null)
         }
     }
 
@@ -56,13 +80,7 @@ class RecordResourcePage : Fragment() {
                     if (!tabPane.tabs.contains(recordableTab)) tabPane.tabs.add(recordableTab)
                 } ?: tabPane.tabs.remove(recordableTab)
             }
-            recordableTab.currentTakeNumberProperty.onChangeAndDoNow {
-                it?.let { take ->
-                    if (take.toInt() > 0) viewModel.currentTakeNumberProperty.set(it.toInt())
-                }
-            }
         }
-        viewModel.currentTakeNumberProperty.set(null)
         navigator.dock(this, breadCrumb)
     }
 

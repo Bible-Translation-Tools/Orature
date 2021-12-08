@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -36,28 +54,39 @@ class SourceAudioAccessor(
     }
 
     private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer): SourceAudio? {
-        return if (rc.media != null && !media.chapterUrl.isNullOrEmpty()) {
+        return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
-                if (cache.containsKey(path)) {
-                    cache[path]
-                }
-                val extension = File(path).extension
-                val temp = File(dir, File(path).name).apply { createNewFile() }
-                if (extension == "mp3") {
-                    val cueFile = File(temp.absolutePath.replace(".mp3", ".cue")).apply { createNewFile() }
-                    cueFile.deleteOnExit()
-                    val cuePath = path.replace(".mp3", ".cue")
-                    rc.accessor.getInputStream(cuePath).use {
-                        it.copyTo(cueFile.outputStream())
+                val file = when(cache.containsKey(path)) {
+                    true -> cache[path]!!
+                    false -> {
+                        val temp = File(dir, File(path).name).apply { createNewFile() }
+                        val extension = File(path).extension
+                        if (extension == "mp3") {
+                            val cueFile = File(temp.absolutePath.replace(".mp3", ".cue"))
+                                .apply { createNewFile() }
+                            cueFile.deleteOnExit()
+                            val cuePath = path.replace(".mp3", ".cue")
+                            rc.accessor.getInputStream(cuePath).use { input ->
+                                cueFile.outputStream().use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                        }
+                        cache[path] = temp
+                        temp.deleteOnExit()
+                        rc.accessor.getInputStream(path).use { input ->
+                            temp.outputStream().use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                        temp
                     }
                 }
-                cache[path] = temp
-                temp.deleteOnExit()
-                rc.accessor.getInputStream(path).use { it.copyTo(temp.outputStream()) }
-                val audioFile = AudioFile(temp)
+
+                val audioFile = AudioFile(file)
                 val size = audioFile.totalFrames
-                SourceAudio(temp, 0, size)
+                SourceAudio(file, 0, size)
             } else {
                 null
             }

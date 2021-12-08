@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import org.kordamp.ikonli.javafx.FontIcon
@@ -7,25 +25,44 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.text.MessageFormat
 
 class NavigationMediator : Component(), ScopedInstance {
 
+    val workbookDataStore: WorkbookDataStore by inject()
     val breadCrumbsBar = BreadcrumbBar()
 
     private val recorderBreadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["recording"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_MICROPHONE))
+        titleProperty.bind(
+            workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
+                MessageFormat.format(
+                    messages["takeTitle"],
+                    messages["take"],
+                    take
+                )
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
     }
 
     private val editorBreadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["recording"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_MICROPHONE))
+        titleProperty.bind(
+            workbookDataStore.activeTakeNumberProperty.stringBinding { take ->
+                MessageFormat.format(
+                    messages["takeTitle"],
+                    messages["take"],
+                    take
+                )
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_LIBRARY_MUSIC))
     }
 
     private val markerBreadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["addMarkers"])
-        iconProperty.set(FontIcon(MaterialDesign.MDI_LINK_OFF))
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_PLUS_OUTLINE))
     }
 
     init {

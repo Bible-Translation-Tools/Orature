@@ -1,18 +1,38 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import org.slf4j.LoggerFactory
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.Slider
+import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
 
+const val DURATION_FORMAT = "%02d:%02d" // mm:ss
 private const val ANIMATION_REFRESH_MS = 16L
 
 class AudioPlayerController(
@@ -23,7 +43,6 @@ class AudioPlayerController(
 
     private var startAtLocation = 0
     private var disposable: Disposable? = null
-    private var dragging = false
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
@@ -33,30 +52,11 @@ class AudioPlayerController(
     }
 
     fun toggle() {
-        disposable?.dispose()
         player?.let { _player ->
             if (_player.isPlaying()) {
                 pause()
             } else {
-                disposable = startProgressUpdate()
                 play()
-                _player.addEventListener {
-                    if (
-                        it == AudioPlayerEvent.PAUSE ||
-                        it == AudioPlayerEvent.STOP ||
-                        it == AudioPlayerEvent.COMPLETE
-                    ) {
-                        disposable?.dispose()
-                        Platform.runLater {
-                            isPlayingProperty.set(false)
-                            if (it == AudioPlayerEvent.COMPLETE) {
-                                audioSlider.value = 0.0
-                                _player.getAudioReader()?.seek(0)
-                            }
-                        }
-                    }
-                }
-                isPlayingProperty.set(true)
             }
         }
     }
@@ -64,7 +64,34 @@ class AudioPlayerController(
     fun load(player: IAudioPlayer) {
         audioSlider.value = 0.0
         audioSlider.max = player.getDurationInFrames().toDouble()
+        startAtLocation = 0
+
         this.player = player
+        disposable?.dispose()
+        disposable = startProgressUpdate()
+
+        player.addEventListener {
+            if (
+                it == AudioPlayerEvent.PAUSE ||
+                it == AudioPlayerEvent.STOP ||
+                it == AudioPlayerEvent.COMPLETE
+            ) {
+                Platform.runLater {
+                    isPlayingProperty.set(false)
+                    when (it) {
+                        AudioPlayerEvent.COMPLETE -> {
+                            audioSlider.value = 0.0
+                            startAtLocation = 0
+                            player.getAudioReader()?.seek(0)
+                        }
+                        AudioPlayerEvent.STOP -> {
+                            audioSlider.value = 0.0
+                            startAtLocation = 0
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun initializeSliderActions() {
@@ -75,7 +102,6 @@ class AudioPlayerController(
                 resumeAfterDrag = true
                 toggle()
             }
-            dragging = true
         }
         audioSlider.setOnMouseClicked {
             val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
@@ -86,6 +112,10 @@ class AudioPlayerController(
             }
             seek(percentageToLocation(percent))
             if (wasPlaying) {
+                toggle()
+            }
+            if (resumeAfterDrag) {
+                resumeAfterDrag = false
                 toggle()
             }
         }
@@ -99,13 +129,19 @@ class AudioPlayerController(
                 logger.error("Error in startProgressUpdate", e)
             }
             .subscribe {
-                if (player?.isPlaying() == true && !audioSlider.isValueChanging && !dragging) {
+                if (player?.isPlaying() == true){
+                    isPlayingProperty.set(true)
+                } else {
+                    isPlayingProperty.set(false)
+                }
+                if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
                     audioSlider.value = playbackPosition().toDouble()
                 }
             }
     }
 
     private fun play() {
+        isPlayingProperty.set(true)
         if (startAtLocation != 0) {
             seek(startAtLocation)
         }
@@ -114,6 +150,7 @@ class AudioPlayerController(
     }
 
     fun pause() {
+        isPlayingProperty.set(false)
         player?.let {
             startAtLocation = it.getLocationInFrames()
             it.pause()
@@ -121,9 +158,10 @@ class AudioPlayerController(
     }
 
     fun seek(location: Int) {
+        audioSlider.value = location.toDouble()
+        
         player?.let {
             it.seek(location)
-            audioSlider.value = location.toDouble()
             if (!it.isPlaying()) {
                 startAtLocation = location
             }
@@ -133,7 +171,7 @@ class AudioPlayerController(
     }
 
     private fun percentageToLocation(percent: Double): Int {
-        var _percent = if (percent > 1.00) percent / 100F else percent
+        val _percent = if (percent > 1.00) percent / 100F else percent
         player?.let {
             return (_percent * it.getDurationInFrames()).toInt()
         } ?: run {
@@ -142,8 +180,18 @@ class AudioPlayerController(
     }
 
     private fun playbackPosition(): Int {
-        return player?.let {
-            it.getLocationInFrames() - it.frameStart
-        } ?: 0
+        return player?.getLocationInFrames() ?: 0
     }
+}
+
+fun framesToTimecode(value: Double, sampleRate: Int = DEFAULT_SAMPLE_RATE): String {
+    val framesPerMs = if (sampleRate > 0) {
+        sampleRate / 1000
+    } else {
+        DEFAULT_SAMPLE_RATE / 1000
+    }
+    val durationMs = (value / framesPerMs).toLong()
+    val min = TimeUnit.MILLISECONDS.toMinutes(durationMs)
+    val sec = TimeUnit.MILLISECONDS.toSeconds(durationMs) % 60
+    return DURATION_FORMAT.format(min, sec)
 }

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.plugin
 
 import com.sun.javafx.application.ParametersImpl
@@ -20,8 +38,12 @@ import java.net.URLClassLoader
 import java.text.MessageFormat
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
-class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
+class AudioPlugin(
+    private val connectionFactory: AudioConnectionFactory,
+    private val pluginData: AudioPluginData
+) : IAudioPlugin {
 
     private val logger = LoggerFactory.getLogger(AudioPlugin::class.java)
 
@@ -111,13 +133,17 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                     "--source_chunk_end=${pluginParameters.sourceChunkEnd}",
                     "--source_text=${pluginParameters.sourceText}",
                     "--action_title=${pluginParameters.actionText}",
+                    "--target_chapter_audio=${pluginParameters.targetChapterAudio?.absolutePath}",
                     "--content_title=${
                         MessageFormat.format(
                             FX.messages["bookChapterTitle"],
                             pluginParameters.bookTitle,
                             pluginParameters.chapterNumber
                         )
-                    }"
+                    }",
+                    "--license=${pluginParameters.license}",
+                    "--direction=${pluginParameters.direction}",
+                    "--source_direction=${pluginParameters.sourceDirection}"
                 )
             }
         return ParametersImpl(insertedArgs)
@@ -172,6 +198,11 @@ class AudioPlugin(private val pluginData: AudioPluginData) : IAudioPlugin {
                 appWorkspace.navigateBack()
             }
         }
+        val paramsMap = appWorkspace.params
+        val oldEntries = paramsMap.entries.map { it.toPair() }.toTypedArray()
+        val newEntries = mapOf(*oldEntries, Pair("audioConnectionFactory", connectionFactory))
+        scope.workspace.paramsProperty.set(newEntries)
+
         Platform.runLater {
             val plugin = find(pluginClass, scope)
             appWorkspace.dock(plugin)

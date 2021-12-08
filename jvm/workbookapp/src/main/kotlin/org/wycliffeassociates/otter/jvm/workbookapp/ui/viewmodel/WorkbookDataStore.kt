@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import io.reactivex.Completable
@@ -5,18 +23,26 @@ import io.reactivex.Maybe
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
+import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.content.TargetAudio
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
+import java.io.File
 import java.text.MessageFormat
 import java.util.concurrent.Callable
 import javax.inject.Inject
@@ -24,6 +50,9 @@ import javax.inject.Inject
 class WorkbookDataStore : Component(), ScopedInstance {
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var localeLanguage: LocaleLanguage
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -49,13 +78,27 @@ class WorkbookDataStore : Component(), ScopedInstance {
         get() = activeProjectFilesAccessorProperty.value
             ?: throw IllegalStateException("ProjectFilesAccessor is null")
 
+    val activeTakeNumberProperty = SimpleIntegerProperty()
+
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
+    val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
+    val selectedChapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+
+    val sourceLicenseProperty = SimpleStringProperty()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         activeChapterProperty.onChange { updateSourceAudio() }
         activeChunkProperty.onChangeAndDoNow { updateSourceAudio() }
+        activeWorkbookProperty.onChange {
+            if (it == null) {
+                activeChapterProperty.set(null)
+                activeChunkProperty.set(null)
+            } else {
+                sourceLicenseProperty.set(it.source.resourceMetadata.license)
+            }
+        }
     }
 
     fun setProjectFilesAccessor(resourceMetadata: ResourceMetadata) {
@@ -99,6 +142,56 @@ class WorkbookDataStore : Component(), ScopedInstance {
         }
     }
 
+    fun updateSelectedChapterPlayer() {
+        val _chunk = activeChunkProperty.get()
+        val _chapter = activeChapterProperty.get()
+        when {
+            _chapter != null && _chunk == null -> {
+                val take = _chapter.audio.selected.value?.value
+                take?.let {
+                    updateTargetAudio(it.file)
+
+                    val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+                    audioPlayer.load(it.file)
+                    selectedChapterPlayerProperty.set(audioPlayer)
+                } ?: run {
+                    selectedChapterPlayerProperty.set(null)
+                    targetAudioProperty.set(null)
+                }
+            }
+            _chapter != null -> {} // preserve targetAudio for clean up
+            else -> {
+                selectedChapterPlayerProperty.set(null)
+                targetAudioProperty.set(null)
+            }
+        }
+    }
+
+    private fun updateTargetAudio(file: File) {
+        cleanUpTargetAudio()
+
+        val tempFile = directoryProvider.createTempFile(
+            file.nameWithoutExtension,
+            ".${file.extension}"
+        )
+        tempFile.deleteOnExit()
+        file.copyTo(tempFile, true)
+
+        val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+        audioPlayer.load(tempFile)
+        val targetAudio = TargetAudio(tempFile, audioPlayer)
+
+        targetAudioProperty.set(targetAudio)
+    }
+
+    private fun cleanUpTargetAudio() {
+        targetAudioProperty.value?.let {
+            it.player.release()
+            it.file.delete()
+        }
+        targetAudioProperty.set(null)
+    }
+
     fun getSourceAudio(): SourceAudio? {
         val sourceAudio = workbook.sourceAudioAccessor
         return chunk?.let { chunk ->
@@ -136,7 +229,48 @@ class WorkbookDataStore : Component(), ScopedInstance {
         )
     }
 
+    fun activeChapterTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    MessageFormat.format(
+                        messages["bookChapterTitle"],
+                        activeWorkbookProperty.value.source.title,
+                        activeChapterProperty.value.title,
+                    )
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty
+        )
+    }
+
     fun activeChunkTitleBinding(): StringBinding {
+        return Bindings.createStringBinding(
+            Callable {
+                if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {
+                    if (activeChunkProperty.value != null) {
+                        MessageFormat.format(
+                            messages["chunkTitle"],
+                            messages[ContentLabel.of(activeChunkProperty.value.contentType).value],
+                            activeChunkProperty.value.start
+                        )
+                    } else {
+                        null
+                    }
+                } else {
+                    null
+                }
+            },
+            activeWorkbookProperty,
+            activeChapterProperty,
+            activeChunkProperty
+        )
+    }
+
+    fun activeTitleBinding(): StringBinding {
         return Bindings.createStringBinding(
             Callable {
                 if (activeWorkbookProperty.value != null && activeChapterProperty.value != null) {

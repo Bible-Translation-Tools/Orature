@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.sun.glass.ui.Screen
@@ -20,12 +38,12 @@ internal fun positionToMs(x: Int, width: Double, durationMs: Int): Int {
 
 internal fun pixelsToFrames(pixels: Double): Int {
     val framesOnScreen = SECONDS_ON_SCREEN * SAMPLE_RATE
-    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()
+    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth
     return (pixels * framesInPixel).toInt()
 }
 
 internal fun framesToPixels(frames: Int): Int {
     val framesOnScreen = SECONDS_ON_SCREEN * SAMPLE_RATE
-    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth.toDouble()
-    return (frames / framesInPixel).toInt()
+    val framesInPixel = framesOnScreen / Screen.getMainScreen().platformWidth
+    return (frames / framesInPixel)
 }

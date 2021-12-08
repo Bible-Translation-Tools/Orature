@@ -1,8 +1,27 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
 import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.NodeOrientation
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.CheckBox
@@ -47,6 +66,7 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
         stacktraceScrollPane.apply {
             visibleProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
             managedProperty().bind(this@ExceptionContentSkin.content.showMoreProperty())
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
 
         importStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())
@@ -57,6 +77,7 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
         headerLabel.textProperty().bind(content.headerTextProperty())
         sendReportCheckbox.apply {
             textProperty().bind(content.sendReportTextProperty())
+            tooltip { textProperty().bind(this@apply.textProperty()) }
             content.sendReportProperty().bind(selectedProperty())
         }
         stacktraceText.textProperty().bind(content.stackTraceProperty())
@@ -66,11 +87,15 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
                     .then(content.showLessTextProperty())
                     .otherwise(content.showMoreTextProperty())
             )
+            tooltip { textProperty().bind(this@apply.textProperty()) }
             graphicProperty().bind(
                 Bindings.`when`(content.showMoreProperty())
                     .then(showLessIcon)
                     .otherwise(showMoreIcon)
             )
+        }
+        closeButton.apply {
+            tooltip { textProperty().bind(content.closeTextProperty()) }
         }
     }
 

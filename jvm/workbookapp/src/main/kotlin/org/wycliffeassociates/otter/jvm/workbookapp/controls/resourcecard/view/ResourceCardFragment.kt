@@ -1,14 +1,33 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ObservableValue
+import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
@@ -20,12 +39,12 @@ import tornadofx.*
 class ResourceCardFragment(
     private val item: ResourceCardItem,
     private val filterCompletedCardsProperty: BooleanProperty,
+    private val sourceOrientationProperty: ObservableValue<NodeOrientation?>,
     private val navigator: NavigationMediator
 ) : Fragment() {
     override val root = HBox()
     val isCurrentResourceProperty = SimpleBooleanProperty(false)
-    var primaryColorProperty = SimpleObjectProperty<Color>(Color.ORANGE)
-    var primaryColor: Color by primaryColorProperty
+    var primaryColorProperty = SimpleObjectProperty(Color.ORANGE)
 
     init {
         root.apply {
@@ -53,7 +72,9 @@ class ResourceCardFragment(
                     )
                 }
                 text(item.title) {
+                    addClass("text-content")
                     wrappingWidthProperty().bind(root.widthProperty().divide(1.5))
+                    nodeOrientationProperty().bind(sourceOrientationProperty)
                 }
             }
 
@@ -66,8 +87,8 @@ class ResourceCardFragment(
                     highlightColorProperty.bind(primaryColorProperty)
                     secondaryColor = Color.WHITE
                     isHighlightedProperty.bind(isCurrentResourceProperty)
-                    graphic = MaterialIconView(MaterialIcon.APPS, "25px")
-                    text = messages["viewRecordings"]
+                    graphic = FontIcon("gmi-apps").apply { iconSize = 25 }
+                    text = messages["open"]
                     action {
                         item.onSelect()
                         navigator.dock<RecordResourcePage>()
@@ -89,6 +110,12 @@ class ResourceCardFragment(
 fun resourceCardFragment(
     resource: ResourceCardItem,
     filterCompletedCardsProperty: BooleanProperty,
+    sourceOrientationProperty: ObservableValue<NodeOrientation?>,
     navigator: NavigationMediator,
     init: ResourceCardFragment.() -> Unit = {}
-) = ResourceCardFragment(resource, filterCompletedCardsProperty, navigator).apply { init.invoke(this) }
+) = ResourceCardFragment(
+    resource,
+    filterCompletedCardsProperty,
+    sourceOrientationProperty,
+    navigator
+).apply { init.invoke(this) }

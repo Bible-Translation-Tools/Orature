@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.application.Platform
@@ -12,6 +30,7 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.BookCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -19,9 +38,10 @@ class BookSelection : Fragment() {
 
     private val viewModel: BookWizardViewModel by inject()
     private val navigator: NavigationMediator by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     private val breadCrumb = BreadCrumb().apply {
-        titleProperty.set(messages["newBook"])
+        titleProperty.set(messages["selectBook"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
     }
 
@@ -31,7 +51,7 @@ class BookSelection : Fragment() {
             addClass("book-wizard__root")
 
             vbox {
-                label(messages["chooseBook"]) {
+                label(messages["selectBook"]) {
                     addClass("book-wizard__title")
                 }
                 hbox {
@@ -47,7 +67,9 @@ class BookSelection : Fragment() {
                     }
                     label {
                         addClass("book-wizard__divider")
-                        graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT)
+                        graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT).apply {
+                            scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                        }
                     }
                     label {
                         addClass("book-wizard__language")
@@ -72,8 +94,8 @@ class BookSelection : Fragment() {
                 addClass("book-wizard__list")
                 vgrow = Priority.ALWAYS
                 setCellFactory {
-                    BookCell(viewModel.projectTypeProperty, viewModel.existingBooks) {
-                        viewModel.selectedBookProperty.set(it)
+                    BookCell(viewModel.existingBooks) {
+                        viewModel.selectedBookProperty.set(it.collection)
                     }
                 }
                 viewModel.searchQueryProperty.onChange {
@@ -109,6 +131,7 @@ class BookSelection : Fragment() {
             backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             viewModel.showProgressProperty.onChange {
                 Platform.runLater { if (it) open() else close() }

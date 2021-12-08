@@ -1,29 +1,48 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 .app-drawer__content {
     -fx-pref-width: 400px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level5;
 }
 
 .app-drawer-container {
-    -fx-spacing: 20px;
+    -fx-spacing: 30px;
+    -fx-pref-width: 400px;
+    -fx-background-color: -wa-foreground;
 }
 
 .app-drawer__scroll-pane {
     -fx-padding: 40px;
-    -fx-background-color: -wa-white;
-}
-
-.app-drawer__scroll-pane > .viewport {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
 }
 
 .app-drawer__title {
     -fx-font-size: 36px;
+    -fx-wrap-text: true;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__btn--close {
-    -fx-background-color: -wa-white;
-    -fx-border-color: -wa-gray;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-border-color: -wa-border-neutral;
     -fx-border-width: 2px;
     -fx-border-radius: 4px;
     -fx-pref-width: 48px;
@@ -31,47 +50,72 @@
 }
 
 .app-drawer__btn--close:hover {
-    -fx-background-color: -wa-gray-lighter;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .app-drawer__btn--close .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-fill: -wa-gray;
-}
-
-.app-drawer__btn--close:hover .ikonli-font-icon {
-    -fx-fill: -wa-gray-dark;
+    -fx-fill: -wa-fill-neutral;
 }
 
 .app-drawer__subtitle {
     -fx-font-weight: bold;
     -fx-font-size: 26px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__subtitle--small {
     -fx-font-weight: bold;
     -fx-font-size: 20px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__section {
     -fx-spacing: 20px;
+    -fx-pref-width: 400px;
 }
 
 .app-drawer__section--filled {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-take-card-placeholder;
     -fx-background-radius: 6px;
     -fx-spacing: 10px;
     -fx-padding: 10px;
 }
 
+.app-drawer__report-message {
+    -fx-font-size: 16px;
+    -fx-pref-height: 110px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-border-color: -wa-border-light;
+    -fx-border-width: 2px;
+}
+
+.app-drawer__report-message:focused {
+    -fx-background-fill: transparent;
+}
+
+.app-drawer__report-status {
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+    -fx-text-fill: -wa-note-text;
+}
+
 .app-drawer__text {
     -fx-font-size: 20px;
+    -fx-wrap-text: true;
+    -fx-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.app-drawer__text--error {
+    -fx-text-fill: -wa-red;
     -fx-wrap-text: true;
 }
 
 .app-drawer__text--link {
     -fx-font-size: 20px;
-    -fx-text-fill: -wa-primary;
+    -fx-text-fill: -wa-highlight-text;
     -fx-underline: true;
     -fx-cursor: hand;
 }
@@ -84,10 +128,11 @@
     -fx-font-size: 20px;
     -fx-wrap-text: true;
     -fx-text-alignment: center;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .app-drawer__text--link .ikonli-font-icon {
-    -fx-fill: -wa-primary;
+    -fx-fill: -wa-highlight-text;
     -fx-font-size: 24px;
 }
 
@@ -106,7 +151,7 @@
 }
 
 .app-drawer__plugin-header .app-drawer__text {
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-note-text;
     -fx-font-size: 16px;
 }
 
@@ -117,7 +162,7 @@
 }
 
 .app-drawer__plugin-header .ikonli-font-icon {
-    -fx-fill: -wa-black-60;
+    -fx-fill: -wa-regular-text;
     -fx-font-size: 24px;
 }
 
@@ -131,11 +176,11 @@
 }
 
 .app-drawer__plugin .radio-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .app-drawer__plugin .radio-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .app-drawer__plugin .radio-button .radio {
@@ -160,7 +205,7 @@
     -fx-border-radius: 6px;
     -fx-border-color: -wa-primary;
     -fx-border-style: segments(20, 10);
-    -fx-background-color: -wa-primary-05;
+    -fx-background-color: -wa-drag-drop-area;
     -fx-background-radius: 6px;
     -fx-padding: 25px;
     -fx-spacing: 10px;
@@ -169,4 +214,8 @@
 .app-drawer__drag-drop-area__icon .ikonli-font-icon {
     -fx-fill: -wa-primary;
     -fx-font-size: 80px;
+}
+
+.app-drawer__overlay {
+    -fx-background-color: -wa-dialog-overlay;
 }

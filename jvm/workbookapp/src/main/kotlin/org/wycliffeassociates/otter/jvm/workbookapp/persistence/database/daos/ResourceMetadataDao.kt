@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
@@ -114,6 +132,7 @@ class ResourceMetadataDao(
                 DUBLIN_CORE_ENTITY.TYPE,
                 DUBLIN_CORE_ENTITY.TITLE,
                 DUBLIN_CORE_ENTITY.VERSION,
+                DUBLIN_CORE_ENTITY.LICENSE,
                 DUBLIN_CORE_ENTITY.PATH,
                 DUBLIN_CORE_ENTITY.DERIVEDFROM_FK
             )
@@ -131,6 +150,7 @@ class ResourceMetadataDao(
                 entity.type,
                 entity.title,
                 entity.version,
+                entity.license,
                 entity.path,
                 entity.derivedFromFk
             )
@@ -251,6 +271,7 @@ class ResourceMetadataDao(
             .set(DUBLIN_CORE_ENTITY.TYPE, entity.type)
             .set(DUBLIN_CORE_ENTITY.TITLE, entity.title)
             .set(DUBLIN_CORE_ENTITY.VERSION, entity.version)
+            .set(DUBLIN_CORE_ENTITY.LICENSE, entity.license)
             .set(DUBLIN_CORE_ENTITY.PATH, entity.path)
             .set(DUBLIN_CORE_ENTITY.DERIVEDFROM_FK, entity.derivedFromFk)
             .where(DUBLIN_CORE_ENTITY.ID.eq(entity.id))

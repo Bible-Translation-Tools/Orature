@@ -1,87 +1,89 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
 
-<?import com.jfoenix.controls.*?>
-<?import java.lang.*?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import org.kordamp.ikonli.javafx.*?>
+    Copyright (C) 2020, 2021 Wycliffe Associates
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="208.0" prefWidth="392.0" styleClass="card--scripture-take" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
+    This file is part of Orature.
+
+    Orature is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Orature is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer?>
+<?import java.lang.String?>
+<VBox styleClass="card--scripture-take" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <HBox alignment="CENTER_LEFT" spacing="8.0" VBox.vgrow="ALWAYS">
+      <HBox alignment="CENTER" spacing="8.0" VBox.vgrow="ALWAYS">
          <children>
-            <Label fx:id="takeLabel" styleClass="card--scripture-take__take-label" text="Take 01">
+            <HBox styleClass="card--scripture-take__title-box">
+               <children>
+                  <Label fx:id="takeLabel" styleClass="card--scripture-take__take-label" />
+                  <Label text="-" styleClass="card--scripture-take__take-label" />
+                  <Label fx:id="timestampLabel" styleClass="card--scripture-take__take-label" />
+               </children>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="selectBtn">
                <graphic>
-                  <FontIcon iconLiteral="mdi-drag" styleClass="card--scripture-take__take-label"/>
+                  <FontIcon iconLiteral="mdi-arrow-up" />
                </graphic>
-               <font>
-                  <Font name="System Bold" />
-               </font>
-            </Label>
-            <Label fx:id="timestampLabel" styleClass="card--scripture-take__timestamp-label" text="01/01/1991" textFill="#141414">
-               <font>
-                  <Font name="System Italic" />
-               </font>
-            </Label>
-            <HBox HBox.hgrow="SOMETIMES" />
-            <JFXButton fx:id="deleteBtn" text="Delete">
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="btn--icon" />
+               </styleClass>
+            </Button>
+         </children>
+      </HBox>
+      <SimpleAudioPlayer fx:id="player" />
+      <HBox>
+         <children>
+            <Button fx:id="editBtn">
+               <graphic>
+                  <FontIcon iconLiteral="mdi-pencil" />
+               </graphic>
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="btn--icon" />
+               </styleClass>
+            </Button>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="playBtn">
+               <graphic>
+                  <FontIcon iconLiteral="mdi-play" />
+               </graphic>
+               <styleClass>
+                  <String fx:value="btn" />
+                  <String fx:value="btn--icon" />
+               </styleClass>
+            </Button>
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="deleteBtn">
                <graphic>
                   <FontIcon iconLiteral="mdi-delete" />
                </graphic>
                <styleClass>
-                  <String fx:value="card--scripture-take__btn" />
-                  <String fx:value="card--scripture-take__btn--delete" />
+                  <String fx:value="btn" />
+                  <String fx:value="btn--icon" />
                </styleClass>
-            </JFXButton>
-         </children>
-      </HBox>
-      <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
-         <children>
-            <JFXSlider fx:id="slider" HBox.hgrow="ALWAYS" />
-         </children></HBox>
-      <HBox alignment="CENTER" spacing="16.0" VBox.vgrow="ALWAYS">
-         <children>
-            <JFXButton fx:id="playBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Play" HBox.hgrow="ALWAYS">
-               <graphic>
-                  <FontIcon iconLiteral="mdi-play" />
-               </graphic>
-               <font>
-                  <Font name="System Bold" />
-               </font>
-               <styleClass>
-                  <String fx:value="card--scripture-take__btn" />
-                  <String fx:value="card--scripture-take__btn--play" />
-               </styleClass>
-            </JFXButton>
-            <JFXButton fx:id="editBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Edit" HBox.hgrow="ALWAYS">
-               <graphic>
-                  <FontIcon iconLiteral="gmi-mode-edit" styleClass="card--scripture-take__btn--edit" />
-               </graphic>
-               <font>
-                  <Font name="System Bold" />
-               </font>
-               <styleClass>
-                  <String fx:value="card--scripture-take__btn" />
-                  <String fx:value="card--scripture-take__btn--edit" />
-               </styleClass>
-            </JFXButton>
-            <JFXButton fx:id="markerBtn" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Marker" HBox.hgrow="ALWAYS">
-               <graphic>
-                  <FontIcon iconLiteral="gmi-bookmark" styleClass="card--scripture-take__btn" />
-               </graphic>
-               <font>
-                  <Font name="System Bold" />
-               </font>
-               <styleClass>
-                  <String fx:value="card--scripture-take__btn" />
-               </styleClass>
-            </JFXButton>
+            </Button>
          </children>
       </HBox>
    </children>
-   <padding>
-      <Insets bottom="16.0" left="16.0" right="16.0" top="16.0" />
-   </padding>
 </VBox>

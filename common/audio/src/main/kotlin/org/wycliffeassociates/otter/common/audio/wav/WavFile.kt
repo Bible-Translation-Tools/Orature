@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.audio.wav
 
 import java.io.File
@@ -34,7 +52,7 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
-internal class WavFile private constructor() : AudioFormatStrategy {
+class WavFile private constructor() : AudioFormatStrategy {
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 
@@ -188,19 +206,19 @@ internal class WavFile private constructor() : AudioFormatStrategy {
     }
 
     private fun parseMetadata() {
-        if (totalDataLength > totalAudioLength + (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)) {
-            val metadataSize = totalDataLength - totalAudioLength - (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)
-            val bytes = ByteArray(metadataSize)
-            file.inputStream().use {
-                val metadataStart = WAV_HEADER_SIZE + totalAudioLength
-                it.skip(metadataStart.toLong())
-                it.read(bytes)
-            }
+        val nonMetadataSize = totalAudioLength + (WAV_HEADER_SIZE - CHUNK_HEADER_SIZE)
+        if (totalDataLength > nonMetadataSize) {
             try {
+                val metadataSize = totalDataLength - nonMetadataSize
+                val bytes = ByteArray(metadataSize)
+                file.inputStream().use {
+                    val metadataStart = WAV_HEADER_SIZE + totalAudioLength
+                    it.skip(metadataStart.toLong())
+                    it.read(bytes)
+                }
                 metadata.parseMetadata(ByteBuffer.wrap(bytes))
             } catch (e: Exception) {
-                logger.error("Error parsing metadata for file: ${file.name}")
-                throw e
+                logger.error("Error parsing metadata for file: ${file.name}", e)
             }
         }
     }

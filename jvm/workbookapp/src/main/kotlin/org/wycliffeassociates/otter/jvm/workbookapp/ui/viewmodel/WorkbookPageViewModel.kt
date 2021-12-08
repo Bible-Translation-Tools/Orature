@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -8,6 +26,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -114,7 +133,8 @@ class WorkbookPageViewModel : ViewModel() {
                 ChapterCardModel(
                     title = MessageFormat.format(
                         FX.messages["chapterTitle"],
-                        FX.messages["chapter"], chapter.sort
+                        FX.messages["chapter"],
+                        chapter.sort
                     ),
                     chapter = chapter,
                     onClick = { navigate(chapter) }
@@ -138,9 +158,10 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     private fun createWorkbookBanner(): WorkbookBannerModel {
+        val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
-            title = workbookDataStore.workbook.target.title,
-            coverArt = workbookDataStore.workbook.coverArtAccessor.getArtwork(),
+            title = workbook.target.title,
+            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE),
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])
@@ -186,7 +207,9 @@ class WorkbookPageViewModel : ViewModel() {
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
 
         activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+        )
 
         projectExporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
@@ -215,7 +238,9 @@ class WorkbookPageViewModel : ViewModel() {
         val deleteProject = deleteProjectProvider.get()
 
         activeProjectTitleProperty.set(workbook.target.title)
-        activeProjectCoverProperty.set(workbook.coverArtAccessor.getArtwork())
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+        )
 
         workbookRepository.closeWorkbook(workbook)
         deleteProject

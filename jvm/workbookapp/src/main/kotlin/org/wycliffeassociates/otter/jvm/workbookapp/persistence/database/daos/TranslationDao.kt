@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables
@@ -57,11 +75,13 @@ class TranslationDao(
             .insertInto(
                 Tables.TRANSLATION_ENTITY,
                 Tables.TRANSLATION_ENTITY.SOURCE_FK,
-                Tables.TRANSLATION_ENTITY.TARGET_FK
+                Tables.TRANSLATION_ENTITY.TARGET_FK,
+                Tables.TRANSLATION_ENTITY.MODIFIED_TS
             )
             .values(
                 entity.sourceFk,
-                entity.targetFk
+                entity.targetFk,
+                entity.modifiedTs
             )
             .execute()
 
@@ -72,5 +92,17 @@ class TranslationDao(
             .fetchOne {
                 it.getValue(DSL.max(Tables.TRANSLATION_ENTITY.ID))
             }
+    }
+
+    @Synchronized
+    fun update(entity: TranslationEntity, dsl: DSLContext = instanceDsl) {
+        // Update the translation entity
+        dsl
+            .update(Tables.TRANSLATION_ENTITY)
+            .set(Tables.TRANSLATION_ENTITY.SOURCE_FK, entity.sourceFk)
+            .set(Tables.TRANSLATION_ENTITY.TARGET_FK, entity.targetFk)
+            .set(Tables.TRANSLATION_ENTITY.MODIFIED_TS, entity.modifiedTs)
+            .where(Tables.TRANSLATION_ENTITY.ID.eq(entity.id))
+            .execute()
     }
 }

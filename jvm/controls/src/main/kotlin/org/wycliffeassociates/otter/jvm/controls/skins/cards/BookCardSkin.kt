@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
 import javafx.fxml.FXML
@@ -38,7 +56,7 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
     lateinit var title: Label
 
     @FXML
-    lateinit var projectType: Label
+    lateinit var slug: Label
 
     @FXML
     lateinit var addBookBtn: Button
@@ -51,7 +69,12 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
     }
 
     private fun initializeControl() {
-        root.setOnMouseClicked { card.onPrimaryActionProperty.value?.invoke() }
+        root.apply {
+            setOnMouseClicked { card.onPrimaryActionProperty.value?.invoke() }
+            if (card.newBookProperty.value) {
+                addClass("book-card__new")
+            }
+        }
         bookCardPlaceholder.apply {
             visibleProperty().bind(
                 card.coverArtProperty.isNull.or(card.newBookProperty)
@@ -60,9 +83,12 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         coverArt.apply {
             backgroundProperty().bind(
                 card.coverArtProperty.objectBinding {
-                    it?.let { Background(backgroundImage(it)) }
+                    it?.let { Background(backgroundImage(it.file)) }
                 }
             )
+            tooltip {
+                textProperty().bind(card.attributionTextProperty)
+            }
             val rect = Rectangle().apply {
                 widthProperty().bind(coverArt.widthProperty())
                 heightProperty().bind(coverArt.heightProperty())
@@ -80,12 +106,15 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         title.apply {
             textProperty().bind(card.titleProperty)
         }
-        projectType.apply {
-            textProperty().bind(card.projectTypeProperty)
+        slug.apply {
+            textProperty().bind(card.slugProperty)
         }
         addBookBtn.apply {
             textProperty().bind(card.addBookTextProperty)
             visibleProperty().bind(card.newBookProperty)
+            tooltip {
+                textProperty().bind(card.addBookTextProperty)
+            }
             onActionProperty().bind(card.onAddBookActionProperty)
         }
     }

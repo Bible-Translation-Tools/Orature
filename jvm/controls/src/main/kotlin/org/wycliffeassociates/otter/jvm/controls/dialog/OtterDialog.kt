@@ -1,6 +1,28 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
+import com.jthemedetecor.OsThemeDetector
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Bounds
+import javafx.geometry.NodeOrientation
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
@@ -14,6 +36,10 @@ import tornadofx.*
 abstract class OtterDialog : Fragment() {
 
     private val roundRadius = 15.0
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+
+    private val osThemeDetector = OsThemeDetector.getDetector()
+    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
 
     private val mainContainer = VBox().apply {
         addClass("otter-dialog-container")
@@ -21,11 +47,26 @@ abstract class OtterDialog : Fragment() {
 
     override val root = VBox().apply {
         addClass("otter-dialog-overlay")
+        nodeOrientationProperty().bind(orientationProperty)
+
         add(mainContainer)
+
+        if (osThemeDetector.isDark) {
+            addClass("dark-theme")
+        } else {
+            addClass("light-theme")
+        }
     }
 
     init {
         importStylesheet(resources.get("/css/otter-dialog.css"))
+        /* the dialog component does not derive from root view;
+         * it needs its own style class theme manipulation
+         */
+        importStylesheet(resources["/css/theme/light-theme.css"])
+        importStylesheet(resources["/css/theme/dark-theme.css"])
+
+        bindThemeToSystem()
     }
 
     fun open() {
@@ -67,5 +108,21 @@ abstract class OtterDialog : Fragment() {
         rect.arcWidth = roundRadius
         rect.arcHeight = roundRadius
         region.clip = rect
+    }
+
+    private fun bindThemeToSystem() {
+        isOSDarkTheme.onChange {
+            if (it) {
+                root.removeClass("light-theme")
+                root.addClass("dark-theme")
+            } else {
+                root.removeClass("dark-theme")
+                root.addClass("light-theme")
+            }
+        }
+
+        osThemeDetector.registerListener {
+            runLater { isOSDarkTheme.set(it) }
+        }
     }
 }

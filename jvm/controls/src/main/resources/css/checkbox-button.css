@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 .checkbox-button-container {
     -fx-alignment: center;
     -fx-padding: 10px;
@@ -5,27 +23,27 @@
 }
 
 .checkbox-button {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-checkbox-button-background;
     -fx-background-radius: 6px;
     -fx-pref-height: 48px;
     -fx-cursor: hand;
 }
 
 .checkbox-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-secondary-btn-background-hover;
 }
 
 .checkbox-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-secondary-btn-background-pressed;
 }
 
 .checkbox-button:selected {
-    -fx-background-color: -wa-primary-10;
+    -fx-background-color: -wa-checkbox-button-background-selected;
     -fx-text-fill: -wa-primary;
 }
 
 .checkbox-button__title {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
 }
@@ -42,7 +60,7 @@
 }
 
 .checkbox-button__icon .ikonli-font-icon {
-    -fx-icon-color: -wa-black;
+    -fx-icon-color: -wa-regular-text;
     -fx-icon-size: 30px;
 }
 
@@ -53,20 +71,4 @@
 .checkbox-button__checkbox {
     -fx-pref-width: 18px;
     -fx-pref-height: 18px;
-}
-
-.checkbox-button__checkbox .box {
-    -fx-border-width: 2px;
-    -fx-border-color: -wa-black;
-    -fx-border-radius: 2px;
-    -fx-background-color: -wa-white;
-}
-
-.checkbox-button:selected .checkbox-button__checkbox .box {
-    -fx-border-color: -wa-primary;
-    -fx-background-color: -wa-primary;
-}
-
-.checkbox-button:selected .checkbox-button__checkbox .mark {
-    -fx-background-color: -wa-white;
 }

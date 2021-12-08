@@ -1,5 +1,5 @@
 group = 'org.wycliffeassociates.otter.common'
-version = '0.0.3'
+version = '0.3.2'
 
 dependencies {
     testImplementation "junit:junit:$junitVer"

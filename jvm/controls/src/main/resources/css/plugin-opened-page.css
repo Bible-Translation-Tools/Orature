@@ -1,7 +1,24 @@
-@import "root.css"
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 .plugin-opened-page {
-    -fx-background-color: white;
+    -fx-background-color: -wa-background;
 }
 
 .plugin-opened-page__label {
@@ -11,6 +28,7 @@
     -fx-alignment: center;
     -fx-text-alignment: center;
     -fx-wrap-text: true;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .plugin-opened-page__title {
@@ -22,7 +40,7 @@
     -fx-font-weight: normal;
     -fx-padding: 0 20px 20px 20px;
     -fx-text-alignment: justify;
-    -fx-text-fill: -wa-gray-darker;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 1.5em;
 }
 
@@ -40,4 +58,9 @@
 
 .plugin-opened-page__close-button * {
     -fx-fill: -wa-primary;
+}
+
+.plugin-opened-page__source {
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-color: -wa-border-light;
 }

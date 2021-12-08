@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
@@ -15,6 +33,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.text.MessageFormat
 
@@ -22,6 +41,7 @@ class AddFilesView : View() {
     private val logger = LoggerFactory.getLogger(AddFilesView::class.java)
 
     private val viewModel: AddFilesViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -37,7 +57,7 @@ class AddFilesView : View() {
                 addClass("app-drawer-container")
 
                 hbox {
-                    label(messages["addFiles"]).apply {
+                    label(messages["importFiles"]).apply {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
@@ -45,6 +65,7 @@ class AddFilesView : View() {
                         JFXButton().apply {
                             addClass("app-drawer__btn--close")
                             graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                            tooltip(messages["close"])
                             action { collapse() }
                         }
                     )
@@ -76,7 +97,7 @@ class AddFilesView : View() {
 
                     label {
                         addClass("app-drawer__drag-drop-area__icon")
-                        graphic = FontIcon(MaterialDesign.MDI_LINK_OFF)
+                        graphic = FontIcon(MaterialDesign.MDI_FILE_MULTIPLE)
                     }
 
                     label(messages["dragToImport"]) {
@@ -89,6 +110,9 @@ class AddFilesView : View() {
                             "btn",
                             "btn--primary"
                         )
+                        tooltip {
+                            textProperty().bind(this@button.textProperty())
+                        }
                         graphic = FontIcon(MaterialDesign.MDI_OPEN_IN_NEW)
                         action {
                             viewModel.onChooseFile()
@@ -129,6 +153,7 @@ class AddFilesView : View() {
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
 
         viewModel.showImportDialogProperty.onChange {
@@ -151,8 +176,9 @@ class AddFilesView : View() {
             )
             messageTextProperty.set(messages["importResourceSuccessMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
-            cancelButtonTextProperty.set(messages["goHome"])
+            cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
             onCancelAction { viewModel.showImportSuccessDialogProperty.set(false) }
         }
@@ -177,6 +203,7 @@ class AddFilesView : View() {
             )
             messageTextProperty.set(messages["importResourceFailMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }

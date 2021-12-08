@@ -16,6 +16,20 @@ repositories {
         }
         metadataSources { artifact() }
     }
+    ivy {
+        url 'https://nightlybuilds.s3.amazonaws.com/Bible-Translation-Tools/artwork/'
+        patternLayout {
+            artifact '[artifact].[ext]'
+        }
+        metadataSources { artifact() }
+    }
+    ivy {
+        url 'https://nexus-registry.walink.org/repository/maven-releases/'
+        patternLayout {
+            artifact '[organisation]/[module]/[revision]/[artifact]-[revision].[ext]'
+        }
+        metadataSources { artifact() }
+    }
 }
 
 configurations {
@@ -23,8 +37,11 @@ configurations {
 }
 
 dependencies {
+    content 'bible-translation-tools:en_art_wa:1.0.0@zip'
+    content 'bible-translation-tools:en_art_sp:1.0.0@zip'
     content 'wycliffeassociates:en_ulb:v19-10@zip'
     content 'unfoldingword:langnames@json'
+    content 'bible-translation-tools:bible_artwork@zip'
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation project(":common")
 
@@ -41,7 +58,7 @@ task copyToResources(type: Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('-v\\d{2}-\\d{2}\\.zip$', '.zip')
+                filename.replaceAll('-.*.zip$', '.zip')
             }
     }
 }

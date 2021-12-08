@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.scene.control.ToggleGroup
@@ -23,7 +41,7 @@ class AppBar : Fragment() {
     private val buttonsToggleGroup = ToggleGroup()
 
     private val addButton = AppBarButton().apply {
-        textProperty().set(messages["add"])
+        textProperty().set(messages["import"])
         graphicProperty().set(FontIcon(MaterialDesign.MDI_PLUS))
         toggleGroup = buttonsToggleGroup
         selectedProperty().onChange {
@@ -65,7 +83,7 @@ class AppBar : Fragment() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-bar.css").toExternalForm())
+        importStylesheet(resources.get("/css/app-bar.css"))
 
         root.apply {
             styleClass.setAll("app-bar")
@@ -82,6 +100,17 @@ class AppBar : Fragment() {
             add(addButton)
             add(settingsButton)
             add(infoButton)
+
+            subscribe<DrawerEvent<UIComponent>> {
+                if (it.action == DrawerEventAction.CLOSE) {
+                    when (it.type) {
+                        // ignore the drawer views as they handle closing via the toggle group
+                        AddFilesView::class, SettingsView::class, InfoView::class -> {}
+                        // If the drawer is closed from something other than the toggle buttons, deselect them all
+                        else -> { buttonsToggleGroup.toggles.forEach { it.isSelected = false } }
+                    }
+                }
+            }
         }
     }
 

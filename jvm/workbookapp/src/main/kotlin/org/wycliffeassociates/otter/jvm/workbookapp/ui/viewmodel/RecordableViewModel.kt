@@ -1,11 +1,31 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -24,7 +44,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
+import java.io.File
 import java.util.concurrent.Callable
+import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 open class RecordableViewModel(
     private val audioPluginViewModel: AudioPluginViewModel
@@ -37,9 +59,7 @@ open class RecordableViewModel(
     val recordableProperty = SimpleObjectProperty<Recordable?>()
     var recordable by recordableProperty
 
-    val currentTakeNumberProperty = SimpleObjectProperty<Int?>()
-
-    val contextProperty = SimpleObjectProperty<PluginType>(PluginType.RECORDER)
+    val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
@@ -48,6 +68,10 @@ open class RecordableViewModel(
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer?>(null)
+
+    val showImportProgressDialogProperty = SimpleBooleanProperty(false)
+    val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
+    val showImportFailDialogProperty = SimpleBooleanProperty(false)
 
     private val disposables = CompositeDisposable()
 
@@ -64,13 +88,8 @@ open class RecordableViewModel(
             }
         }
 
-        workbookDataStore.sourceAudioProperty.onChangeAndDoNow { source ->
-            var audioPlayer: IAudioPlayer? = null
-            if (source != null) {
-                audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                audioPlayer.loadSection(source.file, source.start, source.end)
-            }
-            sourceAudioPlayerProperty.set(audioPlayer)
+        workbookDataStore.sourceAudioProperty.onChangeAndDoNow {
+            openSourceAudioPlayer()
         }
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
@@ -82,7 +101,7 @@ open class RecordableViewModel(
             contextProperty.set(PluginType.RECORDER)
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
-                    currentTakeNumberProperty.set(takeNumber)
+                    workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
@@ -108,14 +127,14 @@ open class RecordableViewModel(
     fun processTakeWithPlugin(takeEvent: TakeEvent, pluginType: PluginType) {
         closePlayers()
         contextProperty.set(pluginType)
-        currentTakeNumberProperty.set(takeEvent.take.number)
+        workbookDataStore.activeTakeNumberProperty.set(takeEvent.take.number)
         audioPluginViewModel
             .getPlugin(pluginType)
             .flatMapSingle { plugin ->
                 fire(PluginOpenedEvent(pluginType, plugin.isNativePlugin()))
                 when (pluginType) {
-                    PluginType.EDITOR -> audioPluginViewModel.edit(takeEvent.take)
-                    PluginType.MARKER -> audioPluginViewModel.mark(takeEvent.take)
+                    PluginType.EDITOR -> audioPluginViewModel.edit(recordable!!.audio, takeEvent.take)
+                    PluginType.MARKER -> audioPluginViewModel.mark(recordable!!.audio, takeEvent.take)
                     else -> null
                 }
             }
@@ -125,7 +144,6 @@ open class RecordableViewModel(
             }
             .onErrorReturn { TakeActions.Result.NO_PLUGIN }
             .subscribe { result: TakeActions.Result ->
-                currentTakeNumberProperty.set(null)
                 fire(PluginClosedEvent(pluginType))
                 when (result) {
                     TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
@@ -146,6 +164,30 @@ open class RecordableViewModel(
         } ?: clearSelectedTake()
     }
 
+    fun importTakes(files: List<File>) {
+        showImportProgressDialogProperty.set(true)
+        closePlayers()
+
+        recordable?.let { rec ->
+            files.toRxObservable()
+                .subscribeOn(Schedulers.io())
+                .flatMapCompletable { takeFile ->
+                    audioPluginViewModel.import(rec, takeFile)
+                }
+                .observeOnFx()
+                .doOnError { e ->
+                    logger.error("Error in importing take", e)
+                }
+                .doFinally {
+                    showImportProgressDialogProperty.set(false)
+                }
+                .subscribe(
+                    { showImportSuccessDialogProperty.set(true) },
+                    { showImportFailDialogProperty.set(true) }
+                )
+        }
+    }
+
     private fun clearSelectedTake() {
         selectedTakeProperty.value?.let { selectedTake ->
             selectedTake.selected = false
@@ -164,6 +206,7 @@ open class RecordableViewModel(
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
             selectedTakeProperty.set(takeModel)
             workbookDataStore.updateSelectedTakesFile()
+            take.file.setLastModified(System.currentTimeMillis())
         }
     }
 
@@ -177,12 +220,12 @@ open class RecordableViewModel(
             Callable {
                 String.format(
                     messages["sourceDialogTitle"],
-                    currentTakeNumberProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get()
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -191,13 +234,13 @@ open class RecordableViewModel(
             Callable {
                 String.format(
                     messages["sourceDialogMessage"],
-                    currentTakeNumberProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get(),
-                    audioPluginViewModel.pluginNameProperty.get()
+                    workbookDataStore.activeTakeNumberProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value,
+                    audioPluginViewModel.pluginNameProperty.value
                 )
             },
             audioPluginViewModel.pluginNameProperty,
-            currentTakeNumberProperty
+            workbookDataStore.activeTakeNumberProperty
         )
     }
 
@@ -249,7 +292,6 @@ open class RecordableViewModel(
         val selectedModel = takes.find { it.selected }
         selectedTakeProperty.set(selectedModel)
 
-        closePlayers()
         takeCardModels.clear()
         takeCardModels.addAll(takes)
         sortTakes()
@@ -261,8 +303,6 @@ open class RecordableViewModel(
             }
             .subscribe { take ->
                 if (takeCardModels.find { it.take.equals(take) } == null) {
-                    val ap: IAudioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
-                    ap.load(take.file)
                     addToAlternateTakes(
                         take.mapToCardModel(take.equals(selected))
                     )
@@ -290,6 +330,7 @@ open class RecordableViewModel(
             .doOnError { e ->
                 logger.error("Error in subscribing take to relay for audio: $audio", e)
             }
+            .observeOnFx()
             .subscribe { takeHolder ->
                 takeCardModels.forEach { it.selected = false }
                 val takeModel = takeCardModels.find { it.take == takeHolder.value }
@@ -328,15 +369,26 @@ open class RecordableViewModel(
 
     fun openPlayers() {
         takeCardModels.forEach { it.audioPlayer.load(it.take.file) }
+        openSourceAudioPlayer()
+    }
+
+    fun openSourceAudioPlayer() {
+        workbookDataStore.sourceAudioProperty.value?.let { source ->
+            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            audioPlayer.loadSection(source.file, source.start, source.end)
+            sourceAudioPlayerProperty.set(audioPlayer)
+        }
     }
 
     fun closePlayers() {
         takeCardModels.forEach { it.audioPlayer.close() }
+        sourceAudioPlayerProperty.value?.close()
     }
 
     fun stopPlayers() {
         takeCardModels.forEach { it.audioPlayer.stop() }
         selectedTakeProperty.value?.audioPlayer?.stop()
+        sourceAudioPlayerProperty.value?.stop()
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {

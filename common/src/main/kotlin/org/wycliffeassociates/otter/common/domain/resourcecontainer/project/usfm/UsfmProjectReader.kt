@@ -1,10 +1,30 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
+import java.io.File
+import java.io.Reader
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.Content
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -17,10 +37,10 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
+import org.wycliffeassociates.usfmtools.models.markers.FMarker
 import org.wycliffeassociates.usfmtools.models.markers.TextBlock
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
-import java.io.File
-import java.io.Reader
+import org.wycliffeassociates.usfmtools.models.markers.XMarker
 
 private const val FORMAT = "text/usfm"
 
@@ -33,9 +53,8 @@ class UsfmProjectReader : IProjectReader {
         project: Project,
         zipEntryTreeBuilder: IZipEntryTreeBuilder
     ): OtterTree<CollectionOrContent> {
-        // TODO 2/25/19
         return when (container.file.extension) {
-            "zip" -> constructTreeFromZip(container, project)
+            "zip", "orature" -> constructTreeFromZip(container, project)
             else -> constructTreeFromDirOrFile(container, project)
         }
     }
@@ -119,7 +138,7 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
     val chapters = doc.getChildMarkers(CMarker::class.java)
     return chapters.map { chapter ->
         val verses = chapter.getChildMarkers(VMarker::class.java)
-        val startVerse = verses.maxByOrNull { it.startingVerse }?.startingVerse ?: 1
+        val startVerse = verses.minByOrNull { it.startingVerse }?.startingVerse ?: 1
         val endVerse = verses.maxByOrNull { it.endingVerse }?.endingVerse ?: 1
         val chapterSlug = "${projectSlug}_${chapter.number}"
         val chapterCollection = Collection(
@@ -162,10 +181,14 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
 }
 
 fun VMarker.getText(): String {
-    val text = this.getChildMarkers(TextBlock::class.java)
+    val ignoredMarkers = listOf<Class<*>>(FMarker::class.java, XMarker::class.java)
+    val text = this.getChildMarkers(TextBlock::class.java, ignoredMarkers)
     val sb = StringBuilder()
-    for (txt in text) {
-        sb.append(txt.text)
+    for ((idx, txt) in text.withIndex()) {
+        sb.append(txt.text.trim())
+        if (idx != text.lastIndex) {
+            sb.append(" ")
+        }
     }
     return sb.toString()
 }

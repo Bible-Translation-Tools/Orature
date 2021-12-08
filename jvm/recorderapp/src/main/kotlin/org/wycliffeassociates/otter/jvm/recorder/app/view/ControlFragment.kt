@@ -1,5 +1,24 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
+import com.jfoenix.controls.JFXButton
 import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
@@ -18,7 +37,7 @@ class ControlFragment : Fragment() {
     }
     val continueBtn = button(messages["continue"], FontIcon("fas-check"))
     val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
-    val recordBtn = FontIcon("gmi-mic")
+    val recordBtn = JFXButton()
 
     override val root = borderpane {
         addClass("controls")
@@ -51,8 +70,16 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
-            iconSize = 48
-            fill = Color.WHITE
+            graphic = FontIcon("gmi-mic").apply {
+                iconSize = 48
+                fill = Color.WHITE
+            }
+            tooltip {
+                textProperty().bind(
+                    vm.recordingProperty.stringBinding {
+                        if (it == true) messages["pause"] else messages["record"]
+                })
+            }
             setOnMouseClicked {
                 toggleRecording()
             }
@@ -60,6 +87,7 @@ class ControlFragment : Fragment() {
 
         continueBtn.apply {
             addClass("continue-button")
+            tooltip(text)
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
             setOnMouseClicked {
@@ -69,6 +97,7 @@ class ControlFragment : Fragment() {
 
         cancelBtn.apply {
             addClass("continue-button")
+            tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             setOnMouseClicked {
@@ -79,9 +108,9 @@ class ControlFragment : Fragment() {
 
     private fun toggleRecording() {
         if (!vm.isRecording) {
-            recordBtn.iconLiteral = "gmi-pause-circle-outline"
+            (recordBtn.graphic as FontIcon).iconLiteral = "gmi-pause-circle-outline"
         } else {
-            recordBtn.iconLiteral = "gmi-mic"
+            (recordBtn.graphic as FontIcon).iconLiteral = "gmi-mic"
         }
         vm.toggle()
     }

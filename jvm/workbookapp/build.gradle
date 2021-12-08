@@ -17,6 +17,7 @@ javafx {
 }
 
 repositories {
+    maven { url 'https://maven.ej-technologies.com/repository' }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
     maven { url 'https://jitpack.io' }
 }
@@ -33,18 +34,18 @@ sourceSets {
             runtimeClasspath += main.output + test.output
             srcDir file('src/integration-test/kotlin')
         }
-        resources{
-            srcDirs += [ file('src/integration-test/resources'), assets.resources ]
+        resources {
+            srcDirs += [file('src/integration-test/resources'), assets.resources]
         }
     }
     main {
         resources {
-            srcDirs += [ assets.resources ]
+            srcDirs += [assets.resources]
         }
     }
     test {
         resources {
-            srcDirs += [ assets.resources ]
+            srcDirs += [assets.resources]
         }
     }
 }
@@ -60,9 +61,13 @@ application {
 
 apply from: './jooq.gradle'
 
+boolean devbuild = hasProperty("devbuild")
+
 //install4j tasks for building win/nix/mac installers. Executable jar can be built without it
 install4j {
     vmParameters = ["-Dinstall4j.timestampUrl=http://timestamp.sectigo.com/"]
+    faster = devbuild
+    disableSigning = devbuild
     //pass in the install4j directory via -P if it's not in the default install location, e.q. for use with travis or arbitrary paths
     if (project.hasProperty('gradlewInstall4jDirectory')) {
         installDir = file(gradlewInstall4jDirectory)
@@ -79,7 +84,7 @@ install4j {
 
 task install4jdeploy(type: com.install4j.gradle.Install4jTask) {
     projectFile = 'otter.install4j'
-    //Pass Travis Build ID to install4j for versioning
+    //Pass Build run # to install4j for versioning
     if (project.hasProperty('gradlewCommandVersionProp')) {
         release = gradlewCommandVersionProp
     }
@@ -106,14 +111,8 @@ dependencies {
     implementation "com.jfoenix:jfoenix:$jfoenixVer"
 
     // ControlsFX
-    implementation 'com.github.jsarabia:javafx-gridview:-SNAPSHOT'
+    implementation "org.wycliffeassociates:javafx-gridview:$javaGridviewVer"
     implementation "org.controlsfx:controlsfx:$controlsfxVer"
-
-    // FontAwesomeFX
-    implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"
-    implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"
-    implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
-    implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
 
     // Ikonli
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
@@ -156,7 +155,6 @@ dependencies {
     implementation project(':jvm:utils')
     implementation project(':jvm:workbookplugin')
     implementation "org.wycliffeassociates:kotlin-resource-container:$kotlinresourcecontainerVer"
-    implementation "org.wycliffeassociates:jdenticon-kotlin:$jdenticonKoltinVer"
     implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
 
     // Atlassian commonmark (for rendering markdown)
@@ -172,6 +170,9 @@ dependencies {
 
     // Sentry
     implementation "io.sentry:sentry:$sentryVer"
+
+    implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
+    implementation "com.install4j:install4j-runtime:$install4jVer"
 }
 
 // tell gradle what to put in the jar
@@ -211,7 +212,7 @@ task createVersionProperties(dependsOn: processResources) {
 
 task createGithubProperties(dependsOn: processResources) {
     doLast {
-        if(project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
+        if (project.hasProperty('githubRepoUrl') && project.hasProperty('githubOauthToken')) {
             new File("$buildDir/resources/main/github.properties").withWriter { w ->
                 Properties p = new Properties()
                 p['repo-url'] = githubRepoUrl
@@ -224,7 +225,7 @@ task createGithubProperties(dependsOn: processResources) {
 
 task createSentryProperties(dependsOn: processResources) {
     doLast {
-        if(project.hasProperty('sentryDsn')) {
+        if (project.hasProperty('sentryDsn')) {
             new File("$buildDir/resources/main/sentry.properties").withWriter { w ->
                 Properties p = new Properties()
                 p['dsn'] = sentryDsn
@@ -232,6 +233,35 @@ task createSentryProperties(dependsOn: processResources) {
             }
         }
     }
+}
+
+task createLocalesProperties(dependsOn: processResources) {
+    doLast {
+        FileTree resources = fileTree("$buildDir/resources/main").matching {
+            include "Messages_*"
+        }
+
+        new File("$buildDir/resources/main/languages.properties").withWriter { w ->
+            Properties p = new Properties()
+            resources.files.each {
+                String name = it.name.replace(".properties", "").replace("Messages_", "")
+                p[name] = ''
+            }
+            p.store w, null
+        }
+    }
+}
+
+task copyMessages(dependsOn: processResources, type: Copy) {
+    from file("$buildDir/resources/main/Messages_en.properties")
+    into "$buildDir/resources/main"
+    rename { "Messages.properties" }
+}
+
+task copyTestResources(dependsOn: processResources, type: Copy) {
+    from "$buildDir/resources/main"
+    into "$buildDir/resources/test"
+    include "*.properties"
 }
 
 ///////////Customize Gradle Test Output ////////////////////////////////
@@ -285,6 +315,9 @@ compileJava.dependsOn ':jvm:markerapp:copyJarToWorkbookAppResources'
 compileJava.dependsOn createVersionProperties
 compileJava.dependsOn createGithubProperties
 compileJava.dependsOn createSentryProperties
+compileJava.dependsOn createLocalesProperties
+compileJava.dependsOn copyMessages
+compileJava.dependsOn copyTestResources
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'

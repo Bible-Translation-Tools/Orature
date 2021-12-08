@@ -32,18 +32,14 @@ dependencies {
 
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
 
-    // FontAwesomeFX
-    implementation "de.jensd:fontawesomefx-commons:$fontawesomeCommonsVer"
-    implementation "de.jensd:fontawesomefx-materialicons:$fontawesomeMaterialIconsVer"
-    implementation "de.jensd:fontawesomefx-icons525:$fontawesomeIcons525Ver"
-    implementation "de.jensd:fontawesomefx-materialdesignfont:$fontawesomeMaterialFontVer"
-
     implementation "org.kordamp.ikonli:ikonli-javafx:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-fontawesome-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-fontawesome5-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-material-pack:$ikonliVer"
 
+    // Dark mode detector
+    implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
 
     // Atlassian commonmark (for rendering markdown)
     implementation "com.atlassian.commonmark:commonmark:$commonmarkVer"
@@ -51,4 +47,5 @@ dependencies {
     implementation project(':common')
     implementation project(':jvm:utils')
     implementation project(':common:audio')
+    implementation project(':jvm:device')
 }

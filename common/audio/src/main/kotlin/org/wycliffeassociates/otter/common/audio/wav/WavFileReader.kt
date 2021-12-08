@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.audio.wav
 
 import org.slf4j.LoggerFactory
@@ -27,13 +45,7 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
 
     override fun open() {
         mappedFile?.let { release() }
-        val totalFrames = wav.totalFrames
-        var begin = if (start != null) min(max(0, start), totalFrames) else 0
-        var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
-        begin *= wav.frameSizeInBytes
-        begin += WAV_HEADER_SIZE
-        end *= wav.frameSizeInBytes
-        end += WAV_HEADER_SIZE
+        val (begin, end) = computeBounds(wav)
         mappedFile =
             RandomAccessFile(wav.file, "r").use {
                 channel = it.channel
@@ -43,6 +55,35 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
                     (end - begin).toLong()
                 )
             }
+    }
+
+    fun computeBounds(wav: WavFile): Pair<Int, Int> {
+        if (wav.file.length() <= WAV_HEADER_SIZE) {
+            logger.info("Wav file ${wav.file.name} is just a header or empty, size is ${wav.file.length()}")
+            return Pair(0,0)
+        }
+
+        val totalFrames = wav.totalFrames
+        var begin = if (start != null) min(max(0, start), totalFrames) else 0
+        var end = if (end != null) min(max(begin, end), totalFrames) else totalFrames
+
+        // Convert from frames to array index
+        begin *= wav.frameSizeInBytes
+        begin += WAV_HEADER_SIZE
+        end *= wav.frameSizeInBytes
+        end += WAV_HEADER_SIZE
+
+        // Should be clamped between header size, computed beginning, and the file length
+        val clampedBegin = max(WAV_HEADER_SIZE, min(begin, max(wav.file.length().toInt(), WAV_HEADER_SIZE)))
+        val clampedEnd = max(clampedBegin, min(end, max(wav.file.length().toInt(), WAV_HEADER_SIZE)))
+
+        if (clampedBegin != begin || clampedEnd != end) {
+            logger.error("Error in file ${wav.file.name}")
+            logger.error("Wanted to open for bounds: $begin to $end; file length is ${wav.file.length()}")
+            logger.error("Bounds clamped to: $clampedBegin to $clampedEnd")
+        }
+
+        return Pair(clampedBegin, clampedEnd)
     }
 
     override fun getPcmBuffer(bytes: ByteArray): Int {

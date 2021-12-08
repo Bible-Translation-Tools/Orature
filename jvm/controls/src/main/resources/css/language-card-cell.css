@@ -1,18 +1,37 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 .language-card-cell {
     -fx-padding: 10px;
     -fx-spacing: 20px;
     -fx-alignment: center-left;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
-    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .language-card-cell:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .language-card-cell:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .language-card-cell:disabled {
@@ -26,6 +45,7 @@
 
 .language-card-cell__icon .ikonli-font-icon {
     -fx-font-size: 24px;
+    -fx-icon-color: -wa-regular-text;
 }
 
 .language-card-cell__title {

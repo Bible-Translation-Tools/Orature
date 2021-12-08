@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories
 
 import io.reactivex.Completable
@@ -15,10 +33,12 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.AppPreferences
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.AppDatabase
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.AudioPluginDataMapper
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 
 class AudioPluginRepository @Inject constructor(
     database: AppDatabase,
     private val preferences: IAppPreferences,
+    private val audioConnectionFactory: AudioConnectionFactory,
     private val mapper: AudioPluginDataMapper
 ) : IAudioPluginRepository {
     private val logger = LoggerFactory.getLogger(AudioPluginRepository::class.java)
@@ -52,7 +72,7 @@ class AudioPluginRepository @Inject constructor(
     override fun getAllPlugins(): Single<List<IAudioPlugin>> {
         return getAll()
             .map {
-                it.map { AudioPlugin(it) }
+                it.map { AudioPlugin(audioConnectionFactory, it) }
             }
     }
 
@@ -129,7 +149,7 @@ class AudioPluginRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
 
     override fun getPlugin(type: PluginType): Maybe<IAudioPlugin> {
-        return getPluginData(type).map { AudioPlugin(it) }
+        return getPluginData(type).map { AudioPlugin(audioConnectionFactory, it) }
     }
 
     override fun getPluginData(type: PluginType): Maybe<AudioPluginData> {

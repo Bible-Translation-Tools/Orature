@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database.daos
 
 import jooq.Tables.*
@@ -60,7 +78,8 @@ class CollectionDao(
                 COLLECTION_ENTITY.TITLE,
                 COLLECTION_ENTITY.LABEL,
                 COLLECTION_ENTITY.SORT,
-                COLLECTION_ENTITY.DUBLIN_CORE_FK
+                COLLECTION_ENTITY.DUBLIN_CORE_FK,
+                COLLECTION_ENTITY.MODIFIED_TS
             )
             .values(
                 entity.parentFk,
@@ -69,7 +88,8 @@ class CollectionDao(
                 entity.title,
                 entity.label,
                 entity.sort,
-                entity.dublinCoreFk
+                entity.dublinCoreFk,
+                entity.modifiedTs
             )
             .execute()
 
@@ -121,6 +141,7 @@ class CollectionDao(
             .set(COLLECTION_ENTITY.LABEL, entity.label)
             .set(COLLECTION_ENTITY.SORT, entity.sort)
             .set(COLLECTION_ENTITY.DUBLIN_CORE_FK, entity.dublinCoreFk)
+            .set(COLLECTION_ENTITY.MODIFIED_TS, entity.modifiedTs)
             .where(COLLECTION_ENTITY.ID.eq(entity.id))
             .execute()
     }

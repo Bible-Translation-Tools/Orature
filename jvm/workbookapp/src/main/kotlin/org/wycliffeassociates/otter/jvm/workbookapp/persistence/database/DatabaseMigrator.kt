@@ -1,6 +1,26 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence.database
 
 import jooq.tables.AudioPluginEntity
+import jooq.tables.CollectionEntity
+import jooq.tables.DublinCoreEntity
 import jooq.tables.InstalledEntity
 import jooq.tables.LanguageEntity
 import jooq.tables.TranslationEntity
@@ -9,7 +29,7 @@ import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 4
+const val SCHEMA_VERSION = 7
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -22,6 +42,10 @@ class DatabaseMigrator {
             currentVersion = migrate1to2(dsl, currentVersion)
             currentVersion = migrate2to3(dsl, currentVersion)
             currentVersion = migrate3to4(dsl, currentVersion)
+            currentVersion = migrate4to5(dsl, currentVersion)
+            currentVersion = migrate5to6(dsl, currentVersion)
+            currentVersion = migrate6to7(dsl, currentVersion)
+
             updateDatabaseVersion(dsl, currentVersion)
         }
     }
@@ -89,6 +113,7 @@ class DatabaseMigrator {
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
                 // be performed in sqlite.
+                logger.error("Error in migrate1to2", e)
             }
             return 2
         } else {
@@ -113,6 +138,7 @@ class DatabaseMigrator {
             } catch (e: DataAccessException) {
                 // Exception is thrown because the column might already exist but an existence check cannot
                 // be performed in sqlite.
+                logger.error("Error in migrate2to3", e)
             }
             return 3
         } else {
@@ -148,5 +174,80 @@ class DatabaseMigrator {
             logger.info("Updated database from version 3 to 4")
             return 4
         } else current
+    }
+
+    /**
+     * Version 5
+     * Adds a column for the rights to the dublin core table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate4to5(dsl: DSLContext, current: Int): Int {
+        return if (current < 5) {
+            try {
+                dsl
+                    .alterTable(DublinCoreEntity.DUBLIN_CORE_ENTITY)
+                    .addColumn(DublinCoreEntity.DUBLIN_CORE_ENTITY.LICENSE)
+                    .execute()
+                logger.info("Updated database from version 4 to 5")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in migrate4to5", e)
+            }
+            return 5
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 6
+     * Adds a column for the modified timestamp to the translations table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate5to6(dsl: DSLContext, current: Int): Int {
+        return if (current < 6) {
+            try {
+                dsl
+                    .alterTable(TranslationEntity.TRANSLATION_ENTITY)
+                    .addColumn(TranslationEntity.TRANSLATION_ENTITY.MODIFIED_TS)
+                    .execute()
+                logger.info("Updated database from version 5 to 6")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in migrate5to6", e)
+            }
+            return 6
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 7
+     * Adds a column for the modified timestamp to the collection table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate6to7(dsl: DSLContext, current: Int): Int {
+        return if (current < 7) {
+            try {
+                dsl
+                    .alterTable(CollectionEntity.COLLECTION_ENTITY)
+                    .addColumn(CollectionEntity.COLLECTION_ENTITY.MODIFIED_TS)
+                    .execute()
+                logger.info("Updated database from version 6 to 7")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in migrate6to7", e)
+            }
+            return 7
+        } else {
+            current
+        }
     }
 }

@@ -1,0 +1,85 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.chunk-item {
+    -fx-border-color: -wa-list-item-border-light;
+    -fx-border-width: 0 0 2px 0;
+    -fx-padding: 0 10px 10px 10px;
+    -fx-cursor: hand;
+    -fx-spacing: 20px;
+}
+
+.chunk-item__title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.chunk-item__take-counter {
+    -fx-font-size: 16px;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.chunk-item__take-counter .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
+    -fx-icon-size: 24px;
+}
+
+.chunk-item__status {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+}
+
+.chunk-item__selected-status {
+    -fx-fill: transparent;
+    -fx-stroke: -wa-black-20;
+    -fx-stroke-width: 2px;
+}
+
+.chunk-item__selected-status--active {
+    -fx-fill: -wa-status-active;
+    -fx-stroke: null;
+}
+
+.chunk-item__show-takes .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-fill: -wa-regular-text;
+}
+
+.chunk-item__takes {
+    -fx-background-color: -wa-background;
+    -fx-background-radius: 16px;
+    -fx-spacing: 10px;
+    -fx-alignment: top-center;
+    -fx-padding: 15px;
+}
+
+.chunk-item__take-items {
+    -fx-spacing: 20px;
+}
+
+.chunk-item__take-items .list-view {
+    -fx-background-color: -wa-transparent;
+}
+
+.chunk-item__take-items .list-view .list-cell:selected,
+.chunk-item__take-items .list-view .list-cell:even,
+.chunk-item__take-items .list-view .list-cell:odd {
+    -fx-background-color: -wa-transparent;
+}

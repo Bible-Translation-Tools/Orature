@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
@@ -9,6 +27,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
@@ -20,7 +39,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
 import java.text.MessageFormat
@@ -37,10 +57,12 @@ import java.text.MessageFormat
  * This page contains a tab for each resource in the workbook. If the workbook only contains the book
  * itself, then no tabs will be shown.
  */
-class WorkbookPage : Fragment() {
+class WorkbookPage : View() {
     private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
     private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     private var deleteListener: ChangeListener<Boolean>? = null
     private var deleteProgressListener: ChangeListener<Boolean>? = null
@@ -50,17 +72,11 @@ class WorkbookPage : Fragment() {
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
-            viewModel.workbookDataStore.activeChapterProperty.stringBinding {
-                it?.let {
-                    MessageFormat.format(
-                        messages["chapterTitle"],
-                        messages["chapter"],
-                        it.sort
-                    )
-                } ?: messages["chapter"]
+            workbookDataStore.activeWorkbookProperty.stringBinding {
+                it?.target?.title
             }
         )
-        iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
         onClickAction {
             navigator.dock(this@WorkbookPage)
         }
@@ -71,11 +87,6 @@ class WorkbookPage : Fragment() {
         importStylesheet(resources.get("/css/chapter-card.css"))
         importStylesheet(resources.get("/css/workbook-banner.css"))
         importStylesheet(resources.get("/css/confirm-dialog.css"))
-
-        initializeProgressDialogs()
-        initializeDeleteConfirmDialog()
-        initializeDeleteSuccessDialog()
-        initializeDeleteFailDialog()
     }
 
     /**
@@ -92,6 +103,10 @@ class WorkbookPage : Fragment() {
         viewModel.workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
         selectLastResourceTab()
+        initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
+        initializeDeleteSuccessDialog()
+        initializeDeleteFailDialog()
     }
 
     /**
@@ -121,14 +136,13 @@ class WorkbookPage : Fragment() {
     override val root = JFXTabPane().apply {
         importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
-        importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
         tabs.onChange {
             when (it.list.size) {
-                1 -> addClass(MainScreenStyles.singleTab)
-                else -> removeClass(MainScreenStyles.singleTab)
+                1 -> addClass("singleTab")
+                else -> removeClass("singleTab")
             }
         }
     }
@@ -138,16 +152,17 @@ class WorkbookPage : Fragment() {
             messageTextProperty.set(messages["deleteProjectConfirmation"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["keepProject"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
             )
 
             onConfirmAction {
@@ -169,16 +184,17 @@ class WorkbookPage : Fragment() {
             messageTextProperty.set(messages["deleteProjectSuccess"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["goHome"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
             )
 
             deleteSuccessListener = ChangeListener { _, _, new ->
@@ -196,16 +212,17 @@ class WorkbookPage : Fragment() {
             messageTextProperty.set(messages["deleteProjectFail"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
             )
 
             deleteFailListener = ChangeListener { _, _, new ->
@@ -255,7 +272,16 @@ class WorkbookPage : Fragment() {
                             }
                         }
                     )
-                    messageTextProperty.set(messages["exportProjectMessage"])
+
+                    viewModel.activeProjectTitleProperty.stringBinding {
+                        it?.let {
+                            MessageFormat.format(
+                                messages["exportProjectMessage"],
+                                it
+                            )
+                        }
+                    }.onChangeAndDoNow { messageTextProperty.set(it) }
+                    
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
@@ -266,6 +292,7 @@ class WorkbookPage : Fragment() {
 
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
         }
     }
 

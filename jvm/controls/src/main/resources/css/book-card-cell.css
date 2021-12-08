@@ -1,18 +1,38 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 .book-card-cell {
     -fx-padding: 10px;
     -fx-spacing: 20px;
     -fx-alignment: center-left;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
-    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .book-card-cell:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-foreground-hover;
+    -fx-cursor: hand;
 }
 
 .book-card-cell:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-foreground-pressed;
 }
 
 .book-card-cell:disabled {
@@ -21,7 +41,7 @@
 }
 
 .book-card-cell__title {
-    -fx-spacing: 5px;
+    -fx-padding: 5px 0 5px 0;
 }
 
 .book-card-cell__name {
@@ -29,8 +49,14 @@
     -fx-font-weight: bold;
 }
 
-.book-card-cell__project-type {
-    -fx-font-size: 16px;
+.book-card-cell__info {
+    -fx-font-size: 14px;
+    -fx-spacing: 10px;
+}
+
+.book-card-cell__dot .ikonli-font-icon {
+    -fx-icon-size: 8px;
+    -fx-icon-color: -wa-regular-text;
 }
 
 .book-card-cell__graphic {
@@ -43,7 +69,7 @@
 }
 
 .book-card-cell__bg {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-background-radius: 6px;
     -fx-alignment: center;
 }

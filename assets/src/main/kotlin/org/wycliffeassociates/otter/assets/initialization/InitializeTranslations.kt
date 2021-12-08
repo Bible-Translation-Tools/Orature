@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 @file:Suppress("FunctionNaming")
 package org.wycliffeassociates.otter.assets.initialization
 
@@ -9,6 +27,7 @@ import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class InitializeTranslations @Inject constructor(
@@ -55,7 +74,11 @@ class InitializeTranslations @Inject constructor(
     }
 
     private fun insertTranslation(workBook: Workbook) {
-        val translation = Translation(workBook.source.language, workBook.target.language)
+        val translation = Translation(
+            workBook.source.language,
+            workBook.target.language,
+            LocalDateTime.now()
+        )
         languageRepository
             .insertTranslation(translation)
             .doOnError { e ->

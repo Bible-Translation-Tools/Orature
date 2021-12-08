@@ -1,7 +1,24 @@
-@import "root.css"
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 .source-content {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-background;
     -fx-padding: 10px 20px;
     -fx-alignment: center;
 }
@@ -18,81 +35,75 @@
 .source-content__bottom {
     -fx-min-height: 60px;
     -fx-border-width: 1px 0 0 0;
-    -fx-border-color: -wa-gray-light;
+    -fx-border-color: -wa-border-light;
 }
 
 .source-content__not-available {
     -fx-alignment: center;
     -fx-font-size: 1.3em;
-    -fx-background-color: #e7ecf5;
+    -fx-background-color: -wa-card-image-placeholder-background;
     -fx-font-weight: bold;
     -fx-background-radius: 10px;
     -fx-pref-height: 45px;
 }
 
 .source-content__not-available .label {
-    -fx-text-fill: -wa-gray-dark;
-}
-
-.source-content__audio-slider {
-
-}
-
-.source-content__play-btn {
-    -fx-pref-width: 250px;
-    -fx-max-width: 250px;
-    -fx-pref-height: 50px;
-    -fx-font-size: 1.3em;
-    -fx-graphic-text-gap: 20px;
-}
-
-.source-content__play-btn .ikonli-font-icon {
-    -fx-icon-size: 18px;
-}
-
-.source-content__play-btn.btn--primary .ikonli-font-icon {
-    -fx-fill: -wa-white;
-}
-
-.source-content__play-btn.btn--secondary {
-    -fx-fill: -wa-primary;
-}
-
-.source-content__play-btn.btn--secondary .ikonli-font-icon {
-    -fx-fill: -wa-primary;
+    -fx-text-fill: -wa-inverse-text;
 }
 
 .source-content__minimize-btn {
-    -fx-border-color: -wa-gray;
+    -fx-border-color: -wa-btn-icon-border-color;
     -fx-border-radius: 3px;
     -fx-background-radius: 3px;
 }
 
 .source-content__minimize-btn .ikonli-font-icon {
     -fx-icon-size: 20px;
+    -fx-fill: -wa-regular-text;
 }
 
 .source-content__text-container {
-    -fx-background: -wa-white;
-    -fx-background-color: -wa-white;
     -fx-pref-height: 100px;
 }
 
 .source-content__audio_container {
     -fx-alignment: center-left;
-    -fx-padding: 5px 0;
+    -fx-padding: 8px;
     -fx-min-height: 60px;
     -fx-spacing: 20px;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 5;
+}
+
+.source-content__audio_container--target {
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -wa-border-light;
+    -fx-padding: 15px 5px;
+}
+
+.source-content__scroll-pane,
+.source-content__scroll-pane .viewport, /* this region belongs to scroll bar skin */
+.source-content__text-wrapper {
+    -fx-background-color: -wa-background;
+}
+
+.source-content__text-wrapper {
+    -fx-padding: 10px;
 }
 
 .source-content__text {
     -fx-font-size: 1.5em;
-    -fx-alignment: center;
-    -fx-text-alignment: justify;
-    -fx-fill: -wa-gray-darker;
+    -fx-padding: 0 15px;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.source-content__license-text {
+    -fx-font-size: 1.25em;
+    -fx-text-fill: -wa-note-text;
 }
 
 .source-content__title {
     -fx-font-size: 1.5em;
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }

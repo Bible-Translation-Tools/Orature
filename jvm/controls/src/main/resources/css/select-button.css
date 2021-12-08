@@ -1,3 +1,22 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 .select-button-container {
     -fx-alignment: center;
     -fx-padding: 10px;
@@ -6,7 +25,7 @@
 
 .select-button {
     -fx-background-radius: 6px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-checkbox-button-background;
     -fx-pref-height: 48px;
     -fx-cursor: hand;
 }
@@ -16,19 +35,19 @@
 }
 
 .select-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-secondary-btn-background-hover;
 }
 
 .select-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-checkbox-button-background-pressed;
 }
 
 .select-button:selected {
-    -fx-background-color: -wa-primary-light;
+    -fx-background-color: -wa-checkbox-button-background-selected;
 }
 
 .select-button__title {
-    -fx-text-fill: -wa-black;
+    -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
 }
@@ -42,20 +61,4 @@
 .select-button:disabled .select-button__title,
 .select-button:selected .select-button__title {
     -fx-underline: false;
-}
-
-.select-button__radio .radio {
-    -fx-background-color: -wa-white;
-    -fx-border-width: 2px;
-    -fx-border-radius: 1.0em;
-    -fx-border-color: -wa-gray-darker;
-}
-
-.select-button:selected .select-button__radio .radio {
-    -fx-border-color: -wa-primary;
-}
-
-.select-button:selected .select-button__radio .dot {
-    -fx-background-color: -wa-primary;
-    -fx-background-insets: -2, 0;
 }

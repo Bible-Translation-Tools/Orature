@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.audio.wav
 
 import org.junit.Assert.assertEquals
@@ -65,7 +83,7 @@ class CueChunkTest {
             for (cues in testEnv) {
                 val file = File.createTempFile("test", "wav")
                 file.deleteOnExit()
-                val wav = WavFile(file, 1, 44100, 16)
+                val wav = WavFile(file, 1, 44100, 16, WavMetadata(listOf(CueChunk())))
                 for (cue in cues) {
                     wav.metadata.addCue(cue.location, cue.label)
                 }
@@ -73,7 +91,7 @@ class CueChunkTest {
                 os.use {
                     os.write(ByteArray(writeSize))
                 }
-                val validator = WavFile(file)
+                val validator = WavFile(file, WavMetadata(listOf(CueChunk())))
                 val resultMetadata = validator.metadata
                 assertEquals(cues.size, resultMetadata.getCues().size)
                 for (cue in cues) {

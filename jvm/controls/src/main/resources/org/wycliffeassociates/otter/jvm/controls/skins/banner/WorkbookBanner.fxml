@@ -1,24 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2020, 2021 Wycliffe Associates
+
+    This file is part of Orature.
+
+    Orature is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Orature is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
 
 <?import com.jfoenix.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
 <?import org.kordamp.ikonli.javafx.*?>
 
 <StackPane fx:id="root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
-        <HBox fx:id="bgGraphic" StackPane.alignment="CENTER" />
-        <HBox styleClass="workbook-banner__overlay" StackPane.alignment="CENTER" />
-        <VBox alignment="CENTER_LEFT" spacing="20.0" StackPane.alignment="CENTER_LEFT">
+        <HBox fx:id="bgGraphic" StackPane.alignment="CENTER">
+            <Region HBox.hgrow="ALWAYS"></Region>
+            <ImageView fx:id="bookCoverImage" pickOnBounds="true" preserveRatio="true"></ImageView>
+        </HBox>
+        <HBox styleClass="workbook-banner__overlay" StackPane.alignment="CENTER" mouseTransparent="true"/>
+        <VBox alignment="CENTER_LEFT" spacing="20.0" StackPane.alignment="CENTER_LEFT" pickOnBounds="false">
             <children>
-                <VBox spacing="10.0">
+                <VBox spacing="10.0" pickOnBounds="false">
                     <children>
                         <Label fx:id="bookTitle" styleClass="workbook-banner__book-title" text="book" />
                         <Label fx:id="resourceTitle"  styleClass="workbook-banner__resource-title" text="resource" />
                     </children>
                 </VBox>
-                <HBox spacing="15.0">
+                <HBox spacing="15.0" pickOnBounds="false">
                     <children>
                         <JFXButton fx:id="deleteBtn" styleClass="btn, btn--secondary, workbook-banner__btn--delete" text="delete" underline="true">
                             <graphic>
