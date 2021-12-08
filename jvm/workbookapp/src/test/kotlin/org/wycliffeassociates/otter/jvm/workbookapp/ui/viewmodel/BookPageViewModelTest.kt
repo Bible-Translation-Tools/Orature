@@ -27,10 +27,9 @@ class BookPageViewModelTest {
     }
 
     private fun createMockDataStore() : WorkbookDataStore {
-        val activeWorkbookProp = SimpleObjectProperty<Workbook>()
         val mockWorkbookDS = mock(WorkbookDataStore::class.java)
         `when`(mockWorkbookDS.activeWorkbookProperty)
-            .thenReturn(activeWorkbookProp)
+            .thenReturn(SimpleObjectProperty<Workbook>())
         `when`(mockWorkbookDS.activeChapterProperty)
             .thenReturn(SimpleObjectProperty())
 
