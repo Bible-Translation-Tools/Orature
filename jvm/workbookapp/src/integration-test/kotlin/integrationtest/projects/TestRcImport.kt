@@ -105,40 +105,40 @@ class TestRcImport {
             )
     }
 
-//    @Test
-//    fun obsV6() {
-//        dbEnvProvider.get()
-//            .import("obs-biel-v6.zip")
-//            .assertRowCounts(
-//                RowCount(
-//                    collections = 57,
-//                    contents = mapOf(
-//                        META to 55,
-//                        TEXT to 1314
-//                    ),
-//                    links = 0
-//                )
-//            )
-//    }
-//
-//    @Test
-//    fun obsAndTnV6() {
-//        dbEnvProvider.get()
-//            .import("obs-biel-v6.zip")
-//            .import("obs-tn-biel-v6.zip")
-//            .assertRowCounts(
-//                RowCount(
-//                    contents = mapOf(
-//                        META to 55,
-//                        TEXT to 1314,
-//                        TITLE to 2237,
-//                        BODY to 2237
-//                    ),
-//                    collections = 57,
-//                    links = 4474
-//                )
-//            )
-//    }
+    @Test
+    fun obsV6() {
+        dbEnvProvider.get()
+            .import("obs-biel-v6.zip")
+            .assertRowCounts(
+                RowCount(
+                    collections = 57,
+                    contents = mapOf(
+                        META to 55,
+                        TEXT to 716
+                    ),
+                    links = 0
+                )
+            )
+    }
+
+    @Test
+    fun obsAndTnV6() {
+        dbEnvProvider.get()
+            .import("obs-biel-v6.zip")
+            .import("obs-tn-biel-v6.zip")
+            .assertRowCounts(
+                RowCount(
+                    contents = mapOf(
+                        META to 55,
+                        TEXT to 716,
+                        TITLE to 2237,
+                        BODY to 2237
+                    ),
+                    collections = 57,
+                    links = 4474
+                )
+            )
+    }
 
     @Test
     fun obsSlugs() {
