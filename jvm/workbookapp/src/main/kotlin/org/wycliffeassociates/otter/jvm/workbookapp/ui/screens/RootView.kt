@@ -71,10 +71,6 @@ class RootView : View() {
             left<AppBar>()
             center<AppContent>()
         }
-
-        subscribe<ThemeColorEvent<UIComponent>> {
-            viewModel.updateTheme(it.data)
-        }
     }
 
     private fun initThemeStylesheets() {
@@ -106,8 +102,8 @@ class RootView : View() {
         }
     }
 
-    fun bindThemeClass() {
-        viewModel.appColorMode.onChange {
+    private fun bindThemeClass() {
+        settingsViewModel.appColorMode.onChange {
             when (it) {
                 ColorTheme.LIGHT -> {
                     root.addClass("light-theme")

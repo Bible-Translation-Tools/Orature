@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jthemedetecor.OsThemeDetector
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -36,6 +37,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import tornadofx.*
 import javax.inject.Inject
 
@@ -81,6 +83,10 @@ class SettingsViewModel : ViewModel() {
     val inputDevices = observableListOf<String>()
     val selectedInputDeviceProperty = SimpleObjectProperty<String>()
 
+    val appColorMode = SimpleObjectProperty<ColorTheme>()
+    private val osThemeDetector = OsThemeDetector.getDetector()
+    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
+
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val orientationScaleProperty = orientationProperty.doubleBinding {
         when (it) {
@@ -105,6 +111,13 @@ class SettingsViewModel : ViewModel() {
             if (oldValue != null) {
                 newValue?.let { updateLanguage(it) }
             }
+        }
+
+        osThemeDetector.registerListener {
+            runLater { isOSDarkMode.set(it) }
+        }
+        subscribe<ThemeColorEvent<UIComponent>> {
+            updateTheme(it.data)
         }
     }
 
@@ -233,5 +246,26 @@ class SettingsViewModel : ViewModel() {
                 else -> NodeOrientation.LEFT_TO_RIGHT
             }
         )
+    }
+
+    fun updateTheme(selectedTheme: ColorTheme) {
+        if (selectedTheme == ColorTheme.SYSTEM) {
+            bindSystemTheme()
+        } else {
+            appColorMode.unbind()
+            appColorMode.set(selectedTheme)
+        }
+
+        theme.setPreferredThem(selectedTheme)
+            .subscribe()
+    }
+
+    private fun bindSystemTheme() {
+        appColorMode.bind(isOSDarkMode.objectBinding {
+            if (it == true)
+                ColorTheme.DARK
+            else
+                ColorTheme.LIGHT
+        })
     }
 }

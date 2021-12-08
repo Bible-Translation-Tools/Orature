@@ -18,13 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.jthemedetecor.OsThemeDetector
 import java.lang.IllegalArgumentException
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.ColorTheme
-import org.wycliffeassociates.otter.common.domain.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -42,23 +39,12 @@ class RootViewModel : ViewModel() {
     val showAudioErrorDialogProperty = SimpleBooleanProperty(false)
     var audioErrorType = SimpleObjectProperty<AudioErrorType>()
 
-    val appColorMode = SimpleObjectProperty<ColorTheme>()
-    private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkMode = SimpleBooleanProperty(osThemeDetector.isDark)
-
-    @Inject
-    lateinit var theme: AppTheme
-
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         initializeAudioErrorListener()
-
-        osThemeDetector.registerListener {
-            runLater { isOSDarkMode.set(it) }
-        }
     }
 
     private fun initializeAudioErrorListener() {
@@ -77,26 +63,5 @@ class RootViewModel : ViewModel() {
                     }
                 }
             }
-    }
-
-    fun updateTheme(selectedTheme: ColorTheme) {
-        if (selectedTheme == ColorTheme.SYSTEM) {
-            bindSystemTheme()
-        } else {
-            appColorMode.unbind()
-            appColorMode.set(selectedTheme)
-        }
-
-        theme.setPreferredThem(selectedTheme)
-            .subscribe()
-    }
-
-    private fun bindSystemTheme() {
-        appColorMode.bind(isOSDarkMode.objectBinding {
-            if (it == true)
-                ColorTheme.DARK
-            else
-                ColorTheme.LIGHT
-        })
     }
 }
