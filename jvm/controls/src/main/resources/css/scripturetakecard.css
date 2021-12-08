@@ -43,7 +43,7 @@
 }
 
 .card--scripture-take--empty {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-take-card-placeholder;
     -fx-background-radius: 10px;
     -fx-pref-height: 182px;
 }

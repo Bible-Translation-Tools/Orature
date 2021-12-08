@@ -26,17 +26,20 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RootViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class AppContent : View() {
 
     private val navigator: NavigationMediator by inject()
     private val rootViewModel: RootViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     override val root = HiddenSidesPane().apply {
         content =  stackpane {
             borderpane {
                 top = navigator.breadCrumbsBar.apply {
+                    orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
                     disableWhen(rootViewModel.pluginOpenedProperty)
                 }
                 center<Workspace>()

@@ -28,6 +28,7 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class ChunkCell(
+    private val orientationScale: Double,
     private val getPlayer: () -> IAudioPlayer,
     private val onChunkOpen: (CardData) -> Unit,
     private val onTakeSelected: (CardData, TakeModel) -> Unit
@@ -44,6 +45,7 @@ class ChunkCell(
 
         graphic = view.apply {
             showTakesProperty.set(false)
+            orientationScaleProperty.set(orientationScale)
 
             chunkTitleProperty.set(
                 MessageFormat.format(

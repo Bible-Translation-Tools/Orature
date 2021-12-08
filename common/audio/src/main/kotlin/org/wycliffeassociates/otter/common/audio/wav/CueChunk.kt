@@ -22,19 +22,19 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-private const val CUE_LABEL = "cue "
-private const val DATA_LABEL = "data"
-private const val LIST_LABEL = "LIST"
-private const val ADTL_LABEL = "adtl"
-private const val LABEL_LABEL = "labl"
+internal const val CUE_LABEL = "cue "
+internal const val DATA_LABEL = "data"
+internal const val LIST_LABEL = "LIST"
+internal const val ADTL_LABEL = "adtl"
+internal const val LABEL_LABEL = "labl"
 
-private const val CUE_HEADER_SIZE = 4
-private const val CUE_COUNT_SIZE = 4
-private const val CUE_ID_SIZE = 4
-private const val CUE_DATA_SIZE = 24
+internal const val CUE_HEADER_SIZE = 4
+internal const val CUE_COUNT_SIZE = 4
+internal const val CUE_ID_SIZE = 4
+internal const val CUE_DATA_SIZE = 24
 
 // We only care to read the cue id and location, seek over the next 16 bytes
-private const val DONT_CARE_CUE_DATA_SIZE = 16
+internal const val DONT_CARE_CUE_DATA_SIZE = 16
 
 /**
  * Cue Chunk
@@ -76,7 +76,7 @@ private const val DONT_CARE_CUE_DATA_SIZE = 16
  * 4 - cue point id (matching the id from the cue chunk)
  * _ - text of the label (should be word aligned, but technically we double word align
  */
-internal class CueChunk : RiffChunk {
+open class CueChunk : RiffChunk {
 
     val cues: List<AudioCue> = mutableListOf()
 
@@ -127,7 +127,7 @@ internal class CueChunk : RiffChunk {
         return combinedBuffer.array()
     }
 
-    private fun createCueData(cueNumber: Int, cue: AudioCue): ByteArray {
+    protected fun createCueData(cueNumber: Int, cue: AudioCue): ByteArray {
         val buffer = ByteBuffer.allocate(CUE_DATA_SIZE)
         buffer.order(ByteOrder.LITTLE_ENDIAN)
         buffer.putInt(cueNumber)
@@ -139,7 +139,7 @@ internal class CueChunk : RiffChunk {
         return buffer.array()
     }
 
-    private fun createLabelChunk(cues: List<AudioCue>): ByteArray {
+    internal fun createLabelChunk(cues: List<AudioCue>): ByteArray {
         // size = (8 for labl header, 4 for cue id) * num cues + all strings
         val size = (CHUNK_HEADER_SIZE + CHUNK_LABEL_SIZE) * cues.size + computeTextSize(cues)
         // adds LIST header which is a standard chunk header and a "adtl" label
@@ -207,6 +207,10 @@ internal class CueChunk : RiffChunk {
             // move on to the next chunk
             chunk.seek(wordAlign(subchunkSize))
         }
+        addParsedCues(cueListBuilder)
+    }
+
+    open internal fun addParsedCues(cueListBuilder: CueListBuilder) {
         cues as MutableList
         cues.clear()
         cues.addAll(cueListBuilder.build())
@@ -287,7 +291,7 @@ internal class CueChunk : RiffChunk {
     }
 }
 
-private class CueListBuilder {
+internal class CueListBuilder {
 
     private data class TempCue(var location: Int?, var label: String?)
 

@@ -29,7 +29,7 @@ internal class AudioPlayerConnectionFactory(
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) {
 
-    lateinit var outputLine: SourceDataLine
+    var outputLine: SourceDataLine? = null
 
     internal lateinit var player: AudioBufferPlayer
         private set
@@ -39,13 +39,13 @@ internal class AudioPlayerConnectionFactory(
     internal var currentConnection: AudioPlayerConnectionState? = null
 
     @Synchronized
-    fun setLine(newLine: SourceDataLine) {
+    fun setLine(newLine: SourceDataLine?) {
         if (this::player.isInitialized) {
             player.pause()
         } else {
             player = AudioBufferPlayer(newLine, errorRelay)
         }
-        newLine.close()
+        newLine?.close()
         outputLine = newLine
         currentConnection?.let {
             load(it)
@@ -99,7 +99,7 @@ internal class AudioPlayerConnectionFactory(
         try {
             player.pause()
             swapConnection(request)
-            outputLine.flush()
+            outputLine?.flush()
             if (request.id != currentConnection?.id) {
                 player.stop()
             }

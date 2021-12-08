@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.breadcrumbs
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.EventHandler
@@ -35,6 +36,7 @@ class BreadCrumb : HBox() {
     val titleProperty = SimpleStringProperty()
     val isActiveProperty = SimpleBooleanProperty(false)
     val tooltipTextProperty = SimpleStringProperty()
+    val orientationScaleProperty = SimpleDoubleProperty()
     val onClickProperty = SimpleObjectProperty<EventHandler<MouseEvent>>()
 
     init {
@@ -60,8 +62,9 @@ class BreadCrumb : HBox() {
 
         label {
             addClass("breadcrumb__separator")
-
-            graphic = FontIcon(MaterialDesign.MDI_PLAY)
+            graphic = FontIcon(MaterialDesign.MDI_MENU_RIGHT).apply {
+                scaleXProperty().bind(orientationScaleProperty)
+            }
             hiddenWhen(isActiveProperty)
             managedWhen(visibleProperty())
         }

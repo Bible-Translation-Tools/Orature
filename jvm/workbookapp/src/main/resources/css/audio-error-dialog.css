@@ -19,7 +19,7 @@
 
 .audio-error-dialog {
     -fx-pref-width: 480px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-background;
 }
 
 .audio-error-dialog__header {
@@ -34,11 +34,13 @@
 .audio-error-dialog__title {
     -fx-font-size: 28px;
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .audio-error-dialog__subtitle {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .audio-error-dialog__body {
@@ -48,7 +50,7 @@
 }
 
 .audio-error-dialog__message {
-    -fx-text-fill: -wa-gray-darker;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 18px;
     -fx-wrap-text: true;
 }
@@ -69,42 +71,42 @@
 }
 
 .audio-error-dialog__progress .progress-bar .track {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-slider-track-color;
     -fx-background-radius: 6px;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
-    -fx-border-color: -wa-black-40;
+    -fx-border-color: -wa-slider-border-color;
 }
 
 .audio-error-dialog__progress-title {
     -fx-font-size: 16px;
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .audio-error-dialog__footer {
     -fx-padding: 20px 15px;
     -fx-border-width: 2px 0 0 0;
-    -fx-border-color: #ccc;
+    -fx-border-color: -wa-border-neutral;
     -fx-spacing: 10px;
 }
 
 .audio-error-dialog__btn--close,
 .audio-error-dialog__btn--close:hover,
 .audio-error-dialog__btn--close:pressed {
-    -fx-border-color: -wa-white;
+    -fx-border-color: -wa-border-neutral;
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
 }
 
 .audio-error-dialog__btn--close:hover {
-    -fx-background-color: -wa-white-30;
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .audio-error-dialog__btn--close .ikonli-font-icon,
 .audio-error-dialog__btn--close:hover .ikonli-font-icon,
 .audio-error-dialog__btn--close:pressed .ikonli-font-icon {
     -fx-icon-size: 18px;
-    -fx-fill: -wa-white;
+    -fx-fill: -wa-fill-neutral;
 }
 
 .audio-error-dialog__footer-spacer {

@@ -26,7 +26,7 @@
 }
 
 .card--take__placeholder {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: wa-card-drag-drop-placeholder;
     -fx-background-radius: 10px;
 }
 
@@ -42,26 +42,4 @@
 
 .card--take__border-glow {
     -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 5, 5);
-}
-
-.card--take__slider .track {
-    -fx-background-color: -wa-slider-track-color;
-}
-
-.card--take__slider .colored-track {
-    -fx-background-color: -wa-primary;
-}
-
-.card--take__slider .thumb {
-    -fx-background-color: #edf1f8;
-    -fx-padding: 5 7.6;
-    -fx-effect: -wa-level2;
-}
-
-.card--take__slider--active .thumb {
-    -fx-background-color: -wa-highlight-text;
-}
-
-.card--take__slider .animated-thumb {
-    visibility: hidden;
 }

@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -38,6 +39,7 @@ class ChunkItem : VBox() {
     val chunkTitleProperty = SimpleStringProperty()
     val showTakesProperty = SimpleBooleanProperty(false)
     val hasSelectedProperty = SimpleBooleanProperty(false)
+    val orientationScaleProperty = SimpleDoubleProperty()
 
     val takes = observableListOf<TakeModel>()
     val takeViews = observableListOf<TakeItem>()
@@ -118,7 +120,9 @@ class ChunkItem : VBox() {
                 addClass("btn", "btn--secondary")
                 text = FX.messages["openVerse"]
                 tooltip(text)
-                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
+                graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                    scaleXProperty().bind(orientationScaleProperty)
+                }
                 onActionProperty().bind(onChunkOpenActionProperty)
             }
 

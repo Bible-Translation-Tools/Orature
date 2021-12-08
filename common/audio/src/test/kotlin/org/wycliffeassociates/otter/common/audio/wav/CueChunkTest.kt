@@ -83,7 +83,7 @@ class CueChunkTest {
             for (cues in testEnv) {
                 val file = File.createTempFile("test", "wav")
                 file.deleteOnExit()
-                val wav = WavFile(file, 1, 44100, 16)
+                val wav = WavFile(file, 1, 44100, 16, WavMetadata(listOf(CueChunk())))
                 for (cue in cues) {
                     wav.metadata.addCue(cue.location, cue.label)
                 }
@@ -91,7 +91,7 @@ class CueChunkTest {
                 os.use {
                     os.write(ByteArray(writeSize))
                 }
-                val validator = WavFile(file)
+                val validator = WavFile(file, WavMetadata(listOf(CueChunk())))
                 val resultMetadata = validator.metadata
                 assertEquals(cues.size, resultMetadata.getCues().size)
                 for (cue in cues) {

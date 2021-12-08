@@ -18,13 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.glass.ui.Screen
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.ReplaySubject
+import io.reactivex.subjects.Subject
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
@@ -63,7 +61,7 @@ class WaveformImageBuilder(
             .doOnError { e ->
                 logger.error("Error in building WaveformImage", e)
             }
-            .doFinally {
+            .doAfterTerminate {
                 reader.release()
             }
             .subscribeOn(Schedulers.computation())
@@ -72,31 +70,27 @@ class WaveformImageBuilder(
     fun buildWaveformAsync(
         reader: AudioFileReader,
         width: Int = Screen.getMainScreen().platformWidth,
-        height: Int = Screen.getMainScreen().platformHeight
-    ): Observable<Image> {
-        val waveformStream = ReplaySubject.create<Image>()
-
-        Completable.fromAction {
+        height: Int = Screen.getMainScreen().platformHeight,
+        waveformStream: Subject<Image>
+    ): Completable {
+        return Completable.fromAction {
             reader.open()
             drawPartialImages(reader, width, height, waveformStream)
         }
         .doOnError { e ->
             logger.error("Error in building WaveformImage", e)
         }
-        .doFinally {
+        .doAfterTerminate {
             reader.release()
         }
         .subscribeOn(Schedulers.computation())
-        .subscribe()
-
-        return waveformStream
     }
 
     private fun drawPartialImages(
         reader: AudioFileReader,
         width: Int,
         height: Int,
-        waveformStream: ReplaySubject<Image>
+        waveformStream: Subject<Image>
     ) {
         val framesPerPixel = reader.totalFrames / width
         var img = WritableImage(partialImageWidth, height)
@@ -118,9 +112,9 @@ class WaveformImageBuilder(
 
             counter++
             if (counter == partialImageWidth) {
-                counter = 0
                 waveformStream.onNext(img)
                 img = WritableImage(partialImageWidth, height)
+                counter = 0
             }
         }
 

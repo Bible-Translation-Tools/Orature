@@ -52,7 +52,7 @@ class InvalidWavFileException(message: String? = null) : Exception(message)
 /**
  * Wraps a file for the purposes of reading wav header metadata
  */
-internal class WavFile private constructor() : AudioFormatStrategy {
+class WavFile private constructor() : AudioFormatStrategy {
 
     val logger = LoggerFactory.getLogger(WavFile::class.java)
 
@@ -218,7 +218,7 @@ internal class WavFile private constructor() : AudioFormatStrategy {
                 }
                 metadata.parseMetadata(ByteBuffer.wrap(bytes))
             } catch (e: Exception) {
-                logger.error("Error parsing metadata for file: ${file.name}")
+                logger.error("Error parsing metadata for file: ${file.name}", e)
             }
         }
     }

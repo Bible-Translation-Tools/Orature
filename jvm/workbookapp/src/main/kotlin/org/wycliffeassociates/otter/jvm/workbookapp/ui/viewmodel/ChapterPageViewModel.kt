@@ -142,8 +142,7 @@ class ChapterPageViewModel : ViewModel() {
 
     fun openPlayers() {
         workbookDataStore.targetAudioProperty.value?.let { target ->
-            val player = (app as OtterApp).dependencyGraph.injectPlayer()
-            player.load(target.file)
+            target.player.load(target.file)
         }
         workbookDataStore.sourceAudioProperty.value?.let { source ->
             val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
@@ -153,6 +152,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun closePlayers() {
+        workbookDataStore.selectedChapterPlayerProperty.value?.close()
         workbookDataStore.targetAudioProperty.value?.player?.close()
         sourceAudioPlayerProperty.value?.close()
         sourceAudioPlayerProperty.set(null)
@@ -264,8 +264,11 @@ class ChapterPageViewModel : ViewModel() {
                 chunk.chunkSource?.audio?.selected?.value?.value?.file
             }
 
+            var compiled: File? = null
+
             ConcatenateAudio(directoryProvider).execute(takes)
                 .flatMapCompletable { file ->
+                    compiled = file
                     audioPluginViewModel.import(chapter, file)
                 }
                 .subscribeOn(Schedulers.io())
@@ -274,6 +277,7 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .doFinally {
                     isCompilingProperty.set(false)
+                    compiled?.delete()
                 }
                 .observeOnFx()
                 .subscribe()
@@ -382,7 +386,7 @@ class ChapterPageViewModel : ViewModel() {
             .observeOnFx()
             .subscribe { takeHolder ->
                 setSelectedChapterTake(takeHolder.value)
-                workbookDataStore.updateTargetAudio()
+                workbookDataStore.updateSelectedChapterPlayer()
             }
             .let { disposables.add(it) }
     }

@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.AudioCue
 
-internal class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
+class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
 
     private val logger = LoggerFactory.getLogger(WavMetadata::class.java)
 
@@ -40,7 +40,7 @@ internal class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetad
         if (cue != null) {
             cueChunk = cue as CueChunk
         } else {
-            cueChunk = CueChunk()
+            cueChunk = VerseMarkerChunk()
             chunks.add(cueChunk)
         }
     }

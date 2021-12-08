@@ -39,8 +39,8 @@ ext {
     log4j2Ver = '2.12.1'
     ikonliVer = '12.2.0'
     controlsfxVer = '11.0.1'
-    sentryVer = '1.7.30'
-    usfmToolsVer = "1.6.0"
+    sentryVer = '5.2.4'
+    usfmToolsVer = "1.7.1"
     testFxVer = '4.0.15-alpha'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'

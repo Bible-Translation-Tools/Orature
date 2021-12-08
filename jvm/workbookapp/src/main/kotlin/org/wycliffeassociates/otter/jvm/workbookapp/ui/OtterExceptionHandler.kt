@@ -20,12 +20,15 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import io.sentry.Attachment
 import io.sentry.Sentry
 import javafx.application.Platform
 import javafx.application.Platform.runLater
+import javafx.geometry.NodeOrientation
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.OratureInfo
 import org.wycliffeassociates.otter.common.data.ErrorReportException
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.dialog.ExceptionDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.report.GithubReporter
@@ -36,7 +39,10 @@ import java.io.File
 import java.io.PrintWriter
 import java.util.*
 
-class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.UncaughtExceptionHandler {
+class OtterExceptionHandler(
+    val directoryProvider: IDirectoryProvider,
+    val localeLanguage: LocaleLanguage
+) : Thread.UncaughtExceptionHandler {
     val logger = LoggerFactory.getLogger(DefaultErrorHandler::class.java)
 
     class ErrorEvent(val thread: Thread, val error: Throwable) {
@@ -47,7 +53,22 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     init {
-        Sentry.init()
+        initializeSentry()
+    }
+
+    private fun initializeSentry() {
+        // Empty string for dsn disables the sentry SDK, used for running in the IDE
+        var sentryDsn = ""
+        try {
+            // This file is configured in build.gradle, set via github actions
+            val sentryProperties = ResourceBundle.getBundle("sentry")
+            sentryDsn = sentryProperties["dsn"]
+        } catch (e: MissingResourceException) {
+            logger.info("Sentry disabled due to missing sentry.properties file")
+        }
+        Sentry.init {
+            it.dsn = sentryDsn
+        }
     }
 
     // By default, all error messages are shown. Override to decide if certain errors should be handled another way.
@@ -87,6 +108,11 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
     }
 
     private fun showErrorDialog(error: Throwable) {
+        val orientation = when (localeLanguage.preferredLanguage?.direction) {
+            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+            else -> NodeOrientation.LEFT_TO_RIGHT
+        }
+
         ExceptionDialog().apply {
             titleTextProperty.set(FX.messages["needsRestart"])
             headerTextProperty.set(FX.messages["yourWorkSaved"])
@@ -95,6 +121,7 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
             sendReportTextProperty.set(FX.messages["sendErrorReport"])
             stackTraceProperty.set(stringFromError(error))
             closeTextProperty.set(FX.messages["closeApp"])
+            orientationProperty.set(orientation)
 
             onCloseAction {
                 if (sendReportProperty.value) {
@@ -141,15 +168,15 @@ class OtterExceptionHandler(val directoryProvider: IDirectoryProvider) : Thread.
 
     private fun sendSentryReport(error: Throwable) {
         val environment = getEnvironment()
-        val sentryContext = Sentry.getContext()
+        Sentry.withScope { scope ->
+            scope.setTag("app version", environment.getVersion() ?: "")
+            environment.getSystemData().forEach {
+                scope.setTag(it.first, it.second)
+            }
+            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory,"orature.log").absolutePath))
 
-        sentryContext.addTag("app version", environment.getVersion())
-        environment.getSystemData().forEach {
-            sentryContext.addTag(it.first, it.second)
+            Sentry.captureException(error)
         }
-
-        Sentry.capture(error)
-        Sentry.clearContext()
     }
 
     private fun getEnvironment(): AppInfo {

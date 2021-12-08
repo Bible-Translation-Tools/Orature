@@ -53,6 +53,9 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
     @FXML
     lateinit var seeMoreBtn: Button
 
+    @FXML
+    lateinit var divider: Label
+
     private val downIcon = FontIcon(MaterialDesign.MDI_MENU_DOWN)
     private val upIcon = FontIcon(MaterialDesign.MDI_MENU_UP)
 
@@ -90,6 +93,10 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
             setOnAddBookAction {
                 card.onNewBookActionProperty.value?.invoke()
             }
+        }
+
+        divider.apply {
+            graphic.scaleXProperty().bind(card.orientationScaleProperty)
         }
 
         seeMoreBtn.apply {

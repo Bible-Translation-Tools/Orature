@@ -24,6 +24,7 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import javafx.geometry.NodeOrientation
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -58,6 +59,7 @@ class SettingsViewModel : ViewModel() {
     lateinit var theme: AppTheme
 
     private val audioPluginViewModel: AudioPluginViewModel by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
 
     val audioPlugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
 
@@ -78,6 +80,20 @@ class SettingsViewModel : ViewModel() {
 
     val inputDevices = observableListOf<String>()
     val selectedInputDeviceProperty = SimpleObjectProperty<String>()
+
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val orientationScaleProperty = orientationProperty.doubleBinding {
+        when (it) {
+            NodeOrientation.RIGHT_TO_LEFT -> -1.0
+            else -> 1.0
+        }
+    }
+    val sourceOrientationProperty = workbookDataStore.activeWorkbookProperty.objectBinding {
+        when (it?.source?.language?.direction) {
+            "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+            else -> NodeOrientation.LEFT_TO_RIGHT
+        }
+    }
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -208,5 +224,14 @@ class SettingsViewModel : ViewModel() {
             .subscribe {
                 showChangeLanguageSuccessDialogProperty.set(true)
             }
+    }
+
+    fun setAppOrientation() {
+        orientationProperty.set(
+            when (localeLanguage.preferredLanguage?.direction) {
+                "rtl" -> NodeOrientation.RIGHT_TO_LEFT
+                else -> NodeOrientation.LEFT_TO_RIGHT
+            }
+        )
     }
 }

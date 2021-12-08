@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.card
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -30,6 +31,7 @@ class NewTranslationCard : Control() {
 
     val sourceLanguageProperty = SimpleStringProperty("???")
     val targetLanguageProperty = SimpleStringProperty("???")
+    val orientationScaleProperty = SimpleDoubleProperty()
 
     val newTranslationTextProperty = SimpleStringProperty()
     val onActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()

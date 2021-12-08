@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.breadcrumbs
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.layout.HBox
 import tornadofx.*
 import java.util.concurrent.Callable
@@ -27,11 +28,14 @@ class BreadcrumbBar : HBox() {
 
     private val items = observableListOf<BreadCrumb>()
 
+    val orientationScaleProperty = SimpleDoubleProperty()
+
     init {
         importStylesheet(javaClass.getResource("/css/breadcrumb-bar.css").toExternalForm())
         styleClass.setAll("breadcrumb-bar")
 
         bindChildren(items) { breadcrumb ->
+            breadcrumb.orientationScaleProperty.bind(orientationScaleProperty)
             breadcrumb.isActiveProperty.bind(
                 Bindings.createBooleanBinding(
                     Callable { items.last() == breadcrumb },
