@@ -21,9 +21,6 @@ package org.wycliffeassociates.otter.assets.initialization
 import io.reactivex.Completable
 import java.io.File
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResourceContainer
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.persistence.config.Installable
 import org.wycliffeassociates.otter.common.persistence.repositories.IInstalledEntityRepository
 import javax.inject.Inject

@@ -249,7 +249,7 @@ class ChapterPage : Fragment() {
                         viewModel.compile()
                     }
                 }
-                region { 
+                region {
                     hgrow = Priority.ALWAYS
                 }
                 button {

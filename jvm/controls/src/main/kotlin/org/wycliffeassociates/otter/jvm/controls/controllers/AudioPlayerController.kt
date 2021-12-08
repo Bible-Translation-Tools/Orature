@@ -129,7 +129,7 @@ class AudioPlayerController(
                 logger.error("Error in startProgressUpdate", e)
             }
             .subscribe {
-                if (player?.isPlaying() == true){
+                if (player?.isPlaying() == true) {
                     isPlayingProperty.set(true)
                 } else {
                     isPlayingProperty.set(false)
@@ -159,7 +159,7 @@ class AudioPlayerController(
 
     fun seek(location: Int) {
         audioSlider.value = location.toDouble()
-        
+
         player?.let {
             it.seek(location)
             if (!it.isPlaying()) {

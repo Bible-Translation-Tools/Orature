@@ -144,8 +144,8 @@ class LanguageDao(
             val transactionDsl = DSL.using(config)
             entities.forEach { entity ->
                 // Update region of the language entity
-                transactionDsl.
-                    update(LANGUAGE_ENTITY)
+                transactionDsl
+                    .update(LANGUAGE_ENTITY)
                     .set(LANGUAGE_ENTITY.REGION, entity.region)
                     .where(LANGUAGE_ENTITY.SLUG.eq(entity.slug))
                     .execute()

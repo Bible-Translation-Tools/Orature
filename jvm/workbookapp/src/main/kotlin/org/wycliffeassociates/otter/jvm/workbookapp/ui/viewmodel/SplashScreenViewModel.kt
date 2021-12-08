@@ -27,7 +27,6 @@ import org.wycliffeassociates.otter.assets.initialization.InitializeApp
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 import javax.inject.Inject
-import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 
 class SplashScreenViewModel : ViewModel() {

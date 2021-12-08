@@ -47,6 +47,4 @@ class BookCardData(val collection: Collection, artwork: Observable<Artwork>) {
                 )
             }
     }
-
 }
-

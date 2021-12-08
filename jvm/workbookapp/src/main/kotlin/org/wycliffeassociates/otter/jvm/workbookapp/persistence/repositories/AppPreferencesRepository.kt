@@ -50,7 +50,6 @@ class AppPreferencesRepository @Inject constructor(
         return preferences.setLastResource(resource)
     }
 
-
     override fun getInputDevice(): Single<String> {
         return preferences
             .audioInputDevice()

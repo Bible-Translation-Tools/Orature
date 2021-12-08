@@ -114,7 +114,7 @@ class AppBar : Fragment() {
         }
     }
 
-    private inline fun <reified T: UIComponent> toggleOpen(isActive: Boolean) {
+    private inline fun <reified T : UIComponent> toggleOpen(isActive: Boolean) {
         when (isActive) {
             true -> fire(DrawerEvent(T::class, DrawerEventAction.OPEN))
             false -> fire(DrawerEvent(T::class, DrawerEventAction.CLOSE))

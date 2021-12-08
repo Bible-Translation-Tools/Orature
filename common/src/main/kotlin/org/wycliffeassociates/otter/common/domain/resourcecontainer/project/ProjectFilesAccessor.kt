@@ -38,7 +38,6 @@ import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
-import java.io.InputStream
 import kotlin.io.path.outputStream
 
 class ProjectFilesAccessor(
@@ -283,10 +282,10 @@ class ProjectFilesAccessor(
 
     private fun getLicense(sourceContainer: File): File? {
         ResourceContainer.load(sourceContainer).use { rc ->
-            if (rc.accessor.fileExists(RcConstants.LICENSE_FILE)){
+            if (rc.accessor.fileExists(RcConstants.LICENSE_FILE)) {
                 val license = kotlin.io.path.createTempFile(suffix = ".md")
 
-                rc.accessor.getInputStream(RcConstants.LICENSE_FILE).use{ input ->
+                rc.accessor.getInputStream(RcConstants.LICENSE_FILE).use { input ->
                     license.outputStream().write(input.readAllBytes())
                 }
                 return license.toFile()

@@ -127,7 +127,6 @@ class AudioBufferPlayer(
                         } catch (e: IllegalArgumentException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                         }
-
                     }
                     playbackThread.start()
                 }
@@ -157,7 +156,6 @@ class AudioBufferPlayer(
     }
 
     override fun close() {
-
     }
 
     override fun release() {

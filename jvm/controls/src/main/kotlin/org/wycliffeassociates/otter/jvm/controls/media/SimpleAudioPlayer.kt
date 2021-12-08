@@ -61,7 +61,7 @@ class SimpleAudioPlayer(
         button {
             addClass("btn", "btn--icon")
             tooltip {
-                textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding{
+                textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding {
                     if (it == true) messages["pause"] else messages["play"]
                 })
             }
@@ -110,7 +110,7 @@ class SimpleAudioPlayer(
             it?.let { button ->
                 button.apply {
                     tooltip {
-                        textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding{
+                        textProperty().bind(audioPlayerController.isPlayingProperty.stringBinding {
                             if (it == true) messages["pause"] else messages["play"]
                         })
                     }

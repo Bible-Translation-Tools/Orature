@@ -173,7 +173,7 @@ class OtterExceptionHandler(
             environment.getSystemData().forEach {
                 scope.setTag(it.first, it.second)
             }
-            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory,"orature.log").absolutePath))
+            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory, "orature.log").absolutePath))
 
             Sentry.captureException(error)
         }

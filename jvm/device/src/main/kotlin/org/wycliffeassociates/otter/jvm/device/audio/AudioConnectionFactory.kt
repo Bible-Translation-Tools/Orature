@@ -46,7 +46,6 @@ class AudioConnectionFactory(
         return playerConnectionFactory.getPlayer()
     }
 
-
     fun getRecorder(): IAudioRecorder {
         return recorderConnectionFactory.getRecorder()
     }

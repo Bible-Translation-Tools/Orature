@@ -4,7 +4,7 @@ import tornadofx.FXEvent
 import tornadofx.UIComponent
 import kotlin.reflect.KClass
 
-class ThemeColorEvent<T: UIComponent>(val type: KClass<T>, val action: ChangeThemeEventAction): FXEvent()
+class ThemeColorEvent<T : UIComponent>(val type: KClass<T>, val action: ChangeThemeEventAction) : FXEvent()
 enum class ChangeThemeEventAction {
     LIGHT,
     DARK

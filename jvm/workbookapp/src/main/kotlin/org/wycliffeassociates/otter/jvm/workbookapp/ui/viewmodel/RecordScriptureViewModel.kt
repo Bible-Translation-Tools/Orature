@@ -53,7 +53,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
-import java.text.SimpleDateFormat
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -444,7 +443,7 @@ class RecordScriptureViewModel : ViewModel() {
     private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
         Platform.runLater {
             takeCardModels.removeAll { it.take == take }
-            if (autoSelect){
+            if (autoSelect) {
                 takeCardModels.firstOrNull()?.let {
                     selectTake(it.take)
                 }
