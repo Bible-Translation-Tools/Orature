@@ -556,6 +556,11 @@
     -fx-text-fill: -wa-regular-text;
 }
 
+.wa-menu-button .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-fill: -wa-regular-text;
+}
+
 .wa-menu-button__icon .ikonli-font-icon {
     -fx-icon-size: 34;
     -fx-icon-color: -wa-regular-text;
