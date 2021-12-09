@@ -27,6 +27,7 @@ class WaMenuButton : Button() {
             addClass("wa-menu-button__content")
 
             label {
+                addClass("wa-menu-button__icon")
                 graphic = FontIcon(MaterialDesign.MDI_SPEEDOMETER)
             }
             label {
