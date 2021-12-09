@@ -25,11 +25,13 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.CheckboxButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class AddPluginDialog : OtterDialog() {
 
     private val viewModel: AddPluginViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
     private val content = VBox().apply {
         addClass("add-plugin-dialog")
@@ -131,6 +133,11 @@ class AddPluginDialog : OtterDialog() {
 
     init {
         setContent(content)
+    }
+
+    override fun onDock() {
+        super.onDock()
+        themeProperty.set(settingsViewModel.appColorMode.value)
     }
 
     override fun onUndock() {

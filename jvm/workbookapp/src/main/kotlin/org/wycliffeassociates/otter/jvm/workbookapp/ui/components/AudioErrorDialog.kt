@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ObjectProperty
@@ -34,17 +32,14 @@ import javafx.scene.layout.BackgroundPosition
 import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
-import javax.inject.Inject
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
-import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
+import java.util.concurrent.Callable
 
 class AudioErrorDialog : OtterDialog() {
     private val logger = LoggerFactory.getLogger(AudioErrorDialog::class.java)
@@ -247,6 +242,11 @@ class AudioErrorDialog : OtterDialog() {
 
     fun onCancelActionProperty(): ObjectProperty<EventHandler<ActionEvent>> {
         return onCancelActionProperty
+    }
+
+    override fun onDock() {
+        super.onDock()
+        themeProperty.set(settingsViewModel.appColorMode.value)
     }
 }
 

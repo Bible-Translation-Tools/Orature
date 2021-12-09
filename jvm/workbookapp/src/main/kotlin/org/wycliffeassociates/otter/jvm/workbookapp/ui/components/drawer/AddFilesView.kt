@@ -154,6 +154,7 @@ class AddFilesView : View() {
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
         }
 
         viewModel.showImportDialogProperty.onChange {
@@ -177,6 +178,7 @@ class AddFilesView : View() {
             messageTextProperty.set(messages["importResourceSuccessMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportSuccessDialogProperty.set(false) }
@@ -204,6 +206,7 @@ class AddFilesView : View() {
             messageTextProperty.set(messages["importResourceFailMessage"])
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showImportErrorDialogProperty.set(false) }

@@ -153,6 +153,7 @@ class WorkbookPage : View() {
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["keepProject"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
@@ -185,6 +186,7 @@ class WorkbookPage : View() {
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["goHome"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
@@ -213,6 +215,7 @@ class WorkbookPage : View() {
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["close"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
@@ -293,6 +296,7 @@ class WorkbookPage : View() {
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
         }
     }
 

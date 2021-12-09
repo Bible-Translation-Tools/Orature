@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferen
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import javax.inject.Inject
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import org.wycliffeassociates.otter.common.data.ColorTheme
 
 class AppPreferencesRepository @Inject constructor(
     private val preferences: IAppPreferences,
@@ -93,5 +94,16 @@ class AppPreferencesRepository @Inject constructor(
 
     override fun setLocaleLanguage(language: Language): Completable {
         return preferences.setLocaleLanguage(language.slug)
+    }
+
+    override fun appTheme(): Single<ColorTheme> {
+        return preferences.appTheme()
+            .map {
+                ColorTheme.valueOf(it)
+            }
+    }
+
+    override fun setAppTheme(theme: ColorTheme): Completable {
+        return preferences.setAppTheme(theme.name)
     }
 }

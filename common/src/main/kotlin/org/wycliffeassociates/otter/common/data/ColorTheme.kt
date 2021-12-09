@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
+package org.wycliffeassociates.otter.common.data
 
-import org.wycliffeassociates.otter.common.data.ColorTheme
-import tornadofx.FXEvent
-import tornadofx.UIComponent
-import kotlin.reflect.KClass
-
-class ThemeColorEvent<T: UIComponent>(val type: KClass<T>, val data: ColorTheme): FXEvent()
+enum class ColorTheme(val titleKey: String) {
+    LIGHT("light"),
+    DARK("dark"),
+    SYSTEM("system");
+}

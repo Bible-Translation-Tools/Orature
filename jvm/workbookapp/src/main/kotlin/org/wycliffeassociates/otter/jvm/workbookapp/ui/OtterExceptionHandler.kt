@@ -112,7 +112,6 @@ class OtterExceptionHandler(
             "rtl" -> NodeOrientation.RIGHT_TO_LEFT
             else -> NodeOrientation.LEFT_TO_RIGHT
         }
-
         ExceptionDialog().apply {
             titleTextProperty.set(FX.messages["needsRestart"])
             headerTextProperty.set(FX.messages["yourWorkSaved"])

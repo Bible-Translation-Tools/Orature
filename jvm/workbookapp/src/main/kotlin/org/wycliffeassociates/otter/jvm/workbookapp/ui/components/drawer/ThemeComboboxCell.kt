@@ -18,9 +18,26 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
+import javafx.scene.control.ListCell
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.data.ColorTheme
-import tornadofx.FXEvent
-import tornadofx.UIComponent
-import kotlin.reflect.KClass
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxButton
+import tornadofx.FX.Companion.messages
+import tornadofx.*
 
-class ThemeColorEvent<T: UIComponent>(val type: KClass<T>, val data: ColorTheme): FXEvent()
+class ThemeComboboxCell(private val icon: FontIcon) : ListCell<ColorTheme>() {
+    val view = ComboboxButton()
+    override fun updateItem(item: ColorTheme?, empty: Boolean) {
+        super.updateItem(item, empty)
+
+        if (item == null || empty) {
+            graphic = null
+            return
+        }
+
+        graphic = view.apply {
+            textProperty.set(messages[item.titleKey])
+            iconProperty.set(icon)
+        }
+    }
+}

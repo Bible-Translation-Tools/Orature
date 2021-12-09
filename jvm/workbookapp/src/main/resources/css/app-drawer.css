@@ -114,6 +114,7 @@
 }
 
 .app-drawer__text--link {
+    -fx-padding: 5 5 15 5;
     -fx-font-size: 20px;
     -fx-text-fill: -wa-highlight-text;
     -fx-underline: true;
