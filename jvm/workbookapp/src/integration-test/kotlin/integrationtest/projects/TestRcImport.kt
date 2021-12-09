@@ -18,11 +18,20 @@
  */
 package integrationtest.projects
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
+import com.fasterxml.jackson.databind.MappingIterator
+import com.fasterxml.jackson.dataformat.csv.CsvMapper
+import com.fasterxml.jackson.dataformat.csv.CsvSchema
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
-import org.junit.Test
-import org.wycliffeassociates.otter.common.data.primitives.ContentType.*
 import javax.inject.Inject
 import javax.inject.Provider
+import org.junit.Test
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
+import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 
 class TestRcImport {
 
@@ -62,7 +71,7 @@ class TestRcImport {
             .assertRowCounts(
                 RowCount(
                     contents = mapOf(
-                        TEXT to 31104,
+                        TEXT to 31102,
                         META to 1189
                     ),
                     collections = 1256,
@@ -152,6 +161,8 @@ class TestRcImport {
             )
     }
 
+
+
     @Test
     fun ulbSlugs() {
         dbEnvProvider.get()
@@ -162,5 +173,30 @@ class TestRcImport {
                 CollectionDescriptor(label = "project", slug = "gen"),
                 CollectionDescriptor(label = "chapter", slug = "gen_1")
             )
+    }
+
+    @Test
+    fun ulbVerseCount() {
+        val books = javaClass.getResource("/verse-count-en_ulb-v21-05/books.txt").readText().split("\n")
+        val tests = mutableListOf<ChapterVerse>()
+        for (book in books) {
+            val csv = javaClass.getResource("/verse-count-en_ulb-v21-05/$book.csv").readText()
+            val mapper = CsvMapper().registerModule(KotlinModule())
+            val schema = CsvSchema.builder().addColumn("Chapter").addColumn("Verses").setUseHeader(true).build()
+            val reader: MappingIterator<ChapterVerse> = mapper
+                .readerFor(ChapterVerse::class.java)
+                .with(schema)
+                .readValues(csv)
+            val data = reader.readAll()
+
+            for (test in data) {
+                test.chapter = "${book}_${test.chapter}"
+            }
+            tests.addAll(data)
+        }
+
+        dbEnvProvider.get()
+            .import("en_ulb.zip", true)
+            .assertChapters("ulb", *tests.toTypedArray())
     }
 }
