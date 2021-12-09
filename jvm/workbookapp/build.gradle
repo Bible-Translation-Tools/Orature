@@ -173,6 +173,8 @@ dependencies {
 
     implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
     implementation "com.install4j:install4j-runtime:$install4jVer"
+
+    implementation "be.tarsos:tarsosdsp:2.4"
 }
 
 // tell gradle what to put in the jar

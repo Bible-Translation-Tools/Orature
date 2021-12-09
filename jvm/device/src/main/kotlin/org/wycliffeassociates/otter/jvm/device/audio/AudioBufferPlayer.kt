@@ -19,21 +19,23 @@
 package org.wycliffeassociates.otter.jvm.device.audio
 
 import com.jakewharton.rxrelay2.PublishRelay
-import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import java.io.File
-import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
+
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioPlayer {
+
+    val monitor = Object()
 
     override val frameStart: Int
         get() = begin
@@ -49,6 +51,8 @@ class AudioBufferPlayer(
     private lateinit var playbackThread: Thread
     private var begin = 0
     private var end = 0
+
+    val processor = AudioProcessor()
 
     private val listeners = mutableListOf<IAudioPlayerListener>()
 
@@ -71,7 +75,7 @@ class AudioBufferPlayer(
         reader = AudioFile(file).reader().let { _reader ->
             begin = 0
             end = _reader.totalFrames
-            bytes = ByteArray(_reader.sampleRate * _reader.channels)
+            bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -86,7 +90,7 @@ class AudioBufferPlayer(
         begin = frameStart
         end = frameEnd
         reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
-            bytes = ByteArray(_reader.sampleRate * _reader.channels)
+            bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
             _reader.open()
             _reader
@@ -112,22 +116,20 @@ class AudioBufferPlayer(
                             player.open()
                             player.start()
                             while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
-                                val written = _reader.getPcmBuffer(bytes)
-                                player.write(bytes, 0, written)
-                            }
-                            player.drain()
-                            if (!pause.get()) {
-                                startPosition = 0
-                                listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
-                                player.close()
-                                seek(0)
+                                synchronized(monitor) {
+                                    if (_reader.framePosition > bytes.size / 2) {
+                                        _reader.seek(_reader.framePosition - processor.overlap)
+                                    }
+                                    val written = _reader.getPcmBuffer(bytes)
+                                    val output = processor.process(bytes)
+                                    player.write(output, 0, output.size)
+                                }
                             }
                         } catch (e: LineUnavailableException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                         } catch (e: IllegalArgumentException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                         }
-
                     }
                     playbackThread.start()
                 }
@@ -168,6 +170,18 @@ class AudioBufferPlayer(
         }
     }
 
+    override fun changeRate(rate: Double) {
+        synchronized(monitor) {
+            val resume = player?.isActive ?: false
+            pause()
+            processor.updatePlaybackRate(rate)
+            if (resume) {
+                play()
+            }
+            bytes = ByteArray(processor.inputBufferSize * 2)
+        }
+    }
+
     override fun seek(position: Int) {
         val resume = player?.isActive ?: false
         player?.stop()
@@ -195,7 +209,7 @@ class AudioBufferPlayer(
     }
 
     override fun getLocationInFrames(): Int {
-        return startPosition + (player?.framePosition ?: 0)
+        return (startPosition + ((player?.framePosition ?: 0) * processor.playbackRate)).toInt()
     }
 
     override fun getLocationMs(): Int {

@@ -62,8 +62,8 @@ class SourceAudioFragment : Fragment() {
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
-            playLabelProperty.set(messages["playSource"])
-            pauseLabelProperty.set(messages["pauseSource"])
+            playSourceLabelProperty.set(messages["playSource"])
+            pauseSourceLabelProperty.set(messages["pauseSource"])
             playTargetLabelProperty.set(messages["playTarget"])
             pauseTargetLabelProperty.set(messages["pauseTarget"])
             licenseProperty.set(license)
@@ -104,7 +104,7 @@ class SourceAudioFragment : Fragment() {
                     endFrame = null
                 }
                 val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
-                root.audioPlayerProperty.set(player)
+                root.sourceAudioPlayerProperty.set(player)
 
                 val targetAudio: String? = parameters.named["target_chapter_audio"]
                 targetFile = if (targetAudio != null && File(targetAudio).exists()) File(targetAudio) else null
