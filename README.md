@@ -4,7 +4,7 @@ Orature is an application for oral drafting, narration, and translation of the B
 More information can be found [here.](https://bibletranslationtools.org/tool/orature/)
 
 <p float="left">
-  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%20Home.png" width="48%" />
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%20Home.png" width="48%" title="Artwork in screenshot provided by Sweet Publishing, CC By-SA 3.0, www.sweetpublishing.com" />
   <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Recording%20Page.png" width="48%" /> 
 </p>
 <p float="left">
