@@ -123,7 +123,7 @@ class TestRcImport {
                     collections = 57,
                     contents = mapOf(
                         META to 55,
-                        TEXT to 1314
+                        TEXT to 716
                     ),
                     links = 0
                 )
@@ -139,7 +139,7 @@ class TestRcImport {
                 RowCount(
                     contents = mapOf(
                         META to 55,
-                        TEXT to 1314,
+                        TEXT to 716,
                         TITLE to 2237,
                         BODY to 2237
                     ),
