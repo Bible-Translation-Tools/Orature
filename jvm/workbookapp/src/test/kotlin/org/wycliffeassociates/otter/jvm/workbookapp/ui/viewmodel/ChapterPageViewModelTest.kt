@@ -170,14 +170,6 @@ class ChapterPageViewModelTest {
 
         private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
 
-        @Throws(InterruptedException::class)
-        private fun waitForRunLater(runnable: Runnable) {
-            val countdownLatch = CountDownLatch(1)
-            Platform.runLater(countdownLatch::countDown)
-            countdownLatch.await()
-            runnable.run()
-        }
-
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
