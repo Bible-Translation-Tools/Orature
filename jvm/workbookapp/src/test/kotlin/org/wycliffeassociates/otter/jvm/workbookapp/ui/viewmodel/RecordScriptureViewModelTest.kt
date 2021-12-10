@@ -19,71 +19,171 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.ReplayRelay
+import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
+import io.reactivex.Observable
 import java.io.File
-import java.time.LocalDate
-import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ChangeListener
+import org.junit.After
+import org.junit.Assert
+import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
+import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.Take
-import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import tornadofx.*
 
 class RecordScriptureViewModelTest {
+    companion object {
+        private val testApp: TestApp = TestApp()
 
-    private val activeChunk = Chunk(
-        sort = 1,
-        audio = createAssociatedAudio(),
-        textItem = TextItem("Chunk 1", MimeType.USFM),
-        start = 1,
-        end = 1,
-        contentType = ContentType.TEXT,
-        resources = listOf(),
-        label = "Chunk"
-    )
+        private lateinit var recordScriptureViewModel: RecordScriptureViewModel
+        private lateinit var workbookDataStore: WorkbookDataStore
 
-    private var selectedTake: Take?
-        get() = activeChunk.audio.selected.value?.value
-        set(take) {
-            activeChunk.audio.selected.accept(TakeHolder(take))
+        private var contextListener: ChangeListener<PluginType>? = null
+        private var activeTakeNumberListener: ChangeListener<Number>? = null
+
+        private val chunk1 = Chunk(
+            sort = 1,
+            audio = createAssociatedAudio(),
+            textItem = TextItem("Chunk 1", MimeType.USFM),
+            start = 1,
+            end = 1,
+            contentType = ContentType.TEXT,
+            resources = listOf(),
+            label = "Chunk"
+        )
+
+        private val chunk2 = Chunk(
+            sort = 2,
+            audio = createAssociatedAudio(),
+            textItem = TextItem("Chunk 2", MimeType.USFM),
+            start = 2,
+            end = 2,
+            contentType = ContentType.TEXT,
+            resources = listOf(),
+            label = "Chunk"
+        )
+
+        private val chapter1 = Chapter(
+            1,
+            "1",
+            "1",
+            createAssociatedAudio(),
+            listOf(),
+            listOf(),
+            Observable.fromIterable(listOf(chunk1, chunk2))
+        )
+
+        private val english = Language(
+            "en",
+            "English",
+            "English",
+            "ltr",
+            true,
+            "Europe"
+        )
+
+        private val resourceMetadata = mock<ResourceMetadata> {
+            on { identifier } doReturn "ulb"
         }
 
-    var selectedTakeProperty = SimpleObjectProperty<Take?>()
-    init {
-        activeChunk.audio.selected.value?.value?.getProperty(RecordScriptureViewModelTest::selectedTakeProperty)
+        private val book = mock<Book> {
+            on { resourceMetadata } doReturn resourceMetadata
+            on { chapters } doReturn Observable.fromIterable(listOf(chapter1))
+            on { language } doReturn english
+            on { slug } doReturn "gen"
+        }
+
+        private val takeFile = File(RecordScriptureViewModelTest::class.java.getResource("/files/test.wav")!!.file)
+
+        private val sourceAudioAccessor = mock<SourceAudioAccessor> {
+            on { getChapter(any()) } doReturn SourceAudio(takeFile, 0, 1)
+        }
+
+        private val workbook = mock<Workbook> {
+            on { source } doReturn book
+            on { target } doReturn book
+            on { sourceAudioAccessor } doReturn sourceAudioAccessor
+        }
+
+        private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
+
+        private fun <T> createChangeListener(callback: (T) -> Unit): ChangeListener<T> {
+            return ChangeListener { _, _, value ->
+                callback(value)
+            }
+        }
+
+        private val projectFilesAccessor = mock<ProjectFilesAccessor> {
+            on { audioDir } doReturn File("test")
+        }
+
+        @BeforeClass
+        @JvmStatic fun setup() {
+            FxToolkit.registerPrimaryStage()
+            FxToolkit.setupApplication { testApp }
+
+            val configureAudio = ConfigureAudioSystem(
+                testApp.dependencyGraph.injectConnectionFactory(),
+                testApp.dependencyGraph.injectAudioDeviceProvider(),
+                testApp.dependencyGraph.injectAppPreferencesRepository()
+            )
+            configureAudio.configure()
+
+            workbookDataStore = find()
+            workbookDataStore.activeWorkbookProperty.set(workbook)
+            workbookDataStore.activeChapterProperty.set(chapter1)
+            workbookDataStore.activeProjectFilesAccessorProperty.set(projectFilesAccessor)
+            workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
+
+            recordScriptureViewModel = find()
+        }
     }
 
-    private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create<Take>())
+    @Before
+    fun prepare() {
+        recordScriptureViewModel.contextProperty.set(PluginType.RECORDER)
+        workbookDataStore.activeTakeNumberProperty.set(0)
+    }
+
+    @After
+    fun cleanup() {
+        contextListener?.let {
+            recordScriptureViewModel.contextProperty.removeListener(it)
+        }
+        activeTakeNumberListener?.let {
+            workbookDataStore.activeTakeNumberProperty.removeListener(it)
+        }
+    }
 
     @Test
-    fun test() {
-        val take1 = Take(
-            "testTake1.wav",
-            File("testTake1.wav"),
-            1,
-            MimeType.WAV,
-            LocalDate.now()
-        )
-        val take2 = Take(
-            "testTake2.wav",
-            File("testTake2.wav"),
-            2,
-            MimeType.WAV,
-            LocalDate.now()
-        )
-
-        selectedTakeProperty.onChangeAndDoNow {
-            println("From on change: ${selectedTake?.name}")
+    fun recordNewTake() {
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.RECORDER, it)
         }
+        recordScriptureViewModel.contextProperty.addListener(contextListener)
 
-        selectedTake = take1
-        println("Hardcode 1: ${selectedTake?.name}")
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
-        selectedTake = take2
-        println("Hardcode 2: ${selectedTake?.name}")
+        recordScriptureViewModel.recordNewTake()
     }
 }

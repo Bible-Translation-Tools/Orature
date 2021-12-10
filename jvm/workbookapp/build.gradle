@@ -142,6 +142,7 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
     testImplementation "org.testfx:testfx-core:$testFxVer"
     testImplementation "org.testfx:testfx-junit:$testFxVer"
+    testImplementation "org.testfx:openjfx-monocle:jdk-11+26"
     integrationTestCompile group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestCompile "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation sourceSets.main.compileClasspath
