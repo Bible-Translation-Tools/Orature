@@ -103,8 +103,10 @@ class WorkbookPageViewModelTest {
         assertEquals(0, vm.chapters.size)
 
         val lockObject = Object()
+        val chapterSizeChanges = mutableListOf<Int>()
         vm.chapters.onChange {
-            if (vm.chapters.size > 0) {
+            chapterSizeChanges.add(vm.chapters.size)
+            if (vm.chapters.size == 3) {
                 thread {
                     notifyListenerExecuted(lockObject)
                 }
@@ -113,11 +115,10 @@ class WorkbookPageViewModelTest {
         vm.openWorkbook()
 
         waitForListenerExecution(lockObject) {
-            assertEquals(chapters.size, vm.chapters.size)
+            assertEquals(3, vm.chapters.size)
+            verify(mockWorkbookDS, atLeastOnce()).workbook
+            verify(mockWorkbookDS).activeChapterProperty
         }
-
-        verify(mockWorkbookDS, atLeastOnce()).workbook
-        verify(mockWorkbookDS).activeChapterProperty
     }
 
     @Test
