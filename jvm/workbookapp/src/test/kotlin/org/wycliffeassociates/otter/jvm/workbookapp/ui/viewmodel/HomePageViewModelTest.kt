@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.times
 import io.reactivex.Maybe
 import io.reactivex.Single
 import org.junit.Assert.assertEquals
@@ -104,7 +103,6 @@ class HomePageViewModelTest {
         }
 
         verify(mockSettingsVM).refreshPlugins()
-        verify(mockWorkbook)
     }
 
     private val languages = listOf(
