@@ -40,6 +40,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
+import kotlin.concurrent.thread
 
 class HomePageViewModelTest {
     private val vm: HomePageViewModel
@@ -93,15 +94,20 @@ class HomePageViewModelTest {
 
         val lockObject = Object()
         vm.resumeBookProperty.onChange {
-            notifyListenerExecuted(lockObject)
+            if (it != null) {
+                thread {
+                    notifyListenerExecuted(lockObject)
+                }
+            }
         }
         vm.loadResumeBook()
 
         waitForListenerExecution(lockObject) {
             assertNotNull(vm.resumeBookProperty.value)
             assertEquals(mockWorkbook, vm.resumeBookProperty.value)
+            verify(mockPreferenceRepo).resumeProjectId()
+            verify(mockCollectionRepo).getProject(resumeProjectId)
         }
-
         verify(mockSettingsVM).refreshPlugins()
     }
 
@@ -143,17 +149,18 @@ class HomePageViewModelTest {
         assertEquals(0, vm.translationModels.size)
 
         val lockObject = Object()
-        vm.translations.onChange {
-            notifyListenerExecuted(lockObject)
+        vm.translationModels.onChange {
+            thread {
+                notifyListenerExecuted(lockObject)
+            }
         }
         vm.loadTranslations()
 
         waitForListenerExecution(lockObject) {
             assertEquals(2, vm.translations.size)
             assertEquals(2, vm.translationModels.size)
+            verify(mockWorkbookRepo, atLeastOnce()).getProjects(any())
+            verify(mockLanguageRepo).getAllTranslations()
         }
-
-        verify(mockLanguageRepo).getAllTranslations()
-        verify(mockWorkbookRepo, atLeastOnce()).getProjects(any())
     }
 }

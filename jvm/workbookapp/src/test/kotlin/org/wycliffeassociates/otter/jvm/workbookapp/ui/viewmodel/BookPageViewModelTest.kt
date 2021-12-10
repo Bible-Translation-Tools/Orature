@@ -31,6 +31,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
+import kotlin.concurrent.thread
 
 class BookPageViewModelTest {
     private val vm: BookPageViewModel
@@ -79,7 +80,9 @@ class BookPageViewModelTest {
         val lockObject = Object()
         vm.allContent.onChange {
             if (vm.allContent.size != 0) {
-                notifyListenerExecuted(lockObject)
+                thread {
+                    notifyListenerExecuted(lockObject)
+                }
             }
         }
         vm.workbookDataStore.activeWorkbookProperty.set(mockWorkbook)

@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardMode
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
+import kotlin.concurrent.thread
 
 class BookWizardViewModelTest {
     private val vm: BookWizardViewModel
@@ -81,15 +82,16 @@ class BookWizardViewModelTest {
         assertEquals(0, vm.filteredBooks.size)
 
         vm.filteredBooks.onChange {
-            notifyListenerExecuted(lockObject)
+            thread {
+                notifyListenerExecuted(lockObject)
+            }
         }
         vm.selectedSourceProperty.set(simpleResource)
 
         waitForListenerExecution(lockObject) {
             assertEquals(1, vm.filteredBooks.size)
+            verify(mockCollectionRepo).getChildren(simpleResource)
         }
-
-        verify(mockCollectionRepo).getChildren(simpleResource)
     }
 
     private val sourceLanguage = Language(
@@ -130,20 +132,21 @@ class BookWizardViewModelTest {
     @Test
     fun loadExistingProjects() {
         setUpMocks_loadExistingProject()
-        val lockObject = Object()
 
         assertEquals(0, vm.existingBooks.size)
 
+        val lockObject = Object()
         vm.existingBooks.onChange {
-            notifyListenerExecuted(lockObject)
+            thread {
+                notifyListenerExecuted(lockObject)
+            }
         }
         vm.loadExistingProjects()
 
         waitForListenerExecution(lockObject) {
             assertEquals(1, vm.existingBooks.size)
+            verify(mockWorkbookRepo).getProjects(any())
         }
-
-        verify(mockWorkbookRepo).getProjects(any())
     }
 
     private val rootSources = listOf(
@@ -189,16 +192,25 @@ class BookWizardViewModelTest {
 
         assertEquals(0, spyVM.sourceCollections.size)
 
+        val lockObject = Object()
+        spyVM.sourceCollections.onChange {
+            thread {
+                notifyListenerExecuted(lockObject)
+            }
+        }
         spyVM.loadResources()
-        verify(mockTranslationModel, atLeastOnce()).sourceLanguage
-        verify(spyVM).setFilterMenu()
-        verify(rootSources[0].resourceContainer)!!.language
-        verify(rootSources[1].resourceContainer)!!.language
 
-        assertEquals(
-            "There should be only 1 resource matching $sourceLanguage.",
-            1,
-            spyVM.sourceCollections.size
-        )
+        waitForListenerExecution(lockObject) {
+            verify(mockTranslationModel, atLeastOnce()).sourceLanguage
+            verify(spyVM).setFilterMenu()
+            verify(rootSources[0].resourceContainer)!!.language
+            verify(rootSources[1].resourceContainer)!!.language
+
+            assertEquals(
+                "There should be only 1 resource matching $sourceLanguage.",
+                1,
+                spyVM.sourceCollections.size
+            )
+        }
     }
 }

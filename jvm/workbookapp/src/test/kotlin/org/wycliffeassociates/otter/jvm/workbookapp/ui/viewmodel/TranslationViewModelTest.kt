@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRep
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.notifyListenerExecuted
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.Utilities.Companion.waitForListenerExecution
 import tornadofx.*
+import kotlin.concurrent.thread
 
 class TranslationViewModelTest {
     private val vm: TranslationViewModel
@@ -79,25 +80,24 @@ class TranslationViewModelTest {
 
         val lockObject = Object()
         val progressStatus = mutableListOf<Boolean>()
-        // progress should be true and then false
-        vm.showProgressProperty.onChangeTimes(2) {
-            it?.let {
-                progressStatus.add(it)
-                if (progressStatus.size == 2) {
+
+        vm.showProgressProperty.onChange {
+            progressStatus.add(it)
+            if (progressStatus.size == 2) {
+                thread {
                     notifyListenerExecuted(lockObject)
                 }
             }
         }
-
         vm.selectedSourceLanguageProperty.onChangeOnce {
             vm.selectedTargetLanguageProperty.set(targetLanguage)
         }
         vm.selectedSourceLanguageProperty.set(sourceLanguage)
 
         waitForListenerExecution(lockObject) {
-            verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
             assertTrue(progressStatus[0])
             assertFalse(progressStatus[1])
+            verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
         }
     }
 
@@ -131,7 +131,9 @@ class TranslationViewModelTest {
 
         val lockObject = Object()
         vm.sourceLanguages.onChange {
-            notifyListenerExecuted(lockObject)
+            thread {
+                notifyListenerExecuted(lockObject)
+            }
         }
         vm.loadSourceLanguages()
 
@@ -158,8 +160,9 @@ class TranslationViewModelTest {
 
         val lockObject = Object()
         vm.targetLanguages.onChange {
-            notifyListenerExecuted(lockObject)
-        }
+            thread {
+                notifyListenerExecuted(lockObject)
+            }        }
         vm.loadTargetLanguages()
 
         waitForListenerExecution(lockObject) {

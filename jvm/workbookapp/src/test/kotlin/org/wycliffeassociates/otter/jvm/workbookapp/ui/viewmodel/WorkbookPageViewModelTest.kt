@@ -47,6 +47,7 @@ import tornadofx.*
 import java.io.File
 import java.time.LocalDateTime
 import javax.inject.Provider
+import kotlin.concurrent.thread
 
 class WorkbookPageViewModelTest {
     private val vm: WorkbookPageViewModel
@@ -104,18 +105,15 @@ class WorkbookPageViewModelTest {
         val lockObject = Object()
         vm.chapters.onChange {
             if (vm.chapters.size > 0) {
-                notifyListenerExecuted(lockObject)
+                thread {
+                    notifyListenerExecuted(lockObject)
+                }
             }
         }
         vm.openWorkbook()
 
         waitForListenerExecution(lockObject) {
-            assertEquals(
-                "Opened workbook - chapter model must have " +
-                        "${chapters.size} chapter(s) + 1 workbook banner.",
-                chapters.size + 1,
-                vm.chapters.size
-            )
+            assertEquals(chapters.size, vm.chapters.size)
         }
 
         verify(mockWorkbookDS, atLeastOnce()).workbook
@@ -135,20 +133,22 @@ class WorkbookPageViewModelTest {
         val exportProvider: Provider<ProjectExporter> = Provider {
             mockProjectExporter
         }
+        vm.projectExporterProvider = exportProvider
 
         val projectTitleChanges = mutableListOf<String?>()
         val showProgressChanges = mutableListOf<Boolean>()
-        vm.projectExporterProvider = exportProvider
 
         val lockObject = Object()
         vm.activeProjectTitleProperty.onChange {
             projectTitleChanges.add(it)
+            if (projectTitleChanges.size == 2) {
+                thread {
+                    notifyListenerExecuted(lockObject)
+                }
+            }
         }
         vm.showExportProgressDialogProperty.onChange {
             showProgressChanges.add(it)
-            if (showProgressChanges.size > 1) {
-                notifyListenerExecuted(lockObject)
-            }
         }
         vm.exportWorkbook(mock(File::class.java))
 
