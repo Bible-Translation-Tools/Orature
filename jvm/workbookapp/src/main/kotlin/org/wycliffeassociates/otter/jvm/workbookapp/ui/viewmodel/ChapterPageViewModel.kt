@@ -45,8 +45,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.io.File
@@ -62,6 +60,9 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
+
+    var audioConverter: AudioConverter
+    var concatenateAudio: ConcatenateAudio
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -96,6 +97,9 @@ class ChapterPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        audioConverter = AudioConverter()
+        concatenateAudio = ConcatenateAudio(directoryProvider)
 
         allContent
             .changes()
@@ -168,7 +172,8 @@ class ChapterPageViewModel : ViewModel() {
         if (filteredContent.isEmpty()) return
 
         val hasTakes = filteredContent.any { chunk ->
-            chunk.chunkSource?.audio?.getAllTakes()?.isNotEmpty() ?: false
+            chunk.chunkSource?.audio?.getAllTakes()
+                ?.any { it.deletedTimestamp.value?.value == null } ?: false
         }
 
         if (hasTakes) {
@@ -263,7 +268,7 @@ class ChapterPageViewModel : ViewModel() {
 
             var compiled: File? = null
 
-            ConcatenateAudio(directoryProvider).execute(takes)
+            concatenateAudio.execute(takes)
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
@@ -281,21 +286,18 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    fun exportChapter() {
+    fun exportChapter(directory: File) {
         selectedChapterTakeProperty.value?.let { take ->
-            val directory = chooseDirectory(FX.messages["exportChapter"])
-            directory?.let {
-                showExportProgressDialogProperty.set(true)
+            showExportProgressDialogProperty.set(true)
 
-                val mp3Name = take.file.nameWithoutExtension + ".mp3"
-                val mp3File = File(directory, mp3Name)
-                AudioConverter().wavToMp3(take.file, mp3File)
-                    .subscribeOn(Schedulers.io())
-                    .observeOnFx()
-                    .subscribe {
-                        showExportProgressDialogProperty.set(false)
-                    }
-            }
+            val mp3Name = take.file.nameWithoutExtension + ".mp3"
+            val mp3File = File(directory, mp3Name)
+            audioConverter.wavToMp3(take.file, mp3File)
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .subscribe {
+                    showExportProgressDialogProperty.set(false)
+                }
         }
     }
 

@@ -22,10 +22,16 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import io.reactivex.Completable
 import io.reactivex.Observable
+import io.reactivex.Single
 import javafx.application.Platform
+import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -36,209 +42,507 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
-import java.util.concurrent.Semaphore
+import java.util.concurrent.CountDownLatch
 
 class ChapterPageViewModelTest {
+    companion object {
+        private val testApp: TestApp = TestApp()
 
-    private val testApp: TestApp = TestApp()
-    private lateinit var chapterPageViewModel: ChapterPageViewModel
-    private lateinit var workbookDataStore: WorkbookDataStore
+        private lateinit var chapterPageViewModel: ChapterPageViewModel
+        private lateinit var audioPluginViewModel: AudioPluginViewModel
+        private lateinit var workbookDataStore: WorkbookDataStore
+        private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
 
-    private val chunk1 = Chunk(
-        sort = 1,
-        audio = createAssociatedAudio(),
-        textItem = TextItem("Chunk 1", MimeType.USFM),
-        start = 1,
-        end = 2,
-        contentType = ContentType.TEXT,
-        resources = listOf(),
-        label = "Chunk"
-    )
+        private var canCompileListener: ChangeListener<Boolean>? = null
+        private var isCompilingListener: ChangeListener<Boolean>? = null
+        private var contextListener: ChangeListener<PluginType>? = null
+        private var activeChapterListener: ChangeListener<Chapter>? = null
+        private var activeChunkListener: ChangeListener<Chunk>? = null
+        private var noTakesListener: ChangeListener<Boolean>? = null
+        private var activeTakeNumberListener: ChangeListener<Number>? = null
+        private var workChunkListener: ChangeListener<CardData>? = null
+        private var selectedChapterTakeListener: ChangeListener<Take>? = null
+        private var showExportProgressListener: ChangeListener<Boolean>? = null
 
-    private val chunk2 = Chunk(
-        sort = 2,
-        audio = createAssociatedAudio(),
-        textItem = TextItem("Chunk 2", MimeType.USFM),
-        start = 3,
-        end = 4,
-        contentType = ContentType.TEXT,
-        resources = listOf(),
-        label = "Chunk"
-    )
+        private val chunk1 = Chunk(
+            sort = 1,
+            audio = createAssociatedAudio(),
+            textItem = TextItem("Chunk 1", MimeType.USFM),
+            start = 1,
+            end = 2,
+            contentType = ContentType.TEXT,
+            resources = listOf(),
+            label = "Chunk"
+        )
 
-    private val chapter1 = Chapter(
-        1,
-        "1",
-        "1",
-        createAssociatedAudio(),
-        listOf(),
-        listOf(),
-        Observable.fromIterable(listOf(chunk1, chunk2))
-    )
+        private val chunk2 = Chunk(
+            sort = 2,
+            audio = createAssociatedAudio(),
+            textItem = TextItem("Chunk 2", MimeType.USFM),
+            start = 3,
+            end = 4,
+            contentType = ContentType.TEXT,
+            resources = listOf(),
+            label = "Chunk"
+        )
 
-    private val chapter2 = Chapter(
-        2,
-        "2",
-        "2",
-        createAssociatedAudio(),
-        listOf(),
-        listOf(),
-        Observable.fromIterable(listOf(chunk1, chunk2))
-    )
+        private val takeFile = File(ChapterPageViewModelTest::class.java.getResource("/files/test.wav")!!.file)
 
-    private val english = Language(
-        "en",
-        "English",
-        "English",
-        "ltr",
-        true,
-        "Europe"
-    )
+        private val chapter1 = Chapter(
+            1,
+            "1",
+            "1",
+            createAssociatedAudio(),
+            listOf(),
+            listOf(),
+            Observable.fromIterable(listOf(chunk1, chunk2))
+        )
 
-    private val takeFile = File(javaClass.getResource("/files/test.wav")!!.file)
-    private val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.MIN)
+        private val chapter2 = Chapter(
+            2,
+            "2",
+            "2",
+            createAssociatedAudio(),
+            listOf(),
+            listOf(),
+            Observable.fromIterable(listOf(chunk1, chunk2))
+        )
 
-    private val resourceMetadata = mock<ResourceMetadata>()
+        private val english = Language(
+            "en",
+            "English",
+            "English",
+            "ltr",
+            true,
+            "Europe"
+        )
 
-    private val book = mock<Book> {
-        on { resourceMetadata } doReturn resourceMetadata
-        on { chapters } doReturn Observable.fromIterable(listOf(chapter1, chapter2))
-        on { language } doReturn english
-    }
+        private val resourceMetadata = mock<ResourceMetadata> {
+            on { identifier } doReturn "ulb"
+        }
 
-    private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-        on { getChapter(any()) } doReturn SourceAudio(takeFile, 0, 1)
-    }
+        private val book = mock<Book> {
+            on { resourceMetadata } doReturn resourceMetadata
+            on { chapters } doReturn Observable.fromIterable(listOf(chapter1, chapter2))
+            on { language } doReturn english
+            on { slug } doReturn "gen"
+        }
 
-    private val workbook = mock<Workbook> {
-        on { source } doReturn book
-        on { target } doReturn book
-        on { sourceAudioAccessor } doReturn sourceAudioAccessor
-    }
+        private val sourceAudioAccessor = mock<SourceAudioAccessor> {
+            on { getChapter(any()) } doReturn SourceAudio(takeFile, 0, 1)
+        }
 
-    private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
+        private val workbook = mock<Workbook> {
+            on { source } doReturn book
+            on { target } doReturn book
+            on { sourceAudioAccessor } doReturn sourceAudioAccessor
+        }
 
-    private fun waitForRunLater() {
-        val semaphore = Semaphore(0)
-        Platform.runLater { semaphore.release() }
-        semaphore.acquire()
+        private val recorderPlugin = AudioPluginData(
+            1,
+            "Recorder",
+            "1",
+            false,
+            true,
+            false,
+            "",
+            listOf(),
+            null
+        )
+
+        private val projectFilesAccessor = mock<ProjectFilesAccessor> {
+            on { audioDir } doReturn File("test")
+        }
+
+        private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
+
+        @Throws(InterruptedException::class)
+        private fun waitForRunLater(runnable: Runnable) {
+            val countdownLatch = CountDownLatch(1)
+            Platform.runLater(countdownLatch::countDown)
+            countdownLatch.await()
+            runnable.run()
+        }
+
+        @BeforeClass
+        @JvmStatic fun setup() {
+            FxToolkit.registerPrimaryStage()
+            FxToolkit.setupApplication { testApp }
+
+            val configureAudio = ConfigureAudioSystem(
+                testApp.dependencyGraph.injectConnectionFactory(),
+                testApp.dependencyGraph.injectAudioDeviceProvider(),
+                testApp.dependencyGraph.injectAppPreferencesRepository()
+            )
+            configureAudio.configure()
+
+            workbookDataStore = find()
+            workbookDataStore.activeWorkbookProperty.set(workbook)
+            workbookDataStore.activeChapterProperty.set(chapter1)
+            workbookDataStore.activeProjectFilesAccessorProperty.set(projectFilesAccessor)
+            workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
+
+            audioPluginViewModel = find()
+            chapterPageViewModel = find()
+        }
     }
 
     @Before
-    fun setup() {
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication { testApp }
+    fun prepare() {
+        chapterPageViewModel.selectedChapterTakeProperty.set(null)
+        chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
+        chapterPageViewModel.noTakesProperty.set(false)
+        chapterPageViewModel.workChunkProperty.set(null)
+        chapterPageViewModel.canCompileProperty.set(false)
 
-        val configureAudio = ConfigureAudioSystem(
-            testApp.dependencyGraph.injectConnectionFactory(),
-            testApp.dependencyGraph.injectAudioDeviceProvider(),
-            testApp.dependencyGraph.injectAppPreferencesRepository()
-        )
-        configureAudio.configure()
+        workbookDataStore.activeTakeNumberProperty.set(0)
 
-        workbookDataStore = find()
-        workbookDataStore.activeWorkbookProperty.set(workbook)
-        workbookDataStore.activeChapterProperty.set(chapter1)
+        chunk1.audio.selectTake(null)
+        chunk1.audio.getAllTakes().map {
+            it.deletedTimestamp.accept(DateHolder.now())
+        }
+        chunk2.audio.selectTake(null)
+        chunk2.audio.getAllTakes().map {
+            it.deletedTimestamp.accept(DateHolder.now())
+        }
+    }
 
-        chapterPageViewModel = find()
+    @After
+    fun cleanup() {
+        canCompileListener?.let {
+            chapterPageViewModel.canCompileProperty.removeListener(it)
+        }
+        contextListener?.let {
+            chapterPageViewModel.contextProperty.removeListener(it)
+        }
+        activeChapterListener?.let {
+            workbookDataStore.activeChapterProperty.removeListener(it)
+        }
+        activeChunkListener?.let {
+            workbookDataStore.activeChunkProperty.removeListener(it)
+        }
+        noTakesListener?.let {
+            chapterPageViewModel.noTakesProperty.removeListener(it)
+        }
+        activeTakeNumberListener?.let {
+            workbookDataStore.activeTakeNumberProperty.removeListener(it)
+        }
+        workChunkListener?.let {
+            chapterPageViewModel.workChunkProperty.removeListener(it)
+        }
+        selectedChapterTakeListener?.let {
+            chapterPageViewModel.selectedChapterTakeProperty.removeListener(it)
+        }
+        isCompilingListener?.let {
+            chapterPageViewModel.isCompilingProperty.removeListener(it)
+        }
+        showExportProgressListener?.let {
+            chapterPageViewModel.showExportProgressDialogProperty.removeListener(it)
+        }
+    }
+
+    private fun <T> createChangeListener(callback: (T) -> Unit): ChangeListener<T> {
+        return ChangeListener { _, _, value ->
+            callback(value)
+        }
     }
 
     @Test
     fun onCardSelection_chapterCard() {
         val chapterCard = CardData(chapter2)
+
+        activeChapterListener = createChangeListener {
+            Assert.assertEquals(chapterCard.chapterSource, it)
+        }
+        workbookDataStore.activeChapterProperty.addListener(activeChapterListener)
+
+        activeChunkListener = createChangeListener {
+            Assert.assertNull(it)
+        }
+        workbookDataStore.activeChunkProperty.addListener(activeChunkListener)
+
         chapterPageViewModel.onCardSelection(chapterCard)
-
-        Assert.assertEquals(
-            chapterCard.chapterSource,
-            chapterPageViewModel.workbookDataStore.activeChapterProperty.value
-        )
-
-        Assert.assertNull(chapterPageViewModel.workbookDataStore.activeChunkProperty.value)
     }
 
     @Test
     fun onCardSelection_chunkCard() {
         val chunkCard = CardData(chunk1)
-        chapterPageViewModel.onCardSelection(chunkCard)
 
-        Assert.assertEquals(
-            chunkCard.chunkSource,
-            chapterPageViewModel.workbookDataStore.activeChunkProperty.value
-        )
+        activeChunkListener = createChangeListener {
+            Assert.assertEquals(chunkCard.chunkSource, it)
+        }
+        workbookDataStore.activeChunkProperty.addListener(activeChunkListener)
+
+        chapterPageViewModel.onCardSelection(chunkCard)
     }
 
     @Test
     fun checkCanCompile_someSelected() {
+        canCompileListener = createChangeListener {
+            Assert.assertEquals(false, it)
+        }
+        chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
+
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        chunk1.audio.insertTake(take)
         chunk1.audio.selectTake(take)
+        chunk2.audio.insertTake(take)
         chunk2.audio.selectTake(null)
 
-        waitForRunLater()
-
         chapterPageViewModel.checkCanCompile()
-
-        Assert.assertEquals(false, chapterPageViewModel.canCompileProperty.value)
     }
 
     @Test
     fun checkCanCompile_allSelected() {
+        canCompileListener = createChangeListener {
+            Assert.assertEquals(true, it)
+        }
+        chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
+
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        chunk1.audio.insertTake(take)
         chunk1.audio.selectTake(take)
+        chunk2.audio.insertTake(take)
         chunk2.audio.selectTake(take)
 
-        waitForRunLater()
-
         chapterPageViewModel.checkCanCompile()
-
-        Assert.assertTrue(chapterPageViewModel.canCompileProperty.value == true)
     }
 
     @Test
     fun setWorkChunk_initially() {
         val chunkCard = CardData(chunk1)
-        chapterPageViewModel.setWorkChunk()
 
-        Assert.assertTrue(chapterPageViewModel.noTakesProperty.value == true)
-        Assert.assertEquals(chunkCard.sort, chapterPageViewModel.workChunkProperty.value.sort)
+        noTakesListener = createChangeListener {
+            Assert.assertEquals(true, it)
+        }
+        chapterPageViewModel.noTakesProperty.addListener(noTakesListener)
+
+        workChunkListener = createChangeListener {
+            Assert.assertEquals(chunkCard, it)
+        }
+        chapterPageViewModel.workChunkProperty.addListener(workChunkListener)
+
+        chapterPageViewModel.setWorkChunk()
     }
 
     @Test
     fun setWorkChunk_secondChunk() {
         val chunkCard = CardData(chunk2)
+
+        noTakesListener = createChangeListener {
+            Assert.assertEquals(false, it)
+        }
+        chapterPageViewModel.noTakesProperty.addListener(noTakesListener)
+
+        workChunkListener = createChangeListener {
+            Assert.assertEquals(chunkCard, it)
+        }
+        chapterPageViewModel.workChunkProperty.addListener(workChunkListener)
+
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
         chunk1.audio.insertTake(take)
         chunk1.audio.selectTake(take)
 
-        waitForRunLater()
-
         chapterPageViewModel.setWorkChunk()
-
-        Assert.assertTrue(chapterPageViewModel.noTakesProperty.value == false)
-        Assert.assertEquals(chunkCard, chapterPageViewModel.workChunkProperty.value)
     }
 
     @Test
     fun setSelectedChapterTake_takeSelected() {
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        chapter1.audio.insertTake(take)
         chapter1.audio.selectTake(take)
 
-        waitForRunLater()
-
-        Assert.assertEquals(take, chapterPageViewModel.selectedChapterTakeProperty.value)
+        selectedChapterTakeListener = createChangeListener {
+            Assert.assertEquals(take, it)
+        }
+        chapterPageViewModel.selectedChapterTakeProperty.addListener(selectedChapterTakeListener)
     }
 
     @Test
     fun recordChapter_recordsTake1() {
-        chapterPageViewModel.recordChapter()
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.RECORDER, it)
+        }
+        chapterPageViewModel.contextProperty.addListener(contextListener)
 
-        Assert.assertEquals(PluginType.RECORDER, chapterPageViewModel.contextProperty.value)
-        Assert.assertEquals(1, workbookDataStore.activeTakeNumberProperty.value)
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        chapterPageViewModel.recordChapter()
+    }
+
+    @Test
+    fun processTakeWithPlugin_recorder() {
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.RECORDER, it)
+        }
+        chapterPageViewModel.contextProperty.addListener(contextListener)
+
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        chapter1.audio.insertTake(take)
+        chapter1.audio.selectTake(take)
+
+        chapterPageViewModel.processTakeWithPlugin(PluginType.RECORDER)
+    }
+
+    @Test
+    fun processTakeWithPlugin_editor() {
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.EDITOR, it)
+        }
+        chapterPageViewModel.contextProperty.addListener(contextListener)
+
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        chapter1.audio.insertTake(take)
+        chapter1.audio.selectTake(take)
+
+        chapterPageViewModel.processTakeWithPlugin(PluginType.EDITOR)
+    }
+
+    @Test
+    fun processTakeWithPlugin_marker() {
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        chapter1.audio.insertTake(take)
+        chapter1.audio.selectTake(take)
+
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.MARKER, it)
+        }
+        chapterPageViewModel.contextProperty.addListener(contextListener)
+
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        chapterPageViewModel.processTakeWithPlugin(PluginType.MARKER)
+    }
+
+    @Test
+    fun processTakeWithPlugin_noSelectedTake() {
+        contextListener = createChangeListener {
+            Assert.assertEquals(null, it)
+        }
+        chapterPageViewModel.contextProperty.addListener(contextListener)
+
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(0, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        chapterPageViewModel.processTakeWithPlugin(PluginType.EDITOR)
+    }
+
+    @Test
+    fun compile_updateProperty() {
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        chunk1.audio.insertTake(take)
+        chunk1.audio.selectTake(take)
+        chunk2.audio.insertTake(take)
+        chunk2.audio.selectTake(take)
+
+        val file = directoryProvider.createTempFile("test", ".wav")
+        takeFile.copyTo(file, true)
+
+        chapterPageViewModel.concatenateAudio = mock {
+            on { execute(any()) } doReturn Single.just(file)
+        }
+
+        var counter = 1
+        isCompilingListener = createChangeListener {
+            when (counter) {
+                1 -> Assert.assertEquals(true, it)
+                2 -> Assert.assertEquals(false, it)
+            }
+            counter++
+        }
+        chapterPageViewModel.isCompilingProperty.addListener(isCompilingListener)
+
+        chapterPageViewModel.checkCanCompile()
+        chapterPageViewModel.compile()
+    }
+
+    @Test
+    fun exportChapter_updateProperty() {
+        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+
+        chapter1.audio.insertTake(take)
+        chapter1.audio.selectTake(take)
+        chapterPageViewModel.audioConverter = mock {
+            on { wavToMp3(any(), any(), any()) } doReturn Completable.complete()
+        }
+
+        var counter = 1
+        showExportProgressListener = createChangeListener {
+            when (counter) {
+                1 -> Assert.assertEquals(true, it)
+                2 -> Assert.assertEquals(false, it)
+            }
+            counter++
+        }
+        chapterPageViewModel.showExportProgressDialogProperty.addListener(showExportProgressListener)
+
+        chapterPageViewModel.exportChapter(File("test"))
+    }
+
+    @Test
+    fun dialogTitleBinding_pluginTitle() {
+        val stringProperty = SimpleStringProperty()
+        stringProperty.bind(chapterPageViewModel.dialogTitleBinding())
+
+        chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
+        audioPluginViewModel.selectedRecorderProperty.set(recorderPlugin)
+        workbookDataStore.activeTakeNumberProperty.set(1)
+
+        Assert.assertEquals("Take 01 opened in Recorder", stringProperty.value)
+    }
+
+    @Test
+    fun dialogTextBinding_pluginText() {
+        val expected = "Orature will be unavailable while take 01 is open in Recorder. " +
+                "Finish your work in Recorder to continue using Orature."
+
+        val stringProperty = SimpleStringProperty()
+        stringProperty.bind(chapterPageViewModel.dialogTextBinding())
+
+        chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
+        audioPluginViewModel.selectedRecorderProperty.set(recorderPlugin)
+        workbookDataStore.activeTakeNumberProperty.set(1)
+
+        Assert.assertEquals(expected, stringProperty.value)
     }
 }

@@ -187,7 +187,10 @@ class ChapterPage : Fragment() {
                         tooltip(text)
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
-                            viewModel.exportChapter()
+                            val directory = chooseDirectory(FX.messages["exportChapter"])
+                            directory?.let {
+                                viewModel.exportChapter(it)
+                            }
                         }
                         disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
                     }
