@@ -64,6 +64,7 @@ class ChapterPageViewModelTest {
 
         private lateinit var chapterPageViewModel: ChapterPageViewModel
         private lateinit var audioPluginViewModel: AudioPluginViewModel
+        private lateinit var settingsViewModel: SettingsViewModel
         private lateinit var workbookDataStore: WorkbookDataStore
         private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
 
@@ -190,6 +191,7 @@ class ChapterPageViewModelTest {
 
             audioPluginViewModel = find()
             chapterPageViewModel = find()
+            settingsViewModel = find()
         }
     }
 
@@ -517,7 +519,7 @@ class ChapterPageViewModelTest {
         stringProperty.bind(chapterPageViewModel.dialogTitleBinding())
 
         chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
-        audioPluginViewModel.selectedRecorderProperty.set(recorderPlugin)
+        settingsViewModel.selectedRecorderProperty.set(recorderPlugin)
         workbookDataStore.activeTakeNumberProperty.set(1)
 
         Assert.assertEquals("Take 01 opened in Recorder", stringProperty.value)
@@ -532,7 +534,7 @@ class ChapterPageViewModelTest {
         stringProperty.bind(chapterPageViewModel.dialogTextBinding())
 
         chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
-        audioPluginViewModel.selectedRecorderProperty.set(recorderPlugin)
+        settingsViewModel.selectedRecorderProperty.set(recorderPlugin)
         workbookDataStore.activeTakeNumberProperty.set(1)
 
         Assert.assertEquals(expected, stringProperty.value)
