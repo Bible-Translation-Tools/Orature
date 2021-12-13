@@ -136,10 +136,10 @@ class RecordScriptureViewModelTest {
 
         @BeforeClass
         @JvmStatic fun setup() {
-            System.setProperty("testfx.robot", "glass");
-            System.setProperty("testfx.headless", "true");
-            System.setProperty("prism.order", "sw");
-            System.setProperty("prism.text", "t2k");
+            /*System.setProperty("testfx.robot", "glass")
+            System.setProperty("testfx.headless", "true")
+            System.setProperty("prism.order", "sw")
+            System.setProperty("prism.text", "t2k")*/
 
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
