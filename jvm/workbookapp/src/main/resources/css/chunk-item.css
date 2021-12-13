@@ -18,7 +18,7 @@
  */
 
 .chunk-item {
-    -fx-border-color: -wa-black-10;
+    -fx-border-color: -wa-list-item-border-light;
     -fx-border-width: 0 0 2px 0;
     -fx-padding: 0 10px 10px 10px;
     -fx-cursor: hand;
@@ -28,15 +28,16 @@
 .chunk-item__title {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .chunk-item__take-counter {
     -fx-font-size: 16px;
-    -fx-text-fill: -wa-black-60;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .chunk-item__take-counter .ikonli-font-icon {
-    -fx-icon-color: -wa-black-60;
+    -fx-fill: -wa-regular-text;
     -fx-icon-size: 24px;
 }
 
@@ -58,6 +59,7 @@
 
 .chunk-item__show-takes .ikonli-font-icon {
     -fx-icon-size: 24px;
+    -fx-fill: -wa-regular-text;
 }
 
 .chunk-item__takes {

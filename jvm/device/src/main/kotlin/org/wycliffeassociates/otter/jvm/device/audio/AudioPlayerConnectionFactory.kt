@@ -78,6 +78,7 @@ internal class AudioPlayerConnectionFactory(
         request.listeners.forEach {
             player.addEventListener(it)
         }
+        player.processor.updatePlaybackRate(request.rate)
         if (request.begin != null && request.end != null) {
             player.loadSection(request.file, request.begin!!, request.end!!)
         } else {

@@ -74,6 +74,29 @@ class SettingsView : View() {
                 vbox {
                     addClass("app-drawer__section")
 
+                    label(messages["colorTheme"]).apply {
+                        addClass("app-drawer__subtitle--small")
+                    }
+
+                    combobox(viewModel.selectedThemeProperty, viewModel.supportedThemes) {
+                        addClass("wa-combobox")
+
+                        cellFormat {
+                            val view = ComboboxItem()
+                            graphic = view.apply {
+                                topTextProperty.set(messages[it.titleKey])
+                            }
+                        }
+
+                        buttonCell = ThemeComboboxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6))
+
+                        viewModel.selectedThemeProperty.addListener { _, oldValue, newValue ->
+                            if (oldValue != null && newValue != null) {
+                                fire(ThemeColorEvent(this@SettingsView::class, newValue))
+                            }
+                        }
+                    }
+
                     label(messages["languageSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
@@ -276,6 +299,7 @@ class SettingsView : View() {
             titleTextProperty.set(messages["settings"])
             messageTextProperty.set(messages["changeLanguageSuccessMessage"])
             orientationProperty.set(viewModel.orientationProperty.value)
+            themeProperty.set(viewModel.appColorMode.value)
 
             cancelButtonTextProperty.set(messages["close"])
             onCloseAction { viewModel.showChangeLanguageSuccessDialogProperty.set(false) }

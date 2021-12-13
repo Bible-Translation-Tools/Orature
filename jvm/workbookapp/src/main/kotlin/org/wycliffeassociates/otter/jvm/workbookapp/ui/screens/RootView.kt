@@ -18,10 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jthemedetecor.OsThemeDetector
 import javafx.application.Platform
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -35,8 +34,6 @@ import tornadofx.*
 class RootView : View() {
 
     private val viewModel: RootViewModel by inject()
-    private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
     private val settingsViewModel: SettingsViewModel by inject()
 
     init {
@@ -56,9 +53,9 @@ class RootView : View() {
         workspace.root.vgrow = Priority.ALWAYS
 
         importStylesheet(resources.get("/css/audio-error-dialog.css"))
+        initThemeStylesheets()
+        bindThemeClassToRoot()
 
-        initThemeStylesheet()
-        bindAppThemeToSystem()
         initAudioErrorDialog()
     }
 
@@ -72,33 +69,11 @@ class RootView : View() {
             left<AppBar>()
             center<AppContent>()
         }
-
-        if (osThemeDetector.isDark) {
-            addClass("dark-theme")
-        } else {
-            addClass("light-theme")
-        }
     }
 
-    private fun initThemeStylesheet() {
+    private fun initThemeStylesheets() {
         importStylesheet(resources["/css/theme/light-theme.css"])
         importStylesheet(resources["/css/theme/dark-theme.css"])
-    }
-
-    private fun bindAppThemeToSystem() {
-        isOSDarkTheme.onChange {
-            if (it) {
-                root.removeClass("light-theme")
-                root.addClass("dark-theme")
-            } else {
-                root.removeClass("dark-theme")
-                root.addClass("light-theme")
-            }
-        }
-
-        osThemeDetector.registerListener {
-            runLater { isOSDarkTheme.set(it) }
-        }
     }
 
     private fun initAudioErrorDialog() {
@@ -122,6 +97,21 @@ class RootView : View() {
 
         viewModel.showAudioErrorDialogProperty.onChangeAndDoNow {
             Platform.runLater { if (it!!) errorDialog.open() else errorDialog.close() }
+        }
+    }
+
+    private fun bindThemeClassToRoot() {
+        settingsViewModel.appColorMode.onChange {
+            when (it) {
+                ColorTheme.LIGHT -> {
+                    root.addClass("light-theme")
+                    root.removeClass("dark-theme")
+                }
+                ColorTheme.DARK -> {
+                    root.addClass("dark-theme")
+                    root.removeClass("light-theme")
+                }
+            }
         }
     }
 }

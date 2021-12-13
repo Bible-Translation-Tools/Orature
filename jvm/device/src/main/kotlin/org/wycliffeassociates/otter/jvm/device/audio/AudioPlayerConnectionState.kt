@@ -26,6 +26,7 @@ internal class AudioPlayerConnectionState(
     var file: File = File(""),
     var begin: Int? = null,
     var end: Int? = null,
+    var rate: Double = 1.0,
     var position: Int = 0,
     var durationInFrames: Int = 0,
     var durationInMs: Int = 0,

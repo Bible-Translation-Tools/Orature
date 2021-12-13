@@ -19,7 +19,7 @@
 
 .confirm-dialog {
     -fx-pref-width: 480px;
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-dialog-background;
 }
 
 .confirm-dialog__header {
@@ -66,11 +66,11 @@
 }
 
 .confirm-dialog__progress .progress-bar .track {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-slider-track-color;
     -fx-background-radius: 6px;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
-    -fx-border-color: -wa-black-40;
+    -fx-border-color: -wa-slider-border-color;
 }
 
 .confirm-dialog__progress-title {
