@@ -151,7 +151,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                 take?.let {
                     updateTargetAudio(it.file)
 
-                    val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+                    val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
                     audioPlayer.load(it.file)
                     selectedChapterPlayerProperty.set(audioPlayer)
                 } ?: run {
