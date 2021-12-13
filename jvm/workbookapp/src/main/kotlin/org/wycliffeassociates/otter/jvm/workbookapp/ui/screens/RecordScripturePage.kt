@@ -85,14 +85,14 @@ class RecordScripturePage : View() {
     private val sourceContent =
         SourceContent().apply {
             sourceTextProperty.bind(workbookDataStore.sourceTextBinding())
-            audioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
+            sourceAudioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             isMinimizableProperty.set(false)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
-            playLabelProperty.set(messages["playSource"])
-            pauseLabelProperty.set(messages["pauseSource"])
+            playSourceLabelProperty.set(messages["playSource"])
+            pauseSourceLabelProperty.set(messages["pauseSource"])
 
             contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
@@ -365,6 +365,7 @@ class RecordScripturePage : View() {
             showProgressBarProperty.set(true)
 
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
         }
     }
 
@@ -374,6 +375,7 @@ class RecordScripturePage : View() {
             messageTextProperty.set(messages["importTakesSuccessMessage"])
             cancelButtonTextProperty.set(messages["close"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             importSuccessListener = ChangeListener { _, _, value ->
                 if (value) open() else close()
@@ -391,6 +393,7 @@ class RecordScripturePage : View() {
             messageTextProperty.set(messages["importTakesFailMessage"])
             cancelButtonTextProperty.set(messages["close"])
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             importFailListener = ChangeListener { _, _, value ->
                 if (value) open() else close()

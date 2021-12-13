@@ -51,18 +51,23 @@
 /* -------------------- Components mappings --------------------*/
     -wa-regular-text: #e6e6e6;
     -wa-note-text: #c0bfbf;
-    -wa-status-active: #2ec144;
     -wa-highlight-text: -wa-accent-light;
     -wa-disabled-text: gray;
     -wa-disabled-background: #ffffff20;
+    -wa-status-active: #2ec144;
+    -wa-inverse-text: -wa-gray-dark;
+
+    /* borders */
     -wa-border-neutral: #cccccc;
     -wa-fill-neutral: #cccccc;
     -wa-border-light: gray;
+    -wa-list-item-border-light: -wa-white-10;
 
     /* breadcrumb, navigation */
     -wa-breadcrumb-background: -wa-foreground;
     -wa-breadcrumb-background-hover: -wa-foreground-hover;
     -wa-breadcrumb-background-pressed: -wa-foreground-pressed;
+    -wa-breadcrumb-item-background-active: #CDDDF4;
 
     /* tab pane */
     -wa-tab-background: gray;
@@ -71,12 +76,15 @@
     -wa-selected-tab-line: -wa-accent;
     -wa-selected-tab-label: -wa-accent-light;
 
-    /* place holder, empty area */
+    /* place holder, drag drop */
     -wa-drag-drop-area: -wa-background;
+    -wa-drag-drop-target-overlay: #b3ccff30;
     -wa-card-image-placeholder-background: #b3b3b3;
-    -wa-card-placeholder-empty: -wa-card-image-placeholder-background;
+    -wa-card-drag-drop-placeholder: #b3b3b360;
+    -wa-take-card-placeholder: -wa-white-05;
 
     /* buttons */
+    -wa-primary-btn-text-fill: -wa-white;
     -wa-secondary-btn-text-fill: -wa-regular-text;
     -wa-secondary-btn-text-fill-hover: -wa-regular-text;
     -wa-secondary-btn-text-fill-pressed: -wa-regular-text;
@@ -85,11 +93,12 @@
     -wa-secondary-btn-background-pressed: -wa-foreground-pressed;
     -wa-secondary-btn-border: -wa-regular-text;
     -wa-btn-icon-background: -wa-transparent;
-    -wa-btn-icon-border-color: -wa-regular-text;
+    -wa-btn-icon-background-hover: -wa-foreground-hover;
+    -wa-btn-icon-background-pressed: -wa-foreground-pressed;
     -wa-btn-icon-background-selected: #9bbcdd;
-    -wa-checkbox-button-background: #4d4f66;
-    -wa-checkbox-button-background-selected: #bdd8ff;
+    -wa-btn-icon-border-color: -wa-regular-text;
     -wa-filter-button-background: #4d4f66;
+    -wa-app-bar-btn-text: -wa-white;
 
     /* text field input */
     -wa-text-input-fill: -wa-black;
@@ -103,12 +112,20 @@
 
     /* combo box, drop down */
     -wa-combo-box-background: -wa-foreground;
+    -wa-combo-box-background-selected: -wa-primary-10;
+
+    /* check box, radio */
+    -wa-checkbox-background: -wa-fill-neutral;
+    -wa-checkbox-button-background: #4d4f66;
+    -wa-checkbox-button-background-selected: #bdd8ff;
 
     /* shadow effects */
-    -wa-card-shadow-lower-right: dropshadow(gaussian, rgba(26,26,26,0.3), 6, 0, 2, 4); /* [blur], [color], [radius], [spread], [x], [y] */
+    -wa-card-shadow-lower-right: -wa-level0;
+    -wa-card-shadow-lower-right-dark: -wa-level0;
 
     /* audio player */
     -wa-slider-track-color: gray;
+    -wa-slider-border-color: -wa-white-30;
     -wa-recorder-controls-background: #0c0033;
     -wa-waveform-background: #999999;
     -wa-waveform-background-dark: #4f5964;
@@ -131,7 +148,7 @@
 
 .dark-theme .scroll-bar .thumb {
     -fx-background-color: #768198;
-    -fx-background-insets: 0, 2, 0;
+    -fx-background-insets: 0;
     -fx-background-radius: 0;
 }
 

@@ -105,6 +105,7 @@ class TargetLanguageSelection : Fragment() {
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             translationViewModel.showProgressProperty.onChange {
                 Platform.runLater { if (it) open() else close() }

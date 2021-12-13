@@ -81,6 +81,11 @@ internal class AudioPlayerConnection(
         return connectionFactory.player.getAudioReader()
     }
 
+    override fun changeRate(rate: Double) {
+        state.rate = rate
+        connectionFactory.load(state)
+    }
+
     override fun play() {
         connectionFactory.load(state)
         connectionFactory.player.play()

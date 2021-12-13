@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.controls.media
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
@@ -34,10 +33,8 @@ import java.text.MessageFormat
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
 
-    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    val sourceAudioAvailableProperty: BooleanBinding = audioPlayerProperty.isNotNull
-    val audioSampleRate = SimpleIntegerProperty(0)
-
+    val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val sourceAudioAvailableProperty: BooleanBinding = sourceAudioPlayerProperty.isNotNull
     val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     val sourceTextProperty = SimpleStringProperty()
@@ -49,8 +46,8 @@ class SourceContent : Control() {
     val audioNotAvailableTextProperty = SimpleStringProperty()
     val textNotAvailableTextProperty = SimpleStringProperty()
 
-    val playLabelProperty = SimpleStringProperty()
-    val pauseLabelProperty = SimpleStringProperty()
+    val playSourceLabelProperty = SimpleStringProperty()
+    val pauseSourceLabelProperty = SimpleStringProperty()
 
     val playTargetLabelProperty = SimpleStringProperty()
     val pauseTargetLabelProperty = SimpleStringProperty()
@@ -66,9 +63,6 @@ class SourceContent : Control() {
 
     init {
         initialize()
-        audioPlayerProperty.onChange {
-            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
-        }
         licenseProperty.onChange {
             licenseTextProperty.set(
                 MessageFormat.format(FX.messages["licenseStatement"], it)

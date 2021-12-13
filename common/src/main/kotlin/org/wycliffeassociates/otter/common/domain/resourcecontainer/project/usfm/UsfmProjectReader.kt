@@ -18,11 +18,13 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm
 
+import java.io.File
+import java.io.Reader
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.collections.OtterTreeNode
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
 import org.wycliffeassociates.otter.common.data.primitives.Content
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -35,10 +37,10 @@ import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import org.wycliffeassociates.usfmtools.USFMParser
 import org.wycliffeassociates.usfmtools.models.markers.CMarker
+import org.wycliffeassociates.usfmtools.models.markers.FMarker
 import org.wycliffeassociates.usfmtools.models.markers.TextBlock
 import org.wycliffeassociates.usfmtools.models.markers.VMarker
-import java.io.File
-import java.io.Reader
+import org.wycliffeassociates.usfmtools.models.markers.XMarker
 
 private const val FORMAT = "text/usfm"
 
@@ -179,10 +181,14 @@ private fun parseUSFMToChapterTrees(reader: Reader, projectSlug: String): List<O
 }
 
 fun VMarker.getText(): String {
-    val text = this.getChildMarkers(TextBlock::class.java)
+    val ignoredMarkers = listOf<Class<*>>(FMarker::class.java, XMarker::class.java)
+    val text = this.getChildMarkers(TextBlock::class.java, ignoredMarkers)
     val sb = StringBuilder()
-    for (txt in text) {
-        sb.append(txt.text)
+    for ((idx, txt) in text.withIndex()) {
+        sb.append(txt.text.trim())
+        if (idx != text.lastIndex) {
+            sb.append(" ")
+        }
     }
     return sb.toString()
 }

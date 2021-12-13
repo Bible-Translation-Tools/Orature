@@ -40,8 +40,9 @@ ext {
     ikonliVer = '12.2.0'
     controlsfxVer = '11.0.1'
     sentryVer = '5.2.4'
-    usfmToolsVer = "1.6.0"
+    usfmToolsVer = "1.7.1"
     testFxVer = '4.0.15-alpha'
+    testFxMonocleVer = 'jdk-12.0.1+2'
     jlayerVer = '1.0'
     cuelibVer = '2.0.0'
     install4jVer = '9.0.4'

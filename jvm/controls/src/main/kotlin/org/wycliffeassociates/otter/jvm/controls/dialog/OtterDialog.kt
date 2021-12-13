@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import com.jthemedetecor.OsThemeDetector
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Bounds
 import javafx.geometry.NodeOrientation
@@ -31,15 +29,14 @@ import javafx.scene.shape.Rectangle
 import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import tornadofx.*
 
 abstract class OtterDialog : Fragment() {
+    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val themeProperty = SimpleObjectProperty<ColorTheme>()
 
     private val roundRadius = 15.0
-    val orientationProperty = SimpleObjectProperty<NodeOrientation>()
-
-    private val osThemeDetector = OsThemeDetector.getDetector()
-    private val isOSDarkTheme = SimpleBooleanProperty(osThemeDetector.isDark)
 
     private val mainContainer = VBox().apply {
         addClass("otter-dialog-container")
@@ -50,23 +47,17 @@ abstract class OtterDialog : Fragment() {
         nodeOrientationProperty().bind(orientationProperty)
 
         add(mainContainer)
-
-        if (osThemeDetector.isDark) {
-            addClass("dark-theme")
-        } else {
-            addClass("light-theme")
-        }
     }
 
     init {
         importStylesheet(resources.get("/css/otter-dialog.css"))
-        /* the dialog component does not derive from root view;
-         * it needs its own style class theme manipulation
+        /*
+         * The dialog does not inherit style class from root view;
+         * it needs its own theme configuration
          */
         importStylesheet(resources["/css/theme/light-theme.css"])
         importStylesheet(resources["/css/theme/dark-theme.css"])
-
-        bindThemeToSystem()
+        bindTheme()
     }
 
     fun open() {
@@ -93,6 +84,21 @@ abstract class OtterDialog : Fragment() {
         )
     }
 
+    private fun bindTheme() {
+        themeProperty.onChange {
+            when (it) {
+                ColorTheme.LIGHT -> {
+                    root.addClass("light-theme")
+                    root.removeClass("dark-theme")
+                }
+                ColorTheme.DARK -> {
+                    root.addClass("dark-theme")
+                    root.removeClass("light-theme")
+                }
+            }
+        }
+    }
+
     private fun fitStageToParent(stage: Stage) {
         stage.width = primaryStage.width
         stage.height = primaryStage.height
@@ -108,21 +114,5 @@ abstract class OtterDialog : Fragment() {
         rect.arcWidth = roundRadius
         rect.arcHeight = roundRadius
         region.clip = rect
-    }
-
-    private fun bindThemeToSystem() {
-        isOSDarkTheme.onChange {
-            if (it) {
-                root.removeClass("light-theme")
-                root.addClass("dark-theme")
-            } else {
-                root.removeClass("dark-theme")
-                root.addClass("light-theme")
-            }
-        }
-
-        osThemeDetector.registerListener {
-            runLater { isOSDarkTheme.set(it) }
-        }
     }
 }

@@ -35,7 +35,7 @@
 .source-content__bottom {
     -fx-min-height: 60px;
     -fx-border-width: 1px 0 0 0;
-    -fx-border-color: -wa-gray-light;
+    -fx-border-color: -wa-border-light;
 }
 
 .source-content__not-available {
@@ -48,7 +48,7 @@
 }
 
 .source-content__not-available .label {
-    -fx-text-fill: -wa-gray-dark;
+    -fx-text-fill: -wa-inverse-text;
 }
 
 .source-content__minimize-btn {
@@ -63,8 +63,6 @@
 }
 
 .source-content__text-container {
-    -fx-background: -wa-white;
-    -fx-background-color: -wa-white;
     -fx-pref-height: 100px;
 }
 
@@ -79,7 +77,7 @@
 
 .source-content__audio_container--target {
     -fx-border-width: 0 0 1px 0;
-    -fx-border-color: -wa-gray-light;
+    -fx-border-color: -wa-border-light;
     -fx-padding: 15px 5px;
 }
 
@@ -95,8 +93,8 @@
 
 .source-content__text {
     -fx-font-size: 1.5em;
-    -fx-fill: -wa-gray-darker;
     -fx-padding: 0 15px;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .source-content__license-text {
@@ -107,9 +105,5 @@
 .source-content__title {
     -fx-font-size: 1.5em;
     -fx-font-weight: bold;
-    -fx-text-fill: -wa-regular-text;
-}
-
-.source-content__text {
     -fx-text-fill: -wa-regular-text;
 }

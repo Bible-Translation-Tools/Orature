@@ -1,6 +1,16 @@
 # Orature
+
 Orature is an application for oral drafting, narration, and translation of the Bible, books (such as [Open Bible Stories](https://www.unfoldingword.org/open-bible-stories)), and translation helps/resources (such as notes and checking questions). Additionally, Orature can connect with third party applications for more expansive recording and editing options.
-More information can be found [here.](https://bibletranslationtools.org/tool/orature/)
+More information can be found [here.](https://bibletranslationtools.org/tool/orature/), as well as in the [wiki.](https://github.com/Bible-Translation-Tools/Orature/wiki)
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Orature%20Home.png" width="48%" title="Artwork in screenshot provided by Sweet Publishing, CC By-SA 3.0, www.sweetpublishing.com" />
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Recording%20Page.png" width="48%" /> 
+</p>
+<p float="left">
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Verse%20Marker%20Placement.png" width="48%" />
+  <img src="https://raw.githubusercontent.com/jsarabia/orature-screenshots/main/Takes%20Page.png" width="48%" /> 
+</p>
 
 # Usage
 Orature runs on OpenJDK 11+. Installers for Windows, Debian-based Linux, and Mac are available in the Releases section of the repository on GitHub.

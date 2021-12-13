@@ -18,7 +18,7 @@
  */
 
 .card--container-dragover {
-    -fx-background-color: -wa-primary-20;
+    -fx-background-color: -wa-drag-drop-target-overlay;
     -fx-border-width: 2px;
     -fx-border-color: -wa-primary;
     -fx-border-style: segments(10, 15, 15, 15)  line-cap round;
@@ -32,7 +32,7 @@
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 6px;
     -fx-border-width: 2px;
-    -fx-border-color: -wa-black-20;
+    -fx-border-color: -wa-border-light;
     -fx-border-radius: 6px;
     -fx-max-width: 500px;
 }
@@ -59,7 +59,7 @@
 }
 
 .card--resource-take--empty {
-    -fx-background-color: -wa-card-placeholder-empty;
+    -fx-background-color: -wa-card-drag-drop-placeholder;
     -fx-background-radius: 10px;
     -fx-max-width: 500px;
     -fx-pref-height: 90px;
@@ -82,7 +82,8 @@
 .card__right-region {
     -fx-padding: 30px 70px 30px 30px;
     -fx-background-color: -wa-background;
-    -fx-border-color: transparent transparent transparent -wa-border-light;
+    -fx-border-width: 0 0 0 1px;
+    -fx-border-color: -wa-border-light;
 }
 
 .card__content-text {
