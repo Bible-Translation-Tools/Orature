@@ -177,7 +177,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
         tempFile.deleteOnExit()
         file.copyTo(tempFile, true)
 
-        val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+        val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
         audioPlayer.load(tempFile)
         val targetAudio = TargetAudio(tempFile, audioPlayer)
 
