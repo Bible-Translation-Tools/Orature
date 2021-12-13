@@ -23,6 +23,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
+import javafx.beans.property.SimpleBooleanProperty
 import java.io.File
 import javafx.beans.value.ChangeListener
 import org.junit.After
@@ -30,6 +31,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
+import org.mockito.Mockito
 import org.testfx.api.FxToolkit
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -39,14 +41,17 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import tornadofx.*
+import java.time.LocalDate
 
 class RecordScriptureViewModelTest {
     companion object {
@@ -136,11 +141,6 @@ class RecordScriptureViewModelTest {
 
         @BeforeClass
         @JvmStatic fun setup() {
-            /*System.setProperty("testfx.robot", "glass")
-            System.setProperty("testfx.headless", "true")
-            System.setProperty("prism.order", "sw")
-            System.setProperty("prism.text", "t2k")*/
-
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
@@ -178,7 +178,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun recordNewTake() {
+    fun recordNewTake_recorder() {
         contextListener = createChangeListener {
             Assert.assertEquals(PluginType.RECORDER, it)
         }
@@ -190,5 +190,41 @@ class RecordScriptureViewModelTest {
         workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
         recordScriptureViewModel.recordNewTake()
+    }
+
+    @Test
+    fun processTakeWithPlugin_editor() {
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.EDITOR, it)
+        }
+        recordScriptureViewModel.contextProperty.addListener(contextListener)
+
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        val take = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        val takeEvent = TakeEvent(take, { }, TakeEvent.EDIT_TAKE)
+
+        recordScriptureViewModel.processTakeWithPlugin(takeEvent, PluginType.EDITOR)
+    }
+
+    @Test
+    fun processTakeWithPlugin_marker() {
+        contextListener = createChangeListener {
+            Assert.assertEquals(PluginType.MARKER, it)
+        }
+        recordScriptureViewModel.contextProperty.addListener(contextListener)
+
+        activeTakeNumberListener = createChangeListener {
+            Assert.assertEquals(1, it)
+        }
+        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
+
+        val take = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        val takeEvent = TakeEvent(take, { }, TakeEvent.MARK_TAKE)
+
+        recordScriptureViewModel.processTakeWithPlugin(takeEvent, PluginType.MARKER)
     }
 }
