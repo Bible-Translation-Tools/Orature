@@ -53,6 +53,7 @@ class ChunkCell(
             setOnTakeSelected {
                 hasSelectedProperty.set(true)
                 item.onTakeSelected(item, it)
+                refreshTakes()
             }
 
             hasSelectedProperty.set(item.takes.size > 1)

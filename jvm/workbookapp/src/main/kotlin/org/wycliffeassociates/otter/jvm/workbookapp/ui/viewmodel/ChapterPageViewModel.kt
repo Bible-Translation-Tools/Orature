@@ -419,11 +419,11 @@ class ChapterPageViewModel : ViewModel() {
         chunk.chunkSource?.audio?.selectTake(take.take)
         workbookDataStore.updateSelectedTakesFile()
         take.take.file.setLastModified(System.currentTimeMillis())
-        chunk.takes.clear()
         buildTakes(chunk)
     }
 
     private fun buildTakes(chunkData: CardData) {
+        chunkData.takes.clear()
         chunkData.chunkSource?.let { chunk ->
             val selected = chunk.audio.selected.value?.value
             disposables.add(

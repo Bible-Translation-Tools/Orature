@@ -128,7 +128,6 @@ class ChunkItem : VBox() {
         onTakeSelectedActionProperty.set(
             EventHandler {
                 op.invoke(it.source as TakeModel)
-                println("should be recreating take views")
                 createTakeViews()
             }
         )
