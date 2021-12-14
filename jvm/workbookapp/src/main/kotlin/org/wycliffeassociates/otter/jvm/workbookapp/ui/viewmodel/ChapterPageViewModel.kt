@@ -84,7 +84,7 @@ class ChapterPageViewModel : ViewModel() {
     val workChunkProperty = SimpleObjectProperty<CardData>()
     val noTakesProperty = SimpleBooleanProperty()
 
-    val chapterCardProperty = SimpleObjectProperty<CardData>(CardData(workbookDataStore.chapter))
+    val chapterCardProperty = SimpleObjectProperty(CardData(workbookDataStore.chapter))
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
@@ -100,6 +100,25 @@ class ChapterPageViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
+        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
+
+        chapterCardProperty.onChangeAndDoNow { chapter ->
+            clearDisposables()
+            chapter?.chapterSource?.let { chapterSource ->
+                subscribeSelectedTakePropertyToRelay(chapterSource.audio)
+            }
+        }
+    }
+
+    fun loadContent() {
+        workbookDataStore.activeChapterProperty.value.let { _chapter ->
+            _chapter?.let { chapter ->
+                loadChapterContents(chapter).subscribe()
+                val chap = CardData(chapter)
+                chapterCardProperty.set(chap)
+            }
+        }
+
         allContent
             .changes()
             .doOnError { e ->
@@ -114,23 +133,12 @@ class ChapterPageViewModel : ViewModel() {
                 checkCanCompile()
                 setWorkChunk()
             }
+    }
 
-        workbookDataStore.activeChapterProperty.onChangeAndDoNow { _chapter ->
-            _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe()
-                val chap = CardData(chapter)
-                chapterCardProperty.set(chap)
-            }
-        }
-
-        audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
-
-        chapterCardProperty.onChangeAndDoNow { chapter ->
-            clearDisposables()
-            chapter?.chapterSource?.let { chapterSource ->
-                subscribeSelectedTakePropertyToRelay(chapterSource.audio)
-            }
-        }
+    fun dispose() {
+        filteredContent.clear()
+        allContent.clear()
+        disposables.dispose()
     }
 
     fun onCardSelection(cardData: CardData) {
@@ -214,7 +222,8 @@ class ChapterPageViewModel : ViewModel() {
                     fire(PluginClosedEvent(PluginType.RECORDER))
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
-                        TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {}
+                        TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                        }
                     }
                 }
         } ?: throw IllegalStateException("Recordable is null")
@@ -246,7 +255,8 @@ class ChapterPageViewModel : ViewModel() {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noEditor"])
                         else -> {
                             when (pluginType) {
-                                PluginType.EDITOR, PluginType.MARKER -> {}
+                                PluginType.EDITOR, PluginType.MARKER -> {
+                                }
                             }
                         }
                     }
@@ -363,6 +373,7 @@ class ChapterPageViewModel : ViewModel() {
         return chapter.chunks
             .map { CardData(it) }
             .map {
+                buildTakes(it)
                 it.player = getPlayer()
                 it.onChunkOpen = ::onChunkOpen
                 it.onTakeSelected = ::onTakeSelected
@@ -408,6 +419,28 @@ class ChapterPageViewModel : ViewModel() {
         chunk.chunkSource?.audio?.selectTake(take.take)
         workbookDataStore.updateSelectedTakesFile()
         take.take.file.setLastModified(System.currentTimeMillis())
+        chunk.takes.clear()
+        buildTakes(chunk)
+    }
+
+    private fun buildTakes(chunkData: CardData) {
+        chunkData.chunkSource?.let { chunk ->
+            val selected = chunk.audio.selected.value?.value
+            disposables.add(
+                chunk.audio.takes
+                    .filter { it.deletedTimestamp.value?.value == null }
+                    .map { take ->
+                        take.mapToModel(take == selected)
+                    }.subscribe {
+                        chunkData.takes.addAll(it)
+                    }
+            )
+        }
+    }
+
+    private fun Take.mapToModel(selected: Boolean): TakeModel {
+        val audioPlayer = getPlayer()
+        return TakeModel(this, selected, false, audioPlayer)
     }
 
     private fun getPlayer(): IAudioPlayer {

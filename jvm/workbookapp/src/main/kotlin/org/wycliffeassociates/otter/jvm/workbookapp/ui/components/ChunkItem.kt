@@ -53,27 +53,6 @@ class ChunkItem : VBox() {
     init {
         styleClass.setAll("chunk-item")
 
-        takes.onChange { model ->
-            hasSelectedProperty.set(model.list?.any { it.selected } ?: false)
-
-            val animationMediator = ListAnimationMediator<TakeItem>()
-            takeViews.setAll(
-                model.list.map { takeModel ->
-                    TakeItem().apply {
-                        selectedProperty.set(takeModel.selected)
-                        takeProperty.set(takeModel)
-                        animationMediatorProperty.set(animationMediator)
-
-                        setOnTakeSelected {
-                            onTakeSelectedActionProperty.value?.handle(
-                                ActionEvent(takeModel, null)
-                            )
-                        }
-                    }
-                }
-            )
-        }
-
         hbox {
             vbox {
                 hgrow = Priority.ALWAYS
@@ -108,6 +87,7 @@ class ChunkItem : VBox() {
             }
 
             setOnMouseClicked {
+                createTakeViews()
                 showTakesProperty.set(showTakesProperty.value.not())
             }
         }
@@ -139,12 +119,43 @@ class ChunkItem : VBox() {
     }
 
     fun setOnChunkOpen(op: () -> Unit) {
-        onChunkOpenActionProperty.set(EventHandler { op.invoke() })
+        onChunkOpenActionProperty.set(EventHandler {
+            op.invoke()
+        })
     }
 
     fun setOnTakeSelected(op: (take: TakeModel) -> Unit) {
         onTakeSelectedActionProperty.set(
-            EventHandler { op.invoke(it.source as TakeModel) }
+            EventHandler {
+                op.invoke(it.source as TakeModel)
+                println("should be recreating take views")
+                createTakeViews()
+            }
+        )
+    }
+
+    fun createTakeViews() {
+        hasSelectedProperty.set(takes.any { it.selected } ?: false)
+        val animationMediator = ListAnimationMediator<TakeItem>()
+        takeViews.setAll(
+            takes.map { takeModel ->
+                println(takeModel.take.number)
+                if (!takeModel.loaded) {
+                    takeModel.audioPlayer.load(takeModel.take.file)
+                    takeModel.loaded = true
+                }
+                TakeItem().apply {
+                    selectedProperty.set(takeModel.selected)
+                    takeProperty.set(takeModel)
+                    animationMediatorProperty.set(animationMediator)
+
+                    setOnTakeSelected {
+                        onTakeSelectedActionProperty.value?.handle(
+                            ActionEvent(takeModel, null)
+                        )
+                    }
+                }
+            }
         )
     }
 }

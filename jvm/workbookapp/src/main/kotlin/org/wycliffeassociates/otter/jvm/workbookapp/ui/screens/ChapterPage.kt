@@ -86,20 +86,21 @@ class ChapterPage : View() {
         workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
 
+        viewModel.loadContent()
         viewModel.setWorkChunk()
         viewModel.openPlayers()
 
         viewModel.checkCanCompile()
         chunkListView.refresh()
-
         initializeProgressDialog()
     }
+
 
     override fun onUndock() {
         super.onUndock()
         viewModel.closePlayers()
+        viewModel.dispose()
         removeDialogListeners()
-        (app as OtterApp).dependencyGraph.injectConnectionFactory().printConnections()
     }
 
     init {
