@@ -52,6 +52,8 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordScripturePage
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -360,6 +362,12 @@ class ChapterPageViewModel : ViewModel() {
         loading = true
         return chapter.chunks
             .map { CardData(it) }
+            .map {
+                it.player = getPlayer()
+                it.onChunkOpen = ::onChunkOpen
+                it.onTakeSelected = ::onTakeSelected
+                it
+            }
             .doOnComplete {
                 loading = false
             }
@@ -389,5 +397,20 @@ class ChapterPageViewModel : ViewModel() {
                 workbookDataStore.updateSelectedChapterPlayer()
             }
             .let { disposables.add(it) }
+    }
+
+    private fun onChunkOpen(chunk: CardData) {
+        onCardSelection(chunk)
+        navigator.dock<RecordScripturePage>()
+    }
+
+    private fun onTakeSelected(chunk: CardData, take: TakeModel) {
+        chunk.chunkSource?.audio?.selectTake(take.take)
+        workbookDataStore.updateSelectedTakesFile()
+        take.take.file.setLastModified(System.currentTimeMillis())
+    }
+
+    private fun getPlayer(): IAudioPlayer {
+        return (app as OtterApp).dependencyGraph.injectPlayer()
     }
 }

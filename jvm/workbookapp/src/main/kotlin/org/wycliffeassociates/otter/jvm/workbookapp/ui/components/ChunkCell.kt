@@ -28,10 +28,7 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class ChunkCell(
-    private val orientationScale: Double,
-    private val getPlayer: () -> IAudioPlayer,
-    private val onChunkOpen: (CardData) -> Unit,
-    private val onTakeSelected: (CardData, TakeModel) -> Unit
+    private val orientationScale: Double
 ) : ListCell<CardData>() {
     private val view = ChunkItem()
 
@@ -57,10 +54,10 @@ class ChunkCell(
 
             setTakes(item, takes)
 
-            setOnChunkOpen { onChunkOpen(item) }
+            setOnChunkOpen { item.onChunkOpen(item) }
             setOnTakeSelected {
                 hasSelectedProperty.set(true)
-                onTakeSelected(item, it)
+                item.onTakeSelected(item, it)
                 setTakes(item, takes)
             }
         }
@@ -83,7 +80,7 @@ class ChunkCell(
     }
 
     private fun Take.mapToModel(selected: Boolean): TakeModel {
-        val audioPlayer = getPlayer()
+        val audioPlayer = item.player
         audioPlayer.load(this.file)
         return TakeModel(this, selected, audioPlayer)
     }

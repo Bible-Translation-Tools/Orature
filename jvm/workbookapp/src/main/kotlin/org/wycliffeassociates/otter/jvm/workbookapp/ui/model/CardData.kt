@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 
 data class CardData(
     val item: String,
@@ -30,6 +31,11 @@ data class CardData(
     val chunkSource: Chunk? = null,
     val chapterSource: Chapter? = null
 ) {
+
+    lateinit var player: IAudioPlayer
+    var onChunkOpen: (CardData) -> Unit = {}
+    var onTakeSelected: (CardData, TakeModel) -> Unit = { _, _ -> }
+
     constructor(chunk: Chunk) : this(
         item = ContentLabel.of(chunk.contentType).value,
         dataType = CardDataType.CONTENT.value,
