@@ -40,21 +40,17 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
     override val framePosition: Int
         get() = (mappedFile?.position() ?: 0) / wav.frameSizeInBytes
 
-    private var mappedFile: MappedByteBuffer? = null
+    private var mappedFile: ByteBuffer? = null
     private var channel: FileChannel? = null
 
     override fun open() {
         mappedFile?.let { release() }
+        
         val (begin, end) = computeBounds(wav)
-        mappedFile =
-            RandomAccessFile(wav.file, "r").use {
-                channel = it.channel
-                channel!!.map(
-                    FileChannel.MapMode.READ_ONLY,
-                    begin.toLong(),
-                    (end - begin).toLong()
-                )
-            }
+        RandomAccessFile(wav.file, "r").use {
+            mappedFile = ByteBuffer.allocate(end - begin)
+            it.channel.read(mappedFile, begin.toLong())
+        }
     }
 
     fun computeBounds(wav: WavFile): Pair<Int, Int> {
