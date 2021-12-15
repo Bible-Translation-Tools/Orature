@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="9.0.5" transformSequenceNumber="9">
-  <directoryPresets config="./build/resources/main/images" />
+  <directoryPresets config="./build/resources/main" />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="11">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
   </application>
@@ -699,7 +699,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
               <property name="imageEdgeBorder" type="boolean" value="true" />
               <property name="imageFile">
                 <object class="com.install4j.api.beans.ExternalFile">
-                  <string>./workbookapp/build/resources/main/images/placeholder-image.png</string>
+                  <string>./build/resources/main/orature_splash.png</string>
                 </object>
               </property>
               <property name="insets">
