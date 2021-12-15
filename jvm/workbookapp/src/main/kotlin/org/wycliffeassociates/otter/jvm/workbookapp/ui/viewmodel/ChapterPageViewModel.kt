@@ -426,15 +426,13 @@ class ChapterPageViewModel : ViewModel() {
         chunkData.takes.clear()
         chunkData.chunkSource?.let { chunk ->
             val selected = chunk.audio.selected.value?.value
-            disposables.add(
-                chunk.audio.takes
-                    .filter { it.deletedTimestamp.value?.value == null }
-                    .map { take ->
-                        take.mapToModel(take == selected)
-                    }.subscribe {
-                        chunkData.takes.addAll(it)
-                    }
-            )
+            chunk.audio.takes
+                .filter { it.deletedTimestamp.value?.value == null }
+                .map { take ->
+                    take.mapToModel(take == selected)
+                }.subscribe {
+                    chunkData.takes.addAll(it)
+                }
         }
     }
 
