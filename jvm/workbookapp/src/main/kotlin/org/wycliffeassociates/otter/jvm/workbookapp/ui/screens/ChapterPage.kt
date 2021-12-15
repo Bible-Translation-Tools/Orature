@@ -101,7 +101,6 @@ class ChapterPage : View() {
         viewModel.closePlayers()
         viewModel.dispose()
         removeDialogListeners()
-        println((app as OtterApp).dependencyGraph.injectConnectionFactory().getConnectionCount())
         (app as OtterApp).dependencyGraph.injectConnectionFactory().releasePlayer()
         (app as OtterApp).dependencyGraph.injectConnectionFactory().clearPlayerConnections()
     }
