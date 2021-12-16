@@ -86,7 +86,7 @@ class ChapterPage : View() {
         workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
 
-        viewModel.loadContent()
+        viewModel.dock()
         viewModel.setWorkChunk()
         viewModel.openPlayers()
 
@@ -99,7 +99,7 @@ class ChapterPage : View() {
     override fun onUndock() {
         super.onUndock()
         viewModel.closePlayers()
-        viewModel.dispose()
+        viewModel.undock()
         removeDialogListeners()
         (app as OtterApp).dependencyGraph.injectConnectionFactory().releasePlayer()
         (app as OtterApp).dependencyGraph.injectConnectionFactory().clearPlayerConnections()

@@ -109,7 +109,7 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    fun loadContent() {
+    fun dock() {
         workbookDataStore.activeChapterProperty.value.let { _chapter ->
             _chapter?.let { chapter ->
                 loadChapterContents(chapter).subscribe()
@@ -134,7 +134,7 @@ class ChapterPageViewModel : ViewModel() {
             }
     }
 
-    fun dispose() {
+    fun undock() {
         filteredContent.clear()
         allContent.clear()
         disposables.clear()
