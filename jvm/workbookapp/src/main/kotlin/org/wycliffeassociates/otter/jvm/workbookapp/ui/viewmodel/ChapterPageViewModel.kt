@@ -103,7 +103,6 @@ class ChapterPageViewModel : ViewModel() {
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
 
         chapterCardProperty.onChangeAndDoNow { chapter ->
-            clearDisposables()
             chapter?.chapterSource?.let { chapterSource ->
                 subscribeSelectedTakePropertyToRelay(chapterSource.audio)
             }
@@ -138,7 +137,7 @@ class ChapterPageViewModel : ViewModel() {
     fun dispose() {
         filteredContent.clear()
         allContent.clear()
-        disposables.dispose()
+        disposables.clear()
     }
 
     fun onCardSelection(cardData: CardData) {
@@ -392,10 +391,6 @@ class ChapterPageViewModel : ViewModel() {
             }.ignoreElement()
     }
 
-    private fun clearDisposables() {
-        disposables.clear()
-    }
-
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
         audio
             .selected
@@ -432,6 +427,8 @@ class ChapterPageViewModel : ViewModel() {
                     take.mapToModel(take == selected)
                 }.subscribe {
                     chunkData.takes.addAll(it)
+                }.let {
+                    disposables.add(it)
                 }
         }
     }
