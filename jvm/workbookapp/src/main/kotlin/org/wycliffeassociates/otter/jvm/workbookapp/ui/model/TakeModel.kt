@@ -6,5 +6,6 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 data class TakeModel(
     val take: Take,
     val selected: Boolean,
+    var loaded: Boolean,
     val audioPlayer: IAudioPlayer
 )
