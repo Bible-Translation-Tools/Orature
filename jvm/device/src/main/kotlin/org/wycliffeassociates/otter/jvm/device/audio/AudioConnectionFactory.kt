@@ -54,4 +54,16 @@ class AudioConnectionFactory(
     fun errorListener(): Observable<AudioError> {
         return errorRelay
     }
+
+    fun clearPlayerConnections() {
+        playerConnectionFactory.clearConnections()
+    }
+
+    fun getConnectionCount(): Int {
+        return playerConnectionFactory.connections.size
+    }
+
+    fun releasePlayer() {
+        playerConnectionFactory.releasePlayer()
+    }
 }
