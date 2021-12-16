@@ -102,7 +102,6 @@ internal class AudioPlayerConnectionFactory(
             swapConnection(request)
             outputLine?.flush()
             player.stop()
-            player.release()
             player = AudioBufferPlayer(outputLine, errorRelay)
             setDurationOfConnection(request)
             loadRequestIntoPlayer(request)
