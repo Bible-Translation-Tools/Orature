@@ -60,10 +60,10 @@ application {
 }
 
 test {
-    systemProperty 'testfx.robot', System.getProperty('testfx.robot')
-    systemProperty 'testfx.headless', System.getProperty('testfx.headless')
-    systemProperty 'prism.order', System.getProperty('prism.order')
-    systemProperty 'prism.text', System.getProperty('prism.text')
+    systemProperty 'testfx.robot', 'glass'
+    systemProperty 'testfx.headless', 'true'
+    systemProperty 'prism.order', 'sw'
+    systemProperty 'prism.text', 't2k'
 }
 
 apply from: './jooq.gradle'
