@@ -138,7 +138,6 @@ class ChunkItem : VBox() {
         val animationMediator = ListAnimationMediator<TakeItem>()
         takeViews.setAll(
             takes.map { takeModel ->
-                println(takeModel.take.number)
                 if (!takeModel.loaded) {
                     takeModel.audioPlayer.load(takeModel.take.file)
                     takeModel.loaded = true
