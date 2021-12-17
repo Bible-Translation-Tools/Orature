@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="9.0.5" transformSequenceNumber="9">
-  <directoryPresets config="./build/resources/main" />
+  <directoryPresets config="." />
   <application name="Orature" applicationId="8057-9807-3529-9982" mediaDir=".exec" mediaFilePattern="${compiler:sys.shortName}-${compiler:sys.platform}-${compiler:sys.version}" shortName="orature" version="0.1" allPathsRelative="true" convertDotsToUnderscores="false" macVolumeId="82fd10b9f6e2b1b5" javaMinVersion="11" javaMaxVersion="11">
     <codeSigning windowsEnabled="true" windowsPkcs12File="~/signing.p12" />
   </application>
@@ -635,6 +635,13 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
             </serializedBean>
           </formComponent>
           <group name="Main" id="37" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup">
+            <serializedBean>
+              <property name="imageFile">
+                <object class="com.install4j.api.beans.ExternalFile">
+                  <string>./Installer_banner.png</string>
+                </object>
+              </property>
+            </serializedBean>
             <beans>
               <formComponent id="38" beanClass="com.install4j.runtime.beans.styles.ContentComponent" insetTop="10" insetLeft="20" insetBottom="10" insetRight="20" />
               <formComponent name="Watermark" id="39" beanClass="com.install4j.runtime.beans.formcomponents.SeparatorComponent" insetTop="0" insetLeft="5" insetBottom="0" useExternalParametrization="true" externalParametrizationName="Custom watermark" externalParametrizationMode="include">
@@ -683,9 +690,9 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
               <property name="imageEdgeBackgroundColor">
                 <object class="com.install4j.runtime.beans.LightOrDarkColor">
                   <object class="java.awt.Color">
-                    <int>25</int>
-                    <int>143</int>
-                    <int>220</int>
+                    <int>1</int>
+                    <int>90</int>
+                    <int>217</int>
                     <int>255</int>
                   </object>
                   <object class="java.awt.Color">
@@ -699,7 +706,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
               <property name="imageEdgeBorder" type="boolean" value="true" />
               <property name="imageFile">
                 <object class="com.install4j.api.beans.ExternalFile">
-                  <string>./build/resources/main/orature_splash.png</string>
+                  <string>./Installer_banner.png</string>
                 </object>
               </property>
               <property name="insets">
@@ -771,7 +778,7 @@ file.getParent() != null || (file.getName().endsWith(".app") &amp;&amp; director
                   <property name="imageEdgeBorderWidth" type="int" value="2" />
                   <property name="imageFile">
                     <object class="com.install4j.api.beans.ExternalFile">
-                      <string>icon:${installer:sys.installerApplicationMode}_header.png</string>
+                      <string>./orature_installer_icon_32x32.png</string>
                     </object>
                   </property>
                   <property name="imageInsets">
