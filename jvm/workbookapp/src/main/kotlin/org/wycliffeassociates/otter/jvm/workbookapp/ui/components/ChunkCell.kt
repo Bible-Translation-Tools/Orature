@@ -51,6 +51,7 @@ class ChunkCell(
 
             setOnChunkOpen { item.onChunkOpen(item) }
             setOnTakeSelected {
+                hasSelectedProperty.set(true)
                 item.onTakeSelected(item, it)
                 refreshTakes()
             }
