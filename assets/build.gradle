@@ -37,8 +37,8 @@ configurations {
 }
 
 dependencies {
-    content 'bible-translation-tools:en_art_wa:1.0.0@zip'
-    content 'bible-translation-tools:en_art_sp:1.0.0@zip'
+    content 'bible-translation-tools:en_art_wa:2.0.0@zip'
+    content 'bible-translation-tools:en_art_sp:2.0.0@zip'
     content 'wa-catalog:en_ulb:V21-05@zip'
     content 'unfoldingword:langnames@json'
     content 'bible-translation-tools:bible_artwork@zip'

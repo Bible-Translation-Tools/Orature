@@ -125,6 +125,13 @@ class AudioBufferPlayer(
                                     player.write(output, 0, output.size)
                                 }
                             }
+                            player.drain()
+                            if (!pause.get()) {
+                                startPosition = 0
+                                listeners.forEach { it.onEvent(AudioPlayerEvent.COMPLETE) }
+                                player.close()
+                                seek(0)
+                            }
                         } catch (e: LineUnavailableException) {
                             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
                         } catch (e: IllegalArgumentException) {

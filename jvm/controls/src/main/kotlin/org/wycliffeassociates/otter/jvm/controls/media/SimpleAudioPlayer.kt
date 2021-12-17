@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerControll
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
 import java.text.MessageFormat
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
@@ -77,7 +78,7 @@ class SimpleAudioPlayer(
         nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
         playerProperty.onChange {
-            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: 0)
+            audioSampleRate.set(it?.getAudioReader()?.sampleRate ?: DEFAULT_SAMPLE_RATE)
         }
 
         alignment = Pos.CENTER

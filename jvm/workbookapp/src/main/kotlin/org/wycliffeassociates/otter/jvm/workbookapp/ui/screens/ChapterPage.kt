@@ -28,20 +28,17 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -49,8 +46,9 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 
-class ChapterPage : Fragment() {
+class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
 
     private val viewModel: ChapterPageViewModel by inject()
@@ -88,19 +86,23 @@ class ChapterPage : Fragment() {
         workbookDataStore.activeResourceProperty.set(null)
         navigator.dock(this, breadCrumb)
 
+        viewModel.dock()
         viewModel.setWorkChunk()
         viewModel.openPlayers()
 
         viewModel.checkCanCompile()
         chunkListView.refresh()
-
         initializeProgressDialog()
     }
+
 
     override fun onUndock() {
         super.onUndock()
         viewModel.closePlayers()
+        viewModel.undock()
         removeDialogListeners()
+        (app as OtterApp).dependencyGraph.injectConnectionFactory().releasePlayer()
+        (app as OtterApp).dependencyGraph.injectConnectionFactory().clearPlayerConnections()
     }
 
     init {
@@ -279,29 +281,11 @@ class ChapterPage : Fragment() {
                 fitToParentHeight()
                 setCellFactory {
                     ChunkCell(
-                        settingsViewModel.orientationScaleProperty.value,
-                        ::getPlayer,
-                        ::onChunkOpen,
-                        ::onTakeSelected
+                        settingsViewModel.orientationScaleProperty.value
                     )
                 }
             }
         }
-    }
-
-    private fun onChunkOpen(chunk: CardData) {
-        viewModel.onCardSelection(chunk)
-        navigator.dock<RecordScripturePage>()
-    }
-
-    private fun onTakeSelected(chunk: CardData, take: TakeModel) {
-        chunk.chunkSource?.audio?.selectTake(take.take)
-        workbookDataStore.updateSelectedTakesFile()
-        take.take.file.setLastModified(System.currentTimeMillis())
-    }
-
-    private fun getPlayer(): IAudioPlayer {
-        return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
