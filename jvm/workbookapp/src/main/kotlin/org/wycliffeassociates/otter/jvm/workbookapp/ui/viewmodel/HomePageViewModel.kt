@@ -104,6 +104,9 @@ class HomePageViewModel : ViewModel() {
     }
 
     fun clearSelectedProject() {
+        workbookDataStore.activeWorkbookProperty.value?.let {
+            workbookRepo.closeWorkbook(it)
+        }
         workbookDataStore.activeWorkbookProperty.set(null)
     }
 
