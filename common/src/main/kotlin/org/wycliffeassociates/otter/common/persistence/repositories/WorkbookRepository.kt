@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.jakewharton.rxrelay2.BehaviorRelay
@@ -25,25 +43,32 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
-class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookRepository {
+class WorkbookRepository(
+    private val directoryProvider: IDirectoryProvider,
+    private val db: IDatabaseAccessors
+) : IWorkbookRepository {
     private val logger = LoggerFactory.getLogger(WorkbookRepository::class.java)
 
     @Inject
     constructor(
+        directoryProvider: IDirectoryProvider,
         collectionRepository: ICollectionRepository,
         contentRepository: IContentRepository,
         resourceRepository: IResourceRepository,
         resourceMetadataRepo: IResourceMetadataRepository,
         takeRepository: ITakeRepository
     ) : this(
+        directoryProvider,
         DefaultDatabaseAccessors(
             collectionRepository,
             contentRepository,
@@ -60,7 +85,7 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
-        val workbook = Workbook(book(source, disposables), book(target, disposables))
+        val workbook = Workbook(directoryProvider, book(source, disposables), book(target, disposables))
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
     }
@@ -79,14 +104,32 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
     override fun getProjects(): Single<List<Workbook>> {
         return db.getDerivedProjects()
             .map { projects ->
-                projects.filter { it.resourceContainer?.type == ContainerType.Book }
+                projects.filter {
+                    it.resourceContainer?.type == ContainerType.Book
+                }
             }
             .flattenAsObservable { it }
             .flatMapMaybe(::getWorkbook)
             .toList()
     }
 
-    private fun getWorkbook(project: Collection): Maybe<Workbook> {
+    override fun getProjects(translation: Translation): Single<List<Workbook>> {
+        return db.getDerivedProjects()
+            .map { projects ->
+                projects
+                    .filter { it.resourceContainer?.type == ContainerType.Book }
+                    .filter { it.resourceContainer?.language == translation.target }
+                    .filter {
+                        val sourceProject = db.getSourceProject(it).blockingGet()
+                        sourceProject.resourceContainer?.language == translation.source
+                    }
+            }
+            .flattenAsObservable { it }
+            .flatMapMaybe(::getWorkbook)
+            .toList()
+    }
+
+    override fun getWorkbook(project: Collection): Maybe<Workbook> {
         return db.getSourceProject(project)
             .map { sourceProject ->
                 get(sourceProject, project)
@@ -105,7 +148,8 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             chapters = constructBookChapters(bookCollection, disposables),
             resourceMetadata = resourceMetadata,
             linkedResources = db.getLinkedResourceMetadata(resourceMetadata),
-            subtreeResources = db.getSubtreeResourceMetadata(bookCollection)
+            subtreeResources = db.getSubtreeResourceMetadata(bookCollection),
+            modifiedTs = bookCollection.modifiedTs
         )
     }
 
@@ -381,10 +425,13 @@ class WorkbookRepository(private val db: IDatabaseAccessors) : IWorkbookReposito
             }
 
             // Insert the new take into the DB. (We already filtered existing takes out.)
-            .subscribe { (_, modelTake) ->
+            .subscribe { (wbTake, modelTake) ->
                 db.insertTakeForContent(modelTake, content)
                     .doOnError { e -> logger.error("Error inserting take: $modelTake for content: $content", e) }
-                    .subscribe { insertionId -> modelTake.id = insertionId }
+                    .subscribe { insertionId ->
+                        modelTake.id = insertionId
+                        selectedTakeRelay.accept(TakeHolder(wbTake))
+                    }
             }
 
         synchronized(disposables) {

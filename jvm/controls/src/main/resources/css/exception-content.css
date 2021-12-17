@@ -1,0 +1,89 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/* Dialog style */
+.dialog-pane > .button-bar > .container {
+    -fx-padding: 0;
+}
+
+.dialog-pane > .content {
+    -fx-padding: 0;
+}
+
+/* Exception dialog style */
+.exception-content {
+    -fx-background-color: -wa-dialog-background;
+}
+
+.exception-content > .label,
+.exception-content__send-report {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.exception-content__show-more-btn:hover {
+    -fx-background-color: -wa-secondary-btn-background-hover;
+}
+
+.exception-content__show-more-btn * {
+    -fx-fill: -wa-secondary-btn-text-fill;
+    -fx-icon-color: -wa-secondary-btn-text-fill;
+}
+
+.exception-content__send-report {
+    -fx-cursor: hand;
+    -jfx-checked-color: -wa-primary;
+}
+
+.exception-content__stacktrace-container {
+    -fx-background-color: -wa-primary-light;
+    -fx-background-radius: 10px;
+}
+
+.exception-content__stacktrace-container__sub {
+    -fx-background-color: -wa-primary-light;
+}
+
+/* Scrollbar style */
+.exception-content__stacktrace-container .scroll-bar {
+    -fx-background-color: -wa-transparent;
+}
+
+.exception-content__stacktrace-container .scroll-bar .track {
+    -fx-background-color: -wa-transparent;
+	-fx-border-color: -wa-transparent;
+}
+
+.exception-content__stacktrace-container .scroll-bar .increment-button,
+.exception-content__stacktrace-container .scroll-bar .decrement-button {
+    -fx-background-color: -wa-transparent;
+	-fx-border-color: -wa-transparent;
+	-fx-padding: 0;
+}
+
+.exception-content__stacktrace-container .scroll-bar .increment-arrow,
+.exception-content__stacktrace-container .scroll-bar .decrement-arrow {
+	-fx-background-color: -wa-transparent;
+	-fx-padding: 0 5;
+}
+
+.exception-content__stacktrace-container .scroll-bar .thumb {
+    -fx-background-color: -wa-gray;
+	-fx-background-insets: 2, 0, 0;
+	-fx-background-radius: 10px;
+}

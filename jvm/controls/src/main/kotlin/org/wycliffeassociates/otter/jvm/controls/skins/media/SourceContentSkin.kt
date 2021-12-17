@@ -1,47 +1,68 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
+import javafx.geometry.NodeOrientation
+import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
-import javafx.scene.control.Slider
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
 
-    companion object {
-        private const val SCROLL_TEXT_RESIZE_RATIO = 1.5
-    }
-
-    private val playIcon = FontIcon("fa-play")
-    private val pauseIcon = FontIcon("fa-pause")
-
-    private val minimizedIcon = FontIcon("mdi-window-minimize")
-    private val maximizedIcon = FontIcon("mdi-window-maximize")
+    private val minimizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MINIMIZE)
+    private val maximizedIcon = FontIcon(MaterialDesign.MDI_WINDOW_MAXIMIZE)
 
     @FXML
     lateinit var sourceAudioContainer: HBox
 
     @FXML
-    lateinit var playBtn: Button
+    lateinit var playSourceBtn: Button
 
     @FXML
-    lateinit var audioSlider: Slider
+    lateinit var playTargetBtn: Button
+
+    @FXML
+    lateinit var sourcePlayer: SimpleAudioPlayer
+
+    @FXML
+    lateinit var targetPlayer: SimpleAudioPlayer
 
     @FXML
     lateinit var sourceAudioNotAvailable: HBox
 
     @FXML
     lateinit var audioNotAvailableText: Label
+
+    @FXML
+    lateinit var targetAudio: HBox
 
     @FXML
     lateinit var sourceTextContainer: VBox
@@ -59,6 +80,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var sourceText: Label
 
     @FXML
+    lateinit var licenseText: Label
+
+    @FXML
     lateinit var title: Label
 
     @FXML
@@ -71,9 +95,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var minimizeBtn: Button
 
     @FXML
-    lateinit var sourceAudioBlock: HBox
-
-    lateinit var audioController: AudioPlayerController
+    lateinit var sourceAudioBlock: VBox
 
     init {
         loadFXML()
@@ -87,13 +109,14 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initControllers() {
-        audioController = AudioPlayerController(audioSlider)
+
     }
 
     private fun initAudioControls() {
         sourceAudioContainer.apply {
             visibleWhen(sourceContent.sourceAudioAvailableProperty)
             managedWhen(visibleProperty())
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
 
         sourceAudioNotAvailable.apply {
@@ -101,26 +124,32 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             managedWhen(visibleProperty())
         }
 
+        targetAudio.apply {
+            visibleWhen(sourceContent.targetAudioPlayerProperty.isNotNull)
+            managedWhen(visibleProperty())
+            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
+        }
+
         audioNotAvailableText.apply {
             textProperty().bind(sourceContent.audioNotAvailableTextProperty)
         }
 
-        playBtn.apply {
-            setOnMouseClicked {
-                audioController.toggle()
-            }
+        sourcePlayer.apply {
+            playerProperty.bind(sourceContent.sourceAudioPlayerProperty)
+            enablePlaybackRateProperty.set(true)
+            playButtonProperty.set(playSourceBtn)
+            playTextProperty.bind(sourceContent.playSourceLabelProperty)
+            pauseTextProperty.bind(sourceContent.pauseSourceLabelProperty)
+            menuSideProperty.set(Side.TOP)
         }
 
-        audioController.isPlayingProperty.onChangeAndDoNow {
-            togglePlayButtonIcon(it)
-            togglePlayButtonStyle(it)
-            togglePlayButtonText(it)
-        }
-
-        sourceContent.audioPlayerProperty.onChangeAndDoNow { player ->
-            player?.let {
-                audioController.load(it)
-            }
+        targetPlayer.apply {
+            playerProperty.bind(sourceContent.targetAudioPlayerProperty)
+            enablePlaybackRateProperty.set(true)
+            playButtonProperty.set(playTargetBtn)
+            playTextProperty.bind(sourceContent.playTargetLabelProperty)
+            pauseTextProperty.bind(sourceContent.pauseTargetLabelProperty)
+            menuSideProperty.set(Side.TOP)
         }
 
         sourceAudioBlock.apply {
@@ -146,33 +175,26 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
         sourceTextScroll.apply {
             whenVisible { vvalue = 0.0 }
-
             isFitToWidth = true
-
-            maxWidthProperty().bind(
-                sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
-            )
+            nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
         }
 
         sourceText.apply {
             textProperty().bind(sourceContent.sourceTextProperty)
         }
 
-        title.apply {
-            textProperty().bind(sourceContent.contentTitleProperty)
+        licenseText.apply {
+            textProperty().bind(sourceContent.licenseTextProperty)
+            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
+                when (it) {
+                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                    else -> ""
+                }
+            })
         }
 
-        titleContainer.apply {
-            sourceContent.isMinimizedProperty.onChangeAndDoNow {
-                if (it == true) {
-                    maxWidthProperty().unbind()
-                    maxWidthProperty().set(Double.MAX_VALUE)
-                } else {
-                    maxWidthProperty().bind(
-                        sourceContent.widthProperty().divide(SCROLL_TEXT_RESIZE_RATIO)
-                    )
-                }
-            }
+        title.apply {
+            textProperty().bind(sourceContent.contentTitleProperty)
         }
 
         minimizeBtn.apply {
@@ -201,31 +223,15 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
     }
 
-    private fun togglePlayButtonIcon(isPlaying: Boolean?) {
+    /*private fun togglePlayButtonStyle(btn: Button, isPlaying: Boolean?) {
         if (isPlaying == true) {
-            playBtn.graphicProperty().set(pauseIcon)
+            btn.removeClass("btn--primary")
+            btn.addClass("btn--secondary")
         } else {
-            playBtn.graphicProperty().set(playIcon)
+            btn.removeClass("btn--secondary")
+            btn.addClass("btn--primary")
         }
-    }
-
-    private fun togglePlayButtonStyle(isPlaying: Boolean?) {
-        if (isPlaying == true) {
-            playBtn.removeClass("btn--primary")
-            playBtn.addClass("btn--secondary")
-        } else {
-            playBtn.removeClass("btn--secondary")
-            playBtn.addClass("btn--primary")
-        }
-    }
-
-    private fun togglePlayButtonText(isPlaying: Boolean?) {
-        if (isPlaying == true) {
-            playBtn.text = sourceContent.pauseLabelProperty.value
-        } else {
-            playBtn.text = sourceContent.playLabelProperty.value
-        }
-    }
+    }*/
 
     private fun loadFXML() {
         val loader = FXMLLoader(javaClass.getResource("SourceContent.fxml"))

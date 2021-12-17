@@ -1,29 +1,34 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.novoda:bintray-release:0.9.1'
-    }
-}
-
-apply plugin: 'com.novoda.bintray-release'
-
 group 'org.wycliffeassociates.otter'
 version '0.0.1'
 
 repositories {
     ivy {
-        url 'https://git.door43.org'
+        url 'https://content.bibletranslationtools.org'
         patternLayout {
             artifact '[organisation]/[module]/archive/[revision].[ext]'
         }
+        metadataSources { artifact() }
     }
     ivy {
-        url 'http://td.unfoldingword.org/exports/'
+        url 'https://td.unfoldingword.org/exports/'
         patternLayout {
             artifact '[artifact].[ext]'
         }
+        metadataSources { artifact() }
+    }
+    ivy {
+        url 'https://nightlybuilds.s3.amazonaws.com/Bible-Translation-Tools/artwork/'
+        patternLayout {
+            artifact '[artifact].[ext]'
+        }
+        metadataSources { artifact() }
+    }
+    ivy {
+        url 'https://nexus-registry.walink.org/repository/maven-releases/'
+        patternLayout {
+            artifact '[organisation]/[module]/[revision]/[artifact]-[revision].[ext]'
+        }
+        metadataSources { artifact() }
     }
 }
 
@@ -32,8 +37,11 @@ configurations {
 }
 
 dependencies {
-    content 'wycliffeassociates:en_ulb:v19-10@zip'
+    content 'bible-translation-tools:en_art_wa:2.0.0@zip'
+    content 'bible-translation-tools:en_art_sp:2.0.0@zip'
+    content 'wa-catalog:en_ulb:V21-05@zip'
     content 'unfoldingword:langnames@json'
+    content 'bible-translation-tools:bible_artwork@zip'
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation project(":common")
 
@@ -50,23 +58,9 @@ task copyToResources(type: Copy) {
             if (filename.matches(".*.json\$")) {
                 filename.replaceAll('-\\.json$', '.json')
             } else {
-                filename.replaceAll('-v\\d{2}-\\d{2}\\.zip$', '.zip')
+                filename.replaceAll('-.*.zip$', '.zip')
             }
     }
 }
 
 compileJava.dependsOn copyToResources
-
-publish {
-    def groupProjectID = 'org.wycliffeassociates.otter'
-    def artifactProjectID = 'assets'
-    def publishVersionID = "0.0.1"
-
-    userOrg = 'bible-translation-tools'
-    repoName = 'otter'
-    groupId = groupProjectID
-    artifactId = artifactProjectID
-    publishVersion = publishVersionID
-    desc = ''
-    website = 'https://github.com/Bible-Translation-Tools/otter'
-}

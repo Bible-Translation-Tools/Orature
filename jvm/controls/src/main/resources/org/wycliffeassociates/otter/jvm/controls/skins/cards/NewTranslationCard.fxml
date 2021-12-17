@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2020, 2021 Wycliffe Associates
+
+    This file is part of Orature.
+
+    Orature is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Orature is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+
+-->
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.*?>
+
+<HBox fx:id="root" styleClass="new-translation-card__root" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <HBox styleClass="new-translation-card__languages">
+            <children>
+                <Label fx:id="sourceLanguageText" graphicTextGap="8.0" styleClass="new-translation-card__language">
+                    <graphic>
+                        <FontIcon iconLiteral="gmi-hearing" />
+                    </graphic>
+                </Label>
+                <Label fx:id="divider" styleClass="new-translation-card__divider">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-menu-right" />
+                    </graphic>
+                </Label>
+                <Label fx:id="targetLanguageText" graphicTextGap="8.0" styleClass="new-translation-card__language">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-voice" />
+                    </graphic>
+                </Label>
+            </children>
+        </HBox>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button fx:id="newTranslationBtn">
+            <styleClass>
+                <String fx:value="btn" />
+                <String fx:value="btn--secondary" />
+                <String fx:value="btn--borderless" />
+            </styleClass>
+            <graphic>
+                <FontIcon iconLiteral="mdi-plus" />
+            </graphic>
+        </Button>
+    </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</HBox>

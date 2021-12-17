@@ -1,17 +1,32 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import javafx.beans.binding.BooleanBinding
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
+import java.io.File
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleStringProperty
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.common.domain.plugins.CreatePlugin
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.MainMenuViewModel
 import tornadofx.*
-import java.io.File
 import javax.inject.Inject
 
 class AddPluginViewModel : ViewModel() {
@@ -20,83 +35,74 @@ class AddPluginViewModel : ViewModel() {
 
     @Inject lateinit var pluginRepository: IAudioPluginRepository
 
-    private val mainMenuViewModel: MainMenuViewModel by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
 
-    var name: String by property("")
-    val nameProperty = getProperty(AddPluginViewModel::name)
-    var path: String by property("")
-    val pathProperty = getProperty(AddPluginViewModel::path)
-    var canEdit: Boolean by property(false)
-    val canEditProperty = getProperty(AddPluginViewModel::canEdit)
-    var canRecord: Boolean by property(false)
-    val canRecordProperty = getProperty(AddPluginViewModel::canRecord)
+    val nameProperty = SimpleStringProperty()
+    private val name by nameProperty
+    val pathProperty = SimpleStringProperty()
+    private val path by pathProperty
+    val canEditProperty = SimpleBooleanProperty()
+    private val canEdit by canEditProperty
+    val canRecordProperty = SimpleBooleanProperty()
+    private val canRecord by canRecordProperty
 
-    val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList<AudioPluginData>()
+    val validProperty = SimpleBooleanProperty(false)
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        pluginRepository
-            .getAll()
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error in getting all plugins", e)
-            }
-            .subscribe { retrieved ->
-                plugins.addAll(retrieved)
-            }
-    }
 
-    fun validateName(): ValidationMessage? {
-        return if (name.isEmpty()) validationContext.error("Name cannot be blank") else null
-    }
-
-    fun validatePath(): ValidationMessage? {
-        return when {
-            path.isEmpty() -> validationContext.error("Executable cannot be blank")
-            !File(path).exists() -> validationContext.error("Executable not found")
-            File(path).isDirectory -> validationContext.error("Executable cannot be a directory")
-            else -> null
-        }
-    }
-
-    fun validated(): BooleanBinding {
-        return nameProperty
-            .isNotBlank()
-            .and(
-                pathProperty.booleanBinding {
-                    validatePath() == null
-                }
-            )
+        validProperty.bind(
+            nameProperty.isNotEmpty
+                .and(pathProperty.isNotEmpty)
+                .and(canRecordProperty.or(canEditProperty))
+        )
     }
 
     fun save() {
         // Create the audio plugin
-        if (validateName() == null && validatePath() == null) {
-            val pluginData = AudioPluginData(
-                0,
-                name,
-                "1.0.0",
-                canEdit,
-                canRecord,
-                false,
-                path,
-                listOf(),
-                null
-            )
-            CreatePlugin(pluginRepository)
-                .create(pluginData)
-                .doOnSuccess {
-                    pluginData.id = it
-                    mainMenuViewModel.selectRecorder(pluginData)
-                    mainMenuViewModel.selectEditor(pluginData)
-                    mainMenuViewModel.refreshPlugins()
-                }
-                .doOnError { e ->
-                    logger.error("Error creating a plugin:")
-                    logger.error("Plugin name: $name, path: $path, record: $canRecord, edit: $canEdit", e)
-                }
-                .onErrorComplete()
-                .subscribe()
+        if (!validProperty.value) return
+
+        val pluginData = AudioPluginData(
+            0,
+            name,
+            "1.0.0",
+            canEdit,
+            canRecord,
+            false,
+            path,
+            listOf(),
+            null
+        )
+        CreatePlugin(pluginRepository)
+            .create(pluginData)
+            .doOnSuccess {
+                pluginData.id = it
+
+                settingsViewModel.selectRecorder(pluginData)
+                settingsViewModel.selectEditor(pluginData)
+                settingsViewModel.refreshPlugins()
+            }
+            .doOnError { e ->
+                logger.error("Error creating a plugin:")
+                logger.error("Plugin name: $name, path: $path, record: $canRecord, edit: $canEdit", e)
+            }
+            .onErrorComplete()
+            .subscribe()
+    }
+
+    /**
+     * Allows for completing the path to the plugin binary, if needed based on platform.
+     * Currently only adds the remaining path after the .app directory on MacOS.
+     */
+    fun completePluginPath(path: String): String {
+        if (File(path).isDirectory && path.matches(Regex(".*.app"))) {
+            val macPath = File(path, "Contents/MacOS/")
+            if (macPath.exists()) {
+                // This directory may have multiple files, but we can't necessarily know the binary name
+                // thus, we'll try the first, and if it's wrong, the user can edit the text after.
+                return macPath.listFiles().first().absolutePath
+            }
         }
+        return path
     }
 }

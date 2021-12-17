@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -8,20 +26,23 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.menu.viewmodel.errorMessage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -41,6 +62,9 @@ class WorkbookPageViewModel : ViewModel() {
     @Inject
     lateinit var workbookRepository: IWorkbookRepository
 
+    @Inject
+    lateinit var preferencesRepository: IAppPreferencesRepository
+
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
@@ -52,9 +76,16 @@ class WorkbookPageViewModel : ViewModel() {
     val showDeleteProgressDialogProperty = SimpleBooleanProperty(false)
     val showExportProgressDialogProperty = SimpleBooleanProperty(false)
 
+    val activeProjectTitleProperty = SimpleStringProperty()
+    val activeProjectCoverProperty = SimpleObjectProperty<File>()
+
     val selectedChapterProperty = SimpleObjectProperty<Chapter>()
     val showDeleteDialogProperty = SimpleBooleanProperty(false)
+    val showDeleteSuccessDialogProperty = SimpleBooleanProperty(false)
+    val showDeleteFailDialogProperty = SimpleBooleanProperty(false)
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
+
+    private val navigator: NavigationMediator by inject()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -102,7 +133,8 @@ class WorkbookPageViewModel : ViewModel() {
                 ChapterCardModel(
                     title = MessageFormat.format(
                         FX.messages["chapterTitle"],
-                        FX.messages["chapter"], chapter.sort
+                        FX.messages["chapter"],
+                        chapter.sort
                     ),
                     chapter = chapter,
                     onClick = { navigate(chapter) }
@@ -126,9 +158,10 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     private fun createWorkbookBanner(): WorkbookBannerModel {
+        val workbook = workbookDataStore.workbook
         return WorkbookBannerModel(
-            title = workbookDataStore.workbook.target.title,
-            coverArt = workbookDataStore.workbook.coverArtAccessor.getArtwork(),
+            title = workbook.target.title,
+            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE),
             onDelete = { showDeleteDialogProperty.set(true) },
             onExport = {
                 val directory = chooseDirectory(FX.messages["exportProject"])
@@ -141,6 +174,14 @@ class WorkbookPageViewModel : ViewModel() {
         }
     }
 
+    fun getLastResource(): String {
+        return preferencesRepository.lastResource().blockingGet()
+    }
+
+    private fun updateLastResource(resource: String) {
+        preferencesRepository.setLastResource(resource).subscribe()
+    }
+
     /**
      * Opens the next page of the workbook based on the selected chapter.
      * This updates the active properties of the WorkbookDataStore and selects
@@ -150,18 +191,25 @@ class WorkbookPageViewModel : ViewModel() {
         selectedChapterProperty.set(chapter)
         workbookDataStore.activeChapterProperty.set(chapter)
         val resourceMetadata = workbookDataStore.activeResourceMetadata
+        updateLastResource(resourceMetadata.identifier)
         when (resourceMetadata.type) {
-            ContainerType.Book, ContainerType.Bundle -> workspace.dock<ChapterPage>()
-            ContainerType.Help -> workspace.dock<ResourcePage>()
+            ContainerType.Book, ContainerType.Bundle -> navigator.dock<ChapterPage>()
+            ContainerType.Help -> navigator.dock<ResourcePage>()
         }
     }
 
     fun exportWorkbook(directory: File) {
         showExportProgressDialogProperty.set(true)
+
         val workbook = workbookDataStore.workbook
         val projectExporter = projectExporterProvider.get()
         val resourceMetadata = workbookDataStore.activeResourceMetadata
         val projectFileAccessor = workbookDataStore.activeProjectFilesAccessor
+
+        activeProjectTitleProperty.set(workbook.target.title)
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+        )
 
         projectExporter
             .export(directory, resourceMetadata, workbook, projectFileAccessor)
@@ -169,6 +217,10 @@ class WorkbookPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in exporting project for project: ${workbook.target.slug}")
                 logger.error("Project language: ${workbook.target.language.slug}, file: $directory", e)
+            }
+            .doFinally {
+                activeProjectTitleProperty.set(null)
+                activeProjectCoverProperty.set(null)
             }
             .subscribe { result: ExportResult ->
                 showExportProgressDialogProperty.set(false)
@@ -180,9 +232,15 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun deleteWorkbook() {
+        showDeleteDialogProperty.set(false)
         showDeleteProgressDialogProperty.set(true)
         val workbook = workbookDataStore.workbook
         val deleteProject = deleteProjectProvider.get()
+
+        activeProjectTitleProperty.set(workbook.target.title)
+        activeProjectCoverProperty.set(
+            workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+        )
 
         workbookRepository.closeWorkbook(workbook)
         deleteProject
@@ -191,9 +249,24 @@ class WorkbookPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in deleting project: ${workbook.target.slug} ${workbook.target.language.slug}", e)
             }
-            .subscribe {
+            .doFinally {
+                activeProjectTitleProperty.set(null)
+                activeProjectCoverProperty.set(null)
                 showDeleteProgressDialogProperty.set(false)
-                workspace.navigateBack()
             }
+            .subscribe(
+                {
+                    showDeleteSuccessDialogProperty.set(true)
+                    preferencesRepository.setResumeProjectId(NO_RESUMABLE_PROJECT).subscribe()
+                },
+                {
+                    showDeleteFailDialogProperty.set(true)
+                }
+            )
+    }
+
+    fun goBack() {
+        showDeleteSuccessDialogProperty.set(false)
+        navigator.back()
     }
 }

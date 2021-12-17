@@ -1,21 +1,37 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.card.card
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
@@ -28,7 +44,6 @@ class BookPage : Fragment() {
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
 
     override val root = JFXTabPane().apply {
-        importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
@@ -38,9 +53,9 @@ class BookPage : Fragment() {
         // Using a size property binding and toggleClass() did not work consistently. This does.
         tabs.onChange {
             if (it.list.size == 1) {
-                addClass(MainScreenStyles.singleTab)
+                addClass("singleTab")
             } else {
-                removeClass(MainScreenStyles.singleTab)
+                removeClass("singleTab")
             }
         }
     }
@@ -143,9 +158,12 @@ class BookPage : Fragment() {
                             }
                             cardbutton {
                                 addClass(DefaultStyles.defaultCardButton)
-                                text = messages["openProject"]
-                                graphic = MaterialIconView(MaterialIcon.ARROW_FORWARD, "25px")
-                                    .apply { fill = AppTheme.colors.appRed }
+                                text = messages["open"]
+                                graphic = FontIcon("gmi-arrow-forward")
+                                    .apply {
+                                        iconSize = 25
+                                        iconColor = AppTheme.colors.appRed
+                                    }
                                 onMousePressed = EventHandler {
                                     workbookDataStore.activeChapterProperty.set(item.chapterSource)
                                     viewModel.navigate(workbookDataStore.activeResourceMetadata)

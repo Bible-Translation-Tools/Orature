@@ -1,9 +1,28 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -11,6 +30,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Take
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
@@ -32,6 +52,7 @@ import org.wycliffeassociates.resourcecontainer.entity.Source
 import java.io.File
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -63,6 +84,16 @@ class ProjectImporter @Inject constructor(
             hasInProgressMarker(resourceContainer)
         } catch (e: IOException) {
             false
+        }
+    }
+
+    fun getSourceMetadata(resourceContainer: File): Maybe<ResourceMetadata> {
+        return Maybe.fromCallable {
+            val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
+            val manifestSources = manifest.dublinCore.source.toSet()
+            val manifestProject = manifest.projects.single()
+            val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+            sourceCollection.resourceContainer
         }
     }
 
@@ -112,6 +143,8 @@ class ProjectImporter @Inject constructor(
         val sourceCollection = findSourceCollection(manifestSources, manifestProject)
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
+
+        createTranslation(sourceMetadata.language, metadata.language)
 
         val projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
@@ -236,7 +269,10 @@ class ProjectImporter @Inject constructor(
     private fun importSources(fileReader: IFileReader) {
         val sourceFiles: Sequence<String> = fileReader
             .list(RcConstants.SOURCE_DIR)
-            .filter { it.endsWith(".zip", ignoreCase = true) }
+            .filter {
+                val ext = it.substringAfterLast(".")
+                OratureFileFormat.isSupported(ext)
+            }
 
         val firstTry: Map<String, ImportResult> = sourceFiles
             .map { importSource(it, fileReader) }
@@ -257,6 +293,17 @@ class ProjectImporter @Inject constructor(
             .blockingGet()
         log.debug("Import source resource container {} result {}", name, result)
         return fileInZip to result
+    }
+
+    private fun createTranslation(sourceLanguage: Language, targetLanguage: Language) {
+        val translation = Translation(sourceLanguage, targetLanguage, LocalDateTime.now())
+        languageRepository
+            .insertTranslation(translation)
+            .doOnError { e ->
+                log.error("Error in inserting translation", e)
+            }
+            .onErrorReturnItem(0)
+            .blockingGet()
     }
 
     private fun getContent(sig: ContentSignature, project: Collection, metadata: ResourceMetadata): Content? {

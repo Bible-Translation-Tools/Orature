@@ -1,0 +1,64 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.translation-card__root {
+    -fx-max-width: 800px;
+    -fx-spacing: 10px;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 15px;
+    -fx-effect: -wa-card-shadow-lower-right;
+}
+
+.translation-card__root .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.translation-card__header {
+    -fx-spacing: 15px;
+    -fx-padding: 15px;
+    -fx-alignment: center-left;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-color: -wa-border-light;
+}
+
+.translation-card__header .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+}
+
+.translation-card__language {
+    -fx-font-size: 20px;
+}
+
+.translation-card__language .ikonli-font-icon {
+    -fx-font-size: 24px;
+}
+
+.translation-card__divider .ikonli-font-icon {
+    -fx-font-size: 20px;
+}
+
+.translation-card__book--no-bg:hover,
+.translation-card__book--no-bg:pressed {
+    -fx-background-color: transparent !important;
+}
+
+.translation-card__see-more-content {
+    -fx-alignment: center;
+    -fx-padding: 20px;
+}

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
@@ -34,24 +52,25 @@ class TestProjectImport {
         "",
         "ulb",
         LocalDate.now(),
-        Language("en", "", "", "", true),
+        Language("en", "", "", "", true, ""),
         LocalDate.now(),
         "",
         "",
         ContainerType.Book,
         "",
         "12",
+        "",
         File(".")
     )
 
     private val ulbTargetMetadata = sourceMetadata.copy(
         creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true)
+        language = Language("en-x-demo1", "", "", "", true, "Europe")
     )
 
     private val tnTargetMetadata = sourceMetadata.copy(
         creator = "Orature",
-        language = Language("en-x-demo1", "", "", "", true),
+        language = Language("en-x-demo1", "", "", "", true, "Europe"),
         identifier = "tn",
         version = "11",
         type = ContainerType.Help

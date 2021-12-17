@@ -1,10 +1,29 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
-import com.jfoenix.controls.JFXButton
+import com.jfoenix.controls.JFXProgressBar
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.ReadOnlyDoubleProperty
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
@@ -22,30 +41,26 @@ import javafx.scene.layout.BackgroundRepeat
 import javafx.scene.layout.BackgroundSize
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
-import javafx.stage.Modality
-import javafx.stage.StageStyle
 import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 
-class ConfirmDialog : Fragment() {
+class ConfirmDialog : OtterDialog() {
 
     val titleTextProperty = SimpleStringProperty()
     val messageTextProperty = SimpleStringProperty()
     val backgroundImageFileProperty = SimpleObjectProperty<File>()
     val confirmButtonTextProperty = SimpleStringProperty()
     val cancelButtonTextProperty = SimpleStringProperty()
+    val progressTitleProperty = SimpleStringProperty()
+    val showProgressBarProperty = SimpleBooleanProperty()
 
     private val onCloseActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onCancelActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onConfirmActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    init {
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
-    }
-
-    override val root = vbox {
+    private val content = vbox {
         addClass("confirm-dialog")
 
         stackpane {
@@ -71,13 +86,13 @@ class ConfirmDialog : Fragment() {
                 region {
                     hgrow = Priority.ALWAYS
                 }
-                add(
-                    JFXButton().apply {
-                        addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
-                        graphic = FontIcon("gmi-close")
-                        onActionProperty().bind(onCloseActionProperty())
-                    }
-                )
+                button {
+                    addClass("btn", "btn--secondary", "confirm-dialog__btn--close")
+                    tooltip(messages["close"])
+                    graphic = FontIcon("gmi-close")
+                    onActionProperty().bind(onCloseActionProperty())
+                    visibleProperty().bind(onCloseActionProperty().isNotNull)
+                }
             }
         }
         hbox {
@@ -88,36 +103,55 @@ class ConfirmDialog : Fragment() {
                 addClass("confirm-dialog__message")
             }
         }
+        vbox {
+            addClass("confirm-dialog__progress")
+            add(
+                JFXProgressBar().apply {
+                    prefWidthProperty().bind(this@vbox.widthProperty())
+                }
+            )
+            label(progressTitleProperty).apply {
+                addClass("confirm-dialog__progress-title")
+            }
+            visibleProperty().bind(showProgressBarProperty)
+            managedProperty().bind(visibleProperty())
+        }
         hbox {
             addClass("confirm-dialog__footer")
 
-            add(
-                JFXButton().apply {
-                    addClass("btn", "btn--primary", "confirm-dialog__btn--cancel")
-                    graphic = FontIcon("gmi-close")
-                    textProperty().bind(cancelButtonTextProperty)
-                    onActionProperty().bind(onCancelActionProperty())
-                }
-            )
+            button(cancelButtonTextProperty) {
+                addClass("btn", "btn--primary")
+                tooltip { textProperty().bind(this@button.textProperty()) }
+                graphic = FontIcon("gmi-close")
+                onActionProperty().bind(onCancelActionProperty())
+                visibleProperty().bind(onCancelActionProperty.isNotNull)
+                managedProperty().bind(visibleProperty())
+            }
 
             region {
                 addClass("confirm-dialog__footer-spacer")
                 hgrow = Priority.ALWAYS
+                managedProperty().bind(onCancelActionProperty.isNotNull)
             }
 
-            add(
-                JFXButton().apply {
-                    addClass("btn", "btn--secondary", "confirm-dialog__btn--confirm")
-                    graphic = FontIcon("gmi-remove")
-                    textProperty().bind(confirmButtonTextProperty)
-                    onActionProperty().bind(onConfirmActionProperty())
-                }
+            button(confirmButtonTextProperty) {
+                addClass("btn", "btn--secondary", "btn--borderless")
+                tooltip { textProperty().bind(this@button.textProperty()) }
+                graphic = FontIcon("gmi-remove")
+                onActionProperty().bind(onConfirmActionProperty())
+                visibleProperty().bind(onConfirmActionProperty.isNotNull)
+                managedProperty().bind(visibleProperty())
+            }
+
+            visibleProperty().bind(
+                onCancelActionProperty.isNotNull.or(onConfirmActionProperty.isNotNull)
             )
+            managedProperty().bind(visibleProperty())
         }
     }
 
-    fun open() {
-        openModal(StageStyle.UNDECORATED, Modality.APPLICATION_MODAL, false)
+    init {
+        setContent(content)
     }
 
     private fun backgroundBinding(): ObjectBinding<Background?> {
@@ -171,14 +205,14 @@ class ConfirmDialog : Fragment() {
             1.0,
             true,
             true,
-            false,
-            true
+            true,
+            false
         )
         return BackgroundImage(
             image,
             BackgroundRepeat.NO_REPEAT,
             BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
+            BackgroundPosition.CENTER,
             backgroundSize
         )
     }

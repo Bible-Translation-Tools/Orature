@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.persistence
 
 import java.io.File
@@ -13,11 +31,11 @@ import org.wycliffeassociates.otter.common.data.primitives.Take
 
 object TestDataStore {
     val languages = listOf(
-            Language("ar", "العَرَبِيَّة", "Arabic", "rtl", true),
-            Language("en", "English", "English", "ltr", true),
-            Language("atj", "Atikamekw", "Atikamekw", "ltr", false),
-            Language("bbs", "Bakpinka", "Bakpinka", "ltr", false),
-            Language("nfl", "Äiwoo", "Ayiwo", "ltr", false)
+            Language("ar", "العَرَبِيَّة", "Arabic", "rtl", true, "Africa"),
+            Language("en", "English", "English", "ltr", true, "Africa"),
+            Language("atj", "Atikamekw", "Atikamekw", "ltr", false, "Africa"),
+            Language("bbs", "Bakpinka", "Bakpinka", "ltr", false, "Africa"),
+            Language("nfl", "Äiwoo", "Ayiwo", "ltr", false, "Africa")
     )
     val resourceContainers = listOf(
             ResourceMetadata(
@@ -34,6 +52,7 @@ object TestDataStore {
                     ContainerType.Book,
                     "Unlocked Literal Bible",
                     "3",
+                    "",
                     File("/path/to/my/container")
             ),
             ResourceMetadata(
@@ -50,6 +69,7 @@ object TestDataStore {
                     ContainerType.Book,
                     "The Lord of the Rings",
                     "1",
+                    "",
                     File("/path/to/my/amazing/esource")
             )
     )

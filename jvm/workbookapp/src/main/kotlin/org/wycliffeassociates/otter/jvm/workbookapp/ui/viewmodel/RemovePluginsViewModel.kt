@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -17,6 +35,8 @@ class RemovePluginsViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(RemovePluginsViewModel::class.java)
 
     @Inject lateinit var pluginRepository: IAudioPluginRepository
+
+    private val settingsViewModel: SettingsViewModel by inject()
 
     val plugins: ObservableList<AudioPluginData> = FXCollections.observableArrayList()
     val noPluginsProperty: ReadOnlyBooleanProperty
@@ -42,6 +62,9 @@ class RemovePluginsViewModel : ViewModel() {
 
     fun remove(plugin: AudioPluginData) {
         plugins.remove(plugin)
-        pluginRepository.delete(plugin).subscribe()
+        pluginRepository.delete(plugin).subscribe {
+            settingsViewModel.refreshPlugins()
+        }
+
     }
 }

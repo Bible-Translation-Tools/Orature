@@ -1,23 +1,46 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.audio.wav
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
 import java.io.FileInputStream
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
 class WavIOTest {
     private val testCues = listOf(
-        WavCue(123_943_347, "marker 1"),
-        WavCue(200_000_000, "marker 2"),
-        WavCue(300_000_000, "marker 3 ")
+        AudioCue(123_943_347, "marker 1"),
+        AudioCue(200_000_000, "marker 2"),
+        AudioCue(300_000_000, "marker 3 ")
     )
 
-    private fun writeDataToFile(file: File, samplesToWrite: Int, cues: List<WavCue>): WavFile {
+    private fun writeDataToFile(file: File, samplesToWrite: Int, cues: List<AudioCue>): WavFile {
         val wav = WavFile(
             file,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
         for (cue in cues) {
             wav.metadata.addCue(cue.location, cue.label)
@@ -96,13 +119,15 @@ class WavIOTest {
             temp,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
         val wav2 = WavFile(
             temp2,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
 
         val audioSamples = 700_000
@@ -148,13 +173,15 @@ class WavIOTest {
             temp,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
         val wav2 = WavFile(
             temp2,
             DEFAULT_CHANNELS,
             DEFAULT_SAMPLE_RATE,
-            DEFAULT_BITS_PER_SAMPLE
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
         )
 
         val audioSamples = 700_000

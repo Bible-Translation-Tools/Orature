@@ -1,0 +1,84 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.add-plugin-dialog {
+    -fx-background-color: -wa-dialog-background;
+    -fx-pref-width: 600px;
+    -fx-padding: 15px;
+    -fx-spacing: 20px;
+}
+
+.add-plugin-dialog__header {
+    -fx-alignment: center;
+}
+
+.add-plugin-dialog__title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-highlight-text;
+}
+
+.add-plugin-dialog__btn--close {
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-border-color: -wa-border-neutral;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -jfx-disable-visual-focus: true;
+}
+
+.add-plugin-dialog__btn--close:hover {
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.add-plugin-dialog__btn--close .ikonli-font-icon {
+    -fx-icon-size: 24px;
+    -fx-fill: -wa-fill-neutral;
+}
+
+.add-plugin-dialog__info .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.add-plugin-dialog__subtitle {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.add-plugin-dialog__text {
+    -fx-font-size: 18px;
+}
+
+.add-plugin-dialog__inputs {
+    -fx-spacing: 10px;
+}
+
+.add-plugin-dialog__label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.add-plugin-dialog__bottom-controls {
+    -fx-spacing: 10px;
+}
+
+.add-plugin-dialog__checkboxes {
+    -fx-spacing: 15px;
+}

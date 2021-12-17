@@ -1,23 +1,46 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
+import javafx.beans.value.ChangeListener
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
-import org.wycliffeassociates.otter.jvm.controls.dialog.progressdialog
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.MainScreenStyles
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
 import java.text.MessageFormat
@@ -34,14 +57,36 @@ import java.text.MessageFormat
  * This page contains a tab for each resource in the workbook. If the workbook only contains the book
  * itself, then no tabs will be shown.
  */
-class WorkbookPage : Fragment() {
+class WorkbookPage : View() {
     private val viewModel: WorkbookPageViewModel by inject()
     private val tabMap: MutableMap<String, Tab> = mutableMapOf()
+    private val navigator: NavigationMediator by inject()
+    private val workbookDataStore: WorkbookDataStore by inject()
+    private val settingsViewModel: SettingsViewModel by inject()
+
+    private var deleteListener: ChangeListener<Boolean>? = null
+    private var deleteProgressListener: ChangeListener<Boolean>? = null
+    private var deleteSuccessListener: ChangeListener<Boolean>? = null
+    private var deleteFailListener: ChangeListener<Boolean>? = null
+    private var exportProgressListener: ChangeListener<Boolean>? = null
+
+    private val breadCrumb = BreadCrumb().apply {
+        titleProperty.bind(
+            workbookDataStore.activeWorkbookProperty.stringBinding {
+                it?.target?.title
+            }
+        )
+        iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
+        onClickAction {
+            navigator.dock(this@WorkbookPage)
+        }
+    }
 
     init {
-        initializeProgressDialogs()
-        initializeDeleteConfirmDialog()
         importStylesheet(resources.get("/css/workbook-page.css"))
+        importStylesheet(resources.get("/css/chapter-card.css"))
+        importStylesheet(resources.get("/css/workbook-banner.css"))
+        importStylesheet(resources.get("/css/confirm-dialog.css"))
     }
 
     /**
@@ -53,6 +98,15 @@ class WorkbookPage : Fragment() {
         viewModel.openWorkbook()
         createTabs()
         root.tabs.setAll(tabMap.values)
+        viewModel.workbookDataStore.activeChunkProperty.set(null)
+        viewModel.workbookDataStore.activeResourceComponentProperty.set(null)
+        viewModel.workbookDataStore.activeResourceProperty.set(null)
+        navigator.dock(this, breadCrumb)
+        selectLastResourceTab()
+        initializeProgressDialogs()
+        initializeDeleteConfirmDialog()
+        initializeDeleteSuccessDialog()
+        initializeDeleteFailDialog()
     }
 
     /**
@@ -60,6 +114,7 @@ class WorkbookPage : Fragment() {
      */
     override fun onUndock() {
         tabMap.clear()
+        removeDialogListeners()
     }
 
     private fun createTabs() {
@@ -68,17 +123,26 @@ class WorkbookPage : Fragment() {
         }
     }
 
+    private fun selectLastResourceTab() {
+        val lastResource = viewModel.getLastResource()
+        tabMap.map {
+            val tab = (it.value as? WorkbookResourceTab)
+            if (tab?.resourceMetadata?.identifier == lastResource) {
+                tab.select()
+            }
+        }
+    }
+
     override val root = JFXTabPane().apply {
         importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
-        importStylesheet<MainScreenStyles>()
         importStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
         tabs.onChange {
             when (it.list.size) {
-                1 -> addClass(MainScreenStyles.singleTab)
-                else -> removeClass(MainScreenStyles.singleTab)
+                1 -> addClass("singleTab")
+                else -> removeClass("singleTab")
             }
         }
     }
@@ -88,54 +152,160 @@ class WorkbookPage : Fragment() {
             messageTextProperty.set(messages["deleteProjectConfirmation"])
             confirmButtonTextProperty.set(messages["removeProject"])
             cancelButtonTextProperty.set(messages["keepProject"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
                 messages["removeProjectTitle"],
-                messages["remove"],
+                messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
 
             titleTextProperty.set(titleText)
             backgroundImageFileProperty.set(
-                viewModel.workbookDataStore.workbook.coverArtAccessor.getArtwork()
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
             )
 
             onConfirmAction {
-                viewModel.showDeleteDialogProperty.set(false)
                 viewModel.deleteWorkbook()
             }
 
-            viewModel.showDeleteDialogProperty.onChange {
-                if (it) open() else close()
+            deleteListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
             }
+            viewModel.showDeleteDialogProperty.addListener(deleteListener)
 
             onCloseAction { viewModel.showDeleteDialogProperty.set(false) }
             onCancelAction { viewModel.showDeleteDialogProperty.set(false) }
         }
     }
 
-    private fun initializeProgressDialogs() {
-        progressdialog {
-            viewModel.showDeleteProgressDialogProperty.onChange {
-                if (it) {
-                    text = messages["deletingProject"]
-                    graphic = FontIcon("mdi-delete")
-                    open()
-                } else {
-                    close()
-                }
-            }
+    private fun initializeDeleteSuccessDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectSuccess"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["goHome"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
-            viewModel.showExportProgressDialogProperty.onChange {
-                if (it) {
-                    text = messages["exportProject"]
-                    graphic = FontIcon("mdi-share-variant")
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["delete"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+            )
+
+            deleteSuccessListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
+            }
+            viewModel.showDeleteSuccessDialogProperty.addListener(deleteSuccessListener)
+
+            onCloseAction { viewModel.goBack() }
+            onCancelAction { viewModel.goBack() }
+        }
+    }
+
+    private fun initializeDeleteFailDialog() {
+        confirmdialog {
+            messageTextProperty.set(messages["deleteProjectFail"])
+            confirmButtonTextProperty.set(messages["removeProject"])
+            cancelButtonTextProperty.set(messages["close"])
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
+
+            val titleText = MessageFormat.format(
+                messages["removeProjectTitle"],
+                messages["delete"],
+                viewModel.workbookDataStore.workbook.target.title
+            )
+
+            titleTextProperty.set(titleText)
+            backgroundImageFileProperty.set(
+                viewModel.workbookDataStore.workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)?.file
+            )
+
+            deleteFailListener = ChangeListener { _, _, new ->
+                if (new) open() else close()
+            }
+            viewModel.showDeleteFailDialogProperty.addListener(deleteFailListener)
+
+            onCloseAction { viewModel.showDeleteFailDialogProperty.set(false) }
+            onCancelAction { viewModel.showDeleteFailDialogProperty.set(false) }
+        }
+    }
+
+    private fun initializeProgressDialogs() {
+        confirmdialog {
+            deleteProgressListener = ChangeListener { _, _, value ->
+                if (value) {
+                    titleTextProperty.bind(
+                        viewModel.activeProjectTitleProperty.stringBinding {
+                            it?.let {
+                                MessageFormat.format(
+                                    messages["deleteProjectTitle"],
+                                    messages["delete"],
+                                    it
+                                )
+                            }
+                        }
+                    )
+                    messageTextProperty.set(messages["deleteProjectMessage"])
+                    backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {
                     close()
                 }
             }
+            viewModel.showDeleteProgressDialogProperty.addListener(deleteProgressListener)
+
+            exportProgressListener = ChangeListener { _, _, value ->
+                if (value) {
+                    titleTextProperty.bind(
+                        viewModel.activeProjectTitleProperty.stringBinding {
+                            it?.let {
+                                MessageFormat.format(
+                                    messages["exportProjectTitle"],
+                                    messages["export"],
+                                    it
+                                )
+                            }
+                        }
+                    )
+
+                    viewModel.activeProjectTitleProperty.stringBinding {
+                        it?.let {
+                            MessageFormat.format(
+                                messages["exportProjectMessage"],
+                                it
+                            )
+                        }
+                    }.onChangeAndDoNow { messageTextProperty.set(it) }
+                    
+                    backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
+                    open()
+                } else {
+                    close()
+                }
+            }
+            viewModel.showExportProgressDialogProperty.addListener(exportProgressListener)
+
+            progressTitleProperty.set(messages["pleaseWait"])
+            showProgressBarProperty.set(true)
+            orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
         }
+    }
+
+    private fun removeDialogListeners() {
+        viewModel.showDeleteDialogProperty.removeListener(deleteListener)
+        viewModel.showDeleteProgressDialogProperty.removeListener(deleteProgressListener)
+        viewModel.showDeleteFailDialogProperty.removeListener(deleteFailListener)
+        viewModel.showDeleteSuccessDialogProperty.removeListener(deleteSuccessListener)
+        viewModel.showExportProgressDialogProperty.removeListener(exportProgressListener)
     }
 
     /**

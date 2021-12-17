@@ -1,0 +1,51 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.translation-wizard__root {
+    -fx-pref-width: 800px;
+    -fx-padding: 40px 10px 0 30px;
+    -fx-background-color: -wa-background;
+    -fx-spacing: 30px;
+}
+
+.translation-wizard__title {
+    -fx-font-size: 36px;
+}
+
+.translation-wizard__list {
+    -fx-background-color: -wa-transparent;
+}
+
+.translation-wizard__root .filtered-search-bar {
+    -fx-max-width: 800px;
+}
+
+.translation-wizard__list .list-cell {
+    -fx-background-color: -wa-transparent;
+    -fx-padding: 5px 0;
+}
+
+.translation-wizard__title,
+.translation-wizard__list .list-cell .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.translation-wizard__root .list-cell .language-card-cell {
+    -fx-max-width: 800px;
+}

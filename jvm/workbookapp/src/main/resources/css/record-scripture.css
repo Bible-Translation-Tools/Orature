@@ -1,0 +1,58 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.card--container-dragover {
+    -fx-background-color: -wa-drag-drop-target-overlay;
+    -fx-border-width: 2px;
+    -fx-border-color: -wa-primary;
+    -fx-border-style: segments(10, 15, 15, 15)  line-cap round;
+}
+
+.record-scripture__right {
+    -fx-spacing: 15px;
+    -fx-padding: 30px;
+    -fx-alignment: top-center;
+    -fx-background-color: -wa-background;
+}
+
+.record-scripture__navigate-buttons {
+    -fx-spacing: 30px;
+    -fx-alignment: center;
+}
+
+.record-scripture__book-info {
+    -fx-alignment: center;
+}
+
+.record-scripture__book-info .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.record-scripture__book-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.record-scripture__chunk-title {
+    -fx-font-size: 36px;
+}
+
+.wa-list-view .cell {
+    -fx-padding: 15px 1px 0 1px;
+}

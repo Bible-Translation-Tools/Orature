@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
 import org.wycliffeassociates.otter.common.collections.OtterTree
@@ -167,9 +185,14 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         return contents.filterNot { it.text.isNullOrEmpty() }
     }
 
-    private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> =
-        this.filterPreserveParents { it.isFile && extensions.matches(it.name) }
-            ?: throw ImportException(ImportResult.LOAD_RC_ERROR) // No markdown found
+    private fun OtterTree<OtterFile>.filterMarkdownFiles(): OtterTree<OtterFile> {
+        val filtered = this.filterPreserveParents {
+            it.isFile && extensions.matches(it.name)
+        }
+        if (filtered != null) {
+            return filtered
+        } else throw ImportException(ImportResult.LOAD_RC_ERROR) // No markdown found
+    }
 
     /** Expand any list values to be individual tree nodes. */
     private fun OtterTree<Contents>.flattenContent(): OtterTree<CollectionOrContent> =
@@ -209,8 +232,8 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
             content(
                 type = ContentType.META,
                 index = 0,
-                start = contents.map { it.start }.min() ?: 0,
-                end = contents.map { it.end }.max() ?: 0
+                start = contents.map { it.start }.minOrNull() ?: 0,
+                end = contents.map { it.end }.maxOrNull() ?: 0
             )
         )
     }

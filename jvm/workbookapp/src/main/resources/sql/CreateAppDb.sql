@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS language_entity (
   name          TEXT NOT NULL,
   gateway       INTEGER DEFAULT 0 NOT NULL,
   anglicized    TEXT NOT NULL,
-  direction     TEXT NOT NULL
+  direction     TEXT NOT NULL,
+  region        TEXT
 );
 
 CREATE TABLE IF NOT EXISTS dublin_core_entity (
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS dublin_core_entity (
     type        TEXT NOT NULL,
     title       TEXT NOT NULL,
     version     TEXT NOT NULL,
+    license     TEXT NOT NULL,
     path        TEXT NOT NULL,
     derivedFrom_fk INTEGER REFERENCES dublin_core_entity(id),
     UNIQUE (language_fk, identifier, version, creator, derivedFrom_fk)
@@ -43,6 +45,7 @@ CREATE TABLE IF NOT EXISTS collection_entity (
     slug            TEXT NOT NULL,
     sort            INTEGER NOT NULL,
     dublin_core_fk  INTEGER NOT NULL REFERENCES dublin_core_entity(id),
+    modified_ts     TEXT DEFAULT NULL,
     UNIQUE (slug, dublin_core_fk, label)
 );
 
@@ -134,4 +137,12 @@ CREATE TABLE IF NOT EXISTS preferences (
 CREATE TABLE IF NOT EXISTS installed_entity (
     name                TEXT PRIMARY KEY NOT NULL,
     version             INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS translation_entity (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
+    target_fk        INTEGER NOT NULL REFERENCES language_entity(id) ON DELETE CASCADE,
+    modified_ts      TEXT DEFAULT NULL,
+    UNIQUE (source_fk, target_fk)
 );

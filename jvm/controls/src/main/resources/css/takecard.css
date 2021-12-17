@@ -1,0 +1,45 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.card--take--new {
+    -fx-background-color: -wa-primary-gradient;
+    -fx-background-radius: 6px;
+    -fx-alignment: center;
+    -fx-pref-height: 128px;
+    -fx-min-height: 128px;
+}
+
+.card--take__placeholder {
+    -fx-background-color: wa-card-drag-drop-placeholder;
+    -fx-background-radius: 10px;
+}
+
+.card--take__add .ikonli-font-icon {
+    -fx-font-size: 30px;
+    -fx-fill: -wa-primary;
+}
+
+.card--take__dragtarget-overlay {
+    -fx-background-color: -wa-white-60;
+    -fx-background-radius: 10px;
+}
+
+.card--take__border-glow {
+    -fx-effect: dropshadow(gaussian, -wa-primary, 10, 0, 5, 5);
+}

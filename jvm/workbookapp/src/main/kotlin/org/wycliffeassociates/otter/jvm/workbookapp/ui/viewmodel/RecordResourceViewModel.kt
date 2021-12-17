@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
@@ -7,19 +25,19 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import javafx.collections.ObservableList
-import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import org.wycliffeassociates.otter.common.domain.content.Recordable
-import org.wycliffeassociates.otter.jvm.utils.getNotNull
-import java.util.EnumMap
 import javafx.collections.ListChangeListener
+import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import tornadofx.*
+import java.util.*
 
 class RecordResourceViewModel : ViewModel() {
 
@@ -33,13 +51,13 @@ class RecordResourceViewModel : ViewModel() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val resourceListViewModel: ResourceListViewModel by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
-    val recordableViewModel = RecordableViewModel(audioPluginViewModel)
+    private val recordableViewModel = RecordableViewModel(audioPluginViewModel)
 
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
-    private val activeChunk: Chunk by activeChunkProperty
+    private val activeChunk: Chunk? by activeChunkProperty
 
     private val activeResourceProperty = SimpleObjectProperty<Resource>()
-    private val activeResource: Resource by activeResourceProperty
+    private val activeResource: Resource? by activeResourceProperty
 
     private val resourceList: ObservableList<Resource> = observableListOf()
 
@@ -95,9 +113,7 @@ class RecordResourceViewModel : ViewModel() {
 
         workbookDataStore.activeResourceProperty.onChangeAndDoNow {
             activeResourceProperty.set(it)
-            if (it != null) {
-                setHasNextAndPrevious()
-            }
+            setHasNextAndPrevious()
         }
     }
 
@@ -222,17 +238,17 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     private fun nextResource(): Resource? {
-        var currentResourceIndex = resourceList.indexOf(activeResource)
+        val currentResourceIndex = resourceList.indexOf(activeResource)
         return resourceList.getOrNull(currentResourceIndex + 1)
     }
 
     private fun previousResource(): Resource? {
-        var currentResourceIndex = resourceList.indexOf(activeResource)
+        val currentResourceIndex = resourceList.indexOf(activeResource)
         return resourceList.getOrNull(currentResourceIndex - 1)
     }
 
     private fun nextGroupCardItem(): ResourceGroupCardItem? {
-        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+        val currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
             resourceListViewModel.selectedGroupCardItem.get()
         )
         return resourceListViewModel.resourceGroupCardItemList.getOrNull(
@@ -241,7 +257,7 @@ class RecordResourceViewModel : ViewModel() {
     }
 
     private fun previousGroupCardItem(): ResourceGroupCardItem? {
-        var currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
+        val currentGroupCardItemIndex = resourceListViewModel.resourceGroupCardItemList.indexOf(
             resourceListViewModel.selectedGroupCardItem.get()
         )
         return resourceListViewModel.resourceGroupCardItemList.getOrNull(

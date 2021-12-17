@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.ReplayRelay
@@ -8,8 +26,6 @@ import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Observable
 import java.io.File
 import java.time.LocalDate
-import javafx.scene.Parent
-import javafx.scene.layout.Region
 import org.junit.Assert
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -24,16 +40,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
-import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
-
-private class TestView(override val root: Parent = Region()) : Fragment()
-
-private class TestApp : App(TestView::class), IDependencyGraphProvider {
-    override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
-}
 
 class ResourceListViewModelTest : ViewModel() {
 
@@ -49,7 +56,14 @@ class ResourceListViewModelTest : ViewModel() {
         recordResourceViewModel = find()
     }
 
-    private val english = Language("en", "English", "English", "ltr", isGateway = true)
+    private val english = Language(
+        "en",
+        "English",
+        "English",
+        "ltr",
+        isGateway = true,
+        region = "Europe"
+    )
     private val resourceMetadataTn = ResourceMetadata(
         conformsTo = "rc0.2",
         creator = "Door43 World Missions Community",
@@ -64,6 +78,7 @@ class ResourceListViewModelTest : ViewModel() {
         type = ContainerType.Help,
         title = "translationNotes",
         version = "1",
+        license = "",
         path = File(".")
     )
 

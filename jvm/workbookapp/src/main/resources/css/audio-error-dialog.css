@@ -1,0 +1,114 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.audio-error-dialog {
+    -fx-pref-width: 480px;
+    -fx-background-color: -wa-background;
+}
+
+.audio-error-dialog__header {
+    -fx-pref-height: 240px;
+}
+
+.audio-error-dialog__title-bar {
+    -fx-alignment: center-left;
+    -fx-padding: 15px;
+}
+
+.audio-error-dialog__title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.audio-error-dialog__subtitle {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.audio-error-dialog__body {
+    -fx-padding: 15px;
+    -fx-text-alignment: justify;
+    -fx-min-height: 100px;
+}
+
+.audio-error-dialog__message {
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 18px;
+    -fx-wrap-text: true;
+}
+
+.audio-error-dialog__progress {
+    -fx-alignment: center-left;
+    -fx-padding: 20px;
+    -fx-spacing: 6px;
+}
+
+.audio-error-dialog__progress .progress-bar {
+    -fx-pref-height: 8px;
+}
+
+.audio-error-dialog__progress .progress-bar .bar {
+    -fx-background-radius: 6px;
+    -fx-background-color: -wa-primary;
+}
+
+.audio-error-dialog__progress .progress-bar .track {
+    -fx-background-color: -wa-slider-track-color;
+    -fx-background-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-slider-border-color;
+}
+
+.audio-error-dialog__progress-title {
+    -fx-font-size: 16px;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.audio-error-dialog__footer {
+    -fx-padding: 20px 15px;
+    -fx-border-width: 2px 0 0 0;
+    -fx-border-color: -wa-border-neutral;
+    -fx-spacing: 10px;
+}
+
+.audio-error-dialog__btn--close,
+.audio-error-dialog__btn--close:hover,
+.audio-error-dialog__btn--close:pressed {
+    -fx-border-color: -wa-border-neutral;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+}
+
+.audio-error-dialog__btn--close:hover {
+    -fx-background-color: -wa-foreground-hover;
+}
+
+.audio-error-dialog__btn--close .ikonli-font-icon,
+.audio-error-dialog__btn--close:hover .ikonli-font-icon,
+.audio-error-dialog__btn--close:pressed .ikonli-font-icon {
+    -fx-icon-size: 18px;
+    -fx-fill: -wa-fill-neutral;
+}
+
+.audio-error-dialog__footer-spacer {
+    -fx-max-width: 20px;
+}

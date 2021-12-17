@@ -1,5 +1,25 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package integrationtest.projects
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import jooq.Tables.CONTENT_DERIVATIVE
 import org.junit.Assert
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -88,6 +108,26 @@ class DatabaseEnvironment @Inject constructor(
         return this
     }
 
+    fun assertChapters(
+        rcSlug: String,
+        vararg chapter: ChapterVerse
+    ): DatabaseEnvironment {
+        val rc = db.resourceMetadataDao.fetchAll().firstOrNull { it.identifier == rcSlug }
+        Assert.assertNotNull("Retrieving resource container info", rc)
+
+        chapter.forEach { (slug, verseCount) ->
+            val entity = db.collectionDao.fetch(containerId = rc!!.id, label = "chapter", slug = slug)
+            Assert.assertNotNull("Retrieving chapter $slug", entity)
+            val content = db.contentDao.fetchByCollectionId(entity!!.id)
+            val verses = content.filter { it.type_fk == 1 }.count()
+            val meta = content.filter { it.type_fk == 2 }.count()
+            Assert.assertEquals("Verses for $slug", verseCount, verses)
+            Assert.assertEquals("Meta for $slug", 1, meta)
+        }
+
+        return this
+    }
+
     private fun setUpDatabase() {
         val langNames = ClassLoader.getSystemResourceAsStream("content/langnames.json")!!
         importLanguagesProvider.get()
@@ -124,4 +164,10 @@ class DatabaseEnvironment @Inject constructor(
 data class CollectionDescriptor(
     val label: String,
     val slug: String
+)
+
+@JsonPropertyOrder("chapter, verses")
+data class ChapterVerse(
+    @JsonProperty("Chapter") var chapter: String,
+    @JsonProperty("Verses") val verses: Int
 )

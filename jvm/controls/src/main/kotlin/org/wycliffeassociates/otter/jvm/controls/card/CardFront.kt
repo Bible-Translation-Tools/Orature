@@ -1,14 +1,31 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import com.jfoenix.controls.JFXButton
-import de.jensd.fx.glyphs.materialicons.MaterialIcon
-import de.jensd.fx.glyphs.materialicons.MaterialIconView
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
+import org.kordamp.ikonli.javafx.FontIcon
 import tornadofx.*
 
 class CardFront : StackPane() {
@@ -16,7 +33,7 @@ class CardFront : StackPane() {
     val childrenList = observableListOf<Node>()
 
     val defaultFill = c("#CC4141")
-    val forwardArrow = MaterialIconView(MaterialIcon.ARROW_FORWARD, "20px")
+    val forwardArrow = FontIcon("gmi-arrow-forward").apply { iconSize = 20 }
 
     val isActiveProperty = SimpleBooleanProperty(false)
     var isActive by isActiveProperty
@@ -57,7 +74,7 @@ class CardFront : StackPane() {
 
     init {
         importStylesheet<DefaultStyles>()
-        forwardArrow.fill = defaultFill
+        forwardArrow.iconColor = defaultFill
         alignment = Pos.TOP_CENTER
         // the colored top half of the card
         vbox {

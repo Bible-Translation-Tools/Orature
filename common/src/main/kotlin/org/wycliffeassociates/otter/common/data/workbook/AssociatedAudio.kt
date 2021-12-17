@@ -1,10 +1,28 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.wycliffeassociates.otter.common.data.workbook
 
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Single
 
-data class AssociatedAudio(
+class AssociatedAudio(
     /**
      *  This will cache and emit all Takes. As takes are created, this will emit more items.
      *  The UX may push new items here for propagation, and the persistence layer should respond by storing them.
@@ -26,7 +44,7 @@ data class AssociatedAudio(
     fun getNewTakeNumber(): Single<Int> =
         Single.just(
             getAllTakes()
-                .maxBy { it.number }
+                .maxByOrNull { it.number }
                 ?.number
                 ?.plus(1)
                 ?: 1

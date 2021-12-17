@@ -1,0 +1,112 @@
+/**
+ * Copyright (C) 2020, 2021 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.book-wizard__root {
+    -fx-padding: 40px 10px 0 30px;
+    -fx-background-color: -wa-background;
+    -fx-spacing: 30px;
+    -fx-pref-width: 800px;
+}
+
+.book-wizard__title {
+    -fx-font-size: 36px;
+}
+
+.book-wizard__language-card {
+    -fx-spacing: 15px;
+    -fx-alignment: center-left;
+}
+
+.book-wizard__language {
+    -fx-font-size: 20px;
+}
+
+.book-wizard__language .ikonli-font-icon,
+.book-wizard__divider .ikonli-font-icon {
+    -fx-font-size: 24px;
+    -fx-icon-color: -wa-regular-text;
+}
+
+.book-wizard__header-gap {
+    -fx-pref-height: 30px;
+}
+
+.book-wizard__project-type-card {
+    -fx-background-radius: 16px;
+    -fx-padding: 40px;
+    -fx-spacing: 20px;
+    -fx-pref-width: 632px;
+    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+}
+
+.book-wizard__project-type-card--primary {
+    -fx-background-color: -wa-primary;
+}
+
+.book-wizard__project-type-card--secondary {
+    -fx-background-color: -wa-white;
+}
+
+.book-wizard__project-type-card--primary .label {
+    -fx-text-fill: -wa-white;
+}
+
+.book-wizard__project-type-card--primary .book-wizard__project-type-info {
+    -fx-fill: -wa-white;
+}
+
+.book-wizard__project-type-icon .ikonli-font-icon {
+    -fx-font-size: 80px;
+}
+
+.book-wizard__project-type-card--primary .book-wizard__project-type-icon .ikonli-font-icon {
+    -fx-fill: -wa-white;
+}
+
+.book-wizard__project-type-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.book-wizard__project-type-info {
+    -fx-font-size: 20px;
+}
+
+.book-wizard__root .filtered-search-bar {
+    -fx-max-width: 800px;
+}
+
+.book-wizard__list {
+    -fx-background-color: -wa-transparent;
+}
+
+.book-wizard__list .list-cell {
+    -fx-background-color: -wa-transparent;
+    -fx-padding: 5px 0;
+}
+
+.book-wizard__title,
+.book-wizard__language-card .label,
+.book-wizard__list .list-cell .label {
+    -fx-text-fill: -wa-regular-text;
+}
+
+.book-wizard__root .list-cell .book-card-cell {
+    -fx-max-width: 800px;
+}
