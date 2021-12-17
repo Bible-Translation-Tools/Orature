@@ -34,6 +34,7 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -46,7 +47,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -101,8 +101,8 @@ class ChapterPage : View() {
         viewModel.closePlayers()
         viewModel.undock()
         removeDialogListeners()
-        (app as OtterApp).dependencyGraph.injectConnectionFactory().releasePlayer()
-        (app as OtterApp).dependencyGraph.injectConnectionFactory().clearPlayerConnections()
+        (app as IDependencyGraphProvider).dependencyGraph.injectConnectionFactory().releasePlayer()
+        (app as IDependencyGraphProvider).dependencyGraph.injectConnectionFactory().clearPlayerConnections()
     }
 
     init {

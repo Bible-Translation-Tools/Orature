@@ -98,6 +98,7 @@ class ChapterPageViewModel : ViewModel() {
     val snackBarObservable: PublishSubject<String> = PublishSubject.create()
 
     private val disposables = CompositeDisposable()
+    private val navigator: NavigationMediator by inject()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
