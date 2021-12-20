@@ -38,8 +38,9 @@ import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
-import java.io.InputStream
+import kotlin.io.path.createTempDirectory
 import kotlin.io.path.outputStream
+import net.lingala.zip4j.ZipFile as Zip4J
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -73,10 +74,17 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun copySourceFiles(linkedResource: ResourceMetadata? = null) {
+    fun copySourceFiles(
+        linkedResource: ResourceMetadata? = null,
+        excludeMedia: Boolean = true
+    ) {
         val target = sourceDir.resolve(sourceMetadata.path.name)
         if (!target.exists()) {
-            sourceMetadata.path.copyTo(target)
+            if (excludeMedia) {
+                copySourceWithoutMedia(sourceMetadata.path, target)
+            } else {
+                sourceMetadata.path.copyTo(target)
+            }
         }
 
         // Copy linked resource
@@ -212,6 +220,27 @@ class ProjectFilesAccessor(
             val normalized = File(it).invariantSeparatorsPath
             selectedChapters.contains(normalized)
         }
+    }
+
+    fun copySourceWithoutMedia(source: File, target: File) {
+        val ext = source.path.substringAfterLast(".")
+        if (!OratureFileFormat.isSupported(ext)) {
+            return
+        }
+        val extractedDir = createTempDirectory("otter").toFile()
+        Zip4J(source).extractAll(extractedDir.path)
+
+        extractedDir.walk().firstOrNull {
+            it.isDirectory && it.name == "media"
+        }?.deleteRecursively()
+
+        if (extractedDir.listFiles().size == 1) {
+            Zip4J(target).addFolder(extractedDir.listFiles().first())
+        } else {
+            Zip4J(target).addFiles(extractedDir.listFiles().toList())
+        }
+
+        extractedDir.deleteRecursively()
     }
 
     private fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
