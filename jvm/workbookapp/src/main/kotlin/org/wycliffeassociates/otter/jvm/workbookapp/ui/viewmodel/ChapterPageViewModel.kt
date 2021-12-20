@@ -41,7 +41,6 @@ import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -107,12 +106,6 @@ class ChapterPageViewModel : ViewModel() {
         concatenateAudio = ConcatenateAudio(directoryProvider)
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
-
-        chapterCardProperty.onChangeAndDoNow { chapter ->
-            chapter?.chapterSource?.let { chapterSource ->
-                subscribeSelectedTakePropertyToRelay(chapterSource.audio)
-            }
-        }
     }
 
     fun dock() {
@@ -121,6 +114,7 @@ class ChapterPageViewModel : ViewModel() {
                 loadChapterContents(chapter).subscribe()
                 val chap = CardData(chapter)
                 chapterCardProperty.set(chap)
+                subscribeSelectedTakePropertyToRelay(chapter.audio)
             }
         }
 
@@ -402,6 +396,7 @@ class ChapterPageViewModel : ViewModel() {
             .observeOnFx()
             .subscribe { takeHolder ->
                 takeHolder.value?.let {
+                    logger.info("Setting selected chapter take to ${takeHolder.value?.name}")
                     setSelectedChapterTake(takeHolder.value)
                     workbookDataStore.updateSelectedChapterPlayer()
                 }

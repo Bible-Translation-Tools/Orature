@@ -90,7 +90,7 @@
         </VBox>
         <HBox>
             <children>
-                <JFXCheckBox fx:id="sendReportCheckbox" prefHeight="30.0" selected="true" styleClass="exception-content__send-report">
+                <JFXCheckBox fx:id="sendReportCheckbox" prefHeight="30.0" selected="false" styleClass="exception-content__send-report">
                     <font>
                         <Font size="16.0" />
                     </font>
