@@ -213,6 +213,7 @@ class ChapterPageViewModelTest {
         chunk2.audio.getAllTakes().map {
             it.deletedTimestamp.accept(DateHolder.now())
         }
+        chapterPageViewModel.dock()
     }
 
     @After
@@ -296,7 +297,6 @@ class ChapterPageViewModelTest {
         chunk1.audio.insertTake(take)
         chunk1.audio.selectTake(take)
         chunk2.audio.insertTake(take)
-        chunk2.audio.selectTake(null)
 
         chapterPageViewModel.checkCanCompile()
     }

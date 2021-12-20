@@ -45,14 +45,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordScripturePage
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordScripturePage
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -438,6 +437,6 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     private fun getPlayer(): IAudioPlayer {
-        return (app as OtterApp).dependencyGraph.injectPlayer()
+        return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 }
