@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
@@ -35,6 +36,10 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
                 inputFile.sampleRate,
                 inputFile.bitsPerSample
             )
+
+            var markerId = 1
+            var markerLocation = 0
+
             outputFile.writer(append = true).use { os ->
                 files.forEach { file ->
                     val audioFile = AudioFile(file)
@@ -46,8 +51,15 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
                         os.write(buffer, 0, written)
                     }
                     reader.release()
+
+                    outputFile.metadata.addCue(
+                        markerLocation, markerId.toString()
+                    )
+                    markerLocation += audioFile.totalFrames
+                    markerId++
                 }
             }
+            outputFile.update()
             outputFile.file
         }
     }

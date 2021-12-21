@@ -63,6 +63,10 @@ class ConcatenateAudioTest {
             }
             outStr == "123456"
         }
+        // generated verse marker count
+        testObserver.assertValue { file ->
+            AudioFile(file).metadata.getCues().size == 3
+        }
     }
 
     @Test
