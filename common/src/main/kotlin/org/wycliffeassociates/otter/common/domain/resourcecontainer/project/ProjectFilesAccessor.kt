@@ -128,7 +128,7 @@ class ProjectFilesAccessor(
     fun initializeResourceContainerInDir() {
         ResourceContainer
             .create(projectDir) {
-                val projectPath = "./${RcConstants.MEDIA_DIR}"
+                val projectPath = "./${RcConstants.PROJECT_CONTENT_DIR}"
                 manifest = buildManifest(targetMetadata, sourceMetadata, project, projectPath)
                 getLicense(sourceMetadata.path)?.let {
                     addFileToContainer(it, RcConstants.LICENSE_FILE)
@@ -143,7 +143,7 @@ class ProjectFilesAccessor(
     fun initializeResourceContainerInFile(workbook: Workbook, container: File) {
         ResourceContainer
             .create(container) {
-                val projectPath = "./${RcConstants.MEDIA_DIR}"
+                val projectPath = "./${RcConstants.PROJECT_CONTENT_DIR}"
                 manifest = buildManifest(targetMetadata, workbook, projectPath)
 
                 getLicense(workbook.source.resourceMetadata.path)?.let {
@@ -216,13 +216,13 @@ class ProjectFilesAccessor(
             val normalized = File(it).invariantSeparatorsPath
             !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
         }
-        fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
+        fileWriter.copyDirectory(audioDir, RcConstants.PROJECT_CONTENT_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             selectedChapters.contains(normalized)
         }
     }
 
-    fun copySourceWithoutMedia(source: File, target: File) {
+    private fun copySourceWithoutMedia(source: File, target: File) {
         val ext = source.path.substringAfterLast(".")
         if (!OratureFileFormat.isSupported(ext)) {
             return
@@ -231,7 +231,7 @@ class ProjectFilesAccessor(
         Zip4J(source).extractAll(extractedDir.path)
 
         extractedDir.walk().firstOrNull {
-            it.isDirectory && it.name == "media"
+            it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
         }?.deleteRecursively()
 
         if (extractedDir.listFiles().size == 1) {
@@ -240,6 +240,11 @@ class ProjectFilesAccessor(
             Zip4J(target).addFiles(extractedDir.listFiles().toList())
         }
 
+        // update media manifest
+        ResourceContainer.load(target).use { rc ->
+            rc.media?.projects = listOf()
+            rc.writeMedia()
+        }
         extractedDir.deleteRecursively()
     }
 
