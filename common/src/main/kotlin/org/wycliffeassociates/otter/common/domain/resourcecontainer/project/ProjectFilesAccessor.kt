@@ -230,11 +230,18 @@ class ProjectFilesAccessor(
         val extractedDir = createTempDirectory("otter").toFile()
         Zip4J(source).extractAll(extractedDir.path)
 
+        // exclude media of unrelated projects
         extractedDir.walk().firstOrNull {
             it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
-        }?.deleteRecursively()
+        }?.let { mediaDir ->
+            mediaDir.listFiles().forEach { subDir ->
+                if (subDir.isDirectory && subDir.name != project.slug) {
+                    subDir.deleteRecursively()
+                }
+            }
+        }
 
-        if (extractedDir.listFiles().size == 1) {
+        if (extractedDir.list().size == 1) {
             Zip4J(target).addFolder(extractedDir.listFiles().first())
         } else {
             Zip4J(target).addFiles(extractedDir.listFiles().toList())
@@ -242,7 +249,13 @@ class ProjectFilesAccessor(
 
         // update media manifest
         ResourceContainer.load(target).use { rc ->
-            rc.media?.projects = listOf()
+            val mediaProjectList = rc.media?.projects?.firstOrNull {
+                it.identifier == project.slug
+            }?.let { mediaProject ->
+                listOf(mediaProject)
+            } ?: listOf()
+
+            rc.media?.projects = mediaProjectList
             rc.writeMedia()
         }
         extractedDir.deleteRecursively()

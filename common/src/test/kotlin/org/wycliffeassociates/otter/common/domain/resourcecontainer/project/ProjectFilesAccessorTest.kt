@@ -42,9 +42,13 @@ class ProjectFilesAccessorTest {
     private lateinit var projectSourceDir: File
     private lateinit var sourceRC: File
     private val directoryProviderMock = mock(IDirectoryProvider::class.java)
+    private val mediaProjectSize = 2
 
-    private fun setUp_copySourceFiles(tempDir: File): ProjectFilesAccessor {
-        sourceRC = getResource("source_with_imported_media.zip")
+    private fun setUp_copySourceFiles(
+        project: Collection,
+        tempDir: File
+    ): ProjectFilesAccessor {
+        sourceRC = getResource("source_with_imported_media_jas_jud.zip")
         projectSourceDir = tempDir.resolve("source").apply { mkdir() }
 
         val sourceMetadata = ResourceMetadata(
@@ -81,7 +85,7 @@ class ProjectFilesAccessorTest {
             "_",
             File("")
         )
-        val project = mock(Collection::class.java)
+
         `when`(
             directoryProviderMock.getProjectDirectory(
                 sourceMetadata, targetMetadata, project
@@ -108,7 +112,9 @@ class ProjectFilesAccessorTest {
     @Test
     fun copySourceFiles_excludeMedia() {
         val tempDir = createTempDirectory("otter-test").toFile()
-        val projectFilesAccessor = setUp_copySourceFiles(tempDir)
+        val project = mock(Collection::class.java)
+        `when`(project.slug).thenReturn("jas")
+        val projectFilesAccessor = setUp_copySourceFiles(project, tempDir)
 
         projectFilesAccessor.copySourceFiles(excludeMedia = true)
 
@@ -118,21 +124,25 @@ class ProjectFilesAccessorTest {
         )
         val target = projectSourceDir.listFiles().first()
         ResourceContainer.load(target).use {
-            assertTrue(
-                "Target media manifest should not have resources for source.",
-                it.media == null || it.media!!.projects.isEmpty()
+            assertEquals(
+                "Target media manifest should not have resources for other project's source.",
+                1,
+                it.media!!.projects.size
             )
         }
         ZipFile(target).extractAll(projectSourceDir.path)
 
-        val anyMedia = projectSourceDir.walk().any {
+        val mediaProjectDirCount = projectSourceDir.walk().firstOrNull {
             it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
-        }
-        assertFalse(
-            "Copied files from source should not have media.",
-            anyMedia
-        )
+        }?.let {
+            it.list().size
+        } ?: 0
 
+        assertEquals(
+            "Copied files from source should not have media.",
+            1,
+            mediaProjectDirCount
+        )
         verify(directoryProviderMock).getProjectSourceDirectory(
             any(), any(), any<Collection>()
         )
@@ -143,7 +153,9 @@ class ProjectFilesAccessorTest {
     @Test
     fun copySourceFiles_includeMedia() {
         val tempDir = createTempDirectory("otter-test").toFile()
-        val projectFilesAccessor = setUp_copySourceFiles(tempDir)
+        val project = mock(Collection::class.java)
+        `when`(project.slug).thenReturn("jas")
+        val projectFilesAccessor = setUp_copySourceFiles(project, tempDir)
 
         projectFilesAccessor.copySourceFiles(excludeMedia = false)
 
@@ -154,18 +166,26 @@ class ProjectFilesAccessorTest {
 
         val target = projectSourceDir.listFiles().first()
         ResourceContainer.load(target).use {
-            assertTrue(
-                it.media != null && it.media!!.projects.isNotEmpty()
+            assertNotNull(
+                it.media != null
+            )
+            assertEquals(
+                mediaProjectSize,
+                it.media!!.projects.size
             )
         }
         ZipFile(target).extractAll(projectSourceDir.path)
 
-        val anyMedia = projectSourceDir.walk().any {
+        val mediaProjectDirCount = projectSourceDir.walk().firstOrNull {
             it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
-        }
-        assertTrue(
+        }?.let {
+            it.list().size
+        } ?: 0
+
+        assertEquals(
             "Copied files from source should have media.",
-            anyMedia
+            mediaProjectSize,
+            mediaProjectDirCount
         )
         verify(directoryProviderMock).getProjectSourceDirectory(
             any(), any(), any<Collection>()
