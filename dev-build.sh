@@ -8,5 +8,5 @@ if [ "$1" = "jar" ]; then
         ./gradlew -Pdevbuild=true -PgradlewInstall4jDirectory=/Applications/install4j.app :jvm:workbookapp:install4jdeploy ;
 # ./dev-build.sh on linux for local build, you need to have install4j installed
     else
-        ./gradlew -Pdevbuild=true -PgradlewInstall4jDirectory=/opt/install4j :jvm:workbookapp:install4jdeploy
+        ./gradlew -Pdevbuild=true -PgradlewInstall4jDirectory=/opt/install4j9 :jvm:workbookapp:install4jdeploy
 fi
