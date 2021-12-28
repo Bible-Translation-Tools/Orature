@@ -45,7 +45,7 @@ internal class AudioPlayerConnectionFactory(
         } else {
             player = AudioBufferPlayer(newLine, errorRelay)
         }
-        newLine?.close()
+        outputLine?.close()
         outputLine = newLine
         currentConnection?.let {
             load(it)
@@ -101,15 +101,23 @@ internal class AudioPlayerConnectionFactory(
             player.pause()
             swapConnection(request)
             outputLine?.flush()
-            if (request.id != currentConnection?.id) {
-                player.stop()
-            }
+            player.stop()
             player = AudioBufferPlayer(outputLine, errorRelay)
             setDurationOfConnection(request)
             loadRequestIntoPlayer(request)
             player.seek(request.position)
         } catch (e: LineUnavailableException) {
             errorRelay.accept(AudioError(AudioErrorType.PLAYBACK, e))
+        }
+    }
+
+    fun clearConnections() {
+        connections.clear()
+    }
+
+    fun releasePlayer() {
+        if (this::player.isInitialized) {
+            player.release()
         }
     }
 }

@@ -55,14 +55,15 @@ class UpdateAvailableFragment : Fragment() {
             }
         }
 
-        add(
-            JFXButton(messages["updateNow"]).apply {
-                styleClass.addAll("btn", "btn--secondary")
-                tooltip(text)
-                setOnAction {
-                    vm.downloadUpdate()
-                }
-            }
-        )
+/** currently does not work on Windows/Linux **/
+//        add(
+//            JFXButton(messages["updateNow"]).apply {
+//                styleClass.addAll("btn", "btn--secondary")
+//                tooltip(text)
+//                setOnAction {
+//                    vm.downloadUpdate()
+//                }
+//            }
+//        )
     }
 }

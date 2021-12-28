@@ -35,7 +35,7 @@ class InitializeArtwork @Inject constructor(
 ) : Installable {
 
     override val name = "ARTWORK"
-    override val version = 2
+    override val version = 3
 
     private val log = LoggerFactory.getLogger(InitializeArtwork::class.java)
 
