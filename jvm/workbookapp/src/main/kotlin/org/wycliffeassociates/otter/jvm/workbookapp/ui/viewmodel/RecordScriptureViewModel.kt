@@ -49,7 +49,6 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
@@ -500,7 +499,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val ap: IAudioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+        val ap: IAudioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
         ap.load(this.file)
         return TakeCardModel(
             this,
