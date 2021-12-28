@@ -57,7 +57,9 @@ class AppInfoViewModel : ViewModel() {
 
     fun browseApplicationLog() {
         if (Desktop.isDesktopSupported()) {
-            Desktop.getDesktop().open(directoryProvider.logsDirectory)
+            Thread {
+                Desktop.getDesktop().open(directoryProvider.logsDirectory)
+            }.start()
         }
     }
 }
