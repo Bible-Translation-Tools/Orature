@@ -270,7 +270,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun deleteTake() {
+    fun deleteTake_timestamp_updated_and_another_take_selected() {
         val take1 = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
         val take2 = Take("take2", take2File, 2, MimeType.USFM, LocalDate.now())
         val initialDeletedTimestamp = take1.deletedTimestamp.value?.value
