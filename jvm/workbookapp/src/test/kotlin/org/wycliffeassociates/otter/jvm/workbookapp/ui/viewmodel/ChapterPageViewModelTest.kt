@@ -25,7 +25,6 @@ import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import javafx.application.Platform
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ChangeListener
 import org.junit.After
@@ -42,7 +41,6 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
-import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -56,7 +54,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
-import java.util.concurrent.CountDownLatch
 
 class ChapterPageViewModelTest {
     companion object {
@@ -79,49 +76,14 @@ class ChapterPageViewModelTest {
         private var selectedChapterTakeListener: ChangeListener<Take>? = null
         private var showExportProgressListener: ChangeListener<Boolean>? = null
 
-        private val chunk1 = Chunk(
-            sort = 1,
-            audio = createAssociatedAudio(),
-            textItem = TextItem("Chunk 1", MimeType.USFM),
-            start = 1,
-            end = 2,
-            contentType = ContentType.TEXT,
-            resources = listOf(),
-            label = "Chunk"
-        )
+        private var chunk1 = createChunk(1)
+        private var chunk2 = createChunk(2)
 
-        private val chunk2 = Chunk(
-            sort = 2,
-            audio = createAssociatedAudio(),
-            textItem = TextItem("Chunk 2", MimeType.USFM),
-            start = 3,
-            end = 4,
-            contentType = ContentType.TEXT,
-            resources = listOf(),
-            label = "Chunk"
-        )
+        private var chapter1 = createChapter(1)
+        private var chapter2 = createChapter(2)
 
         private val takeFile = File(ChapterPageViewModelTest::class.java.getResource("/files/test.wav")!!.file)
-
-        private val chapter1 = Chapter(
-            1,
-            "1",
-            "1",
-            createAssociatedAudio(),
-            listOf(),
-            listOf(),
-            Observable.fromIterable(listOf(chunk1, chunk2))
-        )
-
-        private val chapter2 = Chapter(
-            2,
-            "2",
-            "2",
-            createAssociatedAudio(),
-            listOf(),
-            listOf(),
-            Observable.fromIterable(listOf(chunk1, chunk2))
-        )
+        private val take2File = File(ChapterPageViewModelTest::class.java.getResource("/files/test2.wav")!!.file)
 
         private val english = Language(
             "en",
@@ -171,6 +133,33 @@ class ChapterPageViewModelTest {
 
         private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
 
+        private fun createChunk(number: Int): Chunk {
+            return Chunk(
+                sort = number,
+                audio = createAssociatedAudio(),
+                textItem = TextItem("Chunk $number", MimeType.USFM),
+                start = number,
+                end = number,
+                contentType = ContentType.TEXT,
+                resources = listOf(),
+                label = "Chunk"
+            )
+        }
+
+        private fun createChapter(number: Int): Chapter {
+            chunk1 = createChunk(1)
+            chunk2 = createChunk(2)
+            return Chapter(
+                number,
+                "$number",
+                "$number",
+                createAssociatedAudio(),
+                listOf(),
+                listOf(),
+                Observable.fromIterable(listOf(chunk1, chunk2))
+            )
+        }
+
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
@@ -204,15 +193,6 @@ class ChapterPageViewModelTest {
         chapterPageViewModel.canCompileProperty.set(false)
 
         workbookDataStore.activeTakeNumberProperty.set(0)
-
-        chunk1.audio.selectTake(null)
-        chunk1.audio.getAllTakes().map {
-            it.deletedTimestamp.accept(DateHolder.now())
-        }
-        chunk2.audio.selectTake(null)
-        chunk2.audio.getAllTakes().map {
-            it.deletedTimestamp.accept(DateHolder.now())
-        }
         chapterPageViewModel.dock()
     }
 
@@ -248,6 +228,9 @@ class ChapterPageViewModelTest {
         showExportProgressListener?.let {
             chapterPageViewModel.showExportProgressDialogProperty.removeListener(it)
         }
+
+        chapter1 = createChapter(1)
+        chapter2 = createChapter(2)
     }
 
     private fun <T> createChangeListener(callback: (T) -> Unit): ChangeListener<T> {
@@ -292,11 +275,12 @@ class ChapterPageViewModelTest {
         }
         chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
 
-        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+        val take1 = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+        val take2 = Take("test2.wav", take2File, 2, MimeType.WAV, LocalDate.now())
 
-        chunk1.audio.insertTake(take)
-        chunk1.audio.selectTake(take)
-        chunk2.audio.insertTake(take)
+        chunk1.audio.insertTake(take1)
+        chunk1.audio.selectTake(take1)
+        chunk2.audio.insertTake(take2)
 
         chapterPageViewModel.checkCanCompile()
     }
@@ -308,12 +292,13 @@ class ChapterPageViewModelTest {
         }
         chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
 
-        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+        val take1 = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+        val take2 = Take("test2.wav", take2File, 2, MimeType.WAV, LocalDate.now())
 
-        chunk1.audio.insertTake(take)
-        chunk1.audio.selectTake(take)
-        chunk2.audio.insertTake(take)
-        chunk2.audio.selectTake(take)
+        chunk1.audio.insertTake(take1)
+        chunk1.audio.selectTake(take1)
+        chunk2.audio.insertTake(take2)
+        chunk2.audio.selectTake(take2)
 
         chapterPageViewModel.checkCanCompile()
     }
@@ -462,12 +447,13 @@ class ChapterPageViewModelTest {
 
     @Test
     fun compile_updateProperty() {
-        val take = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+        val take1 = Take("test.wav", takeFile, 1, MimeType.WAV, LocalDate.now())
+        val take2 = Take("test2.wav", take2File, 2, MimeType.WAV, LocalDate.now())
 
-        chunk1.audio.insertTake(take)
-        chunk1.audio.selectTake(take)
-        chunk2.audio.insertTake(take)
-        chunk2.audio.selectTake(take)
+        chunk1.audio.insertTake(take1)
+        chunk1.audio.selectTake(take1)
+        chunk2.audio.insertTake(take2)
+        chunk2.audio.selectTake(take2)
 
         val file = directoryProvider.createTempFile("test", ".wav")
         takeFile.copyTo(file, true)
