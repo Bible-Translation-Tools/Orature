@@ -4,12 +4,14 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.observers.TestObserver
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
 import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.domain.audio.LabeledAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
@@ -70,6 +72,38 @@ class ConcatenateAudioTest {
         ConcatenateAudio(mockDirectoryProvider).execute(listOf()).subscribe(testObserver)
         testObserver.assertNotComplete()
         testObserver.assertErrorMessage("List is empty.")
+    }
+
+    @Test
+    fun testConcatWithMarkers() {
+        val audioWithLabels = inputFiles.mapIndexed { index: Int, file: File ->
+            LabeledAudio("${index+1}", file)
+        }
+        ConcatenateAudio(mockDirectoryProvider).concatWithMarkers(audioWithLabels).subscribe(testObserver)
+
+        testObserver.assertComplete()
+        testObserver.assertResult(outputFile)
+        testObserver.assertValue(outputFile)
+        testObserver.assertValue { file ->
+            val audioFile = AudioFile(file)
+            val reader = audioFile.reader()
+            val buffer = ByteArray(6) // to store 6 characters (123456)
+            reader.open()
+            var outStr = ""
+            while (reader.hasRemaining()) {
+                reader.getPcmBuffer(buffer)
+                outStr = buffer.decodeToString()
+            }
+            outStr == "123456"
+        }
+        testObserver.assertValue { file ->
+            val audioFile = AudioFile(file)
+            val cues = audioFile.metadata.getCues()
+
+            cues.size == 3 && cues.all {
+                it.label == "${cues.indexOf(it) + 1}"
+            }
+        }
     }
 
     private fun createWavFile(name: String, data: ByteArray): File {
