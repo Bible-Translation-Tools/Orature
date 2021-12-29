@@ -19,7 +19,7 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
 internal object RcConstants {
-    const val PROJECT_CONTENT_DIR = "content"
+    const val MEDIA_DIR = "content"
     const val APP_SPECIFIC_DIR = ".apps/orature"
     const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
     const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"

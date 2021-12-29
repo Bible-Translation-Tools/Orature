@@ -128,7 +128,7 @@ class ProjectFilesAccessor(
     fun initializeResourceContainerInDir() {
         ResourceContainer
             .create(projectDir) {
-                val projectPath = "./${RcConstants.PROJECT_CONTENT_DIR}"
+                val projectPath = "./${RcConstants.MEDIA_DIR}"
                 manifest = buildManifest(targetMetadata, sourceMetadata, project, projectPath)
                 getLicense(sourceMetadata.path)?.let {
                     addFileToContainer(it, RcConstants.LICENSE_FILE)
@@ -143,7 +143,7 @@ class ProjectFilesAccessor(
     fun initializeResourceContainerInFile(workbook: Workbook, container: File) {
         ResourceContainer
             .create(container) {
-                val projectPath = "./${RcConstants.PROJECT_CONTENT_DIR}"
+                val projectPath = "./${RcConstants.MEDIA_DIR}"
                 manifest = buildManifest(targetMetadata, workbook, projectPath)
 
                 getLicense(workbook.source.resourceMetadata.path)?.let {
@@ -216,7 +216,7 @@ class ProjectFilesAccessor(
             val normalized = File(it).invariantSeparatorsPath
             !selectedChapters.contains(normalized) && !deletedTakes.contains(normalized)
         }
-        fileWriter.copyDirectory(audioDir, RcConstants.PROJECT_CONTENT_DIR) {
+        fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             selectedChapters.contains(normalized)
         }
