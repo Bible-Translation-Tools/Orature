@@ -100,7 +100,7 @@ class ChapterPageViewModelTest {
 
         private val book = mock<Book> {
             on { resourceMetadata } doReturn resourceMetadata
-            on { chapters } doReturn Observable.fromIterable(listOf(chapter1, chapter2))
+            on { chapters } doReturn Observable.fromIterable(listOf(chapter1/*, chapter2*/))
             on { language } doReturn english
             on { slug } doReturn "gen"
         }
@@ -230,7 +230,7 @@ class ChapterPageViewModelTest {
         }
 
         chapter1 = createChapter(1)
-        chapter2 = createChapter(2)
+        //chapter2 = createChapter(2)
     }
 
     private fun <T> createChangeListener(callback: (T) -> Unit): ChangeListener<T> {
@@ -241,7 +241,7 @@ class ChapterPageViewModelTest {
 
     @Test
     fun onCardSelection_chapterCard() {
-        val chapterCard = CardData(chapter2)
+        val chapterCard = CardData(chapter1)
 
         activeChapterListener = createChangeListener {
             Assert.assertEquals(chapterCard.chapterSource, it)
