@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.domain.audio.LabeledAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
@@ -48,6 +49,42 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
                     reader.release()
                 }
             }
+            outputFile.file
+        }
+    }
+
+    fun concatWithMarkers(audioList: List<LabeledAudio>): Single<File> {
+        return Single.fromCallable {
+            val inputFile = AudioFile(audioList.first().file)
+            val tempFile = directoryProvider.createTempFile("output", ".wav")
+            val outputFile = AudioFile(
+                tempFile,
+                inputFile.channels,
+                inputFile.sampleRate,
+                inputFile.bitsPerSample
+            )
+
+            var markerLocation = 0
+
+            outputFile.writer(append = true).use { os ->
+                audioList.forEach { audio ->
+                    val audioFile = AudioFile(audio.file)
+                    val buffer = ByteArray(10240)
+                    val reader = audioFile.reader()
+                    reader.open()
+                    while (reader.hasRemaining()) {
+                        val written = reader.getPcmBuffer(buffer)
+                        os.write(buffer, 0, written)
+                    }
+                    reader.release()
+
+                    outputFile.metadata.addCue(
+                        markerLocation, audio.title
+                    )
+                    markerLocation += audioFile.totalFrames
+                }
+            }
+            outputFile.update()
             outputFile.file
         }
     }

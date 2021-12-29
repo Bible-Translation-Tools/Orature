@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
+import org.wycliffeassociates.otter.common.domain.audio.LabeledAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
@@ -266,12 +267,14 @@ class ChapterPageViewModel : ViewModel() {
             val chapter = chapterCardProperty.value!!.chapterSource!!
 
             val takes = filteredContent.mapNotNull { chunk ->
-                chunk.chunkSource?.audio?.selected?.value?.value?.file
+                chunk.chunkSource?.audio?.selected?.value?.value?.let { take ->
+                    LabeledAudio(chunk.chunkSource!!.title, take.file)
+                }
             }
 
             var compiled: File? = null
 
-            ConcatenateAudio(directoryProvider).execute(takes)
+            ConcatenateAudio(directoryProvider).concatWithMarkers(takes)
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
