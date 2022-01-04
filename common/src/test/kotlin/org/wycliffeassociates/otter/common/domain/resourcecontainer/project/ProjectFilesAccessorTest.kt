@@ -19,8 +19,9 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import com.nhaarman.mockitokotlin2.any
-import net.lingala.zip4j.ZipFile
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -29,12 +30,12 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
-import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.RcConstants
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.io.FileNotFoundException
 import java.time.LocalDate
+import java.util.zip.ZipFile
 import kotlin.io.path.createTempDirectory
 import kotlin.jvm.Throws
 
@@ -125,24 +126,20 @@ class ProjectFilesAccessorTest {
         val target = projectSourceDir.listFiles().first()
         ResourceContainer.load(target).use {
             assertEquals(
-                "Target media manifest should not have resources for other project's source.",
-                1,
+                "Media manifest (source) projects should be empty.",
+                0,
                 it.media!!.projects.size
             )
         }
-        ZipFile(target).extractAll(projectSourceDir.path)
 
-        val mediaProjectDirCount = projectSourceDir.walk().firstOrNull {
-            it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
-        }?.let {
-            it.list().size
-        } ?: 0
+        ZipFile(target).use{ zip ->
+            val zipEntries = zip.entries().toList()
+            val hasNoMedia = zipEntries.all { entry ->
+                File(entry.name).extension !in ProjectFilesAccessor.ignoredSourceMediaExtensions
+            }
+            assertTrue(hasNoMedia)
+        }
 
-        assertEquals(
-            "Copied files from source should not have media.",
-            1,
-            mediaProjectDirCount
-        )
         verify(directoryProviderMock).getProjectSourceDirectory(
             any(), any(), any<Collection>()
         )
@@ -174,19 +171,15 @@ class ProjectFilesAccessorTest {
                 it.media!!.projects.size
             )
         }
-        ZipFile(target).extractAll(projectSourceDir.path)
 
-        val mediaProjectDirCount = projectSourceDir.walk().firstOrNull {
-            it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
-        }?.let {
-            it.list().size
-        } ?: 0
+        ZipFile(target).use { zip ->
+            val zipEntries = zip.entries().toList()
+            val hasMedia = zipEntries.any { entry ->
+                File(entry.name).extension in ProjectFilesAccessor.ignoredSourceMediaExtensions
+            }
+            assertTrue(hasMedia)
+        }
 
-        assertEquals(
-            "Copied files from source should have media.",
-            mediaProjectSize,
-            mediaProjectDirCount
-        )
         verify(directoryProviderMock).getProjectSourceDirectory(
             any(), any(), any<Collection>()
         )

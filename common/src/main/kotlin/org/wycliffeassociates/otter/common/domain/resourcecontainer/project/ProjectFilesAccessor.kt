@@ -228,8 +228,8 @@ class ProjectFilesAccessor(
                     File(it).extension !in ignoredSourceMediaExtensions
                 }
             val filesToWrite = inMap.mapValues {
-                { out: OutputStream ->
-                    it.value.copyTo(out)
+                { output: OutputStream ->
+                    it.value.copyTo(output)
                     Unit
                 }
             }
