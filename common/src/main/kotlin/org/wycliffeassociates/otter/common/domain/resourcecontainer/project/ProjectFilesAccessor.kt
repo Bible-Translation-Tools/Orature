@@ -217,8 +217,7 @@ class ProjectFilesAccessor(
     }
 
     private fun copySourceWithoutMedia(source: File, target: File) {
-        val ext = source.path.substringAfterLast(".")
-        if (!OratureFileFormat.isSupported(ext)) {
+        if (!OratureFileFormat.isSupported(source.extension)) {
             return
         }
 
