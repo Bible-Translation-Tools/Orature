@@ -16,7 +16,6 @@ dependencies {
     implementation "org.wycliffeassociates:usfmtools:$usfmToolsVer"
 
     implementation "com.google.dagger:dagger:$daggerVer"
-    implementation "net.lingala.zip4j:zip4j:$zip4jVer"
 
     // Explicitly mention reflection lib so Gradle and kotlin-resource-container's Jackson
     // dependencies coexist w/o warnings. This can be removed once the krc lib is updated

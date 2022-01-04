@@ -36,11 +36,11 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.common.utils.mapNotNull
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
-import kotlin.io.path.createTempDirectory
+import java.io.OutputStream
 import kotlin.io.path.outputStream
-import net.lingala.zip4j.ZipFile as Zip4J
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -68,17 +68,11 @@ class ProjectFilesAccessor(
         project
     )
 
-    companion object {
-        fun getTakesDirPath(): String {
-            return RcConstants.TAKE_DIR
-        }
-    }
-
     fun copySourceFiles(
         linkedResource: ResourceMetadata? = null,
         excludeMedia: Boolean = true
     ) {
-        val target = sourceDir.resolve(sourceMetadata.path.name)
+        val target = sourceDir.resolve(sourceMetadata.path.nameWithoutExtension + ".zip")
         if (!target.exists()) {
             if (excludeMedia) {
                 copySourceWithoutMedia(sourceMetadata.path, target)
@@ -227,38 +221,31 @@ class ProjectFilesAccessor(
         if (!OratureFileFormat.isSupported(ext)) {
             return
         }
-        val extractedDir = createTempDirectory("otter").toFile()
-        Zip4J(source).extractAll(extractedDir.path)
 
-        // exclude media of unrelated projects
-        extractedDir.walk().firstOrNull {
-            it.isDirectory && it.name == RcConstants.SOURCE_MEDIA_DIR
-        }?.let { mediaDir ->
-            mediaDir.listFiles().forEach { subDir ->
-                if (subDir.isDirectory && subDir.name != project.slug) {
-                    subDir.deleteRecursively()
+        val targetZip = ZipAccessor(target)
+        ResourceContainer.load(source).use {
+            val inMap = it.accessor.getInputStreams(".", listOf())
+                .filterKeys {
+                    File(it).extension !in ignoredSourceMediaExtensions
+                }
+            val filesToWrite = inMap.mapValues {
+                { out: OutputStream ->
+                    it.value.copyTo(out)
+                    Unit
                 }
             }
-        }
-
-        if (extractedDir.list().size == 1) {
-            Zip4J(target).addFolder(extractedDir.listFiles().first())
-        } else {
-            Zip4J(target).addFiles(extractedDir.listFiles().toList())
+            try {
+                targetZip.write(filesToWrite)
+            } catch (e: Exception) {
+                log.error("Error while copying source container to derived project.", e)
+            }
         }
 
         // update media manifest
         ResourceContainer.load(target).use { rc ->
-            val mediaProjectList = rc.media?.projects?.firstOrNull {
-                it.identifier == project.slug
-            }?.let { mediaProject ->
-                listOf(mediaProject)
-            } ?: listOf()
-
-            rc.media?.projects = mediaProjectList
+            rc.media?.projects = listOf()
             rc.writeMedia()
         }
-        extractedDir.deleteRecursively()
     }
 
     private fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
@@ -330,10 +317,10 @@ class ProjectFilesAccessor(
 
     private fun getLicense(sourceContainer: File): File? {
         ResourceContainer.load(sourceContainer).use { rc ->
-            if (rc.accessor.fileExists(RcConstants.LICENSE_FILE)){
+            if (rc.accessor.fileExists(RcConstants.LICENSE_FILE)) {
                 val license = kotlin.io.path.createTempFile(suffix = ".md")
 
-                rc.accessor.getInputStream(RcConstants.LICENSE_FILE).use{ input ->
+                rc.accessor.getInputStream(RcConstants.LICENSE_FILE).use { input ->
                     license.outputStream().write(input.readAllBytes())
                 }
                 return license.toFile()
@@ -346,4 +333,12 @@ class ProjectFilesAccessor(
 
     private fun isAudioFile(file: File) =
         file.extension.toLowerCase().let { it == "wav" || it == "mp3" }
+
+    companion object {
+        val ignoredSourceMediaExtensions = listOf("wav", "mp3", "jpg", "jpeg", "png", "cue")
+
+        fun getTakesDirPath(): String {
+            return RcConstants.TAKE_DIR
+        }
+    }
 }
