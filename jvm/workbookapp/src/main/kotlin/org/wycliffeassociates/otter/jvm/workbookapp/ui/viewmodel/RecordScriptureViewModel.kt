@@ -266,7 +266,7 @@ class RecordScriptureViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
-                            setMarkers()
+                            setMarker()
                             loadTakes()
                         }
                     }
@@ -331,6 +331,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .subscribe(
                     {
                         showImportSuccessDialogProperty.set(true)
+                        setMarker()
                         loadTakes()
                     },
                     {
@@ -429,12 +430,12 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
-    private fun setMarkers() {
+    private fun setMarker() {
         if (activeChunkProperty.value == null) return
 
         recordable?.audio?.let { audio ->
-            audio.getAllTakes().forEach { take ->
-                AudioFile(take.file).apply {
+            audio.selected.value?.value?.let {
+                AudioFile(it.file).apply {
                     if (metadata.getCues().isEmpty()) {
                         metadata.addCue(0, activeChunk.start.toString())
                         update()
