@@ -20,13 +20,15 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.domain.audio.LabeledAudio
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
 
 class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
 
-    fun execute(files: List<File>): Single<File> {
+    fun execute(
+        files: List<File>,
+        includeMarkers: Boolean = true
+    ): Single<File> {
         return Single.fromCallable {
             val inputFile = AudioFile(files.first())
             val tempFile = directoryProvider.createTempFile("output", ".wav")
@@ -49,27 +51,21 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
                     reader.release()
                 }
             }
+            if (includeMarkers) generateMarkers(files, outputFile)
+
             outputFile.file
         }
     }
 
-    fun concatWithMarkers(audioList: List<LabeledAudio>): Single<File> {
-        val files = audioList.map { it.file }
-        return execute(files)
-            .map { file ->
-                val outputFile = AudioFile(file)
-                var markerLocation = 0
+    private fun generateMarkers(inputFiles: List<File>, outputAudio: AudioFile) {
+        var markerLocation = 0
 
-                audioList.forEach { audio ->
-                    val audioFile = AudioFile(audio.file)
-                    outputFile.metadata.addCue(
-                        markerLocation, audio.title
-                    )
-                    markerLocation += audioFile.totalFrames
-                }
-
-                outputFile.update()
-                outputFile.file
-            }
+        inputFiles.forEach { file ->
+            val audioFile = AudioFile(file)
+            val marker = audioFile.metadata.getCues().first().label
+            outputAudio.metadata.addCue(markerLocation, marker)
+            markerLocation += audioFile.totalFrames
+        }
+        outputAudio.update()
     }
 }

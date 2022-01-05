@@ -34,6 +34,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -53,7 +54,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
-import java.text.SimpleDateFormat
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -266,6 +266,7 @@ class RecordScriptureViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            setMarkers()
                             loadTakes()
                         }
                     }
@@ -425,6 +426,21 @@ class RecordScriptureViewModel : ViewModel() {
                 )
 
             takeCardModels.setAll(takes)
+        }
+    }
+
+    private fun setMarkers() {
+        if (activeChunkProperty.value == null) return
+
+        recordable?.audio?.let { audio ->
+            audio.getAllTakes().forEach { take ->
+                AudioFile(take.file).apply {
+                    if (metadata.getCues().isEmpty()) {
+                        metadata.addCue(0, activeChunk.start.toString())
+                        update()
+                    }
+                }
+            }
         }
     }
 
