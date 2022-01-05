@@ -23,7 +23,6 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
-import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import org.junit.After
 import org.junit.Assert
@@ -31,6 +30,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
@@ -52,7 +52,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
-import java.util.concurrent.Semaphore
 
 class RecordScriptureViewModelTest {
     companion object {
@@ -143,13 +142,6 @@ class RecordScriptureViewModelTest {
             )
         }
 
-        @Throws(InterruptedException::class)
-        fun waitForRunLater() {
-            val semaphore = Semaphore(0)
-            Platform.runLater { semaphore.release() }
-            semaphore.acquire()
-        }
-
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
@@ -180,6 +172,9 @@ class RecordScriptureViewModelTest {
         workbookDataStore.activeTakeNumberProperty.set(0)
         recordScriptureViewModel.showImportProgressDialogProperty.set(false)
 
+        chapter = createChapter()
+        workbookDataStore.activeChapterProperty.set(chapter)
+
         writeWavFile(take1File)
         writeWavFile(take2File)
     }
@@ -197,8 +192,6 @@ class RecordScriptureViewModelTest {
         }
 
         directoryProvider.cleanTempDirectory()
-        chapter = createChapter()
-        workbookDataStore.activeChapterProperty.set(chapter)
     }
 
     @Test
@@ -278,21 +271,20 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun `when take deleted, timestamp updated and another take is selected`() {
-        val take1 = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
-        val take2 = Take("take2", take2File, 2, MimeType.USFM, LocalDate.now())
-        val initialDeletedTimestamp = take1.deletedTimestamp.value?.value
+        recordScriptureViewModel.importTakes(listOf(take1File, take2File))
+        WaitForAsyncUtils.waitForFxEvents()
 
-        chapter.audio.insertTake(take1)
-        chapter.audio.selectTake(take1)
-        chapter.audio.insertTake(take2)
+        val takeCard1 = recordScriptureViewModel.takeCardModels.single { it.take.number == 1 }
+        val takeCard2 = recordScriptureViewModel.takeCardModels.single { it.take.number == 2 }
+        recordScriptureViewModel.selectTake(takeCard1.take)
+        val initialDeletedTimestamp = takeCard1.take.deletedTimestamp.value?.value
+        WaitForAsyncUtils.waitForFxEvents()
 
-        recordScriptureViewModel.loadTakes()
-        recordScriptureViewModel.deleteTake(take1)
+        recordScriptureViewModel.deleteTake(takeCard1.take)
+        WaitForAsyncUtils.waitForFxEvents()
 
-        waitForRunLater()
-
-        Assert.assertNotEquals(take1.deletedTimestamp.value?.value, initialDeletedTimestamp)
+        Assert.assertNotEquals(takeCard1.take.deletedTimestamp.value?.value, initialDeletedTimestamp)
         Assert.assertEquals(1, recordScriptureViewModel.takeCardModels.size)
-        Assert.assertEquals(take2, recordScriptureViewModel.recordable?.audio?.selected?.value?.value)
+        Assert.assertEquals(takeCard2.take, recordScriptureViewModel.recordable?.audio?.selected?.value?.value)
     }
 }
