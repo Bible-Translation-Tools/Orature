@@ -26,6 +26,7 @@ import io.reactivex.Observable
 import javafx.beans.property.SimpleStringProperty
 import org.junit.After
 import org.junit.Assert
+import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
@@ -44,6 +45,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
+import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
@@ -56,7 +58,10 @@ class WorkbookDataStoreTest {
 
         private lateinit var workbookDataStore: WorkbookDataStore
 
-        private val takeFile = File(WorkbookDataStoreTest::class.java.getResource("/files/test.wav")!!.file)
+        private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
+        private val tempDir = directoryProvider.tempDirectory
+        private var takeFile = File(tempDir, "take1.wav")
+        private var sourceTakeFile = File(tempDir, "sourceTake.wav")
 
         private var sourceChunk = createChunk()
         private var targetChunk = createChunk()
@@ -104,8 +109,8 @@ class WorkbookDataStoreTest {
         }
 
         private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-            on { getChapter(any()) } doReturn SourceAudio(takeFile, 0, 10)
-            on { getChunk(any(), any()) } doReturn SourceAudio(takeFile, 0, 1)
+            on { getChapter(any()) } doReturn SourceAudio(sourceTakeFile, 0, 10)
+            on { getChunk(any(), any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
         }
 
         private val workbook = mock<Workbook> {
@@ -115,7 +120,6 @@ class WorkbookDataStoreTest {
         }
 
         private fun createAssociatedAudio() = AssociatedAudio(ReplayRelay.create())
-        private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
 
         private fun createChunk(): Chunk {
             return Chunk(
@@ -154,9 +158,16 @@ class WorkbookDataStoreTest {
             )
             configureAudio.configure()
 
+            writeWavFile(sourceTakeFile)
+
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
         }
+    }
+
+    @Before
+    fun prepare() {
+        writeWavFile(takeFile)
     }
 
     @After
@@ -164,38 +175,39 @@ class WorkbookDataStoreTest {
         directoryProvider.cleanTempDirectory()
         workbookDataStore.activeChapterProperty.set(null)
         workbookDataStore.activeChunkProperty.set(null)
+        directoryProvider.cleanTempDirectory()
     }
 
     @Test
-    fun updateSourceAudio_isNullInitially() {
+    fun `no source audio when there is no active chapter`() {
         workbookDataStore.updateSourceAudio()
 
         Assert.assertNull(workbookDataStore.sourceAudioProperty.value)
     }
 
     @Test
-    fun updateSourceAudio_activeChapter() {
+    fun `there is chapter source audio for active chapter`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.updateSourceAudio()
 
-        Assert.assertEquals(takeFile, workbookDataStore.sourceAudioProperty.value?.file)
+        Assert.assertEquals(sourceTakeFile, workbookDataStore.sourceAudioProperty.value?.file)
         Assert.assertEquals(0, workbookDataStore.sourceAudioProperty.value?.start)
         Assert.assertEquals(10, workbookDataStore.sourceAudioProperty.value?.end)
     }
 
     @Test
-    fun updateSourceAudio_activeChunk() {
+    fun `there is chunk source audio for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
         workbookDataStore.updateSourceAudio()
 
-        Assert.assertEquals(takeFile, workbookDataStore.sourceAudioProperty.value?.file)
+        Assert.assertEquals(sourceTakeFile, workbookDataStore.sourceAudioProperty.value?.file)
         Assert.assertEquals(0, workbookDataStore.sourceAudioProperty.value?.start)
         Assert.assertEquals(1, workbookDataStore.sourceAudioProperty.value?.end)
     }
 
     @Test
-    fun updateSelectedChapterPlayer_isNullInitially() {
+    fun `no chapter player when there is no active chapter`() {
         workbookDataStore.updateSelectedChapterPlayer()
 
         Assert.assertNull(workbookDataStore.selectedChapterPlayerProperty.value)
@@ -203,7 +215,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun updateSelectedChapterPlayer_noSelectedTake() {
+    fun `no chapter player when there is no selected take`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.updateSelectedChapterPlayer()
 
@@ -212,7 +224,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun updateSelectedChapterPlayer_chapterAndTargetPlayers() {
+    fun `there are chapter and target audio players for active chapter with selected take`() {
         val take1 = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
         targetChapter.audio.insertTake(take1)
         targetChapter.audio.selectTake(take1)
@@ -225,7 +237,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun updateSelectedChapterPlayer_noChapterPlayerForChunkPage() {
+    fun `no chapter player for chunk page`() {
         val take1 = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
         targetChapter.audio.insertTake(take1)
         targetChapter.audio.selectTake(take1)
@@ -239,33 +251,33 @@ class WorkbookDataStoreTest {
     }
 
     @Test(expected = IllegalStateException::class)
-    fun getSourceAudio_noChapter() {
+    fun `getting source audio without active chapter throws exception`() {
         workbookDataStore.getSourceAudio()
     }
 
     @Test
-    fun getSourceAudio_activeChapter() {
+    fun `getting source audio for active chapter`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         val sourceAudio = workbookDataStore.getSourceAudio()
 
-        Assert.assertEquals(takeFile, sourceAudio?.file)
+        Assert.assertEquals(sourceTakeFile, sourceAudio?.file)
         Assert.assertEquals(0, sourceAudio?.start)
         Assert.assertEquals(10, sourceAudio?.end)
     }
 
     @Test
-    fun getSourceAudio_activeChunk() {
+    fun `getting source audio for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
         val sourceAudio = workbookDataStore.getSourceAudio()
 
-        Assert.assertEquals(takeFile, sourceAudio?.file)
+        Assert.assertEquals(sourceTakeFile, sourceAudio?.file)
         Assert.assertEquals(0, sourceAudio?.start)
         Assert.assertEquals(1, sourceAudio?.end)
     }
 
     @Test
-    fun getSourceText_activeChapter() {
+    fun `getting source text for active chapter`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
 
         val observer = workbookDataStore.getSourceText().test()
@@ -274,7 +286,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun getSourceText_activeChunk() {
+    fun `getting source text for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
 
@@ -284,7 +296,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun getSourceChapter_activeChapter() {
+    fun `getting source chapter for active chapter`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
 
         val observer = workbookDataStore.getSourceChapter().test()
@@ -293,7 +305,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun getSourceChunk_activeChunk() {
+    fun `getting source chunk for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
 
@@ -303,7 +315,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun activeTitleBinding_activeChapter() {
+    fun `getting title for active chapter`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
 
         val stringProperty = SimpleStringProperty()
@@ -313,7 +325,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun activeTitleBinding_activeChunk() {
+    fun `getting title for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
 
@@ -324,7 +336,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun activeChapterTitleBinding_activeChapter() {
+    fun `getting title for active chapter (alternative)`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
 
         val stringProperty = SimpleStringProperty()
@@ -334,7 +346,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun activeChunkTitleBinding_activeChapterNoChunkTitle() {
+    fun `chunk title is null when there is no active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
 
         val stringProperty = SimpleStringProperty()
@@ -344,7 +356,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun activeChunkTitleBinding_activeChunkTitle() {
+    fun `chunk title for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
 
@@ -355,7 +367,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun sourceTextBinding_activeChapter() {
+    fun `source text for active chapter`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
 
         val stringProperty = SimpleStringProperty()
@@ -365,7 +377,7 @@ class WorkbookDataStoreTest {
     }
 
     @Test
-    fun sourceTextBinding_activeChunk() {
+    fun `source text for active chunk`() {
         workbookDataStore.activeChapterProperty.set(targetChapter)
         workbookDataStore.activeChunkProperty.set(targetChunk)
 
