@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
 import javafx.beans.value.ChangeListener
+import javafx.collections.ListChangeListener
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -69,6 +70,7 @@ class WorkbookPage : View() {
     private var deleteSuccessListener: ChangeListener<Boolean>? = null
     private var deleteFailListener: ChangeListener<Boolean>? = null
     private var exportProgressListener: ChangeListener<Boolean>? = null
+    private val tabChaptersListeners = mutableMapOf<String, ListChangeListener<WorkbookItemModel>>()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -95,9 +97,9 @@ class WorkbookPage : View() {
      * created and added to the view.
      */
     override fun onDock() {
-        viewModel.openWorkbook()
         createTabs()
         root.tabs.setAll(tabMap.values)
+        viewModel.openWorkbook()
         viewModel.workbookDataStore.activeChunkProperty.set(null)
         viewModel.workbookDataStore.activeResourceComponentProperty.set(null)
         viewModel.workbookDataStore.activeResourceProperty.set(null)
@@ -115,6 +117,10 @@ class WorkbookPage : View() {
     override fun onUndock() {
         tabMap.clear()
         removeDialogListeners()
+        tabChaptersListeners.map {
+            viewModel.chapters.removeListener(it.value)
+        }
+        tabChaptersListeners.clear()
     }
 
     private fun createTabs() {
@@ -327,15 +333,16 @@ class WorkbookPage : View() {
                 listView.refresh()
             }
 
-            viewModel.chapters.onChangeAndDoNow {
+            tabChaptersListeners.putIfAbsent(text, ListChangeListener {
                 val item =
-                    it.singleOrNull { model ->
+                    it.list.singleOrNull { model ->
                         model is ChapterCardModel &&
                                 model.source == viewModel.selectedChapterProperty.value
                     }
-                val index = it.indexOf(item)
+                val index = it.list.indexOf(item)
                 listView.scrollTo(index)
-            }
+            })
+            viewModel.chapters.addListener(tabChaptersListeners[text])
         }
 
         fun buildTab(): VBox {
