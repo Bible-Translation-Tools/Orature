@@ -48,6 +48,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
+import org.wycliffeassociates.otter.jvm.workbookapp.utils.Audio
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
@@ -63,6 +64,12 @@ class RecordScriptureViewModelTest {
         private var contextListener: ChangeListener<PluginType>? = null
         private var activeTakeNumberListener: ChangeListener<Number>? = null
         private var showImportProgressListener: ChangeListener<Boolean>? = null
+
+        private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
+        private val tempDir = directoryProvider.tempDirectory
+        private var take1File = File(tempDir, "test1.wav")
+        private var take2File = File(tempDir, "test2.wav")
+        private var sourceTakeFile = File(tempDir, "sourceTake.wav")
 
         private var chunk1 = createChunk()
         private var chapter = createChapter()
@@ -85,13 +92,11 @@ class RecordScriptureViewModelTest {
             on { chapters } doReturn Observable.fromIterable(listOf(chapter))
             on { language } doReturn english
             on { slug } doReturn "gen"
+            on { title } doReturn "Genesis"
         }
 
-        private val takeFile = File(RecordScriptureViewModelTest::class.java.getResource("/files/test.wav")!!.file)
-        private val take2File = File(RecordScriptureViewModelTest::class.java.getResource("/files/test2.wav")!!.file)
-
         private val sourceAudioAccessor = mock<SourceAudioAccessor> {
-            on { getChapter(any()) } doReturn SourceAudio(takeFile, 0, 1)
+            on { getChapter(any()) } doReturn SourceAudio(sourceTakeFile, 0, 1)
         }
 
         private val workbook = mock<Workbook> {
@@ -107,9 +112,6 @@ class RecordScriptureViewModelTest {
                 callback(value)
             }
         }
-
-        private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
-        private val tempDir = directoryProvider.tempDirectory
 
         private val projectFilesAccessor = mock<ProjectFilesAccessor> {
             on { audioDir } doReturn tempDir
@@ -160,6 +162,8 @@ class RecordScriptureViewModelTest {
             )
             configureAudio.configure()
 
+            Audio.writeWavFile(sourceTakeFile)
+
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
             workbookDataStore.activeChapterProperty.set(chapter)
@@ -175,6 +179,9 @@ class RecordScriptureViewModelTest {
         recordScriptureViewModel.contextProperty.set(PluginType.RECORDER)
         workbookDataStore.activeTakeNumberProperty.set(0)
         recordScriptureViewModel.showImportProgressDialogProperty.set(false)
+
+        Audio.writeWavFile(take1File)
+        Audio.writeWavFile(take2File)
     }
 
     @After
@@ -221,7 +228,7 @@ class RecordScriptureViewModelTest {
         }
         workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
-        val take = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
         val takeEvent = TakeEvent(take, { }, TakeEvent.EDIT_TAKE)
 
         recordScriptureViewModel.processTakeWithPlugin(takeEvent, PluginType.EDITOR)
@@ -239,7 +246,7 @@ class RecordScriptureViewModelTest {
         }
         workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
 
-        val take = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
         val takeEvent = TakeEvent(take, { }, TakeEvent.MARK_TAKE)
 
         recordScriptureViewModel.processTakeWithPlugin(takeEvent, PluginType.MARKER)
@@ -247,7 +254,7 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun selectTake_recordableSelected() {
-        val take = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
 
         val initialLastModified = take.file.lastModified()
 
@@ -259,7 +266,7 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun importTakes_showProgressDialog() {
-        val takes = listOf(takeFile)
+        val takes = listOf(take1File)
 
         showImportProgressListener = createChangeListener {
             Assert.assertEquals(true, it)
@@ -271,7 +278,7 @@ class RecordScriptureViewModelTest {
 
     @Test
     fun deleteTake_timestamp_updated_and_another_take_selected() {
-        val take1 = Take("take1", takeFile, 1, MimeType.USFM, LocalDate.now())
+        val take1 = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
         val take2 = Take("take2", take2File, 2, MimeType.USFM, LocalDate.now())
         val initialDeletedTimestamp = take1.deletedTimestamp.value?.value
 
