@@ -34,7 +34,7 @@ ext {
     mockitoKotlinVer = '2.1.0'
     commonmarkVer = '0.12.1'
     clapperJavaUtilVer = '3.2.0'
-    kotlinresourcecontainerVer = '0.9.1'
+    kotlinresourcecontainerVer = '0.10.0'
     slf4jApiVer = '2.0.0-alpha1'
     log4j2Ver = '2.15.0'
     ikonliVer = '12.2.0'

@@ -232,7 +232,7 @@ class BookWizardViewModel : ViewModel() {
                     )
 
                     projectFilesAccessor.initializeResourceContainerInDir()
-                    projectFilesAccessor.copySourceFiles()
+                    projectFilesAccessor.copySourceFiles(excludeMedia = true)
                     projectFilesAccessor.createSelectedTakesFile()
 
                     showProgressProperty.set(false)
