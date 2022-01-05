@@ -39,7 +39,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
@@ -205,13 +204,6 @@ class ResourceListViewModelTest {
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
-
-            val configureAudio = ConfigureAudioSystem(
-                testApp.dependencyGraph.injectConnectionFactory(),
-                testApp.dependencyGraph.injectAudioDeviceProvider(),
-                testApp.dependencyGraph.injectAppPreferencesRepository()
-            )
-            configureAudio.configure()
 
             resourceListViewModel = find()
 
