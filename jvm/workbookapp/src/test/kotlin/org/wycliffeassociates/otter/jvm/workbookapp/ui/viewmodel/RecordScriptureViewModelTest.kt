@@ -48,7 +48,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
-import org.wycliffeassociates.otter.jvm.workbookapp.utils.Audio
+import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
@@ -162,7 +162,7 @@ class RecordScriptureViewModelTest {
             )
             configureAudio.configure()
 
-            Audio.writeWavFile(sourceTakeFile)
+            writeWavFile(sourceTakeFile)
 
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
@@ -180,8 +180,8 @@ class RecordScriptureViewModelTest {
         workbookDataStore.activeTakeNumberProperty.set(0)
         recordScriptureViewModel.showImportProgressDialogProperty.set(false)
 
-        Audio.writeWavFile(take1File)
-        Audio.writeWavFile(take2File)
+        writeWavFile(take1File)
+        writeWavFile(take2File)
     }
 
     @After
@@ -202,7 +202,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun recordNewTake_recorder() {
+    fun `record new take with recorder plugin`() {
         contextListener = createChangeListener {
             Assert.assertEquals(PluginType.RECORDER, it)
         }
@@ -217,7 +217,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun processTakeWithPlugin_editor() {
+    fun `process take with editor plugin`() {
         contextListener = createChangeListener {
             Assert.assertEquals(PluginType.EDITOR, it)
         }
@@ -235,7 +235,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun processTakeWithPlugin_marker() {
+    fun `process take with marker plugin`() {
         contextListener = createChangeListener {
             Assert.assertEquals(PluginType.MARKER, it)
         }
@@ -253,7 +253,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun selectTake_recordableSelected() {
+    fun `make selected take a recordable`() {
         val take = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
 
         val initialLastModified = take.file.lastModified()
@@ -265,7 +265,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun importTakes_showProgressDialog() {
+    fun `show progress dialog when importing takes`() {
         val takes = listOf(take1File)
 
         showImportProgressListener = createChangeListener {
@@ -277,7 +277,7 @@ class RecordScriptureViewModelTest {
     }
 
     @Test
-    fun deleteTake_timestamp_updated_and_another_take_selected() {
+    fun `when take deleted, timestamp updated and another take is selected`() {
         val take1 = Take("take1", take1File, 1, MimeType.USFM, LocalDate.now())
         val take2 = Take("take2", take2File, 2, MimeType.USFM, LocalDate.now())
         val initialDeletedTimestamp = take1.deletedTimestamp.value?.value
