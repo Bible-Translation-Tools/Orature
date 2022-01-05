@@ -36,6 +36,13 @@ class ConcatenateAudioTest {
         inputFiles.add(file1)
         inputFiles.add(file2)
         inputFiles.add(file3)
+
+        inputFiles.forEachIndexed { index, file ->
+            AudioFile(file).apply {
+                metadata.addCue(index, "${index + 1}")
+                update()
+            }
+        }
     }
 
     @After
@@ -70,6 +77,64 @@ class ConcatenateAudioTest {
         ConcatenateAudio(mockDirectoryProvider).execute(listOf()).subscribe(testObserver)
         testObserver.assertNotComplete()
         testObserver.assertErrorMessage("List is empty.")
+    }
+
+    @Test
+    fun testConcatWithMarkers() {
+        ConcatenateAudio(mockDirectoryProvider)
+            .execute(inputFiles, includeMarkers = true).subscribe(testObserver)
+
+        testObserver.assertComplete()
+        testObserver.assertResult(outputFile)
+        testObserver.assertValue(outputFile)
+        testObserver.assertValue { file ->
+            val audioFile = AudioFile(file)
+            val reader = audioFile.reader()
+            val buffer = ByteArray(6) // to store 6 characters (123456)
+            reader.open()
+            var outStr = ""
+            while (reader.hasRemaining()) {
+                reader.getPcmBuffer(buffer)
+                outStr = buffer.decodeToString()
+            }
+            outStr == "123456"
+        }
+        testObserver.assertValue { file ->
+            val audioFile = AudioFile(file)
+            val cues = audioFile.metadata.getCues()
+
+            cues.size == 3 && cues.all {
+                it.location == cues.indexOf(it)
+                it.label == "${cues.indexOf(it) + 1}"
+            }
+        }
+    }
+
+    @Test
+    fun testConcatWithoutMarkers() {
+        ConcatenateAudio(mockDirectoryProvider)
+            .execute(inputFiles, includeMarkers = false).subscribe(testObserver)
+
+        testObserver.assertComplete()
+        testObserver.assertResult(outputFile)
+        testObserver.assertValue(outputFile)
+        testObserver.assertValue { file ->
+            val audioFile = AudioFile(file)
+            val reader = audioFile.reader()
+            val buffer = ByteArray(6) // to store 6 characters (123456)
+            reader.open()
+            var outStr = ""
+            while (reader.hasRemaining()) {
+                reader.getPcmBuffer(buffer)
+                outStr = buffer.decodeToString()
+            }
+            outStr == "123456"
+        }
+        testObserver.assertValue { file ->
+            val audioFile = AudioFile(file)
+            val cues = audioFile.metadata.getCues()
+            cues.isEmpty()
+        }
     }
 
     private fun createWavFile(name: String, data: ByteArray): File {
