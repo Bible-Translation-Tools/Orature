@@ -25,7 +25,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
 
-private class TestView(override val root: Parent = Region()) : Fragment()
+internal class TestView(override val root: Parent = Region()) : Fragment()
 
 internal class TestApp : App(TestView::class), IDependencyGraphProvider {
     override val dependencyGraph: AppDependencyGraph = DaggerAppDependencyGraph.builder().build()
