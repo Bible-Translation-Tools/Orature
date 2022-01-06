@@ -245,6 +245,14 @@ class BookWizardViewModel : ViewModel() {
                     projectFilesAccessor.createSelectedTakesFile()
 
                     updateTranslationModifiedDate(translation)
+                        .observeOnFx()
+                        .doOnError { e ->
+                            logger.error("Error while creating project - update translation timestamp", e)
+                        }
+                        .subscribe {
+                            showProgressProperty.set(false)
+                            Platform.runLater { navigator.home() }
+                        }
                 }
         }
     }
@@ -270,27 +278,18 @@ class BookWizardViewModel : ViewModel() {
             .subscribe()
     }
 
-    private fun updateTranslationModifiedDate(translation: TranslationCardModel) {
-        languageRepository.getAllTranslations()
-            .doOnError { e ->
-                logger.error("Error while creating project - get translations", e)
-            }
-            .subscribe { translations ->
+    private fun updateTranslationModifiedDate(
+        translation: TranslationCardModel
+    ): Completable {
+        return languageRepository.getAllTranslations()
+            .map { translations ->
                 translations.singleOrNull {
                     it.source.slug == translation.sourceLanguage.slug
                             && it.target.slug == translation.targetLanguage.slug
-                }?.let { t ->
-                    t.modifiedTs = LocalDateTime.now()
-                    updateTranslationUseCase.update(t)
-                        .observeOnFx()
-                        .doOnError { e ->
-                            logger.error("Error while creating project - update translation timestamp", e)
-                        }
-                        .subscribe {
-                            showProgressProperty.set(false)
-                            Platform.runLater { navigator.home() }
-                        }
                 }
+            }.flatMapCompletable { t ->
+                t!!.modifiedTs = LocalDateTime.now()
+                updateTranslationUseCase.update(t)
             }
     }
 
