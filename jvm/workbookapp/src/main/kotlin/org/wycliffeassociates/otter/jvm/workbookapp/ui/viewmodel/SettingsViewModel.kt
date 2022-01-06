@@ -107,7 +107,7 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
-        selectedLocaleLanguageProperty.addListener { observable, oldValue, newValue ->
+        selectedLocaleLanguageProperty.addListener { _, oldValue, newValue ->
             if (oldValue != null) {
                 newValue?.let { updateLanguage(it) }
             }

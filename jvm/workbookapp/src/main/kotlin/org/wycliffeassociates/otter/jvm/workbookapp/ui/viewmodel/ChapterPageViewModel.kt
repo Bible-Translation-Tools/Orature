@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -422,12 +423,22 @@ class ChapterPageViewModel : ViewModel() {
             chunk.audio.takes
                 .filter { it.deletedTimestamp.value?.value == null }
                 .map { take ->
+                    setMarker(chunk.start.toString(), take)
                     take.mapToModel(take == selected)
                 }.subscribe {
                     chunkData.takes.addAll(it)
                 }.let {
                     disposables.add(it)
                 }
+        }
+    }
+
+    private fun setMarker(marker: String, take: Take) {
+        AudioFile(take.file).apply {
+            if (metadata.getCues().isEmpty()) {
+                metadata.addCue(0, marker)
+                update()
+            }
         }
     }
 

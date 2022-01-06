@@ -25,7 +25,10 @@ import java.io.File
 
 class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
 
-    fun execute(files: List<File>): Single<File> {
+    fun execute(
+        files: List<File>,
+        includeMarkers: Boolean = true
+    ): Single<File> {
         return Single.fromCallable {
             val inputFile = AudioFile(files.first())
             val tempFile = directoryProvider.createTempFile("output", ".wav")
@@ -48,7 +51,21 @@ class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
                     reader.release()
                 }
             }
+            if (includeMarkers) generateMarkers(files, outputFile)
+
             outputFile.file
         }
+    }
+
+    private fun generateMarkers(inputFiles: List<File>, outputAudio: AudioFile) {
+        var markerLocation = 0
+
+        inputFiles.forEach { file ->
+            val audioFile = AudioFile(file)
+            val marker = audioFile.metadata.getCues().first().label
+            outputAudio.metadata.addCue(markerLocation, marker)
+            markerLocation += audioFile.totalFrames
+        }
+        outputAudio.update()
     }
 }

@@ -31,13 +31,11 @@ import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
 
 class HomePage : View() {
 
     private val viewModel: HomePageViewModel by inject()
-    private val workbookDataStore: WorkbookDataStore by inject()
     private val settingsViewModel: SettingsViewModel by inject()
     private val navigator: NavigationMediator by inject()
 
@@ -138,6 +136,5 @@ class HomePage : View() {
         viewModel.loadResumeBook()
         viewModel.loadTranslations()
         viewModel.clearSelectedProject()
-        workbookDataStore.activeWorkbookProperty.set(null)
     }
 }

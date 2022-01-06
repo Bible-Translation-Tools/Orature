@@ -34,6 +34,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -265,6 +266,7 @@ class RecordScriptureViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            setMarker()
                             loadTakes()
                         }
                     }
@@ -329,6 +331,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .subscribe(
                     {
                         showImportSuccessDialogProperty.set(true)
+                        setMarker()
                         loadTakes()
                     },
                     {
@@ -424,6 +427,21 @@ class RecordScriptureViewModel : ViewModel() {
                 )
 
             takeCardModels.setAll(takes)
+        }
+    }
+
+    private fun setMarker() {
+        if (activeChunkProperty.value == null) return
+
+        recordable?.audio?.let { audio ->
+            audio.selected.value?.value?.let {
+                AudioFile(it.file).apply {
+                    if (metadata.getCues().isEmpty()) {
+                        metadata.addCue(0, activeChunk.start.toString())
+                        update()
+                    }
+                }
+            }
         }
     }
 
