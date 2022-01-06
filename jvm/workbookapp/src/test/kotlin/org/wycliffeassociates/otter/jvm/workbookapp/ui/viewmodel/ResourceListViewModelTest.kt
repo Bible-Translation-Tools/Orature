@@ -24,10 +24,12 @@ import com.nhaarman.mockitokotlin2.times
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Observable
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -212,6 +214,12 @@ class ResourceListViewModelTest {
 
             recordResourceViewModel = find()
         }
+
+        @AfterClass
+        fun tearDown() {
+            FxToolkit.hideStage()
+            testApp.stop()
+        }
     }
 
     @Test
@@ -247,6 +255,8 @@ class ResourceListViewModelTest {
     @Test
     fun `test LoadResourceGroups puts appropriate groups in list`() {
         resourceListViewModel.loadResourceGroups(testChapter)
+
+        WaitForAsyncUtils.waitForFxEvents()
 
         Assert.assertEquals(3, getResourceGroupSize(0))
         Assert.assertEquals(2, getResourceGroupSize(1))

@@ -26,6 +26,7 @@ import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.geometry.NodeOrientation
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
@@ -104,6 +105,12 @@ class SettingsViewModelTest {
             FxToolkit.setupApplication { testApp }
 
             settingsViewModel = find()
+        }
+
+        @AfterClass
+        fun tearDown() {
+            FxToolkit.hideStage()
+            testApp.stop()
         }
     }
 
