@@ -105,15 +105,15 @@ class HomePage : View() {
                     spacing = 20.0
                     bindChildren(viewModel.translationModels) {
                         TranslationCard(it.sourceLanguage.name, it.targetLanguage.name, it.books).apply {
-                            setConverter {
+                            setConverter { workbook ->
                                 BookCard().apply {
-                                    titleProperty.set(it.target.title)
-                                    slugProperty.set(it.target.slug.uppercase())
+                                    titleProperty.set(workbook.target.title)
+                                    slugProperty.set(workbook.target.slug.uppercase())
                                     coverArtProperty.set(
-                                        it.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
+                                        workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )
 
-                                    setOnPrimaryAction { viewModel.selectProject(it) }
+                                    setOnPrimaryAction { viewModel.selectProject(workbook) }
                                 }
                             }
 
