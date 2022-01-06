@@ -28,6 +28,7 @@ import io.reactivex.Single
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ChangeListener
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
@@ -186,6 +187,14 @@ class ChapterPageViewModelTest {
             chapterPageViewModel = find()
             settingsViewModel = find()
         }
+
+        @AfterClass
+        fun tearDown() {
+            directoryProvider.cleanTempDirectory()
+
+            FxToolkit.hideStage()
+            testApp.stop()
+        }
     }
 
     @Before
@@ -238,7 +247,6 @@ class ChapterPageViewModelTest {
         showExportProgressListener?.let {
             chapterPageViewModel.showExportProgressDialogProperty.removeListener(it)
         }
-        directoryProvider.cleanTempDirectory()
     }
 
     private fun <T> createChangeListener(callback: (T) -> Unit): ChangeListener<T> {
@@ -255,11 +263,6 @@ class ChapterPageViewModelTest {
             Assert.assertEquals(chapterCard.chapterSource, it)
         }
         workbookDataStore.activeChapterProperty.addListener(activeChapterListener)
-
-        activeChunkListener = createChangeListener {
-            Assert.assertNull(it)
-        }
-        workbookDataStore.activeChunkProperty.addListener(activeChunkListener)
 
         chapterPageViewModel.onCardSelection(chapterCard)
     }
@@ -482,7 +485,7 @@ class ChapterPageViewModelTest {
         take1File.copyTo(file, true)
 
         chapterPageViewModel.concatenateAudio = mock {
-            on { execute(any()) } doReturn Single.just(file)
+            on { execute(any(), any()) } doReturn Single.just(file)
         }
 
         var counter = 1
