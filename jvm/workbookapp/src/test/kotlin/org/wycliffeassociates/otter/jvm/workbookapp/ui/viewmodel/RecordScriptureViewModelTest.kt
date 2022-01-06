@@ -199,8 +199,6 @@ class RecordScriptureViewModelTest {
         showImportProgressListener?.let {
             recordScriptureViewModel.showImportProgressDialogProperty.removeListener(it)
         }
-
-        //directoryProvider.cleanTempDirectory()
     }
 
     @Test
