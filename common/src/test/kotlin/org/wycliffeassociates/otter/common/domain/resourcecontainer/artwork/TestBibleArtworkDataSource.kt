@@ -138,7 +138,7 @@ class TestBibleArtworkDataSource {
 
     @Throws(FileNotFoundException::class)
     private fun getResource(name: String): File {
-        val path = javaClass.classLoader.getResource(testRCName)?.file
+        val path = javaClass.classLoader.getResource(name)?.file
         if (path == null) {
             throw FileNotFoundException("Could not find resource: $name")
         }

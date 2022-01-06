@@ -149,11 +149,8 @@ class WorkbookPageViewModel : ViewModel() {
                 logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
             }
             .subscribe { list: List<WorkbookItemModel> ->
-                chapters.setAll(list)
-
-                if (chapters.filterIsInstance<WorkbookBannerModel>().isEmpty()) {
-                    chapters.add(0, createWorkbookBanner())
-                }
+                chapters.add(createWorkbookBanner())
+                chapters.addAll(list)
             }
     }
 

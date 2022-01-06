@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import io.reactivex.Completable
+import io.reactivex.schedulers.Schedulers
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.ErrorReportException
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -57,7 +59,11 @@ class AppInfoViewModel : ViewModel() {
 
     fun browseApplicationLog() {
         if (Desktop.isDesktopSupported()) {
-            Desktop.getDesktop().open(directoryProvider.logsDirectory)
+            Completable.fromAction {
+                Desktop.getDesktop().open(directoryProvider.logsDirectory)
+            }
+                .subscribeOn(Schedulers.io())
+                .subscribe()
         }
     }
 }
