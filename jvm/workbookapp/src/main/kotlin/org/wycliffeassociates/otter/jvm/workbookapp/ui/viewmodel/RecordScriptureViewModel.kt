@@ -47,9 +47,9 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
@@ -475,7 +475,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun openSourceAudioPlayer() {
         workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
         } ?: sourceAudioPlayerProperty.set(null)
@@ -517,7 +517,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val ap: IAudioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+        val ap: IAudioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
         ap.load(this.file)
         return TakeCardModel(
             this,
