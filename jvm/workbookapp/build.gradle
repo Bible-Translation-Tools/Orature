@@ -59,6 +59,13 @@ application {
     mainClassName = "org.wycliffeassociates.otter.jvm.workbookapp.MainKt"
 }
 
+test {
+    systemProperty 'testfx.robot', 'glass'
+    systemProperty 'testfx.headless', 'true'
+    systemProperty 'prism.order', 'sw'
+    systemProperty 'prism.text', 't2k'
+}
+
 apply from: './jooq.gradle'
 
 boolean devbuild = hasProperty("devbuild")
@@ -129,6 +136,7 @@ dependencies {
     // Jackson YAML
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVer"
     implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVer"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-csv:$jacksonVer"
 
     //Dagger2
     implementation "com.google.dagger:dagger:$daggerVer"
@@ -141,7 +149,7 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVer"
     testImplementation "org.testfx:testfx-core:$testFxVer"
     testImplementation "org.testfx:testfx-junit:$testFxVer"
-    testImplementation "org.testfx:openjfx-monocle:jdk-12.0.1+2"
+    testImplementation "org.testfx:openjfx-monocle:$testFxMonocleVer"
     integrationTestCompile group: 'junit', name: 'junit', version: "$junitVer"
     integrationTestCompile "org.mockito:mockito-core:$mockitoVer"
     integrationTestImplementation sourceSets.main.compileClasspath
@@ -174,6 +182,8 @@ dependencies {
 
     implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
     implementation "com.install4j:install4j-runtime:$install4jVer"
+
+    implementation "be.tarsos:tarsosdsp:$tarsosDspVer"
 }
 
 // tell gradle what to put in the jar

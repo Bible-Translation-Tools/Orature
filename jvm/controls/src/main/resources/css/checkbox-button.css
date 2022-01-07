@@ -30,11 +30,11 @@
 }
 
 .checkbox-button:hover {
-    -fx-background-color: -wa-black-05;
+    -fx-background-color: -wa-secondary-btn-background-hover;
 }
 
 .checkbox-button:pressed {
-    -fx-background-color: -wa-black-10;
+    -fx-background-color: -wa-secondary-btn-background-pressed;
 }
 
 .checkbox-button:selected {

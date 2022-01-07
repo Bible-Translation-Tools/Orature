@@ -18,8 +18,10 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import javafx.geometry.Pos
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.ThemeColorEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.HomePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.SplashScreenStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -55,9 +57,17 @@ class SplashScreen : View() {
 
     private fun finish() {
         viewModel.initAudioSystem()
-        close()
-        settingsViewModel.setAppOrientation()
-        primaryStage.show()
-        navigator.dock<HomePage>()
+        viewModel.theme.preferredTheme
+            .observeOnFx()
+            .doFinally {
+                close()
+                settingsViewModel.setAppOrientation()
+                primaryStage.show()
+                navigator.dock<HomePage>()
+            }
+            .observeOnFx()
+            .subscribe { theme ->
+                fire(ThemeColorEvent(this::class, theme))
+            }
     }
 }

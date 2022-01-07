@@ -132,6 +132,7 @@ class BookSelection : Fragment() {
             progressTitleProperty.set(messages["pleaseWait"])
             showProgressBarProperty.set(true)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
+            themeProperty.set(settingsViewModel.appColorMode.value)
 
             viewModel.showProgressProperty.onChange {
                 Platform.runLater { if (it) open() else close() }

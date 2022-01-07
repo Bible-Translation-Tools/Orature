@@ -102,7 +102,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
 
     private fun createMenuSeparator(label: String): MenuItem {
         return CustomMenuItem().apply {
-            styleClass.add("filtered-search-bar__menu__separator")
+            styleClass.add("wa-menu-button__separator")
             content = Label(label)
             isHideOnClick = false
         }

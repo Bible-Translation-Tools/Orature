@@ -34,6 +34,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -46,14 +47,13 @@ import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
-import java.text.SimpleDateFormat
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -239,9 +239,8 @@ class RecordScriptureViewModel : ViewModel() {
             StepDirection.FORWARD -> 1
             StepDirection.BACKWARD -> -1
         }
-        chunkList
-            .find { it.start == activeChunk.start + amount }
-            ?.let { newChunk -> activeChunkProperty.set(newChunk) }
+        val nextIndex = chunkList.indexOf(activeChunk) + amount
+        chunkList.elementAtOrNull(nextIndex)?.let { activeChunkProperty.set(it) }
     }
 
     fun recordNewTake() {
@@ -267,6 +266,7 @@ class RecordScriptureViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            setMarker()
                             loadTakes()
                         }
                     }
@@ -331,6 +331,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .subscribe(
                     {
                         showImportSuccessDialogProperty.set(true)
+                        setMarker()
                         loadTakes()
                     },
                     {
@@ -429,6 +430,21 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
+    private fun setMarker() {
+        if (activeChunkProperty.value == null) return
+
+        recordable?.audio?.let { audio ->
+            audio.selected.value?.value?.let {
+                AudioFile(it.file).apply {
+                    if (metadata.getCues().isEmpty()) {
+                        metadata.addCue(0, activeChunk.start.toString())
+                        update()
+                    }
+                }
+            }
+        }
+    }
+
     private fun removeOnDeleted(take: Take, isTakeSelected: Boolean = false) {
         take.deletedTimestamp
             .filter { dateHolder -> dateHolder.value != null }
@@ -459,7 +475,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     fun openSourceAudioPlayer() {
         workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
         } ?: sourceAudioPlayerProperty.set(null)
@@ -501,7 +517,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     fun Take.mapToCardModel(selected: Boolean): TakeCardModel {
-        val ap: IAudioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+        val ap: IAudioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
         ap.load(this.file)
         return TakeCardModel(
             this,

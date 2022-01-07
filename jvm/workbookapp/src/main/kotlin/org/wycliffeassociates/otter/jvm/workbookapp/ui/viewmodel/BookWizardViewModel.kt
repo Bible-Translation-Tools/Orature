@@ -231,7 +231,7 @@ class BookWizardViewModel : ViewModel() {
                     )
 
                     projectFilesAccessor.initializeResourceContainerInDir()
-                    projectFilesAccessor.copySourceFiles()
+                    projectFilesAccessor.copySourceFiles(excludeMedia = true)
                     projectFilesAccessor.createSelectedTakesFile()
 
                     showProgressProperty.set(false)
@@ -296,7 +296,7 @@ class BookWizardViewModel : ViewModel() {
 
     private fun createMenuSeparator(label: String): MenuItem {
         return CustomMenuItem().apply {
-            styleClass.add("filtered-search-bar__menu__separator")
+            styleClass.add("wa-menu-button__separator")
             content = Label(label)
             isHideOnClick = false
         }

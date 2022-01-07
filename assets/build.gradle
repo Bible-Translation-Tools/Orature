@@ -3,7 +3,7 @@ version '0.0.1'
 
 repositories {
     ivy {
-        url 'https://git.door43.org'
+        url 'https://content.bibletranslationtools.org'
         patternLayout {
             artifact '[organisation]/[module]/archive/[revision].[ext]'
         }
@@ -37,9 +37,9 @@ configurations {
 }
 
 dependencies {
-    content 'bible-translation-tools:en_art_wa:1.0.0@zip'
-    content 'bible-translation-tools:en_art_sp:1.0.0@zip'
-    content 'wycliffeassociates:en_ulb:v19-10@zip'
+    content 'bible-translation-tools:en_art_wa:2.0.0@zip'
+    content 'bible-translation-tools:en_art_sp:2.0.0@zip'
+    content 'wa-catalog:en_ulb:V21-05@zip'
     content 'unfoldingword:langnames@json'
     content 'bible-translation-tools:bible_artwork@zip'
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"

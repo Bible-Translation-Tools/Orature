@@ -22,7 +22,7 @@
     -fx-spacing: 10px;
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 15px;
-    -fx-effect: dropshadow(gaussian, -wa-black-20, 10, 0, 3, 3);
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .translation-card__root .label {
@@ -34,7 +34,7 @@
     -fx-padding: 15px;
     -fx-alignment: center-left;
     -fx-border-width: 0 0 1px 0;
-    -fx-border-color: -wa-black-20;
+    -fx-border-color: -wa-border-light;
 }
 
 .translation-card__header .ikonli-font-icon {

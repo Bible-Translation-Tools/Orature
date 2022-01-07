@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.persistence.repositories
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
+import org.wycliffeassociates.otter.common.data.ColorTheme
 import org.wycliffeassociates.otter.common.data.primitives.Language
 
 interface IAppPreferencesRepository {
@@ -34,4 +35,6 @@ interface IAppPreferencesRepository {
     fun setInputDevice(mixer: String): Completable
     fun localeLanguage(): Maybe<Language>
     fun setLocaleLanguage(language: Language): Completable
+    fun appTheme(): Single<ColorTheme>
+    fun setAppTheme(theme: ColorTheme): Completable
 }

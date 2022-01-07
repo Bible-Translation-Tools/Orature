@@ -26,5 +26,5 @@
 .take-item.selected {
     -fx-background-color: -wa-foreground-hover;
     -fx-background-radius: 7px;
-    -fx-effect: dropshadow(gaussian, -wa-black-30, 10, 0, 3, 3);
+    -fx-effect: -wa-card-shadow-lower-right-dark;
 }
