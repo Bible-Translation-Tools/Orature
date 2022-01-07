@@ -31,6 +31,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -45,14 +46,13 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordScripturePage
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RecordScripturePage
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -63,6 +63,9 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
+
+    var audioConverter: AudioConverter
+    var concatenateAudio: ConcatenateAudio
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -98,6 +101,9 @@ class ChapterPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+
+        audioConverter = AudioConverter()
+        concatenateAudio = ConcatenateAudio(directoryProvider)
 
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
     }
@@ -148,7 +154,7 @@ class ChapterPageViewModel : ViewModel() {
             target.player.load(target.file)
         }
         workbookDataStore.sourceAudioProperty.value?.let { source ->
-            val audioPlayer = (app as OtterApp).dependencyGraph.injectPlayer()
+            val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
             audioPlayer.loadSection(source.file, source.start, source.end)
             sourceAudioPlayerProperty.set(audioPlayer)
         }
@@ -162,25 +168,24 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun checkCanCompile() {
-        val hasUnselected = filteredContent
-            .filter { chunk ->
-                chunk.chunkSource?.audio?.selected?.value?.value == null
-            }
-            .any()
+        val hasUnselected = filteredContent.any { chunk ->
+            chunk.chunkSource?.audio?.selected?.value?.value == null
+        }
         canCompileProperty.set(hasUnselected.not())
     }
 
     fun setWorkChunk() {
         if (filteredContent.isEmpty()) return
 
-        val hasTakes = filteredContent.filter { chunk ->
-            chunk.chunkSource?.audio?.getAllTakes()?.isNotEmpty() ?: false
-        }.any()
+        val hasTakes = filteredContent.any { chunk ->
+            chunk.chunkSource?.audio?.getAllTakes()
+                ?.any { it.deletedTimestamp.value?.value == null } ?: false
+        }
 
         if (hasTakes) {
-            val notSelected = filteredContent.filter { chunk ->
+            val notSelected = filteredContent.firstOrNull { chunk ->
                 chunk.chunkSource?.audio?.selected?.value?.value == null
-            }.firstOrNull() ?: filteredContent.last()
+            } ?: filteredContent.last()
             noTakesProperty.set(false)
             workChunkProperty.set(notSelected)
         } else {
@@ -271,7 +276,7 @@ class ChapterPageViewModel : ViewModel() {
 
             var compiled: File? = null
 
-            ConcatenateAudio(directoryProvider).execute(takes)
+            concatenateAudio.execute(takes)
                 .flatMapCompletable { file ->
                     compiled = file
                     audioPluginViewModel.import(chapter, file)
@@ -289,21 +294,18 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
-    fun exportChapter() {
+    fun exportChapter(directory: File) {
         selectedChapterTakeProperty.value?.let { take ->
-            val directory = chooseDirectory(FX.messages["exportChapter"])
-            directory?.let {
-                showExportProgressDialogProperty.set(true)
+            showExportProgressDialogProperty.set(true)
 
-                val mp3Name = take.file.nameWithoutExtension + ".mp3"
-                val mp3File = File(directory, mp3Name)
-                AudioConverter().wavToMp3(take.file, mp3File)
-                    .subscribeOn(Schedulers.io())
-                    .observeOnFx()
-                    .subscribe {
-                        showExportProgressDialogProperty.set(false)
-                    }
-            }
+            val mp3Name = take.file.nameWithoutExtension + ".mp3"
+            val mp3File = File(directory, mp3Name)
+            audioConverter.wavToMp3(take.file, mp3File)
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .subscribe {
+                    showExportProgressDialogProperty.set(false)
+                }
         }
     }
 
@@ -393,9 +395,11 @@ class ChapterPageViewModel : ViewModel() {
             }
             .observeOnFx()
             .subscribe { takeHolder ->
-                logger.info("Setting selected chapter take to ${takeHolder.value?.name}")
-                setSelectedChapterTake(takeHolder.value)
-                workbookDataStore.updateSelectedChapterPlayer()
+                takeHolder.value?.let {
+                    logger.info("Setting selected chapter take to ${takeHolder.value?.name}")
+                    setSelectedChapterTake(takeHolder.value)
+                    workbookDataStore.updateSelectedChapterPlayer()
+                }
             }
             .let { disposables.add(it) }
     }
@@ -419,6 +423,7 @@ class ChapterPageViewModel : ViewModel() {
             chunk.audio.takes
                 .filter { it.deletedTimestamp.value?.value == null }
                 .map { take ->
+                    setMarker(chunk.start.toString(), take)
                     take.mapToModel(take == selected)
                 }.subscribe {
                     chunkData.takes.addAll(it)
@@ -428,12 +433,21 @@ class ChapterPageViewModel : ViewModel() {
         }
     }
 
+    private fun setMarker(marker: String, take: Take) {
+        AudioFile(take.file).apply {
+            if (metadata.getCues().isEmpty()) {
+                metadata.addCue(0, marker)
+                update()
+            }
+        }
+    }
+
     private fun Take.mapToModel(selected: Boolean): TakeModel {
         val audioPlayer = getPlayer()
         return TakeModel(this, selected, false, audioPlayer)
     }
 
     private fun getPlayer(): IAudioPlayer {
-        return (app as OtterApp).dependencyGraph.injectPlayer()
+        return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 }
