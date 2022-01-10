@@ -170,14 +170,9 @@ class ChunkItem : VBox() {
      * Call this method after the list view children have rendered.
      */
     private fun setClipOffsetListView(lv: ListView<TakeItem>) {
-        val offset = TAKE_CELL_HEIGHT
-        val clip = Rectangle(0.0, 0.0)
-        clip.widthProperty().bind(lv.widthProperty())
-        clip.heightProperty().bind(lv.heightProperty().plus(offset))
-        clip.layoutY = -offset
         // traverse to ClippedContainer and update it
         lv.getChildList()?.firstOrNull { it.hasClass("virtual-flow") }
             ?.getChildList()?.firstOrNull { it.hasClass("clipped-container") }
-            ?.clip = clip
+            ?.clip = null
     }
 }
