@@ -61,7 +61,6 @@ import java.text.MessageFormat
 import java.util.*
 
 private const val TAKES_ROW_HEIGHT = 197.0
-private const val SCROLL_SPEED = 0.02
 
 class RecordScripturePage : View() {
     private val logger = LoggerFactory.getLogger(RecordScripturePage::class.java)
@@ -263,11 +262,6 @@ class RecordScripturePage : View() {
                         minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT));
                         placeholder = ListViewPlaceHolder()
                     }
-                }
-
-                content.setOnScroll {
-                    val delta = it.deltaY * SCROLL_SPEED
-                    vvalue -= delta
                 }
             }
 
