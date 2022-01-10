@@ -176,6 +176,8 @@ class ChunkItem : VBox() {
         clip.heightProperty().bind(lv.heightProperty().plus(offset))
         clip.layoutY = -offset
         // traverse to ClippedContainer and update it
-        lv.getChildList()?.firstOrNull()?.getChildList()?.firstOrNull()?.clip = clip
+        lv.getChildList()?.firstOrNull { it.hasClass("virtual-flow") }
+            ?.getChildList()?.firstOrNull { it.hasClass("clipped-container") }
+            ?.clip = clip
     }
 }
