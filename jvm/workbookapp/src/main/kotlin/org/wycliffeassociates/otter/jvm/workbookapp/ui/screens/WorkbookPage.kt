@@ -162,7 +162,7 @@ class WorkbookPage : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
-                messages["removeProjectTitle"],
+                messages["deleteProjectTitle"],
                 messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
@@ -195,7 +195,7 @@ class WorkbookPage : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
-                messages["removeProjectTitle"],
+                messages["deleteProjectTitle"],
                 messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
@@ -224,7 +224,7 @@ class WorkbookPage : View() {
             themeProperty.set(settingsViewModel.appColorMode.value)
 
             val titleText = MessageFormat.format(
-                messages["removeProjectTitle"],
+                messages["deleteProjectTitle"],
                 messages["delete"],
                 viewModel.workbookDataStore.workbook.target.title
             )
