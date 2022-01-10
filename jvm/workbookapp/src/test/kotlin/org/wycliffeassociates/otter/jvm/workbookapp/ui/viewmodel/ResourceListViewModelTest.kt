@@ -218,7 +218,8 @@ class ResourceListViewModelTest {
         @AfterClass
         fun tearDown() {
             FxToolkit.hideStage()
-            testApp.stop()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
         }
     }
 
