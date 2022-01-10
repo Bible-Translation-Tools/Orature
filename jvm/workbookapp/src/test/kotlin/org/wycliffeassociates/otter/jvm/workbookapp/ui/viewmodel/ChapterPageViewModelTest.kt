@@ -168,14 +168,14 @@ class ChapterPageViewModelTest {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
+            writeWavFile(sourceTakeFile)
+
             val configureAudio = ConfigureAudioSystem(
                 testApp.dependencyGraph.injectConnectionFactory(),
                 testApp.dependencyGraph.injectAudioDeviceProvider(),
                 testApp.dependencyGraph.injectAppPreferencesRepository()
             )
             configureAudio.configure()
-
-            writeWavFile(sourceTakeFile)
 
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
@@ -193,7 +193,8 @@ class ChapterPageViewModelTest {
             directoryProvider.cleanTempDirectory()
 
             FxToolkit.hideStage()
-            testApp.stop()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
         }
     }
 
