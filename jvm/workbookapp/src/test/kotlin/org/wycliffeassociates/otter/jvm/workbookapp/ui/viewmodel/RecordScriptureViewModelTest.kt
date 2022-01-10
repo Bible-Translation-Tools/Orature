@@ -295,8 +295,13 @@ class RecordScriptureViewModelTest {
     fun `show progress dialog when importing takes`() {
         val takes = listOf(take1File)
 
+        var counter = 1
         showImportProgressListener = createChangeListener {
-            Assert.assertEquals(true, it)
+            when (counter) {
+                1 -> Assert.assertEquals(true, it)
+                2 -> Assert.assertEquals(false, it)
+            }
+            counter++
         }
         recordScriptureViewModel.showImportProgressDialogProperty.addListener(showImportProgressListener)
 
