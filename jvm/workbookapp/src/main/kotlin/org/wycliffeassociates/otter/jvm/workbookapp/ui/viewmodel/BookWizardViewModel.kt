@@ -39,11 +39,13 @@ import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.CreateProject
 import org.wycliffeassociates.otter.common.domain.collections.UpdateProject
+import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.ArtworkAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -53,6 +55,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
 import java.io.File
+import java.time.LocalDateTime
 import java.util.function.Predicate
 import javax.inject.Inject
 
@@ -73,7 +76,13 @@ class BookWizardViewModel : ViewModel() {
     lateinit var workbookRepo: IWorkbookRepository
 
     @Inject
+    lateinit var languageRepository: ILanguageRepository
+
+    @Inject
     lateinit var updateProjectUseCase: UpdateProject
+
+    @Inject
+    lateinit var updateTranslationUseCase: UpdateTranslation
 
     private val navigator: NavigationMediator by inject()
 
@@ -234,8 +243,15 @@ class BookWizardViewModel : ViewModel() {
                     projectFilesAccessor.copySourceFiles(excludeMedia = true)
                     projectFilesAccessor.createSelectedTakesFile()
 
-                    showProgressProperty.set(false)
-                    Platform.runLater { navigator.home() }
+                    updateTranslationModifiedDate(translation)
+                        .observeOnFx()
+                        .doOnError { e ->
+                            logger.error("Error while creating project - update translation timestamp", e)
+                        }
+                        .subscribe {
+                            showProgressProperty.set(false)
+                            Platform.runLater { navigator.home() }
+                        }
                 }
         }
     }
@@ -262,6 +278,21 @@ class BookWizardViewModel : ViewModel() {
             .subscribe()
 
         return artwork
+    }
+
+    private fun updateTranslationModifiedDate(
+        translation: TranslationCardModel
+    ): Completable {
+        return languageRepository.getAllTranslations()
+            .map { translations ->
+                translations.singleOrNull {
+                    it.source.slug == translation.sourceLanguage.slug
+                            && it.target.slug == translation.targetLanguage.slug
+                }
+            }.flatMapCompletable { t ->
+                t!!.modifiedTs = LocalDateTime.now()
+                updateTranslationUseCase.update(t)
+            }
     }
 
     fun setFilterMenu() {

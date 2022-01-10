@@ -23,6 +23,7 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleStringProperty
@@ -34,6 +35,7 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
@@ -45,10 +47,13 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
@@ -163,10 +168,28 @@ class ChapterPageViewModelTest {
             )
         }
 
+        private val audioPlugin = mock<IAudioPlugin> {
+            on { isNativePlugin() } doReturn true
+            on { launch(any(), any()) } doReturn Completable.complete()
+        }
+
+        private val takeActions = mock<TakeActions> {
+            on { record(any(), any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+            on { mark(any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+            on { edit(any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+            on { import(any(), any(), any(), any()) } doReturn Completable.complete()
+        }
+
+        private val pluginRepository = mock<IAudioPluginRepository> {
+            on { getPlugin(any()) } doReturn Maybe.just(audioPlugin)
+        }
+
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
+
+            writeWavFile(sourceTakeFile)
 
             val configureAudio = ConfigureAudioSystem(
                 testApp.dependencyGraph.injectConnectionFactory(),
@@ -174,8 +197,6 @@ class ChapterPageViewModelTest {
                 testApp.dependencyGraph.injectAppPreferencesRepository()
             )
             configureAudio.configure()
-
-            writeWavFile(sourceTakeFile)
 
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
@@ -186,6 +207,9 @@ class ChapterPageViewModelTest {
             audioPluginViewModel = find()
             chapterPageViewModel = find()
             settingsViewModel = find()
+
+            audioPluginViewModel.pluginRepository = pluginRepository
+            audioPluginViewModel.takeActions = takeActions
         }
 
         @AfterClass
@@ -193,7 +217,8 @@ class ChapterPageViewModelTest {
             directoryProvider.cleanTempDirectory()
 
             FxToolkit.hideStage()
-            testApp.stop()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
         }
     }
 
@@ -204,6 +229,7 @@ class ChapterPageViewModelTest {
         chapterPageViewModel.noTakesProperty.set(false)
         chapterPageViewModel.workChunkProperty.set(null)
         chapterPageViewModel.canCompileProperty.set(false)
+        chapterPageViewModel.isCompilingProperty.set(false)
 
         writeWavFile(take1File)
         writeWavFile(take2File)
@@ -286,12 +312,14 @@ class ChapterPageViewModelTest {
         }
         chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
 
-        val take1 = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
-        val take2 = Take("take2.wav", take2File, 2, MimeType.WAV, LocalDate.now())
+        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
 
         chunk1.audio.insertTake(take1)
         chunk1.audio.selectTake(take1)
         chunk2.audio.insertTake(take2)
+
+        WaitForAsyncUtils.waitForFxEvents()
 
         chapterPageViewModel.checkCanCompile()
     }
@@ -303,19 +331,21 @@ class ChapterPageViewModelTest {
         }
         chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
 
-        val take1 = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
-        val take2 = Take("take2.wav", take2File, 2, MimeType.WAV, LocalDate.now())
+        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
 
         chunk1.audio.insertTake(take1)
         chunk1.audio.selectTake(take1)
         chunk2.audio.insertTake(take2)
         chunk2.audio.selectTake(take2)
 
+        WaitForAsyncUtils.waitForFxEvents()
+
         chapterPageViewModel.checkCanCompile()
     }
 
     @Test
-    fun `inititally workChunk is the first chunk`() {
+    fun `initially workChunk is the first chunk`() {
         val chunkCard = CardData(chunk1)
 
         noTakesListener = createChangeListener {
@@ -345,17 +375,19 @@ class ChapterPageViewModelTest {
         }
         chapterPageViewModel.workChunkProperty.addListener(workChunkListener)
 
-        val take = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 
         chunk1.audio.insertTake(take)
         chunk1.audio.selectTake(take)
+
+        WaitForAsyncUtils.waitForFxEvents()
 
         chapterPageViewModel.setWorkChunk()
     }
 
     @Test
     fun `selected chapter take is the first selected take`() {
-        val take = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 
         chapter1.audio.insertTake(take)
         chapter1.audio.selectTake(take)
@@ -383,7 +415,7 @@ class ChapterPageViewModelTest {
 
     @Test
     fun `process take with recorder plugin`() {
-        val take = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 
         contextListener = createChangeListener {
             Assert.assertEquals(PluginType.RECORDER, it)
@@ -403,7 +435,7 @@ class ChapterPageViewModelTest {
 
     @Test
     fun `process take with editor plugin`() {
-        val take = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 
         contextListener = createChangeListener {
             Assert.assertEquals(PluginType.EDITOR, it)
@@ -423,7 +455,7 @@ class ChapterPageViewModelTest {
 
     @Test
     fun `process take with marker plugin`() {
-        val take = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 
         chapter1.audio.insertTake(take)
         chapter1.audio.selectTake(take)
@@ -473,13 +505,15 @@ class ChapterPageViewModelTest {
 
     @Test
     fun `compiling chapter updates isCompiling property`() {
-        val take1 = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
-        val take2 = Take("take2.wav", take2File, 2, MimeType.WAV, LocalDate.now())
+        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
 
         chunk1.audio.insertTake(take1)
         chunk1.audio.selectTake(take1)
         chunk2.audio.insertTake(take2)
         chunk2.audio.selectTake(take2)
+
+        WaitForAsyncUtils.waitForFxEvents()
 
         val file = directoryProvider.createTempFile("take1", ".wav")
         take1File.copyTo(file, true)
@@ -504,7 +538,7 @@ class ChapterPageViewModelTest {
 
     @Test
     fun `exporting chapter updates export dialog property`() {
-        val take = Take("take1.wav", take1File, 1, MimeType.WAV, LocalDate.now())
+        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 
         chapter1.audio.insertTake(take)
         chapter1.audio.selectTake(take)
@@ -521,6 +555,8 @@ class ChapterPageViewModelTest {
             counter++
         }
         chapterPageViewModel.showExportProgressDialogProperty.addListener(showExportProgressListener)
+
+        WaitForAsyncUtils.waitForFxEvents()
 
         chapterPageViewModel.exportChapter(File("test"))
     }

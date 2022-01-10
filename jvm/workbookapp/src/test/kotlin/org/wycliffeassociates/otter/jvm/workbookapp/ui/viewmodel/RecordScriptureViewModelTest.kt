@@ -22,7 +22,10 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
+import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Observable
+import io.reactivex.Single
 import javafx.beans.value.ChangeListener
 import org.junit.After
 import org.junit.AfterClass
@@ -31,7 +34,6 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.testfx.api.FxToolkit
-import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
@@ -43,9 +45,12 @@ import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.domain.plugins.IAudioPlugin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
@@ -60,6 +65,7 @@ class RecordScriptureViewModelTest {
 
         private lateinit var recordScriptureViewModel: RecordScriptureViewModel
         private lateinit var workbookDataStore: WorkbookDataStore
+        private lateinit var audioPluginViewModel: AudioPluginViewModel
 
         private var contextListener: ChangeListener<PluginType>? = null
         private var activeTakeNumberListener: ChangeListener<Number>? = null
@@ -67,8 +73,8 @@ class RecordScriptureViewModelTest {
 
         private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
         private val tempDir = directoryProvider.tempDirectory
-        private var take1File = File(tempDir, "test1.wav")
-        private var take2File = File(tempDir, "test2.wav")
+        private var take1File = File(tempDir, "take1.wav")
+        private var take2File = File(tempDir, "take2.wav")
         private var sourceTakeFile = File(tempDir, "sourceTake.wav")
 
         private var chunk1 = createChunk()
@@ -143,10 +149,28 @@ class RecordScriptureViewModelTest {
             )
         }
 
+        private val audioPlugin = mock<IAudioPlugin> {
+            on { isNativePlugin() } doReturn true
+            on { launch(any(), any()) } doReturn Completable.complete()
+        }
+
+        private val takeActions = mock<TakeActions> {
+            on { record(any(), any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+            on { mark(any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+            on { edit(any(), any(), any()) } doReturn Single.just(TakeActions.Result.SUCCESS)
+            on { import(any(), any(), any(), any()) } doReturn Completable.complete()
+        }
+
+        private val pluginRepository = mock<IAudioPluginRepository> {
+            on { getPlugin(any()) } doReturn Maybe.just(audioPlugin)
+        }
+
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
+
+            writeWavFile(sourceTakeFile)
 
             val configureAudio = ConfigureAudioSystem(
                 testApp.dependencyGraph.injectConnectionFactory(),
@@ -155,8 +179,6 @@ class RecordScriptureViewModelTest {
             )
             configureAudio.configure()
 
-            writeWavFile(sourceTakeFile)
-
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
             workbookDataStore.activeChapterProperty.set(chapter)
@@ -164,6 +186,10 @@ class RecordScriptureViewModelTest {
             workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
 
             recordScriptureViewModel = find()
+
+            audioPluginViewModel = find()
+            audioPluginViewModel.pluginRepository = pluginRepository
+            audioPluginViewModel.takeActions = takeActions
         }
 
         @AfterClass
@@ -171,7 +197,8 @@ class RecordScriptureViewModelTest {
             directoryProvider.cleanTempDirectory()
 
             FxToolkit.hideStage()
-            testApp.stop()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
         }
     }
 
@@ -274,24 +301,5 @@ class RecordScriptureViewModelTest {
         recordScriptureViewModel.showImportProgressDialogProperty.addListener(showImportProgressListener)
 
         recordScriptureViewModel.importTakes(takes)
-    }
-
-    @Test
-    fun `when take deleted, timestamp updated and another take is selected`() {
-        recordScriptureViewModel.importTakes(listOf(take1File, take2File))
-        WaitForAsyncUtils.waitForFxEvents()
-
-        val takeCard1 = recordScriptureViewModel.takeCardModels.single { it.take.number == 1 }
-        val takeCard2 = recordScriptureViewModel.takeCardModels.single { it.take.number == 2 }
-        recordScriptureViewModel.selectTake(takeCard1.take)
-        val initialDeletedTimestamp = takeCard1.take.deletedTimestamp.value?.value
-        WaitForAsyncUtils.waitForFxEvents()
-
-        recordScriptureViewModel.deleteTake(takeCard1.take)
-        WaitForAsyncUtils.waitForFxEvents()
-
-        Assert.assertNotEquals(takeCard1.take.deletedTimestamp.value?.value, initialDeletedTimestamp)
-        Assert.assertEquals(1, recordScriptureViewModel.takeCardModels.size)
-        Assert.assertEquals(takeCard2.take, recordScriptureViewModel.recordable?.audio?.selected?.value?.value)
     }
 }
