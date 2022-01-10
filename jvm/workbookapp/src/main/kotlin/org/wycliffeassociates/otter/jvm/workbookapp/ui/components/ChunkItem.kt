@@ -25,8 +25,10 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
+import javafx.scene.shape.Rectangle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
@@ -113,6 +115,8 @@ class ChunkItem : VBox() {
                     addClass("wa-list-view")
                     setCellFactory { TakeCell() }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
+
+                    this.childrenUnmodifiable.onChange { setClipOffsetListView(this) }
                 }
             }
         }
@@ -155,5 +159,23 @@ class ChunkItem : VBox() {
                 }
             }
         )
+    }
+
+    /**
+     * The built-in clipped container from the ListView
+     * overlays the timestamp tooltip of the audio player.
+     * This function extends the clipped region towards the
+     * top boundary, allowing the tooltip to be fully visible.
+     *
+     * Call this method after the list view children have rendered.
+     */
+    private fun setClipOffsetListView(lv: ListView<TakeItem>) {
+        val offset = TAKE_CELL_HEIGHT
+        val clip = Rectangle(0.0, 0.0)
+        clip.widthProperty().bind(lv.widthProperty())
+        clip.heightProperty().bind(lv.heightProperty().plus(offset))
+        clip.layoutY = -offset
+        // traverse to ClippedContainer and update it
+        lv.getChildList()?.firstOrNull()?.getChildList()?.firstOrNull()?.clip = clip
     }
 }
