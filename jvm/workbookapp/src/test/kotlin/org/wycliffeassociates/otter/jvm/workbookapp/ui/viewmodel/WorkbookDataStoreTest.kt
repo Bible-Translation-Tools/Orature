@@ -182,10 +182,8 @@ class WorkbookDataStoreTest {
 
     @After
     fun cleanup() {
-        directoryProvider.cleanTempDirectory()
         workbookDataStore.activeChapterProperty.set(null)
         workbookDataStore.activeChunkProperty.set(null)
-        directoryProvider.cleanTempDirectory()
     }
 
     @Test
