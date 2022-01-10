@@ -25,6 +25,7 @@ import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
 import javafx.beans.property.SimpleStringProperty
 import org.junit.After
+import org.junit.AfterClass
 import org.junit.Assert
 import org.junit.Before
 import org.junit.BeforeClass
@@ -162,6 +163,14 @@ class WorkbookDataStoreTest {
 
             workbookDataStore = find()
             workbookDataStore.activeWorkbookProperty.set(workbook)
+        }
+
+        @AfterClass
+        fun tearDown() {
+            directoryProvider.cleanTempDirectory()
+
+            FxToolkit.hideStage()
+            testApp.stop()
         }
     }
 
