@@ -215,11 +215,9 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun setTitle(chunk: Chunk) {
-        title = MessageFormat.format(
-            messages["chunkTitle"],
-            messages["verse"],
-            chunk.start
-        )
+        val label = messages["verse"]
+        val start = chunk.start
+        title = "$label $start"
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {

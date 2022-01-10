@@ -19,16 +19,9 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork
 
 import java.io.File
-import java.text.MessageFormat
 
 data class Artwork(val file: File, val attribution: String, val license: String) {
-    fun attributionText(messagePattern: String, attributionTitle: String, licenseLabel: String): String {
-        return MessageFormat.format(
-            messagePattern,
-            attributionTitle,
-            attribution,
-            licenseLabel,
-            license
-        )
+    fun attributionText(attributionTitle: String, licenseLabel: String): String {
+        return "$attributionTitle:\n© $attribution\n\n$licenseLabel:\n$license"
     }
 }

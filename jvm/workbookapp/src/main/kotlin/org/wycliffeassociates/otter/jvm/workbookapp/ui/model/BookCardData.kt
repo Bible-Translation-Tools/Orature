@@ -41,7 +41,6 @@ class BookCardData(val collection: Collection, artwork: Observable<Artwork>) {
                 artworkFileProperty.set(it.file)
                 attributionProperty.set(
                     it.attributionText(
-                        FX.messages["artworkLicense"],
                         FX.messages["artworkAttributionTitle"],
                         FX.messages["license"]
                     )
