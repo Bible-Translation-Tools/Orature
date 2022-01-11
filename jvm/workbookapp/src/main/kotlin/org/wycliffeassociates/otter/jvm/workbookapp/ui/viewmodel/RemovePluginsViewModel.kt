@@ -65,6 +65,5 @@ class RemovePluginsViewModel : ViewModel() {
         pluginRepository.delete(plugin).subscribe {
             settingsViewModel.refreshPlugins()
         }
-
     }
 }

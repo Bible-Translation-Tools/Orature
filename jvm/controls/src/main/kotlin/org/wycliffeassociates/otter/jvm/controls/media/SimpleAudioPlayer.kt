@@ -328,7 +328,6 @@ class SimpleAudioPlayer(
                 label {
                     hgrow = Priority.ALWAYS
                     text = title
-
                 }
                 tooltip(title)
             }

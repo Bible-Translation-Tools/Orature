@@ -462,7 +462,7 @@ class RecordScriptureViewModel : ViewModel() {
     private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
         Platform.runLater {
             takeCardModels.removeAll { it.take == take }
-            if (autoSelect){
+            if (autoSelect) {
                 takeCardModels.firstOrNull()?.let {
                     selectTake(it.take)
                 }

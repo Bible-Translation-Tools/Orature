@@ -9,7 +9,7 @@ class ListViewPlaceHolder : ListView<Any?>() {
         addClass("wa-list-view")
         items.add(null)
         setCellFactory {
-            object: ListCell<Any?>() {
+            object : ListCell<Any?>() {
                 override fun updateItem(item: Any?, empty: Boolean) {
                     super.updateItem(item, empty)
                     graphic = EmptyCardCell().apply {

@@ -128,7 +128,7 @@ class TestResourceContainerArtworkDataSource {
         val image = dataSource.getArtwork(metadataMock, project, ratio16x9)
 
         assertNotNull(
-            "Could not get default image (${ratioString}) for $project",
+            "Could not get default image ($ratioString) for $project",
             image
         )
         assertFalse(

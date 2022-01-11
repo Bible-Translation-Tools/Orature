@@ -132,7 +132,7 @@ class ProjectFilesAccessorTest {
             )
         }
 
-        ZipFile(target).use{ zip ->
+        ZipFile(target).use { zip ->
             val zipEntries = zip.entries().toList()
             val hasNoMedia = zipEntries.all { entry ->
                 File(entry.name).extension !in ProjectFilesAccessor.ignoredSourceMediaExtensions

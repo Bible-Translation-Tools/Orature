@@ -284,8 +284,8 @@ class BookWizardViewModel : ViewModel() {
         return languageRepository.getAllTranslations()
             .map { translations ->
                 translations.singleOrNull {
-                    it.source.slug == translation.sourceLanguage.slug
-                            && it.target.slug == translation.targetLanguage.slug
+                    it.source.slug == translation.sourceLanguage.slug &&
+                            it.target.slug == translation.targetLanguage.slug
                 }
             }.flatMapCompletable { t ->
                 t!!.modifiedTs = LocalDateTime.now()

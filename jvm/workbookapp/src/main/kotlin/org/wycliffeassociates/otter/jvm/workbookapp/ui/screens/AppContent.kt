@@ -36,7 +36,7 @@ class AppContent : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     override val root = HiddenSidesPane().apply {
-        content =  stackpane {
+        content = stackpane {
             borderpane {
                 top = navigator.breadCrumbsBar.apply {
                     orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
