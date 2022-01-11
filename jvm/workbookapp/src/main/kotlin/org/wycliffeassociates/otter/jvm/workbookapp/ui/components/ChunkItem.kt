@@ -32,6 +32,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.removeListViewClip
 import tornadofx.*
 
 private const val TAKE_CELL_HEIGHT = 80.0
@@ -115,7 +116,7 @@ class ChunkItem : VBox() {
                     setCellFactory { TakeCell() }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
 
-                    this.childrenUnmodifiable.onChange { setClipOffsetListView(this) }
+                    this.childrenUnmodifiable.onChange { removeListViewClip(this as ListView<Any>) }
                 }
             }
         }
@@ -158,20 +159,5 @@ class ChunkItem : VBox() {
                 }
             }
         )
-    }
-
-    /**
-     * The built-in clipped container from the ListView
-     * overlays the timestamp tooltip of the audio player.
-     * This function extends the clipped region towards the
-     * top boundary, allowing the tooltip to be fully visible.
-     *
-     * Call this method after the list view children have rendered.
-     */
-    private fun setClipOffsetListView(lv: ListView<TakeItem>) {
-        // traverse to ClippedContainer and update it
-        lv.getChildList()?.firstOrNull { it.hasClass("virtual-flow") }
-            ?.getChildList()?.firstOrNull { it.hasClass("clipped-container") }
-            ?.clip = null
     }
 }

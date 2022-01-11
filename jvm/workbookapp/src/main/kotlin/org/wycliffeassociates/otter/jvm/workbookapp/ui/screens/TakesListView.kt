@@ -42,5 +42,22 @@ class TakesListView(
         vgrow = Priority.ALWAYS
         isFocusTraversable = false
         addClass("card__takes-list")
+
+        childrenUnmodifiable.onChange { removeListViewClip(this as ListView<Any>) }
     }
+}
+
+/**
+ * The built-in clipped container from the ListView
+ * overlays the timestamp tooltip of the audio player.
+ * This function extends the clipped region towards the
+ * top boundary, allowing the tooltip to be fully visible.
+ *
+ * Call this method after the list view children have rendered.
+ */
+fun removeListViewClip(lv: ListView<Any>) {
+    // traverse to ClippedContainer and update it
+    lv.getChildList()?.firstOrNull { it.hasClass("virtual-flow") }
+        ?.getChildList()?.firstOrNull { it.hasClass("clipped-container") }
+        ?.clip = null
 }
