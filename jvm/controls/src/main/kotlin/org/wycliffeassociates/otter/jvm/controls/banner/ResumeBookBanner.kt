@@ -50,6 +50,7 @@ class ResumeBookBanner : Control() {
             artwork?.let {
                 attributionTextProperty.set(
                     it.attributionText(
+                        FX.messages["artworkLicense"],
                         FX.messages["artworkAttributionTitle"],
                         FX.messages["license"]
                     )
