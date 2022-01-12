@@ -39,13 +39,20 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.button.WaMenuButton
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.framesToTimecode
 import tornadofx.*
 import java.text.MessageFormat
-import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+
+enum class PlaybackRateType {
+    SOURCE,
+    TARGET
+}
+
+class PlaybackRateChangedEvent(val type: PlaybackRateType, val rate: Double) : FXEvent()
 
 class SimpleAudioPlayer(
     player: IAudioPlayer? = null
@@ -159,9 +166,7 @@ class SimpleAudioPlayer(
             }
         }
 
-        audioPlaybackRateProperty.onChange {
-            audioPlayerController.setPlaybackRate(it)
-        }
+        audioPlayerController.playbackRateProperty.bind(audioPlaybackRateProperty)
 
         menuItems.setAll(createPlaybackRateMenu())
     }

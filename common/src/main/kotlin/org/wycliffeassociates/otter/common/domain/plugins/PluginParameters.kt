@@ -37,5 +37,7 @@ data class PluginParameters(
     val targetChapterAudio: File? = null,
     val license: String? = null,
     val direction: String? = null,
-    val sourceDirection: String? = null
+    val sourceDirection: String? = null,
+    val sourceRate: Double = 1.0,
+    val targetRate: Double = 1.0
 )

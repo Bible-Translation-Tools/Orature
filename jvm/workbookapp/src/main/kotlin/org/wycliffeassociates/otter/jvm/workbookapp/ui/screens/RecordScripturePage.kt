@@ -96,6 +96,18 @@ class RecordScripturePage : View() {
             contentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeTranslationProperty.objectBinding {
+                    it?.sourceRate ?: 1.0
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeTranslationProperty.objectBinding {
+                    it?.targetRate ?: 1.0
+                }
+            )
         }
 
     private val breadCrumb = BreadCrumb().apply {
@@ -342,6 +354,18 @@ class RecordScripturePage : View() {
             targetAudioPlayerProperty.bind(workbookDataStore.targetAudioProperty.objectBinding { it?.player })
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeTranslationProperty.objectBinding {
+                    it?.sourceRate ?: 1.0
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeTranslationProperty.objectBinding {
+                    it?.targetRate ?: 1.0
+                }
+            )
         }
     }
 

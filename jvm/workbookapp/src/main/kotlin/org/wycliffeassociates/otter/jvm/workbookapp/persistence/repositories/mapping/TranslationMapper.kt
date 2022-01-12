@@ -30,6 +30,8 @@ class TranslationMapper @Inject constructor() {
             source,
             target,
             type.modifiedTs?.let(LocalDateTime::parse),
+            type.sourceRate,
+            type.targetRate,
             type.id
         )
 
@@ -38,7 +40,9 @@ class TranslationMapper @Inject constructor() {
             type.id,
             type.source.id,
             type.target.id,
-            type.modifiedTs?.toString()
+            type.modifiedTs?.toString(),
+            type.sourceRate,
+            type.targetRate
         )
     }
 }

@@ -30,6 +30,7 @@ interface ILanguageRepository : IRepository<Language> {
     fun getBySlug(slug: String): Single<Language>
     fun getGateway(): Single<List<Language>>
     fun getTargets(): Single<List<Language>>
+    fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
     fun getAllTranslations(): Single<List<Translation>>
     fun insertTranslation(translation: Translation): Single<Int>
     fun updateTranslation(translation: Translation): Completable

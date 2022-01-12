@@ -39,6 +39,8 @@ class SourceAudioFragment : Fragment() {
         var license: String? = null
         var direction: String? = null
         var sourceDirection: String? = null
+        var sourceRate: Double? = null
+        var targetRate: Double? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -48,6 +50,8 @@ class SourceAudioFragment : Fragment() {
                 license = parameters.named["license"]
                 direction = parameters.named["direction"]
                 sourceDirection = parameters.named["source_direction"]
+                sourceRate = parameters.named["source_rate"]?.toDouble()
+                targetRate = parameters.named["target_rate"]?.toDouble()
 
                 sourceContentTitle = getSourceContentTitle(
                     parameters.named["book"],
@@ -81,6 +85,9 @@ class SourceAudioFragment : Fragment() {
                     else -> NodeOrientation.LEFT_TO_RIGHT
                 }
             )
+
+            sourceSpeedRateProperty.set(sourceRate ?: 1.0)
+            targetSpeedRateProperty.set(targetRate ?: 1.0)
         }
     }
 
