@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -54,6 +55,7 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.repositories.IAudioPluginRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
@@ -184,6 +186,12 @@ class ChapterPageViewModelTest {
             on { getPlugin(any()) } doReturn Maybe.just(audioPlugin)
         }
 
+        private val translation = mock<Translation>()
+
+        private val languageRepository = mock<ILanguageRepository> {
+            on { getTranslation(any(), any()) } doReturn Single.just(translation)
+        }
+
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
@@ -199,6 +207,7 @@ class ChapterPageViewModelTest {
             configureAudio.configure()
 
             workbookDataStore = find()
+            workbookDataStore.languageRepository = languageRepository
             workbookDataStore.activeWorkbookProperty.set(workbook)
             workbookDataStore.activeChapterProperty.set(chapter1)
             workbookDataStore.activeProjectFilesAccessorProperty.set(projectFilesAccessor)
