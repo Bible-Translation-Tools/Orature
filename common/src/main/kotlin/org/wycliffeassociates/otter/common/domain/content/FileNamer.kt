@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.common.domain.content
 
 import org.wycliffeassociates.otter.common.audio.AudioFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
-import kotlin.IllegalStateException
 
 class FileNamer(
     val start: Int? = null,
