@@ -84,7 +84,7 @@ class FileNamer(
     private fun formatContentType(): String? {
         return when (contentType) {
             ContentType.TEXT -> null
-            else -> contentType.toString().toLowerCase()
+            else -> contentType.toString().lowercase()
         }
     }
 
