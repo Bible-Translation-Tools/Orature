@@ -40,7 +40,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
