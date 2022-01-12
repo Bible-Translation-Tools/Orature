@@ -29,6 +29,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.workbook.Translation
@@ -90,22 +91,13 @@ class HomePageViewModelTest {
         `when`(mockWorkbookRepo.getWorkbook(collection))
             .thenReturn(Maybe.just(mockWorkbook))
 
-        val lockObject = Object()
-        vm.resumeBookProperty.onChange {
-            if (it != null) {
-                thread {
-                    notifyListenerExecuted(lockObject)
-                }
-            }
-        }
         vm.loadResumeBook()
+        WaitForAsyncUtils.waitForFxEvents()
 
-        waitForListenerExecution(lockObject) {
-            assertNotNull(vm.resumeBookProperty.value)
-            assertEquals(mockWorkbook, vm.resumeBookProperty.value)
-            verify(mockPreferenceRepo).resumeProjectId()
-            verify(mockCollectionRepo).getProject(resumeProjectId)
-        }
+        assertNotNull(vm.resumeBookProperty.value)
+        assertEquals(mockWorkbook, vm.resumeBookProperty.value)
+        verify(mockPreferenceRepo).resumeProjectId()
+        verify(mockCollectionRepo).getProject(resumeProjectId)
         verify(mockSettingsVM).refreshPlugins()
     }
 
@@ -146,19 +138,12 @@ class HomePageViewModelTest {
         assertEquals(0, vm.translations.size)
         assertEquals(0, vm.translationModels.size)
 
-        val lockObject = Object()
-        vm.translationModels.onChange {
-            thread {
-                notifyListenerExecuted(lockObject)
-            }
-        }
         vm.loadTranslations()
+        WaitForAsyncUtils.waitForFxEvents()
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(2, vm.translations.size)
-            assertEquals(2, vm.translationModels.size)
-            verify(mockWorkbookRepo, atLeastOnce()).getProjects(any())
-            verify(mockLanguageRepo).getAllTranslations()
-        }
+        assertEquals(2, vm.translations.size)
+        assertEquals(2, vm.translationModels.size)
+        verify(mockWorkbookRepo, atLeastOnce()).getProjects(any())
+        verify(mockLanguageRepo).getAllTranslations()
     }
 }

@@ -28,6 +28,7 @@ import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -76,27 +77,21 @@ class TranslationViewModelTest {
 
         vm.creationUseCase = mockCreateTranslation
 
-        val lockObject = Object()
         val progressStatus = mutableListOf<Boolean>()
 
         vm.showProgressProperty.onChange {
             progressStatus.add(it)
-            if (progressStatus.size == 2) {
-                thread {
-                    notifyListenerExecuted(lockObject)
-                }
-            }
         }
         vm.selectedSourceLanguageProperty.onChangeOnce {
             vm.selectedTargetLanguageProperty.set(targetLanguage)
         }
         vm.selectedSourceLanguageProperty.set(sourceLanguage)
 
-        waitForListenerExecution(lockObject) {
-            assertTrue(progressStatus[0])
-            assertFalse(progressStatus[1])
-            verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
-        }
+        WaitForAsyncUtils.waitForFxEvents()
+
+        assertTrue(progressStatus[0])
+        assertFalse(progressStatus[1])
+        verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
     }
 
     private val rcMetadata = mock(ResourceMetadata::class.java).apply {
@@ -127,17 +122,11 @@ class TranslationViewModelTest {
 
         assertEquals(0, vm.sourceLanguages.size)
 
-        val lockObject = Object()
-        vm.sourceLanguages.onChange {
-            thread {
-                notifyListenerExecuted(lockObject)
-            }
-        }
         vm.loadSourceLanguages()
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(1, vm.sourceLanguages.size)
-        }
+        WaitForAsyncUtils.waitForFxEvents()
+
+        assertEquals(1, vm.sourceLanguages.size)
         verify(mockCollectionRepo).getRootSources()
         verify(rcMetadata, atLeastOnce()).language
     }
@@ -156,17 +145,11 @@ class TranslationViewModelTest {
 
         assertEquals(0, vm.targetLanguages.size)
 
-        val lockObject = Object()
-        vm.targetLanguages.onChange {
-            thread {
-                notifyListenerExecuted(lockObject)
-            }        }
         vm.loadTargetLanguages()
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(languages.size, vm.targetLanguages.size)
-        }
+        WaitForAsyncUtils.waitForFxEvents()
 
+        assertEquals(languages.size, vm.targetLanguages.size)
         verify(mockLanguageRepo).getAll()
         verify(mockLanguageRepo).getAllTranslations()
     }

@@ -32,6 +32,7 @@ import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Book
@@ -104,19 +105,14 @@ class WorkbookPageViewModelTest {
         val chapterSizeChanges = mutableListOf<Int>()
         vm.chapters.onChange {
             chapterSizeChanges.add(vm.chapters.size)
-            if (vm.chapters.size == 3) {
-                thread {
-                    notifyListenerExecuted(lockObject)
-                }
-            }
         }
         vm.openWorkbook()
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(3, vm.chapters.size)
-            verify(mockWorkbookDS, atLeastOnce()).workbook
-            verify(mockWorkbookDS).activeChapterProperty
-        }
+        WaitForAsyncUtils.waitForFxEvents()
+
+        assertEquals(3, vm.chapters.size)
+        verify(mockWorkbookDS, atLeastOnce()).workbook
+        verify(mockWorkbookDS).activeChapterProperty
     }
 
     @Test
@@ -137,27 +133,20 @@ class WorkbookPageViewModelTest {
         val projectTitleChanges = mutableListOf<String?>()
         val showProgressChanges = mutableListOf<Boolean>()
 
-        val lockObject = Object()
         vm.activeProjectTitleProperty.onChange {
             projectTitleChanges.add(it)
-            if (projectTitleChanges.size == 2) {
-                thread {
-                    notifyListenerExecuted(lockObject)
-                }
-            }
         }
         vm.showExportProgressDialogProperty.onChange {
             showProgressChanges.add(it)
         }
         vm.exportWorkbook(mock(File::class.java))
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(mockBook.title, projectTitleChanges[0])
-            assertNull(projectTitleChanges[1])
-            assertTrue(showProgressChanges[0])
-            assertFalse(showProgressChanges[1])
-        }
+        WaitForAsyncUtils.waitForFxEvents()
 
+        assertEquals(mockBook.title, projectTitleChanges[0])
+        assertNull(projectTitleChanges[1])
+        assertTrue(showProgressChanges[0])
+        assertFalse(showProgressChanges[1])
         verify(mockProjectExporter).export(any(), any(), any(), any(), any())
         verify(mockWorkbookDS).workbook
         verify(mockWorkbookDS).activeResourceMetadata

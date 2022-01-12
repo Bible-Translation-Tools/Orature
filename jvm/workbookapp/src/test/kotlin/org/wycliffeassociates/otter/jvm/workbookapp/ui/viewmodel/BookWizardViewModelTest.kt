@@ -24,6 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.mockito.Mockito.*
 import org.testfx.api.FxToolkit
+import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -75,21 +76,22 @@ class BookWizardViewModelTest {
     fun loadBooksViewData() {
         `when`(mockCollectionRepo.getChildren(simpleResource))
             .thenReturn(Single.just(simpleBooks))
-        val lockObject = Object()
+//        val lockObject = Object()
 
         assertEquals(0, vm.filteredBooks.size)
 
-        vm.filteredBooks.onChange {
-            thread {
-                notifyListenerExecuted(lockObject)
-            }
-        }
+//        vm.filteredBooks.onChange {
+//            thread {
+//                notifyListenerExecuted(lockObject)
+//            }
+//        }
         vm.selectedSourceProperty.set(simpleResource)
+        WaitForAsyncUtils.waitForFxEvents()
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(1, vm.filteredBooks.size)
-            verify(mockCollectionRepo).getChildren(simpleResource)
-        }
+//        waitForListenerExecution(lockObject) {
+//        }
+        assertEquals(1, vm.filteredBooks.size)
+        verify(mockCollectionRepo).getChildren(simpleResource)
     }
 
     private val sourceLanguage = Language(
@@ -133,18 +135,12 @@ class BookWizardViewModelTest {
 
         assertEquals(0, vm.existingBooks.size)
 
-        val lockObject = Object()
-        vm.existingBooks.onChange {
-            thread {
-                notifyListenerExecuted(lockObject)
-            }
-        }
         vm.loadExistingProjects()
 
-        waitForListenerExecution(lockObject) {
-            assertEquals(1, vm.existingBooks.size)
-            verify(mockWorkbookRepo).getProjects(any())
-        }
+        WaitForAsyncUtils.waitForFxEvents()
+
+        assertEquals(1, vm.existingBooks.size)
+        verify(mockWorkbookRepo).getProjects(any())
     }
 
     private val rootSources = listOf(
@@ -190,25 +186,19 @@ class BookWizardViewModelTest {
 
         assertEquals(0, spyVM.sourceCollections.size)
 
-        val lockObject = Object()
-        spyVM.sourceCollections.onChange {
-            thread {
-                notifyListenerExecuted(lockObject)
-            }
-        }
         spyVM.loadResources()
 
-        waitForListenerExecution(lockObject) {
-            verify(mockTranslationModel, atLeastOnce()).sourceLanguage
-            verify(spyVM).setFilterMenu()
-            verify(rootSources[0].resourceContainer)!!.language
-            verify(rootSources[1].resourceContainer)!!.language
+        WaitForAsyncUtils.waitForFxEvents()
 
-            assertEquals(
-                "There should be only 1 resource matching $sourceLanguage.",
-                1,
-                spyVM.sourceCollections.size
-            )
-        }
+        assertEquals(
+            "There should be only 1 resource matching $sourceLanguage.",
+            1,
+            spyVM.sourceCollections.size
+        )
+
+        verify(mockTranslationModel, atLeastOnce()).sourceLanguage
+        verify(spyVM).setFilterMenu()
+        verify(rootSources[0].resourceContainer)!!.language
+        verify(rootSources[1].resourceContainer)!!.language
     }
 }
