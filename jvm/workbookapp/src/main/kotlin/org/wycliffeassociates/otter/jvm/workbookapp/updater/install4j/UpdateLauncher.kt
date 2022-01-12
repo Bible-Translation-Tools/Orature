@@ -28,9 +28,11 @@ class UpdateLauncher(private val listener: UpdateProgressListener? = null) : App
     }
 
     override fun exited(exitValue: Int) {
+        /* no-op */
     }
 
     override fun prepareShutdown() {
+        /* no-op */
     }
 
     override fun createProgressListener(): ApplicationLauncher.ProgressListener? {
