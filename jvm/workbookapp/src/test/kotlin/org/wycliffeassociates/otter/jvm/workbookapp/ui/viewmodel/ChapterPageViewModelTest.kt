@@ -61,6 +61,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
 import java.io.File
 import java.time.LocalDate
+import java.util.*
 
 class ChapterPageViewModelTest {
     companion object {
@@ -84,8 +85,8 @@ class ChapterPageViewModelTest {
 
         private val directoryProvider = testApp.dependencyGraph.injectDirectoryProvider()
         private val tempDir = directoryProvider.tempDirectory
-        private var take1File = File(tempDir, "take1.wav")
-        private var take2File = File(tempDir, "take2.wav")
+        private lateinit var take1File: File
+        private lateinit var take2File: File
         private var sourceTakeFile = File(tempDir, "sourceTake.wav")
 
         private var chunk1 = createChunk(1)
@@ -231,6 +232,8 @@ class ChapterPageViewModelTest {
         chapterPageViewModel.canCompileProperty.set(false)
         chapterPageViewModel.isCompilingProperty.set(false)
 
+        take1File = File(tempDir, "take${UUID.randomUUID()}.wav")
+        take2File = File(tempDir, "take${UUID.randomUUID()}.wav")
         writeWavFile(take1File)
         writeWavFile(take2File)
 
@@ -243,6 +246,9 @@ class ChapterPageViewModelTest {
 
     @After
     fun cleanup() {
+        take1File.delete()
+        take2File.delete()
+        
         canCompileListener?.let {
             chapterPageViewModel.canCompileProperty.removeListener(it)
         }
