@@ -107,6 +107,7 @@
 
 .card__takes-list {
     -fx-background-color: -wa-transparent;
+    -fx-min-width: 250px;
 }
 
 .card__takes-list .list-cell {
