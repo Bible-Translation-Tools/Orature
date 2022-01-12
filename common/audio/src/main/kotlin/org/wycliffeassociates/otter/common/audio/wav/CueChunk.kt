@@ -182,7 +182,6 @@ open class CueChunk : RiffChunk {
             val subchunkLabel = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
 
-
             if (subchunkSize < 0) {
                 throw InvalidWavFileException("Chunk $subchunkLabel has a negative size of $subchunkSize")
             }
@@ -210,7 +209,7 @@ open class CueChunk : RiffChunk {
         addParsedCues(cueListBuilder)
     }
 
-    open internal fun addParsedCues(cueListBuilder: CueListBuilder) {
+    internal open fun addParsedCues(cueListBuilder: CueListBuilder) {
         cues as MutableList
         cues.clear()
         cues.addAll(cueListBuilder.build())

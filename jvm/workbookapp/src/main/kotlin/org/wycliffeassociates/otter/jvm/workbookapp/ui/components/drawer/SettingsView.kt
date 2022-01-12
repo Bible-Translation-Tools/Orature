@@ -135,7 +135,7 @@ class SettingsView : View() {
                     label(messages["playbackSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
-                    
+
                     combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
                         addClass("wa-combobox")
                         fitToParentWidth()

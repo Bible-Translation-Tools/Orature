@@ -55,7 +55,6 @@ class LocaleLanguageTest {
         Mockito.`when`(appPref.localeLanguage()).thenReturn(Single.just(spanish.slug))
 
         Assert.assertEquals(localeLanguage.preferredLanguage, spanish)
-
     }
 
     @Test

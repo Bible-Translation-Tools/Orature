@@ -61,7 +61,6 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
             }.toList().map { it }
     }
 
-
     private fun getInputDevices(): List<Mixer.Info> {
         val mixers = AudioSystem
             .getMixerInfo()

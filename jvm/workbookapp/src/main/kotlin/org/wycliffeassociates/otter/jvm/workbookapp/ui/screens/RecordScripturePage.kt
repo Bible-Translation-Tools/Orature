@@ -259,7 +259,7 @@ class RecordScripturePage : View() {
 
                         setCellFactory { ScriptureTakeCardCell() }
 
-                        minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT));
+                        minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
                         placeholder = ListViewPlaceHolder()
                     }
                 }

@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
 import java.io.BufferedReader
-import java.util.regex.Pattern
 
 // TODO: Add Help type enum to HelpResource? (tn, tq)
 data class HelpResource(var title: String, var body: String)

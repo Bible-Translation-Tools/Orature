@@ -290,7 +290,7 @@ class WorkbookPage : View() {
                             )
                         }
                     }.onChangeAndDoNow { messageTextProperty.set(it) }
-                    
+
                     backgroundImageFileProperty.bind(viewModel.activeProjectCoverProperty)
                     open()
                 } else {

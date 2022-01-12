@@ -95,7 +95,6 @@ class ChapterPage : View() {
         initializeProgressDialog()
     }
 
-
     override fun onUndock() {
         super.onUndock()
         viewModel.closePlayers()
@@ -254,7 +253,7 @@ class ChapterPage : View() {
                         viewModel.compile()
                     }
                 }
-                region { 
+                region {
                     hgrow = Priority.ALWAYS
                 }
                 button {

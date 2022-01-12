@@ -34,7 +34,9 @@ import org.yellowcouch.javazoom.RandomAccessDecoder
 private const val MP3_BUFFER_SIZE = 24576
 
 internal class MP3FileReader(
-    val file: File, start: Int? = null, end: Int? = null
+    val file: File,
+    start: Int? = null,
+    end: Int? = null
 ) : AudioFormatStrategy, AudioFileReader {
 
     private var decoder: RandomAccessDecoder? = RandomAccessDecoder(file.absolutePath)
@@ -114,7 +116,6 @@ internal class MP3FileReader(
     }
 
     override fun open() {
-
     }
 
     override fun release() {

@@ -55,7 +55,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         }
 
         searchQueryProperty.onChange { query ->
-            queryPredicate = if(query.isNullOrBlank()) {
+            queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
                 Predicate { language ->

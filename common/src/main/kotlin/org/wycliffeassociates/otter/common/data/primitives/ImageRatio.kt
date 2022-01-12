@@ -28,7 +28,7 @@ enum class ImageRatio(val width: Int, val height: Int) {
 
     override fun toString(): String {
         return if (this != DEFAULT) {
-            "${width}x${height}"
+            "${width}x$height"
         } else ""
     }
 

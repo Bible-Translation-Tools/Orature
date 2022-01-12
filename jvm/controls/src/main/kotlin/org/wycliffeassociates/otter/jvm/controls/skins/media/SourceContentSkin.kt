@@ -109,7 +109,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initControllers() {
-
     }
 
     private fun initAudioControls() {

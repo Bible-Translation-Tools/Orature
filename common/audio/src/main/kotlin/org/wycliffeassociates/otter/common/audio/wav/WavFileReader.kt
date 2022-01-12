@@ -60,7 +60,7 @@ internal class WavFileReader(val wav: WavFile, val start: Int? = null, val end: 
     fun computeBounds(wav: WavFile): Pair<Int, Int> {
         if (wav.file.length() <= WAV_HEADER_SIZE) {
             logger.info("Wav file ${wav.file.name} is just a header or empty, size is ${wav.file.length()}")
-            return Pair(0,0)
+            return Pair(0, 0)
         }
 
         val totalFrames = wav.totalFrames

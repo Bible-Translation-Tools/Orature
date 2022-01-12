@@ -29,7 +29,6 @@ import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
 
-
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
@@ -166,7 +165,6 @@ class AudioBufferPlayer(
     }
 
     override fun close() {
-
     }
 
     override fun release() {

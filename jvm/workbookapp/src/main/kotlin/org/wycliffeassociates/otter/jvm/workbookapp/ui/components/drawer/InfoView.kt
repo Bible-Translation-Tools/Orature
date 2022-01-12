@@ -38,7 +38,6 @@ class InfoView : View() {
         scrollpane {
             addClass("app-drawer__scroll-pane")
 
-
             vbox {
                 isFitToWidth = true
 

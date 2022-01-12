@@ -68,7 +68,7 @@ class WaveformFrame(
                         fitToParentHeight()
                         hbox {
                             viewModel.waveformContainerNode = this@hbox
-                            val disposable  = viewModel.waveform
+                            val disposable = viewModel.waveform
                                 .observeOnFx()
                                 .subscribe {
                                     this@hbox.add(
