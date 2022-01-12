@@ -47,6 +47,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -143,7 +144,7 @@ class ChapterPage : View() {
                     textProperty().bind(viewModel.chapterCardProperty.stringBinding {
                         MessageFormat.format(
                             FX.messages["chapterTitle"],
-                            FX.messages["chapter"].capitalize(),
+                            FX.messages["chapter"].capitalizeString(),
                             it?.bodyText
                         )
                     })
