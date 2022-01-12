@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -60,7 +60,6 @@ class AudioDeviceProvider(private val audioFormat: AudioFormat) {
                 lines.isNotEmpty()
             }.toList().map { it }
     }
-
 
     private fun getInputDevices(): List<Mixer.Info> {
         val mixers = AudioSystem

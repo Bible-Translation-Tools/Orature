@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -135,7 +135,7 @@ class SettingsView : View() {
                     label(messages["playbackSettings"]).apply {
                         addClass("app-drawer__subtitle--small")
                     }
-                    
+
                     combobox(viewModel.selectedOutputDeviceProperty, viewModel.outputDevices) {
                         addClass("wa-combobox")
                         fitToParentWidth()

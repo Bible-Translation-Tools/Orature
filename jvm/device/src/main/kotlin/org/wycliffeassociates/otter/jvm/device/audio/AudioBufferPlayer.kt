@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,7 +28,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
@@ -166,7 +165,6 @@ class AudioBufferPlayer(
     }
 
     override fun close() {
-
     }
 
     override fun release() {

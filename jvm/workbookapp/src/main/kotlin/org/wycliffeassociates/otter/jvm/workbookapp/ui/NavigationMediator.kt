@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -67,14 +67,14 @@ class NavigationMediator : Component(), ScopedInstance {
 
     init {
         subscribe<PluginOpenedEvent> {
-            when(it.type) {
+            when (it.type) {
                 PluginType.RECORDER -> breadCrumbsBar.addItem(recorderBreadCrumb)
                 PluginType.EDITOR -> breadCrumbsBar.addItem(editorBreadCrumb)
                 PluginType.MARKER -> breadCrumbsBar.addItem(markerBreadCrumb)
             }
         }
         subscribe<PluginClosedEvent> {
-            when(it.type) {
+            when (it.type) {
                 PluginType.RECORDER -> breadCrumbsBar.removeItem(recorderBreadCrumb)
                 PluginType.EDITOR -> breadCrumbsBar.removeItem(editorBreadCrumb)
                 PluginType.MARKER -> breadCrumbsBar.removeItem(markerBreadCrumb)

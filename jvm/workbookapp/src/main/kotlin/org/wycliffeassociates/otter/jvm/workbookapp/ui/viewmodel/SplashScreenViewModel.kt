@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -45,7 +45,7 @@ class SplashScreenViewModel : ViewModel() {
 
     fun initApp(): Observable<Double> {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        
+
         return initApp.initApp()
             .observeOnFx()
             .doOnError { logger.error("Error initializing app: ", it) }

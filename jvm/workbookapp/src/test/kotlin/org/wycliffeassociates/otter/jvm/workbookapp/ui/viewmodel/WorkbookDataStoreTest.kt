@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -51,7 +51,6 @@ import tornadofx.*
 import java.io.File
 import java.time.LocalDate
 import java.time.LocalDateTime
-
 
 class WorkbookDataStoreTest {
     companion object {

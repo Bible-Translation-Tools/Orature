@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -68,7 +68,7 @@ class WaveformFrame(
                         fitToParentHeight()
                         hbox {
                             viewModel.waveformContainerNode = this@hbox
-                            val disposable  = viewModel.waveform
+                            val disposable = viewModel.waveform
                                 .observeOnFx()
                                 .subscribe {
                                     this@hbox.add(

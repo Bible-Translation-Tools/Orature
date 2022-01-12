@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -286,8 +286,8 @@ class BookWizardViewModel : ViewModel() {
         return languageRepository.getAllTranslations()
             .map { translations ->
                 translations.singleOrNull {
-                    it.source.slug == translation.sourceLanguage.slug
-                            && it.target.slug == translation.targetLanguage.slug
+                    it.source.slug == translation.sourceLanguage.slug &&
+                            it.target.slug == translation.targetLanguage.slug
                 }
             }.flatMapCompletable { t ->
                 t!!.modifiedTs = LocalDateTime.now()

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -55,7 +55,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         }
 
         searchQueryProperty.onChange { query ->
-            queryPredicate = if(query.isNullOrBlank()) {
+            queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
                 Predicate { language ->

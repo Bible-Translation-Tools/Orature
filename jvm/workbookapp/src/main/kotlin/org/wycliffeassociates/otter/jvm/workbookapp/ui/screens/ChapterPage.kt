@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -94,7 +94,6 @@ class ChapterPage : View() {
         chunkListView.refresh()
         initializeProgressDialog()
     }
-
 
     override fun onUndock() {
         super.onUndock()
@@ -254,7 +253,7 @@ class ChapterPage : View() {
                         viewModel.compile()
                     }
                 }
-                region { 
+                region {
                     hgrow = Priority.ALWAYS
                 }
                 button {

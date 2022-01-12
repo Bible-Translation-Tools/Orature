@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -72,7 +72,7 @@ class AddFilesViewModel : ViewModel() {
             arrayOf(
                 FileChooser.ExtensionFilter(
                     messages["oratureFileTypes"],
-                    *OratureFileFormat.extensionList.map{ "*.$it"}.toTypedArray()
+                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
                 )
             ),
             mode = FileChooserMode.Single

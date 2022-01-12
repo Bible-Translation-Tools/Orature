@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -24,7 +24,7 @@ import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.util.Duration
 
-class ListAnimationMediator<T: Node> {
+class ListAnimationMediator<T : Node> {
 
     var listView: ListView<T>? = null
     var node: T? = null

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -18,8 +18,6 @@
  */
 package integrationtest.projects
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.fasterxml.jackson.databind.MappingIterator
 import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
@@ -160,8 +158,6 @@ class TestRcImport {
                 CollectionDescriptor(label = "chapter", slug = "obs_1")
             )
     }
-
-
 
     @Test
     fun ulbSlugs() {
