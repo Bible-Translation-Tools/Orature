@@ -23,4 +23,4 @@ import tornadofx.FXEvent
 import tornadofx.UIComponent
 import kotlin.reflect.KClass
 
-class ThemeColorEvent<T: UIComponent>(val type: KClass<T>, val data: ColorTheme): FXEvent()
+class ThemeColorEvent<T : UIComponent>(val type: KClass<T>, val data: ColorTheme) : FXEvent()

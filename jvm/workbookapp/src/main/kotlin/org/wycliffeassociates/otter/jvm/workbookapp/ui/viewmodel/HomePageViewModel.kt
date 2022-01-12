@@ -177,8 +177,8 @@ class HomePageViewModel : ViewModel() {
     private fun updateTranslationModifiedDate(workbook: Workbook) {
         val translation = translations
             .singleOrNull {
-                it.source.slug == workbook.source.language.slug
-                        && it.target.slug == workbook.target.language.slug
+                it.source.slug == workbook.source.language.slug &&
+                        it.target.slug == workbook.target.language.slug
             }
 
         translation?.let {
