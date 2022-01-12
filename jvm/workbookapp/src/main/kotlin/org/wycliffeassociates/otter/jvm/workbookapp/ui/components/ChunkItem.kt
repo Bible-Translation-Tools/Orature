@@ -25,12 +25,14 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.removeListViewClip
 import tornadofx.*
 
 private const val TAKE_CELL_HEIGHT = 80.0
@@ -113,6 +115,8 @@ class ChunkItem : VBox() {
                     addClass("wa-list-view")
                     setCellFactory { TakeCell() }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
+
+                    this.childrenUnmodifiable.onChange { removeListViewClip(this as ListView<Any>) }
                 }
             }
         }
