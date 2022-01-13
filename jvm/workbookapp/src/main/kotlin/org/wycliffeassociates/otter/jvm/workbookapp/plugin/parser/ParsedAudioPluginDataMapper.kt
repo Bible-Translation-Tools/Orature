@@ -23,8 +23,7 @@ import java.io.File
 
 /** @param osName optionally overrides the value from System.getProperty("os.name") */
 class ParsedAudioPluginDataMapper(osName: String? = null) {
-    private val osName = (osName ?: System.getProperty("os.name"))
-        .toUpperCase()
+    private val osName = (osName ?: System.getProperty("os.name")).uppercase()
 
     /**
      * Map from Jackson parser class to an AudioPlugin. No need to map the other way.

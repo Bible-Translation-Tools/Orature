@@ -65,7 +65,7 @@ class AudioPluginRegistrar @Inject constructor(
                 // Only load yaml files
                 it
                     .path
-                    .toLowerCase()
+                    .lowercase()
                     .endsWith(".yaml")
             }
             .map {

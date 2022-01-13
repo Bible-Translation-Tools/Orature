@@ -94,6 +94,7 @@ class ConfigureAudioSystem @Inject constructor(
                     try {
                         line = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
                     } catch (e: Exception) {
+                        logger.error("Error in getOutputLine.", e)
                     }
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()
@@ -118,6 +119,7 @@ class ConfigureAudioSystem @Inject constructor(
                     try {
                         line = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
                     } catch (e: Exception) {
+                        logger.error("Error in getInputLine.", e)
                     }
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()

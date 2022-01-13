@@ -31,15 +31,16 @@ enum class ContainerType(val slug: String) {
 
     @Deprecated("Type not supported")
     Dictionary("dict"),
+
     @Deprecated("Type not supported")
     Manual("man");
 
     companion object {
-        private val map = values().associateBy { it.slug.toLowerCase() }
+        private val map = values().associateBy { it.slug.lowercase() }
 
         /** @throws IllegalArgumentException */
         fun of(slug: String) =
-            map[slug.toLowerCase()]
+            map[slug.lowercase()]
                 ?: throw IllegalArgumentException("Container slug $slug not supported")
     }
 }
