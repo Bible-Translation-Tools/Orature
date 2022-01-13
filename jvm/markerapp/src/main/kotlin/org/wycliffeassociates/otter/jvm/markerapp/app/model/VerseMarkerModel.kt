@@ -128,7 +128,7 @@ class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
 
     private fun initializeHighlights(markers: List<ChunkMarkerModel>): List<MarkerHighlightState> {
         val highlightState = mutableListOf<MarkerHighlightState>()
-        markers.forEachIndexed { i, marker ->
+        markers.forEachIndexed { i, _ ->
             val highlight = MarkerHighlightState()
             if (i % 2 == 0) {
                 highlight.styleClass.bind(highlight.secondaryStyleClass)

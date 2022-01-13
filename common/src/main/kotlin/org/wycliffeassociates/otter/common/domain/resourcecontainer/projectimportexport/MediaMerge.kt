@@ -148,7 +148,7 @@ class MediaMerge(
         filtered.forEach { filename ->
             if (from.accessor.fileExists(filename)) {
                 from.accessor.getInputStream(filename).use { ifs ->
-                    val temp = createTempFile()
+                    val temp = directoryProvider.createTempFile("media_merge")
                     temp.outputStream().use { ofs ->
                         ifs.transferTo(ofs)
                     }

@@ -105,9 +105,11 @@ class AppBar : Fragment() {
                 if (it.action == DrawerEventAction.CLOSE) {
                     when (it.type) {
                         // ignore the drawer views as they handle closing via the toggle group
-                        AddFilesView::class, SettingsView::class, InfoView::class -> {}
+                        AddFilesView::class, SettingsView::class, InfoView::class -> { /* no-op */ }
                         // If the drawer is closed from something other than the toggle buttons, deselect them all
-                        else -> { buttonsToggleGroup.toggles.forEach { it.isSelected = false } }
+                        else -> {
+                            buttonsToggleGroup.toggles.forEach { it.isSelected = false }
+                        }
                     }
                 }
             }
