@@ -19,13 +19,16 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.times
 import io.reactivex.Observable
 import io.reactivex.Single
 import javafx.beans.property.SimpleObjectProperty
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.BeforeClass
 import org.junit.Test
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
@@ -46,55 +49,84 @@ import tornadofx.*
 import java.io.File
 import java.time.LocalDateTime
 import javax.inject.Provider
-import kotlin.concurrent.thread
 
 class WorkbookPageViewModelTest {
-    private val vm: WorkbookPageViewModel
-    private val mockWorkbookDS = mock(WorkbookDataStore::class.java)
-    private val chapters = initChapters()
-    private val mockBook = Book(
-        1,
-        1,
-        "gen",
-        "test",
-        "test",
-        Observable.fromIterable(chapters),
-        mock(ResourceMetadata::class.java),
-        listOf(),
-        LocalDateTime.now(),
-        listOf()
-    )
+    companion object {
+        private val testApp: TestApp = TestApp()
+        private lateinit var vm: WorkbookPageViewModel
+        private val mockWorkbookDS = mock(WorkbookDataStore::class.java)
+        private val chapters = initChapters()
+        private val mockBook = Book(
+            1,
+            1,
+            "gen",
+            "test",
+            "test",
+            Observable.fromIterable(chapters),
+            mock(ResourceMetadata::class.java),
+            listOf(),
+            LocalDateTime.now(),
+            listOf()
+        )
 
-    init {
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication {
-            TestApp()
+        private fun createWorkbookDS(): WorkbookDataStore {
+            val mockWorkbook = mock(Workbook::class.java)
+            `when`(mockWorkbook.target).thenReturn(mockBook)
+
+            val mockArtworkAccessor = mock(ArtworkAccessor::class.java)
+            `when`(mockArtworkAccessor.getArtwork(any()))
+                .thenReturn(null)
+            `when`(mockWorkbook.artworkAccessor)
+                .thenReturn(mockArtworkAccessor)
+
+            `when`(mockWorkbookDS.workbook)
+                .thenReturn(mockWorkbook)
+            `when`(mockWorkbookDS.activeChapterProperty)
+                .thenReturn(SimpleObjectProperty())
+            `when`(mockWorkbookDS.activeResourceMetadata)
+                .thenReturn(mockBook.resourceMetadata)
+            `when`(mockWorkbookDS.activeProjectFilesAccessor)
+                .thenReturn(mock(ProjectFilesAccessor::class.java))
+
+            return mockWorkbookDS
         }
 
-        setInScope(createWorkbookDS(), FX.defaultScope)
-        vm = find()
-    }
+        private fun initChapters() = listOf(
+            Chapter(
+                1,
+                "test",
+                "test",
+                mock(AssociatedAudio::class.java),
+                listOf(),
+                listOf(),
+                Observable.fromIterable(listOf())
+            ),
+            Chapter(
+                2,
+                "test",
+                "test",
+                mock(AssociatedAudio::class.java),
+                listOf(),
+                listOf(),
+                Observable.fromIterable(listOf())
+            )
+        )
 
-    private fun createWorkbookDS(): WorkbookDataStore {
-        val mockWorkbook = mock(Workbook::class.java)
-        `when`(mockWorkbook.target).thenReturn(mockBook)
+        @BeforeClass
+        @JvmStatic fun setup() {
+            FxToolkit.registerPrimaryStage()
+            FxToolkit.setupApplication { testApp }
 
-        val mockArtworkAccessor = mock(ArtworkAccessor::class.java)
-        `when`(mockArtworkAccessor.getArtwork(any()))
-            .thenReturn(null)
-        `when`(mockWorkbook.artworkAccessor)
-            .thenReturn(mockArtworkAccessor)
+            setInScope(createWorkbookDS(), FX.defaultScope)
+            vm = find()
+        }
 
-        `when`(mockWorkbookDS.workbook)
-            .thenReturn(mockWorkbook)
-        `when`(mockWorkbookDS.activeChapterProperty)
-            .thenReturn(SimpleObjectProperty())
-        `when`(mockWorkbookDS.activeResourceMetadata)
-            .thenReturn(mockBook.resourceMetadata)
-        `when`(mockWorkbookDS.activeProjectFilesAccessor)
-            .thenReturn(mock(ProjectFilesAccessor::class.java))
-
-        return mockWorkbookDS
+        @AfterClass
+        @JvmStatic fun tearDown() {
+            FxToolkit.hideStage()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
+        }
     }
 
     @Test
@@ -148,29 +180,8 @@ class WorkbookPageViewModelTest {
         assertTrue(showProgressChanges[0])
         assertFalse(showProgressChanges[1])
         verify(mockProjectExporter).export(any(), any(), any(), any(), any())
-        verify(mockWorkbookDS).workbook
+        verify(mockWorkbookDS, atLeastOnce()).workbook
         verify(mockWorkbookDS).activeResourceMetadata
         verify(mockWorkbookDS).activeProjectFilesAccessor
     }
-
-    private fun initChapters() = listOf(
-        Chapter(
-            1,
-            "test",
-            "test",
-            mock(AssociatedAudio::class.java),
-            listOf(),
-            listOf(),
-            Observable.fromIterable(listOf())
-        ),
-        Chapter(
-            2,
-            "test",
-            "test",
-            mock(AssociatedAudio::class.java),
-            listOf(),
-            listOf(),
-            Observable.fromIterable(listOf())
-        )
-    )
 }
