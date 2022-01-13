@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import java.util.*
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -371,7 +372,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
                     JFXSnackbar.SnackbarEvent(
                         JFXSnackbarLayout(
                             pluginErrorMessage,
-                            messages["addApp"].toUpperCase()
+                            messages["addApp"].uppercase(Locale.getDefault())
                         ) {
                             audioPluginViewModel.addPlugin(true, false)
                         },
