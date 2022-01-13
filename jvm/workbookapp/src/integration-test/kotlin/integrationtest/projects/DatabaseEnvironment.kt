@@ -119,8 +119,8 @@ class DatabaseEnvironment @Inject constructor(
             val entity = db.collectionDao.fetch(containerId = rc!!.id, label = "chapter", slug = slug)
             Assert.assertNotNull("Retrieving chapter $slug", entity)
             val content = db.contentDao.fetchByCollectionId(entity!!.id)
-            val verses = content.filter { it.type_fk == 1 }.count()
-            val meta = content.filter { it.type_fk == 2 }.count()
+            val verses = content.filter { it.typeFk == 1 }.count()
+            val meta = content.filter { it.typeFk == 2 }.count()
             Assert.assertEquals("Verses for $slug", verseCount, verses)
             Assert.assertEquals("Meta for $slug", 1, meta)
         }
@@ -156,7 +156,7 @@ class DatabaseEnvironment @Inject constructor(
     private fun fetchDerivativeRowCount() = db.dsl.selectCount().from(CONTENT_DERIVATIVE).fetchOne(0) as Int
     private fun fetchContentRowCount() =
         db.contentDao.fetchAll()
-            .groupBy { it.type_fk }
+            .groupBy { it.typeFk }
             .mapValues { it.value.count() }
             .mapKeys { db.contentTypeDao.fetchForId(it.key)!! }
 }

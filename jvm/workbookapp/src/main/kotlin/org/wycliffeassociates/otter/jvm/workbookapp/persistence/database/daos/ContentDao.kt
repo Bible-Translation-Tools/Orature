@@ -244,7 +244,7 @@ class ContentDao(
                 e.selectedTakeFk,
                 e.text,
                 e.format,
-                e.type_fk
+                e.typeFk
             )
         }
         insertWithValues.execute()
