@@ -96,7 +96,7 @@ class TranslationViewModelTest {
         }
     }
 
-    @Test
+    /*@Test
     fun createTranslation_showHideProgress() {
         val mockCreateTranslation = mock(CreateTranslation::class.java)
         `when`(mockCreateTranslation.create(sourceLanguage, targetLanguage))
@@ -119,7 +119,7 @@ class TranslationViewModelTest {
         assertTrue(progressStatus[0])
         assertFalse(progressStatus[1])
         verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
-    }
+    }*/
 
     @Test
     fun loadSourceLanguages() {
