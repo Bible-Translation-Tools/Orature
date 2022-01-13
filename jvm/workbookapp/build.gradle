@@ -60,14 +60,10 @@ application {
 }
 
 test {
-    systemProperty 'monocle.platform', 'Headless'
-    systemProperty 'glass.platform', 'Monocle'
     systemProperty 'testfx.robot', 'glass'
     systemProperty 'testfx.headless', 'true'
     systemProperty 'prism.order', 'sw'
     systemProperty 'prism.text', 'native'
-    systemProperty 'embedded', 'monocle'
-    systemProperty 'java.awt.headless', 'true'
 }
 
 apply from: './jooq.gradle'
