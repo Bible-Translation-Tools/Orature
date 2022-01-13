@@ -22,7 +22,6 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -30,7 +29,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
-import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -82,10 +80,9 @@ open class RecordableViewModel(
 
         recordableProperty.onChange {
             clearDisposables()
-            it?.audio?.let { audio ->
-                subscribeSelectedTakePropertyToRelay(audio)
-                loadTakes(audio)
-            }
+            subscribeSelectedTakePropertyToRelay()
+            subscribeTakesDeletedToRelay()
+            loadTakes()
         }
 
         workbookDataStore.sourceAudioProperty.onChangeAndDoNow {
@@ -153,7 +150,6 @@ open class RecordableViewModel(
     }
 
     fun selectTake(take: Take) {
-        clearSelectedTake()
         setSelectedTake(take)
     }
 
@@ -161,7 +157,7 @@ open class RecordableViewModel(
         val take = takeCardModels.find { it.take.name == filename }
         take?.let {
             selectTake(it.take)
-        } ?: clearSelectedTake()
+        }
     }
 
     fun importTakes(files: List<File>) {
@@ -188,25 +184,15 @@ open class RecordableViewModel(
         }
     }
 
-    private fun clearSelectedTake() {
-        selectedTakeProperty.value?.let { selectedTake ->
-            selectedTake.selected = false
-            addToAlternateTakes(selectedTake)
-        }
-        selectedTakeProperty.set(null)
-    }
-
     private fun setSelectedTake(take: Take) {
         val found = takeCardModels.find {
-            take.equals(it.take)
+            take == it.take
         }
         found?.let { takeModel ->
-            removeFromAlternateTakes(take)
-            takeModel.selected = true
             recordable?.audio?.selectTake(takeModel.take) ?: throw IllegalStateException("Recordable is null")
-            selectedTakeProperty.set(takeModel)
             workbookDataStore.updateSelectedTakesFile()
             take.file.setLastModified(System.currentTimeMillis())
+            loadTakes()
         }
     }
 
@@ -278,38 +264,25 @@ open class RecordableViewModel(
 
     private fun Take.isNotDeleted() = deletedTimestamp.value?.value == null
 
-    private fun loadTakes(audio: AssociatedAudio) {
-        // selectedTakeProperty may not have been updated yet so ask for the current selected take
-        val selected = audio.selected.value?.value
+    private fun loadTakes() {
+        recordable?.audio?.let { audio ->
+            // selectedTakeProperty may not have been updated yet so ask for the current selected take
+            val selected = audio.selected.value?.value
 
-        val takes =
-            audio.getAllTakes()
-                .filter { it.isNotDeleted() }
-                .map { take ->
-                    take.mapToCardModel(take.equals(selected))
-                }
+            val takes =
+                audio.getAllTakes()
+                    .filter { it.isNotDeleted() }
+                    .map { take ->
+                        take.mapToCardModel(take == selected)
+                    }
 
-        val selectedModel = takes.find { it.selected }
-        selectedTakeProperty.set(selectedModel)
+            val selectedModel = takes.find { it.selected }
+            selectedTakeProperty.set(selectedModel)
 
-        takeCardModels.clear()
-        takeCardModels.addAll(takes)
-        sortTakes()
-
-        audio.takes
-            .filter { it.isNotDeleted() }
-            .doOnError { e ->
-                logger.error("Error in loading audio takes for audio: $audio", e)
-            }
-            .subscribe { take ->
-                if (takeCardModels.find { it.take.equals(take) } == null) {
-                    addToAlternateTakes(
-                        take.mapToCardModel(take.equals(selected))
-                    )
-                }
-                removeOnDeleted(take)
-            }
-            .let { disposables.add(it) }
+            takeCardModels.clear()
+            takeCardModels.addAll(takes)
+            sortTakes()
+        }
     }
 
     private fun removeOnDeleted(take: Take) {
@@ -318,26 +291,46 @@ open class RecordableViewModel(
             .doOnError { e ->
                 logger.error("Error in removing deleted take: $take", e)
             }
+            .observeOnFx()
             .subscribe {
-                removeFromAlternateTakes(take)
+                val isTakeSelected = takeCardModels.any { it.take == take && it.selected }
+                if (isTakeSelected) {
+                    takeCardModels.firstOrNull()?.let {
+                        selectTake(it.take)
+                    }
+                }
+                loadTakes()
             }
             .let { disposables.add(it) }
     }
 
-    private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
-        audio
-            .selected
-            .doOnError { e ->
-                logger.error("Error in subscribing take to relay for audio: $audio", e)
-            }
-            .observeOnFx()
-            .subscribe { takeHolder ->
-                takeCardModels.forEach { it.selected = false }
-                val takeModel = takeCardModels.find { it.take == takeHolder.value }
-                takeModel?.selected = true
-                selectedTakeProperty.set(takeModel)
-            }
-            .let { disposables.add(it) }
+    private fun subscribeSelectedTakePropertyToRelay() {
+        recordable?.audio?.let { audio ->
+            audio
+                .selected
+                .doOnError { e ->
+                    logger.error("Error in subscribing take to relay for audio: $audio", e)
+                }
+                .observeOnFx()
+                .subscribe { takeHolder ->
+                    takeHolder.value?.let { loadTakes() }
+                }
+                .let { disposables.add(it) }
+        }
+    }
+
+    private fun subscribeTakesDeletedToRelay() {
+        recordable?.audio?.let { audio ->
+            audio.takes
+                .filter { it.isNotDeleted() }
+                .doOnError { e ->
+                    logger.error("Error in loading audio takes for audio: $audio", e)
+                }
+                .subscribe { take ->
+                    removeOnDeleted(take)
+                }
+                .let { disposables.add(it) }
+        }
     }
 
     private fun sortTakes() {
@@ -349,21 +342,6 @@ open class RecordableViewModel(
                 take1.selected -> 1
                 else -> -1
             }
-        }
-    }
-
-    private fun addToAlternateTakes(take: TakeCardModel) {
-        Platform.runLater {
-            if (!takeCardModels.contains(take)) {
-                takeCardModels.add(take)
-                sortTakes()
-            }
-        }
-    }
-
-    private fun removeFromAlternateTakes(take: Take) {
-        Platform.runLater {
-            takeCardModels.removeAll { it.take.equals(take) }
         }
     }
 
