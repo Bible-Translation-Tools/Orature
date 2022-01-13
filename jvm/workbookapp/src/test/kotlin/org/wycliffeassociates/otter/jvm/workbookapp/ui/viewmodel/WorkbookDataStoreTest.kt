@@ -166,8 +166,6 @@ class WorkbookDataStoreTest {
 
         @AfterClass
         @JvmStatic fun tearDown() {
-            directoryProvider.cleanTempDirectory()
-
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)

@@ -110,7 +110,8 @@ class SettingsViewModelTest {
         @AfterClass
         @JvmStatic fun tearDown() {
             FxToolkit.hideStage()
-            testApp.stop()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
         }
     }
 

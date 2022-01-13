@@ -194,8 +194,6 @@ class RecordScriptureViewModelTest {
 
         @AfterClass
         @JvmStatic fun tearDown() {
-            directoryProvider.cleanTempDirectory()
-
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)
