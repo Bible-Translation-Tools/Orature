@@ -214,9 +214,7 @@ class ChapterPageViewModelTest {
         }
 
         @AfterClass
-        fun tearDown() {
-            directoryProvider.cleanTempDirectory()
-
+        @JvmStatic fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)

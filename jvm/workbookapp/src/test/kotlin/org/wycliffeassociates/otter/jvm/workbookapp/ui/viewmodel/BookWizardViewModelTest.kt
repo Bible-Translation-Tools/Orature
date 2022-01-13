@@ -20,9 +20,16 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.nhaarman.mockitokotlin2.any
 import io.reactivex.Single
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
+import org.junit.BeforeClass
 import org.junit.Test
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
 import org.testfx.util.WaitForAsyncUtils
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -33,44 +40,52 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import tornadofx.*
-import kotlin.concurrent.thread
 
 class BookWizardViewModelTest {
-    private val vm: BookWizardViewModel
-    private val mockCollectionRepo = mock(ICollectionRepository::class.java)
-    private val mockWorkbookRepo = mock(IWorkbookRepository::class.java)
+    companion object {
+        private val testApp: TestApp = TestApp()
+        private lateinit var vm: BookWizardViewModel
+        private val mockCollectionRepo = mock(ICollectionRepository::class.java)
+        private val mockWorkbookRepo = mock(IWorkbookRepository::class.java)
 
-    init {
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication {
-            TestApp()
-        }
-        vm = find()
-        vm.collectionRepo = mockCollectionRepo
-        vm.workbookRepo = mockWorkbookRepo
-    }
-
-    private val simpleResource = Collection(
-        1,
-        "ulb",
-        "test-label",
-        "test-key",
-        null,
-        null,
-        1
-    )
-
-    private val simpleBooks = listOf(
-        Collection(
+        private val simpleResource = Collection(
             1,
-            "gen",
-            "Genesis-test-label",
-            "Genesis-test-title",
+            "ulb",
+            "test-label",
+            "test-key",
             null,
             null,
             1
         )
-    )
+
+        private val simpleBooks = listOf(
+            Collection(
+                1,
+                "gen",
+                "Genesis-test-label",
+                "Genesis-test-title",
+                null,
+                null,
+                1
+            )
+        )
+
+        @BeforeClass
+        @JvmStatic fun setup() {
+            FxToolkit.registerPrimaryStage()
+            FxToolkit.setupApplication { testApp }
+            vm = find()
+            vm.collectionRepo = mockCollectionRepo
+            vm.workbookRepo = mockWorkbookRepo
+        }
+
+        @AfterClass
+        @JvmStatic fun tearDown() {
+            FxToolkit.hideStage()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
+        }
+    }
 
     @Test
     fun loadBooksViewData() {

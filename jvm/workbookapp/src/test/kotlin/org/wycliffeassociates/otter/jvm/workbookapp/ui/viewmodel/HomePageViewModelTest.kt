@@ -21,12 +21,14 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.nhaarman.mockitokotlin2.any
 import io.reactivex.Maybe
 import io.reactivex.Single
+import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.BeforeClass
 import org.junit.Test
-import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.atLeastOnce
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.testfx.api.FxToolkit
 import org.testfx.util.WaitForAsyncUtils
@@ -39,49 +41,58 @@ import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionR
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
 import tornadofx.*
-import kotlin.concurrent.thread
 
 class HomePageViewModelTest {
-    private val vm: HomePageViewModel
-    private val mockPreferenceRepo = mock(IAppPreferencesRepository::class.java)
-    private val mockCollectionRepo = mock(ICollectionRepository::class.java)
-    private val mockWorkbookRepo = mock(IWorkbookRepository::class.java)
-    private val mockSettingsVM = mock(SettingsViewModel::class.java)
-    private val mockLanguageRepo = mock(ILanguageRepository::class.java)
+    companion object {
+        private val testApp: TestApp = TestApp()
 
-    init {
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication {
-            TestApp()
+        private lateinit var vm: HomePageViewModel
+        private val mockPreferenceRepo = mock(IAppPreferencesRepository::class.java)
+        private val mockCollectionRepo = mock(ICollectionRepository::class.java)
+        private val mockWorkbookRepo = mock(IWorkbookRepository::class.java)
+        private val mockSettingsVM = mock(SettingsViewModel::class.java)
+        private val mockLanguageRepo = mock(ILanguageRepository::class.java)
+
+        private val resumeProjectId = 1
+        private val collection = Collection(
+            1,
+            "gen",
+            "Genesis-test-label",
+            "Genesis-test-title",
+            null,
+            null,
+            resumeProjectId
+        )
+
+        private fun setUpMocks_loadResumeBook() {
+            `when`(mockPreferenceRepo.resumeProjectId())
+                .thenReturn(Single.just(resumeProjectId))
+
+            `when`(mockCollectionRepo.getProject(resumeProjectId))
+                .thenReturn(Maybe.just(collection))
         }
 
-        `when`(mockSettingsVM.refreshPlugins()).then { }
-        setInScope(mockSettingsVM, FX.defaultScope)
+        @BeforeClass
+        @JvmStatic fun setup() {
+            FxToolkit.registerPrimaryStage()
+            FxToolkit.setupApplication { testApp }
 
-        vm = find(FX.defaultScope)
-        vm.preferencesRepository = mockPreferenceRepo
-        vm.collectionRepo = mockCollectionRepo
-        vm.workbookRepo = mockWorkbookRepo
-        vm.languageRepository = mockLanguageRepo
-    }
+            `when`(mockSettingsVM.refreshPlugins()).then { }
+            setInScope(mockSettingsVM, FX.defaultScope)
 
-    private val resumeProjectId = 1
-    private val collection = Collection(
-        1,
-        "gen",
-        "Genesis-test-label",
-        "Genesis-test-title",
-        null,
-        null,
-        resumeProjectId
-    )
+            vm = find(FX.defaultScope)
+            vm.preferencesRepository = mockPreferenceRepo
+            vm.collectionRepo = mockCollectionRepo
+            vm.workbookRepo = mockWorkbookRepo
+            vm.languageRepository = mockLanguageRepo
+        }
 
-    private fun setUpMocks_loadResumeBook() {
-        `when`(mockPreferenceRepo.resumeProjectId())
-            .thenReturn(Single.just(resumeProjectId))
-
-        `when`(mockCollectionRepo.getProject(resumeProjectId))
-            .thenReturn(Maybe.just(collection))
+        @AfterClass
+        @JvmStatic fun tearDown() {
+            FxToolkit.hideStage()
+            FxToolkit.cleanupStages()
+            FxToolkit.cleanupApplication(testApp)
+        }
     }
 
     @Test
