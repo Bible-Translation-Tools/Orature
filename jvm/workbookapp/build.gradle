@@ -63,7 +63,8 @@ test {
     systemProperty 'testfx.robot', 'glass'
     systemProperty 'testfx.headless', 'true'
     systemProperty 'prism.order', 'sw'
-    systemProperty 'prism.text', 't2k'
+    systemProperty 'prism.text', 'native'
+    systemProperty 'embedded', 'monocle'
 }
 
 apply from: './jooq.gradle'
