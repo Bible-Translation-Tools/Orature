@@ -24,6 +24,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageType
@@ -82,9 +83,9 @@ class SourceLanguageSelection : Fragment() {
     }
 
     init {
-        importStylesheet(resources.get("/css/translation-wizard.css"))
-        importStylesheet(resources.get("/css/language-card-cell.css"))
-        importStylesheet(resources.get("/css/filtered-search-bar.css"))
+        tryImportStylesheet(resources.get("/css/translation-wizard.css"))
+        tryImportStylesheet(resources.get("/css/language-card-cell.css"))
+        tryImportStylesheet(resources.get("/css/filtered-search-bar.css"))
 
         translationViewModel.sourceLanguages.onChange {
             viewModel.regions.setAll(

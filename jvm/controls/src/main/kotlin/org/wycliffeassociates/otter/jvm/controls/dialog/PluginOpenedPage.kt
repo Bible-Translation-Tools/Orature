@@ -26,6 +26,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class PluginOpenedPage : Fragment() {
@@ -42,7 +43,7 @@ class PluginOpenedPage : Fragment() {
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
 
     init {
-        importStylesheet(resources["/css/plugin-opened-page.css"])
+        tryImportStylesheet(resources["/css/plugin-opened-page.css"])
     }
 
     override val root = vbox {

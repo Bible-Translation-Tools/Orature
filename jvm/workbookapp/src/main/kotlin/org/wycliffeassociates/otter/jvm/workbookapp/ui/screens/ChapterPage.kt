@@ -48,6 +48,7 @@ import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
 import org.wycliffeassociates.otter.common.utils.capitalizeString
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -106,11 +107,11 @@ class ChapterPage : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/chapter-page.css"))
-        importStylesheet(resources.get("/css/chunk-item.css"))
-        importStylesheet(resources.get("/css/take-item.css"))
-        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/chapter-page.css"))
+        tryImportStylesheet(resources.get("/css/chunk-item.css"))
+        tryImportStylesheet(resources.get("/css/take-item.css"))
+        tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->

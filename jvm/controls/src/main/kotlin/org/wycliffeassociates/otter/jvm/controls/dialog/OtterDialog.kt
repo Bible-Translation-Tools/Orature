@@ -30,6 +30,7 @@ import javafx.stage.Modality
 import javafx.stage.Stage
 import javafx.stage.StageStyle
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 abstract class OtterDialog : Fragment() {
@@ -50,13 +51,13 @@ abstract class OtterDialog : Fragment() {
     }
 
     init {
-        importStylesheet(resources.get("/css/otter-dialog.css"))
+        tryImportStylesheet(resources.get("/css/otter-dialog.css"))
         /*
          * The dialog does not inherit style class from root view;
          * it needs its own theme configuration
          */
-        importStylesheet(resources["/css/theme/light-theme.css"])
-        importStylesheet(resources["/css/theme/dark-theme.css"])
+        tryImportStylesheet(resources["/css/theme/light-theme.css"])
+        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
         bindTheme()
     }
 

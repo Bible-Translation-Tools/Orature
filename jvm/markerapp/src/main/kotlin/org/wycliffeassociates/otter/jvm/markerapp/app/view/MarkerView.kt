@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.stage.Screen
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
@@ -40,7 +41,7 @@ class MarkerView : PluginEntrypoint() {
             val css = this@MarkerView.javaClass.getResource("/css/verse-marker-app.css")
                 .toExternalForm()
                 .replace(" ", "%20")
-            importStylesheet(css)
+            tryImportStylesheet(css)
 
             FX.stylesheets.addAll(
                 javaClass.getResource("/css/control.css").toExternalForm(),

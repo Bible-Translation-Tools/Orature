@@ -23,6 +23,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -37,7 +38,7 @@ class RecordResourcePage : View() {
     private val workbookDataStore: WorkbookDataStore by inject()
 
     val tabPane = JFXTabPane().apply {
-        importStylesheet(resources.get("/css/tab-pane.css"))
+        tryImportStylesheet(resources.get("/css/tab-pane.css"))
     }
 
     override val root = tabPane

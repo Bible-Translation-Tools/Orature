@@ -48,6 +48,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.dragtarget.DragTargetBuilder
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -247,9 +248,9 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
     }
 
     init {
-        importStylesheet(resources.get("/css/takecard.css"))
-        importStylesheet(resources.get("/css/resourcetakecard.css"))
-        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        tryImportStylesheet(resources.get("/css/takecard.css"))
+        tryImportStylesheet(resources.get("/css/resourcetakecard.css"))
+        tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
         isDraggingTakeProperty.onChange {
             if (it) recordableViewModel.stopPlayers()
