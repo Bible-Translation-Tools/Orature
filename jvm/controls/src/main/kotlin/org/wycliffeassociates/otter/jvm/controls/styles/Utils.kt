@@ -16,22 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.button
+package org.wycliffeassociates.otter.jvm.controls.styles
 
-import javafx.scene.control.CheckBox
-import javafx.scene.control.Skin
-import org.wycliffeassociates.otter.jvm.controls.skins.button.CheckboxButtonSkin
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import tornadofx.*
+import tornadofx.FX
+import tornadofx.importStylesheet
+import java.net.MalformedURLException
+import java.net.URL
 
-class CheckboxButton : CheckBox() {
-
-    init {
-        tryImportStylesheet(javaClass.getResource("/css/checkbox-button.css").toExternalForm())
-        styleClass.setAll("checkbox-button")
+/**
+ * Wrapper of FX.importStylesheet(String).
+ * Use this function to prevent duplicated imports.
+ */
+fun tryImportStylesheet(stylesheet: String) : Boolean {
+    try {
+        URL(stylesheet).toExternalForm()
+    } catch (ex: MalformedURLException) {
+        // Fallback to loading classpath resource
+        FX::class.java.getResource(stylesheet)?.toExternalForm()
+    }?.let { resourcePath ->
+        if (!FX.stylesheets.contains(resourcePath)) {
+            importStylesheet(resourcePath)
+            return true
+        }
     }
-
-    override fun createDefaultSkin(): Skin<*> {
-        return CheckboxButtonSkin(this)
-    }
+    return false
 }
