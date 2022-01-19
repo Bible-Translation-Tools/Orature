@@ -216,7 +216,7 @@ class ResourceListViewModelTest {
         }
 
         @AfterClass
-        fun tearDown() {
+        @JvmStatic fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)

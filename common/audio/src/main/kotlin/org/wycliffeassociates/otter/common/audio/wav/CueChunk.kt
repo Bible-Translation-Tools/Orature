@@ -279,7 +279,7 @@ open class CueChunk : RiffChunk {
                     val labelBytes = ByteArray(wordAlignedSubchunkSize - CHUNK_LABEL_SIZE)
                     chunk.get(labelBytes)
                     // trim necessary to strip trailing 0's used to pad to double word align
-                    val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
+                    val label = String(labelBytes, Charsets.US_ASCII).trim { it.code.toByte() == 0.toByte() }
                     cueListBuilder.addLabel(id, label)
                 }
                 else -> {

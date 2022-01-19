@@ -103,12 +103,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     }
 
     private fun initializeControl() {
-        initControllers()
         initAudioControls()
         initTextControls()
-    }
-
-    private fun initControllers() {
     }
 
     private fun initAudioControls() {

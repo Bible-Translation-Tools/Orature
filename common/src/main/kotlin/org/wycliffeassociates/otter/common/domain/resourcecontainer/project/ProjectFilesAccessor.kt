@@ -184,7 +184,7 @@ class ProjectFilesAccessor(
                     log.error("Error in writeSelectedTakesFile", e)
                 }
                 .blockingSubscribe {
-                    _fileWriter.appendln(it)
+                    _fileWriter.appendLine(it)
                 }
         }
     }
@@ -331,7 +331,7 @@ class ProjectFilesAccessor(
     private fun isAudioFile(file: String) = isAudioFile(File(file))
 
     private fun isAudioFile(file: File) =
-        file.extension.toLowerCase().let { it == "wav" || it == "mp3" }
+        file.extension.lowercase().let { it == "wav" || it == "mp3" }
 
     companion object {
         val ignoredSourceMediaExtensions = listOf("wav", "mp3", "jpg", "jpeg", "png", "cue")

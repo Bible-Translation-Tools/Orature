@@ -16,15 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.data
+package org.wycliffeassociates.otter.common.utils
 
-enum class OratureFileFormat(val extension: String) {
-    ORATURE("orature"),
-    ZIP("zip");
+import java.util.*
 
-    companion object {
-        val extensionList: List<String> = values().map { it.extension }
-
-        fun isSupported(extension: String) = extension.lowercase() in extensionList
-    }
+fun String.capitalizeString(): String {
+    return this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 }

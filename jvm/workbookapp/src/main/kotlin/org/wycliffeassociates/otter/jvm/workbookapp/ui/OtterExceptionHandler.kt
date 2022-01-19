@@ -183,7 +183,7 @@ class OtterExceptionHandler(
     }
 
     private fun getLog(): String? {
-        val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
+        val logFileName = OratureInfo.SUITE_NAME.lowercase()
         val logExt = ".log"
         val logFile = StringBuilder()
             .append(directoryProvider.logsDirectory.absolutePath)

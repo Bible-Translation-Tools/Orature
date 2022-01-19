@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.AppBarButton
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
@@ -83,7 +84,7 @@ class AppBar : Fragment() {
     }
 
     init {
-        importStylesheet(resources.get("/css/app-bar.css"))
+        tryImportStylesheet(resources.get("/css/app-bar.css"))
 
         root.apply {
             styleClass.setAll("app-bar")

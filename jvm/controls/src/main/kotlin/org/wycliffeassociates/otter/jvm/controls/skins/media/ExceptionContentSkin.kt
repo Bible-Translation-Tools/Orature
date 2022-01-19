@@ -30,6 +30,7 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.media.ExceptionContent
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<ExceptionContent>(content) {
@@ -69,7 +70,7 @@ class ExceptionContentSkin(private var content: ExceptionContent) : SkinBase<Exc
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
         }
 
-        importStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/exception-content.css").toExternalForm())
     }
 
     private fun bindText() {

@@ -60,12 +60,12 @@ class ContentTypeDao(
         .get(CONTENT_TYPE.ID)
 
     private fun getAll(dsl: DSLContext): List<Pair<ContentType, Int>> {
-        val nameLookup = ContentType.values().associate { it.name.toLowerCase() to it }
+        val nameLookup = ContentType.values().associate { it.name.lowercase() to it }
         return dsl
             .select()
             .from(CONTENT_TYPE)
             .fetch { record ->
-                val name = record.getValue(CONTENT_TYPE.NAME).toLowerCase()
+                val name = record.getValue(CONTENT_TYPE.NAME).lowercase()
                 val id = record.getValue(CONTENT_TYPE.ID)
                 nameLookup[name]?.let { Pair(it, id) }
             }

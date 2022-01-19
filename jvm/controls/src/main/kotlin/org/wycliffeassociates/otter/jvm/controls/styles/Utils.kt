@@ -16,15 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.data
+package org.wycliffeassociates.otter.jvm.controls.styles
 
-enum class OratureFileFormat(val extension: String) {
-    ORATURE("orature"),
-    ZIP("zip");
+import tornadofx.FX
+import tornadofx.importStylesheet
+import java.net.MalformedURLException
+import java.net.URL
 
-    companion object {
-        val extensionList: List<String> = values().map { it.extension }
-
-        fun isSupported(extension: String) = extension.lowercase() in extensionList
+/**
+ * Wrapper of FX.importStylesheet(String).
+ * Use this function to prevent duplicated imports.
+ */
+fun tryImportStylesheet(stylesheet: String) : Boolean {
+    try {
+        URL(stylesheet).toExternalForm()
+    } catch (ex: MalformedURLException) {
+        // Fallback to loading classpath resource
+        FX::class.java.getResource(stylesheet)?.toExternalForm()
+    }?.let { resourcePath ->
+        if (!FX.stylesheets.contains(resourcePath)) {
+            importStylesheet(resourcePath)
+            return true
+        }
     }
+    return false
 }
