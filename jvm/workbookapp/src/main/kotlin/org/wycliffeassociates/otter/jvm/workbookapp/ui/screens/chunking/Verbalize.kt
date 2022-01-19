@@ -52,7 +52,7 @@ class Verbalize : View() {
     }
 
     override val root = borderpane {
-        addClass("verbalize", "light-theme")
+        addClass("verbalize")
         center = hbox {
             addClass("verbalize__grouping")
             button {

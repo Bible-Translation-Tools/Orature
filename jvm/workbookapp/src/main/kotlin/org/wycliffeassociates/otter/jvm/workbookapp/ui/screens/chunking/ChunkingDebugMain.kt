@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.scene.layout.StackPane
 import javafx.stage.Stage
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
@@ -28,14 +29,15 @@ import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import tornadofx.*
 
 fun main(args: Array<String>) {
-    launch<ChunkingApp>(args)
+    launch<ChunkingDebugApp>(args)
 }
 
-class ChunkingApp : App(Verbalize::class), IDependencyGraphProvider {
+class ChunkingDebugApp : App(ChunkingDebugView::class), IDependencyGraphProvider {
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
 
     init {
         importStylesheet(resources["/css/theme/light-theme.css"])
+        importStylesheet(resources["/css/theme/dark-theme.css"])
         importStylesheet(resources["/css/control.css"])
         ConfigureAudioSystem(
             dependencyGraph.injectConnectionFactory(),
@@ -49,5 +51,14 @@ class ChunkingApp : App(Verbalize::class), IDependencyGraphProvider {
     override fun start(stage: Stage) {
         super.start(stage)
         stage.isMaximized = true
+    }
+}
+
+class ChunkingDebugView : View(){
+
+    override val root = StackPane().apply { addClass("light-theme") }
+
+    init {
+        add<ChunkingWizard>()
     }
 }

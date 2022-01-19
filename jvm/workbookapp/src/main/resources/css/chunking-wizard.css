@@ -17,42 +17,37 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-.verbalize {
+.chunking-wizard {
     -fx-background-color: -wa-background;
-}
-
-.verbalize__grouping {
-    -fx-spacing: 25px;
     -fx-alignment: center;
+    -fx-spacing: 10px;
+    -fx-padding: 15px;
 }
 
-.verbalize__action-container {
-    -fx-pref-width: 200px;
+.chunking-wizard__title .text {
+    -fx-fill: -wa-regular-text;
+    -fx-font-size: 26pt;
+    -fx-font-weight: bolder;
+    -fx-font-style: normal;
 }
 
-.verbalize__btn--secondary {
-    -fx-pref-height: 75px;
-    -fx-pref-width: 75px;
-    -fx-border-radius: 90px;
-    -fx-background-radius: 90px;
+.chunking-wizard__subtitle .text {
+    -fx-fill: -wa-regular-text;
+    -fx-font-size: 20pt;
+    -fx-font-weight: normal;
+    -fx-font-style: normal;
 }
 
-.verbalize__btn--secondary .ikonli-font-icon {
-    -fx-icon-size: 36px;
+.chunking-wizard__step-container {
+    -fx-spacing: 5px;
+    -fx-alignment: center;
+    -fx-padding: 0px;
+    -fx-background-color: -wa-background;
+    -fx-border-width: 0px;
+    -fx-border-color: transparent;
 }
 
-.verbalize__btn--primary {
-    -fx-pref-height: 125px;
-    -fx-pref-width: 125px;
-    -fx-border-radius: 90px;
-    -fx-background-radius: 90px;
-}
-
-.verbalize__btn--primary .ikonli-font-icon {
-    -fx-icon-size: 48px;
-}
-
-.verbalize__animation {
-    -fx-fill: rgba(0, 15, 33, .1);
-    -fx-background-color: transparent;
+.chunking-wizard__step {
+    -fx-arc-height: 6px;
+    -fx-arc-width: 6px;
 }
