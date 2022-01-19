@@ -16,3 +16,43 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+.verbalize {
+    -fx-background-color: white;
+}
+
+.verbalize__grouping {
+    -fx-spacing: 25px;
+    -fx-alignment: center;
+}
+
+.verbalize__action-container {
+    -fx-pref-width: 200px;
+}
+
+.verbalize__btn--secondary {
+    -fx-pref-height: 75px;
+    -fx-pref-width: 75px;
+    -fx-border-radius: 90px;
+    -fx-background-radius: 90px;
+}
+
+.verbalize__btn--secondary .ikonli-font-icon {
+    -fx-icon-size: 36px;
+}
+
+.verbalize__btn--primary {
+    -fx-pref-height: 125px;
+    -fx-pref-width: 125px;
+    -fx-border-radius: 90px;
+    -fx-background-radius: 90px;
+}
+
+.verbalize__btn--primary .ikonli-font-icon {
+    -fx-icon-size: 48px;
+}
+
+.verbalize__animation {
+    -fx-fill: rgba(0, 15, 33, .1);
+    -fx-background-color: transparent;
+}

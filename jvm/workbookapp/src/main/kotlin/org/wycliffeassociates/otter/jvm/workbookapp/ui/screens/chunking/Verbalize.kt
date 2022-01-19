@@ -18,60 +18,45 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
-import javafx.geometry.Pos
-import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
 import javafx.scene.shape.Circle
 import org.kordamp.ikonli.javafx.FontIcon
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
 import tornadofx.*
 
 class Verbalize : View() {
+    private val logger = LoggerFactory.getLogger(Verbalize::class.java)
+
     val chunkVm: ChunkingViewModel by inject()
     val vm: VerbalizeViewModel by inject()
 
-    val playIcon = FontIcon("mdi-play").apply {
-        iconSize = 36
-        iconColor = Color.WHITE
-    }
-    val pauseIcon = FontIcon("mdi-pause").apply {
-        iconSize = 36
-        iconColor = Color.WHITE
-    }
-    val recordIcon = FontIcon("mdi-microphone").apply { iconSize = 48 }
-    val stopIcon = FontIcon("mdi-stop").apply { iconSize = 48 }
-    val rerecordButton = FontIcon("mdi-sync").apply {
-        iconColor = Paint.valueOf("#00377c")
-        iconSize = 36
-    }
+    val playIcon = FontIcon("mdi-play")
+    val pauseIcon = FontIcon("mdi-pause")
+    val recordIcon = FontIcon("mdi-microphone")
+    val stopIcon = FontIcon("mdi-stop")
+    val rerecordButton = FontIcon("mdi-sync")
 
-    val arc = Circle().apply {
-        fill = c("#001533", .10);
-        centerX = 120.0
-        centerY = 120.0
-        radius = 60.0
-        style {
-            backgroundColor += Color.TRANSPARENT
-        }
+    val arc = Circle(120.0, 120.0, 60.0).apply {
+        addClass("verbalize__animation")
     }
 
     override fun onDock() {
         super.onDock()
+        importStylesheet(resources["/css/verbalize-page.css"])
+        logger.info("Verbalize docked")
+        vm.onDock()
         chunkVm.titleProperty.set(messages["verbalizeTitle"])
         chunkVm.stepProperty.set(messages["verbalizeDescription"])
     }
 
     override val root = borderpane {
-        style {
-            backgroundColor += Color.WHITE
-        }
+        addClass("verbalize", "light-theme")
         center = hbox {
-            spacing = 25.0
-            alignment = Pos.CENTER
-
+            addClass("verbalize__grouping")
             button {
+                styleClass.addAll("btn", "btn--primary", "verbalize__btn--secondary")
                 visibleProperty().bind(vm.hasContentProperty)
                 vm.isPlayingProperty.onChangeAndDoNow {
                     it?.let {
@@ -81,19 +66,13 @@ class Verbalize : View() {
                         }
                     }
                 }
-                styleClass.addAll("btn", "btn--primary")
                 action { vm.playToggle() }
-                style {
-                    prefHeight = 75.px
-                    prefWidth = 75.px
-                    borderRadius += box(90.px)
-                    backgroundRadius += box(90.px)
-                }
             }
             stackpane {
-                prefWidth = 200.0
+                addClass("verbalize__action-container")
                 add(arc)
                 button {
+                    styleClass.addAll("btn", "btn--cta", "verbalize__btn--primary")
                     vm.recordingProperty.onChangeAndDoNow {
                         it?.let {
                             when (it) {
@@ -102,32 +81,18 @@ class Verbalize : View() {
                             }
                         }
                     }
-                    styleClass.addAll("btn", "btn--cta")
                     action {
                         arc.radiusProperty().bind(vm.arcLengthProperty)
                         vm.toggle()
                     }
-                    style {
-                        prefHeight = 125.px
-                        prefWidth = 125.px
-                        borderRadius += box(90.px)
-                        backgroundRadius += box(90.px)
-                    }
                 }
             }
             button {
+                styleClass.addAll("btn", "btn--secondary", "verbalize__btn--secondary")
                 visibleProperty().bind(vm.hasContentProperty)
                 graphic = rerecordButton
-                styleClass.addAll("btn", "btn--secondary")
-                action { vm.reRec() }
-                style {
-                    prefHeight = 75.px
-                    prefWidth = 75.px
-                    borderRadius += box(90.px)
-                    backgroundRadius += box(90.px)
-                }
+                action { vm.reRecord() }
             }
-
         }
     }
 }

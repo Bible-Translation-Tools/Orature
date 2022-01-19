@@ -19,8 +19,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.stage.Stage
+import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
+import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
+import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import tornadofx.*
 
 fun main(args: Array<String>) {
@@ -32,7 +36,14 @@ class ChunkingApp : App(Verbalize::class), IDependencyGraphProvider {
 
     init {
         importStylesheet(resources["/css/theme/light-theme.css"])
-        importStylesheet(resources["/css/theme/dark-theme.css"])
+        importStylesheet(resources["/css/control.css"])
+        ConfigureAudioSystem(
+            dependencyGraph.injectConnectionFactory(),
+            AudioDeviceProvider(DEFAULT_AUDIO_FORMAT),
+            dependencyGraph.injectAppPreferencesRepository()
+        ).configure()
+
+        ConfigureLogger(dependencyGraph.injectDirectoryProvider().logsDirectory).configure()
     }
 
     override fun start(stage: Stage) {

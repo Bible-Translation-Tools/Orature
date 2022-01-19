@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
-import java.io.File
 import javafx.animation.Interpolator
 import javafx.animation.Timeline
 import javafx.application.Platform
@@ -27,8 +26,11 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.util.Duration
 import javax.inject.Inject
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioRecorder
@@ -43,6 +45,7 @@ import tornadofx.setValue
 import tornadofx.timeline
 
 class VerbalizeViewModel : ViewModel() {
+    private val logger = LoggerFactory.getLogger(VerbalizeViewModel::class.java)
 
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
@@ -55,17 +58,6 @@ class VerbalizeViewModel : ViewModel() {
     var player: IAudioPlayer? = null
     var recorder: IAudioRecorder? = null
     var writer: WavFileWriter? = null
-
-    init {
-        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-    }
-
-    fun onDock() {
-        wav = AudioFile(directoryProvider.createTempFile("verbalize",".wav").apply { deleteOnExit() }, 1, 44100, 16)
-        recorder = audioConnectionFactory.getRecorder()
-        player = audioConnectionFactory.getPlayer()
-        prepareRecorder()
-    }
 
     val isPlayingProperty = SimpleBooleanProperty(false)
     var isLoaded = false
@@ -81,55 +73,105 @@ class VerbalizeViewModel : ViewModel() {
 
     val canSaveProperty: BooleanBinding = (recordingProperty.not()).and(hasWrittenProperty)
 
+    init {
+        (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+    }
+
+    fun onDock() {
+        prepareAudio()
+    }
+
+    private fun prepareAudio() {
+        prepareVerbalizationFile()
+        getAudioConnections()
+        prepareRecorder()
+    }
+
+    private fun prepareVerbalizationFile() {
+        wav = AudioFile(
+            directoryProvider.createTempFile("verbalize",".wav").apply { deleteOnExit() },
+            DEFAULT_CHANNELS,
+            DEFAULT_SAMPLE_RATE,
+            DEFAULT_BITS_PER_SAMPLE
+        )
+    }
+
+    private fun getAudioConnections() {
+        recorder = audioConnectionFactory.getRecorder()
+        player = audioConnectionFactory.getPlayer()
+    }
+
+    private fun prepareRecorder() {
+        recorder?.let { recorder ->
+            writer = WavFileWriter(wav!!, recorder.getAudioStream()) {
+                Platform.runLater {
+                    logger.info("Writer has stopped, setting content for Verbalize")
+                }
+            }
+        }
+    }
+
     fun toggle() {
         if (isRecording) {
+            logger.info("Pausing Verbalization")
             stop()
             recorder?.stop()
             writer?.pause()
             hasWritten = true
+            hasContentProperty.set(true)
         } else {
             animate()
-            recorder?.start()
-            writer?.start()
+            recorder?.let {
+                logger.info("Recording Verbalization")
+                it.start()
+                writer?.start()
+            }
         }
         isRecording = !isRecording
     }
 
-    fun reRec() {
+    fun reRecord() {
         hasContentProperty.set(false)
         if (isLoaded && player?.isPlaying() == true) {
             isPlayingProperty.set(false)
             player?.pause()
-            player?.close()
         }
+        player!!.release()
         isLoaded = false
-        wav?.file?.delete()
-        wav = AudioFile(File.createTempFile("temp",".wav"), 1, 44100, 16)
+        wav?.file?.let {
+            logger.info("Deleting verbalization.")
+            it.delete()
+        } ?: run {
+            logger.error("Could not delete file for rerecording verbalization.")
+        }
+        prepareAudio()
         toggle()
     }
 
     fun playToggle() {
-        if (!isLoaded) {
-            wav?.let { wav ->
-                player?.load(wav.file)
-                player?.addEventListener {
-                    when (it) {
-                        AudioPlayerEvent.COMPLETE -> {
-                            Platform.runLater {
-                                isPlayingProperty.set(false)
+        player?.let { player ->
+            if (!isLoaded) {
+                wav?.let { wav ->
+                    player.load(wav.file)
+                    player.addEventListener {
+                        when (it) {
+                            AudioPlayerEvent.COMPLETE -> {
+                                Platform.runLater {
+                                    isPlayingProperty.set(false)
+                                }
                             }
                         }
                     }
                 }
+                isLoaded = true
             }
-            isLoaded = true
-        }
-        if(player?.isPlaying() == true) {
-            isPlayingProperty.set(false)
-            player?.pause()
-        } else {
-            isPlayingProperty.set(true)
-            player?.play()
+            if (player.isPlaying()) {
+                isPlayingProperty.set(false)
+                player.pause()
+            } else {
+                isPlayingProperty.set(true)
+                player.play()
+            }
         }
     }
 
@@ -138,7 +180,7 @@ class VerbalizeViewModel : ViewModel() {
     }
 
     val arcLengthProperty = SimpleDoubleProperty(60.0)
-    var animation: Timeline = timeline {
+    val animation: Timeline = timeline {
         cycleCount = Timeline.INDEFINITE
         isAutoReverse = true
 
@@ -152,16 +194,6 @@ class VerbalizeViewModel : ViewModel() {
     }
 
     fun stop() {
-        animation?.pause()
-    }
-
-    private fun prepareRecorder() {
-        recorder?.let { recorder ->
-            writer = WavFileWriter(wav!!, recorder.getAudioStream()) {
-                Platform.runLater {
-                    hasContentProperty.set(true)
-                }
-            }
-        }
+        animation.pause()
     }
 }
