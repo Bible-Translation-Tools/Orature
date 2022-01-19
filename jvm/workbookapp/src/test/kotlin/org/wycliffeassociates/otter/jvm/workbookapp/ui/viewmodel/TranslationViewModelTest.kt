@@ -54,6 +54,15 @@ class TranslationViewModelTest {
             "NA",
             1
         )
+        private val targetLanguage = Language(
+            "ar-test",
+            "Arabic-test",
+            "Arabic-test",
+            "rtl",
+            true,
+            "ME",
+            2
+        )
 
         private val rcMetadata = mock(ResourceMetadata::class.java).apply {
             `when`(this.language).thenReturn(sourceLanguage)
@@ -85,6 +94,31 @@ class TranslationViewModelTest {
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)
         }
+    }
+
+    @Test
+    fun createTranslation_showHideProgress() {
+        val mockCreateTranslation = mock(CreateTranslation::class.java)
+        `when`(mockCreateTranslation.create(sourceLanguage, targetLanguage))
+            .thenReturn(Single.just(1))
+
+        vm.creationUseCase = mockCreateTranslation
+
+        val progressStatus = mutableListOf<Boolean>()
+
+        vm.showProgressProperty.onChange {
+            progressStatus.add(it)
+        }
+        vm.selectedSourceLanguageProperty.onChangeOnce {
+            vm.selectedTargetLanguageProperty.set(targetLanguage)
+        }
+        vm.selectedSourceLanguageProperty.set(sourceLanguage)
+
+        WaitForAsyncUtils.waitForFxEvents()
+
+        assertTrue(progressStatus[0])
+        assertFalse(progressStatus[1])
+        verify(mockCreateTranslation).create(sourceLanguage, targetLanguage)
     }
 
     @Test
