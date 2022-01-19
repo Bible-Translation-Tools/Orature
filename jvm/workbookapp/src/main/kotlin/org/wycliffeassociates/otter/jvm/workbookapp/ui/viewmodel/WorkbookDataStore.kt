@@ -173,7 +173,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
             file.nameWithoutExtension,
             ".${file.extension}"
         )
-        tempFile.deleteOnExit()
         file.copyTo(tempFile, true)
 
         val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()

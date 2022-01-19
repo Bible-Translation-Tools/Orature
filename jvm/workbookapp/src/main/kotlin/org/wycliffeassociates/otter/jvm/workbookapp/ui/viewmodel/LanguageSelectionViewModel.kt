@@ -34,7 +34,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
 
     val searchQueryProperty = SimpleStringProperty("")
     val regions = observableListOf<String>()
-    private val selectedRegions = observableListOf<String>()
+    val selectedRegions = observableListOf<String>()
 
     val menuItems = observableListOf<MenuItem>()
     val anglicizedProperty = SimpleBooleanProperty(false)
@@ -47,7 +47,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     init {
         selectedRegions.onChange {
             regionPredicate = if (it.list.isEmpty()) {
-                Predicate { false }
+                Predicate { true }
             } else {
                 Predicate { language -> selectedRegions.contains(language.region) }
             }
