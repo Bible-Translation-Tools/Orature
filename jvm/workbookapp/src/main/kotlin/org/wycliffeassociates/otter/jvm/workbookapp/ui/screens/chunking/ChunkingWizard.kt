@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import tornadofx.*
 
@@ -50,7 +51,7 @@ class ChunkingWizard : Wizard() {
     }
 
     override fun onDock() {
-        importStylesheet(resources["/css/chunking-wizard.css"])
+        tryImportStylesheet(resources["/css/chunking-wizard.css"])
         val top = vbox {
             removeClass(WizardStyles.content)
             addClass("chunking-wizard")

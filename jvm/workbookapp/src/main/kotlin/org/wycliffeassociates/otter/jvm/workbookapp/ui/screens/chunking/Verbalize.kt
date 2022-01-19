@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import javafx.scene.shape.Circle
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
@@ -44,7 +45,7 @@ class Verbalize : View() {
 
     override fun onDock() {
         super.onDock()
-        importStylesheet(resources["/css/verbalize-page.css"])
+        tryImportStylesheet(resources["/css/verbalize-page.css"])
         logger.info("Verbalize docked")
         vm.onDock()
         chunkVm.titleProperty.set(messages["verbalizeTitle"])
