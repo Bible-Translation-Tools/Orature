@@ -7,9 +7,9 @@ ext {
     buildscanPluginVer = '2.4.2'
     detektPluginVer = '1.17.0'
     ktlintPluginVer = '8.2.0'
-    shadowPluginVer = '5.2.0'
+    shadowPluginVer = '7.1.2'
     sonarcloudPluginVer = '3.0'
-    licensePluginVer = "0.15.0"
+    licensePluginVer = "0.16.1"
 
     // Libraries
     kotlinVer = '1.5.10'
