@@ -29,10 +29,10 @@ import java.io.File;
 
 public class ConfigureLogger {
 
-    static private final String FILE_LOGGER_REF = "logfile";
-    static private final String CONSOLE_LOGGER_REF = "stdout";
-    static private final String LOG_FILE_NAME = OratureInfo.SUITE_NAME.toLowerCase();
-    static private final String LOG_EXT = ".log";
+    private static final String FILE_LOGGER_REF = "logfile";
+    private static final String CONSOLE_LOGGER_REF = "stdout";
+    private static final String LOG_FILE_NAME = OratureInfo.SUITE_NAME.toLowerCase();
+    private static final String LOG_EXT = ".log";
 
     private File logDir;
     private ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
