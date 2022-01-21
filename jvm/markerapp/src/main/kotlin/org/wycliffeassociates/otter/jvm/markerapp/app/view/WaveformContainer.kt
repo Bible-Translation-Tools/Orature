@@ -60,11 +60,11 @@ class WaveformContainer : Fragment() {
             add(
                 WaveformFrame(
                     markerTrack,
-                  //  timecodeHolder,
+                    //  timecodeHolder,
                     viewModel
                 )
             )
             add(WaveformOverlay(viewModel))
-            add(PlaceMarkerLayer(viewModel))
+            add(PlaceMarkerLayer().apply { onPlaceMarkerAction { viewModel.placeMarker() } })
         }
 }
