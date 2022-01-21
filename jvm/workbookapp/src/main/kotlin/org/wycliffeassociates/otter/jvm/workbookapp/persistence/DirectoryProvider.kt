@@ -42,7 +42,7 @@ class DirectoryProvider(
     private val pathSeparator = pathSeparator ?: FileSystems.getDefault().separator
     private val userHome = userHome ?: System.getProperty("user.home")
     private val windowsAppData = windowsAppData ?: System.getenv("APPDATA")
-    private val osName = (osName ?: System.getProperty("os.name")).toUpperCase()
+    private val osName = (osName ?: System.getProperty("os.name")).uppercase()
 
     // create a directory to store the user's application projects/documents
     override fun getUserDataDirectory(appendedPath: String): File {

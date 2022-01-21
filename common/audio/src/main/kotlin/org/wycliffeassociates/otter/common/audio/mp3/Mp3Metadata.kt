@@ -28,6 +28,7 @@ import org.digitalmediaserver.cuelib.FileData
 import org.digitalmediaserver.cuelib.Index
 import org.digitalmediaserver.cuelib.Position
 import org.digitalmediaserver.cuelib.TrackData
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -41,6 +42,8 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 private const val CUE_FRAME_SIZE = 75.0
 
 internal class Mp3Metadata(val file: File) : AudioMetadata {
+
+    private val logger = LoggerFactory.getLogger(Mp3Metadata::class.java)
 
     private val _cues = mutableListOf<AudioCue>()
     private var title = file.nameWithoutExtension
@@ -64,6 +67,7 @@ internal class Mp3Metadata(val file: File) : AudioMetadata {
                     }
                 }
             } catch (e: Exception) {
+                logger.error("Error in initializing Mp3 Metadata", e)
             }
         }
     }
