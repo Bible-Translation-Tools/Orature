@@ -33,7 +33,7 @@ class WaveformContainer : Fragment(), ImageDisposer {
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    val markerTrack: MarkerTrackControl = MarkerTrackControl(
+    private val markerTrack: MarkerTrackControl = MarkerTrackControl(
         viewModel.markers.markers,
         viewModel.markers.highlightState
     ).apply {
@@ -42,9 +42,6 @@ class WaveformContainer : Fragment(), ImageDisposer {
             refreshMarkers()
         }
     }
-
-    lateinit var waveformFrame: WaveformFrame
-    // val timecodeHolder: TimecodeHolder
 
     override val root = ScrollingWaveform(
         viewModel.positionProperty,
@@ -63,8 +60,6 @@ class WaveformContainer : Fragment(), ImageDisposer {
     init {
         viewModel.registerImageDisposer(this)
 
-        // timecodeHolder = TimecodeHolder(viewModel, 50.0)
-
         object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
@@ -74,7 +69,7 @@ class WaveformContainer : Fragment(), ImageDisposer {
         val disposable = viewModel.waveform
             .observeOnFx()
             .subscribe {
-                waveformFrame.addImage(it)
+                root.addWaveformImage(it)
             }
 
         // ready to receive images, start building waveform
@@ -84,10 +79,10 @@ class WaveformContainer : Fragment(), ImageDisposer {
 
         viewModel.compositeDisposable.addAll(disposable, disposableBuilder)
 
-        waveformFrame.addHighlights(viewModel.markers.highlightState)
+        root.addHighlights(viewModel.markers.highlightState)
     }
 
     override fun freeImages() {
-        waveformFrame.freeImages()
+        root.freeImages()
     }
 }
