@@ -44,6 +44,7 @@ import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.ImageDisposer
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -67,7 +68,7 @@ class VerseMarkerViewModel : ViewModel() {
     val compositeDisposable = CompositeDisposable()
     val imageWidth: Double
 
-    lateinit var waveformContainerNode: Node
+    var imageDisposer: ImageDisposer? = null
     val waveformMinimapImage = SimpleObjectProperty<Image>()
     val waveformAsyncBuilder: Completable
     val waveform: Observable<Image>
@@ -176,7 +177,8 @@ class VerseMarkerViewModel : ViewModel() {
         // clear the UI images to free up memory
         runLater {
             waveformMinimapImage.set(null)
-            waveformContainerNode.getChildList()?.clear()
+            imageDisposer?.freeImages()
+            imageDisposer = null
         }
 
         (scope as ParameterizedScope).let {
@@ -212,5 +214,9 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.getDurationInFrames()
+    }
+
+    fun registerImageDisposer(imageDisposer: ImageDisposer) {
+        this.imageDisposer = imageDisposer
     }
 }

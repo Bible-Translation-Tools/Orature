@@ -18,26 +18,51 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
-import javafx.geometry.NodeOrientation
-import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
-class WaveformContainer : Fragment() {
+interface ImageDisposer {
+    fun freeImages()
+}
+
+class WaveformContainer : Fragment(), ImageDisposer {
 
     val viewModel: VerseMarkerViewModel by inject()
-    val markerTrack: MarkerTrackControl
+
+    val markerTrack: MarkerTrackControl = MarkerTrackControl(
+        viewModel.markers.markers,
+        viewModel.markers.highlightState
+    ).apply {
+        prefWidth = viewModel.imageWidth
+        viewModel.markers.markerCountProperty.onChange {
+            refreshMarkers()
+        }
+    }
+
+    lateinit var waveformFrame: WaveformFrame
     // val timecodeHolder: TimecodeHolder
 
+    override val root = ScrollingWaveform(
+        viewModel.positionProperty,
+        viewModel::placeMarker,
+        viewModel::pause,
+        { deltaPos ->
+            val deltaFrames = pixelsToFrames(deltaPos)
+            val curFrames = viewModel.getLocationInFrames()
+            val duration = viewModel.getDurationInFrames()
+            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+            viewModel.seek(final)
+        },
+        markerTrack
+    )
+
     init {
-        markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
-            prefWidth = viewModel.imageWidth
-            viewModel.markers.markerCountProperty.onChange {
-                refreshMarkers()
-            }
-        }
+        viewModel.registerImageDisposer(this)
+
         // timecodeHolder = TimecodeHolder(viewModel, 50.0)
 
         object : AnimationTimer() {
@@ -45,26 +70,24 @@ class WaveformContainer : Fragment() {
                 viewModel.calculatePosition()
             }
         }.start()
+
+        val disposable = viewModel.waveform
+            .observeOnFx()
+            .subscribe {
+                waveformFrame.addImage(it)
+            }
+
+        // ready to receive images, start building waveform
+        val disposableBuilder = viewModel.waveformAsyncBuilder
+            .observeOnFx()
+            .subscribe()
+
+        viewModel.compositeDisposable.addAll(disposable, disposableBuilder)
+
+        waveformFrame.addHighlights(viewModel.markers.highlightState)
     }
 
-    override val root =
-        stackpane {
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-
-            styleClass.add("vm-waveform-container")
-
-            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
-
-            add(MarkerViewBackground())
-            add(
-                WaveformFrame(
-                    markerTrack,
-                    //  timecodeHolder,
-                    viewModel
-                )
-            )
-            add(WaveformOverlay(viewModel))
-            add(PlaceMarkerLayer().apply { onPlaceMarkerAction { viewModel.placeMarker() } })
-        }
+    override fun freeImages() {
+        waveformFrame.freeImages()
+    }
 }
