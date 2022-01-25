@@ -150,6 +150,40 @@ class ResourceContainerRepository @Inject constructor(
         return relatedIds
     }
 
+    override fun removeResourceContainer(
+        resourceContainer: ResourceContainer
+    ): Completable {
+        return Completable.fromAction {
+            database.transaction { dsl ->
+                val metadataEntity = resourceMetadataDao.fetchLatestVersion(
+                    resourceContainer.manifest.dublinCore.language.identifier,
+                    resourceContainer.manifest.dublinCore.identifier
+                ) ?: return@transaction
+
+                // delete entities with foreign keys refer to rc first
+                collectionDao.fetchAll(dsl)
+                    .filter { it.dublinCoreFk == metadataEntity.id }
+                    .forEach {
+                        collectionDao.delete(it, dsl)
+                    }
+
+                resourceMetadataDao.delete(metadataEntity, dsl)
+            }
+        }
+        .doOnError { e ->
+            logger.error("Error in removeResourceContainer.", e)
+        }
+        .doFinally { resourceContainer.close() }
+        .subscribeOn(Schedulers.io())
+    }
+
+    private fun findRootCollectionsForRc(dublinCoreId: Int): List<Collection> {
+        return collectionRepository
+            .getRootSources()
+            .blockingGet()
+            .filter { it.resourceContainer?.id == dublinCoreId }
+    }
+
     inner class ImportHelper(
         private val metadata: ResourceMetadata,
         private val relatedBundleDublinCoreId: Int?,
@@ -161,16 +195,9 @@ class ResourceContainerRepository @Inject constructor(
             importCollection(null, node)
 
             relatedBundleDublinCoreId
-                ?.let(this::findRootCollectionsForRc)
+                ?.let(::findRootCollectionsForRc)
+                ?.map { it.id }
                 ?.forEach(resourceRepository::calculateAndSetSubtreeHasResources)
-        }
-
-        private fun findRootCollectionsForRc(dublinCoreId: Int): List<Int> {
-            return collectionRepository
-                .getRootSources()
-                .blockingGet()
-                .filter { it.resourceContainer?.id == dublinCoreId }
-                .map { it.id }
         }
 
         /** Finds a collection from the database that matches the given collection on slug, label, and containerId. */
