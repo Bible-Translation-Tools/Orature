@@ -173,10 +173,10 @@ class TestRcImport {
 
     @Test
     fun ulbVerseCount() {
-        val books = javaClass.classLoader.getResource("verse-count-en_ulb-v21-05/books.txt").readText().split("\n")
+        val books = javaClass.getResource("/verse-count-en_ulb-v21-05/books.txt").readText().split("\n")
         val tests = mutableListOf<ChapterVerse>()
         for (book in books) {
-            val csv = javaClass.classLoader.getResource("verse-count-en_ulb-v21-05/$book.csv").readText()
+            val csv = javaClass.getResource("/verse-count-en_ulb-v21-05/$book.csv").readText()
             val mapper = CsvMapper().registerModule(KotlinModule())
             val schema = CsvSchema.builder().addColumn("Chapter").addColumn("Verses").setUseHeader(true).build()
             val reader: MappingIterator<ChapterVerse> = mapper
