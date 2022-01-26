@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.helpContentTypes
 import org.wycliffeassociates.otter.common.data.primitives.primaryContentTypes
 import org.wycliffeassociates.otter.common.domain.mapper.mapToMetadata
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportException
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.castOrFindImportException
@@ -152,13 +153,34 @@ class ResourceContainerRepository @Inject constructor(
 
     override fun removeResourceContainer(
         resourceContainer: ResourceContainer
-    ): Completable {
-        return Completable.fromAction {
+    ): Single<DeleteResult> {
+        return Single.fromCallable {
+            var result = DeleteResult.SUCCESS
+
             database.transaction { dsl ->
                 val metadataEntity = resourceMetadataDao.fetchLatestVersion(
                     resourceContainer.manifest.dublinCore.language.identifier,
-                    resourceContainer.manifest.dublinCore.identifier
-                ) ?: return@transaction
+                    resourceContainer.manifest.dublinCore.identifier,
+                    resourceContainer.manifest.dublinCore.creator,
+                    derivedFromFk = null,
+                    dsl = dsl
+                )
+
+                val derivedRcExists = resourceMetadataDao.fetchAll().any {
+                    it.derivedFromFk != null && it.derivedFromFk == metadataEntity?.id
+                }
+
+                when {
+                    metadataEntity == null -> {
+                        result = DeleteResult.NOT_EXISTS
+                        return@transaction
+                    }
+                    derivedRcExists ->{
+                        result = DeleteResult.DEPENDENCY_EXISTS
+                        return@transaction
+                    }
+                    else -> metadataEntity!!
+                }
 
                 // delete entities with foreign keys refer to rc first
                 collectionDao.fetchAll(dsl)
@@ -169,6 +191,8 @@ class ResourceContainerRepository @Inject constructor(
 
                 resourceMetadataDao.delete(metadataEntity, dsl)
             }
+
+            result
         }
         .doOnError { e ->
             logger.error("Error in removeResourceContainer.", e)

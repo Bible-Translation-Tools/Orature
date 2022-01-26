@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
-import io.reactivex.Completable
+import io.reactivex.Single
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
@@ -31,14 +31,17 @@ class DeleteResourceContainer @Inject constructor(
 ) {
     private val logger = LoggerFactory.getLogger(DeleteResourceContainer::class.java)
 
-    fun delete(resourceContainer: ResourceContainer): Completable {
-        val file = directoryProvider.getSourceContainerDirectory(resourceContainer)
-        file.deleteRecursively()
-
+    fun delete(resourceContainer: ResourceContainer): Single<DeleteResult> {
         return resourceContainerRepository
             .removeResourceContainer(resourceContainer)
             .doOnError {
                 logger.error("Error when trying to delete rc: ${resourceContainer.file}.")
+            }
+            .doOnSuccess {
+                if (it == DeleteResult.SUCCESS) {
+                    val file = directoryProvider.getSourceContainerDirectory(resourceContainer)
+                    file.deleteRecursively()
+                }
             }
     }
 }

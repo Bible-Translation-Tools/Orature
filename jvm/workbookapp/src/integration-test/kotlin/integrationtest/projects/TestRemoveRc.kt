@@ -19,11 +19,15 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResourceContainer
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
+import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import javax.inject.Inject
@@ -34,55 +38,105 @@ class TestRemoveRc {
 
     @Inject lateinit var removeUseCase: Provider<DeleteResourceContainer>
 
+    @Inject lateinit var collectionRepo: ICollectionRepository
+
+    @Inject lateinit var languageRepo: ILanguageRepository
+
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    private val rcToDelete = "en_ulb.zip"
+    private val enUlb = "en_ulb.zip"
 
     init {
         DaggerTestPersistenceComponent.create().inject(this)
     }
 
-    private val beforeDelete = RowCount(
-        collections = 2512,
-        contents = mapOf(
-            TEXT to 62208,
-            META to 2378
-        ),
-        links = 0
-    )
-
-    private val afterDelete = RowCount(
-        collections = 1256,
-        contents = mapOf(
-            TEXT to 31104,
-            META to 1189
-        ),
-        links = 0
-    )
-
     @Test
-    fun deleteRC() {
+    fun deleteRC_success() {
         dbEnvProvider.get()
             .import("hi_ulb.zip")
-            .import(rcToDelete)
+            .import(enUlb)
             .assertRowCounts(
-                beforeDelete,
+                RowCount(
+                    collections = 2512,
+                    contents = mapOf(
+                        META to 2378,
+                        TEXT to 62208
+                    ),
+                    links = 0
+                ),
                 "Row count before delete doesn't match."
             )
             .apply {
+                assertEquals(2, db.resourceMetadataDao.fetchAll().size)
+
                 val rc = ResourceContainer.load(
-                    getResource(rcToDelete)
+                    getResource(enUlb)
                 )
-                removeUseCase.get()
-                    .delete(rc).blockingAwait()
+                val result = removeUseCase.get().delete(rc).blockingGet()
+
+                assertEquals(DeleteResult.SUCCESS, result)
+                assertEquals(1, db.resourceMetadataDao.fetchAll().size)
             }
             .assertRowCounts(
-                afterDelete,
+                RowCount(
+                    collections = 1256,
+                    contents = mapOf(
+                        META to 1189,
+                        TEXT to 31104
+                    ),
+                    links = 0
+                ),
                 "Row count after delete doesn't match."
             )
     }
 
+    @Test
+    fun `deleteRC failed with existing derived project`() {
+        dbEnvProvider.get()
+            .import(enUlb)
+            .import("hi_ulb.zip")
+            .assertRowCounts(
+                RowCount(
+                    collections = 2512,
+                    contents = mapOf(
+                        META to 2378,
+                        TEXT to 62208
+                    ),
+                    links = 0
+                ),
+                "Row count before delete doesn't match."
+            )
+            .apply {
+                assertEquals(2, db.resourceMetadataDao.fetchAll().size)
+
+                val language = languageRepo.getBySlug("en").blockingGet()
+                createProject(
+                    collectionRepo
+                        .getRootSources().blockingGet()
+                        .first { it.resourceContainer?.language == language },
+                    language
+                )
+                val rc = ResourceContainer.load(
+                    getResource(enUlb)
+                )
+                val result = removeUseCase.get().delete(rc).blockingGet()
+
+                assertEquals(DeleteResult.DEPENDENCY_EXISTS, result)
+            }
+            .assertRowCounts(
+                RowCount(
+                    collections = 2579,
+                    contents = mapOf(
+                        META to 2378,
+                        TEXT to 62208
+                    ),
+                    links = 0
+                )
+            )
+    }
+
     private fun getResource(rcFile: String) =
-        javaClass.classLoader
-            .getResource("resource-containers/$rcFile")!!.file.let { File(it) }
+        javaClass.classLoader.getResource(
+            "resource-containers/$rcFile"
+        )!!.file.let { File(it) }
 }

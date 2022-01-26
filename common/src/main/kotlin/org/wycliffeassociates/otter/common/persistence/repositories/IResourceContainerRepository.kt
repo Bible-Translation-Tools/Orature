@@ -18,10 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.persistence.repositories
 
-import io.reactivex.Completable
 import io.reactivex.Single
 import org.wycliffeassociates.otter.common.collections.OtterTree
 import org.wycliffeassociates.otter.common.data.primitives.CollectionOrContent
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.DeleteResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.ImportResult
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
@@ -32,5 +32,7 @@ interface IResourceContainerRepository {
         languageSlug: String
     ): Single<ImportResult>
 
-    fun removeResourceContainer(resourceContainer: ResourceContainer): Completable
+    fun removeResourceContainer(
+        resourceContainer: ResourceContainer
+    ): Single<DeleteResult>
 }
