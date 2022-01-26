@@ -23,6 +23,7 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -44,85 +45,145 @@ import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.ImageDisposer
+import javafx.scene.control.Control
+import javafx.scene.control.Skin
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.MarkerPlacementWaveformSkin
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.ScrollingWaveformSkin
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 
 class VerseMarkerViewModel : ViewModel() {
-
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
+    val waveformMinimapImage = SimpleObjectProperty<Image>()
+
+    lateinit var waveformAsyncBuilder: Completable
+    lateinit var waveform: Observable<Image>
+
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
-    val markers: VerseMarkerModel
-    val audioPlayer = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getPlayer()
+    var markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
+    val markers by markerStateProperty
+
     var audioController: AudioPlayerController? = null
+
+    val audioPlayer = (scope.workspace.params["audioConnectionFactory"] as AudioConnectionFactory).getPlayer()
+
     val isPlayingProperty = SimpleBooleanProperty(false)
     val markerRatioProperty = SimpleStringProperty()
     val headerTitle = SimpleStringProperty()
     val headerSubtitle = SimpleStringProperty()
-    val positionProperty = SimpleDoubleProperty(0.0)
     val compositeDisposable = CompositeDisposable()
-    val imageWidth: Double
+    val positionProperty = SimpleDoubleProperty(0.0)
+    var imageWidth: Double = 0.0
 
-    var imageDisposer: ImageDisposer? = null
-    val waveformMinimapImage = SimpleObjectProperty<Image>()
-    val waveformAsyncBuilder: Completable
-    val waveform: Observable<Image>
+    val disposeables = mutableListOf<Disposable>()
 
-    private val audioFile: File
+    private var audioFile: File? = null
 
-    init {
+    fun onDock() {
+        val audio = loadAudio()
+        loadMarkers(audio)
+        loadTitles()
+
+        createWaveformImages(audio)
+        disposeables.add(
+            waveformAsyncBuilder.observeOnFx().subscribe()
+        )
+    }
+
+    fun loadAudio(): AudioFile {
         val scope = scope as ParameterizedScope
-        audioFile = File(scope.parameters.named["wav"])
-        val wav = AudioFile(audioFile)
-        val initialMarkerCount = wav.metadata.getCues().size
-        val totalMarkers: Int =
-            scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
-        headerTitle.set(scope.parameters.named["action_title"])
-        headerSubtitle.set(scope.parameters.named["content_title"])
-        markers = VerseMarkerModel(wav, totalMarkers)
+        val audioFile = File(scope.parameters.named["wav"])
+        val audio = AudioFile(audioFile)
+        audioPlayer.load(audioFile)
+        return audio
+    }
+
+    fun loadMarkers(audio: AudioFile) {
+        val initialMarkerCount = audio.metadata.getCues().size
+        scope as ParameterizedScope
+        val totalMarkers: Int = scope.parameters.named["marker_total"]?.toInt() ?: initialMarkerCount
+        val markers = VerseMarkerModel(audio, totalMarkers)
         markers.markerCountProperty.onChangeAndDoNow {
             markerRatioProperty.set("$it/$totalMarkers")
         }
-        audioPlayer.load(audioFile)
-        imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
+        markerStateProperty.set(markers)
+    }
 
-        WaveformImageBuilder(
-            wavColor = Color.web(WAV_COLOR),
-            background = Color.web(BACKGROUND_COLOR)
-        ).apply {
-            build(
-                AudioFile(audioFile).reader(),
-                width = imageWidth.toInt(),
-                height = 50
-            )
-                .observeOnFx()
-                .subscribe { image ->
-                    waveformMinimapImage.set(image)
-                }.also {
-                    compositeDisposable.add(it)
-                }
+    fun loadTitles() {
+        scope as ParameterizedScope
+        headerTitle.set(scope.parameters.named["action_title"])
+        headerSubtitle.set(scope.parameters.named["content_title"])
+    }
 
-            val waveformSubject = PublishSubject.create<Image>()
-            waveform = waveformSubject
-            waveformAsyncBuilder = buildWaveformAsync(
-                AudioFile(audioFile).reader(),
-                width = imageWidth.toInt(),
-                height = height,
-                waveformSubject
-            )
+    fun writeMarkers(): Completable {
+        audioPlayer.pause()
+        audioPlayer.close()
+        return markerStateProperty.get()?.writeMarkers() ?: Completable.complete()
+    }
+
+    fun calculatePosition() {
+        audioPlayer?.let { audioPlayer ->
+            val current = audioPlayer.getLocationInFrames()
+            val duration = audioPlayer.getDurationInFrames().toDouble()
+            val percentPlayed = current / duration
+            val pos = percentPlayed * imageWidth
+            positionProperty.set(pos)
         }
     }
 
-    fun computeImageWidth(secondsOnScreen: Int): Double {
-        val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
-        val samplesPerPixel = samplesPerScreenWidth / width
-        val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
-        return pixelsInDuration.toDouble()
+    fun saveAndQuit() {
+        compositeDisposable.clear()
+        waveformMinimapImage.set(null)
+
+        (scope as ParameterizedScope).let {
+            writeMarkers()
+                .doOnError { e ->
+                    logger.error("Error in closing the maker app", e)
+                }
+                .delay(300, TimeUnit.MILLISECONDS) // exec after UI clean up
+                .subscribe {
+                    runLater {
+                        it.navigateBack()
+                        System.gc()
+                    }
+                }
+        }
+    }
+
+    fun placeMarker() {
+        markerStateProperty.get()?.addMarker(audioPlayer.getLocationInFrames())
+    }
+
+    fun seekNext() {
+        val wasPlaying = audioPlayer.isPlaying()
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+        markerStateProperty.get()?.let { markers ->
+            seek(markers.seekNext(audioPlayer.getLocationInFrames()))
+        }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+    }
+
+    fun seekPrevious() {
+        val wasPlaying = audioPlayer.isPlaying()
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+        markerStateProperty.get()?.let { markers ->
+            seek(markers.seekPrevious(audioPlayer.getLocationInFrames()))
+        }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
     }
 
     fun initializeAudioController(slider: Slider) {
@@ -143,80 +204,92 @@ class VerseMarkerViewModel : ViewModel() {
         audioController?.seek(location)
     }
 
-    fun seekNext() {
-        val wasPlaying = audioPlayer.isPlaying()
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-        seek(markers.seekNext(audioPlayer.getLocationInFrames()))
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-    }
+    fun createWaveformImages(audio: AudioFile) {
+        imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-    fun seekPrevious() {
-        val wasPlaying = audioPlayer.isPlaying()
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-        seek(markers.seekPrevious(audioPlayer.getLocationInFrames()))
-        if (wasPlaying) {
-            audioController?.toggle()
-        }
-    }
-
-    fun writeMarkers(): Completable {
-        if (isPlayingProperty.value) audioController?.toggle()
-        audioPlayer.close()
-        return markers.writeMarkers()
-    }
-
-    fun saveAndQuit() {
-        compositeDisposable.clear()
-
-        // clear the UI images to free up memory
-        runLater {
-            waveformMinimapImage.set(null)
-            imageDisposer?.freeImages()
-            imageDisposer = null
-        }
-
-        (scope as ParameterizedScope).let {
-            writeMarkers()
-                .doOnError { e ->
-                    logger.error("Error in closing the maker app", e)
+        WaveformImageBuilder(
+            wavColor = Color.web(WAV_COLOR),
+            background = Color.web(BACKGROUND_COLOR)
+        ).apply {
+            build(
+                audio.reader(),
+                width = imageWidth.toInt(),
+                height = 50
+            )
+                .observeOnFx()
+                .subscribe { image ->
+                    waveformMinimapImage.set(image)
+                }.also {
+                    compositeDisposable.add(it)
                 }
-                .delay(300, TimeUnit.MILLISECONDS) // exec after UI clean up
-                .subscribe {
-                    runLater {
-                        it.navigateBack()
-                        System.gc()
-                    }
-                }
+
+            val waveformSubject = PublishSubject.create<Image>()
+            waveform = waveformSubject
+            waveformAsyncBuilder = buildWaveformAsync(
+                audio.reader(),
+                width = imageWidth.toInt(),
+                height = height,
+                waveformSubject
+            )
         }
     }
 
-    fun placeMarker() {
-        markers.addMarker(audioPlayer.getLocationInFrames())
-    }
-
-    fun calculatePosition() {
-        val current = audioPlayer.getLocationInFrames()
-        val duration = audioPlayer.getDurationInFrames().toDouble()
-        val percentPlayed = current / duration
-        val pos = percentPlayed * imageWidth
-        positionProperty.set(pos)
+    fun computeImageWidth(secondsOnScreen: Int): Double {
+        val samplesPerScreenWidth = audioPlayer.getAudioReader()!!.sampleRate * secondsOnScreen
+        val samplesPerPixel = samplesPerScreenWidth / width
+        val pixelsInDuration = audioPlayer.getDurationInFrames() / samplesPerPixel
+        return pixelsInDuration.toDouble()
     }
 
     fun getLocationInFrames(): Int {
-        return audioPlayer.getLocationInFrames()
+        return audioPlayer.getLocationInFrames() ?: 0
     }
 
     fun getDurationInFrames(): Int {
-        return audioPlayer.getDurationInFrames()
+        return audioPlayer.getDurationInFrames() ?: 0
+    }
+}
+
+open class ScrollingWaveform() : Control() {
+
+    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+
+    val positionProperty = SimpleDoubleProperty(0.0)
+
+    var onWaveformClicked: () -> Unit = {}
+    var onWaveformDragReleased: (Double) -> Unit = {}
+
+    fun addWaveformImage(image: Image) {
+        (skin as ScrollingWaveformSkin).addWaveformImage(image)
+    }
+    fun freeImages() {
+        (skin as ScrollingWaveformSkin).freeImages()
     }
 
-    fun registerImageDisposer(imageDisposer: ImageDisposer) {
-        this.imageDisposer = imageDisposer
+    override fun createDefaultSkin(): Skin<*> {
+        return ScrollingWaveformSkin(this)
+    }
+}
+
+class MarkerPlacementWaveform(
+    val topNode: Node
+) : ScrollingWaveform() {
+
+    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
+
+    var onSeekNext: () -> Unit = {}
+    var onSeekPrevious: () -> Unit = {}
+    var onPlaceMarker: () -> Unit = {}
+    var topTrack: Node? = topNode
+    var bottomTrack: Node? = null
+
+    init {
+        markerStateProperty.get()?.let { markers ->
+            (skin as MarkerPlacementWaveformSkin).addHighlights(markers.highlightState)
+        }
+    }
+
+    override fun createDefaultSkin(): Skin<*> {
+        return MarkerPlacementWaveformSkin(this)
     }
 }

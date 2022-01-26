@@ -37,6 +37,7 @@ class MarkerView : PluginEntrypoint() {
     val playbackControls = PlaybackControlsFragment()
 
     init {
+        viewModel.onDock()
         runLater {
             val css = this@MarkerView.javaClass.getResource("/css/verse-marker-app.css")
                 .toExternalForm()

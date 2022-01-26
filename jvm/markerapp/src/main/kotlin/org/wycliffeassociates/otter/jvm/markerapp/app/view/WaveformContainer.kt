@@ -18,71 +18,68 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
-interface ImageDisposer {
-    fun freeImages()
-}
-
-class WaveformContainer : Fragment(), ImageDisposer {
+class WaveformContainer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    private val markerTrack: MarkerTrackControl = MarkerTrackControl(
-        viewModel.markers.markers,
-        viewModel.markers.highlightState
-    ).apply {
+    private val markerTrack: MarkerTrackControl = MarkerTrackControl().apply {
         prefWidth = viewModel.imageWidth
-        viewModel.markers.markerCountProperty.onChange {
-            refreshMarkers()
+        viewModel.markerStateProperty.onChangeAndDoNow { markers ->
+            markers?.let { markers ->
+                markers.markerCountProperty?.onChangeAndDoNow {
+                    this.markers.setAll(viewModel.markers.markers)
+                    highlightState.setAll(viewModel.markers.highlightState)
+                    refreshMarkers()
+                }
+            }
         }
     }
 
-    override val root = ScrollingWaveform(
-        viewModel.positionProperty,
-        viewModel::placeMarker,
-        viewModel::pause,
-        { deltaPos ->
+    override val root = MarkerPlacementWaveform(markerTrack).apply {
+        positionProperty.bind(viewModel.positionProperty)
+
+        onSeekNext = viewModel::seekNext
+        onSeekPrevious = viewModel::seekPrevious
+
+        onPlaceMarker = viewModel::placeMarker
+        onWaveformClicked = { viewModel.pause() }
+        onWaveformDragReleased = { deltaPos ->
             val deltaFrames = pixelsToFrames(deltaPos)
             val curFrames = viewModel.getLocationInFrames()
             val duration = viewModel.getDurationInFrames()
             val final = Utils.clamp(0, curFrames - deltaFrames, duration)
             viewModel.seek(final)
-        },
-        markerTrack
-    )
+        }
+    }
+
+    override fun onDock() {
+        super.onDock()
+        viewModel.compositeDisposable.addAll(
+            viewModel.waveform.subscribe {
+                root.addWaveformImage(it)
+            }
+        )
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        root.freeImages()
+    }
 
     init {
-        viewModel.registerImageDisposer(this)
-
         object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
             }
         }.start()
-
-        val disposable = viewModel.waveform
-            .observeOnFx()
-            .subscribe {
-                root.addWaveformImage(it)
-            }
-
-        // ready to receive images, start building waveform
-        val disposableBuilder = viewModel.waveformAsyncBuilder
-            .observeOnFx()
-            .subscribe()
-
-        viewModel.compositeDisposable.addAll(disposable, disposableBuilder)
-
-        root.addHighlights(viewModel.markers.highlightState)
-    }
-
-    override fun freeImages() {
-        root.freeImages()
     }
 }
