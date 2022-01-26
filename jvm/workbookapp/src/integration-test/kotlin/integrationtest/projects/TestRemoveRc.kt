@@ -91,7 +91,7 @@ class TestRemoveRc {
     }
 
     @Test
-    fun `deleteRC failed with existing derived project`() {
+    fun `deleteRC aborted with existing derived project`() {
         dbEnvProvider.get()
             .import(enUlb)
             .import("hi_ulb.zip")
