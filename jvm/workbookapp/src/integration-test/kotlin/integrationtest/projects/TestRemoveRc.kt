@@ -53,8 +53,8 @@ class TestRemoveRc {
     @Test
     fun deleteRC_success() {
         dbEnvProvider.get()
-            .import("hi_ulb.zip")
             .import(enUlb)
+            .import("hi_ulb.zip")
             .assertRowCounts(
                 RowCount(
                     collections = 2512,

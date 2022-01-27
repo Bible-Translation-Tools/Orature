@@ -70,19 +70,15 @@ class ImportResourceContainer @Inject constructor(
 
         val projectImporter = importProvider.get()
 
-        val valid = validateRc(rcFile)
-        if (!valid) {
-            logger.error("Import failed, $rcFile is an invalid RC")
-            return Single.just(ImportResult.INVALID_RC)
-        }
-
-        val resumable = projectImporter.isResumableProject(rcFile)
-        if (resumable) {
-            logger.info("Importing rc as a resumable project")
-            return projectImporter.importResumableProject(rcFile)
-        }
-
         return when {
+            !validateRc(rcFile) -> {
+                logger.error("Import failed, $rcFile is an invalid RC")
+                return Single.just(ImportResult.INVALID_RC)
+            }
+            projectImporter.isResumableProject(rcFile) -> {
+                logger.info("Importing rc as a resumable project")
+                projectImporter.importResumableProject(rcFile)
+            }
             isAlreadyImported(rcFile) -> {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
@@ -95,13 +91,7 @@ class ImportResourceContainer @Inject constructor(
                     ImportResult.SUCCESS
                 }
             }
-            tryRemoveRCBeforeImport(rcFile) -> {
-                importContainer(rcFile)
-            }
-            else -> {
-                logger.info("RC not already imported, importing...")
-                importContainer(rcFile)
-            }
+            else -> importContainer(rcFile)
         }
     }
 
@@ -151,6 +141,11 @@ class ImportResourceContainer @Inject constructor(
 
     private fun importContainer(file: File): Single<ImportResult> {
         return Single.fromCallable {
+            if (!prepareBeforeImport(file)) {
+                throw ImportException(ImportResult.DEPENDENCY_ERROR)
+            }
+
+            logger.info("Importing RC...")
             val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
             if (internalDir.exists()) {
                 val rcFileExists = file.isFile && internalDir.contains(file.name)
@@ -168,10 +163,11 @@ class ImportResourceContainer @Inject constructor(
     }
 
     /**
-     * Attempts to delete the existing RC
-     * before importing the new one if they have different versions.
+     * Attempts to delete the existing RC before
+     * importing the new one if they have different versions.
+     * Returns false if it could not delete the existing RC.
      */
-    private fun tryRemoveRCBeforeImport(rcFile: File): Boolean {
+    private fun prepareBeforeImport(rcFile: File): Boolean {
         ResourceContainer.load(rcFile).use { rc ->
             resourceMetadataRepository.getAllSources().blockingGet()
                 .find {
@@ -186,7 +182,7 @@ class ImportResourceContainer @Inject constructor(
                         val result = deleteProvider.get().delete(rc).blockingGet()
                         if (result == DeleteResult.SUCCESS) {
                             isDeleted = true
-                            logger.info("RC updated successfully!")
+                            logger.info("Removed old RC successfully!")
                         } else {
                             isDeleted = false
                             logger.error(
@@ -197,7 +193,7 @@ class ImportResourceContainer @Inject constructor(
                     }
 
                     return isDeleted
-                } ?: return false
+                } ?: return true
         }
     }
 
