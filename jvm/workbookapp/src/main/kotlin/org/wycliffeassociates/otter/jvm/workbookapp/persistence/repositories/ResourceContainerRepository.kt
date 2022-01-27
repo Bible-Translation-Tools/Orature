@@ -117,7 +117,7 @@ class ResourceContainerRepository @Inject constructor(
         metadata: ResourceMetadata
     ): ResourceMetadata {
         val existingRow = resourceMetadataDao.fetchLatestVersion(metadata.language.slug, metadata.identifier)
-        if (existingRow != null) {
+        if (existingRow != null && existingRow.derivedFromFk == null) {
             logger.error("Error in inserting metadata, row already exists!: $existingRow")
             throw ImportException(ImportResult.ALREADY_EXISTS)
         }
