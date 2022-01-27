@@ -23,6 +23,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper
 import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
+import org.junit.Assert.assertEquals
 import javax.inject.Inject
 import javax.inject.Provider
 import org.junit.Test
@@ -30,6 +31,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType.BODY
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 
 class TestRcImport {
 
@@ -194,5 +196,32 @@ class TestRcImport {
         dbEnvProvider.get()
             .import("en_ulb.zip", true)
             .assertChapters("ulb", *tests.toTypedArray())
+    }
+
+
+    @Test
+    fun `import override when existing rc has different version`() {
+        val oldRCVer = "12"
+        val newRCVer = "999"
+
+        dbEnvProvider.get()
+            .import("en_ulb.zip")
+            .apply {
+                assertEquals(oldRCVer, db.resourceMetadataDao.fetchAll().single().version)
+            }
+            .import("en_ulb_newer_ver.zip")
+            .assertRowCounts(
+                RowCount(
+                    collections = 1256,
+                    contents = mapOf(
+                        META to 1189,
+                        TEXT to 31104
+                    ),
+                    links = 0
+                )
+            )
+            .apply {
+                assertEquals(newRCVer, db.resourceMetadataDao.fetchAll().single().version)
+            }
     }
 }
