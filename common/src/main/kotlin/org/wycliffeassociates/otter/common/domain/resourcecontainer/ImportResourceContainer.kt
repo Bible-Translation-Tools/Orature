@@ -53,6 +53,7 @@ class ImportResourceContainer @Inject constructor(
     private val logger = LoggerFactory.getLogger(ImportResourceContainer::class.java)
 
     @Inject lateinit var importProvider: Provider<ProjectImporter>
+    @Inject lateinit var deleteProvider: Provider<DeleteResourceContainer>
 
     fun import(file: File): Single<ImportResult> {
         logger.info("Importing resource container: $file")
@@ -76,12 +77,14 @@ class ImportResourceContainer @Inject constructor(
         }
 
         val resumable = projectImporter.isResumableProject(rcFile)
-        return if (resumable) {
+        if (resumable) {
             logger.info("Importing rc as a resumable project")
-            projectImporter.importResumableProject(rcFile)
-        } else {
-            val exists = isAlreadyImported(rcFile)
-            if (exists) {
+            return projectImporter.importResumableProject(rcFile)
+        }
+
+        val exists = isAlreadyImported(rcFile)
+        return when {
+            exists -> {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
                     val existingRC = getExistingMetadata(rcFile)
@@ -92,7 +95,11 @@ class ImportResourceContainer @Inject constructor(
                     ).merge()
                     ImportResult.SUCCESS
                 }
-            } else {
+            }
+            tryRemoveRCBeforeImport(rcFile) -> {
+                importContainer(rcFile)
+            }
+            else -> {
                 logger.info("RC not already imported, importing...")
                 importContainer(rcFile)
             }
@@ -159,6 +166,40 @@ class ImportResourceContainer @Inject constructor(
             logger.error("Error in importContainer, file: $file", e)
             e.castOrFindImportException()?.result ?: throw e
         }.subscribeOn(Schedulers.io())
+    }
+
+    /**
+     * Attempts to delete the existing RC
+     * before importing the new one if they have different versions.
+     */
+    private fun tryRemoveRCBeforeImport(rcFile: File): Boolean {
+        ResourceContainer.load(rcFile).use { rc ->
+            resourceMetadataRepository.getAllSources().blockingGet()
+                .find {
+                    it.language.slug == rc.manifest.dublinCore.language.identifier &&
+                            it.identifier == rc.manifest.dublinCore.identifier
+                }?.let { existingRc ->
+                    var isDeleted = false
+
+                    // delete if matching rc has different version
+                    if (existingRc.version != rc.manifest.dublinCore.version) {
+                        logger.info("Existing RC has different version, updating...")
+                        val result = deleteProvider.get().delete(rc).blockingGet()
+                        if (result == DeleteResult.SUCCESS) {
+                            isDeleted = true
+                            logger.info("RC updated successfully!")
+                        } else {
+                            isDeleted = false
+                            logger.error(
+                                "Failed to update RC " +
+                                        "${existingRc.language.slug}-${existingRc.identifier}: ${result.name}."
+                            )
+                        }
+                    }
+
+                    return isDeleted
+                } ?: return false
+        }
     }
 
     private fun File.contains(name: String): Boolean {
