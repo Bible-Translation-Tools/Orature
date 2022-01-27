@@ -82,9 +82,8 @@ class ImportResourceContainer @Inject constructor(
             return projectImporter.importResumableProject(rcFile)
         }
 
-        val exists = isAlreadyImported(rcFile)
         return when {
-            exists -> {
+            isAlreadyImported(rcFile) -> {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
                     val existingRC = getExistingMetadata(rcFile)
