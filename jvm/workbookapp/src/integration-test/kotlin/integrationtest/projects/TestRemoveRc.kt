@@ -135,30 +135,6 @@ class TestRemoveRc {
             )
     }
 
-    @Test
-    fun `deleteRC success when existing rc has different version`() {
-        dbEnvProvider.get()
-            .import(enUlb)
-            .import("en_ulb_newer_ver.zip")
-            .assertRowCounts(
-                RowCount(
-                    collections = 2512,
-                    contents = mapOf(
-                        META to 2378,
-                        TEXT to 62208
-                    ),
-                    links = 0
-                ),
-                "Row count before delete doesn't match."
-            )
-            .apply {
-                val rc = ResourceContainer.load(
-                    getResource(enUlb)
-                )
-                val result = removeUseCase.get().delete(rc).blockingGet()
-            }
-    }
-
     private fun getResource(rcFile: String) =
         javaClass.classLoader.getResource(
             "resource-containers/$rcFile"
