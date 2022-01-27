@@ -172,7 +172,7 @@ class ResourceContainerRepository @Inject constructor(
 
                 when {
                     metadataEntity == null -> {
-                        result = DeleteResult.NOT_EXISTS
+                        result = DeleteResult.NOT_FOUND
                         return@transaction
                     }
                     derivedRcExists ->{

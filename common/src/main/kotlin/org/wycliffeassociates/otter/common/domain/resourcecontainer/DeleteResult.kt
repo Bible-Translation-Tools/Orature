@@ -21,6 +21,5 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer
 enum class DeleteResult {
     SUCCESS,
     DEPENDENCY_EXISTS,
-    NOT_EXISTS,
-    ERROR
+    NOT_FOUND
 }
