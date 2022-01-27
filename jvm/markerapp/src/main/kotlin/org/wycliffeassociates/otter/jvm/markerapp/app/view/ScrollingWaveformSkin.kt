@@ -6,6 +6,7 @@ import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerViewBackground
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
@@ -72,7 +73,7 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
 
             add(MarkerViewBackground())
             waveformFrame = WaveformFrame(
-                control.topTrack,
+                (skinnable as MarkerPlacementWaveform).topTrack,
             ).apply {
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked { skinnable.onWaveformClicked() }
