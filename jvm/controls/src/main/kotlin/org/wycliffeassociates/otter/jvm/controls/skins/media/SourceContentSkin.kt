@@ -31,8 +31,11 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
+import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<SourceContent>(sourceContent) {
@@ -136,6 +139,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playTextProperty.bind(sourceContent.playSourceLabelProperty)
             pauseTextProperty.bind(sourceContent.pauseSourceLabelProperty)
             menuSideProperty.set(Side.TOP)
+
+            sourceContent.sourceSpeedRateProperty.onChangeAndDoNow { rate ->
+                audioPlaybackRateProperty.set(rate?.toDouble() ?: 1.0)
+            }
+            audioPlaybackRateProperty.onChange { rate ->
+                FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.SOURCE, rate))
+            }
         }
 
         targetPlayer.apply {
@@ -145,6 +155,14 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             playTextProperty.bind(sourceContent.playTargetLabelProperty)
             pauseTextProperty.bind(sourceContent.pauseTargetLabelProperty)
             menuSideProperty.set(Side.TOP)
+
+            sourceContent.targetSpeedRateProperty.onChangeAndDoNow { rate ->
+                audioPlaybackRateProperty.set(rate?.toDouble() ?: 1.0)
+            }
+
+            audioPlaybackRateProperty.onChange { rate ->
+                FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.TARGET, rate))
+            }
         }
 
         sourceAudioBlock.apply {
@@ -217,16 +235,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private fun toggleBody() {
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
     }
-
-    /*private fun togglePlayButtonStyle(btn: Button, isPlaying: Boolean?) {
-        if (isPlaying == true) {
-            btn.removeClass("btn--primary")
-            btn.addClass("btn--secondary")
-        } else {
-            btn.removeClass("btn--secondary")
-            btn.addClass("btn--primary")
-        }
-    }*/
 
     private fun loadFXML() {
         val loader = FXMLLoader(javaClass.getResource("SourceContent.fxml"))

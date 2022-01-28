@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
@@ -41,6 +42,8 @@ class PluginOpenedPage : Fragment() {
     val sourceContentTitleProperty = SimpleStringProperty()
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
+    val sourceSpeedRateProperty = SimpleDoubleProperty()
+    val targetSpeedRateProperty = SimpleDoubleProperty()
 
     init {
         tryImportStylesheet(resources["/css/plugin-opened-page.css"])
@@ -80,6 +83,9 @@ class PluginOpenedPage : Fragment() {
                 sourceOrientationProperty.bind(this@PluginOpenedPage.sourceOrientationProperty)
                 contentTitleProperty.bind(sourceContentTitleProperty)
                 isMinimizableProperty.set(false)
+
+                sourceSpeedRateProperty.bind(this@PluginOpenedPage.sourceSpeedRateProperty)
+                targetSpeedRateProperty.bind(this@PluginOpenedPage.targetSpeedRateProperty)
             }
         )
     }

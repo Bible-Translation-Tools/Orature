@@ -302,6 +302,18 @@ class ChapterPage : View() {
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeTranslationProperty.objectBinding {
+                    it?.sourceRate ?: 1.0
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeTranslationProperty.objectBinding {
+                    it?.targetRate ?: 1.0
+                }
+            )
         }
     }
 
