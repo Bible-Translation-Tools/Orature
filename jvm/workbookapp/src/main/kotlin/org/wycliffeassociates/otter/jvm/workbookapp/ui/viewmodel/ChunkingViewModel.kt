@@ -25,15 +25,15 @@ import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import tornadofx.ViewModel
 import tornadofx.onChange
 
+const val ACTIVE = "chunking-wizard__step--active"
+const val COMPLETE = "chunking-wizard__step--complete"
+const val INACTIVE = "chunking-wizard__step--inactive"
+
 class ChunkingViewModel: ViewModel() {
 
-    private val green = Paint.valueOf("#1edd76")
-    private val gray = Paint.valueOf("#0a337333")
-    private val blue = Paint.valueOf("#015ad9")
-
-    val consumeStepColor = SimpleObjectProperty(Paint.valueOf("#0a337333"))
-    val verbalizeStepColor = SimpleObjectProperty(Paint.valueOf("#0a337333"))
-    val chunkStepColor = SimpleObjectProperty(Paint.valueOf("#0a337333"))
+    val consumeStepColor = SimpleStringProperty(ACTIVE)
+    val verbalizeStepColor = SimpleStringProperty(INACTIVE)
+    val chunkStepColor = SimpleStringProperty(INACTIVE)
 
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
@@ -44,19 +44,19 @@ class ChunkingViewModel: ViewModel() {
         titleProperty.onChange {
             when(it) {
                 "Consume" -> {
-                    consumeStepColor.set(blue)
-                    verbalizeStepColor.set(gray)
-                    chunkStepColor.set(gray)
+                    consumeStepColor.set(ACTIVE)
+                    verbalizeStepColor.set(INACTIVE)
+                    chunkStepColor.set(INACTIVE)
                 }
                 "Verbalize" -> {
-                    consumeStepColor.set(green)
-                    verbalizeStepColor.set(blue)
-                    chunkStepColor.set(gray)
+                    consumeStepColor.set(COMPLETE)
+                    verbalizeStepColor.set(ACTIVE)
+                    chunkStepColor.set(INACTIVE)
                 }
                 "Chunking" -> {
-                    consumeStepColor.set(green)
-                    verbalizeStepColor.set(green)
-                    chunkStepColor.set(blue)
+                    consumeStepColor.set(COMPLETE)
+                    verbalizeStepColor.set(COMPLETE)
+                    chunkStepColor.set(ACTIVE)
                 }
             }
         }

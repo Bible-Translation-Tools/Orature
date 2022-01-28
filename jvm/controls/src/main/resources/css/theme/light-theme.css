@@ -55,6 +55,8 @@
     -wa-disabled-text: -wa-gray-light;
     -wa-disabled-background: -wa-black-15;
     -wa-status-active: -wa-green;
+    -wa-status-inactive: -wa-gray;
+    -wa-status-complete: -wa-blue;
     -wa-inverse-text: -wa-gray-dark;
 
     /* borders */

@@ -18,9 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
+import javafx.scene.Node
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import tornadofx.*
 
@@ -33,21 +35,28 @@ class ChunkingWizard : Wizard() {
 
     val consumeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
-        style {
-            fillProperty().bind(vm.consumeStepColor)
+        vm.consumeStepColor.onChangeAndDoNow {
+            updateStepCssClass(it!!, this)
         }
     }
     val verbalizeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
-        style {
-            fillProperty().bind(vm.verbalizeStepColor)
+        vm.verbalizeStepColor.onChangeAndDoNow {
+            updateStepCssClass(it!!, this)
         }
     }
     val chunkStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
-        style {
-            fillProperty().bind(vm.chunkStepColor)
+        vm.chunkStepColor.onChangeAndDoNow {
+            updateStepCssClass(it!!, this)
         }
+    }
+
+    private fun updateStepCssClass(cssClass: String, node: Node) {
+        node.removeClass("chunking-wizard__step--active")
+        node.removeClass("chunking-wizard__step--complete")
+        node.removeClass("chunking-wizard__step--inactive")
+        node.addClass(cssClass)
     }
 
     override fun onDock() {

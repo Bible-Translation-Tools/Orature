@@ -51,3 +51,13 @@
     -fx-arc-height: 6px;
     -fx-arc-width: 6px;
 }
+
+.chunking-wizard__step--active {
+    -fx-fill: -wa-status-complete;
+}
+.chunking-wizard__step--complete {
+    -fx-fill: -wa-status-active;
+}
+.chunking-wizard__step--inactive {
+    -fx-fill: -wa-status-inactive;
+}

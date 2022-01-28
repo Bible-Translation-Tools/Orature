@@ -49,6 +49,7 @@
     -wa-transparent: rgba(255,255,255,0);
 
     /* Extra Colors */
+    -wa-blue: RGBA(1, 90, 217);
     -wa-green: rgb(0, 134, 75);    /* this is used as a confirmation or success indicator */
     -wa-green-dark: rgb(0, 69, 37);
     -wa-green-light: rgb(30, 221, 119);
