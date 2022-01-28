@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.scene.layout.StackPane
 import javafx.stage.Stage
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.device.audio.AudioDeviceProvider
 import org.wycliffeassociates.otter.jvm.device.audio.DEFAULT_AUDIO_FORMAT
@@ -36,9 +37,9 @@ class ChunkingDebugApp : App(ChunkingDebugView::class), IDependencyGraphProvider
     override val dependencyGraph = DaggerAppDependencyGraph.builder().build()
 
     init {
-        importStylesheet(resources["/css/theme/light-theme.css"])
-        importStylesheet(resources["/css/theme/dark-theme.css"])
-        importStylesheet(resources["/css/control.css"])
+        tryImportStylesheet(resources["/css/theme/light-theme.css"])
+        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
+        tryImportStylesheet(resources["/css/control.css"])
         ConfigureAudioSystem(
             dependencyGraph.injectConnectionFactory(),
             AudioDeviceProvider(DEFAULT_AUDIO_FORMAT),
