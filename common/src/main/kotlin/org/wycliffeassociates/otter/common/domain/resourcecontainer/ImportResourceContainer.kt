@@ -69,17 +69,20 @@ class ImportResourceContainer @Inject constructor(
         }
 
         val projectImporter = importProvider.get()
+        val isValid = validateRc(rcFile)
+        val isResumable = isValid && projectImporter.isResumableProject(rcFile)
+        val canMergeMedia = isValid && isAlreadyImported(rcFile)
 
         return when {
-            !validateRc(rcFile) -> {
+            !isValid -> {
                 logger.error("Import failed, $rcFile is an invalid RC")
                 return Single.just(ImportResult.INVALID_RC)
             }
-            projectImporter.isResumableProject(rcFile) -> {
+            isResumable -> {
                 logger.info("Importing rc as a resumable project")
                 projectImporter.importResumableProject(rcFile)
             }
-            isAlreadyImported(rcFile) -> {
+            canMergeMedia -> {
                 logger.info("RC already imported, merging media")
                 Single.fromCallable {
                     val existingRC = getExistingMetadata(rcFile)
@@ -91,7 +94,10 @@ class ImportResourceContainer @Inject constructor(
                     ImportResult.SUCCESS
                 }
             }
-            else -> importContainer(rcFile)
+            tryUpdateExistingRC(rcFile) -> {
+                importContainer(rcFile)
+            }
+            else -> Single.just(ImportResult.DEPENDENCY_ERROR)
         }
     }
 
@@ -141,9 +147,9 @@ class ImportResourceContainer @Inject constructor(
 
     private fun importContainer(file: File): Single<ImportResult> {
         return Single.fromCallable {
-            if (!prepareBeforeImport(file)) {
-                throw ImportException(ImportResult.DEPENDENCY_ERROR)
-            }
+//            if (!updateExistingRC(file)) {
+//                throw ImportException(ImportResult.DEPENDENCY_ERROR)
+//            }
 
             logger.info("Importing RC...")
             val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
@@ -167,7 +173,7 @@ class ImportResourceContainer @Inject constructor(
      * importing the new one if they have different versions.
      * Returns false if it could not delete the existing RC.
      */
-    private fun prepareBeforeImport(rcFile: File): Boolean {
+    private fun tryUpdateExistingRC(rcFile: File): Boolean {
         ResourceContainer.load(rcFile).use { rc ->
             val dublinCore = rc.manifest.dublinCore
             resourceMetadataRepository.getAllSources().blockingGet()
