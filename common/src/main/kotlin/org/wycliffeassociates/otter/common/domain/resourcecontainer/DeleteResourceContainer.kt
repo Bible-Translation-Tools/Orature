@@ -41,7 +41,11 @@ class DeleteResourceContainer @Inject constructor(
                 if (it == DeleteResult.SUCCESS) {
                     val file = directoryProvider.getSourceContainerDirectory(resourceContainer)
                     logger.info("Deleting RC: $file")
-                    file.deleteRecursively()
+                    if (file.deleteRecursively()) {
+                        logger.error("RC partially deleted: $file")
+                    } else {
+                        logger.info("RC deleted successfully!")
+                    }
                 }
             }
     }
