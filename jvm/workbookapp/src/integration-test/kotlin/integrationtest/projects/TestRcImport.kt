@@ -212,11 +212,8 @@ class TestRcImport {
             .import("en_ulb_newer_ver.zip")
             .assertRowCounts(
                 RowCount(
-                    collections = 1256,
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104
-                    ),
+                    collections = 1,
+                    contents = mapOf(),
                     links = 0
                 )
             )
