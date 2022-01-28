@@ -169,10 +169,11 @@ class ImportResourceContainer @Inject constructor(
      */
     private fun prepareBeforeImport(rcFile: File): Boolean {
         ResourceContainer.load(rcFile).use { rc ->
+            val dublinCore = rc.manifest.dublinCore
             resourceMetadataRepository.getAllSources().blockingGet()
                 .find {
-                    it.language.slug == rc.manifest.dublinCore.language.identifier &&
-                            it.identifier == rc.manifest.dublinCore.identifier
+                    it.language.slug == dublinCore.language.identifier &&
+                            it.identifier == dublinCore.identifier
                 }?.let { existingRc ->
                     var isDeleted = false
 

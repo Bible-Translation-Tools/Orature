@@ -175,7 +175,7 @@ class ResourceContainerRepository @Inject constructor(
                         result = DeleteResult.NOT_FOUND
                         return@transaction
                     }
-                    derivedRcExists ->{
+                    derivedRcExists -> {
                         result = DeleteResult.DEPENDENCY_EXISTS
                         return@transaction
                     }
