@@ -206,8 +206,20 @@ class TestRcImport {
 
         dbEnvProvider.get()
             .import("en_ulb.zip")
+            .assertRowCounts(
+                RowCount(
+                    collections = 1256,
+                    contents = mapOf(
+                        META to 1189,
+                        TEXT to 31104
+                    )
+                )
+            )
             .apply {
-                assertEquals(oldRCVer, db.resourceMetadataDao.fetchAll().single().version)
+                assertEquals(
+                    oldRCVer,
+                    db.resourceMetadataDao.fetchAll().single().version
+                )
             }
             .import("en_ulb_newer_ver.zip")
             .assertRowCounts(
@@ -218,7 +230,10 @@ class TestRcImport {
                 )
             )
             .apply {
-                assertEquals(newRCVer, db.resourceMetadataDao.fetchAll().single().version)
+                assertEquals(
+                    newRCVer,
+                    db.resourceMetadataDao.fetchAll().single().version
+                )
             }
     }
 }
