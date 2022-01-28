@@ -221,6 +221,7 @@ class ChapterPageViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            /* no-op */
                         }
                     }
                 }
@@ -254,6 +255,7 @@ class ChapterPageViewModel : ViewModel() {
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
+                                    /* no-op */
                                 }
                             }
                         }

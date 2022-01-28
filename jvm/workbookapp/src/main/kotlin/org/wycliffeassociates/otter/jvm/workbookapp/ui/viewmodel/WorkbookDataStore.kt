@@ -158,7 +158,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     targetAudioProperty.set(null)
                 }
             }
-            _chapter != null -> {} // preserve targetAudio for clean up
+            _chapter != null -> { /* no-op */ } // preserve targetAudio for clean up
             else -> {
                 selectedChapterPlayerProperty.set(null)
                 targetAudioProperty.set(null)
