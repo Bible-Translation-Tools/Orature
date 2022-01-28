@@ -57,10 +57,10 @@ class TestRemoveRc {
             .import("hi_ulb.zip")
             .assertRowCounts(
                 RowCount(
-                    collections = 2512,
+                    collections = 1257,
                     contents = mapOf(
-                        META to 2378,
-                        TEXT to 62208
+                        META to 1189,
+                        TEXT to 31104
                     ),
                     links = 0
                 ),
@@ -79,11 +79,8 @@ class TestRemoveRc {
             }
             .assertRowCounts(
                 RowCount(
-                    collections = 1256,
-                    contents = mapOf(
-                        META to 1189,
-                        TEXT to 31104
-                    ),
+                    collections = 1,
+                    contents = mapOf(),
                     links = 0
                 ),
                 "Row count after delete doesn't match."
@@ -97,10 +94,10 @@ class TestRemoveRc {
             .import("hi_ulb.zip")
             .assertRowCounts(
                 RowCount(
-                    collections = 2512,
+                    collections = 1257,
                     contents = mapOf(
-                        META to 2378,
-                        TEXT to 62208
+                        META to 1189,
+                        TEXT to 31104
                     ),
                     links = 0
                 ),
@@ -125,10 +122,10 @@ class TestRemoveRc {
             }
             .assertRowCounts(
                 RowCount(
-                    collections = 2579,
+                    collections = 1324,
                     contents = mapOf(
-                        META to 2378,
-                        TEXT to 62208
+                        META to 1189,
+                        TEXT to 31104
                     ),
                     links = 0
                 )
