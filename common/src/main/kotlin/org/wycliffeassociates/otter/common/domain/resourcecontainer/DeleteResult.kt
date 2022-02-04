@@ -18,14 +18,8 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer
 
-enum class ImportResult {
+enum class DeleteResult {
     SUCCESS,
-    INVALID_RC,
-    INVALID_CONTENT,
-    UNSUPPORTED_CONTENT,
-    IMPORT_ERROR,
-    LOAD_RC_ERROR,
-    ALREADY_EXISTS,
-    UNMATCHED_HELP,
-    DEPENDENCY_ERROR
+    DEPENDENCY_EXISTS,
+    NOT_FOUND
 }

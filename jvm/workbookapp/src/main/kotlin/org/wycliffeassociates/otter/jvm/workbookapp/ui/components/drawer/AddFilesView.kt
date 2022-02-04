@@ -204,7 +204,9 @@ class AddFilesView : View() {
                     } ?: messages["importResource"]
                 }
             )
-            messageTextProperty.set(messages["importResourceFailMessage"])
+            messageTextProperty.bind(viewModel.importErrorMessage.stringBinding {
+                it ?: messages["importResourceFailMessage"]
+            })
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)
