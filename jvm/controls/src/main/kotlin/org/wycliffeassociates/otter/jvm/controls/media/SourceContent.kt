@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.controls.media
 
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
@@ -36,9 +35,7 @@ class SourceContent : Control() {
 
     val sourceAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
     val sourceAudioAvailableProperty: BooleanBinding = sourceAudioPlayerProperty.isNotNull
-    val sourceSpeedRateProperty = SimpleDoubleProperty()
     val targetAudioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-    val targetSpeedRateProperty = SimpleDoubleProperty()
 
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull

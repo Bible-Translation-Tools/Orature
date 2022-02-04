@@ -147,9 +147,7 @@ class RecordMappers {
                 record.getValue(TRANSLATION_ENTITY.ID),
                 record.getValue(TRANSLATION_ENTITY.SOURCE_FK),
                 record.getValue(TRANSLATION_ENTITY.TARGET_FK),
-                record.getValue(TRANSLATION_ENTITY.MODIFIED_TS),
-                record.getValue(TRANSLATION_ENTITY.SOURCE_RATE),
-                record.getValue(TRANSLATION_ENTITY.TARGET_RATE)
+                record.getValue(TRANSLATION_ENTITY.MODIFIED_TS)
             )
         }
     }

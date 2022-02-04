@@ -25,7 +25,5 @@ data class Translation(
     var source: Language,
     var target: Language,
     var modifiedTs: LocalDateTime?,
-    var sourceRate: Double = 1.0,
-    var targetRate: Double = 1.0,
     var id: Int = 0
 )

@@ -100,9 +100,6 @@ class AudioPluginViewModel : ViewModel() {
         }
         val targetAudio = workbookDataStore.targetAudioProperty.value
 
-        val sourceRate = workbookDataStore.activeTranslationProperty.value?.sourceRate ?: 1.0
-        val targetRate = workbookDataStore.activeTranslationProperty.value?.targetRate ?: 1.0
-
         return PluginParameters(
             languageName = workbook.target.language.name,
             bookTitle = workbook.target.title,
@@ -120,9 +117,7 @@ class AudioPluginViewModel : ViewModel() {
             targetChapterAudio = targetAudio?.file,
             license = workbook.source.resourceMetadata.license,
             direction = localeLanguage.preferredLanguage?.direction,
-            sourceDirection = workbook.source.language.direction,
-            sourceRate = sourceRate,
-            targetRate = targetRate
+            sourceDirection = workbook.source.language.direction
         )
     }
 

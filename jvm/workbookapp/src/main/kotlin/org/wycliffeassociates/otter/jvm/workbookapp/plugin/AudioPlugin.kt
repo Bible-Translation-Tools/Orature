@@ -143,9 +143,7 @@ class AudioPlugin(
                     }",
                     "--license=${pluginParameters.license}",
                     "--direction=${pluginParameters.direction}",
-                    "--source_direction=${pluginParameters.sourceDirection}",
-                    "--source_rate=${pluginParameters.sourceRate}",
-                    "--target_rate=${pluginParameters.targetRate}"
+                    "--source_direction=${pluginParameters.sourceDirection}"
                 )
             }
         return ParametersImpl(insertedArgs)

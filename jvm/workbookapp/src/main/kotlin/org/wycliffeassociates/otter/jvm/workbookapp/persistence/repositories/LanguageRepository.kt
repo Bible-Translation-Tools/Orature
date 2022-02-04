@@ -151,15 +151,6 @@ class LanguageRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
-    override fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation> {
-        return Single.fromCallable {
-            val translation = translationDao
-                .fetchBySourceAndTarget(sourceLanguage.id, targetLanguage.id)
-
-            translationMapper.mapFromEntity(translation, sourceLanguage, targetLanguage)
-        }
-    }
-
     override fun getAllTranslations(): Single<List<Translation>> {
         return Single.fromCallable {
             translationDao.fetchAll()

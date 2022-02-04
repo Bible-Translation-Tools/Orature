@@ -23,13 +23,11 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.control.Slider
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import tornadofx.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.min
@@ -48,14 +46,9 @@ class AudioPlayerController(
     private var resumeAfterDrag = false
 
     val isPlayingProperty = SimpleBooleanProperty(false)
-    val playbackRateProperty = SimpleDoubleProperty(1.0)
 
     init {
         initializeSliderActions()
-
-        playbackRateProperty.onChange {
-            setPlaybackRate(it)
-        }
     }
 
     fun toggle() {
@@ -91,8 +84,6 @@ class AudioPlayerController(
         this.player = player
         disposable?.dispose()
         disposable = startProgressUpdate()
-
-        setPlaybackRate(playbackRateProperty.value)
 
         player.addEventListener {
             if (
