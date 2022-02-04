@@ -147,10 +147,6 @@ class ImportResourceContainer @Inject constructor(
 
     private fun importContainer(file: File): Single<ImportResult> {
         return Single.fromCallable {
-//            if (!updateExistingRC(file)) {
-//                throw ImportException(ImportResult.DEPENDENCY_ERROR)
-//            }
-
             logger.info("Importing RC...")
             val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
             if (internalDir.exists()) {
