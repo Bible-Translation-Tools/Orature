@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,7 +28,6 @@ import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.device.IAudioPlayerListener
-
 
 class AudioBufferPlayer(
     private val player: SourceDataLine?,
@@ -120,7 +119,7 @@ class AudioBufferPlayer(
                                     if (_reader.framePosition > bytes.size / 2) {
                                         _reader.seek(_reader.framePosition - processor.overlap)
                                     }
-                                    val written = _reader.getPcmBuffer(bytes)
+                                    _reader.getPcmBuffer(bytes)
                                     val output = processor.process(bytes)
                                     player.write(output, 0, output.size)
                                 }
@@ -166,7 +165,6 @@ class AudioBufferPlayer(
     }
 
     override fun close() {
-
     }
 
     override fun release() {

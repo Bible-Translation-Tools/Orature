@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -128,7 +128,7 @@ class TestResourceContainerArtworkDataSource {
         val image = dataSource.getArtwork(metadataMock, project, ratio16x9)
 
         assertNotNull(
-            "Could not get default image (${ratioString}) for $project",
+            "Could not get default image ($ratioString) for $project",
             image
         )
         assertFalse(

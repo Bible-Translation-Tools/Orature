@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -27,6 +27,7 @@ import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class PluginOpenedPage : Fragment() {
@@ -45,7 +46,7 @@ class PluginOpenedPage : Fragment() {
     val targetSpeedRateProperty = SimpleDoubleProperty()
 
     init {
-        importStylesheet(resources["/css/plugin-opened-page.css"])
+        tryImportStylesheet(resources["/css/plugin-opened-page.css"])
     }
 
     override val root = vbox {

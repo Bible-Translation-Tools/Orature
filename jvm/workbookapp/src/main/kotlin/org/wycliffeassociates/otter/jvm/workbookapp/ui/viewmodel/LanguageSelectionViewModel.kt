@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -34,7 +34,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
 
     val searchQueryProperty = SimpleStringProperty("")
     val regions = observableListOf<String>()
-    private val selectedRegions = observableListOf<String>()
+    val selectedRegions = observableListOf<String>()
 
     val menuItems = observableListOf<MenuItem>()
     val anglicizedProperty = SimpleBooleanProperty(false)
@@ -47,7 +47,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
     init {
         selectedRegions.onChange {
             regionPredicate = if (it.list.isEmpty()) {
-                Predicate { false }
+                Predicate { true }
             } else {
                 Predicate { language -> selectedRegions.contains(language.region) }
             }
@@ -55,7 +55,7 @@ class LanguageSelectionViewModel(items: ObservableList<Language>) : ViewModel() 
         }
 
         searchQueryProperty.onChange { query ->
-            queryPredicate = if(query.isNullOrBlank()) {
+            queryPredicate = if (query.isNullOrBlank()) {
                 Predicate { true }
             } else {
                 Predicate { language ->

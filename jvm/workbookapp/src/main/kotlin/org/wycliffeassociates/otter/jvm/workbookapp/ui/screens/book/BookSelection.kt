@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -27,6 +27,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.BookCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
@@ -106,10 +107,10 @@ class BookSelection : Fragment() {
     }
 
     init {
-        importStylesheet(resources.get("/css/book-wizard.css"))
-        importStylesheet(resources.get("/css/filtered-search-bar.css"))
-        importStylesheet(resources.get("/css/book-card-cell.css"))
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/book-wizard.css"))
+        tryImportStylesheet(resources.get("/css/filtered-search-bar.css"))
+        tryImportStylesheet(resources.get("/css/book-card-cell.css"))
+        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
 
         createProgressDialog()
     }

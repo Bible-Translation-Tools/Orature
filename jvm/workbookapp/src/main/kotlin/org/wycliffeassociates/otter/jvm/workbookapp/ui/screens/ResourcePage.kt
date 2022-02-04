@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -55,7 +56,7 @@ class ResourcePage : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/resource-page.css"))
+        tryImportStylesheet(resources.get("/css/resource-page.css"))
     }
 
     override val root = vbox {

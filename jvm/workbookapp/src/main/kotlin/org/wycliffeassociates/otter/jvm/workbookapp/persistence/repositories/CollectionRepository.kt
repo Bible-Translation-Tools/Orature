@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -397,7 +397,7 @@ class CollectionRepository @Inject constructor(
                                 container.manifest.projects = container.manifest.projects.plus(
                                     project {
                                         sort = if (
-                                            mainDerivedMetadata.subject.toLowerCase() == "bible" &&
+                                            mainDerivedMetadata.subject.lowercase() == "bible" &&
                                             projectEntity.sort > 39
                                         ) {
                                             projectEntity.sort + 1

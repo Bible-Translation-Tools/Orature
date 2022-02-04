@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -34,6 +34,7 @@ val ImportResult.errorMessage: String?
             ImportResult.LOAD_RC_ERROR -> FX.messages["importErrorLoadRcError"]
             ImportResult.ALREADY_EXISTS -> FX.messages["importErrorAlreadyExists"]
             ImportResult.UNMATCHED_HELP -> FX.messages["importErrorUnmatchedHelp"]
+            ImportResult.DEPENDENCY_ERROR -> FX.messages["importErrorDependencyExists"]
         }
     }
 

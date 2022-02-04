@@ -1,6 +1,5 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view
 
-import com.jfoenix.controls.JFXButton
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmodel.AppUpdaterViewModel
 import tornadofx.*
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -30,7 +30,7 @@ class LanguageMapper @Inject constructor() : Mapper<LanguageEntity, Language> {
             type.slug,
             type.name,
             type.anglicizedName,
-            type.direction.toLowerCase(),
+            type.direction.lowercase(),
             type.gateway == 1,
             type.region,
             type.id
@@ -42,7 +42,7 @@ class LanguageMapper @Inject constructor() : Mapper<LanguageEntity, Language> {
             type.slug,
             type.name,
             type.anglicizedName,
-            type.direction.toLowerCase(),
+            type.direction.lowercase(),
             if (type.isGateway) 1 else 0,
             type.region
         )

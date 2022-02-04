@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -31,6 +31,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddFilesViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -127,8 +128,8 @@ class AddFilesView : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/app-drawer.css"))
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/app-drawer.css"))
+        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
 
         initImportDialog()
         initSuccessDialog()
@@ -203,7 +204,9 @@ class AddFilesView : View() {
                     } ?: messages["importResource"]
                 }
             )
-            messageTextProperty.set(messages["importResourceFailMessage"])
+            messageTextProperty.bind(viewModel.importErrorMessage.stringBinding {
+                it ?: messages["importResourceFailMessage"]
+            })
             backgroundImageFileProperty.bind(viewModel.importedProjectCoverProperty)
             orientationProperty.set(settingsViewModel.orientationProperty.value)
             themeProperty.set(settingsViewModel.appColorMode.value)

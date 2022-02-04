@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -25,6 +25,6 @@ enum class OratureFileFormat(val extension: String) {
     companion object {
         val extensionList: List<String> = values().map { it.extension }
 
-        fun isSupported(extension: String) = extension.toLowerCase() in extensionList
+        fun isSupported(extension: String) = extension.lowercase() in extensionList
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -22,6 +22,7 @@ import javafx.scene.control.ListCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import java.text.MessageFormat
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 
 class ChunkCell(
@@ -44,7 +45,7 @@ class ChunkCell(
             chunkTitleProperty.set(
                 MessageFormat.format(
                     FX.messages["chunkTitle"],
-                    FX.messages[item.item].capitalize(),
+                    FX.messages[item.item].capitalizeString(),
                     item.bodyText
                 )
             )

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -45,8 +45,8 @@ enum class ContentType {
 
     companion object {
         fun of(s: String): ContentType? {
-            val lower = s.toLowerCase()
-            return values().firstOrNull { lower == it.name.toLowerCase() }
+            val lower = s.lowercase()
+            return values().firstOrNull { lower == it.name.lowercase() }
         }
     }
 }

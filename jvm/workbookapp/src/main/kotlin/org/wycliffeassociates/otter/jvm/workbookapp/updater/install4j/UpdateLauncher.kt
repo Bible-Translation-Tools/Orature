@@ -14,7 +14,7 @@ class UpdateLauncher(private val listener: UpdateProgressListener? = null) : App
         logger.info("Launching update application...")
         ApplicationLauncher.launchApplication(
             "474",
-            arrayOf("-Dinstall4j.debug=true","-Dinstall4j.logToStderr=true"),
+            arrayOf("-Dinstall4j.debug=true", "-Dinstall4j.logToStderr=true"),
             false,
             this
         )
@@ -28,9 +28,11 @@ class UpdateLauncher(private val listener: UpdateProgressListener? = null) : App
     }
 
     override fun exited(exitValue: Int) {
+        /* no-op */
     }
 
     override fun prepareShutdown() {
+        /* no-op */
     }
 
     override fun createProgressListener(): ApplicationLauncher.ProgressListener? {

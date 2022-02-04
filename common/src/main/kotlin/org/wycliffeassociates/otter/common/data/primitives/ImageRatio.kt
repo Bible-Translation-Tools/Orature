@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,7 +28,7 @@ enum class ImageRatio(val width: Int, val height: Int) {
 
     override fun toString(): String {
         return if (this != DEFAULT) {
-            "${width}x${height}"
+            "${width}x$height"
         } else ""
     }
 

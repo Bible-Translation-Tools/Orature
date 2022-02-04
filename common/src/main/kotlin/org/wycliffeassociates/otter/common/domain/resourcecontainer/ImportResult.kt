@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -26,5 +26,6 @@ enum class ImportResult {
     IMPORT_ERROR,
     LOAD_RC_ERROR,
     ALREADY_EXISTS,
-    UNMATCHED_HELP
+    UNMATCHED_HELP,
+    DEPENDENCY_ERROR
 }

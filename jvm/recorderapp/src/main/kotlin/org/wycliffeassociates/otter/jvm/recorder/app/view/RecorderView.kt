@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.stage.Screen
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
@@ -51,7 +52,7 @@ class RecorderView : PluginEntrypoint() {
             val css = this@RecorderView.javaClass.getResource("/css/recorder.css")
                 .toExternalForm()
                 .replace(" ", "%20")
-            importStylesheet(css)
+            tryImportStylesheet(css)
         }
 
         // notifies viewmodel that views have been inflated and the canvas now has a width

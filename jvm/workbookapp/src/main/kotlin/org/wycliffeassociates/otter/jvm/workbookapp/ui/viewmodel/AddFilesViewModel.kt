@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -51,6 +51,7 @@ class AddFilesViewModel : ViewModel() {
     val showImportDialogProperty = SimpleBooleanProperty(false)
     val showImportSuccessDialogProperty = SimpleBooleanProperty(false)
     val showImportErrorDialogProperty = SimpleBooleanProperty(false)
+    val importErrorMessage = SimpleStringProperty(null)
     val importedProjectTitleProperty = SimpleStringProperty()
     val importedProjectCoverProperty = SimpleObjectProperty<File>()
 
@@ -72,7 +73,7 @@ class AddFilesViewModel : ViewModel() {
             arrayOf(
                 FileChooser.ExtensionFilter(
                     messages["oratureFileTypes"],
-                    *OratureFileFormat.extensionList.map{ "*.$it"}.toTypedArray()
+                    *OratureFileFormat.extensionList.map { "*.$it" }.toTypedArray()
                 )
             ),
             mode = FileChooserMode.Single
@@ -98,13 +99,19 @@ class AddFilesViewModel : ViewModel() {
                 importedProjectCoverProperty.set(null)
             }
             .subscribe { result: ImportResult ->
-                if (result == ImportResult.SUCCESS) {
-                    showImportSuccessDialogProperty.value = true
-                    find<HomePageViewModel>().loadTranslations()
-                } else {
-                    showImportErrorDialogProperty.value = true
+                when (result) {
+                    ImportResult.SUCCESS -> {
+                        showImportSuccessDialogProperty.value = true
+                        find<HomePageViewModel>().loadTranslations()
+                    }
+                    ImportResult.DEPENDENCY_ERROR -> {
+                        importErrorMessage.set(messages["importErrorDependencyExists"])
+                        showImportErrorDialogProperty.value = true
+                    }
+                    else -> {
+                        showImportErrorDialogProperty.value = true
+                    }
                 }
-
                 showImportDialogProperty.value = false
             }
     }

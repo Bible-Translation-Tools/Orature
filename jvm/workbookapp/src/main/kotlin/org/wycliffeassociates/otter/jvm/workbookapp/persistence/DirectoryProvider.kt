@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -42,7 +42,7 @@ class DirectoryProvider(
     private val pathSeparator = pathSeparator ?: FileSystems.getDefault().separator
     private val userHome = userHome ?: System.getProperty("user.home")
     private val windowsAppData = windowsAppData ?: System.getenv("APPDATA")
-    private val osName = (osName ?: System.getProperty("os.name")).toUpperCase()
+    private val osName = (osName ?: System.getProperty("os.name")).uppercase()
 
     // create a directory to store the user's application projects/documents
     override fun getUserDataDirectory(appendedPath: String): File {

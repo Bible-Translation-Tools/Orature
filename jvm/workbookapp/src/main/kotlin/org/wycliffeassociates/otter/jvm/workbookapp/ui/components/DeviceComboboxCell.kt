@@ -2,7 +2,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.scene.control.ListCell
 import org.kordamp.ikonli.javafx.FontIcon
-import javax.sound.sampled.Mixer
 
 class DeviceComboboxCell(private val icon: FontIcon) : ListCell<String>() {
     val view = ComboboxButton()

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -221,6 +221,7 @@ class ChapterPageViewModel : ViewModel() {
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            /* no-op */
                         }
                     }
                 }
@@ -254,6 +255,7 @@ class ChapterPageViewModel : ViewModel() {
                         else -> {
                             when (pluginType) {
                                 PluginType.EDITOR, PluginType.MARKER -> {
+                                    /* no-op */
                                 }
                             }
                         }

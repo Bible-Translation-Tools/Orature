@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -21,12 +21,13 @@ package org.wycliffeassociates.otter.jvm.controls.button
 import javafx.scene.control.CheckBox
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.button.CheckboxButtonSkin
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class CheckboxButton : CheckBox() {
 
     init {
-        importStylesheet(javaClass.getResource("/css/checkbox-button.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/checkbox-button.css").toExternalForm())
         styleClass.setAll("checkbox-button")
     }
 

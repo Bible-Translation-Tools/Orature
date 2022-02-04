@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.BookCard
 import org.wycliffeassociates.otter.jvm.controls.card.NewTranslationCard
 import org.wycliffeassociates.otter.jvm.controls.card.TranslationCard
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -48,12 +49,12 @@ class HomePage : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/control.css"))
-        importStylesheet(resources.get("/css/home-page.css"))
-        importStylesheet(resources.get("/css/resume-book-banner.css"))
-        importStylesheet(resources.get("/css/new-translation-card.css"))
-        importStylesheet(resources.get("/css/translation-card.css"))
-        importStylesheet(resources.get("/css/book-card.css"))
+        tryImportStylesheet(resources.get("/css/control.css"))
+        tryImportStylesheet(resources.get("/css/home-page.css"))
+        tryImportStylesheet(resources.get("/css/resume-book-banner.css"))
+        tryImportStylesheet(resources.get("/css/new-translation-card.css"))
+        tryImportStylesheet(resources.get("/css/translation-card.css"))
+        tryImportStylesheet(resources.get("/css/book-card.css"))
     }
 
     override val root = stackpane {

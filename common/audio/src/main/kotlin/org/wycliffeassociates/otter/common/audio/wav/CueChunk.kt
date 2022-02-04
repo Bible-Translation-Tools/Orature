@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -182,7 +182,6 @@ open class CueChunk : RiffChunk {
             val subchunkLabel = chunk.getText(CHUNK_LABEL_SIZE)
             val subchunkSize = chunk.int
 
-
             if (subchunkSize < 0) {
                 throw InvalidWavFileException("Chunk $subchunkLabel has a negative size of $subchunkSize")
             }
@@ -210,7 +209,7 @@ open class CueChunk : RiffChunk {
         addParsedCues(cueListBuilder)
     }
 
-    open internal fun addParsedCues(cueListBuilder: CueListBuilder) {
+    internal open fun addParsedCues(cueListBuilder: CueListBuilder) {
         cues as MutableList
         cues.clear()
         cues.addAll(cueListBuilder.build())
@@ -280,7 +279,7 @@ open class CueChunk : RiffChunk {
                     val labelBytes = ByteArray(wordAlignedSubchunkSize - CHUNK_LABEL_SIZE)
                     chunk.get(labelBytes)
                     // trim necessary to strip trailing 0's used to pad to double word align
-                    val label = String(labelBytes, Charsets.US_ASCII).trim { it.toByte() == 0.toByte() }
+                    val label = String(labelBytes, Charsets.US_ASCII).trim { it.code.toByte() == 0.toByte() }
                     cueListBuilder.addLabel(id, label)
                 }
                 else -> {

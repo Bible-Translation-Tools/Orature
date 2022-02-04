@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -48,6 +48,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -155,10 +156,10 @@ class RecordScripturePage : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/record-scripture.css"))
-        importStylesheet(resources.get("/css/takecard.css"))
-        importStylesheet(resources.get("/css/scripturetakecard.css"))
-        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        tryImportStylesheet(resources.get("/css/record-scripture.css"))
+        tryImportStylesheet(resources.get("/css/takecard.css"))
+        tryImportStylesheet(resources.get("/css/scripturetakecard.css"))
+        tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
         isDraggingFileProperty.onChange {
             if (it) recordScriptureViewModel.stopPlayers()
@@ -266,12 +267,12 @@ class RecordScripturePage : View() {
                     )
 
                     listview(recordScriptureViewModel.takeCardViews) {
-                        addClass("wa-list-view")
+                        addClass("wa-list-view", "record-scripture__take-list")
                         vgrow = Priority.ALWAYS
 
                         setCellFactory { ScriptureTakeCardCell() }
 
-                        minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT));
+                        minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
                         placeholder = ListViewPlaceHolder()
                     }
                 }

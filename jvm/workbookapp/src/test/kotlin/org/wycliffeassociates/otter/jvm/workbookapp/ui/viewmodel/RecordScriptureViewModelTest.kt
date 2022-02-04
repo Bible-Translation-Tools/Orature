@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -193,9 +193,7 @@ class RecordScriptureViewModelTest {
         }
 
         @AfterClass
-        fun tearDown() {
-            directoryProvider.cleanTempDirectory()
-
+        @JvmStatic fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)

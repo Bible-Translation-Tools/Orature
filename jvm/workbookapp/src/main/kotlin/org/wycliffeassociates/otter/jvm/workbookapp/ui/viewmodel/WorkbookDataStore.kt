@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -179,7 +179,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     targetAudioProperty.set(null)
                 }
             }
-            _chapter != null -> {} // preserve targetAudio for clean up
+            _chapter != null -> { /* no-op */ } // preserve targetAudio for clean up
             else -> {
                 selectedChapterPlayerProperty.set(null)
                 targetAudioProperty.set(null)
@@ -194,7 +194,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
             file.nameWithoutExtension,
             ".${file.extension}"
         )
-        tempFile.deleteOnExit()
         file.copyTo(tempFile, true)
 
         val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()

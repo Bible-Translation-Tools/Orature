@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -94,6 +94,7 @@ class ConfigureAudioSystem @Inject constructor(
                     try {
                         line = AudioSystem.getSourceDataLine(DEFAULT_AUDIO_FORMAT, mixer)
                     } catch (e: Exception) {
+                        logger.error("Error in getOutputLine.", e)
                     }
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()
@@ -118,6 +119,7 @@ class ConfigureAudioSystem @Inject constructor(
                     try {
                         line = AudioSystem.getTargetDataLine(DEFAULT_AUDIO_FORMAT, mixer)
                     } catch (e: Exception) {
+                        logger.error("Error in getInputLine.", e)
                     }
                 }
                 if (line != null) Maybe.just(line) else Maybe.empty()

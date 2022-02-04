@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -169,7 +169,7 @@ class VerseMarkerViewModel : ViewModel() {
         audioPlayer.close()
         return markers.writeMarkers()
     }
-    
+
     fun saveAndQuit() {
         compositeDisposable.clear()
 
@@ -184,7 +184,7 @@ class VerseMarkerViewModel : ViewModel() {
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(300, TimeUnit.MILLISECONDS)  // exec after UI clean up
+                .delay(300, TimeUnit.MILLISECONDS) // exec after UI clean up
                 .subscribe {
                     runLater {
                         it.navigateBack()

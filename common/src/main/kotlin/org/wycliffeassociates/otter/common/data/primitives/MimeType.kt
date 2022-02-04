@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -34,7 +34,7 @@ enum class MimeType(vararg types: String) {
             .associate { it }
 
         /** @throws [IllegalArgumentException] if the format type is not supported **/
-        fun of(type: String) = map[type.toLowerCase()]
+        fun of(type: String) = map[type.lowercase()]
             ?: throw IllegalArgumentException("Mime type $type not supported")
     }
 }

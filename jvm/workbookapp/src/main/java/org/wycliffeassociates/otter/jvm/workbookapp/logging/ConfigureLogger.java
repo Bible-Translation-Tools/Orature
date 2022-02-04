@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -29,10 +29,10 @@ import java.io.File;
 
 public class ConfigureLogger {
 
-    private final String FILE_LOGGER_REF = "logfile";
-    private final String CONSOLE_LOGGER_REF = "stdout";
-    private final String LOG_FILE_NAME = OratureInfo.SUITE_NAME.toLowerCase();
-    private final String LOG_EXT = ".log";
+    private static final String FILE_LOGGER_REF = "logfile";
+    private static final String CONSOLE_LOGGER_REF = "stdout";
+    private static final String LOG_FILE_NAME = OratureInfo.SUITE_NAME.toLowerCase();
+    private static final String LOG_EXT = ".log";
 
     private File logDir;
     private ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();

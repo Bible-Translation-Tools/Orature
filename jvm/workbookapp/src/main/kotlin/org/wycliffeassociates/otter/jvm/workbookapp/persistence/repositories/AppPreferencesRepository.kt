@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -50,7 +50,6 @@ class AppPreferencesRepository @Inject constructor(
     override fun setLastResource(resource: String): Completable {
         return preferences.setLastResource(resource)
     }
-
 
     override fun getInputDevice(): Single<String> {
         return preferences

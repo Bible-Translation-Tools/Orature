@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project.markdown
 
 import java.io.BufferedReader
-import java.util.regex.Pattern
 
 // TODO: Add Help type enum to HelpResource? (tn, tq)
 data class HelpResource(var title: String, var body: String)

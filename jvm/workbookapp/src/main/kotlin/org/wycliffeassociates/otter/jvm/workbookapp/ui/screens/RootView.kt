@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import javafx.application.Platform
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.data.ColorTheme
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
@@ -52,7 +53,7 @@ class RootView : View() {
         workspace.header.removeFromParent()
         workspace.root.vgrow = Priority.ALWAYS
 
-        importStylesheet(resources.get("/css/audio-error-dialog.css"))
+        tryImportStylesheet(resources.get("/css/audio-error-dialog.css"))
         initThemeStylesheets()
         bindThemeClassToRoot()
 
@@ -72,8 +73,8 @@ class RootView : View() {
     }
 
     private fun initThemeStylesheets() {
-        importStylesheet(resources["/css/theme/light-theme.css"])
-        importStylesheet(resources["/css/theme/dark-theme.css"])
+        tryImportStylesheet(resources["/css/theme/light-theme.css"])
+        tryImportStylesheet(resources["/css/theme/dark-theme.css"])
     }
 
     private fun initAudioErrorDialog() {
@@ -115,4 +116,3 @@ class RootView : View() {
         }
     }
 }
-

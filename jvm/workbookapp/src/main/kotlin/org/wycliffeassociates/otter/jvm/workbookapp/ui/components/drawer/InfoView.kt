@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXButton
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.AppInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AppInfoViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view.UpdaterView
@@ -37,7 +38,6 @@ class InfoView : View() {
 
         scrollpane {
             addClass("app-drawer__scroll-pane")
-
 
             vbox {
                 isFitToWidth = true
@@ -151,7 +151,7 @@ class InfoView : View() {
     }
 
     init {
-        importStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
     }
 
     private fun collapse() {

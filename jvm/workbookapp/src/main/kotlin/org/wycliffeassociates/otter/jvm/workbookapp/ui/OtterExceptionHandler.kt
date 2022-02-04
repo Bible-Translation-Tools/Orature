@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -172,7 +172,7 @@ class OtterExceptionHandler(
             environment.getSystemData().forEach {
                 scope.setTag(it.first, it.second)
             }
-            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory,"orature.log").absolutePath))
+            scope.addAttachment(Attachment(File(directoryProvider.logsDirectory, "orature.log").absolutePath))
 
             Sentry.captureException(error)
         }
@@ -183,7 +183,7 @@ class OtterExceptionHandler(
     }
 
     private fun getLog(): String? {
-        val logFileName = OratureInfo.SUITE_NAME.toLowerCase()
+        val logFileName = OratureInfo.SUITE_NAME.lowercase()
         val logExt = ".log"
         val logFile = StringBuilder()
             .append(directoryProvider.logsDirectory.absolutePath)

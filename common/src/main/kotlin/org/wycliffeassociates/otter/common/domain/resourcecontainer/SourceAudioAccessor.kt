@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -57,7 +57,7 @@ class SourceAudioAccessor(
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
-                val file = when(cache.containsKey(path)) {
+                val file = when (cache.containsKey(path)) {
                     true -> cache[path]!!
                     false -> {
                         val temp = File(dir, File(path).name).apply { createNewFile() }

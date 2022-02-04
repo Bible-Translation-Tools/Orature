@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -333,7 +333,6 @@ class SimpleAudioPlayer(
                 label {
                     hgrow = Priority.ALWAYS
                     text = title
-
                 }
                 tooltip(title)
             }

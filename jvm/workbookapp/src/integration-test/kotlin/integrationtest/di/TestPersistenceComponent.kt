@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -24,6 +24,7 @@ import integrationtest.initialization.TestInitializeUlb
 import integrationtest.projects.TestProjectCreate
 import integrationtest.projects.TestProjectImport
 import integrationtest.projects.TestRcImport
+import integrationtest.projects.TestRemoveRc
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
@@ -48,4 +49,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestProjectCreate)
     fun inject(test: TestRcImport)
     fun inject(test: TestProjectImport)
+    fun inject(test: TestRemoveRc)
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -187,7 +187,7 @@ class ResourceMetadataRepository @Inject constructor(
                 resourceMetadataDao.delete(metadataMapper.mapToEntity(obj))
             }
             .doOnError { e ->
-                logger.error("Error in delete for metadata: $obj", obj)
+                logger.error("Error in delete for metadata: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }

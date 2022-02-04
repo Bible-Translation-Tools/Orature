@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -132,7 +132,7 @@ class ProjectFilesAccessorTest {
             )
         }
 
-        ZipFile(target).use{ zip ->
+        ZipFile(target).use { zip ->
             val zipEntries = zip.entries().toList()
             val hasNoMedia = zipEntries.all { entry ->
                 File(entry.name).extension !in ProjectFilesAccessor.ignoredSourceMediaExtensions

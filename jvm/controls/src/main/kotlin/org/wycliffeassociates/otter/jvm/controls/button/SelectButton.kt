@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2020, 2021 Wycliffe Associates
+ * Copyright (C) 2020-2022 Wycliffe Associates
  *
  * This file is part of Orature.
  *
@@ -21,11 +21,11 @@ package org.wycliffeassociates.otter.jvm.controls.button
 import javafx.scene.control.Skin
 import javafx.scene.control.ToggleButton
 import org.wycliffeassociates.otter.jvm.controls.skins.button.SelectButtonSkin
-import tornadofx.*
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 
 class SelectButton : ToggleButton() {
     init {
-        importStylesheet(javaClass.getResource("/css/select-button.css").toExternalForm())
+        tryImportStylesheet(javaClass.getResource("/css/select-button.css").toExternalForm())
         styleClass.setAll("select-button")
     }
 
