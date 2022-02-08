@@ -45,6 +45,8 @@ class WaveformContainer : Fragment() {
     }
 
     override val root = MarkerPlacementWaveform(markerTrack).apply {
+
+        markerStateProperty.bind(viewModel.markerStateProperty)
         positionProperty.bind(viewModel.positionProperty)
 
         onSeekNext = viewModel::seekNext

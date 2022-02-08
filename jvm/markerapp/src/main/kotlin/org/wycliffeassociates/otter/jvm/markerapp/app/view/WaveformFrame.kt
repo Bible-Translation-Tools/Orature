@@ -162,7 +162,7 @@ class WaveformFrame(
 
     fun addHighlights(highlights: List<MarkerHighlightState>) {
         highlights.forEach {
-            add(
+            highlightHolder.add(
                 Rectangle().apply {
                     managedProperty().set(false)
                     heightProperty().bind(highlightHolder.heightProperty())

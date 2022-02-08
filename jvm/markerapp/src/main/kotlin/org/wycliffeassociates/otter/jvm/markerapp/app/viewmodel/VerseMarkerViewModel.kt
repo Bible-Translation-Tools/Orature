@@ -285,12 +285,6 @@ class MarkerPlacementWaveform(
     var topTrack: Node? = topNode
     var bottomTrack: Node? = null
 
-    init {
-        markerStateProperty.get()?.let { markers ->
-            (skin as MarkerPlacementWaveformSkin).addHighlights(markers.highlightState)
-        }
-    }
-
     override fun createDefaultSkin(): Skin<*> {
         return MarkerPlacementWaveformSkin(this)
     }

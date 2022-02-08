@@ -12,8 +12,10 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLay
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.ScrollingWaveform
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
 import tornadofx.hgrow
+import tornadofx.onChange
 import tornadofx.vgrow
 
 open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<ScrollingWaveform>(control) {
@@ -84,6 +86,14 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             add(waveformFrame)
             add(WaveformOverlay().apply { playbackPositionProperty.bind(skinnable.positionProperty) })
             add(PlaceMarkerLayer().apply { onPlaceMarkerAction { control.onPlaceMarker() } })
+
+            (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
+                markers?.let { markers ->
+                    println("adding thing")
+                    addHighlights(markers.highlightState)
+                }
+            }
+
         }
         children.add(root)
     }
