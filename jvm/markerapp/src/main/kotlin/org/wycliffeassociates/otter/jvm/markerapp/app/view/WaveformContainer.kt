@@ -18,9 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
-import javafx.scene.Node
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -64,9 +64,10 @@ class WaveformContainer : Fragment() {
     override fun onDock() {
         super.onDock()
         viewModel.compositeDisposable.addAll(
-            viewModel.waveform.subscribe {
+            viewModel.waveform.observeOnFx().subscribe {
                 root.addWaveformImage(it)
-            }
+            },
+            viewModel.waveformAsyncBuilder.observeOnFx().subscribe()
         )
     }
 

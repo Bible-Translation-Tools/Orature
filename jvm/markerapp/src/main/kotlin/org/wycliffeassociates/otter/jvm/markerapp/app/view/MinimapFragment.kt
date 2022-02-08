@@ -37,7 +37,7 @@ class MinimapFragment : Fragment() {
 
     val slider = AudioSlider()
 
-    override fun onDock() {
+    init {
         super.onDock()
         slider.apply {
             waveformMinimapListener = ChangeListener { _, _, it ->
@@ -45,7 +45,7 @@ class MinimapFragment : Fragment() {
             }
             viewModel.waveformMinimapImage.addListener(waveformMinimapListener)
 
-            player.set(viewModel.audioPlayer)
+            player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
     }

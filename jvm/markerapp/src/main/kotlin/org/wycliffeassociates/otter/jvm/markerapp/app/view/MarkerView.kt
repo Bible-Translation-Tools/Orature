@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.scene.layout.Priority
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -32,7 +33,6 @@ class MarkerView : PluginEntrypoint() {
 
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
-    val waveformContainer = WaveformContainer()
     val source = SourceTextFragment()
     val playbackControls = PlaybackControlsFragment()
 
@@ -56,9 +56,11 @@ class MarkerView : PluginEntrypoint() {
         prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
         prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
 
+        vgrow = Priority.ALWAYS
+
         add(titleFragment)
         add(minimap)
-        add(waveformContainer)
+        add<WaveformContainer>()
         add(source)
         add(playbackControls)
     }
