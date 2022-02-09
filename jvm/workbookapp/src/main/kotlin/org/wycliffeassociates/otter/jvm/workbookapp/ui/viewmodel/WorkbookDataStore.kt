@@ -31,16 +31,13 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
-import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import org.wycliffeassociates.otter.common.domain.content.TargetAudio
 import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -57,12 +54,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     @Inject
     lateinit var localeLanguage: LocaleLanguage
-
-    @Inject
-    lateinit var updateTranslationUseCase: UpdateTranslation
-
-    @Inject
-    lateinit var languageRepository: ILanguageRepository
 
     val activeWorkbookProperty = SimpleObjectProperty<Workbook>()
     val workbook: Workbook
@@ -89,7 +80,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
             ?: throw IllegalStateException("ProjectFilesAccessor is null")
 
     val activeTakeNumberProperty = SimpleIntegerProperty()
-    val activeTranslationProperty = SimpleObjectProperty<Translation>()
 
     val sourceAudioProperty = SimpleObjectProperty<SourceAudio>()
     val sourceAudioAvailableProperty = sourceAudioProperty.booleanBinding { it?.file?.exists() ?: false }
@@ -106,13 +96,8 @@ class WorkbookDataStore : Component(), ScopedInstance {
             if (it == null) {
                 activeChapterProperty.set(null)
                 activeChunkProperty.set(null)
-                activeTranslationProperty.set(null)
             } else {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
-                languageRepository.getTranslation(it.source.language, it.target.language)
-                    .subscribe { translation ->
-                        activeTranslationProperty.set(translation)
-                    }
             }
         }
 
@@ -340,12 +325,9 @@ class WorkbookDataStore : Component(), ScopedInstance {
     }
 
     private fun updatePlaybackSpeedRate(event: PlaybackRateChangedEvent) {
-        activeTranslationProperty.value?.let { translation ->
-            when (event.type) {
-                PlaybackRateType.SOURCE -> translation.sourceRate = event.rate
-                PlaybackRateType.TARGET -> translation.targetRate = event.rate
-            }
-            updateTranslationUseCase.update(translation).subscribe()
+        when (event.type) {
+            PlaybackRateType.SOURCE -> workbook.translation.updateSourceRate(event.rate)
+            PlaybackRateType.TARGET -> workbook.translation.updateTargetRate(event.rate)
         }
     }
 }

@@ -31,10 +31,12 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.Marker
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
+import org.wycliffeassociates.otter.common.data.workbook.AssociatedTranslation
 import org.wycliffeassociates.otter.common.data.workbook.Book
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -45,6 +47,7 @@ import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
 import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
@@ -66,7 +69,9 @@ class WorkbookRepository(
         contentRepository: IContentRepository,
         resourceRepository: IResourceRepository,
         resourceMetadataRepo: IResourceMetadataRepository,
-        takeRepository: ITakeRepository
+        takeRepository: ITakeRepository,
+        languageRepository: ILanguageRepository,
+        updateTranslationUseCase: UpdateTranslation
     ) : this(
         directoryProvider,
         DefaultDatabaseAccessors(
@@ -74,7 +79,9 @@ class WorkbookRepository(
             contentRepository,
             resourceRepository,
             resourceMetadataRepo,
-            takeRepository
+            takeRepository,
+            languageRepository,
+            updateTranslationUseCase
         )
     )
 
@@ -85,7 +92,20 @@ class WorkbookRepository(
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
-        val workbook = Workbook(directoryProvider, book(source, disposables), book(target, disposables))
+        val sourceResourceMetadata = source.resourceContainer
+            ?: throw IllegalStateException("Book collection with id=${source.id} has null resource container")
+        val targetResourceMetadata = target.resourceContainer
+            ?: throw IllegalStateException("Book collection with id=${source.id} has null resource container")
+        val workbook = Workbook(
+            directoryProvider,
+            book(source, disposables),
+            book(target, disposables),
+            constructAssociatedTranslation(
+                sourceResourceMetadata.language,
+                targetResourceMetadata.language,
+                disposables
+            )
+        )
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
     }
@@ -355,6 +375,63 @@ class WorkbookRepository(
         )
     }
 
+    private fun constructAssociatedTranslation(
+        sourceLanguage: Language,
+        targetLanguage: Language,
+        disposables: MutableList<Disposable>
+    ): AssociatedTranslation {
+        val sourceRateRelay = BehaviorRelay.createDefault(1.0)
+        val targetRateRelay = BehaviorRelay.createDefault(1.0)
+
+        db.getTranslation(sourceLanguage, targetLanguage)
+            .doOnError { e ->
+                logger.error("Error in getTranslation, source: $sourceLanguage, target: $targetLanguage", e)
+            }
+            .subscribe { translation ->
+                sourceRateRelay.accept(translation.sourceRate)
+                targetRateRelay.accept(translation.targetRate)
+            }
+
+        val sourceRateRelaySubscription = sourceRateRelay
+            .distinctUntilChanged()
+            .skip(1)
+            .doOnError { e ->
+                logger.error("Error in sourceRateRelay", e)
+            }
+            .subscribe { rate ->
+                db.getTranslation(sourceLanguage, targetLanguage)
+                    .flatMapCompletable { translation ->
+                        translation.sourceRate = rate
+                        db.updateTranslation(translation)
+                    }
+                    .doOnError { e -> logger.error("Error in updating translation", e) }
+                    .subscribe()
+            }
+
+        val targetRateRelaySubscription = targetRateRelay
+            .distinctUntilChanged()
+            .skip(1)
+            .doOnError { e ->
+                logger.error("Error in targetRateRelay", e)
+            }
+            .subscribe { rate ->
+                db.getTranslation(sourceLanguage, targetLanguage)
+                    .flatMapCompletable { translation ->
+                        translation.targetRate = rate
+                        db.updateTranslation(translation)
+                    }
+                    .doOnError { e -> logger.error("Error in updating translation", e) }
+                    .subscribe()
+            }
+
+        synchronized(disposables) {
+            disposables.add(sourceRateRelaySubscription)
+            disposables.add(targetRateRelaySubscription)
+        }
+
+        return AssociatedTranslation(sourceRateRelay, targetRateRelay)
+    }
+
     private fun constructAssociatedAudio(
         content: Content,
         disposables: MutableList<Disposable>
@@ -479,6 +556,8 @@ class WorkbookRepository(
         fun getSoftDeletedTakes(metadata: ResourceMetadata, projectSlug: String): Single<List<ModelTake>>
         fun getDerivedProjects(): Single<List<Collection>>
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
+        fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
+        fun updateTranslation(translation: Translation): Completable
     }
 }
 
@@ -487,7 +566,9 @@ private class DefaultDatabaseAccessors(
     private val contentRepo: IContentRepository,
     private val resourceRepo: IResourceRepository,
     private val resourceMetadataRepo: IResourceMetadataRepository,
-    private val takeRepo: ITakeRepository
+    private val takeRepo: ITakeRepository,
+    private val languageRepo: ILanguageRepository,
+    private val updateTranslationUseCase: UpdateTranslation
 ) : WorkbookRepository.IDatabaseAccessors {
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
 
@@ -521,4 +602,12 @@ private class DefaultDatabaseAccessors(
 
     override fun getSourceProject(targetProject: Collection): Maybe<Collection> =
         collectionRepo.getSource(targetProject)
+
+    override fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation> {
+        return languageRepo.getTranslation(sourceLanguage, targetLanguage)
+    }
+
+    override fun updateTranslation(translation: Translation): Completable {
+        return updateTranslationUseCase.update(translation)
+    }
 }

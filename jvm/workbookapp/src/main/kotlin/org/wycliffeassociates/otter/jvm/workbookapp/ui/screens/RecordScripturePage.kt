@@ -99,14 +99,14 @@ class RecordScripturePage : View() {
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
             sourceSpeedRateProperty.bind(
-                workbookDataStore.activeTranslationProperty.objectBinding {
-                    it?.sourceRate ?: 1.0
+                workbookDataStore.activeWorkbookProperty.objectBinding {
+                    it?.translation?.sourceRate?.value ?: 1.0
                 }
             )
 
             targetSpeedRateProperty.bind(
-                workbookDataStore.activeTranslationProperty.objectBinding {
-                    it?.targetRate ?: 1.0
+                workbookDataStore.activeWorkbookProperty.objectBinding {
+                    it?.translation?.targetRate?.value ?: 1.0
                 }
             )
         }
@@ -357,14 +357,14 @@ class RecordScripturePage : View() {
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
             sourceSpeedRateProperty.bind(
-                workbookDataStore.activeTranslationProperty.objectBinding {
-                    it?.sourceRate ?: 1.0
+                workbookDataStore.activeWorkbookProperty.objectBinding {
+                    it?.translation?.sourceRate?.value ?: 1.0
                 }
             )
 
             targetSpeedRateProperty.bind(
-                workbookDataStore.activeTranslationProperty.objectBinding {
-                    it?.targetRate ?: 1.0
+                workbookDataStore.activeWorkbookProperty.objectBinding {
+                    it?.translation?.targetRate?.value ?: 1.0
                 }
             )
         }
