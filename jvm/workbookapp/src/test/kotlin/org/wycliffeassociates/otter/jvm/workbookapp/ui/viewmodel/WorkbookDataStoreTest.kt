@@ -23,7 +23,6 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.Observable
-import io.reactivex.Single
 import javafx.beans.property.SimpleStringProperty
 import org.junit.After
 import org.junit.AfterClass
@@ -43,11 +42,9 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
-import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudioAccessor
-import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.jvm.device.ConfigureAudioSystem
 import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
@@ -149,12 +146,6 @@ class WorkbookDataStoreTest {
             )
         }
 
-        private val translation = mock<Translation>()
-
-        private val languageRepository = mock<ILanguageRepository> {
-            on { getTranslation(any(), any()) } doReturn Single.just(translation)
-        }
-
         @BeforeClass
         @JvmStatic fun setup() {
             FxToolkit.registerPrimaryStage()
@@ -170,7 +161,6 @@ class WorkbookDataStoreTest {
             configureAudio.configure()
 
             workbookDataStore = find()
-            workbookDataStore.languageRepository = languageRepository
             workbookDataStore.activeWorkbookProperty.set(workbook)
         }
 
