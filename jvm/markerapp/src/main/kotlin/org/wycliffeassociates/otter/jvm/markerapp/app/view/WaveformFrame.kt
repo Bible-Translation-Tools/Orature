@@ -18,8 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.sun.javafx.util.Utils
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.event.ActionEvent
@@ -175,6 +173,10 @@ class WaveformFrame(
                 }
             )
         }
+    }
+
+    fun clearHighlights() {
+        highlightHolder.children.removeIf { it is Rectangle }
     }
 
     fun freeImages() {

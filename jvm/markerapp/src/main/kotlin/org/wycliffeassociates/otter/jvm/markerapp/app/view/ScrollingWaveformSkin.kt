@@ -15,7 +15,6 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.ScrollingWavefor
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
 import tornadofx.hgrow
-import tornadofx.onChange
 import tornadofx.vgrow
 
 open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<ScrollingWaveform>(control) {
@@ -60,7 +59,8 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
 
 class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : ScrollingWaveformSkin(control) {
 
-    fun addHighlights(highlights: List<MarkerHighlightState>) {
+    private fun addHighlights(highlights: List<MarkerHighlightState>) {
+        waveformFrame.clearHighlights()
         waveformFrame.addHighlights(highlights)
     }
 
@@ -89,7 +89,6 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
 
             (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
                 markers?.let { markers ->
-                    println("adding thing")
                     addHighlights(markers.highlightState)
                 }
             }

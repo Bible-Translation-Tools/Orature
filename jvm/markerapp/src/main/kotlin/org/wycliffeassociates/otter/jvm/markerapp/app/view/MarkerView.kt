@@ -52,16 +52,18 @@ class MarkerView : PluginEntrypoint() {
         viewModel.initializeAudioController(minimap.slider)
     }
 
-    override val root = vbox {
-        prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
-        prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
-
-        vgrow = Priority.ALWAYS
-
-        add(titleFragment)
-        add(minimap)
-        add<WaveformContainer>()
-        add(source)
-        add(playbackControls)
-    }
+    override val root =
+        borderpane {
+            top = vbox {
+                add(titleFragment)
+                add(minimap)
+            }
+            center = stackpane {
+                add<WaveformContainer>()
+            }
+            bottom = vbox {
+                add(source)
+                add(playbackControls)
+            }
+        }
 }
