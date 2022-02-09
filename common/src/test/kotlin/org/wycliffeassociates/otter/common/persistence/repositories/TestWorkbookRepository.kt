@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
@@ -341,6 +342,18 @@ class TestWorkbookRepository {
             mockedDb.updateContent(any())
         ).thenReturn(
             Completable.complete()
+        )
+
+        whenever(
+            mockedDb.getTranslation(any(), any())
+        ).thenReturn(
+            Single.just(
+                Translation(
+                    english,
+                    latin,
+                    null
+                )
+            )
         )
 
         return buildWorkbook(mockedDb)
