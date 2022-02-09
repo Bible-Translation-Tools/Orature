@@ -89,8 +89,8 @@ class VerseMarkerViewModel : ViewModel() {
         val audio = loadAudio()
         loadMarkers(audio)
         loadTitles()
-
         createWaveformImages(audio)
+        waveformAsyncBuilder.observeOnFx().subscribe()
     }
 
     fun loadAudio(): AudioFile {

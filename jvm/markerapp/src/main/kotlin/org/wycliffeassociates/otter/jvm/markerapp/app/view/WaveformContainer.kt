@@ -79,10 +79,11 @@ class WaveformContainer : Fragment() {
     }
 
     init {
-        object : AnimationTimer() {
+        val timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
             }
-        }.start()
+        }
+        timer.start()
     }
 }

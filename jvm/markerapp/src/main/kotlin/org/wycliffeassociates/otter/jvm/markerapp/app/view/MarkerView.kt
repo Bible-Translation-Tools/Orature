@@ -18,26 +18,57 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.sun.javafx.util.Utils
+import java.time.Duration
+import javafx.animation.AnimationTimer
 import javafx.scene.layout.Priority
 import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
+import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
-const val WINDOW_OFFSET = 50.0
-
 class MarkerView : PluginEntrypoint() {
 
+    var timer: AnimationTimer? = null
+
     val viewModel: VerseMarkerViewModel by inject()
+
+    private val markerTrack: MarkerTrackControl = MarkerTrackControl()
+
+    val waveform = MarkerPlacementWaveform(markerTrack)
 
     val titleFragment = TitleFragment()
     val minimap = MinimapFragment()
     val source = SourceTextFragment()
     val playbackControls = PlaybackControlsFragment()
 
-    init {
+    override fun onDock() {
+        super.onDock()
         viewModel.onDock()
+        timer = object : AnimationTimer() {
+            override fun handle(currentNanoTime: Long) {
+                viewModel.calculatePosition()
+            }
+        }
+        timer?.start()
+        markerTrack.apply {
+            prefWidth = viewModel.imageWidth
+            viewModel.markerStateProperty.onChangeAndDoNow { markers ->
+                markers?.let { markers ->
+                    markers.markerCountProperty?.onChangeAndDoNow {
+                        this.markers.setAll(viewModel.markers.markers)
+                        highlightState.setAll(viewModel.markers.highlightState)
+                        refreshMarkers()
+                    }
+                }
+            }
+        }
+
         runLater {
             val css = this@MarkerView.javaClass.getResource("/css/verse-marker-app.css")
                 .toExternalForm()
@@ -50,6 +81,23 @@ class MarkerView : PluginEntrypoint() {
             )
         }
         viewModel.initializeAudioController(minimap.slider)
+        // viewModel.compositeDisposable.addAll(
+        runLater {
+            Duration.ofSeconds(3L)
+            viewModel.waveform.observeOnFx().subscribe {
+                waveform.addWaveformImage(it)
+            }
+        }
+        // )
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        timer?.stop()
+        timer = null
+        waveform.freeImages()
+        waveform.markerStateProperty.unbind()
+        waveform.positionProperty.unbind()
     }
 
     override val root =
@@ -58,8 +106,23 @@ class MarkerView : PluginEntrypoint() {
                 add(titleFragment)
                 add(minimap)
             }
-            center = stackpane {
-                add<WaveformContainer>()
+            center = waveform.apply {
+
+                markerStateProperty.bind(viewModel.markerStateProperty)
+                positionProperty.bind(viewModel.positionProperty)
+
+                onSeekNext = viewModel::seekNext
+                onSeekPrevious = viewModel::seekPrevious
+
+                onPlaceMarker = viewModel::placeMarker
+                onWaveformClicked = { viewModel.pause() }
+                onWaveformDragReleased = { deltaPos ->
+                    val deltaFrames = pixelsToFrames(deltaPos)
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    viewModel.seek(final)
+                }
             }
             bottom = vbox {
                 add(source)
