@@ -144,7 +144,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                 audioPlaybackRateProperty.set(rate?.toDouble() ?: 1.0)
             }
             audioPlaybackRateProperty.onChange { rate ->
-                FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.SOURCE, rate))
+                if (rate > 0) FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.SOURCE, rate))
             }
         }
 
@@ -161,7 +161,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             }
 
             audioPlaybackRateProperty.onChange { rate ->
-                FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.TARGET, rate))
+                if (rate > 0) FX.eventbus.fire(PlaybackRateChangedEvent(PlaybackRateType.TARGET, rate))
             }
         }
 

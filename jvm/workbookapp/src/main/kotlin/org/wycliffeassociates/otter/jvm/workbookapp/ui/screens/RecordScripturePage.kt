@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.binding.Bindings
@@ -99,14 +100,14 @@ class RecordScripturePage : View() {
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
             sourceSpeedRateProperty.bind(
-                workbookDataStore.activeWorkbookProperty.objectBinding {
-                    it?.translation?.sourceRate?.value ?: 1.0
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.sourceRate.toLazyBinding()
                 }
             )
 
             targetSpeedRateProperty.bind(
-                workbookDataStore.activeWorkbookProperty.objectBinding {
-                    it?.translation?.targetRate?.value ?: 1.0
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.targetRate.toLazyBinding()
                 }
             )
         }
@@ -357,14 +358,14 @@ class RecordScripturePage : View() {
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
             sourceSpeedRateProperty.bind(
-                workbookDataStore.activeWorkbookProperty.objectBinding {
-                    it?.translation?.sourceRate?.value ?: 1.0
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.sourceRate.toLazyBinding()
                 }
             )
 
             targetSpeedRateProperty.bind(
-                workbookDataStore.activeWorkbookProperty.objectBinding {
-                    it?.translation?.targetRate?.value ?: 1.0
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.targetRate.toLazyBinding()
                 }
             )
         }
