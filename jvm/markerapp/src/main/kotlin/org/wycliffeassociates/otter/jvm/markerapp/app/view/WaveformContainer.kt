@@ -18,11 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*

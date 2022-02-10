@@ -29,7 +29,6 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.Node
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
@@ -45,11 +44,7 @@ import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
-import javafx.scene.control.Control
-import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.MarkerPlacementWaveformSkin
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.ScrollingWaveformSkin
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -246,44 +241,5 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.get().getDurationInFrames() ?: 0
-    }
-}
-
-open class ScrollingWaveform() : Control() {
-
-    val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
-
-    val positionProperty = SimpleDoubleProperty(0.0)
-
-    var onWaveformClicked: () -> Unit = {}
-    var onWaveformDragReleased: (Double) -> Unit = {}
-
-    fun addWaveformImage(image: Image) {
-        (skin as ScrollingWaveformSkin).addWaveformImage(image)
-    }
-
-    fun freeImages() {
-        (skin as ScrollingWaveformSkin).freeImages()
-    }
-
-    override fun createDefaultSkin(): Skin<*> {
-        return ScrollingWaveformSkin(this)
-    }
-}
-
-class MarkerPlacementWaveform(
-    val topNode: Node
-) : ScrollingWaveform() {
-
-    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
-
-    var onSeekNext: () -> Unit = {}
-    var onSeekPrevious: () -> Unit = {}
-    var onPlaceMarker: () -> Unit = {}
-    var topTrack: Node? = topNode
-    var bottomTrack: Node? = null
-
-    override fun createDefaultSkin(): Skin<*> {
-        return MarkerPlacementWaveformSkin(this)
     }
 }

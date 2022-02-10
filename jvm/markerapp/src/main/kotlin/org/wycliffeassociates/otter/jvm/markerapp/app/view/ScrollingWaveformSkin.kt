@@ -6,12 +6,9 @@ import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerViewBackground
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
 import tornadofx.hgrow
