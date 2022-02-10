@@ -135,6 +135,8 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun undock() {
+        selectedChapterTakeProperty.set(null)
+
         filteredContent.clear()
         allContent.clear()
         disposables.clear()
