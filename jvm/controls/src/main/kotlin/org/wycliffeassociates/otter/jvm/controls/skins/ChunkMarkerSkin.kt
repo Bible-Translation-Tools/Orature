@@ -23,7 +23,6 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import tornadofx.*
 
 class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control) {
@@ -39,8 +38,6 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
         placedBookmarkIcon.managedProperty().bind(control.isPlacedProperty)
         addBookmarkIcon.visibleProperty().bind(placedBookmarkIcon.visibleProperty().not())
         addBookmarkIcon.managedProperty().bind(placedBookmarkIcon.managedProperty().not())
-
-        tryImportStylesheet(javaClass.getResource("/css/chunk-marker.css").toExternalForm())
 
         children.add(
             HBox().apply {

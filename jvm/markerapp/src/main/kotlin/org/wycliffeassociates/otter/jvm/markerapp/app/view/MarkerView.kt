@@ -37,17 +37,9 @@ class MarkerView : PluginEntrypoint() {
     val playbackControls = PlaybackControlsFragment()
 
     init {
-        runLater {
-            val css = this@MarkerView.javaClass.getResource("/css/verse-marker-app.css")
-                .toExternalForm()
-                .replace(" ", "%20")
-            tryImportStylesheet(css)
+        tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
+        tryImportStylesheet(resources.get("/css/chunk-marker.css"))
 
-            FX.stylesheets.addAll(
-                javaClass.getResource("/css/control.css").toExternalForm(),
-                css
-            )
-        }
         viewModel.initializeAudioController(minimap.slider)
     }
 
