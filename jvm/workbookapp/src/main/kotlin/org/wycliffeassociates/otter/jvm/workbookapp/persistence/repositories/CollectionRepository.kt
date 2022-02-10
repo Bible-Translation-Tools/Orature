@@ -373,6 +373,10 @@ class CollectionRepository @Inject constructor(
                     val sourceCollectionEntity = collectionDao.fetchById(sourceCollection.id, dsl)
                     // Try to find existent project
                     var projectEntity = findProjectCollection(sourceCollectionEntity, mainDerivedMetadata, dsl)
+                    projectEntity?.let {
+                        it.modifiedTs = LocalDateTime.now().toString()
+                        collectionDao.update(it)
+                    }
 
                     if (projectEntity == null) {
                         // Insert the derived project
