@@ -61,8 +61,10 @@ class VerseMarkerViewModel : ViewModel() {
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
 
-    lateinit var waveformAsyncBuilder: Completable
-    lateinit var waveform: Observable<Image>
+    private val waveformSubject = PublishSubject.create<Image>()
+    val waveform: Observable<Image>
+        get() = waveformSubject
+
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -90,7 +92,6 @@ class VerseMarkerViewModel : ViewModel() {
         loadMarkers(audio)
         loadTitles()
         createWaveformImages(audio)
-        waveformAsyncBuilder.observeOnFx().subscribe()
     }
 
     fun loadAudio(): AudioFile {
@@ -206,32 +207,30 @@ class VerseMarkerViewModel : ViewModel() {
     fun createWaveformImages(audio: AudioFile) {
         imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        WaveformImageBuilder(
+        val builder = WaveformImageBuilder(
             wavColor = Color.web(WAV_COLOR),
             background = Color.web(BACKGROUND_COLOR)
-        ).apply {
-            build(
+        )
+
+        builder
+            .build(
                 audio.reader(),
                 width = imageWidth.toInt(),
                 height = 50
             )
-                .observeOnFx()
-                .subscribe { image ->
-                    println("adding image from builder ${image.width}x${image.height}")
-                    waveformMinimapImage.set(image)
-                }.also {
-                    compositeDisposable.add(it)
-                }
-
-            val waveformSubject = PublishSubject.create<Image>()
-            waveform = waveformSubject
-            waveformAsyncBuilder = buildWaveformAsync(
-                audio.reader(),
-                width = imageWidth.toInt(),
-                height = height,
-                waveformSubject
-            )
-        }
+            .observeOnFx()
+            .map { image ->
+                waveformMinimapImage.set(image)
+            }
+            .ignoreElement()
+            .andThen(
+                builder.buildWaveformAsync(
+                    audio.reader(),
+                    width = imageWidth.toInt(),
+                    height = height,
+                    waveformSubject
+                )
+            ).subscribe()
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {

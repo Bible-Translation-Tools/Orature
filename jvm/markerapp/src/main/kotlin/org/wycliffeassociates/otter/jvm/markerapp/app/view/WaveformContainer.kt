@@ -65,12 +65,6 @@ class WaveformContainer : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.compositeDisposable.addAll(
-            viewModel.waveform.observeOnFx().subscribe {
-                root.addWaveformImage(it)
-            },
-            viewModel.waveformAsyncBuilder.observeOnFx().subscribe()
-        )
     }
 
     override fun onUndock() {

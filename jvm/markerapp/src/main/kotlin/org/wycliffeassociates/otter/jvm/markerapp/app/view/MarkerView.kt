@@ -20,10 +20,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
-import java.time.Duration
 import javafx.animation.AnimationTimer
-import javafx.scene.layout.Priority
-import javafx.stage.Screen
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.MarkerPlacementWaveform
@@ -81,14 +78,6 @@ class MarkerView : PluginEntrypoint() {
             )
         }
         viewModel.initializeAudioController(minimap.slider)
-        // viewModel.compositeDisposable.addAll(
-        runLater {
-            Duration.ofSeconds(3L)
-            viewModel.waveform.observeOnFx().subscribe {
-                waveform.addWaveformImage(it)
-            }
-        }
-        // )
     }
 
     override fun onUndock() {
@@ -107,7 +96,9 @@ class MarkerView : PluginEntrypoint() {
                 add(minimap)
             }
             center = waveform.apply {
-
+                viewModel.compositeDisposable.add(
+                    viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                )
                 markerStateProperty.bind(viewModel.markerStateProperty)
                 positionProperty.bind(viewModel.positionProperty)
 
