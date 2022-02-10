@@ -259,7 +259,6 @@ open class ScrollingWaveform() : Control() {
     var onWaveformDragReleased: (Double) -> Unit = {}
 
     fun addWaveformImage(image: Image) {
-        println("adding image")
         (skin as ScrollingWaveformSkin).addWaveformImage(image)
     }
 
