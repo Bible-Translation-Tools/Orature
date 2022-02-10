@@ -1,25 +1,25 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.geometry.NodeOrientation
-import javafx.scene.control.SkinBase
-import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerViewBackground
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
 import tornadofx.hgrow
 import tornadofx.vgrow
 
-open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<ScrollingWaveform>(control) {
+class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : ScrollingWaveformSkin(control) {
 
-    protected lateinit var waveformFrame: WaveformFrame
-
-    init {
-        initialize()
+    private fun addHighlights(highlights: List<MarkerHighlightState>) {
+        waveformFrame.clearHighlights()
+        waveformFrame.addHighlights(highlights)
     }
 
-    open fun initialize() {
+    override fun initialize() {
         val root = StackPane().apply {
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
@@ -29,7 +29,9 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())
-            waveformFrame = WaveformFrame().apply {
+            waveformFrame = WaveformFrame(
+                (skinnable as MarkerPlacementWaveform).topTrack,
+            ).apply {
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked { skinnable.onWaveformClicked() }
                 onWaveformDragReleased {
@@ -38,15 +40,15 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
             }
             add(waveformFrame)
             add(WaveformOverlay().apply { playbackPositionProperty.bind(skinnable.positionProperty) })
+            add(PlaceMarkerLayer().apply { onPlaceMarkerAction { control.onPlaceMarker() } })
+
+            (skinnable as MarkerPlacementWaveform).markerStateProperty.onChangeAndDoNow { markers ->
+                markers?.let { markers ->
+                    addHighlights(markers.highlightState)
+                }
+            }
+
         }
         children.add(root)
-    }
-
-    fun freeImages() {
-        waveformFrame.freeImages()
-    }
-
-    fun addWaveformImage(image: Image) {
-        waveformFrame.addImage(image)
     }
 }
