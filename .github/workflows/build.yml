@@ -17,8 +17,7 @@ jobs:
         id: tagged
         run: |
           echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=${{ steps.semver_parser.outputs.fullversion }}+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
-          echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
-          echo "${{ steps.semver_parser.outputs.fullversion }}" > VERSION
+          echo "UPDATE_PATH=release" >> $GITHUB_ENV
         if: contains( github.ref, 'refs/tags/v' )
       - name: If this is a tagged pre-release build set pre-release label and update path
         id: prerelease
