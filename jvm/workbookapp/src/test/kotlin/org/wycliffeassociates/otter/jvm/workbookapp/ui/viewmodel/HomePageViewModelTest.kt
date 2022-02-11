@@ -73,7 +73,8 @@ class HomePageViewModelTest {
         }
 
         @BeforeClass
-        @JvmStatic fun setup() {
+        @JvmStatic
+        fun setup() {
             FxToolkit.registerPrimaryStage()
             FxToolkit.setupApplication { testApp }
 
@@ -88,7 +89,8 @@ class HomePageViewModelTest {
         }
 
         @AfterClass
-        @JvmStatic fun tearDown() {
+        @JvmStatic
+        fun tearDown() {
             FxToolkit.hideStage()
             FxToolkit.cleanupStages()
             FxToolkit.cleanupApplication(testApp)
@@ -134,8 +136,8 @@ class HomePageViewModelTest {
     )
 
     private val translations = listOf(
-        Translation(languages[0], languages[1], null, 0),
-        Translation(languages[1], languages[0], null, 1)
+        Translation(languages[0], languages[1], null, 1.0, 1.0, 0),
+        Translation(languages[1], languages[0], null, 1.0, 1.0, 1)
     )
 
     @Test
