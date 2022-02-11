@@ -126,7 +126,10 @@ class AudioPluginRepository @Inject constructor(
                     preferences.pluginId(PluginType.EDITOR)
                         .flatMapCompletable { editorId ->
                             val editPlugins = allPlugins.filter { it.edit == 1 }
-                            if (editorId == AppPreferences.NO_ID && editPlugins.isNotEmpty()) {
+                            val isPluginValid = editPlugins.isNotEmpty() &&
+                                    (editorId == AppPreferences.NO_ID  || !editPlugins.any { it.id == editorId })
+
+                            if (isPluginValid) {
                                 preferences.setPluginId(PluginType.EDITOR, editPlugins.first().id)
                             } else {
                                 Completable.complete()
@@ -135,7 +138,10 @@ class AudioPluginRepository @Inject constructor(
                         .andThen(preferences.pluginId(PluginType.RECORDER))
                         .flatMapCompletable { recorderId ->
                             val recordPlugins = allPlugins.filter { it.record == 1 }
-                            if (recorderId == AppPreferences.NO_ID && recordPlugins.isNotEmpty()) {
+                            val pluginNotFound = recordPlugins.isNotEmpty() &&
+                                    (recorderId == AppPreferences.NO_ID  || !recordPlugins.any { it.id == recorderId })
+
+                            if (pluginNotFound) {
                                 preferences.setPluginId(PluginType.RECORDER, recordPlugins.first().id)
                             } else {
                                 Completable.complete()
