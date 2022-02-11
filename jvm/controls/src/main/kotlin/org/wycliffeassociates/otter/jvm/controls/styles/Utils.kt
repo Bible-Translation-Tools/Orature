@@ -28,11 +28,12 @@ import java.net.URL
  * Use this function to prevent duplicated imports.
  */
 fun tryImportStylesheet(stylesheet: String) : Boolean {
+    val css = stylesheet.replace(" ", "%20")
     try {
-        URL(stylesheet).toExternalForm()
+        URL(css).toExternalForm()
     } catch (ex: MalformedURLException) {
         // Fallback to loading classpath resource
-        FX::class.java.getResource(stylesheet)?.toExternalForm()
+        FX::class.java.getResource(css)?.toExternalForm()
     }?.let { resourcePath ->
         if (!FX.stylesheets.contains(resourcePath)) {
             importStylesheet(resourcePath)
