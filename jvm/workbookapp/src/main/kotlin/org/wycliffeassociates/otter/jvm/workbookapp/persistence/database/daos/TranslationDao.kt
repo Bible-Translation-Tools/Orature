@@ -27,22 +27,14 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.entities.Transla
 class TranslationDao(
     private val instanceDsl: DSLContext
 ) {
-    fun fetchBySourceId(id: Int, dsl: DSLContext = instanceDsl): List<TranslationEntity> {
+    fun fetch(sourceId: Int, targetId: Int, dsl: DSLContext = instanceDsl): TranslationEntity? {
         return dsl
             .select()
             .from(Tables.TRANSLATION_ENTITY)
-            .where(Tables.TRANSLATION_ENTITY.SOURCE_FK.eq(id))
-            .fetch {
-                RecordMappers.mapToTranslationEntity(it)
-            }
-    }
-
-    fun fetchByTargetId(id: Int, dsl: DSLContext = instanceDsl): List<TranslationEntity> {
-        return dsl
-            .select()
-            .from(Tables.TRANSLATION_ENTITY)
-            .where(Tables.TRANSLATION_ENTITY.TARGET_FK.eq(id))
-            .fetch {
+            .where(Tables.TRANSLATION_ENTITY.SOURCE_FK.eq(sourceId))
+            .and(Tables.TRANSLATION_ENTITY.TARGET_FK.eq(targetId))
+            .fetchOne()
+            ?.let {
                 RecordMappers.mapToTranslationEntity(it)
             }
     }
