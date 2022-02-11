@@ -28,6 +28,7 @@ import org.digitalmediaserver.cuelib.FileData
 import org.digitalmediaserver.cuelib.Index
 import org.digitalmediaserver.cuelib.Position
 import org.digitalmediaserver.cuelib.TrackData
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioMetadata
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
@@ -39,8 +40,11 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
  * https://www.cdrfaq.org/faq02.html#S2-43-3
  */
 private const val CUE_FRAME_SIZE = 75.0
+private const val DEFAULT_CUE_TRACK_INDEX = 1 // see https://en.wikipedia.org/wiki/Cue_sheet_(computing) or look up "cue sheet file"
 
 internal class Mp3Metadata(val file: File) : AudioMetadata {
+
+    private val logger = LoggerFactory.getLogger(Mp3Metadata::class.java)
 
     private val _cues = mutableListOf<AudioCue>()
     private var title = file.nameWithoutExtension
@@ -54,7 +58,7 @@ internal class Mp3Metadata(val file: File) : AudioMetadata {
                 }
                 cuesheet.allTrackData.forEach {
                     val label = it.title
-                    val index = it.indices.find { it.number == 1 }
+                    val index = it.indices.find { it.number == DEFAULT_CUE_TRACK_INDEX }
                     index?.let {
                         val position = (
                                 index.position.totalFrames / CUE_FRAME_SIZE * DEFAULT_SAMPLE_RATE.toFloat()
@@ -64,6 +68,7 @@ internal class Mp3Metadata(val file: File) : AudioMetadata {
                     }
                 }
             } catch (e: Exception) {
+                logger.error("Error in initializing Mp3 Metadata", e)
             }
         }
     }
@@ -87,7 +92,7 @@ internal class Mp3Metadata(val file: File) : AudioMetadata {
             val trackData = TrackData(fileData, cueNumber, "AUDIO")
             trackData.title = cue.label
             val index = Index()
-            index.number = 1
+            index.number = DEFAULT_CUE_TRACK_INDEX
             index.position = Position(cue.location.toLong(), DEFAULT_SAMPLE_RATE)
             trackData.indices.add(index)
 

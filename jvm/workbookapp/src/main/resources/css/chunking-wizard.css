@@ -1,0 +1,63 @@
+/**
+ * Copyright (C) 2020-2022 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+.chunking-wizard {
+    -fx-background-color: -wa-background;
+    -fx-alignment: center;
+    -fx-spacing: 10px;
+    -fx-padding: 15px;
+}
+
+.chunking-wizard__title .text {
+    -fx-fill: -wa-regular-text;
+    -fx-font-size: 26pt;
+    -fx-font-weight: bolder;
+    -fx-font-style: normal;
+}
+
+.chunking-wizard__subtitle .text {
+    -fx-fill: -wa-regular-text;
+    -fx-font-size: 20pt;
+    -fx-font-weight: normal;
+    -fx-font-style: normal;
+}
+
+.chunking-wizard__step-container {
+    -fx-spacing: 5px;
+    -fx-alignment: center;
+    -fx-padding: 0px;
+    -fx-background-color: -wa-background;
+    -fx-border-width: 0px;
+    -fx-border-color: transparent;
+}
+
+.chunking-wizard__step {
+    -fx-arc-height: 6px;
+    -fx-arc-width: 6px;
+}
+
+.chunking-wizard__step--active {
+    -fx-fill: -wa-status-complete;
+}
+.chunking-wizard__step--complete {
+    -fx-fill: -wa-status-active;
+}
+.chunking-wizard__step--inactive {
+    -fx-fill: -wa-status-inactive;
+}
