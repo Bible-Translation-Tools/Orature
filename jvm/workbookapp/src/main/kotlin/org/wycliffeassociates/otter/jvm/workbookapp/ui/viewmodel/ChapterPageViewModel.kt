@@ -136,6 +136,7 @@ class ChapterPageViewModel : ViewModel() {
 
     fun undock() {
         selectedChapterTakeProperty.set(null)
+        workbookDataStore.selectedChapterPlayerProperty.set(null)
 
         filteredContent.clear()
         allContent.clear()

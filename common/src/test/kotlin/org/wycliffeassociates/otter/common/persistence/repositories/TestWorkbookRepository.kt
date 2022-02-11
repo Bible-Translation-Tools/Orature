@@ -356,6 +356,12 @@ class TestWorkbookRepository {
             )
         )
 
+        whenever(
+            mockedDb.updateTranslation(any())
+        ).thenReturn(
+            Completable.complete()
+        )
+
         return buildWorkbook(mockedDb)
     }
 
@@ -596,5 +602,29 @@ class TestWorkbookRepository {
                 it.textItem.text.startsWith("/v ${it.title}")
             )
         }
+    }
+
+    @Test
+    fun changingSourcePlaybackRateRelayCallsDbWrite() {
+        val mockedDb = buildBasicTestDb()
+        val workbook = buildBasicTestWorkbook(mockedDb)
+
+        // Verify precondition - no DB writes yet
+        verify(mockedDb, times(0)).updateTranslation(any())
+
+        workbook.translation.sourceRate.accept(2.0)
+        verify(mockedDb, times(1)).updateTranslation(any())
+    }
+
+    @Test
+    fun changingTargetPlaybackRateRelayCallsDbWrite() {
+        val mockedDb = buildBasicTestDb()
+        val workbook = buildBasicTestWorkbook(mockedDb)
+
+        // Verify precondition - no DB writes yet
+        verify(mockedDb, times(0)).updateTranslation(any())
+
+        workbook.translation.targetRate.accept(2.0)
+        verify(mockedDb, times(1)).updateTranslation(any())
     }
 }

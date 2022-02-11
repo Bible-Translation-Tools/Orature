@@ -25,6 +25,7 @@ import jooq.tables.InstalledEntity
 import jooq.tables.LanguageEntity
 import jooq.tables.TranslationEntity
 import org.jooq.DSLContext
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 

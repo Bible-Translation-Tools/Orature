@@ -96,7 +96,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
             if (it == null) {
                 activeChapterProperty.set(null)
                 activeChunkProperty.set(null)
-                selectedChapterPlayerProperty.set(null)
             } else {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
             }

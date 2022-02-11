@@ -383,53 +383,53 @@ class WorkbookRepository(
         val sourceRateRelay = BehaviorRelay.createDefault(1.0)
         val targetRateRelay = BehaviorRelay.createDefault(1.0)
 
-        db.getTranslation(sourceLanguage, targetLanguage)
+        val translation = db.getTranslation(sourceLanguage, targetLanguage)
+
+        val translationSubscription = translation
             .doOnError { e ->
                 logger.error("Error in getTranslation, source: $sourceLanguage, target: $targetLanguage", e)
             }
-            .subscribe { translation ->
-                sourceRateRelay.accept(translation.sourceRate)
-                targetRateRelay.accept(translation.targetRate)
+            .subscribe { _translation ->
+                sourceRateRelay.accept(_translation.sourceRate)
+                targetRateRelay.accept(_translation.targetRate)
             }
 
-        val sourceRateRelaySubscription = sourceRateRelay
-            .distinctUntilChanged()
-            .skip(1)
-            .doOnError { e ->
-                logger.error("Error in sourceRateRelay", e)
+        val sourceRateRelaySubscription = subscribePlaybackRateRelay(sourceRateRelay)
+            .flatMapCompletable { rate ->
+                translation.flatMapCompletable { _translation ->
+                    _translation.sourceRate = rate
+                    db.updateTranslation(_translation)
+                }
             }
-            .subscribe { rate ->
-                db.getTranslation(sourceLanguage, targetLanguage)
-                    .flatMapCompletable { translation ->
-                        translation.sourceRate = rate
-                        db.updateTranslation(translation)
-                    }
-                    .doOnError { e -> logger.error("Error in updating translation", e) }
-                    .subscribe()
-            }
+            .doOnError { e -> logger.error("Error in subscribePlaybackRateRelay", e) }
+            .subscribe()
 
-        val targetRateRelaySubscription = targetRateRelay
-            .distinctUntilChanged()
-            .skip(1)
-            .doOnError { e ->
-                logger.error("Error in targetRateRelay", e)
+        val targetRateRelaySubscription = subscribePlaybackRateRelay(targetRateRelay)
+            .flatMapCompletable { rate ->
+                translation.flatMapCompletable { _translation ->
+                    _translation.targetRate = rate
+                    db.updateTranslation(_translation)
+                }
             }
-            .subscribe { rate ->
-                db.getTranslation(sourceLanguage, targetLanguage)
-                    .flatMapCompletable { translation ->
-                        translation.targetRate = rate
-                        db.updateTranslation(translation)
-                    }
-                    .doOnError { e -> logger.error("Error in updating translation", e) }
-                    .subscribe()
-            }
+            .doOnError { e -> logger.error("Error in subscribePlaybackRateRelay", e) }
+            .subscribe()
 
         synchronized(disposables) {
             disposables.add(sourceRateRelaySubscription)
             disposables.add(targetRateRelaySubscription)
+            disposables.add(translationSubscription)
         }
 
         return AssociatedTranslation(sourceRateRelay, targetRateRelay)
+    }
+
+    private fun subscribePlaybackRateRelay(relay: BehaviorRelay<Double>): Observable<Double> {
+        return relay
+            .distinctUntilChanged()
+            .skip(1)
+            .doOnError { e ->
+                logger.error("Error in subscribeRateRelay, relay: $relay", e)
+            }
     }
 
     private fun constructAssociatedAudio(
