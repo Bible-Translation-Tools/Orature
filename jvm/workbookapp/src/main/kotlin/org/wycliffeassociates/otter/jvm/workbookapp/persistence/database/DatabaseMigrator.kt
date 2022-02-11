@@ -25,7 +25,6 @@ import jooq.tables.InstalledEntity
 import jooq.tables.LanguageEntity
 import jooq.tables.TranslationEntity
 import org.jooq.DSLContext
-import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
@@ -105,17 +104,11 @@ class DatabaseMigrator {
      */
     private fun migrate1to2(dsl: DSLContext, current: Int): Int {
         return if (current < 2) {
-            try {
-                dsl
-                    .alterTable(AudioPluginEntity.AUDIO_PLUGIN_ENTITY)
-                    .addColumn(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
-                    .execute()
-                logger.info("Updated database from version 1 to 2")
-            } catch (e: DataAccessException) {
-                // Exception is thrown because the column might already exist but an existence check cannot
-                // be performed in sqlite.
-                logger.error("Error in migrate1to2", e)
-            }
+            dsl
+                .alterTable(AudioPluginEntity.AUDIO_PLUGIN_ENTITY)
+                .addColumn(AudioPluginEntity.AUDIO_PLUGIN_ENTITY.MARK)
+                .execute()
+            logger.info("Updated database from version 1 to 2")
             return 2
         } else {
             current
@@ -130,17 +123,11 @@ class DatabaseMigrator {
      */
     private fun migrate2to3(dsl: DSLContext, current: Int): Int {
         return if (current < 3) {
-            try {
-                dsl
-                    .alterTable(LanguageEntity.LANGUAGE_ENTITY)
-                    .addColumn(LanguageEntity.LANGUAGE_ENTITY.REGION)
-                    .execute()
-                logger.info("Updated database from version 2 to 3")
-            } catch (e: DataAccessException) {
-                // Exception is thrown because the column might already exist but an existence check cannot
-                // be performed in sqlite.
-                logger.error("Error in migrate2to3", e)
-            }
+            dsl
+                .alterTable(LanguageEntity.LANGUAGE_ENTITY)
+                .addColumn(LanguageEntity.LANGUAGE_ENTITY.REGION)
+                .execute()
+            logger.info("Updated database from version 2 to 3")
             return 3
         } else {
             current
@@ -185,17 +172,11 @@ class DatabaseMigrator {
      */
     private fun migrate4to5(dsl: DSLContext, current: Int): Int {
         return if (current < 5) {
-            try {
-                dsl
-                    .alterTable(DublinCoreEntity.DUBLIN_CORE_ENTITY)
-                    .addColumn(DublinCoreEntity.DUBLIN_CORE_ENTITY.LICENSE)
-                    .execute()
-                logger.info("Updated database from version 4 to 5")
-            } catch (e: DataAccessException) {
-                // Exception is thrown because the column might already exist but an existence check cannot
-                // be performed in sqlite.
-                logger.error("Error in migrate4to5", e)
-            }
+            dsl
+                .alterTable(DublinCoreEntity.DUBLIN_CORE_ENTITY)
+                .addColumn(DublinCoreEntity.DUBLIN_CORE_ENTITY.LICENSE)
+                .execute()
+            logger.info("Updated database from version 4 to 5")
             return 5
         } else {
             current
@@ -210,17 +191,11 @@ class DatabaseMigrator {
      */
     private fun migrate5to6(dsl: DSLContext, current: Int): Int {
         return if (current < 6) {
-            try {
-                dsl
-                    .alterTable(TranslationEntity.TRANSLATION_ENTITY)
-                    .addColumn(TranslationEntity.TRANSLATION_ENTITY.MODIFIED_TS)
-                    .execute()
-                logger.info("Updated database from version 5 to 6")
-            } catch (e: DataAccessException) {
-                // Exception is thrown because the column might already exist but an existence check cannot
-                // be performed in sqlite.
-                logger.error("Error in migrate5to6", e)
-            }
+            dsl
+                .alterTable(TranslationEntity.TRANSLATION_ENTITY)
+                .addColumn(TranslationEntity.TRANSLATION_ENTITY.MODIFIED_TS)
+                .execute()
+            logger.info("Updated database from version 5 to 6")
             return 6
         } else {
             current
@@ -235,17 +210,11 @@ class DatabaseMigrator {
      */
     private fun migrate6to7(dsl: DSLContext, current: Int): Int {
         return if (current < 7) {
-            try {
-                dsl
-                    .alterTable(CollectionEntity.COLLECTION_ENTITY)
-                    .addColumn(CollectionEntity.COLLECTION_ENTITY.MODIFIED_TS)
-                    .execute()
-                logger.info("Updated database from version 6 to 7")
-            } catch (e: DataAccessException) {
-                // Exception is thrown because the column might already exist but an existence check cannot
-                // be performed in sqlite.
-                logger.error("Error in migrate6to7", e)
-            }
+            dsl
+                .alterTable(CollectionEntity.COLLECTION_ENTITY)
+                .addColumn(CollectionEntity.COLLECTION_ENTITY.MODIFIED_TS)
+                .execute()
+            logger.info("Updated database from version 6 to 7")
             return 7
         } else {
             current
