@@ -56,6 +56,11 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
 private typealias WorkbookTake = org.wycliffeassociates.otter.common.data.workbook.Take
 
+enum class PlaybackRateType {
+    SOURCE,
+    TARGET
+}
+
 class WorkbookRepository(
     private val directoryProvider: IDirectoryProvider,
     private val db: IDatabaseAccessors
@@ -394,25 +399,17 @@ class WorkbookRepository(
                 targetRateRelay.accept(_translation.targetRate)
             }
 
-        val sourceRateRelaySubscription = subscribePlaybackRateRelay(sourceRateRelay)
-            .flatMapCompletable { rate ->
-                translation.flatMapCompletable { _translation ->
-                    _translation.sourceRate = rate
-                    db.updateTranslation(_translation)
-                }
-            }
-            .doOnError { e -> logger.error("Error in subscribePlaybackRateRelay", e) }
-            .subscribe()
+        val sourceRateRelaySubscription = subscribePlaybackRateRelay(
+            sourceRateRelay,
+            translation,
+            PlaybackRateType.SOURCE
+        )
 
-        val targetRateRelaySubscription = subscribePlaybackRateRelay(targetRateRelay)
-            .flatMapCompletable { rate ->
-                translation.flatMapCompletable { _translation ->
-                    _translation.targetRate = rate
-                    db.updateTranslation(_translation)
-                }
-            }
-            .doOnError { e -> logger.error("Error in subscribePlaybackRateRelay", e) }
-            .subscribe()
+        val targetRateRelaySubscription = subscribePlaybackRateRelay(
+            targetRateRelay,
+            translation,
+            PlaybackRateType.TARGET
+        )
 
         synchronized(disposables) {
             disposables.add(sourceRateRelaySubscription)
@@ -423,13 +420,27 @@ class WorkbookRepository(
         return AssociatedTranslation(sourceRateRelay, targetRateRelay)
     }
 
-    private fun subscribePlaybackRateRelay(relay: BehaviorRelay<Double>): Observable<Double> {
+    private fun subscribePlaybackRateRelay(
+        relay: BehaviorRelay<Double>,
+        translation: Single<Translation>,
+        playbackRateType: PlaybackRateType
+    ): Disposable {
         return relay
             .distinctUntilChanged()
             .skip(1)
-            .doOnError { e ->
-                logger.error("Error in subscribeRateRelay, relay: $relay", e)
+            .flatMapCompletable { rate ->
+                translation.flatMapCompletable { _translation ->
+                    when (playbackRateType) {
+                        PlaybackRateType.SOURCE -> _translation.sourceRate = rate
+                        PlaybackRateType.TARGET -> _translation.targetRate = rate
+                    }
+                    db.updateTranslation(_translation)
+                }
             }
+            .doOnError { e ->
+                logger.error("Error in subscribePlaybackRateRelay, relay: $relay", e)
+            }
+            .subscribe()
     }
 
     private fun constructAssociatedAudio(
