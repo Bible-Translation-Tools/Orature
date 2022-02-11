@@ -33,6 +33,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -85,10 +86,10 @@ class WorkbookPage : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/workbook-page.css"))
-        importStylesheet(resources.get("/css/chapter-card.css"))
-        importStylesheet(resources.get("/css/workbook-banner.css"))
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/workbook-page.css"))
+        tryImportStylesheet(resources.get("/css/chapter-card.css"))
+        tryImportStylesheet(resources.get("/css/workbook-banner.css"))
+        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
     }
 
     /**
@@ -142,7 +143,7 @@ class WorkbookPage : View() {
     override val root = JFXTabPane().apply {
         importStylesheet<CardGridStyles>()
         importStylesheet<DefaultStyles>()
-        importStylesheet(resources.get("/css/tab-pane.css"))
+        tryImportStylesheet(resources.get("/css/tab-pane.css"))
         addClass(Stylesheet.tabPane)
 
         tabs.onChange {

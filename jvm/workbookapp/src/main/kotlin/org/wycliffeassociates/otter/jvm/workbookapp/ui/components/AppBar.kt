@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.AppBarButton
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.AddFilesView
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer.DrawerEventAction
@@ -83,7 +84,7 @@ class AppBar : Fragment() {
     }
 
     init {
-        importStylesheet(resources.get("/css/app-bar.css"))
+        tryImportStylesheet(resources.get("/css/app-bar.css"))
 
         root.apply {
             styleClass.setAll("app-bar")
@@ -105,7 +106,7 @@ class AppBar : Fragment() {
                 if (it.action == DrawerEventAction.CLOSE) {
                     when (it.type) {
                         // ignore the drawer views as they handle closing via the toggle group
-                        AddFilesView::class, SettingsView::class, InfoView::class -> {}
+                        AddFilesView::class, SettingsView::class, InfoView::class -> { /* no-op */ }
                         // If the drawer is closed from something other than the toggle buttons, deselect them all
                         else -> { buttonsToggleGroup.toggles.forEach { it.isSelected = false } }
                     }

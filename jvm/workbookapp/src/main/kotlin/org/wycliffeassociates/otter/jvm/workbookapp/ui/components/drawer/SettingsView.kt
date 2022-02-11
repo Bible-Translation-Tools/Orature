@@ -25,6 +25,7 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceComboboxCell
@@ -272,9 +273,9 @@ class SettingsView : View() {
     }
 
     init {
-        importStylesheet(resources.get("/css/app-drawer.css"))
-        importStylesheet(resources.get("/css/add-plugin-dialog.css"))
-        importStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/app-drawer.css"))
+        tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
+        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
         viewModel.refreshPlugins()
         initChangeLanguageDialog()
 

@@ -44,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 open class RecordableViewModel(
@@ -115,6 +116,7 @@ open class RecordableViewModel(
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {
+                            /* no-op */
                         }
                     }
                 }
@@ -376,11 +378,11 @@ open class RecordableViewModel(
             this,
             selected,
             ap,
-            FX.messages["edit"].capitalize(),
-            FX.messages["delete"].capitalize(),
-            FX.messages["marker"].capitalize(),
-            FX.messages["play"].capitalize(),
-            FX.messages["pause"].capitalize()
+            FX.messages["edit"].capitalizeString(),
+            FX.messages["delete"].capitalizeString(),
+            FX.messages["marker"].capitalizeString(),
+            FX.messages["play"].capitalizeString(),
+            FX.messages["pause"].capitalizeString()
         )
     }
 }

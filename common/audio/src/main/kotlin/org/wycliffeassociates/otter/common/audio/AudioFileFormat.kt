@@ -23,11 +23,11 @@ enum class AudioFileFormat(val extension: String) {
     MP3("mp3");
 
     companion object {
-        private val map = values().associateBy { it.extension.toLowerCase() }
+        private val map = values().associateBy { it.extension.lowercase() }
 
         /** @throws IllegalArgumentException */
         fun of(extension: String) =
-            map[extension.toLowerCase()]
+            map[extension.lowercase()]
                 ?: throw IllegalArgumentException("Audio extension $extension not supported")
     }
 }

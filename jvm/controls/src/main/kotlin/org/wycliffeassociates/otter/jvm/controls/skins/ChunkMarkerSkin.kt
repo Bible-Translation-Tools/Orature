@@ -39,8 +39,6 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
         addBookmarkIcon.visibleProperty().bind(placedBookmarkIcon.visibleProperty().not())
         addBookmarkIcon.managedProperty().bind(placedBookmarkIcon.managedProperty().not())
 
-        importStylesheet(javaClass.getResource("/css/chunk-marker.css").toExternalForm())
-
         children.add(
             HBox().apply {
 

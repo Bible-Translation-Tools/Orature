@@ -54,6 +54,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -525,11 +526,11 @@ class RecordScriptureViewModel : ViewModel() {
             this,
             selected,
             ap,
-            FX.messages["edit"].capitalize(),
-            FX.messages["delete"].capitalize(),
-            FX.messages["marker"].capitalize(),
-            FX.messages["play"].capitalize(),
-            FX.messages["pause"].capitalize()
+            FX.messages["edit"].capitalizeString(),
+            FX.messages["delete"].capitalizeString(),
+            FX.messages["marker"].capitalizeString(),
+            FX.messages["play"].capitalizeString(),
+            FX.messages["pause"].capitalizeString()
         )
     }
 }

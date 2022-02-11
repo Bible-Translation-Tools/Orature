@@ -40,7 +40,6 @@ import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.Proj
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.OtterApp
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -95,6 +94,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             if (it == null) {
                 activeChapterProperty.set(null)
                 activeChunkProperty.set(null)
+                selectedChapterPlayerProperty.set(null)
             } else {
                 sourceLicenseProperty.set(it.source.resourceMetadata.license)
             }
@@ -159,7 +159,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     targetAudioProperty.set(null)
                 }
             }
-            _chapter != null -> {} // preserve targetAudio for clean up
+            _chapter != null -> { /* no-op */ } // preserve targetAudio for clean up
             else -> {
                 selectedChapterPlayerProperty.set(null)
                 targetAudioProperty.set(null)
@@ -174,7 +174,6 @@ class WorkbookDataStore : Component(), ScopedInstance {
             file.nameWithoutExtension,
             ".${file.extension}"
         )
-        tempFile.deleteOnExit()
         file.copyTo(tempFile, true)
 
         val audioPlayer = (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()

@@ -187,7 +187,7 @@ class ResourceMetadataRepository @Inject constructor(
                 resourceMetadataDao.delete(metadataMapper.mapToEntity(obj))
             }
             .doOnError { e ->
-                logger.error("Error in delete for metadata: $obj", obj)
+                logger.error("Error in delete for metadata: $obj", e)
             }
             .subscribeOn(Schedulers.io())
     }
