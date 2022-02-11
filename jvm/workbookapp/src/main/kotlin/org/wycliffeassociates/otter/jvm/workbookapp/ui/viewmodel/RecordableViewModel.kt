@@ -22,6 +22,7 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
@@ -35,6 +36,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -44,7 +46,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
-import org.wycliffeassociates.otter.common.utils.capitalizeString
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 open class RecordableViewModel(
@@ -75,10 +76,6 @@ open class RecordableViewModel(
     private val disposables = CompositeDisposable()
 
     init {
-        selectedTakeProperty.onChangeAndDoNow {
-            sortTakes()
-        }
-
         recordableProperty.onChange {
             clearDisposables()
             subscribeSelectedTakePropertyToRelay()
@@ -277,13 +274,16 @@ open class RecordableViewModel(
                     .map { take ->
                         take.mapToCardModel(take == selected)
                     }
+                    .sortedWith(
+                        compareByDescending<TakeCardModel> { it.selected }
+                            .thenByDescending { it.take.file.lastModified() }
+                    )
 
             val selectedModel = takes.find { it.selected }
             selectedTakeProperty.set(selectedModel)
 
             takeCardModels.clear()
             takeCardModels.addAll(takes)
-            sortTakes()
         }
     }
 
@@ -296,14 +296,20 @@ open class RecordableViewModel(
             .observeOnFx()
             .subscribe {
                 val isTakeSelected = takeCardModels.any { it.take == take && it.selected }
-                if (isTakeSelected) {
-                    takeCardModels.firstOrNull()?.let {
-                        selectTake(it.take)
-                    }
-                }
-                loadTakes()
+                removeFromTakes(take, isTakeSelected)
             }
             .let { disposables.add(it) }
+    }
+
+    private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
+        Platform.runLater {
+            takeCardModels.removeAll { it.take == take }
+            if (autoSelect) {
+                takeCardModels.firstOrNull()?.let {
+                    selectTake(it.take)
+                }
+            }
+        }
     }
 
     private fun subscribeSelectedTakePropertyToRelay() {
@@ -332,18 +338,6 @@ open class RecordableViewModel(
                     removeOnDeleted(take)
                 }
                 .let { disposables.add(it) }
-        }
-    }
-
-    private fun sortTakes() {
-        FXCollections.sort(
-            takeCardModels
-        ) { take1, take2 ->
-            when {
-                take1.selected == take2.selected -> take1.take.number.compareTo(take2.take.number)
-                take1.selected -> 1
-                else -> -1
-            }
         }
     }
 
