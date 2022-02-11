@@ -167,7 +167,8 @@ class LanguageRepository @Inject constructor(
     override fun insertTranslation(translation: Translation): Single<Int> {
         return Single
             .fromCallable {
-                translationDao.insert(translationMapper.mapToEntity(translation))
+                val existing = translationDao.fetch(translation.source.id, translation.target.id)
+                existing?.id ?: translationDao.insert(translationMapper.mapToEntity(translation))
             }
             .doOnError { e ->
                 logger.error("Error in insert for translation: $translation", e)

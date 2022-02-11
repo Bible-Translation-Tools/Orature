@@ -144,7 +144,7 @@ class ProjectImporter @Inject constructor(
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
-        createTranslation(sourceMetadata.language, metadata.language)
+        val translation = createTranslation(sourceMetadata.language, metadata.language)
 
         val projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
@@ -164,6 +164,9 @@ class ProjectImporter @Inject constructor(
             sourceCollection,
             projectFilesAccessor
         )
+
+        translation.modifiedTs = LocalDateTime.now()
+        languageRepository.updateTranslation(translation).subscribe()
     }
 
     private fun importTakes(
@@ -295,15 +298,17 @@ class ProjectImporter @Inject constructor(
         return fileInZip to result
     }
 
-    private fun createTranslation(sourceLanguage: Language, targetLanguage: Language) {
+    private fun createTranslation(sourceLanguage: Language, targetLanguage: Language): Translation {
         val translation = Translation(sourceLanguage, targetLanguage, LocalDateTime.now())
-        languageRepository
+        val id = languageRepository
             .insertTranslation(translation)
             .doOnError { e ->
                 log.error("Error in inserting translation", e)
             }
             .onErrorReturnItem(0)
             .blockingGet()
+        translation.id = id
+        return translation
     }
 
     private fun getContent(sig: ContentSignature, project: Collection, metadata: ResourceMetadata): Content? {
