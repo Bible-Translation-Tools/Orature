@@ -61,7 +61,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: set s3 destination_dir
-        if: ${{ env.CI_REF_NAME_SLUG == 'pre-release' }}
         run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
       - name: Upload file to bucket
         uses: shallwefootball/s3-upload-action@v1.1.3
