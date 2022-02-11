@@ -39,6 +39,17 @@ class TranslationDao(
             }
     }
 
+    fun fetchBySourceAndTarget(sourceId: Int, targetId: Int, dsl: DSLContext = instanceDsl): TranslationEntity {
+        return dsl
+            .select()
+            .from(Tables.TRANSLATION_ENTITY)
+            .where(Tables.TRANSLATION_ENTITY.SOURCE_FK.eq(sourceId))
+            .and(Tables.TRANSLATION_ENTITY.TARGET_FK.eq(targetId))
+            .fetchOne {
+                RecordMappers.mapToTranslationEntity(it)
+            }
+    }
+
     fun fetchById(id: Int, dsl: DSLContext = instanceDsl): TranslationEntity {
         return dsl
             .select()
@@ -94,6 +105,8 @@ class TranslationDao(
             .set(Tables.TRANSLATION_ENTITY.SOURCE_FK, entity.sourceFk)
             .set(Tables.TRANSLATION_ENTITY.TARGET_FK, entity.targetFk)
             .set(Tables.TRANSLATION_ENTITY.MODIFIED_TS, entity.modifiedTs)
+            .set(Tables.TRANSLATION_ENTITY.SOURCE_RATE, entity.sourceRate)
+            .set(Tables.TRANSLATION_ENTITY.TARGET_RATE, entity.targetRate)
             .where(Tables.TRANSLATION_ENTITY.ID.eq(entity.id))
             .execute()
     }

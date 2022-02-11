@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.value.ChangeListener
@@ -302,6 +303,18 @@ class ChapterPage : View() {
             sourceContentTitleProperty.bind(workbookDataStore.activeTitleBinding())
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
+
+            sourceSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.sourceRate.toLazyBinding()
+                }
+            )
+
+            targetSpeedRateProperty.bind(
+                workbookDataStore.activeWorkbookProperty.select {
+                    it.translation.targetRate.toLazyBinding()
+                }
+            )
         }
     }
 

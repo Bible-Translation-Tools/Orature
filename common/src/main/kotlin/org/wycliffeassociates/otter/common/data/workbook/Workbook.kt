@@ -26,7 +26,8 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 class Workbook(
     directoryProvider: IDirectoryProvider,
     val source: Book,
-    val target: Book
+    val target: Book,
+    val translation: AssociatedTranslation
 ) {
     val sourceAudioAccessor: SourceAudioAccessor by lazy {
         SourceAudioAccessor(

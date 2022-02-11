@@ -25,10 +25,11 @@ import jooq.tables.InstalledEntity
 import jooq.tables.LanguageEntity
 import jooq.tables.TranslationEntity
 import org.jooq.DSLContext
+import org.jooq.exception.DataAccessException
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 
-const val SCHEMA_VERSION = 7
+const val SCHEMA_VERSION = 8
 const val DATABASE_INSTALLABLE_NAME = "DATABASE"
 
 class DatabaseMigrator {
@@ -44,6 +45,7 @@ class DatabaseMigrator {
             currentVersion = migrate4to5(dsl, currentVersion)
             currentVersion = migrate5to6(dsl, currentVersion)
             currentVersion = migrate6to7(dsl, currentVersion)
+            currentVersion = migrate7to8(dsl, currentVersion)
 
             updateDatabaseVersion(dsl, currentVersion)
         }
@@ -215,6 +217,35 @@ class DatabaseMigrator {
                 .execute()
             logger.info("Updated database from version 6 to 7")
             return 7
+        } else {
+            current
+        }
+    }
+
+    /**
+     * Version 8
+     * Adds a column for the source rate and target rate to the translations table
+     *
+     * The DataAccessException is caught in the event that the column already exists.
+     */
+    private fun migrate7to8(dsl: DSLContext, current: Int): Int {
+        return if (current < 8) {
+            try {
+                dsl
+                    .alterTable(TranslationEntity.TRANSLATION_ENTITY)
+                    .addColumn(TranslationEntity.TRANSLATION_ENTITY.SOURCE_RATE)
+                    .execute()
+                dsl
+                    .alterTable(TranslationEntity.TRANSLATION_ENTITY)
+                    .addColumn(TranslationEntity.TRANSLATION_ENTITY.TARGET_RATE)
+                    .execute()
+                logger.info("Updated database from version 7 to 8")
+            } catch (e: DataAccessException) {
+                // Exception is thrown because the column might already exist but an existence check cannot
+                // be performed in sqlite.
+                logger.error("Error in migrate7to8", e)
+            }
+            return 8
         } else {
             current
         }

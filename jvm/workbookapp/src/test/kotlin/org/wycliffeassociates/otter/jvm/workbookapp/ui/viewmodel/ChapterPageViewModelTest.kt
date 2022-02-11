@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TextItem
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
@@ -184,6 +185,8 @@ class ChapterPageViewModelTest {
         private val pluginRepository = mock<IAudioPluginRepository> {
             on { getPlugin(any()) } doReturn Maybe.just(audioPlugin)
         }
+
+        private val translation = mock<Translation>()
 
         @BeforeClass
         @JvmStatic fun setup() {

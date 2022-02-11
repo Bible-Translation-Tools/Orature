@@ -42,6 +42,7 @@ import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.data.workbook.TakeHolder
+import org.wycliffeassociates.otter.common.data.workbook.Translation
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.persistence.repositories.WorkbookRepository.IDatabaseAccessors
 
@@ -343,6 +344,24 @@ class TestWorkbookRepository {
             Completable.complete()
         )
 
+        whenever(
+            mockedDb.getTranslation(any(), any())
+        ).thenReturn(
+            Single.just(
+                Translation(
+                    english,
+                    latin,
+                    null
+                )
+            )
+        )
+
+        whenever(
+            mockedDb.updateTranslation(any())
+        ).thenReturn(
+            Completable.complete()
+        )
+
         return buildWorkbook(mockedDb)
     }
 
@@ -583,5 +602,29 @@ class TestWorkbookRepository {
                 it.textItem.text.startsWith("/v ${it.title}")
             )
         }
+    }
+
+    @Test
+    fun changingSourcePlaybackRateRelayCallsDbWrite() {
+        val mockedDb = buildBasicTestDb()
+        val workbook = buildBasicTestWorkbook(mockedDb)
+
+        // Verify precondition - no DB writes yet
+        verify(mockedDb, times(0)).updateTranslation(any())
+
+        workbook.translation.sourceRate.accept(2.0)
+        verify(mockedDb, times(1)).updateTranslation(any())
+    }
+
+    @Test
+    fun changingTargetPlaybackRateRelayCallsDbWrite() {
+        val mockedDb = buildBasicTestDb()
+        val workbook = buildBasicTestWorkbook(mockedDb)
+
+        // Verify precondition - no DB writes yet
+        verify(mockedDb, times(0)).updateTranslation(any())
+
+        workbook.translation.targetRate.accept(2.0)
+        verify(mockedDb, times(1)).updateTranslation(any())
     }
 }
