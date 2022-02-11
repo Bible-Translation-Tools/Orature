@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.data.workbook.Take
 import java.util.concurrent.Callable
 
 data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
@@ -49,6 +50,8 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
         disposables.clear()
     }
 
+    private fun Take.isNotDeleted() = deletedTimestamp.value?.value == null
+
     private fun AssociatedAudio.progressProperty(): DoubleProperty {
         val progressProperty = SimpleDoubleProperty(0.0)
         val sub = this.selected
@@ -56,7 +59,8 @@ data class ResourceCardItem(val resource: Resource, val onSelect: () -> Unit) {
                 logger.error("Error in updating resource card progress", e)
             }
             .subscribe {
-                progressProperty.set(if (it.value != null) 1.0 else 0.0)
+                val completed = it.value?.isNotDeleted() ?: false
+                progressProperty.set(if (completed) 1.0 else 0.0)
             }
         disposables.add(sub)
         return progressProperty
