@@ -1,10 +1,10 @@
 package org.wycliffeassociates.otter.common.data.workbook
 
-import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.Relay
 
 class AssociatedTranslation(
-    val sourceRate: BehaviorRelay<Double>,
-    val targetRate: BehaviorRelay<Double>
+    val sourceRate: Relay<Double>,
+    val targetRate: Relay<Double>
 ) {
     fun updateSourceRate(rate: Double) = sourceRate.accept(rate)
 

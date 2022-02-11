@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.jakewharton.rxrelay2.BehaviorRelay
 import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -100,8 +101,8 @@ class AudioPluginViewModel : ViewModel() {
         }
         val targetAudio = workbookDataStore.targetAudioProperty.value
 
-        val sourceRate = workbookDataStore.workbook.translation.sourceRate.value ?: 1.0
-        val targetRate = workbookDataStore.workbook.translation.targetRate.value ?: 1.0
+        val sourceRate = (workbookDataStore.workbook.translation.sourceRate as BehaviorRelay).value ?: 1.0
+        val targetRate = (workbookDataStore.workbook.translation.targetRate as BehaviorRelay).value ?: 1.0
 
         return PluginParameters(
             languageName = workbook.target.language.name,
