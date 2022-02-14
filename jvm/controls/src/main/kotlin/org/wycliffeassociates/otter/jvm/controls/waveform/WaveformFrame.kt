@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -33,8 +33,6 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
@@ -158,21 +156,9 @@ class WaveformFrame(
         )
     }
 
-    fun addHighlights(highlights: List<MarkerHighlightState>) {
-        highlights.forEach {
-            highlightHolder.add(
-                Rectangle().apply {
-                    managedProperty().set(false)
-                    heightProperty().bind(highlightHolder.heightProperty())
-                    widthProperty().bind(it.width)
-                    translateXProperty().bind(it.translate)
-                    visibleProperty().bind(it.visibility)
-                    it.styleClass.onChangeAndDoNow {
-                        styleClass.setAll(it)
-                    }
-                }
-            )
-        }
+    fun addHighlight(rect: Rectangle) {
+        rect.heightProperty().bind(highlightHolder.heightProperty())
+        highlightHolder.add(rect)
     }
 
     fun clearHighlights() {

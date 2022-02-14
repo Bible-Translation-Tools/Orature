@@ -1,12 +1,14 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import javafx.geometry.NodeOrientation
 import javafx.scene.control.SkinBase
 import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerViewBackground
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerViewBackground
+import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformFrame
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformOverlay
 import tornadofx.add
 import tornadofx.hgrow
 import tornadofx.vgrow

@@ -1,9 +1,10 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
+import org.wycliffeassociates.otter.jvm.controls.skins.waveform.ScrollingWaveformSkin
 
 open class ScrollingWaveform() : Control() {
     val positionProperty = SimpleDoubleProperty(0.0)

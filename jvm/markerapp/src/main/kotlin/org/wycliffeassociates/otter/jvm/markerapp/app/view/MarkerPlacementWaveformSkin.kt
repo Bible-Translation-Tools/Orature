@@ -3,10 +3,13 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.geometry.NodeOrientation
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
+import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.jvm.controls.skins.waveform.ScrollingWaveformSkin
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerViewBackground
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerViewBackground
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformFrame
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
+import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
 import tornadofx.hgrow
@@ -16,7 +19,20 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
 
     private fun addHighlights(highlights: List<MarkerHighlightState>) {
         waveformFrame.clearHighlights()
-        waveformFrame.addHighlights(highlights)
+
+        highlights.forEach {
+            waveformFrame.addHighlight(
+                Rectangle().apply {
+                    managedProperty().set(false)
+                    widthProperty().bind(it.width)
+                    translateXProperty().bind(it.translate)
+                    visibleProperty().bind(it.visibility)
+                    it.styleClass.onChangeAndDoNow {
+                        styleClass.setAll(it)
+                    }
+                }
+            )
+        }
     }
 
     override fun initialize() {
