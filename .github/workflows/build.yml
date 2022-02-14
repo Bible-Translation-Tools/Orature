@@ -11,7 +11,7 @@ jobs:
         uses: booxmedialtd/ws-action-parse-semver@v1.4.2
         with:
           input_string: ${{ env.CI_REF_NAME }}
-          version_extractor_regex: '\/v(.*)$' 
+          version_extractor_regex: 'v(.*)$' 
         if: contains( github.ref, 'refs/tags/v' )
       - name: set version var for tags and update path for releases
         id: tagged
