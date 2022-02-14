@@ -17,12 +17,14 @@ jobs:
         id: tagged
         run: |
           echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=${{ steps.semver_parser.outputs.fullversion }}+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
+          echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=release" >> $GITHUB_ENV
         if: contains( github.ref, 'refs/tags/v' )
       - name: If this is a tagged pre-release build set pre-release label and update path
         id: prerelease
         run: |
           echo "PRERELEASE_LABEL=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV && \
+          echo "PRERELEASE_BOOL=true" >> $GITHUB_ENV && \
           echo "UPDATE_PATH=pre-release-updates/$PRERELEASE_LABEL" >> $GITHUB_ENV
         if: ${{ steps.semver_parser.outputs.prerelease }}
       - name: set version var for not-tags and upload dir for branches
@@ -74,5 +76,5 @@ jobs:
         if: ${{ contains( github.ref, 'refs/tags/v' ) }}
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: ${{ steps.semver_parser.outputs.prerelease }}
+          prerelease: ${{ env.PRERELEASE_BOOL }}
           files: jvm/workbookapp/.exec/*.*
