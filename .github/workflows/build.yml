@@ -8,7 +8,7 @@ jobs:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
       - name: Parse SemVer if tagged build
         id: semver_parser 
-        uses: booxmedialtd/ws-action-parse-semver@v1
+        uses: booxmedialtd/ws-action-parse-semver@v1.4.2
         with:
           input_string: ${{ env.CI_REF_NAME }}
           version_extractor_regex: '\/v(.*)$' 
