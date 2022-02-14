@@ -126,10 +126,10 @@ class AudioPluginRepository @Inject constructor(
                     preferences.pluginId(PluginType.EDITOR)
                         .flatMapCompletable { editorId ->
                             val editPlugins = allPlugins.filter { it.edit == 1 }
-                            val isPluginValid = editPlugins.isNotEmpty() &&
+                            val pluginNotFound = editPlugins.isNotEmpty() &&
                                     (editorId == AppPreferences.NO_ID  || !editPlugins.any { it.id == editorId })
 
-                            if (isPluginValid) {
+                            if (pluginNotFound) {
                                 preferences.setPluginId(PluginType.EDITOR, editPlugins.first().id)
                             } else {
                                 Completable.complete()
