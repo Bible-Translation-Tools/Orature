@@ -18,53 +18,64 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
-import javafx.geometry.NodeOrientation
-import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.*
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformContainer : Fragment() {
 
     val viewModel: VerseMarkerViewModel by inject()
-    val markerTrack: MarkerTrackControl
-    // val timecodeHolder: TimecodeHolder
 
-    init {
-        markerTrack = MarkerTrackControl(viewModel.markers.markers, viewModel.markers.highlightState).apply {
-            prefWidth = viewModel.imageWidth
-            viewModel.markers.markerCountProperty.onChange {
-                refreshMarkers()
+    private val markerTrack: MarkerTrackControl = MarkerTrackControl().apply {
+        prefWidth = viewModel.imageWidth
+        viewModel.markerStateProperty.onChangeAndDoNow { markers ->
+            markers?.let { markers ->
+                markers.markerCountProperty?.onChangeAndDoNow {
+                    this.markers.setAll(viewModel.markers.markers)
+                    highlightState.setAll(viewModel.markers.highlightState)
+                    refreshMarkers()
+                }
             }
         }
-        // timecodeHolder = TimecodeHolder(viewModel, 50.0)
+    }
 
-        object : AnimationTimer() {
+    override val root = MarkerPlacementWaveform(markerTrack).apply {
+
+        markerStateProperty.bind(viewModel.markerStateProperty)
+        positionProperty.bind(viewModel.positionProperty)
+
+        onSeekNext = viewModel::seekNext
+        onSeekPrevious = viewModel::seekPrevious
+
+        onPlaceMarker = viewModel::placeMarker
+        onWaveformClicked = { viewModel.pause() }
+        onWaveformDragReleased = { deltaPos ->
+            val deltaFrames = pixelsToFrames(deltaPos)
+            val curFrames = viewModel.getLocationInFrames()
+            val duration = viewModel.getDurationInFrames()
+            val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+            viewModel.seek(final)
+        }
+    }
+
+    override fun onDock() {
+        super.onDock()
+    }
+
+    override fun onUndock() {
+        super.onUndock()
+        root.freeImages()
+    }
+
+    init {
+        val timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
             }
-        }.start()
-    }
-
-    override val root =
-        stackpane {
-            hgrow = Priority.ALWAYS
-            vgrow = Priority.ALWAYS
-
-            styleClass.add("vm-waveform-container")
-
-            nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
-
-            add(MarkerViewBackground())
-            add(
-                WaveformFrame(
-                    markerTrack,
-                  //  timecodeHolder,
-                    viewModel
-                )
-            )
-            add(WaveformOverlay(viewModel))
-            add(PlaceMarkerLayer(viewModel))
         }
+        timer.start()
+    }
 }
