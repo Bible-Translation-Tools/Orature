@@ -24,6 +24,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import javax.inject.Inject
 import javax.inject.Provider
 import org.junit.Test
@@ -32,6 +34,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType.META
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import java.io.File
 
 class TestRcImport {
 
@@ -203,6 +206,7 @@ class TestRcImport {
     fun `import override when existing rc has different version`() {
         val oldRCVer = "12"
         val newRCVer = "999"
+        var oldRCFile: File? = null
 
         dbEnvProvider.get()
             .import("en_ulb.zip")
@@ -220,6 +224,8 @@ class TestRcImport {
                     oldRCVer,
                     db.resourceMetadataDao.fetchAll().single().version
                 )
+                oldRCFile = File(db.resourceMetadataDao.fetchAll().single().path)
+                assertTrue(oldRCFile!!.exists())
             }
             .import("en_ulb_newer_ver.zip")
             .assertRowCounts(
@@ -233,6 +239,10 @@ class TestRcImport {
                 assertEquals(
                     newRCVer,
                     db.resourceMetadataDao.fetchAll().single().version
+                )
+                assertFalse(
+                    "Old rc should no longer exist after overwrite import.",
+                    oldRCFile!!.exists()
                 )
             }
     }
