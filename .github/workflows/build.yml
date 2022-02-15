@@ -40,7 +40,7 @@ jobs:
         run: |
           docker run -v $(pwd):/repo \
           -v $HOME/signing.p12:/root/signing.p12 \
-          -e UPDATE_PATH \
+          -e CI_REF_NAME_SLUG \
           -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp \
           -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp \
           -e ORG_GRADLE_PROJECT_githubRepoUrl \
@@ -69,10 +69,10 @@ jobs:
           aws_bucket: ${{ secrets.AWS_BUCKET }}
           source_dir: ./jvm/workbookapp/.exec
           destination_dir: ${{ env.CURRENT_S3_DESTINATION }}
-      - name: upload artifacts to github releases on release tags
-        uses: "marvinpinto/action-automatic-releases@latest"
-        if: ${{ contains( github.ref, 'refs/tags/v' ) }}
+      - name: upload artifacts to github releases on tags
+        uses: "marvinpinto/action-automatic-releases@v1.2.1"
+        if: contains( github.ref, 'refs/tags/v' )
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: ${{ steps.semver_parser.outputs.prerelease }}
+          prerelease: false
           files: jvm/workbookapp/.exec/*.*
