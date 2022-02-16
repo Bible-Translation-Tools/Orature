@@ -272,7 +272,7 @@ class ProjectImporter @Inject constructor(
     }
 
     /**
-     * Find the relevant source for the (if any) regardless of version
+     * Find the relevant source (if any) for the project, regardless of version
      */
     private fun fetchExistingSource(
         manifestProject: Project,
