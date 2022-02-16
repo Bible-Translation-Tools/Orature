@@ -59,23 +59,26 @@ const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 
-class ChunkingViewModel: ViewModel() {
+class ChunkingViewModel : ViewModel() {
+
+    val workbookDataStore: WorkbookDataStore by inject()
 
     val consumeStepColor = SimpleStringProperty(ACTIVE)
     val verbalizeStepColor = SimpleStringProperty(INACTIVE)
     val chunkStepColor = SimpleStringProperty(INACTIVE)
 
+    val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
 
-    val sourceAudio = SimpleObjectProperty<AudioFile>()
+    val sourceAudio by workbookDataStore.sourceAudioProperty
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
 
     init {
         titleProperty.onChange {
-            when(it) {
+            when (it) {
                 "Consume" -> {
                     consumeStepColor.set(ACTIVE)
                     verbalizeStepColor.set(INACTIVE)
@@ -96,113 +99,100 @@ class ChunkingViewModel: ViewModel() {
     }
 
 
-        private val width = Screen.getMainScreen().platformWidth
-        private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
+    private val width = Screen.getMainScreen().platformWidth
+    private val height = Integer.min(Screen.getMainScreen().platformHeight, 500)
 
-        val waveformMinimapImage = SimpleObjectProperty<Image>()
+    private val waveformSubject = PublishSubject.create<Image>()
 
-        private val waveformSubject = PublishSubject.create<Image>()
+    val waveform: Observable<Image>
+        get() = waveformSubject
 
-        val waveform: Observable<Image>
-            get() = waveformSubject
+    var audioController: AudioPlayerController? = null
+    val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
+    val isPlayingProperty = SimpleBooleanProperty(false)
+    val compositeDisposable = CompositeDisposable()
+    val positionProperty = SimpleDoubleProperty(0.0)
+    var imageWidth: Double = 0.0
 
-        var audioController: AudioPlayerController? = null
-        val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
-        val isPlayingProperty = SimpleBooleanProperty(false)
-        val compositeDisposable = CompositeDisposable()
-        val positionProperty = SimpleDoubleProperty(0.0)
-        var imageWidth: Double = 0.0
+    val disposeables = mutableListOf<Disposable>()
 
-        val disposeables = mutableListOf<Disposable>()
-
-        fun onDock(audio: AudioFile) {
+    fun onDockConsume() {
+        sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-            val audio = loadAudio(audio)
+            val audio = loadAudio(it)
             createWaveformImages(audio)
             initializeAudioController()
         }
+    }
 
-        fun loadAudio(audioFile: AudioFile): AudioFile {
-            val player = audioConnectionFactory.getPlayer()
-            val audio = AudioFile(audioFile.file)
-            player.load(audioFile.file)
-            audioPlayer.set(player)
-            return audio
+    fun loadAudio(audioFile: File): AudioFile {
+        val player = audioConnectionFactory.getPlayer()
+        val audio = AudioFile(audioFile)
+        player.load(audioFile)
+        audioPlayer.set(player)
+        return audio
+    }
+
+    fun calculatePosition() {
+        audioPlayer.get()?.let { audioPlayer ->
+            val current = audioPlayer.getLocationInFrames()
+            val duration = audioPlayer.getDurationInFrames().toDouble()
+            val percentPlayed = current / duration
+            val pos = percentPlayed * imageWidth
+            positionProperty.set(pos)
         }
+    }
 
-        fun calculatePosition() {
-            audioPlayer.get()?.let { audioPlayer ->
-                val current = audioPlayer.getLocationInFrames()
-                val duration = audioPlayer.getDurationInFrames().toDouble()
-                val percentPlayed = current / duration
-                val pos = percentPlayed * imageWidth
-                positionProperty.set(pos)
-            }
-        }
+    fun saveAndQuit() {
+        compositeDisposable.clear()
+    }
 
-        fun saveAndQuit() {
-            compositeDisposable.clear()
-        }
+    fun initializeAudioController() {
+        audioController = AudioPlayerController()
+        audioController?.load(audioPlayer.get())
+        isPlayingProperty.bind(audioController!!.isPlayingProperty)
+    }
 
-        fun initializeAudioController() {
-            audioController = AudioPlayerController()
-            audioController?.load(audioPlayer.get())
-            isPlayingProperty.bind(audioController!!.isPlayingProperty)
-        }
+    fun pause() {
+        audioController?.pause()
+    }
 
-        fun pause() {
-            audioController?.pause()
-        }
+    fun mediaToggle() {
+        audioController?.toggle()
+    }
 
-        fun mediaToggle() {
-            audioController?.toggle()
-        }
+    fun seek(location: Int) {
+        audioController?.seek(location)
+    }
 
-        fun seek(location: Int) {
-            audioController?.seek(location)
-        }
+    fun createWaveformImages(audio: AudioFile) {
+        imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
 
-        fun createWaveformImages(audio: AudioFile) {
-            imageWidth = computeImageWidth(SECONDS_ON_SCREEN)
-
-            val builder = WaveformImageBuilder(
+        compositeDisposable.add(
+            WaveformImageBuilder(
                 wavColor = Color.web(WAV_COLOR),
                 background = Color.web(BACKGROUND_COLOR)
-            )
+            ).buildWaveformAsync(
+                audio.reader(),
+                width = imageWidth.toInt(),
+                height = height,
+                waveformSubject
+            ).subscribe()
+        )
+    }
 
-            builder
-                .build(
-                    audio.reader(),
-                    width = imageWidth.toInt(),
-                    height = 50
-                )
-                .observeOnFx()
-                .map { image ->
-                    waveformMinimapImage.set(image)
-                }
-                .ignoreElement()
-                .andThen(
-                    builder.buildWaveformAsync(
-                        audio.reader(),
-                        width = imageWidth.toInt(),
-                        height = height,
-                        waveformSubject
-                    )
-                ).subscribe()
-        }
+    fun computeImageWidth(secondsOnScreen: Int): Double {
+        val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
+        val samplesPerPixel = samplesPerScreenWidth / width
+        val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
+        return pixelsInDuration.toDouble()
+    }
 
-        fun computeImageWidth(secondsOnScreen: Int): Double {
-            val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
-            val samplesPerPixel = samplesPerScreenWidth / width
-            val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
-            return pixelsInDuration.toDouble()
-        }
+    fun getLocationInFrames(): Int {
+        return audioPlayer.get().getLocationInFrames() ?: 0
+    }
 
-        fun getLocationInFrames(): Int {
-            return audioPlayer.get().getLocationInFrames() ?: 0
-        }
-
-        fun getDurationInFrames(): Int {
-            return audioPlayer.get().getDurationInFrames() ?: 0
-        }
+    fun getDurationInFrames(): Int {
+        return audioPlayer.get().getDurationInFrames() ?: 0
+    }
 }
