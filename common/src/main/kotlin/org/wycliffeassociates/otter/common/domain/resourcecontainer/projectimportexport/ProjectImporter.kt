@@ -138,17 +138,8 @@ class ProjectImporter @Inject constructor(
         manifestProject: Project,
         manifestSources: Set<Source>
     ) {
-        // find an existing source for this project regardless of version
-        val existingSource = collectionRepository.getSourceProjects().blockingGet()
-            .asSequence()
-            .firstOrNull { collection ->
-                manifestSources.firstOrNull()?.let {
-                    manifestProject.identifier == collection.slug &&
-                            it.identifier == collection.resourceContainer!!.identifier &&
-                            it.language == collection.resourceContainer!!.language.slug
-                } ?: false
-            }
-
+        val existingSource = fetchExistingSource(manifestProject, manifestSources)
+        // if any relevant source exists then use it
         val sourceCollection = if (existingSource == null) {
             importSources(fileReader)
             findSourceCollection(manifestSources, manifestProject)
@@ -278,6 +269,24 @@ class ProjectImporter @Inject constructor(
         return directoryProvider.newFileReader(resourceContainer).use {
             it.exists(RcConstants.SELECTED_TAKES_FILE)
         }
+    }
+
+    /**
+     * Find the relevant source for the (if any) regardless of version
+     */
+    private fun fetchExistingSource(
+        manifestProject: Project,
+        requestedSources: Set<Source>
+    ): Collection? {
+        return collectionRepository.getSourceProjects().blockingGet()
+            .asSequence()
+            .firstOrNull { collection ->
+                requestedSources.any { source ->
+                    manifestProject.identifier == collection.slug &&
+                            source.identifier == collection.resourceContainer!!.identifier &&
+                            source.language == collection.resourceContainer!!.language.slug
+                }
+            }
     }
 
     private fun importSources(fileReader: IFileReader) {
