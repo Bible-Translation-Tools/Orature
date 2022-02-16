@@ -138,6 +138,7 @@ class ProjectImporter @Inject constructor(
         manifestProject: Project,
         manifestSources: Set<Source>
     ) {
+        // find an existing source for this project regardless of version
         val existingSource = collectionRepository.getSourceProjects().blockingGet()
             .asSequence()
             .firstOrNull { collection ->
