@@ -152,7 +152,9 @@ class ProjectImporter @Inject constructor(
         val sourceCollection = if (existingSource == null) {
             importSources(fileReader)
             findSourceCollection(manifestSources, manifestProject)
-        } else existingSource
+        } else {
+            existingSource
+        }
 
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
