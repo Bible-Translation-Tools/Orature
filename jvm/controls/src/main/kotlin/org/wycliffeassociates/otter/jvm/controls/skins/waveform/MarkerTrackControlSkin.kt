@@ -16,39 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
 import javafx.geometry.Point2D
-import javafx.scene.control.Control
-import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarkerModel
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.framesToPixels
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
-import javafx.beans.property.SimpleObjectProperty
-
-class MarkerTrackControl() : Control() {
-
-    val markers = observableListOf<ChunkMarkerModel>()
-    val highlightState = observableListOf<MarkerHighlightState>()
-
-    fun refreshMarkers() {
-        (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }
-    }
-
-    override fun createDefaultSkin(): Skin<*> {
-        return MarkerTrackControlSkin(this)
-    }
-}
+import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 

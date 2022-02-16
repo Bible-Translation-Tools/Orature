@@ -1,14 +1,16 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
+import javafx.application.Platform
 import javafx.geometry.NodeOrientation
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.controls.skins.waveform.ScrollingWaveformSkin
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
+import org.wycliffeassociates.otter.jvm.controls.model.MarkerHighlightState
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerViewBackground
+import org.wycliffeassociates.otter.jvm.controls.waveform.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformFrame
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.add
@@ -46,7 +48,7 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
 
             add(MarkerViewBackground())
             waveformFrame = WaveformFrame(
-                (skinnable as MarkerPlacementWaveform).topTrack,
+                (skinnable as MarkerPlacementWaveform).topTrack
             ).apply {
                 framePositionProperty.bind(skinnable.positionProperty)
                 onWaveformClicked { skinnable.onWaveformClicked() }
@@ -63,7 +65,6 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
                     addHighlights(markers.highlightState)
                 }
             }
-
         }
         children.add(root)
     }

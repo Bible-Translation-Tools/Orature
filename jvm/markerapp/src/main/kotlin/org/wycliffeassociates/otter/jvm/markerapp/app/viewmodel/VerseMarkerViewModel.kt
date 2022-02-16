@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*

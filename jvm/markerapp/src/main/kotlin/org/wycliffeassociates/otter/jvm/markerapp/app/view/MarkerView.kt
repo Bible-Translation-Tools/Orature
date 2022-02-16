@@ -21,8 +21,10 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint

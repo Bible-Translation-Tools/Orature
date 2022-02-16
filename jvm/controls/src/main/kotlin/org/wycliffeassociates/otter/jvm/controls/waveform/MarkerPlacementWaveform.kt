@@ -1,10 +1,10 @@
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
 import javafx.scene.control.Skin
-import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.skins.waveform.MarkerPlacementWaveformSkin
 
 class MarkerPlacementWaveform(
     val topNode: Node

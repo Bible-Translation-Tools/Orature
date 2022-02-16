@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.jfoenix.controls.JFXButton
 import javafx.beans.property.SimpleObjectProperty
