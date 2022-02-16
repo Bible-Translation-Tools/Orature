@@ -138,9 +138,21 @@ class ProjectImporter @Inject constructor(
         manifestProject: Project,
         manifestSources: Set<Source>
     ) {
-        importSources(fileReader)
+        val existingSource = collectionRepository.getSourceProjects().blockingGet()
+            .asSequence()
+            .firstOrNull { collection ->
+                manifestSources.firstOrNull()?.let {
+                    manifestProject.identifier == collection.slug &&
+                            it.identifier == collection.resourceContainer!!.identifier &&
+                            it.language == collection.resourceContainer!!.language.slug
+                } ?: false
+            }
 
-        val sourceCollection = findSourceCollection(manifestSources, manifestProject)
+        val sourceCollection = if (existingSource == null) {
+            importSources(fileReader)
+            findSourceCollection(manifestSources, manifestProject)
+        } else existingSource
+
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
@@ -182,11 +194,7 @@ class ProjectImporter @Inject constructor(
             ContainerType.Help -> sourceCollection
             else -> project
         }
-
-        val sourceMetadata = resourceMetadataRepository
-            .get(metadata)
-            .flatMapMaybe(resourceMetadataRepository::getSource)
-            .blockingGet()
+        val sourceMetadata = sourceCollection.resourceContainer!!
 
         val selectedTakes = fileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
