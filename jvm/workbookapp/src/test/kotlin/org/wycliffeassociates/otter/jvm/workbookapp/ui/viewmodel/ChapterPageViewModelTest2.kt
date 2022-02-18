@@ -3,6 +3,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import javafx.beans.property.SimpleObjectProperty
+import kotlin.properties.Delegates.notNull
 import org.junit.Assert
 import org.junit.Test
 import org.testfx.api.FxToolkit
@@ -43,6 +44,15 @@ class ChapterPageViewModelTest2 {
         Assert.assertEquals(3, workbookDataStore.activeChunkProperty.value.sort)
         chapterPageViewModel.onCardSelection(chapterCard)
         Assert.assertEquals(5, workbookDataStore.activeChapterProperty.value.sort)
+        Assert.assertNull(workbookDataStore.activeChunkProperty.value)
+
+        val chapterCard2 = mock<CardData>()
+        workbookDataStore.activeChapterProperty.set(null)
+        workbookDataStore.activeChunkProperty.set(chunk)
+        Assert.assertNull(workbookDataStore.activeChapterProperty.value)
+        Assert.assertNotNull(workbookDataStore.activeChunkProperty.value)
+        chapterPageViewModel.onCardSelection(chapterCard2)
+        Assert.assertNull(workbookDataStore.activeChapterProperty.value)
         Assert.assertNull(workbookDataStore.activeChunkProperty.value)
 
         FxToolkit.hideStage()
