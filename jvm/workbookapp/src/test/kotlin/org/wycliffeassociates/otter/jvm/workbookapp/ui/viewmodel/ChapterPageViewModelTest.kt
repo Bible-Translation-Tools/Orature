@@ -288,68 +288,6 @@ class ChapterPageViewModelTest {
         }
     }
 
-    @Test
-    fun `select chapter card on card selection`() {
-        val chapterCard = CardData(chapter1)
-
-        activeChapterListener = createChangeListener {
-            Assert.assertEquals(chapterCard.chapterSource, it)
-        }
-        workbookDataStore.activeChapterProperty.addListener(activeChapterListener)
-
-        chapterPageViewModel.onCardSelection(chapterCard)
-    }
-
-    @Test
-    fun `select chunk card on card selection`() {
-        val chunkCard = CardData(chunk1)
-
-        activeChunkListener = createChangeListener {
-            Assert.assertEquals(chunkCard.chunkSource, it)
-        }
-        workbookDataStore.activeChunkProperty.addListener(activeChunkListener)
-
-        chapterPageViewModel.onCardSelection(chunkCard)
-    }
-
-    @Test
-    fun `when not all chunks selected, canCompile is false`() {
-        canCompileListener = createChangeListener {
-            Assert.assertEquals(false, it)
-        }
-        chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
-
-        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
-        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
-
-        chunk1.audio.insertTake(take1)
-        chunk1.audio.selectTake(take1)
-        chunk2.audio.insertTake(take2)
-
-        WaitForAsyncUtils.waitForFxEvents()
-
-        chapterPageViewModel.checkCanCompile()
-    }
-
-    @Test
-    fun `when all chunks selected, canCompile is true`() {
-        canCompileListener = createChangeListener {
-            Assert.assertEquals(true, it)
-        }
-        chapterPageViewModel.canCompileProperty.addListener(canCompileListener)
-
-        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
-        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
-
-        chunk1.audio.insertTake(take1)
-        chunk1.audio.selectTake(take1)
-        chunk2.audio.insertTake(take2)
-        chunk2.audio.selectTake(take2)
-
-        WaitForAsyncUtils.waitForFxEvents()
-
-        chapterPageViewModel.checkCanCompile()
-    }
 
     @Test
     fun `initially workChunk is the first chunk`() {
