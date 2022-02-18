@@ -19,6 +19,9 @@ class ChapterPageViewModelTest2 {
         FxToolkit.registerPrimaryStage()
         FxToolkit.setupApplication { testApp }
 
+        val chunk = mock<Chunk> {
+            on { sort } doReturn 3
+        }
         val chapter = mock<Chapter> {
             on { sort } doReturn 5
         }
@@ -27,7 +30,7 @@ class ChapterPageViewModelTest2 {
         }
 
         val chapProp = SimpleObjectProperty<Chapter>()
-        val chunkProp = SimpleObjectProperty<Chunk>()
+        val chunkProp = SimpleObjectProperty<Chunk>(chunk)
         val workbookDataStore = mock<WorkbookDataStore> {
             on { activeChapterProperty } doReturn chapProp
             on { activeChunkProperty } doReturn chunkProp
@@ -36,8 +39,11 @@ class ChapterPageViewModelTest2 {
         FX.getComponents()[WorkbookDataStore::class] = workbookDataStore
 
         val chapterPageViewModel: ChapterPageViewModel = find()
+        Assert.assertNull(workbookDataStore.activeChapterProperty.value)
+        Assert.assertEquals(3, workbookDataStore.activeChunkProperty.value.sort)
         chapterPageViewModel.onCardSelection(chapterCard)
-        Assert.assertNotNull(workbookDataStore.activeChapterProperty.value)
+        Assert.assertEquals(5, workbookDataStore.activeChapterProperty.value.sort)
+        Assert.assertNull(workbookDataStore.activeChunkProperty.value)
 
         FxToolkit.hideStage()
         FxToolkit.cleanupStages()
