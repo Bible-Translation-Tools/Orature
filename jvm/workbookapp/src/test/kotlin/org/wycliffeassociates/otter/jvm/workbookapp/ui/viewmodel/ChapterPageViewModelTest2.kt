@@ -5,19 +5,12 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import javafx.beans.property.SimpleObjectProperty
-import kotlin.properties.Delegates.notNull
 import org.junit.Assert
 import org.junit.Test
 import org.testfx.api.FxToolkit
-import org.testfx.util.WaitForAsyncUtils
-import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.workbook.*
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
-import org.wycliffeassociates.otter.jvm.workbookapp.utils.writeWavFile
 import tornadofx.*
-import java.io.File
-import java.time.LocalDate
-import java.util.*
 import org.junit.After
 import org.junit.Before
 
@@ -124,7 +117,7 @@ class ChapterPageViewModelTest2 {
         val cardData1 = mock<CardData> { on { chunkSource } doReturn mockedChunk }
         val cardData2 = mock<CardData>()
 
-        val list = observableListOf<CardData>(cardData1, cardData2)
+        val list = observableListOf(cardData1, cardData2)
 
         chapterPageViewModel.filteredContent.setAll(list)
 
@@ -213,5 +206,11 @@ class ChapterPageViewModelTest2 {
         chapterPageViewModel.setWorkChunk()
         Assert.assertFalse(chapterPageViewModel.noTakesProperty.value)
         Assert.assertEquals(100, chapterPageViewModel.workChunkProperty.value.sort)
+    }
+
+    @Test
+    fun `record first chapter take with take number 1`() {
+        val chapterPageViewModel = find<ChapterPageViewModel>()
+        chapterPageViewModel.recordChapter()
     }
 }
