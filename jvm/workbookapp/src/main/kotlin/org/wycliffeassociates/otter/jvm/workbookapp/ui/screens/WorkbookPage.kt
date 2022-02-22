@@ -31,7 +31,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -90,6 +89,7 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources.get("/css/chapter-card.css"))
         tryImportStylesheet(resources.get("/css/workbook-banner.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/tab-pane.css"))
     }
 
     /**
@@ -141,11 +141,6 @@ class WorkbookPage : View() {
     }
 
     override val root = JFXTabPane().apply {
-        importStylesheet<CardGridStyles>()
-        importStylesheet<DefaultStyles>()
-        tryImportStylesheet(resources.get("/css/tab-pane.css"))
-        addClass(Stylesheet.tabPane)
-
         tabs.onChange {
             when (it.list.size) {
                 1 -> addClass("singleTab")

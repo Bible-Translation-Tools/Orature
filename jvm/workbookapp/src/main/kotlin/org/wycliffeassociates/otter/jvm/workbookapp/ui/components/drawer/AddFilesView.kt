@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
-import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
@@ -62,14 +61,12 @@ class AddFilesView : View() {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
-                    add(
-                        JFXButton().apply {
-                            addClass("app-drawer__btn--close")
-                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                            tooltip(messages["close"])
-                            action { collapse() }
-                        }
-                    )
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                        tooltip(messages["close"])
+                        action { collapse() }
+                    }
                 }
 
                 vbox {

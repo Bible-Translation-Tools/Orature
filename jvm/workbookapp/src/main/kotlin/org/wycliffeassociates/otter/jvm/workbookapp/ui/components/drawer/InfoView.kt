@@ -49,14 +49,12 @@ class InfoView : View() {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
-                    add(
-                        JFXButton().apply {
-                            addClass("app-drawer__btn--close")
-                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                            tooltip(messages["close"])
-                            action { collapse() }
-                        }
-                    )
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                        tooltip(messages["close"])
+                        action { collapse() }
+                    }
                 }
 
                 vbox {

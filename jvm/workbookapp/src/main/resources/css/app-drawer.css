@@ -40,24 +40,6 @@
     -fx-text-fill: -wa-regular-text;
 }
 
-.app-drawer__btn--close {
-    -fx-background-color: -wa-btn-icon-background;
-    -fx-border-color: -wa-border-neutral;
-    -fx-border-width: 2px;
-    -fx-border-radius: 4px;
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
-}
-
-.app-drawer__btn--close:hover {
-    -fx-background-color: -wa-foreground-hover;
-}
-
-.app-drawer__btn--close .ikonli-font-icon {
-    -fx-icon-size: 24px;
-    -fx-fill: -wa-fill-neutral;
-}
-
 .app-drawer__subtitle {
     -fx-font-weight: bold;
     -fx-font-size: 26px;

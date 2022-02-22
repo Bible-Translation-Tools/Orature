@@ -46,6 +46,10 @@
     -fx-border-width: 0px;
 }
 
+.app-bar-button:focused {
+    -fx-border-width: 4px;
+}
+
 .app-bar-button-container {
     -fx-alignment: center;
 }

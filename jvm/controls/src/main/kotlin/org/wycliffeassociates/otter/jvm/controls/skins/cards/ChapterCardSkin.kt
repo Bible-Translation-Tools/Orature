@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
+import com.sun.javafx.scene.control.behavior.ButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -32,6 +33,8 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class ChapterCardSkin(private val card: ChapterCard) : SkinBase<ChapterCard>(card) {
+
+    private val behavior = ButtonBehavior(card)
 
     @FXML
     lateinit var coverArt: ImageView
@@ -110,5 +113,10 @@ class ChapterCardSkin(private val card: ChapterCard) : SkinBase<ChapterCard>(car
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        behavior.dispose()
     }
 }

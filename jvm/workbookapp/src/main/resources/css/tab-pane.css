@@ -17,6 +17,10 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.jfx-tab-pane {
+    -fx-focus-traversable: false;
+}
+
 .jfx-tab-pane .tab-header-background {
     -fx-background-color: -wa-tab-region-background;
 }

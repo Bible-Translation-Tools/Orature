@@ -18,7 +18,7 @@
  */
 
 /* -------------- Todo List -------------- */
-/* TODO: .btn class should have a `0.2s Ease-in-out` transition for all effects applied.
+/* TODO: .btn class should have a `0.2s Ease-in-out` transition for all effects applied. */
 
 /* -------------- Button Base -------------- */
 /* This controls all of the common variables found in each button type */
@@ -30,6 +30,11 @@
     -fx-font-size: 20px;
     -fx-cursor: hand;
 }
+
+.btn:focused {
+    -fx-border-width: 4px;
+}
+
 
 /* -------------- Button Icon -------------- */
 .btn__icon {

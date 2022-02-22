@@ -17,6 +17,10 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.translation-card {
+    -fx-focus-traversable: false;
+}
+
 .translation-card__root {
     -fx-max-width: 800px;
     -fx-spacing: 10px;
@@ -51,6 +55,10 @@
 
 .translation-card__divider .ikonli-font-icon {
     -fx-font-size: 20px;
+}
+
+.translation-card__book--no-bg {
+    -fx-focus-traversable: false;
 }
 
 .translation-card__book--no-bg:hover,

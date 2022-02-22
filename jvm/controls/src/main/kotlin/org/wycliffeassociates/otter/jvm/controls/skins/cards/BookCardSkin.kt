@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.cards
 
+import com.sun.javafx.scene.control.behavior.ButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -39,6 +40,8 @@ import tornadofx.*
 import java.io.File
 
 class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
+
+    private val behavior = ButtonBehavior(card)
 
     @FXML
     lateinit var root: HBox
@@ -70,7 +73,6 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
 
     private fun initializeControl() {
         root.apply {
-            setOnMouseClicked { card.onPrimaryActionProperty.value?.invoke() }
             if (card.newBookProperty.value) {
                 addClass("book-card__new")
             }
@@ -143,5 +145,10 @@ class BookCardSkin(private val card: BookCard) : SkinBase<BookCard>(card) {
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        behavior.dispose()
     }
 }

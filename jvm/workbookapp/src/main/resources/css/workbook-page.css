@@ -20,6 +20,7 @@
 .workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
     -fx-background-color: -wa-background;
+    -fx-focus-traversable: false;
 }
 
 .workbook-page__chapter-list .list-cell:selected,

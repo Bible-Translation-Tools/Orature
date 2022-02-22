@@ -36,6 +36,7 @@ class AppContent : View() {
     private val settingsViewModel: SettingsViewModel by inject()
 
     override val root = HiddenSidesPane().apply {
+        addClass("app-bar__app-content")
         content = stackpane {
             borderpane {
                 top = navigator.breadCrumbsBar.apply {

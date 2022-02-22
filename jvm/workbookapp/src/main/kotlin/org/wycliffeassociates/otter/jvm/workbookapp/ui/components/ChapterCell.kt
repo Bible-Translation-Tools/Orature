@@ -52,7 +52,7 @@ class ChapterCell : ListCell<WorkbookItemModel>() {
             titleProperty.set(item.title)
             notStartedTextProperty.set(FX.messages["notStarted"])
 
-            setOnMouseClicked {
+            setOnAction {
                 item.source?.let { chapter ->
                     item.onClick(chapter)
                 }
