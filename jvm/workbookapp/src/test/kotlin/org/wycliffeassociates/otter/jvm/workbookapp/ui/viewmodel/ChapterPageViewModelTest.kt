@@ -288,61 +288,6 @@ class ChapterPageViewModelTest {
         }
     }
 
-
-    @Test
-    fun `initially workChunk is the first chunk`() {
-        val chunkCard = CardData(chunk1)
-
-        noTakesListener = createChangeListener {
-            Assert.assertEquals(true, it)
-        }
-        chapterPageViewModel.noTakesProperty.addListener(noTakesListener)
-
-        workChunkListener = createChangeListener {
-            Assert.assertEquals(chunkCard, it)
-        }
-        chapterPageViewModel.workChunkProperty.addListener(workChunkListener)
-
-        chapterPageViewModel.setWorkChunk()
-    }
-
-    @Test
-    fun `when first chunk has takes, workChunk is the second chunk`() {
-        val chunkCard = CardData(chunk2)
-
-        noTakesListener = createChangeListener {
-            Assert.assertEquals(false, it)
-        }
-        chapterPageViewModel.noTakesProperty.addListener(noTakesListener)
-
-        workChunkListener = createChangeListener {
-            Assert.assertEquals(chunkCard, it)
-        }
-        chapterPageViewModel.workChunkProperty.addListener(workChunkListener)
-
-        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
-
-        chunk1.audio.insertTake(take)
-        chunk1.audio.selectTake(take)
-
-        WaitForAsyncUtils.waitForFxEvents()
-
-        chapterPageViewModel.setWorkChunk()
-    }
-
-    @Test
-    fun `selected chapter take is the first selected take`() {
-        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
-
-        chapter1.audio.insertTake(take)
-        chapter1.audio.selectTake(take)
-
-        selectedChapterTakeListener = createChangeListener {
-            Assert.assertEquals(take, it)
-        }
-        chapterPageViewModel.selectedChapterTakeProperty.addListener(selectedChapterTakeListener)
-    }
-
     @Test
     fun `record first chapter take with take number 1`() {
         contextListener = createChangeListener {

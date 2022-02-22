@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import javafx.beans.property.SimpleObjectProperty
@@ -17,15 +18,29 @@ import tornadofx.*
 import java.io.File
 import java.time.LocalDate
 import java.util.*
+import org.junit.After
+import org.junit.Before
 
 class ChapterPageViewModelTest2 {
 
-    @Test
-    fun `select chapter card on card selection`() {
-        val testApp: TestApp = TestApp()
+    private lateinit var testApp: TestApp
+
+    @Before
+    fun setup() {
+        testApp = TestApp()
         FxToolkit.registerPrimaryStage()
         FxToolkit.setupApplication { testApp }
+    }
 
+    @After
+    fun teardown() {
+        FxToolkit.hideStage()
+        FxToolkit.cleanupStages()
+        FxToolkit.cleanupApplication(testApp)
+    }
+
+    @Test
+    fun `select chapter card on card selection`() {
         val chunk = mock<Chunk> {
             on { sort } doReturn 3
         }
@@ -60,18 +75,10 @@ class ChapterPageViewModelTest2 {
         chapterPageViewModel.onCardSelection(chapterCard2)
         Assert.assertNull(workbookDataStore.activeChapterProperty.value)
         Assert.assertNull(workbookDataStore.activeChunkProperty.value)
-
-        FxToolkit.hideStage()
-        FxToolkit.cleanupStages()
-        FxToolkit.cleanupApplication(testApp)
     }
 
     @Test
     fun `select chunk card on card selection`() {
-        val testApp: TestApp = TestApp()
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication { testApp }
-
         val oldChunk = mock<Chunk> {
             on { sort } doReturn 1
         }
@@ -101,18 +108,10 @@ class ChapterPageViewModelTest2 {
         chapterPageViewModel.onCardSelection(chapterCard)
         Assert.assertEquals(5, workbookDataStore.activeChapterProperty.value.sort)
         Assert.assertEquals(3, workbookDataStore.activeChunkProperty.value.sort)
-
-        FxToolkit.hideStage()
-        FxToolkit.cleanupStages()
-        FxToolkit.cleanupApplication(testApp)
     }
 
     @Test
     fun `when not all chunks selected, canCompile is false`() {
-        val testApp: TestApp = TestApp()
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication { testApp }
-
         val chapterPageViewModel: ChapterPageViewModel = find()
 
         Assert.assertFalse(chapterPageViewModel.canCompileProperty.value)
@@ -131,18 +130,10 @@ class ChapterPageViewModelTest2 {
 
         chapterPageViewModel.checkCanCompile()
         Assert.assertFalse(chapterPageViewModel.canCompileProperty.value)
-
-        FxToolkit.hideStage()
-        FxToolkit.cleanupStages()
-        FxToolkit.cleanupApplication(testApp)
     }
 
     @Test
     fun `when all chunks selected, canCompile is true`() {
-        val testApp: TestApp = TestApp()
-        FxToolkit.registerPrimaryStage()
-        FxToolkit.setupApplication { testApp }
-
         val chapterPageViewModel: ChapterPageViewModel = find()
 
         Assert.assertFalse(chapterPageViewModel.canCompileProperty.value)
@@ -161,9 +152,66 @@ class ChapterPageViewModelTest2 {
 
         chapterPageViewModel.checkCanCompile()
         Assert.assertTrue(chapterPageViewModel.canCompileProperty.value)
+    }
 
-        FxToolkit.hideStage()
-        FxToolkit.cleanupStages()
-        FxToolkit.cleanupApplication(testApp)
+    @Test
+    fun `initially workChunk is the first chunk`() {
+        val chapterPageViewModel = find<ChapterPageViewModel>()
+
+        chapterPageViewModel.setWorkChunk()
+        Assert.assertFalse(chapterPageViewModel.noTakesProperty.value)
+        Assert.assertNull(chapterPageViewModel.workChunkProperty.value)
+
+        val takeRelay = ReplayRelay.create<Take>()
+        val mockedAudio = mock<AssociatedAudio> { on { takes } doReturn takeRelay }
+        val mockedChunk = mock<Chunk> { on { audio } doReturn mockedAudio }
+        val cardData = mock<CardData> {
+            on { chunkSource } doReturn mockedChunk
+            on { sort } doReturn 42
+        }
+        val cardData2 = mock<CardData> {
+            on { chunkSource } doReturn mockedChunk
+            on { sort } doReturn 100
+        }
+
+        chapterPageViewModel.filteredContent.setAll(cardData, cardData2)
+        chapterPageViewModel.setWorkChunk()
+        Assert.assertTrue(chapterPageViewModel.noTakesProperty.value)
+        Assert.assertEquals(42, chapterPageViewModel.workChunkProperty.value.sort)
+    }
+
+    @Test
+    fun `when first chunk has takes, workChunk is the second chunk`() {
+        val chapterPageViewModel = find<ChapterPageViewModel>()
+
+        chapterPageViewModel.setWorkChunk()
+        Assert.assertFalse(chapterPageViewModel.noTakesProperty.value)
+        Assert.assertNull(chapterPageViewModel.workChunkProperty.value)
+
+        val mockedTake = mock<Take> {
+            on {deletedTimestamp } doReturn mock()
+        }
+        val selectedMock = BehaviorRelay.createDefault(TakeHolder(mockedTake))
+        val mockedAudio = mock<AssociatedAudio> {
+            on { getAllTakes() } doReturn arrayOf(mockedTake)
+            on { selected } doReturn selectedMock
+        }
+        val mockedChunk = mock<Chunk> { on { audio } doReturn mockedAudio }
+        val cardData = mock<CardData> {
+            on { chunkSource } doReturn mockedChunk
+            on { sort } doReturn 42
+        }
+        val takeRelay2 = ReplayRelay.create<Take>()
+        val mockedAudio2 = mock<AssociatedAudio> { on { takes } doReturn takeRelay2 }
+        val mockedChunk2 = mock<Chunk> { on { audio } doReturn mockedAudio2 }
+        val cardData2 = mock<CardData> {
+            on { chunkSource } doReturn mockedChunk2
+            on { sort } doReturn 100
+        }
+
+        chapterPageViewModel.filteredContent.setAll(cardData, cardData2)
+        chapterPageViewModel.setWorkChunk()
+        Assert.assertFalse(chapterPageViewModel.noTakesProperty.value)
+        Assert.assertEquals(100, chapterPageViewModel.workChunkProperty.value.sort)
     }
 }
