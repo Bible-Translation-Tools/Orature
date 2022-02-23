@@ -28,19 +28,24 @@ import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
+import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 
-    val track: Region
+    val track: Region = Region().apply {
+        styleClass.add("vm-marker-track")
+    }
+
     val markers = mutableListOf<ChunkMarker>()
 
-    val highlights = mutableListOf<Rectangle>()
+    private val highlights = mutableListOf<Rectangle>()
 
-    private val preDragThumbPos = DoubleArray(control.markers.size)
+    private var preDragThumbPos = DoubleArray(control.markers.size)
     var dragStart: Array<Point2D?> = Array(control.markers.size) { null }
+
 
     fun refreshMarkers() {
         if (skinnable.width > 0) {
@@ -57,73 +62,87 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         }
     }
 
-    init {
-        control.markers.forEachIndexed { i, mk ->
-            val marker = ChunkMarker().apply {
-                val pixel = framesToPixels(
-                    mk.frame
-                ).toDouble()
+    private fun resetState() {
+        markers.clear()
+        highlights.clear()
+        preDragThumbPos = DoubleArray(skinnable.markers.size)
+        dragStart = Array(skinnable.markers.size) { null }
+    }
 
-                isPlacedProperty.set(mk.placed)
-                markerNumberProperty.set(mk.label)
-                canBeMovedProperty.set(i != 0)
-                markerPositionProperty.set(pixel)
+    private fun createMarker(i: Int, mk: ChunkMarkerModel): ChunkMarker {
+        return ChunkMarker().apply {
+            val pixel = framesToPixels(
+                mk.frame
+            ).toDouble()
 
-                setOnMouseClicked { me ->
-                    val trackWidth = this@MarkerTrackControlSkin.skinnable.width
-                    if (trackWidth > 0) {
-                        dragStart[i] = localToParent(me.x, me.y)
-                        val clampedValue: Double = Utils.clamp(
-                            0.0,
-                            markerPositionProperty.value,
-                            trackWidth
-                        )
-                        preDragThumbPos[i] = clampedValue / trackWidth
-                        me.consume()
-                    }
+            isPlacedProperty.set(mk.placed)
+            markerNumberProperty.set(mk.label)
+            canBeMovedProperty.set(i != 0)
+            markerPositionProperty.set(pixel)
+
+            setOnMouseClicked { me ->
+                val trackWidth = this@MarkerTrackControlSkin.skinnable.width
+                if (trackWidth > 0) {
+                    dragStart[i] = localToParent(me.x, me.y)
+                    val clampedValue: Double = Utils.clamp(
+                        0.0,
+                        markerPositionProperty.value,
+                        trackWidth
+                    )
+                    preDragThumbPos[i] = clampedValue / trackWidth
+                    me.consume()
                 }
+            }
 
-                setOnMouseDragged { me ->
-                    if (!canBeMovedProperty.value) return@setOnMouseDragged
-                    val trackWidth = this@MarkerTrackControlSkin.skinnable.width
-                    if (trackWidth > 0.0) {
-                        if (trackWidth > this.width) {
-                            val cur: Point2D = localToParent(me.x, me.y)
-                            if (dragStart[i] == null) {
-                                // we're getting dragged without getting a mouse press
-                                dragStart[i] = localToParent(me.x, me.y)
-                                val clampedValue: Double = Utils.clamp(
-                                    0.0,
-                                    markerPositionProperty.value,
-                                    trackWidth
-                                )
-                                preDragThumbPos[i] = clampedValue / trackWidth
-                            }
-                            val dragPos = cur.x - dragStart[i]!!.x
-                            updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
-                        }
-                        me.consume()
-                    }
-                }
-
-                markerPositionProperty.onChangeAndDoNow {
-                    it?.let {
-                        val trackWidth = this@MarkerTrackControlSkin.skinnable.width
-                        translateX = it.toDouble()
-                        if (trackWidth > 0) {
-                            control.markers.get(i).frame = pixelsToFrames(
-                                it.toDouble()
+            setOnMouseDragged { me ->
+                if (!canBeMovedProperty.value) return@setOnMouseDragged
+                val trackWidth = this@MarkerTrackControlSkin.skinnable.width
+                if (trackWidth > 0.0) {
+                    if (trackWidth > this.width) {
+                        val cur: Point2D = localToParent(me.x, me.y)
+                        if (dragStart[i] == null) {
+                            // we're getting dragged without getting a mouse press
+                            dragStart[i] = localToParent(me.x, me.y)
+                            val clampedValue: Double = Utils.clamp(
+                                0.0,
+                                markerPositionProperty.value,
+                                trackWidth
                             )
+                            preDragThumbPos[i] = clampedValue / trackWidth
                         }
+                        val dragPos = cur.x - dragStart[i]!!.x
+                        updateValue(i, preDragThumbPos[i] + dragPos / (trackWidth - this.width))
                     }
+                    me.consume()
                 }
             }
 
-            val rect = Rectangle().apply {
-                skinnable.highlightState[i].styleClass.onChangeAndDoNow {
-                    styleClass.setAll(it)
+            markerPositionProperty.onChangeAndDoNow {
+                it?.let {
+                    val trackWidth = this@MarkerTrackControlSkin.skinnable.width
+                    translateX = it.toDouble()
+                    if (trackWidth > 0) {
+                        skinnable.markers.get(i).frame = pixelsToFrames(
+                            it.toDouble()
+                        )
+                    }
                 }
             }
+        }
+    }
+
+    private fun createHighlight(i: Int, mk: ChunkMarkerModel): Rectangle {
+        return Rectangle().apply {
+            skinnable.highlightState[i].styleClass.onChangeAndDoNow {
+                styleClass.setAll(it)
+            }
+        }
+    }
+
+    private fun initializeMarkers() {
+        skinnable.markers.forEachIndexed { i, mk ->
+            val marker = createMarker(i, mk)
+            val rect = createHighlight(i, mk)
 
             rect.heightProperty().bind(skinnable.heightProperty())
             rect.translateXProperty().bind(marker.translateXProperty())
@@ -132,43 +151,47 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             markers.add(marker)
             highlights.add(rect)
         }
+    }
 
-        track = Region().apply {
-            styleClass.add("vm-marker-track")
-        }
+    init {
+        skinnable.markers.onChangeAndDoNow {
+            resetState()
+            initializeMarkers()
 
-        highlights.forEach { track.add(it) }
-        markers.forEach { track.add(it) }
+            track.getChildList()?.clear()
+            highlights.forEach { track.add(it) }
+            markers.forEach { track.add(it) }
 
-        highlights.forEachIndexed { i, rect ->
-            val endPos = skinnable.widthProperty()
+            highlights.forEachIndexed { i, rect ->
+                val endPos = skinnable.widthProperty()
 
-            if (i + 1 < highlights.size) {
-                highlights[i + 1]?.let { next ->
-                    val nextVis = next.visibleProperty()
-                    val nextPos = next.translateXProperty()
-                    val highlightWidth = Bindings.createDoubleBinding(
-                        Callable {
-                            return@Callable if (nextVis.value) {
-                                nextPos.value - rect.translateXProperty().value
-                            } else {
-                                endPos.value - rect.translateXProperty().value
-                            }
-                        },
-                        nextVis,
-                        nextPos,
-                        endPos,
-                        rect.translateXProperty(),
-                        next.translateXProperty()
-                    )
-                    rect.widthProperty().bind(highlightWidth)
+                if (i + 1 < highlights.size) {
+                    highlights[i + 1]?.let { next ->
+                        val nextVis = next.visibleProperty()
+                        val nextPos = next.translateXProperty()
+                        val highlightWidth = Bindings.createDoubleBinding(
+                            Callable {
+                                return@Callable if (nextVis.value) {
+                                    nextPos.value - rect.translateXProperty().value
+                                } else {
+                                    endPos.value - rect.translateXProperty().value
+                                }
+                            },
+                            nextVis,
+                            nextPos,
+                            endPos,
+                            rect.translateXProperty(),
+                            next.translateXProperty()
+                        )
+                        rect.widthProperty().bind(highlightWidth)
+                    }
+                } else {
+                    rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
                 }
-            } else {
-                rect.widthProperty().bind(endPos.minus(rect.translateXProperty()))
+                skinnable.highlightState[i].visibility.bind(rect.visibleProperty())
+                skinnable.highlightState[i].translate.bind(rect.translateXProperty())
+                skinnable.highlightState[i].width.bind(rect.widthProperty())
             }
-            skinnable.highlightState[i].visibility.bind(rect.visibleProperty())
-            skinnable.highlightState[i].translate.bind(rect.translateXProperty())
-            skinnable.highlightState[i].width.bind(rect.widthProperty())
         }
 
         children.clear()
