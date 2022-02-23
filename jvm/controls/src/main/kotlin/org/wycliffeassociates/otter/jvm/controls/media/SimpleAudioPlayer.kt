@@ -114,12 +114,11 @@ class SimpleAudioPlayer(
                 value = 0.0
 
                 setValueFactory {
-                    Bindings.createStringBinding(
-                        {
-                            framesToTimecode(it.value, audioSampleRate.value)
-                        },
-                        valueProperty()
-                    )
+                    valueProperty().stringBinding {
+                        it?.let {
+                            framesToTimecode(it.toDouble(), audioSampleRate.value)
+                        }
+                    }
                 }
             }
         )

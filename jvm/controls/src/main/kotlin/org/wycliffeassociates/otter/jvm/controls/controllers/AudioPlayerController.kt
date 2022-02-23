@@ -25,6 +25,7 @@ import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.control.Slider
+import javafx.scene.input.KeyCode
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
@@ -139,6 +140,12 @@ class AudioPlayerController(
                 toggle()
             }
         }
+        audioSlider.setOnKeyPressed {
+            when (it.code) {
+                KeyCode.LEFT, KeyCode.RIGHT -> seekInterval(it.code)
+                KeyCode.ENTER, KeyCode.SPACE -> toggle()
+            }
+        }
     }
 
     private fun startProgressUpdate(): Disposable {
@@ -201,6 +208,28 @@ class AudioPlayerController(
 
     private fun playbackPosition(): Int {
         return player?.getLocationInFrames() ?: 0
+    }
+
+    private fun timeToFrames(milliSec: Int, sampleRate: Int = DEFAULT_SAMPLE_RATE): Int {
+        val framesPerMs = if (sampleRate > 0) {
+            sampleRate / 1000
+        } else {
+            DEFAULT_SAMPLE_RATE / 1000
+        }
+        return milliSec * framesPerMs
+    }
+
+    private fun seekInterval(keyCode: KeyCode) {
+        player?.let {
+            val sampleRate = it.getAudioReader()?.sampleRate ?: DEFAULT_SAMPLE_RATE
+            val interval = timeToFrames(1000, sampleRate)
+            var location = it.getLocationInFrames()
+            when (keyCode) {
+                KeyCode.LEFT -> location -= interval
+                KeyCode.RIGHT -> location += interval
+            }
+            seek(max(0, location))
+        }
     }
 }
 

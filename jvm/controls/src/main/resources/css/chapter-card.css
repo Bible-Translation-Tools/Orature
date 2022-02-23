@@ -34,6 +34,12 @@
     -fx-background-color: -wa-foreground-pressed;
 }
 
+.chapter-card:focused {
+    -fx-border-color: -wa-card-border;
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+}
+
 .chapter-card__graphic {
     -fx-background-radius: 10px;
     -fx-background-color: -wa-card-image-placeholder-background;

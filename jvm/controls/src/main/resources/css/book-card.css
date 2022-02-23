@@ -29,6 +29,12 @@
     -fx-background-color: -wa-foreground-pressed;
 }
 
+.book-card:focused {
+    -fx-border-color: -wa-card-border;
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+}
+
 .book-card__root {
     -fx-spacing: 20px;
     -fx-cursor: hand;

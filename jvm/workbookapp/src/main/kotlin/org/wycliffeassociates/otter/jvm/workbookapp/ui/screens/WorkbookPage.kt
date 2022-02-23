@@ -46,6 +46,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageVie
 import tornadofx.*
 import java.text.MessageFormat
 
+
 /**
  * The page for an open Workbook (project).
  *
@@ -79,7 +80,7 @@ class WorkbookPage : View() {
             }
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
-        onClickAction {
+        setOnAction {
             navigator.dock(this@WorkbookPage)
         }
     }
@@ -323,7 +324,8 @@ class WorkbookPage : View() {
             text = resourceMetadata.identifier
 
             add(tab)
-            setOnSelectionChanged {
+
+            whenSelected {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()

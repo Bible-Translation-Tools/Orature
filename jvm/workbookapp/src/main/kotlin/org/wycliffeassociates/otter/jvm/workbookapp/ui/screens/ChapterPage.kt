@@ -77,7 +77,7 @@ class ChapterPage : View() {
             }
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_FILE))
-        onClickAction {
+        setOnAction {
             navigator.dock(this@ChapterPage)
         }
     }

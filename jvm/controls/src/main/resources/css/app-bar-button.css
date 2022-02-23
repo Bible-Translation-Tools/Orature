@@ -42,12 +42,13 @@
 
 .app-bar-button:selected {
     -fx-background-color: -wa-white;
-    -fx-background-radius: 6px;
+    -fx-background-radius: 10px;
     -fx-border-width: 0px;
 }
 
 .app-bar-button:focused {
     -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
 }
 
 .app-bar-button-container {
