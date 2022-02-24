@@ -23,6 +23,7 @@ import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -229,38 +230,45 @@ class SettingsView : View() {
 
                                 region { hgrow = Priority.ALWAYS }
 
-                                radiobutton {
-                                    isDisable = !pluginData.canRecord
-                                    viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
-                                        isSelected = selectedData == pluginData
+                                add(
+                                    SelectButton().apply {
+                                        isDisable = !pluginData.canRecord
+                                        viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
+                                            isSelected = selectedData == pluginData
+                                        }
+                                        selectedProperty().onChange { selected ->
+                                            if (selected) viewModel.selectRecorder(pluginData)
+                                        }
+                                        toggleGroup = recorderToggleGroup
                                     }
-                                    selectedProperty().onChange { selected ->
-                                        if (selected) viewModel.selectRecorder(pluginData)
-                                    }
-                                    toggleGroup = recorderToggleGroup
-                                }
+                                )
 
-                                radiobutton {
-                                    isDisable = !pluginData.canEdit
-                                    viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
-                                        isSelected = selectedData == pluginData
+                                add(
+                                    SelectButton().apply {
+                                        isDisable = !pluginData.canEdit
+                                        viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
+                                            isSelected = selectedData == pluginData
+                                        }
+                                        selectedProperty().onChange { selected ->
+                                            if (selected) viewModel.selectEditor(pluginData)
+                                        }
+                                        toggleGroup = editorToggleGroup
                                     }
-                                    selectedProperty().onChange { selected ->
-                                        if (selected) viewModel.selectEditor(pluginData)
-                                    }
-                                    toggleGroup = editorToggleGroup
-                                }
+                                )
                             }
                         }
                     }
 
-                    label(messages["addApp"]).apply {
+                    hyperlink {
                         addClass("app-drawer__text--link")
-                        tooltip {
-                            textProperty().bind(this@apply.textProperty())
-                        }
+
+                        text = messages["addApp"]
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                        setOnMouseClicked {
+                        tooltip {
+                            textProperty().bind(this@hyperlink.textProperty())
+                        }
+
+                        action {
                             addPluginDialog.open()
                         }
                     }

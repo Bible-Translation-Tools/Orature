@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.button
 
+import com.sun.javafx.scene.control.behavior.ToggleButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -25,9 +26,13 @@ import javafx.scene.control.Label
 import javafx.scene.control.RadioButton
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
+import tornadofx.*
 
 class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton>(button) {
+    private val behavior = ToggleButtonBehavior(button)
+
     @FXML
     lateinit var root: HBox
 
@@ -38,6 +43,9 @@ class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton
     lateinit var btnIcon: Label
 
     @FXML
+    lateinit var spacer: Region
+
+    @FXML
     lateinit var btnRadio: RadioButton
 
     init {
@@ -46,15 +54,20 @@ class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton
     }
 
     private fun initializeControl() {
-        button.setOnMouseClicked {
-            if (!button.isSelected) {
-                button.fire()
-            }
-        }
         btnRadio.selectedProperty().bindBidirectional(button.selectedProperty())
 
-        btnLabel.textProperty().bind(button.textProperty())
-        btnIcon.graphicProperty().bind(button.graphicProperty())
+        btnLabel.apply {
+            textProperty().bind(button.textProperty())
+            managedProperty().bind(textProperty().booleanBinding { it?.isNotEmpty() ?: false })
+        }
+        btnIcon.apply {
+            graphicProperty().bind(button.graphicProperty())
+            managedProperty().bind(graphicProperty().booleanBinding { it != null })
+        }
+        spacer.managedProperty().bind(
+            btnLabel.textProperty().booleanBinding { it?.isNotEmpty() ?: false }
+                .or(btnIcon.graphicProperty().booleanBinding { it != null })
+        )
     }
 
     private fun loadFXML() {
@@ -62,5 +75,10 @@ class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        behavior.dispose()
     }
 }

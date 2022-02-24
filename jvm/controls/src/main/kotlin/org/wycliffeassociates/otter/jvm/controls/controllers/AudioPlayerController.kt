@@ -142,7 +142,23 @@ class AudioPlayerController(
         }
         audioSlider.setOnKeyPressed {
             when (it.code) {
-                KeyCode.LEFT, KeyCode.RIGHT -> seekInterval(it.code)
+                KeyCode.LEFT, KeyCode.RIGHT -> {
+                    if (player?.isPlaying() == true) {
+                        resumeAfterDrag = true
+                        toggle()
+                    }
+                    seekInterval(it.code)
+                }
+            }
+        }
+        audioSlider.setOnKeyReleased {
+            when (it.code) {
+                KeyCode.LEFT, KeyCode.RIGHT -> {
+                    if (resumeAfterDrag) {
+                        resumeAfterDrag = false
+                        toggle()
+                    }
+                }
                 KeyCode.ENTER, KeyCode.SPACE -> toggle()
             }
         }
@@ -210,19 +226,9 @@ class AudioPlayerController(
         return player?.getLocationInFrames() ?: 0
     }
 
-    private fun timeToFrames(milliSec: Int, sampleRate: Int = DEFAULT_SAMPLE_RATE): Int {
-        val framesPerMs = if (sampleRate > 0) {
-            sampleRate / 1000
-        } else {
-            DEFAULT_SAMPLE_RATE / 1000
-        }
-        return milliSec * framesPerMs
-    }
-
     private fun seekInterval(keyCode: KeyCode) {
         player?.let {
-            val sampleRate = it.getAudioReader()?.sampleRate ?: DEFAULT_SAMPLE_RATE
-            val interval = timeToFrames(1000, sampleRate)
+            val interval = percentageToLocation(10.0)
             var location = it.getLocationInFrames()
             when (keyCode) {
                 KeyCode.LEFT -> location -= interval

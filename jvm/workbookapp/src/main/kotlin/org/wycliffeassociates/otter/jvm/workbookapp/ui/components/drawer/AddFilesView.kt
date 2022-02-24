@@ -81,6 +81,9 @@ class AddFilesView : View() {
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
                             addClass("app-drawer__text--link")
+                            tooltip {
+                                text = "audio.bibleineverylanguage.org"
+                            }
                             action {
                                 hostServices.showDocument("https://audio.bibleineverylanguage.org/")
                             }

@@ -34,25 +34,6 @@
     -fx-text-fill: -wa-highlight-text;
 }
 
-.add-plugin-dialog__btn--close {
-    -fx-background-color: -wa-btn-icon-background;
-    -fx-border-color: -wa-border-neutral;
-    -fx-border-width: 2px;
-    -fx-border-radius: 4px;
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
-    -jfx-disable-visual-focus: true;
-}
-
-.add-plugin-dialog__btn--close:hover {
-    -fx-background-color: -wa-foreground-hover;
-}
-
-.add-plugin-dialog__btn--close .ikonli-font-icon {
-    -fx-icon-size: 24px;
-    -fx-fill: -wa-fill-neutral;
-}
-
 .add-plugin-dialog__info .label {
     -fx-text-fill: -wa-regular-text;
 }

@@ -149,39 +149,6 @@
     -fx-font-size: 24px;
 }
 
-.app-drawer__plugin .radio-button {
-    -fx-padding: 14px;
-    -fx-background-radius: 6px;
-}
-
-.app-drawer__plugin .radio-button:selected {
-    -fx-background-color: -wa-primary-05;
-}
-
-.app-drawer__plugin .radio-button:hover {
-    -fx-background-color: -wa-foreground-hover;
-}
-
-.app-drawer__plugin .radio-button:pressed {
-    -fx-background-color: -wa-foreground-pressed;
-}
-
-.app-drawer__plugin .radio-button .radio {
-    -fx-background-color: -wa-white;
-    -fx-border-width: 2px;
-    -fx-border-radius: 1.0em;
-    -fx-border-color: -wa-gray-darker;
-}
-
-.app-drawer__plugin .radio-button:selected .radio {
-    -fx-border-color: -wa-primary;
-}
-
-.app-drawer__plugin .radio-button:selected .radio .dot {
-    -fx-background-color: -wa-primary;
-    -fx-background-insets: -1, 0;
-}
-
 .app-drawer__drag-drop-area {
     -fx-alignment: center;
     -fx-border-width: 2px;
