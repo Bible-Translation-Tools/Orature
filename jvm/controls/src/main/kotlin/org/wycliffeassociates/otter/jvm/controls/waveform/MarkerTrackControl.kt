@@ -13,22 +13,8 @@ import tornadofx.observableListOf
 
 class MarkerTrackControl() : Control() {
 
-    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
-
     val markers = observableListOf<ChunkMarkerModel>()
     val highlightState = observableListOf<MarkerHighlightState>()
-
-    init {
-        markerStateProperty.onChangeAndDoNow { markers ->
-            markers?.let { markers ->
-                markers.markerCountProperty?.onChangeAndDoNow {
-                    this.markers.setAll(markers.markers)
-                    highlightState.setAll(markers.highlightState)
-                    refreshMarkers()
-                }
-            }
-        }
-    }
 
     fun refreshMarkers() {
         (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }

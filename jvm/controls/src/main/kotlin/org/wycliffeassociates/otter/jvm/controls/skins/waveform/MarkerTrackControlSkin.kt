@@ -62,7 +62,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         }
     }
 
-    private fun resetState() {
+    fun resetState() {
         markers.clear()
         highlights.clear()
         preDragThumbPos = DoubleArray(skinnable.markers.size)

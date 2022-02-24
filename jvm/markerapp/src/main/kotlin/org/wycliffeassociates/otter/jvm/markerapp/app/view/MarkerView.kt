@@ -59,8 +59,8 @@ class MarkerView : PluginEntrypoint() {
             viewModel.markerStateProperty.onChangeAndDoNow { markers ->
                 markers?.let { markers ->
                     markers.markerCountProperty?.onChangeAndDoNow {
-                        this.markers.setAll(viewModel.markers.markers)
                         highlightState.setAll(viewModel.markers.highlightState)
+                        this.markers.setAll(viewModel.markers.markers)
                         refreshMarkers()
                     }
                 }

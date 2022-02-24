@@ -41,6 +41,7 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.wav.WavFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -75,6 +76,9 @@ class ChunkingViewModel : ViewModel() {
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
+
+    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
+    val markers by markerStateProperty
 
     init {
         titleProperty.onChange {
@@ -116,13 +120,19 @@ class ChunkingViewModel : ViewModel() {
 
     val disposeables = mutableListOf<Disposable>()
 
+    lateinit var audio: AudioFile
+
     fun onDockConsume() {
         sourceAudio?.file?.let {
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-            val audio = loadAudio(it)
+            audio = loadAudio(it)
             createWaveformImages(audio)
             initializeAudioController()
         }
+    }
+
+    fun onDockChunk() {
+        loadMarkers(audio)
     }
 
     fun loadAudio(audioFile: File): AudioFile {
@@ -131,6 +141,12 @@ class ChunkingViewModel : ViewModel() {
         player.load(audioFile)
         audioPlayer.set(player)
         return audio
+    }
+
+    fun loadMarkers(audio: AudioFile) {
+        val totalMarkers: Int = 250
+        val markers = VerseMarkerModel(audio, totalMarkers)
+        markerStateProperty.set(markers)
     }
 
     fun calculatePosition() {
@@ -194,5 +210,10 @@ class ChunkingViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.get().getDurationInFrames() ?: 0
+    }
+
+    fun placeMarker() {
+        val pos = audioPlayer.get().getLocationInFrames()
+        markerStateProperty.get()?.addMarker(pos)
     }
 }
