@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
@@ -90,6 +91,7 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources.get("/css/chapter-card.css"))
         tryImportStylesheet(resources.get("/css/workbook-banner.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/contributor-info.css"))
     }
 
     /**
@@ -351,20 +353,26 @@ class WorkbookPage : View() {
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
                 alignment = Pos.CENTER
-                addClass(AppStyles.whiteBackground)
+
                 progressindicator {
                     visibleProperty().bind(viewModel.loadingProperty)
                     managedProperty().bind(visibleProperty())
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                listView = listview(viewModel.chapters) {
+                hbox {
                     vgrow = Priority.ALWAYS
-                    addClass("workbook-page__chapter-list")
 
-                    setCellFactory {
-                        ChapterCell()
+                    listView = listview(viewModel.chapters) {
+                        hgrow = Priority.ALWAYS
+                        vgrow = Priority.ALWAYS
+                        addClass("workbook-page__chapter-list")
+
+                        setCellFactory {
+                            ChapterCell()
+                        }
                     }
+                    add(ContributorInfo())
                 }
             }
         }

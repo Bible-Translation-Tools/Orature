@@ -1,0 +1,13 @@
+.contributor__section-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.25em;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.contributor__section-text {
+    -fx-fill: -wa-regular-text;
+}
+
+.contributor__list {
+
+}

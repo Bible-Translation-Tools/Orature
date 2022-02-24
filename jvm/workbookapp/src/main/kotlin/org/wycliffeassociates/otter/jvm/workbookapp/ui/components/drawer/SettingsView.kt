@@ -258,7 +258,7 @@ class SettingsView : View() {
                     }
 
                     label(messages["addApp"]).apply {
-                        addClass("app-drawer__text--link")
+                        addClass("wa-text-hyperlink")
                         tooltip {
                             textProperty().bind(this@apply.textProperty())
                         }

@@ -83,7 +83,7 @@ class AddFilesView : View() {
                             addClass("app-drawer__text")
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
-                            addClass("app-drawer__text--link")
+                            addClass("wa-text-hyperlink")
                             action {
                                 hostServices.showDocument("https://audio.bibleineverylanguage.org/")
                             }
