@@ -12,7 +12,10 @@ import tornadofx.FX.Companion.messages
 
 class ContributorInfo : VBox() {
     private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."))
+
     init {
+        addClass("contributor__container")
+
         vbox {
             label(messages["licenseHeading"]) {
                 addClass("contributor__section-title")
@@ -38,10 +41,13 @@ class ContributorInfo : VBox() {
             text(messages["contributorDescription"]) {
                 addClass("contributor__section-text")
             }
+        }
+        vbox {
             hbox {
+                addClass("contributor__input-group")
                 textfield {
-                    addClass("txt-input")
-
+                    addClass("txt-input", "contributor__text-input")
+                    promptText = messages["contributorName"]
                 }
                 label(messages["addContributor"]) {
                     addClass("wa-text-hyperlink")
@@ -52,7 +58,7 @@ class ContributorInfo : VBox() {
                 }
             }
             listview(contributors) {
-                addClass("wa-list-view")
+                addClass("wa-list-view", "contributor__list")
                 setCellFactory {
                     ContributorListCell()
                 }
@@ -74,15 +80,19 @@ class ContributorListCell : ListCell<Contributor>() {
 
         graphic = cellGraphic.apply {
             nameProperty.set(item.name)
+            disableProperty().set(true)
         }
     }
 }
 
 class ContributorCell : HBox() {
     val nameProperty = SimpleStringProperty()
+
     init {
+        addClass("contributor__list-cell")
+
         label(nameProperty) {
-            addClass("contributor__section-text")
+            addClass("contributor__list-cell__name")
         }
     }
 }

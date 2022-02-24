@@ -1,3 +1,8 @@
+.contributor__container {
+    -fx-padding: 30px;
+    -fx-spacing: 20px;
+}
+
 .contributor__section-title {
     -fx-font-weight: bold;
     -fx-font-size: 1.25em;
@@ -6,8 +11,33 @@
 
 .contributor__section-text {
     -fx-fill: -wa-regular-text;
+    -fx-font-size: 1.1em;
+}
+
+.contributor__input-group {
+    -fx-align: center-left;
+}
+
+.contributor__text-input {
+    -fx-font-size: 1.2em;
+    -fx-pref-height: 42px;
 }
 
 .contributor__list {
+    -fx-padding: 8px 0;
+}
 
+.contributor__list .list-cell {
+    -fx-padding: 2px 0;
+}
+
+.contributor__list-cell {
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px 10px;
+}
+
+.contributor__list-cell__name.label {
+    -fx-font-size: 1.15em;
+    -fx-text-fill: -wa-regular-text;
 }

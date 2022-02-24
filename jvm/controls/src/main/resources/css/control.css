@@ -286,7 +286,6 @@
 }
 .txt-input:focused {
     -fx-text-fill: -wa-text-input-fill;
-    -fx-font-size: 20px;
     -fx-background-color: -wa-text-field-background-focused;
     -fx-border-color: -wa-text-field-border-focused;
     -fx-effect: -wa-text-field-focused-effect;
