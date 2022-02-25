@@ -144,7 +144,7 @@ class ChunkingViewModel : ViewModel() {
     }
 
     fun loadMarkers(audio: AudioFile) {
-        val totalMarkers: Int = 250
+        val totalMarkers: Int = 200
         val markers = VerseMarkerModel(audio, totalMarkers)
         markerStateProperty.set(markers)
     }
@@ -216,4 +216,31 @@ class ChunkingViewModel : ViewModel() {
         val pos = audioPlayer.get().getLocationInFrames()
         markerStateProperty.get()?.addMarker(pos)
     }
+
+    fun seekNext() {
+        val wasPlaying = audioPlayer.get().isPlaying()
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+        markerStateProperty.get()?.let { markers ->
+            seek(markers.seekNext(audioPlayer.get().getLocationInFrames()))
+        }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+    }
+
+    fun seekPrevious() {
+        val wasPlaying = audioPlayer.get().isPlaying()
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+        markerStateProperty.get()?.let { markers ->
+            seek(markers.seekPrevious(audioPlayer.get().getLocationInFrames()))
+        }
+        if (wasPlaying) {
+            audioController?.toggle()
+        }
+    }
+
 }

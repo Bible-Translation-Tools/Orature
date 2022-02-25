@@ -1,9 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.jfoenix.controls.JFXButton
 import com.sun.javafx.util.Utils
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
+import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -24,6 +26,14 @@ class Chunk : Fragment() {
 
     val playIcon = FontIcon("mdi-play")
     val pauseIcon = FontIcon("mdi-pause")
+    private val nextIcon = FontIcon("gmi-skip-next")
+    private val previousIcon = FontIcon("gmi-skip-previous")
+
+    private val rootStyles = "vm-play-controls"
+    private val playButtonStyle = "vm-play-controls__play-btn"
+    private val roundedButtonStyle = "vm-play-controls__btn--rounded"
+    private val seekButtonStyle = "vm-play-controls__seek-btn"
+    private val continueButtonStyle = "vm-continue-button"
 
     val vm: ChunkingViewModel by inject()
 
@@ -91,6 +101,27 @@ class Chunk : Fragment() {
         }
         bottom = hbox {
             styleClass.addAll("consume__bottom")
+            styleClass.add(rootStyles)
+            alignment = Pos.CENTER
+            val nextBtn = JFXButton().apply {
+                graphic = nextIcon
+                setOnAction { vm.seekNext() }
+                styleClass.addAll(
+                    seekButtonStyle,
+                    roundedButtonStyle
+                )
+            }
+
+            val previousBtn = JFXButton().apply {
+                graphic = previousIcon
+                setOnAction { vm.seekPrevious() }
+                styleClass.addAll(
+                    seekButtonStyle,
+                    roundedButtonStyle
+                )
+            }
+            add(previousBtn)
+
             button {
                 vm.isPlayingProperty.onChangeAndDoNow {
                     it?.let {
@@ -100,11 +131,15 @@ class Chunk : Fragment() {
                         }
                     }
                 }
-                styleClass.addAll("btn", "btn--cta", "consume__btn--primary")
+                styleClass.addAll(
+                    playButtonStyle,
+                    roundedButtonStyle
+                )
                 action {
                     vm.mediaToggle()
                 }
             }
+            add(nextBtn)
         }
     }
 }
