@@ -138,15 +138,9 @@ class ProjectImporter @Inject constructor(
         manifestProject: Project,
         manifestSources: Set<Source>
     ) {
-        val existingSource = fetchExistingSource(manifestProject, manifestSources)
-        // if any relevant source exists then use it
-        val sourceCollection = if (existingSource == null) {
-            importSources(fileReader)
-            findSourceCollection(manifestSources, manifestProject)
-        } else {
-            existingSource
-        }
+        importSources(fileReader)
 
+        val sourceCollection = findSourceCollection(manifestSources, manifestProject)
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
@@ -188,7 +182,11 @@ class ProjectImporter @Inject constructor(
             ContainerType.Help -> sourceCollection
             else -> project
         }
-        val sourceMetadata = sourceCollection.resourceContainer!!
+
+        val sourceMetadata = resourceMetadataRepository
+            .get(metadata)
+            .flatMapMaybe(resourceMetadataRepository::getSource)
+            .blockingGet()
 
         val selectedTakes = fileReader
             .bufferedReader(RcConstants.SELECTED_TAKES_FILE)
@@ -269,24 +267,6 @@ class ProjectImporter @Inject constructor(
         return directoryProvider.newFileReader(resourceContainer).use {
             it.exists(RcConstants.SELECTED_TAKES_FILE)
         }
-    }
-
-    /**
-     * Find the relevant source (if any) for the project, regardless of version
-     */
-    private fun fetchExistingSource(
-        manifestProject: Project,
-        requestedSources: Set<Source>
-    ): Collection? {
-        return collectionRepository.getSourceProjects().blockingGet()
-            .asSequence()
-            .firstOrNull { collection ->
-                requestedSources.any { source ->
-                    manifestProject.identifier == collection.slug &&
-                            source.identifier == collection.resourceContainer!!.identifier &&
-                            source.language == collection.resourceContainer!!.language.slug
-                }
-            }
     }
 
     private fun importSources(fileReader: IFileReader) {

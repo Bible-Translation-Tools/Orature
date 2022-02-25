@@ -169,9 +169,9 @@ class ImportResourceContainer @Inject constructor(
      * importing the new one if they have different versions.
      * Returns false if it could not delete the existing RC.
      */
-    private fun tryUpdateExistingRC(newFile: File): Boolean {
-        ResourceContainer.load(newFile).use { newRc ->
-            val dublinCore = newRc.manifest.dublinCore
+    private fun tryUpdateExistingRC(rcFile: File): Boolean {
+        ResourceContainer.load(rcFile).use { rc ->
+            val dublinCore = rc.manifest.dublinCore
             resourceMetadataRepository.getAllSources().blockingGet()
                 .find {
                     it.language.slug == dublinCore.language.identifier &&
@@ -180,10 +180,9 @@ class ImportResourceContainer @Inject constructor(
                     var isDeleted = false
 
                     // delete if matching rc has different version
-                    if (existingRc.version != newRc.manifest.dublinCore.version) {
+                    if (existingRc.version != rc.manifest.dublinCore.version) {
                         logger.info("Existing RC has different version, updating...")
-
-                        val result = deleteProvider.get().delete(existingRc.path).blockingGet()
+                        val result = deleteProvider.get().delete(rc).blockingGet()
                         if (result == DeleteResult.SUCCESS) {
                             isDeleted = true
                             logger.info("Removed old RC successfully!")

@@ -6,30 +6,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
-      - name: Parse SemVer if tagged build
-        id: semver_parser 
-        uses: booxmedialtd/ws-action-parse-semver@v1.4.2
-        with:
-          input_string: ${{ env.CI_REF_NAME }}
-          version_extractor_regex: 'v(.*)$' 
-        if: contains( github.ref, 'refs/tags/v' )
-      - name: set version var for tags and update path for releases
-        id: tagged
-        run: |
-          echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=${{ steps.semver_parser.outputs.fullversion }}+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
-          echo "UPDATE_PATH=release" >> $GITHUB_ENV
-        if: contains( github.ref, 'refs/tags/v' )
-      - name: If this is a tagged pre-release build set pre-release label and update path
-        id: prerelease
-        run: |
-          echo "PRERELEASE_LABEL=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV && \
-          echo "UPDATE_PATH=pre-release-updates/$PRERELEASE_LABEL" >> $GITHUB_ENV
-        if: ${{ steps.semver_parser.outputs.prerelease }}
-      - name: set version var for not-tags and upload dir for branches
-        run: |
-          echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=$(cat VERSION)+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
-          echo "UPDATE_PATH=$CI_REF_NAME_SLUG" >> $GITHUB_ENV
-        if: ${{ steps.tagged.outcome == 'skipped' }}
+      - name: set version var
+        run: echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=$(cat VERSION)_$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
       - name: Decrypt secret file
         shell: bash
         run: ./.github/scripts/decrypt_secret.sh
@@ -59,11 +37,14 @@ jobs:
           ORG_GRADLE_PROJECT_sentryDsn: ${{ secrets.SENTRY_OTTER_DSN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: set s3 destination_dir
-        run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$UPDATE_PATH" >> $GITHUB_ENV
+      - name: set s3 destination_dir for branches that are not release or dev
+        if: ${{ env.CI_REF_NAME_SLUG != 'release' && env.CI_REF_NAME_SLUG != 'dev' && env.CI_REF_NAME_SLUG != 'jbs-install4j-update' }}
+        run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$CI_REF_NAME_SLUG/$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+      - name: set s3 destination_dir for release or dev for install4j updates to work
+        if: ${{ env.CI_REF_NAME_SLUG == 'release' || env.CI_REF_NAME_SLUG == 'dev' || env.CI_REF_NAME_SLUG == 'jbs-install4j-update' }}
+        run: echo "CURRENT_S3_DESTINATION=$CI_REPOSITORY_OWNER/$CI_REPOSITORY_NAME/$CI_REF_NAME_SLUG" >> $GITHUB_ENV
       - name: Upload file to bucket
         uses: shallwefootball/s3-upload-action@v1.1.3
-        if: github.event_name != 'pull_request'
         with:
           aws_key_id: ${{ secrets.AWS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
