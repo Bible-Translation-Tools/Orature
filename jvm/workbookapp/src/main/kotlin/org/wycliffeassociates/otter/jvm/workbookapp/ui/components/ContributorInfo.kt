@@ -24,8 +24,8 @@ class ContributorInfo : VBox() {
                 text(messages["licenseDescription"]) {
                     addClass("contributor__section-text")
                 }
-                hyperlink("CC BY-SA 4.0") {
-                    addClass("")
+                hyperlink("Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)") {
+                    addClass("contributor__license-link")
                     action {
                         FX.application.hostServices.showDocument(
                             "https://creativecommons.org/licenses/by-sa/4.0/"
@@ -49,10 +49,10 @@ class ContributorInfo : VBox() {
                     addClass("txt-input", "contributor__text-input")
                     promptText = messages["contributorName"]
                 }
-                label(messages["addContributor"]) {
-                    addClass("wa-text-hyperlink")
+                button(messages["addContributor"]) {
+                    addClass("btn--secondary","btn--borderless")
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                    setOnMouseClicked {
+                    setOnAction {
 
                     }
                 }
