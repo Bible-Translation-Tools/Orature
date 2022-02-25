@@ -159,7 +159,10 @@ class AudioPlayerController(
                         toggle()
                     }
                 }
-                KeyCode.ENTER, KeyCode.SPACE -> toggle()
+                KeyCode.ENTER, KeyCode.SPACE -> {
+                    toggle()
+                    it.consume()
+                }
             }
         }
     }

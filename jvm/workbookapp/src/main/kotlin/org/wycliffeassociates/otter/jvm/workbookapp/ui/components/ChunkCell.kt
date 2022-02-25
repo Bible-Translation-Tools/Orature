@@ -19,11 +19,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.scene.control.ListCell
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
 import java.text.MessageFormat
-import org.wycliffeassociates.otter.common.utils.capitalizeString
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 
 class ChunkCell(
     private val orientationScale: Double
