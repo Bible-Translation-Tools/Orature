@@ -24,13 +24,10 @@ import com.sun.javafx.util.Utils
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
-import javafx.scene.Node
-import javafx.scene.layout.HBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
-import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
@@ -67,8 +64,8 @@ class Chunk : Fragment() {
         tryImportStylesheet(resources.get("/css/consume-page.css"))
         vm.onDockConsume()
         vm.pageProperty.set(ChunkingWizardPage.CHUNK)
-        vm.titleProperty.set("Chunking")
-        vm.stepProperty.set(MessageFormat.format(messages["consumeDescription"], vm.chapterTitle))
+        vm.titleProperty.set(messages["chunkingTitle"])
+        vm.stepProperty.set(messages["chunkingDescription"])
 
         timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
