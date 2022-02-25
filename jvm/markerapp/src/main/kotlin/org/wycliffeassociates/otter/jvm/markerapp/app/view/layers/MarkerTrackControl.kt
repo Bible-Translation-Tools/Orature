@@ -34,9 +34,12 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
+import javafx.beans.property.SimpleObjectProperty
 
-class MarkerTrackControl(val markers: List<ChunkMarkerModel>, val highlightState: List<MarkerHighlightState>) :
-    Control() {
+class MarkerTrackControl() : Control() {
+
+    val markers = observableListOf<ChunkMarkerModel>()
+    val highlightState = observableListOf<MarkerHighlightState>()
 
     fun refreshMarkers() {
         (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }

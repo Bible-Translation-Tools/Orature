@@ -19,14 +19,23 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.jfoenix.controls.JFXButton
+import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
-class PlaceMarkerLayer(viewModel: VerseMarkerViewModel) : VBox() {
+class PlaceMarkerLayer : VBox() {
+
+    val onPlaceMarkerActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    fun onPlaceMarkerAction(op: () -> Unit) {
+        onPlaceMarkerActionProperty.set(EventHandler { op.invoke() })
+    }
+
     init {
         with(this) {
             isPickOnBounds = false
@@ -43,9 +52,7 @@ class PlaceMarkerLayer(viewModel: VerseMarkerViewModel) : VBox() {
                         "vm-play-controls__btn--rounded",
                         "vm-play-controls__add-marker-btn"
                     )
-                    setOnAction {
-                        viewModel.placeMarker()
-                    }
+                    onActionProperty().bind(onPlaceMarkerActionProperty)
                 }
             )
             style {
