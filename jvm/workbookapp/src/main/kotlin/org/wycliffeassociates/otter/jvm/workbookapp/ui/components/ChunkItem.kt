@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import com.sun.javafx.scene.traversal.Direction
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -27,13 +26,11 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.control.ListView
-import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
-import org.wycliffeassociates.otter.jvm.controls.utils.simulateKeyPress
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.removeListViewClip
 import tornadofx.*
@@ -57,20 +54,6 @@ class ChunkItem : VBox() {
 
     init {
         styleClass.setAll("chunk-item")
-        setOnKeyReleased {
-            when (it.code) {
-                KeyCode.ENTER, KeyCode.SPACE -> {
-                    toggleShowTakes()
-                }
-                KeyCode.DOWN -> simulateKeyPress(KeyCode.TAB, Direction.DOWN)
-                KeyCode.UP -> simulateKeyPress(KeyCode.TAB, Direction.UP)
-            }
-        }
-
-        setOnMouseClicked {
-            requestFocus()
-            toggleShowTakes()
-        }
 
         hbox {
             vbox {
@@ -173,7 +156,7 @@ class ChunkItem : VBox() {
         )
     }
 
-    private fun toggleShowTakes() {
+    fun toggleShowTakes() {
         if (!showTakesProperty.value) createTakeViews()
         showTakesProperty.set(showTakesProperty.value.not())
     }

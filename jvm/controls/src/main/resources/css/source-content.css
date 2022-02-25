@@ -18,6 +18,10 @@
  */
 
 .source-content {
+    -fx-focus-traversable: false;
+}
+
+.source-content__root {
     -fx-background-color: -wa-background;
     -fx-padding: 10px 20px;
     -fx-alignment: center;
@@ -79,6 +83,16 @@
     -fx-border-width: 0 0 1px 0;
     -fx-border-color: -wa-border-light;
     -fx-padding: 15px 5px;
+}
+
+.source-content__scroll-pane {
+    -fx-focus-traversable: true;
+}
+
+.source-content__scroll-pane:focused {
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-card-border;
 }
 
 .source-content__scroll-pane,

@@ -18,8 +18,11 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import com.sun.javafx.scene.traversal.Direction
 import javafx.scene.control.ListCell
+import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.utils.capitalizeString
+import org.wycliffeassociates.otter.jvm.controls.utils.simulateKeyPress
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
@@ -59,6 +62,21 @@ class ChunkCell(
             hasSelectedProperty.set(item.takes.size > 0)
 
             refreshTakes()
+
+            setOnKeyReleased {
+                when (it.code) {
+                    KeyCode.ENTER, KeyCode.SPACE -> {
+                        toggleShowTakes()
+                    }
+                    KeyCode.DOWN -> simulateKeyPress(KeyCode.TAB, Direction.DOWN)
+                    KeyCode.UP -> simulateKeyPress(KeyCode.TAB, Direction.UP)
+                }
+            }
+
+            setOnMouseClicked {
+                requestFocus()
+                toggleShowTakes()
+            }
         }
     }
 
