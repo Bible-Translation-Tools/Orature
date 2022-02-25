@@ -60,6 +60,12 @@ const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 
+enum class ChunkingWizardPage {
+    CONSUME,
+    VERBALIZE,
+    CHUNK
+}
+
 class ChunkingViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
@@ -69,6 +75,7 @@ class ChunkingViewModel : ViewModel() {
     val chunkStepColor = SimpleStringProperty(INACTIVE)
 
     val chapterTitle get() = workbookDataStore.activeChapterProperty.value?.title ?: ""
+    val pageProperty = SimpleObjectProperty(ChunkingWizardPage.CONSUME)
     val titleProperty = SimpleStringProperty("")
     val stepProperty = SimpleStringProperty("")
 
@@ -81,19 +88,20 @@ class ChunkingViewModel : ViewModel() {
     val markers by markerStateProperty
 
     init {
-        titleProperty.onChange {
-            when (it) {
-                "Consume" -> {
+
+        pageProperty.onChange {
+            when(it) {
+                ChunkingWizardPage.CONSUME -> {
                     consumeStepColor.set(ACTIVE)
                     verbalizeStepColor.set(INACTIVE)
                     chunkStepColor.set(INACTIVE)
                 }
-                "Verbalize" -> {
+                ChunkingWizardPage.VERBALIZE -> {
                     consumeStepColor.set(COMPLETE)
                     verbalizeStepColor.set(ACTIVE)
                     chunkStepColor.set(INACTIVE)
                 }
-                "Chunking" -> {
+                ChunkingWizardPage.CHUNK -> {
                     consumeStepColor.set(COMPLETE)
                     verbalizeStepColor.set(COMPLETE)
                     chunkStepColor.set(ACTIVE)

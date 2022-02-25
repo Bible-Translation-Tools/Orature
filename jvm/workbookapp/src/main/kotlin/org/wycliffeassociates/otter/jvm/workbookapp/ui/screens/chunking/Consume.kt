@@ -28,6 +28,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SECONDS_ON_SCREEN
 import tornadofx.*
 
@@ -45,6 +46,7 @@ class Consume : Fragment() {
         tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
         vm.onDockConsume()
+        vm.pageProperty.set(ChunkingWizardPage.CONSUME)
         vm.titleProperty.set(messages["consumeTitle"])
         vm.stepProperty.set(MessageFormat.format(messages["consumeDescription"], vm.chapterTitle))
 

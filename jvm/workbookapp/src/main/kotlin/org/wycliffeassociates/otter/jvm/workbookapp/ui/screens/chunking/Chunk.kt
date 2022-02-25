@@ -15,6 +15,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import tornadofx.Fragment
 import tornadofx.action
 import tornadofx.borderpane
@@ -47,6 +48,7 @@ class Chunk : Fragment() {
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
         vm.onDockConsume()
+        vm.pageProperty.set(ChunkingWizardPage.CHUNK)
         vm.titleProperty.set("Chunking")
         vm.stepProperty.set(MessageFormat.format(messages["consumeDescription"], vm.chapterTitle))
 

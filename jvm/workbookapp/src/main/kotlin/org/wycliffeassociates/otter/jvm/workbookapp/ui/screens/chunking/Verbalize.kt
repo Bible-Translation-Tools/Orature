@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
 import tornadofx.*
 
@@ -48,6 +49,7 @@ class Verbalize : View() {
         tryImportStylesheet(resources["/css/verbalize-page.css"])
         logger.info("Verbalize docked")
         vm.onDock()
+        chunkVm.pageProperty.set(ChunkingWizardPage.VERBALIZE)
         chunkVm.titleProperty.set(messages["verbalizeTitle"])
         chunkVm.stepProperty.set(messages["verbalizeDescription"])
     }
