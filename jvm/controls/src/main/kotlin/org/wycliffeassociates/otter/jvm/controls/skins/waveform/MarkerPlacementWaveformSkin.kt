@@ -42,7 +42,7 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
-            styleClass.add("vm-waveform-container")
+            styleClass.add("scrolling-waveform-container")
 
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 

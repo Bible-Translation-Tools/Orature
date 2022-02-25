@@ -71,6 +71,7 @@ class MarkerView : PluginEntrypoint() {
 
     init {
         tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
+        tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
     }
 

@@ -43,7 +43,7 @@ class Consume : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
+        tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/consume-page.css"))
         vm.onDockConsume()
         vm.pageProperty.set(ChunkingWizardPage.CONSUME)

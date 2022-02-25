@@ -45,11 +45,11 @@ class Chunk : Fragment() {
     private val nextIcon = FontIcon("gmi-skip-next")
     private val previousIcon = FontIcon("gmi-skip-previous")
 
-    private val rootStyles = "vm-play-controls"
-    private val playButtonStyle = "vm-play-controls__play-btn"
-    private val roundedButtonStyle = "vm-play-controls__btn--rounded"
-    private val seekButtonStyle = "vm-play-controls__seek-btn"
-    private val continueButtonStyle = "vm-continue-button"
+    private val rootStyles = "chunking-play-controls"
+    private val playButtonStyle = "chunking-play-controls__play-btn"
+    private val roundedButtonStyle = "chunking-play-controls__btn--rounded"
+    private val seekButtonStyle = "chunking-play-controls__seek-btn"
+    private val continueButtonStyle = "chunking-continue-button"
 
     val vm: ChunkingViewModel by inject()
 
@@ -59,9 +59,9 @@ class Chunk : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
+        tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
-        tryImportStylesheet(resources.get("/css/consume-page.css"))
+        tryImportStylesheet(resources.get("/css/chunk-page.css"))
         vm.onDockConsume()
         vm.pageProperty.set(ChunkingWizardPage.CHUNK)
         vm.titleProperty.set(messages["chunkingTitle"])

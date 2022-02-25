@@ -49,14 +49,14 @@ class PlaceMarkerLayer : VBox() {
                 JFXButton("", FontIcon("mdi-bookmark-plus-outline")).apply {
                     styleClass.addAll(
                         "btn--cta",
-                        "vm-play-controls__btn--rounded",
-                        "vm-play-controls__add-marker-btn"
+                        "scrolling-waveform-play-controls__btn--rounded",
+                        "scrolling-waveform-play-controls__add-marker-btn"
                     )
                     onActionProperty().bind(onPlaceMarkerActionProperty)
                 }
             )
             style {
-                styleClass.addAll("vm-play-controls__add-marker-container")
+                styleClass.addAll("scrolling-waveform-play-controls__add-marker-container")
             }
         }
     }

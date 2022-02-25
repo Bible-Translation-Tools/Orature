@@ -71,7 +71,7 @@ class WaveformFrame(
 
             top {
                 region {
-                    styleClass.add("vm-waveform-frame__top-track")
+                    styleClass.add("scrolling-waveform-frame__top-track")
                     topTrack?.let {
                         add(it)
                     }
@@ -83,7 +83,7 @@ class WaveformFrame(
                     imageRegion = this
                     stackpane {
                         highlightHolder = this
-                        styleClass.add("vm-waveform-frame__center")
+                        styleClass.add("scrolling-waveform-frame__center")
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
@@ -96,7 +96,7 @@ class WaveformFrame(
 
             bottom {
                 region {
-                    styleClass.add("vm-waveform-frame__bottom-track")
+                    styleClass.add("scrolling-waveform-frame__bottom-track")
                     bottomTrack?.let {
                         add(it)
                     }

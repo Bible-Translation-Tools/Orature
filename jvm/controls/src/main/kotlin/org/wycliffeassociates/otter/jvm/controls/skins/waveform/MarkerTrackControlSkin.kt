@@ -36,7 +36,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 
     val track: Region = Region().apply {
-        styleClass.add("vm-marker-track")
+        styleClass.add("scrolling-waveform__marker-track")
     }
 
     val markers = mutableListOf<ChunkMarker>()

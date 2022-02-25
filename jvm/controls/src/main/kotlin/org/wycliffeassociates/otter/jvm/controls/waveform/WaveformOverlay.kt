@@ -21,7 +21,7 @@ class WaveformOverlay : StackPane() {
 
         add(
             Rectangle().apply {
-                styleClass.add("vm-waveform-holder--played")
+                styleClass.add("scrolling-waveform-holder--played")
                 heightProperty().bind(this@WaveformOverlay.heightProperty().minus(90.0))
                 widthProperty().bind(
                     Bindings.min(
@@ -36,7 +36,7 @@ class WaveformOverlay : StackPane() {
         add(
             Line(0.0, 40.0, 0.0, 0.0).apply {
                 endYProperty().bind(this@WaveformOverlay.heightProperty())
-                styleClass.add("vm-playback-line")
+                styleClass.add("scrolling-waveform__playback-line")
             }
         )
     }

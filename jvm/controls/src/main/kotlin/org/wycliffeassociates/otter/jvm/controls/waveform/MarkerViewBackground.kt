@@ -32,13 +32,13 @@ class MarkerViewBackground : BorderPane() {
         with(this) {
             top {
                 region {
-                    styleClass.add("vm-waveform-frame__top-track")
+                    styleClass.add("scrolling-waveform-frame__top-track")
                 }
             }
 
             bottom {
                 region {
-                    styleClass.add("vm-waveform-frame__bottom-track")
+                    styleClass.add("scrolling-waveform-frame__bottom-track")
                 }
             }
         }
