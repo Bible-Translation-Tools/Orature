@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceContainerRepository
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
+import java.io.File
 import javax.inject.Inject
 
 class DeleteResourceContainer @Inject constructor(
@@ -42,11 +43,17 @@ class DeleteResourceContainer @Inject constructor(
                     val file = directoryProvider.getSourceContainerDirectory(resourceContainer)
                     logger.info("Deleting RC: $file")
                     if (file.deleteRecursively()) {
-                        logger.error("RC partially deleted: $file")
-                    } else {
                         logger.info("RC deleted successfully!")
+                    } else {
+                        logger.error("RC partially deleted: $file")
                     }
                 }
             }
+    }
+
+    fun delete(rcFile: File): Single<DeleteResult> {
+        ResourceContainer.load(rcFile).use {
+            return delete(it)
+        }
     }
 }
