@@ -22,6 +22,7 @@ import javafx.beans.binding.Bindings
 import javafx.beans.property.BooleanProperty
 import javafx.collections.ObservableList
 import javafx.scene.control.ListCell
+import javafx.scene.input.KeyCode
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -70,6 +71,14 @@ class LanguageCell(
 
             setOnMouseClicked {
                 onSelected(item)
+            }
+
+            if (isSelected and !isDisabled) {
+                listView.setOnKeyPressed {
+                    when (it.code) {
+                        KeyCode.ENTER, KeyCode.SPACE -> onSelected(item)
+                    }
+                }
             }
 
             disableProperty().bind(Bindings.createBooleanBinding(

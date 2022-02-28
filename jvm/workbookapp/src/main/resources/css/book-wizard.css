@@ -94,11 +94,24 @@
 
 .book-wizard__list {
     -fx-background-color: -wa-transparent;
+    -fx-focus-traversable: true;
 }
 
 .book-wizard__list .list-cell {
     -fx-background-color: -wa-transparent;
     -fx-padding: 5px 0;
+}
+
+.book-wizard__list:focused,
+.book-wizard__list .list-cell:focused,
+.book-wizard__list .list-cell:focused .book-card-cell {
+    -fx-border-width: 0;
+}
+
+.book-wizard__list:focused .list-cell:focused .book-card-cell {
+    -fx-border-color: -wa-card-border;
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
 }
 
 .book-wizard__title,

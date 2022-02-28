@@ -18,23 +18,27 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.utils
 
-import com.sun.javafx.scene.traversal.Direction
 import javafx.scene.Node
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 
-fun Node.simulateKeyPress(key: KeyCode, direction: Direction) {
-    val shiftPressed = direction == Direction.UP
+fun Node.simulateKeyPress(
+    key: KeyCode,
+    shiftDown: Boolean = false,
+    controlDown: Boolean = false,
+    altDown: Boolean = false,
+    metaDown: Boolean = false
+) {
     fireEvent(
         KeyEvent(
             KeyEvent.KEY_PRESSED,
             "",
             "",
             key,
-            shiftPressed,
-            false,
-            false,
-            false
+            shiftDown,
+            controlDown,
+            altDown,
+            metaDown
         )
     )
 }
