@@ -61,6 +61,11 @@
     -fx-background-radius: 3px;
 }
 
+.source-content__minimize-btn:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+}
+
 .source-content__minimize-btn .ikonli-font-icon {
     -fx-icon-size: 20px;
     -fx-fill: -wa-regular-text;
