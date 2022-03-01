@@ -19,14 +19,16 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import tornadofx.*
 
-class WaveformOverlay(val viewModel: VerseMarkerViewModel) : StackPane() {
+class WaveformOverlay : StackPane() {
+
+    val playbackPositionProperty = SimpleDoubleProperty(0.0)
 
     init {
         isMouseTransparent = true
@@ -38,7 +40,7 @@ class WaveformOverlay(val viewModel: VerseMarkerViewModel) : StackPane() {
                 heightProperty().bind(this@WaveformOverlay.heightProperty().minus(90.0))
                 widthProperty().bind(
                     Bindings.min(
-                        viewModel.positionProperty,
+                        playbackPositionProperty,
                         this@WaveformOverlay.widthProperty().divide(2)
                     )
                 )
