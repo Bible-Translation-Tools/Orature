@@ -5,6 +5,7 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import org.junit.Assert
 import org.junit.Test
 import org.testfx.api.FxToolkit
@@ -13,6 +14,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import tornadofx.*
 import org.junit.After
 import org.junit.Before
+import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
+import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 
 class ChapterPageViewModelTest2 {
 
@@ -208,9 +211,107 @@ class ChapterPageViewModelTest2 {
         Assert.assertEquals(100, chapterPageViewModel.workChunkProperty.value.sort)
     }
 
+    //    @Test
+//    fun `compiling chapter updates isCompiling property`() {
+//        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
+//        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
+//
+//        chunk1.audio.insertTake(take1)
+//        chunk1.audio.selectTake(take1)
+//        chunk2.audio.insertTake(take2)
+//        chunk2.audio.selectTake(take2)
+//
+//        WaitForAsyncUtils.waitForFxEvents()
+//
+//        val file = directoryProvider.createTempFile("take1", ".wav")
+//        take1File.copyTo(file, true)
+//
+//        chapterPageViewModel.concatenateAudio = mock {
+//            on { execute(any(), any()) } doReturn Single.just(file)
+//        }
+//
+//        var counter = 1
+//        isCompilingListener = createChangeListener {
+//            when (counter) {
+//                1 -> Assert.assertEquals(true, it)
+//                2 -> Assert.assertEquals(false, it)
+//            }
+//            counter++
+//        }
+//        chapterPageViewModel.isCompilingProperty.addListener(isCompilingListener)
+//
+//        chapterPageViewModel.checkCanCompile()
+//        chapterPageViewModel.compile()
+//    }
+//
+//    @Test
+//    fun `exporting chapter updates export dialog property`() {
+//        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
+//
+//        chapter1.audio.insertTake(take)
+//        chapter1.audio.selectTake(take)
+//        chapterPageViewModel.audioConverter = mock {
+//            on { wavToMp3(any(), any(), any()) } doReturn Completable.complete()
+//        }
+//
+//        var counter = 1
+//        showExportProgressListener = createChangeListener {
+//            when (counter) {
+//                1 -> Assert.assertEquals(true, it)
+//                2 -> Assert.assertEquals(false, it)
+//            }
+//            counter++
+//        }
+//        chapterPageViewModel.showExportProgressDialogProperty.addListener(showExportProgressListener)
+//
+//        WaitForAsyncUtils.waitForFxEvents()
+//
+//        chapterPageViewModel.exportChapter(File("test"))
+//    }
+//
+
     @Test
-    fun `record first chapter take with take number 1`() {
+    fun `dialogTextBinding for audio plugin text`() {
+        val stringProperty = SimpleStringProperty()
         val chapterPageViewModel = find<ChapterPageViewModel>()
-        chapterPageViewModel.recordChapter()
+        val settingsViewModel = find<SettingsViewModel>()
+        val workbookDataStore = find<WorkbookDataStore>()
+
+
+        stringProperty.bind(chapterPageViewModel.dialogTextBinding())
+
+        val recorderMock = mock<AudioPluginData>() {
+            on { name } doReturn "testRecorder"
+        }
+
+        val editorMock = mock<AudioPluginData>() {
+            on { name } doReturn "testEditor"
+        }
+        val markerMock = mock<AudioPluginData>() {
+            on { name } doReturn "testMarker"
+        }
+
+        settingsViewModel.selectedRecorderProperty.set(recorderMock)
+        chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
+        workbookDataStore.activeTakeNumberProperty.set(1)
+
+        val recorderExpected = "Orature will be unavailable while take 01 is open in testRecorder. " +
+                "Finish your work in testRecorder to continue using Orature."
+
+        val editorExpected = "Orature will be unavailable while take 01 is open in testEditor. " +
+                "Finish your work in testEditor to continue using Orature."
+
+        val markerExpected = "Orature will be unavailable while take 01 is open in testMarker. " +
+                "Finish your work in testMarker to continue using Orature."
+
+        Assert.assertEquals(recorderExpected, stringProperty.value)
+
+        settingsViewModel.selectedEditorProperty.set(editorMock)
+        chapterPageViewModel.contextProperty.set(PluginType.EDITOR)
+        Assert.assertEquals(editorExpected, stringProperty.value)
+
+        settingsViewModel.selectedMarkerProperty.set(markerMock)
+        chapterPageViewModel.contextProperty.set(PluginType.MARKER)
+        Assert.assertEquals(markerExpected, stringProperty.value)
     }
 }

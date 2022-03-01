@@ -288,20 +288,7 @@ class ChapterPageViewModelTest {
 //        }
 //    }
 //
-//    @Test
-//    fun `record first chapter take with take number 1`() {
-//        contextListener = createChangeListener {
-//            Assert.assertEquals(PluginType.RECORDER, it)
-//        }
-//        chapterPageViewModel.contextProperty.addListener(contextListener)
-//
-//        activeTakeNumberListener = createChangeListener {
-//            Assert.assertEquals(1, it)
-//        }
-//        workbookDataStore.activeTakeNumberProperty.addListener(activeTakeNumberListener)
-//
-//        chapterPageViewModel.recordChapter()
-//    }
+
 //
 //    @Test
 //    fun `process take with recorder plugin`() {
@@ -393,88 +380,5 @@ class ChapterPageViewModelTest {
 //        chapterPageViewModel.processTakeWithPlugin(PluginType.MARKER)
 //    }
 //
-//    @Test
-//    fun `compiling chapter updates isCompiling property`() {
-//        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
-//        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
-//
-//        chunk1.audio.insertTake(take1)
-//        chunk1.audio.selectTake(take1)
-//        chunk2.audio.insertTake(take2)
-//        chunk2.audio.selectTake(take2)
-//
-//        WaitForAsyncUtils.waitForFxEvents()
-//
-//        val file = directoryProvider.createTempFile("take1", ".wav")
-//        take1File.copyTo(file, true)
-//
-//        chapterPageViewModel.concatenateAudio = mock {
-//            on { execute(any(), any()) } doReturn Single.just(file)
-//        }
-//
-//        var counter = 1
-//        isCompilingListener = createChangeListener {
-//            when (counter) {
-//                1 -> Assert.assertEquals(true, it)
-//                2 -> Assert.assertEquals(false, it)
-//            }
-//            counter++
-//        }
-//        chapterPageViewModel.isCompilingProperty.addListener(isCompilingListener)
-//
-//        chapterPageViewModel.checkCanCompile()
-//        chapterPageViewModel.compile()
-//    }
-//
-//    @Test
-//    fun `exporting chapter updates export dialog property`() {
-//        val take = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
-//
-//        chapter1.audio.insertTake(take)
-//        chapter1.audio.selectTake(take)
-//        chapterPageViewModel.audioConverter = mock {
-//            on { wavToMp3(any(), any(), any()) } doReturn Completable.complete()
-//        }
-//
-//        var counter = 1
-//        showExportProgressListener = createChangeListener {
-//            when (counter) {
-//                1 -> Assert.assertEquals(true, it)
-//                2 -> Assert.assertEquals(false, it)
-//            }
-//            counter++
-//        }
-//        chapterPageViewModel.showExportProgressDialogProperty.addListener(showExportProgressListener)
-//
-//        WaitForAsyncUtils.waitForFxEvents()
-//
-//        chapterPageViewModel.exportChapter(File("test"))
-//    }
-//
-//    @Test
-//    fun `dialogTitleBinding for audio plugin name`() {
-//        val stringProperty = SimpleStringProperty()
-//        stringProperty.bind(chapterPageViewModel.dialogTitleBinding())
-//
-//        chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
-//        settingsViewModel.selectedRecorderProperty.set(recorderPlugin)
-//        workbookDataStore.activeTakeNumberProperty.set(1)
-//
-//        Assert.assertEquals("Take 01 opened in Recorder", stringProperty.value)
-//    }
-//
-//    @Test
-//    fun `dialogTextBinding for audio plugin text`() {
-//        val expected = "Orature will be unavailable while take 01 is open in Recorder. " +
-//                "Finish your work in Recorder to continue using Orature."
-//
-//        val stringProperty = SimpleStringProperty()
-//        stringProperty.bind(chapterPageViewModel.dialogTextBinding())
-//
-//        chapterPageViewModel.contextProperty.set(PluginType.RECORDER)
-//        settingsViewModel.selectedRecorderProperty.set(recorderPlugin)
-//        workbookDataStore.activeTakeNumberProperty.set(1)
-//
-//        Assert.assertEquals(expected, stringProperty.value)
-//    }
+
 }
