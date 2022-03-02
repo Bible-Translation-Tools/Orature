@@ -93,7 +93,7 @@ class Consume : Fragment() {
                         }
                     }
                 }
-                styleClass.addAll("btn", "btn--cta", "consume__btn--primary")
+                styleClass.addAll("btn--cta", "consume__btn")
                 action {
                     vm.mediaToggle()
                 }

@@ -23,13 +23,13 @@
     -fx-background-color: -wa-recorder-controls-background;
  }
 
-.consume__btn--primary {
+.consume__btn {
     -fx-pref-height: 60px;
     -fx-pref-width: 60px;
     -fx-border-radius: 90px;
     -fx-background-radius: 90px;
 }
 
-.consume__btn--primary .ikonli-font-icon {
+.consume__btn .ikonli-font-icon {
     -fx-icon-size: 28px;
 }
