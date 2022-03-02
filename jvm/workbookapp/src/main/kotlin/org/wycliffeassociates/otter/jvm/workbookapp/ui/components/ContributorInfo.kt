@@ -1,8 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.ListCell
-import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -24,7 +22,7 @@ class ContributorInfo : VBox() {
                 text(messages["licenseDescription"]) {
                     addClass("contributor__section-text")
                 }
-                hyperlink("Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)") {
+                hyperlink(messages["licenseCCBYSA"]) {
                     addClass("contributor__license-link")
                     action {
                         FX.application.hostServices.showDocument(
@@ -43,6 +41,8 @@ class ContributorInfo : VBox() {
             }
         }
         vbox {
+            vgrow = Priority.ALWAYS
+
             hbox {
                 addClass("contributor__input-group")
                 textfield {
@@ -59,40 +59,12 @@ class ContributorInfo : VBox() {
             }
             listview(contributors) {
                 addClass("wa-list-view", "contributor__list")
+                vgrow = Priority.ALWAYS
+
                 setCellFactory {
                     ContributorListCell()
                 }
             }
-        }
-    }
-}
-
-class ContributorListCell : ListCell<Contributor>() {
-    private val cellGraphic = ContributorCell()
-
-    override fun updateItem(item: Contributor?, empty: Boolean) {
-        super.updateItem(item, empty)
-
-        if (empty || item == null) {
-            graphic = null
-            return
-        }
-
-        graphic = cellGraphic.apply {
-            nameProperty.set(item.name)
-            disableProperty().set(true)
-        }
-    }
-}
-
-class ContributorCell : HBox() {
-    val nameProperty = SimpleStringProperty()
-
-    init {
-        addClass("contributor__list-cell")
-
-        label(nameProperty) {
-            addClass("contributor__list-cell__name")
         }
     }
 }
