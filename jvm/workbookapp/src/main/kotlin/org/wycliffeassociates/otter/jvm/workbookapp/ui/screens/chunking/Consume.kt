@@ -24,12 +24,12 @@ import com.sun.javafx.util.Utils
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SECONDS_ON_SCREEN
 import tornadofx.*
 
 class Consume : Fragment() {

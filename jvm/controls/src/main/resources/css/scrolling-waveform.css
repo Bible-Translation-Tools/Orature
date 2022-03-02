@@ -45,7 +45,7 @@
     -fx-padding: 0 0 28px 0;
 }
 
-scrolling-waveform__marker-track {
+.scrolling-waveform__marker-track {
     -fx-background-color: #c8d2e3;
     -fx-pref-height: 40px;
 }
