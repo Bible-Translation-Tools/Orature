@@ -34,6 +34,7 @@ import javax.inject.Inject
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
@@ -46,7 +47,6 @@ const val ACTIVE = "chunking-wizard__step--active"
 const val COMPLETE = "chunking-wizard__step--complete"
 const val INACTIVE = "chunking-wizard__step--inactive"
 
-const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 

@@ -45,8 +45,8 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 
-const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#F7FAFF"
 

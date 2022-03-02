@@ -21,10 +21,11 @@ package org.wycliffeassociates.otter.jvm.controls.model
 import com.sun.glass.ui.Screen
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 
+const val SECONDS_ON_SCREEN = 10
+
 private const val EPSILON = 10
 private const val MS_IN_SECOND = 1000
 private const val SAMPLE_RATE = DEFAULT_SAMPLE_RATE
-private const val SECONDS_ON_SCREEN = 10
 
 fun pixelsInSecond(width: Double, durationMs: Int): Int {
     val msInPixels = durationMs / width
