@@ -37,7 +37,7 @@ class Verbalize : View() {
 
     val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
     val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
-    val recordIcon = FontIcon(MaterialDesign.MDI_RECORD)
+    val recordIcon = FontIcon(MaterialDesign.MDI_MICROPHONE)
     val stopIcon = FontIcon(MaterialDesign.MDI_STOP)
     val rerecordButton = FontIcon(MaterialDesign.MDI_SYNC)
 
