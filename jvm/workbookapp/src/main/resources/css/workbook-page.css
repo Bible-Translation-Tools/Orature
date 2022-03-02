@@ -29,7 +29,8 @@
     -fx-border-width: 0;
 }
 
-.workbook-page__chapter-list:focused .list-cell:focused .chapter-card {
+.workbook-page__chapter-list:focused .list-cell:focused .chapter-card,
+.workbook-page__chapter-list:focused .list-cell:focused .workbook-banner {
     -fx-border-color: -wa-card-border;
     -fx-border-width: 4px;
     -fx-border-radius: 6px;

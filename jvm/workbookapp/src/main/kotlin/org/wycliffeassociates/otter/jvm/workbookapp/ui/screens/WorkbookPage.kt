@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
+import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.geometry.Pos
@@ -322,13 +323,15 @@ class WorkbookPage : View() {
 
         init {
             text = resourceMetadata.identifier
-
-            add(tab)
+            content = tab
 
             whenSelected {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()
+                Platform.runLater {
+                    content.requestFocus()
+                }
             }
 
             tabChaptersListeners.putIfAbsent(text, ListChangeListener {
@@ -345,6 +348,7 @@ class WorkbookPage : View() {
 
         fun buildTab(): VBox {
             return VBox().apply {
+                addClass("workbook-page__tab-content")
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
                 alignment = Pos.CENTER

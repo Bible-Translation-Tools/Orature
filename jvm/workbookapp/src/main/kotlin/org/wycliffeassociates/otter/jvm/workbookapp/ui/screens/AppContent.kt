@@ -71,7 +71,9 @@ class AppContent : View() {
                             left = find(it.type).root
                             show(Side.LEFT)
 
-                            left.requestFocus()
+                            Platform.runLater {
+                                left.requestFocus()
+                            }
                         }
                     }.start()
                 }
