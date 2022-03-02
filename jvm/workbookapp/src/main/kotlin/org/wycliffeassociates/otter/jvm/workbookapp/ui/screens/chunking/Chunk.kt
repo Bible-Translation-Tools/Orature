@@ -25,6 +25,8 @@ import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.material.Material
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
@@ -40,10 +42,10 @@ import tornadofx.hbox
 
 class Chunk : Fragment() {
 
-    val playIcon = FontIcon("mdi-play")
-    val pauseIcon = FontIcon("mdi-pause")
-    private val nextIcon = FontIcon("gmi-skip-next")
-    private val previousIcon = FontIcon("gmi-skip-previous")
+    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+    private val nextIcon = FontIcon(Material.SKIP_NEXT)
+    private val previousIcon = FontIcon(Material.SKIP_PREVIOUS)
 
     private val rootStyles = "chunking-play-controls"
     private val playButtonStyle = "chunking-play-controls__play-btn"

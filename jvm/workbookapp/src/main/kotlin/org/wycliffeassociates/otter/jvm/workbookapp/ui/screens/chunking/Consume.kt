@@ -24,6 +24,7 @@ import com.sun.javafx.util.Utils
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
@@ -34,8 +35,8 @@ import tornadofx.*
 
 class Consume : Fragment() {
 
-    val playIcon = FontIcon("mdi-play")
-    val pauseIcon = FontIcon("mdi-pause")
+    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
 
     val vm: ChunkingViewModel by inject()
 
