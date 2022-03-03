@@ -28,7 +28,7 @@
 }
 
 .scrolling-waveform-play-controls__btn--rounded .ikonli-font-icon {
-    -fx-fill: #000000;
+    -fx-fill: -wa-regular-text;
 }
 
 .scrolling-waveform-play-controls__add-marker-btn {
@@ -38,7 +38,7 @@
 
 .scrolling-waveform-play-controls__add-marker-btn .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-icon-color: black;
+    -fx-icon-color: -wa-regular-text;
 }
 
 .scrolling-waveform-play-controls__add-marker-container {
@@ -46,20 +46,20 @@
 }
 
 .scrolling-waveform__marker-track {
-    -fx-background-color: #c8d2e3;
+    -fx-background-color: -wa-marker-track-background;
     -fx-pref-height: 40px;
 }
 
 .scrolling-waveform-holder {
-    -fx-background-color: #0a337333;
+    -fx-background-color: -wa-scrolling-waveform-background;
 }
 
 .scrolling-waveform-holder--played {
-    -fx-fill: #015ad966;
+    -fx-fill: -wa-played-audio-highlight;
 }
 
 .scrolling-waveform__playback-line {
-    -fx-stroke: #ffb100;
+    -fx-stroke: -wa-playback-line;
 }
 
 .scrolling-waveform-frame__top-track {
@@ -68,14 +68,14 @@
 }
 
 .scrolling-waveform-frame__center {
-    -fx-background-color: #c8d2e3;
+    -fx-background-color: -wa-scrolling-waveform-frame-background;
 }
 
 .scrolling-waveform-frame__bottom-track {
     -fx-pref-height: 50px;
     -fx-background-color: -wa-waveform-background-dark;
     -fx-border-width: 1px;
-    -fx-border-color: null null #a7b6cf null;
+    -fx-border-color: null null -wa-scrolling-waveform-track-border null;
 }
 
 .scrolling-waveform__highlight--primary {
