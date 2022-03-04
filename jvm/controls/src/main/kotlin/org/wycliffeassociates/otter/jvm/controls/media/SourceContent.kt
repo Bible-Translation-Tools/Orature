@@ -65,6 +65,8 @@ class SourceContent : Control() {
     private val userAgentStyleSheet = javaClass.getResource("/css/source-content.css").toExternalForm()
 
     init {
+        addClass("source-content")
+
         initialize()
         licenseProperty.onChange {
             licenseTextProperty.set(

@@ -59,12 +59,14 @@ class ResourceCardFragment(
                     spacing = 3.0
                     add(
                         statusindicator {
+                            addClass("resource-group-card__status-indicator")
                             initForResourceCard()
                             progressProperty.bind(item.titleProgressProperty)
                         }
                     )
                     add(
                         statusindicator {
+                            addClass("resource-group-card__status-indicator")
                             initForResourceCard()
                             item.bodyProgressProperty?.let { progressProperty.bind(it) }
                             isVisible = item.hasBodyAudio

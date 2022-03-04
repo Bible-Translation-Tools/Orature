@@ -23,6 +23,13 @@
     -fx-padding: 0 10px 10px 10px;
     -fx-cursor: hand;
     -fx-spacing: 20px;
+    -fx-focus-traversable: true;
+}
+
+.chunk-item:focused {
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-card-border;
 }
 
 .chunk-item__title {

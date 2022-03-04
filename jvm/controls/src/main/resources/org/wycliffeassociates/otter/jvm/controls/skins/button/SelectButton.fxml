@@ -27,7 +27,7 @@
     <children>
         <Label fx:id="btnIcon" styleClass="select-button__icon" />
         <Label fx:id="btnLabel" styleClass="select-button__title" />
-        <Region HBox.hgrow="ALWAYS" />
-        <RadioButton fx:id="btnRadio" styleClass="wa-radio" />
+        <Region fx:id="spacer" HBox.hgrow="ALWAYS" />
+        <RadioButton fx:id="btnRadio" styleClass="wa-radio" focusTraversable="false" />
     </children>
 </HBox>

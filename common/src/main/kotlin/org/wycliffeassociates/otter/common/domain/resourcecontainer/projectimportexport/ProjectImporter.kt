@@ -155,7 +155,7 @@ class ProjectImporter @Inject constructor(
         val projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
             sourceMetadata,
-            metadata,
+            derivedProject.resourceContainer!!,
             derivedProject
         )
 

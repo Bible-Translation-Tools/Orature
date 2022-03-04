@@ -213,7 +213,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         minimizeBtn.apply {
             visibleWhen(sourceContent.isMinimizableProperty)
 
-            setOnMouseClicked {
+            setOnAction {
                 toggleBody()
             }
             sourceContent.isMinimizedProperty.onChange { isMinimized ->

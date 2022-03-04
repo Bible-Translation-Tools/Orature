@@ -114,12 +114,11 @@ class SimpleAudioPlayer(
                 value = 0.0
 
                 setValueFactory {
-                    Bindings.createStringBinding(
-                        {
-                            framesToTimecode(it.value, audioSampleRate.value)
-                        },
-                        valueProperty()
-                    )
+                    valueProperty().stringBinding {
+                        it?.let {
+                            framesToTimecode(it.toDouble(), audioSampleRate.value)
+                        }
+                    }
                 }
             }
         )
@@ -194,11 +193,11 @@ class SimpleAudioPlayer(
         val items = mutableListOf<MenuItem>()
         items.add(
             CustomMenuItem().apply {
+                styleClass.add("wa-menu-button__separator")
                 vbox {
                     prefWidth = 400.0
                     spacing = 10.0
                     hbox {
-                        styleClass.add("wa-menu-button__separator")
                         alignment = Pos.CENTER
                         label {
                             text = FX.messages["playbackSpeed"]
@@ -207,7 +206,7 @@ class SimpleAudioPlayer(
                             hgrow = Priority.ALWAYS
                         }
                         button {
-                            addClass("btn", "btn--secondary", "btn--borderless")
+                            addClass("btn", "btn--secondary", "btn--borderless", "wa-menu-button__btn-util")
                             text = FX.messages["custom"]
                             action {
                                 menuItems.setAll(createCustomRateMenu())
@@ -216,6 +215,11 @@ class SimpleAudioPlayer(
                         }
                     }
                 }
+                action {
+                    menuItems.setAll(createCustomRateMenu())
+                    menuButton.show()
+                }
+                isHideOnClick = false
             }
         )
 
@@ -238,11 +242,11 @@ class SimpleAudioPlayer(
         val items = mutableListOf<MenuItem>()
         items.add(
             CustomMenuItem().apply {
+                styleClass.add("wa-menu-button__separator")
                 vbox {
                     prefWidth = 400.0
                     spacing = 10.0
                     hbox {
-                        styleClass.add("wa-menu-button__separator")
                         alignment = Pos.CENTER
                         label {
                             text = FX.messages["custom"]
@@ -251,7 +255,7 @@ class SimpleAudioPlayer(
                             hgrow = Priority.ALWAYS
                         }
                         button {
-                            addClass("btn", "btn--secondary", "btn--borderless")
+                            addClass("btn", "btn--secondary", "btn--borderless", "wa-menu-button__btn-util")
                             text = FX.messages["cancel"]
                             action {
                                 menuItems.setAll(createPlaybackRateMenu())
@@ -267,6 +271,7 @@ class SimpleAudioPlayer(
                         max = playbackRateOptions.last()
 
                         value = audioPlaybackRateProperty.value
+                        blockIncrement = (10 * max) / 100 // 10% intervals
 
                         setValueFactory {
                             Bindings.createStringBinding(
@@ -298,6 +303,10 @@ class SimpleAudioPlayer(
                         }
                         fitToParentWidth()
                     }
+                }
+                action {
+                    menuItems.setAll(createPlaybackRateMenu())
+                    menuButton.show()
                 }
                 isHideOnClick = false
             }

@@ -58,6 +58,7 @@ class WorkbookHeader : VBox() {
             }
             add(
                 JFXCheckBox().apply {
+                    addClass("workbook-header__hide-completed")
                     isDisableVisualFocus = true
                     textProperty().bind(filterTextProperty)
                     managedProperty().bind(filterTextProperty.isNotNull)
@@ -68,6 +69,7 @@ class WorkbookHeader : VBox() {
         }
         add(
             statusindicator {
+                addClass("workbook-header__status-indicator")
                 hgrow = Priority.ALWAYS
                 primaryFillProperty.bind(progressBarTrackFillProperty)
                 accentFillProperty.bind(progressBarTrackFillProperty)

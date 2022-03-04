@@ -39,7 +39,6 @@ class HighlightableButton : JFXButton() {
         importStylesheet<HighlightableButtonStyles>()
 
         addClass(HighlightableButtonStyles.hButton)
-        isDisableVisualFocus = true
 
         isHighlightedProperty.onChange { applyColors() }
         hoverProperty().onChange { applyColors() }

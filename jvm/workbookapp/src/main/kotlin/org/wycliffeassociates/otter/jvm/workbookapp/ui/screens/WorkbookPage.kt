@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXTabPane
+import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.geometry.Pos
@@ -31,7 +32,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.controls.card.DefaultStyles
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -47,6 +47,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookPageViewModel
 import tornadofx.*
 import java.text.MessageFormat
+
 
 /**
  * The page for an open Workbook (project).
@@ -81,7 +82,7 @@ class WorkbookPage : View() {
             }
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOK))
-        onClickAction {
+        setOnAction {
             navigator.dock(this@WorkbookPage)
         }
     }
@@ -91,6 +92,7 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources.get("/css/chapter-card.css"))
         tryImportStylesheet(resources.get("/css/workbook-banner.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/tab-pane.css"))
         tryImportStylesheet(resources.get("/css/contributor-info.css"))
     }
 
@@ -143,11 +145,6 @@ class WorkbookPage : View() {
     }
 
     override val root = JFXTabPane().apply {
-        importStylesheet<CardGridStyles>()
-        importStylesheet<DefaultStyles>()
-        tryImportStylesheet(resources.get("/css/tab-pane.css"))
-        addClass(Stylesheet.tabPane)
-
         tabs.onChange {
             when (it.list.size) {
                 1 -> addClass("singleTab")
@@ -328,12 +325,15 @@ class WorkbookPage : View() {
 
         init {
             text = resourceMetadata.identifier
+            content = tab
 
-            add(tab)
-            setOnSelectionChanged {
+            whenSelected {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()
+                Platform.runLater {
+                    content.requestFocus()
+                }
             }
 
             tabChaptersListeners.putIfAbsent(text, ListChangeListener {
@@ -350,6 +350,7 @@ class WorkbookPage : View() {
 
         fun buildTab(): VBox {
             return VBox().apply {
+                addClass("workbook-page__tab-content")
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
                 alignment = Pos.CENTER
