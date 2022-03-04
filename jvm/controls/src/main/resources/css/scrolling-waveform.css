@@ -18,7 +18,7 @@
  */
 .scrolling-waveform-container {
     -fx-min-height: 200px;
-    -fx-background-color: -wa-waveform-background;
+    -fx-background-color: -wa-scrolling-waveform-background;
 }
 
 .scrolling-waveform-play-controls__btn--rounded {
@@ -64,16 +64,16 @@
 
 .scrolling-waveform-frame__top-track {
     -fx-pref-height: 40px;
-    -fx-background-color: -wa-waveform-background-dark;
+    -fx-background-color: -wa-marker-track-background;
 }
 
 .scrolling-waveform-frame__center {
-    -fx-background-color: -wa-scrolling-waveform-frame-background;
+    -fx-background-color: -wa-scrolling-waveform-background;
 }
 
 .scrolling-waveform-frame__bottom-track {
     -fx-pref-height: 50px;
-    -fx-background-color: -wa-waveform-background-dark;
+    -fx-background-color: -wa-marker-track-background;
     -fx-border-width: 1px;
     -fx-border-color: null null -wa-scrolling-waveform-track-border null;
 }

@@ -129,9 +129,10 @@
     -wa-slider-track-color: -wa-black-05;
     -wa-slider-border-color: -wa-black-20;
     -wa-recorder-controls-background: #282CBD;
-    -wa-scrolling-waveform-frame-background: rgb(200, 210, 227);
-    -wa-scrolling-waveform-background: rgba(10, 51, 115, 0.2);
+
+    -wa-scrolling-waveform-background: -wa-black-30-noalpha;
     -wa-scrolling-waveform-track-border: rgb(167, 182, 207);
+
     -wa-waveform-background: rgb(247, 250, 255);
     -wa-waveform-background-dark: rgb(206, 214, 227);
 
@@ -140,7 +141,7 @@
 
     -wa-marker-overlay-primary: rgba(30, 221, 118, 0.2);
     -wa-marker-overlay-secondary: rgba(1, 90, 217, 0.2);
-    -wa-marker-track-background: rgb(200, 210, 227);
+    -wa-marker-track-background: -wa-black-10-noalpha;
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-60;

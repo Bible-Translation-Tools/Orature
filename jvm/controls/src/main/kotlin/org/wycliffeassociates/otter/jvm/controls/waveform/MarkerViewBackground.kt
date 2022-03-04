@@ -36,6 +36,10 @@ class MarkerViewBackground : BorderPane() {
                 }
             }
 
+            center {
+                styleClass.add("scrolling-waveform-frame__center")
+            }
+
             bottom {
                 region {
                     styleClass.add("scrolling-waveform-frame__bottom-track")

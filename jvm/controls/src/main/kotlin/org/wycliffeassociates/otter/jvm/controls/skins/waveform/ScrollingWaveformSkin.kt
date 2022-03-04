@@ -44,8 +44,6 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
             hgrow = Priority.ALWAYS
             vgrow = Priority.ALWAYS
 
-            styleClass.add("scrolling-waveform-container")
-
             nodeOrientation = NodeOrientation.LEFT_TO_RIGHT
 
             add(MarkerViewBackground())
