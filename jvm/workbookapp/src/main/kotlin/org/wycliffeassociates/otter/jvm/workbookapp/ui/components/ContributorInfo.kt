@@ -61,6 +61,7 @@ class ContributorInfo : VBox() {
                 }
             }
             button (messages["saveContributors"]) {
+                vgrow = Priority.ALWAYS
                 addClass("btn--primary","btn--borderless")
                 setOnAction {
 

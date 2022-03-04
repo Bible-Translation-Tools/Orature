@@ -60,9 +60,6 @@ class ContributorCell : HBox() {
             }
             button {
                 addClass("btn", "btn--icon", "contributor__list-cell__save-btn")
-                hboxConstraints {
-
-                }
                 graphic = FontIcon(Material.CHECK)
                 setOnAction {
                     nameProperty.set(newNameProperty.value)
