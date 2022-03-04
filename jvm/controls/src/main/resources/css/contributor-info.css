@@ -72,3 +72,8 @@
 .contributor__list-cell__discard-btn .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
 }
+
+.contributor__add-btn {
+    -fx-padding: 10 60 10 60px;
+    -alignment: center;
+}

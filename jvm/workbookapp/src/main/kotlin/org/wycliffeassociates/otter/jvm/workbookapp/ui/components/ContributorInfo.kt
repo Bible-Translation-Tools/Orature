@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.event.EventTarget
+import javafx.scene.control.Button
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -30,15 +31,24 @@ class ContributorInfo : VBox() {
 
             hbox {
                 addClass("contributor__input-group")
-                contributorField = textfield {
+                textfield {
+                    contributorField = this
                     addClass("txt-input", "contributor__text-input")
                     promptText = messages["contributorName"]
-                }
+                }.hide()
                 button(messages["addContributor"]) {
                     addClass("btn--secondary","btn--borderless")
+                    hgrow = Priority.ALWAYS
+
                     graphic = FontIcon(MaterialDesign.MDI_PLUS)
                     setOnAction {
-                        if (contributorField.isVisible) contributorField.hide() else contributorField.show()
+                        if (contributorField.isVisible) {
+                            contributorField.hide()
+                            this.show()
+                        } else {
+                            contributorField.show()
+                            this.hide()
+                        }
                     }
                 }
             }
@@ -55,7 +65,7 @@ class ContributorInfo : VBox() {
                 setOnAction {
 
                 }
-            }
+            }.setVisible(contributors.size != 0)
             textflow {
                 text(messages["creativeCommonsDescription"]) {
                     addClass("contributor__section-text")
