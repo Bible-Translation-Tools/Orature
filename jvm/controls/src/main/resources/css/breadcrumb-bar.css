@@ -26,6 +26,10 @@
 }
 
 .breadcrumb {
+    -fx-focus-traversable: false;
+}
+
+.breadcrumb__root {
     -fx-spacing: 5px;
     -fx-alignment: center;
 }
@@ -41,6 +45,11 @@
     -fx-text-fill: -wa-regular-text;
     -fx-underline: true;
     -fx-font-size: 20px;
+    -fx-focus-traversable: true
+}
+
+.breadcrumb__content:focused {
+    -fx-border-width: 4px;
 }
 
 .breadcrumb__content:disabled {
@@ -61,7 +70,11 @@
     -fx-icon-size: 24px;
 }
 
-.breadcrumb--active, .breadcrumb--active:hover, .breadcrumb--active:pressed {
+.breadcrumb--active {
+    -fx-focus-traversable: false;
+}
+
+.breadcrumb--active .label, .breadcrumb--active .label:hover, .breadcrumb--active .label:pressed {
     -fx-border-width: 0px;
     -fx-background-color: -wa-breadcrumb-item-background-active;
     -fx-background-radius: 6px;
@@ -71,7 +84,7 @@
     -fx-underline: false;
 }
 
-.breadcrumb--active .ikonli-font-icon {
+.breadcrumb--active .label .ikonli-font-icon {
     -fx-icon-color: -wa-primary-dark;
 }
 

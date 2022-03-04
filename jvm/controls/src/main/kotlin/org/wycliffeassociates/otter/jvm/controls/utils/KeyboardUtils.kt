@@ -16,19 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.wycliffeassociates.otter.jvm.controls.utils
 
-.app-bar {
-    -fx-padding: 20px 4px 4px 4px;
-    -fx-background-color: -wa-primary-dark;
-    -fx-alignment: top-center;
-    -fx-spacing: 4px;
-}
+import javafx.scene.Node
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 
-.app-bar__logo .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-    -fx-icon-size: 40px;
-}
-
-.app-bar__app-content {
-    -fx-focus-traversable: false;
+fun Node.simulateKeyPress(
+    key: KeyCode,
+    shiftDown: Boolean = false,
+    controlDown: Boolean = false,
+    altDown: Boolean = false,
+    metaDown: Boolean = false
+) {
+    fireEvent(
+        KeyEvent(
+            KeyEvent.KEY_PRESSED,
+            "",
+            "",
+            key,
+            shiftDown,
+            controlDown,
+            altDown,
+            metaDown
+        )
+    )
 }

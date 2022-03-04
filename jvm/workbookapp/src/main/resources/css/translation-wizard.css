@@ -30,6 +30,7 @@
 
 .translation-wizard__list {
     -fx-background-color: -wa-transparent;
+    -fx-focus-traversable: true;
 }
 
 .translation-wizard__root .filtered-search-bar {
@@ -39,6 +40,18 @@
 .translation-wizard__list .list-cell {
     -fx-background-color: -wa-transparent;
     -fx-padding: 5px 0;
+}
+
+.translation-wizard__list:focused,
+.translation-wizard__list .list-cell:focused,
+.translation-wizard__list .list-cell:focused .language-card-cell {
+    -fx-border-width: 0;
+}
+
+.translation-wizard__list:focused .list-cell:focused .language-card-cell {
+    -fx-border-color: -wa-card-border;
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
 }
 
 .translation-wizard__title,

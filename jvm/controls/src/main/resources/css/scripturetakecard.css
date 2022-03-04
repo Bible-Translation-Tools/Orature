@@ -22,6 +22,16 @@
 }
 
 .card--scripture-take {
+    -fx-focus-traversable: true;
+}
+
+.card--scripture-take:focused {
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-card-border;
+}
+
+.card--scripture-take__root {
     -fx-padding: 10px;
     -fx-effect: -wa-top-shadow;
     -fx-background-color: -wa-foreground;

@@ -16,19 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.wycliffeassociates.otter.jvm.controls.utils
 
-.app-bar {
-    -fx-padding: 20px 4px 4px 4px;
-    -fx-background-color: -wa-primary-dark;
-    -fx-alignment: top-center;
-    -fx-spacing: 4px;
-}
+import javafx.scene.Node
+import javafx.scene.Parent
+import kotlin.reflect.KClass
 
-.app-bar__logo .ikonli-font-icon {
-    -fx-icon-color: -wa-white;
-    -fx-icon-size: 40px;
-}
+inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
+inline fun <reified T: Node> Node.findChildren(): List<Node> = findChildren(T::class)
+fun <T: Node> Node.findChildren(type: KClass<T>): List<Node> {
+    if (this !is Parent) return listOf()
 
-.app-bar__app-content {
-    -fx-focus-traversable: false;
+    val list = this.childrenUnmodifiable
+        .filter { type.isInstance(it) }
+        .filter { it.isVisible }
+        .toMutableList()
+
+    for (node: Node in this.childrenUnmodifiable) {
+        (node as? Parent)?.findChildren(type)?.let {
+            list.addAll(it)
+        }
+    }
+
+    return list
 }

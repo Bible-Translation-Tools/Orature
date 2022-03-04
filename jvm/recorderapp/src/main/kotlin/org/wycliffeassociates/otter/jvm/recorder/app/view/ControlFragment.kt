@@ -70,6 +70,7 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
+            addClass("record-button")
             graphic = FontIcon("gmi-mic").apply {
                 iconSize = 48
                 fill = Color.WHITE
@@ -80,7 +81,7 @@ class ControlFragment : Fragment() {
                         if (it == true) messages["pause"] else messages["record"]
                 })
             }
-            setOnMouseClicked {
+            setOnAction {
                 toggleRecording()
             }
         }
@@ -90,7 +91,7 @@ class ControlFragment : Fragment() {
             tooltip(text)
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
-            setOnMouseClicked {
+            setOnAction {
                 vm.save()
             }
         }
@@ -100,7 +101,7 @@ class ControlFragment : Fragment() {
             tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
-            setOnMouseClicked {
+            setOnAction {
                 vm.save()
             }
         }

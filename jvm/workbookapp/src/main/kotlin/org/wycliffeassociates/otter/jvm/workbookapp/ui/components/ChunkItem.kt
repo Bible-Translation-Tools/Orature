@@ -87,11 +87,6 @@ class ChunkItem : VBox() {
                     })
                 }
             }
-
-            setOnMouseClicked {
-                createTakeViews()
-                showTakesProperty.set(showTakesProperty.value.not())
-            }
         }
         vbox {
             addClass("chunk-item__takes")
@@ -137,7 +132,7 @@ class ChunkItem : VBox() {
         )
     }
 
-    fun createTakeViews() {
+    private fun createTakeViews() {
         hasSelectedProperty.set(takes.any { it.selected } ?: false)
         val animationMediator = ListAnimationMediator<TakeItem>()
         takeViews.setAll(
@@ -159,5 +154,10 @@ class ChunkItem : VBox() {
                 }
             }
         )
+    }
+
+    fun toggleShowTakes() {
+        if (!showTakesProperty.value) createTakeViews()
+        showTakesProperty.set(showTakesProperty.value.not())
     }
 }

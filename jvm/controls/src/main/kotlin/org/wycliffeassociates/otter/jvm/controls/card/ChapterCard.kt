@@ -25,13 +25,14 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.scene.control.Control
+import javafx.event.ActionEvent
+import javafx.scene.control.ButtonBase
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ChapterCardSkin
 import java.io.File
 import java.util.concurrent.Callable
 
-class ChapterCard : Control() {
+class ChapterCard : ButtonBase() {
 
     val coverArtProperty = SimpleObjectProperty<File>()
     val titleProperty = SimpleStringProperty()
@@ -99,5 +100,11 @@ class ChapterCard : Control() {
 
     override fun createDefaultSkin(): Skin<*> {
         return ChapterCardSkin(this)
+    }
+
+    override fun fire() {
+        if (!isDisabled) {
+            fireEvent(ActionEvent())
+        }
     }
 }

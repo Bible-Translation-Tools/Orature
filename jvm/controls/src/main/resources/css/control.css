@@ -18,7 +18,7 @@
  */
 
 /* -------------- Todo List -------------- */
-/* TODO: .btn class should have a `0.2s Ease-in-out` transition for all effects applied.
+/* TODO: .btn class should have a `0.2s Ease-in-out` transition for all effects applied. */
 
 /* -------------- Button Base -------------- */
 /* This controls all of the common variables found in each button type */
@@ -29,6 +29,11 @@
     -fx-border-style: solid;
     -fx-font-size: 20px;
     -fx-cursor: hand;
+}
+
+.btn:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
 }
 
 /* -------------- Button Icon -------------- */
@@ -316,6 +321,11 @@
     -fx-cursor: hand;
 }
 
+.wa-combobox:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+}
+
 .wa-combobox .arrow {
     -fx-background-color: -wa-regular-text;
 }
@@ -416,6 +426,7 @@
     -fx-border-width: 2px;
     -fx-border-radius: 1.0em;
     -fx-border-color: -wa-gray-darker;
+    -fx-background-insets: -2, 0;
 }
 
 .wa-radio:selected .radio {
@@ -425,6 +436,12 @@
 .wa-radio:selected .dot {
     -fx-background-color: -wa-primary;
     -fx-background-insets: -2, 0;
+}
+
+.wa-radio:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
 }
 
 .wa-radio--bordered {
@@ -447,6 +464,12 @@
 
 .wa-radio--bordered:pressed {
     -fx-background-color: -wa-black-10;
+}
+
+.wa-radio--bordered:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
 }
 
 /* -------------- Checkbox ---------------- */
@@ -505,6 +528,10 @@
     -fx-pref-height: 20px;
 }
 
+.wa-slider:focused .thumb {
+    -fx-border-color: -wa-button-border;
+}
+
 .wa-slider .animated-thumb {
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
@@ -514,6 +541,7 @@
 /* ----------------- ListView ---------------- */
 .wa-list-view {
     -fx-background-color: -wa-transparent;
+    -fx-focus-traversable: false;
 }
 
 .wa-list-view .list-cell:selected,
@@ -537,6 +565,12 @@
     -fx-cursor: hand;
 }
 
+.wa-menu-button:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
+}
+
 .wa-menu-button__content {
     -fx-alignment: center;
     -fx-spacing: 6px;
@@ -549,6 +583,14 @@
 
 .wa-menu-button .menu-item {
     -fx-background-color: -wa-foreground;
+    -fx-focus-traversable: true;
+}
+
+.wa-menu-button .menu-item:focused .wa-menu-button__list-item,
+.wa-menu-button .menu-item:focused .wa-menu-button__btn-util {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
 }
 
 .wa-menu-button .label {
@@ -571,6 +613,7 @@
     -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-font-family: 'sans-serif';
+    -fx-focus-traversable: false;
 }
 
 .wa-menu-button__large-text {
@@ -598,4 +641,13 @@
 .wa-menu-button__arrow .ikonli-font-icon {
    -fx-icon-size: 12;
    -fx-icon-color: -wa-regular-text;
+}
+
+/* ------------------- Hyperlink --------------- */
+
+.hyperlink:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-style: solid;
+    -fx-border-radius: 6px;
 }

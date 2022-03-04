@@ -64,6 +64,8 @@
     -wa-fill-neutral: #cccccc;
     -wa-border-light: gray;
     -wa-list-item-border-light: -wa-white-10;
+    -wa-button-border: #001533;
+    -wa-card-border: #cccccc;
 
     /* breadcrumb, navigation */
     -wa-breadcrumb-background: -wa-foreground;

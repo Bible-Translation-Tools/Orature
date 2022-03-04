@@ -18,12 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
-import com.jfoenix.controls.JFXButton
 import javafx.application.Platform
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -58,14 +58,12 @@ class SettingsView : View() {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
-                    add(
-                        JFXButton().apply {
-                            addClass("app-drawer__btn--close")
-                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                            tooltip(messages["close"])
-                            action { collapse() }
-                        }
-                    )
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                        tooltip(messages["close"])
+                        action { collapse() }
+                    }
                 }
 
                 label(messages["interfaceSettings"]).apply {
@@ -232,38 +230,45 @@ class SettingsView : View() {
 
                                 region { hgrow = Priority.ALWAYS }
 
-                                radiobutton {
-                                    isDisable = !pluginData.canRecord
-                                    viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
-                                        isSelected = selectedData == pluginData
+                                add(
+                                    SelectButton().apply {
+                                        isDisable = !pluginData.canRecord
+                                        viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
+                                            isSelected = selectedData == pluginData
+                                        }
+                                        selectedProperty().onChange { selected ->
+                                            if (selected) viewModel.selectRecorder(pluginData)
+                                        }
+                                        toggleGroup = recorderToggleGroup
                                     }
-                                    selectedProperty().onChange { selected ->
-                                        if (selected) viewModel.selectRecorder(pluginData)
-                                    }
-                                    toggleGroup = recorderToggleGroup
-                                }
+                                )
 
-                                radiobutton {
-                                    isDisable = !pluginData.canEdit
-                                    viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
-                                        isSelected = selectedData == pluginData
+                                add(
+                                    SelectButton().apply {
+                                        isDisable = !pluginData.canEdit
+                                        viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
+                                            isSelected = selectedData == pluginData
+                                        }
+                                        selectedProperty().onChange { selected ->
+                                            if (selected) viewModel.selectEditor(pluginData)
+                                        }
+                                        toggleGroup = editorToggleGroup
                                     }
-                                    selectedProperty().onChange { selected ->
-                                        if (selected) viewModel.selectEditor(pluginData)
-                                    }
-                                    toggleGroup = editorToggleGroup
-                                }
+                                )
                             }
                         }
                     }
 
-                    label(messages["addApp"]).apply {
+                    hyperlink {
                         addClass("app-drawer__text--link")
-                        tooltip {
-                            textProperty().bind(this@apply.textProperty())
-                        }
+
+                        text = messages["addApp"]
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                        setOnMouseClicked {
+                        tooltip {
+                            textProperty().bind(this@hyperlink.textProperty())
+                        }
+
+                        action {
                             addPluginDialog.open()
                         }
                     }
