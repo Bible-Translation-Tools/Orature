@@ -18,7 +18,9 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
+import com.sun.javafx.util.Utils
 import javafx.beans.value.ChangeListener
+import javafx.scene.Node
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
@@ -26,6 +28,7 @@ import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -34,18 +37,18 @@ import kotlin.math.min
 
 class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
-    val thumb = Rectangle(1.0, 1.0).apply {
+    private val thumb = Rectangle(1.0, 1.0).apply {
         stroke = Color.BLACK
         strokeWidth = 1.0
         arcHeight = 10.0
         arcWidth = 10.0
     }
-    val playbackLine = Line(0.0, 0.0, 0.0, 1.0).apply {
+    private val playbackLine = Line(0.0, 0.0, 0.0, 1.0).apply {
         stroke = Color.BLACK
         strokeWidth = 1.0
     }
-
-    val root = Region()
+    private val markersHolder = Region()
+    private val root = Region()
 
     private var imageViewDisposable: ImageView? = null
 
@@ -63,6 +66,12 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 root.add(imageView)
                 root.add(thumb)
                 root.add(playbackLine)
+
+                markersHolder.apply {
+                    prefHeightProperty().bind(root.heightProperty())
+                    prefWidthProperty().bind(root.widthProperty())
+                }
+                root.add(markersHolder)
             }
 
             // clear minimap image when exiting marker app - free up memory
@@ -97,7 +106,29 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         control.widthProperty().onChangeAndDoNow {
             moveThumb()
             resizeThumbWidth()
+            placeMarkers()
         }
+        control.markers.onChangeAndDoNow {
+            placeMarkers()
+        }
+    }
+
+    fun placeMarkers() {
+        markersHolder.getChildList()?.clear()
+        control.markers.forEach {
+            markersHolder.add(createMarker(it))
+        }
+    }
+
+    fun updateMarker(id: Int, position: Double) {
+        val location = position * control.max
+
+        val min = getMin(id)
+        val max = getMax(id)
+        val clamped = Utils.clamp(min, location, max)
+
+        control.markers[id].location = clamped.toInt()
+        placeMarkers()
     }
 
     private fun moveThumb() {
@@ -124,5 +155,46 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
             thumb.width = min(pixelsInHighlight, control.width)
             return pixelsInHighlight
         } ?: 0.0
+    }
+
+    private fun createMarker(cue: AudioCue): Node {
+        val controlWidth = control.widthProperty().value
+        val pos = (cue.location / control.max) * controlWidth
+        var xFinal = min(pos, controlWidth)
+        xFinal = max(xFinal, 0.0)
+
+        val line = Line(0.0, 0.0, 0.0, 1.0).apply {
+            stroke = Color.BLACK
+            strokeWidth = 2.0
+        }
+        line.layoutX = xFinal
+        line.layoutY = control.padding.top
+        line.endYProperty().bind(
+            root.heightProperty() - control.padding.top - control.padding.bottom
+        )
+        line.tooltip {
+            text = cue.label
+        }
+        return line
+    }
+
+    private fun getMin(id: Int): Double {
+        val placedMarkers = control.markers
+        val previousMaker = if (id > 0) {
+            placedMarkers[id - 1]
+        } else {
+            null
+        }
+        return previousMaker?.location?.toDouble() ?: 0.0
+    }
+
+    private fun getMax(id: Int): Double {
+        val placedMarkers = control.markers
+        val previousMaker = if (id < placedMarkers.size - 1) {
+            placedMarkers[id + 1]
+        } else {
+            null
+        }
+        return previousMaker?.location?.toDouble() ?: control.max
     }
 }

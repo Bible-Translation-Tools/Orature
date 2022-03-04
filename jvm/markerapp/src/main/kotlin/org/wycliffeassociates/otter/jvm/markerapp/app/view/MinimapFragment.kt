@@ -25,28 +25,42 @@ import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class MinimapFragment : Fragment() {
 
-    val viewModel: VerseMarkerViewModel by inject()
-
-    lateinit var waveformMinimapListener: ChangeListener<Image>
+    private val viewModel: VerseMarkerViewModel by inject()
+    private var waveformMinimapImageListener: ChangeListener<Image>
+    private var markerStateListener: ChangeListener<VerseMarkerModel>
 
     val slider = AudioSlider()
 
     init {
         super.onDock()
         slider.apply {
-            waveformMinimapListener = ChangeListener { _, _, it ->
+            waveformMinimapImageListener = ChangeListener { _, _, it ->
                 waveformImageProperty.set(it)
             }
-            viewModel.waveformMinimapImage.addListener(waveformMinimapListener)
+            viewModel.waveformMinimapImage.addListener(waveformMinimapImageListener)
 
             player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
+
+            markerStateListener = ChangeListener { _, _, it ->
+                it?.let { model ->
+                    model.markers.onChangeAndDoNow {
+                        markers.setAll(
+                            it.filter { marker -> marker.placed }
+                                .map { marker -> marker.toAudioCue() }
+                        )
+                    }
+                }
+            }
+            viewModel.markerStateProperty.addListener(markerStateListener)
         }
     }
 
@@ -77,7 +91,8 @@ class MinimapFragment : Fragment() {
 
     override fun onUndock() {
         super.onUndock()
-        viewModel.waveformMinimapImage.removeListener(waveformMinimapListener)
+        viewModel.waveformMinimapImage.removeListener(waveformMinimapImageListener)
+        viewModel.markerStateProperty.removeListener(markerStateListener)
         slider.clearListeners()
     }
 }
