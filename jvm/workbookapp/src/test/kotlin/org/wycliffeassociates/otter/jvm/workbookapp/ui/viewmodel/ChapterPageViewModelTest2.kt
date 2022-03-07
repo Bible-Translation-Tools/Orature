@@ -211,7 +211,7 @@ class ChapterPageViewModelTest2 {
         Assert.assertEquals(100, chapterPageViewModel.workChunkProperty.value.sort)
     }
 
-    //    @Test
+//    @Test
 //    fun `compiling chapter updates isCompiling property`() {
 //        val take1 = Take("take1", take1File, 1, MimeType.WAV, LocalDate.now())
 //        val take2 = Take("take2", take2File, 2, MimeType.WAV, LocalDate.now())
@@ -266,9 +266,10 @@ class ChapterPageViewModelTest2 {
 //
 //        WaitForAsyncUtils.waitForFxEvents()
 //
-//        chapterPageViewModel.exportChapter(File("test"))
+//        val chapterPageViewModel = find<ChapterPageViewModel>()
+//        chapterPageViewModel.exportChapter()
 //    }
-//
+
 
     @Test
     fun `dialogTextBinding for audio plugin text`() {
