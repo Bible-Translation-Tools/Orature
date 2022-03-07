@@ -26,32 +26,31 @@ class ContributorInfo : VBox() {
                 addClass("contributor__section-text")
             }
         }
+
         vbox {
             vgrow = Priority.ALWAYS
-
-            hbox {
-                addClass("contributor__input-group")
-                textfield {
-                    contributorField = this
-                    addClass("txt-input", "contributor__text-input")
-                    promptText = messages["contributorName"]
-                }.hide()
-                button(messages["addContributor"]) {
-                    addClass("btn--secondary","btn--borderless")
-                    hgrow = Priority.ALWAYS
-
-                    graphic = FontIcon(MaterialDesign.MDI_PLUS)
-                    setOnAction {
-                        if (contributorField.isVisible) {
-                            contributorField.hide()
-                            this.show()
-                        } else {
-                            contributorField.show()
-                            this.hide()
-                        }
+            addClass("contributor__input-group")
+            textfield {
+                hgrow = Priority.ALWAYS
+                contributorField = this
+                addClass("txt-input", "contributor__text-input")
+                promptText = messages["contributorName"]
+            }.hide()
+            button(messages["addContributor"]) {
+                useMaxWidth = true
+                addClass("btn", "btn--secondary")
+                graphic = FontIcon(MaterialDesign.MDI_PLUS)
+                setOnAction {
+                    if (contributorField.isVisible) {
+                        contributorField.hide()
+                        this.show()
+                    } else {
+                        contributorField.show()
+                        this.hide()
                     }
                 }
             }
+
             listview(contributors) {
                 addClass("wa-list-view", "contributor__list")
                 vgrow = Priority.ALWAYS
@@ -60,9 +59,10 @@ class ContributorInfo : VBox() {
                     ContributorListCell()
                 }
             }
+
             button (messages["saveContributors"]) {
-                vgrow = Priority.ALWAYS
                 addClass("btn--primary","btn--borderless")
+                useMaxWidth = true
                 setOnAction {
 
                 }
