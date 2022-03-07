@@ -21,11 +21,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 import javafx.scene.layout.Pane
 import javafx.stage.Stage
 import javafx.stage.StageStyle
+import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.DaggerAppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.jvm.workbookapp.logging.ConfigureLogger
 import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.RootView
@@ -40,6 +41,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
 
     @Inject lateinit var localeLanguage: LocaleLanguage
     @Inject lateinit var directoryProvider: IDirectoryProvider
+    @Inject lateinit var audioConnectionFactory: AudioConnectionFactory
 
     init {
         dependencyGraph.inject(this)
@@ -68,7 +70,7 @@ class OtterApp : App(RootView::class), IDependencyGraphProvider {
             if (shouldBlockWindowCloseRequest) {
                 it.consume()
                 SnackbarHandler.enqueue(messages["applicationCloseBlocked"])
-            }
+            } else audioConnectionFactory.releasePlayer()
         }
         find<SplashScreen>().openModal(StageStyle.UNDECORATED)
     }
