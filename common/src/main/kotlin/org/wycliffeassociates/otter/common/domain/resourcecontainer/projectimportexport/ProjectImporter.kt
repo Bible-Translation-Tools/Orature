@@ -102,12 +102,7 @@ class ProjectImporter @Inject constructor(
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
 
-                val metadata = languageRepository
-                    .getBySlug(manifest.dublinCore.language.identifier)
-                    .map { language ->
-                        manifest.dublinCore.mapToMetadata(resourceContainer, language)
-                    }
-                    .blockingGet()
+
 
                 val manifestSources = manifest.dublinCore.source.toSet()
 
@@ -119,7 +114,22 @@ class ProjectImporter @Inject constructor(
                 }
 
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
-                    importResumableProject(fileReader, metadata, manifestProject, manifestSources)
+                    val existingSource = fetchExistingSource(manifestProject, manifestSources)
+                    val sourceCollection = if (existingSource == null) {
+                        importSources(fileReader)
+                        findSourceCollection(manifestSources, manifestProject)
+                    } else {
+                        manifest.dublinCore.version = existingSource.resourceContainer!!.version
+                        existingSource
+                    }
+                    val metadata = languageRepository
+                        .getBySlug(manifest.dublinCore.language.identifier)
+                        .map { language ->
+                            manifest.dublinCore.mapToMetadata(resourceContainer, language)
+                        }
+                        .blockingGet()
+
+                    importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
                 }
 
                 ImportResult.SUCCESS
@@ -136,17 +146,8 @@ class ProjectImporter @Inject constructor(
         fileReader: IFileReader,
         metadata: ResourceMetadata,
         manifestProject: Project,
-        manifestSources: Set<Source>
+        sourceCollection: Collection
     ) {
-        val existingSource = fetchExistingSource(manifestProject, manifestSources)
-        // if any relevant source exists then use it
-        val sourceCollection = if (existingSource == null) {
-            importSources(fileReader)
-            findSourceCollection(manifestSources, manifestProject)
-        } else {
-            existingSource
-        }
-
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
