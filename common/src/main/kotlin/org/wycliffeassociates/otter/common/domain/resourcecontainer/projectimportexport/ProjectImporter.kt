@@ -119,9 +119,11 @@ class ProjectImporter @Inject constructor(
                         importSources(fileReader)
                         findSourceCollection(manifestSources, manifestProject)
                     } else {
-                        manifest.dublinCore.version = existingSource.resourceContainer!!.version
                         existingSource
                     }
+                    // apply source version to target version to synchronize before import
+                    manifest.dublinCore.version = sourceCollection.resourceContainer!!.version
+
                     val metadata = languageRepository
                         .getBySlug(manifest.dublinCore.language.identifier)
                         .map { language ->
