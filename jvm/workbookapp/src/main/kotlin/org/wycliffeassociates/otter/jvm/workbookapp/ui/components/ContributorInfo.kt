@@ -13,7 +13,7 @@ import tornadofx.*
 import tornadofx.FX.Companion.messages
 
 class ContributorInfo : VBox() {
-    private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."))
+    private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."), Contributor("Joel S."))
     var contributorField: TextField by singleAssign()
 
     init {
@@ -46,6 +46,7 @@ class ContributorInfo : VBox() {
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
                 setOnAction {
                     if (contributorField.isVisible) {
+                        contributorField.clear()
                         contributorField.hide()
                     } else {
                         contributorField.show()
