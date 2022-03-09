@@ -58,14 +58,14 @@ class ChapterPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
 
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
-
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    var audioConverter: AudioConverter
-    var concatenateAudio: ConcatenateAudio
+    @Inject
+    lateinit var audioConverter: AudioConverter
+
+    @Inject
+    lateinit var concatenateAudio: ConcatenateAudio
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -86,7 +86,7 @@ class ChapterPageViewModel : ViewModel() {
     val workChunkProperty = SimpleObjectProperty<CardData>()
     val noTakesProperty = SimpleBooleanProperty()
 
-    val chapterCardProperty = SimpleObjectProperty(CardData(workbookDataStore.chapter))
+    val chapterCardProperty = SimpleObjectProperty<CardData>()
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
@@ -102,13 +102,11 @@ class ChapterPageViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        audioConverter = AudioConverter()
-        concatenateAudio = ConcatenateAudio(directoryProvider)
-
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
     }
 
     fun dock() {
+        chapterCardProperty.set(CardData(workbookDataStore.chapter))
         workbookDataStore.activeChapterProperty.value.let { _chapter ->
             _chapter?.let { chapter ->
                 loadChapterContents(chapter).subscribe()
