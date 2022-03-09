@@ -20,9 +20,10 @@ package org.wycliffeassociates.otter.common.domain.audio
 
 import io.reactivex.Completable
 import java.io.File
+import javax.inject.Inject
 import de.sciss.jump3r.Main as jump3r
 
-class AudioConverter {
+class AudioConverter @Inject constructor() {
     fun wavToMp3(
         wavFile: File,
         mp3File: File,
