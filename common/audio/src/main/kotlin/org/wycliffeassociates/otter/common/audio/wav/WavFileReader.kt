@@ -38,19 +38,17 @@ internal class WavFileReader(
     override val channels: Int = wav.channels
     override val sampleSize: Int = wav.bitsPerSample
     override val framePosition: Int
-        get() = pos / wav.frameSizeInBytes
+        get() = ((raf?.filePointer?.toInt() ?: 0) + start) / wav.frameSizeInBytes
 
     private var raf: RandomAccessFile? = null
 
     private var start = 0
     private var stop = 0
-    private var pos = playbackSectionBegin ?: 44
 
     override fun open() {
         val (begin, end) = computeBounds(wav)
         start = begin
         stop = end
-        pos = start
         raf = RandomAccessFile(wav.file, "r")
     }
 
@@ -87,7 +85,6 @@ internal class WavFileReader(
         raf?.let { raf ->
             val written = remaining().coerceAtMost(bytes.size)
             raf.read(bytes, 0, written)
-            pos += written
             return written
         } ?: run {
             throw IllegalStateException("Tried to get pcm buffer before opening file")
@@ -95,14 +92,13 @@ internal class WavFileReader(
     }
 
     private fun remaining(): Int {
-        return stop - pos
+        return stop - ((raf?.filePointer?.toInt() ?: 0) + start)
     }
 
     @Throws(ArrayIndexOutOfBoundsException::class)
     override fun seek(sample: Int) {
         raf?.let { raf ->
-            val index = min(wav.sampleIndex(sample) + WAV_HEADER_SIZE, stop)
-            pos = index
+            val index = min(wav.sampleIndex(sample) + start, stop)
             raf.seek(index.toLong())
         } ?: run {
             throw IllegalStateException("Tried to seek before opening file")
@@ -116,7 +112,7 @@ internal class WavFileReader(
     override fun release() {
         raf?.let {
             it.close()
-            pos = 0
         }
+        raf = null
     }
 }
