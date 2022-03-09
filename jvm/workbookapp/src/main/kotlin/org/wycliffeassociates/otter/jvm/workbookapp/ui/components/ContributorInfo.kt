@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.event.EventTarget
+import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
@@ -26,30 +27,35 @@ class ContributorInfo : VBox() {
                 addClass("contributor__section-text")
             }
         }
+        hbox {
+            spacing = 20.0
+            alignment = Pos.CENTER
 
-        vbox {
-            vgrow = Priority.ALWAYS
-            addClass("contributor__input-group")
             textfield {
-                hgrow = Priority.ALWAYS
                 contributorField = this
+                hgrow = Priority.ALWAYS
+
                 addClass("txt-input", "contributor__text-input")
                 promptText = messages["contributorName"]
             }.hide()
             button(messages["addContributor"]) {
                 useMaxWidth = true
+                hgrow = Priority.SOMETIMES
+
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
                 setOnAction {
                     if (contributorField.isVisible) {
                         contributorField.hide()
-                        this.show()
                     } else {
                         contributorField.show()
-                        this.hide()
                     }
                 }
             }
+        }
+        vbox {
+            vgrow = Priority.ALWAYS
+            addClass("contributor__input-group")
 
             listview(contributors) {
                 addClass("wa-list-view", "contributor__list")
@@ -66,7 +72,7 @@ class ContributorInfo : VBox() {
                 setOnAction {
 
                 }
-            }.setVisible(contributors.size != 0)
+            }.isVisible = contributors.size != 0
             textflow {
                 text(messages["creativeCommonsDescription"]) {
                     addClass("contributor__section-text")
