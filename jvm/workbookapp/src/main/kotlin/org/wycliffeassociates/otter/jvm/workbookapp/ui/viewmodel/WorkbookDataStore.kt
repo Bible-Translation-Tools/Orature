@@ -27,6 +27,7 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -42,6 +43,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -113,16 +115,16 @@ class WorkbookDataStore : Component(), ScopedInstance {
             resourceMetadata,
             workbook.target.toCollection()
         )
-        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
 
         val linkedResource = workbook
             .source
             .linkedResources
             .firstOrNull { it.identifier == resourceMetadata.identifier }
 
-        activeProjectFilesAccessor.initializeResourceContainerInDir()
-        activeProjectFilesAccessor.copySourceFiles(linkedResource)
-        activeProjectFilesAccessor.createSelectedTakesFile()
+        projectFilesAccessor.initializeResourceContainerInDir(false)
+        projectFilesAccessor.copySourceFiles(linkedResource)
+        projectFilesAccessor.createSelectedTakesFile()
+        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
     }
 
     fun updateSelectedTakesFile() {

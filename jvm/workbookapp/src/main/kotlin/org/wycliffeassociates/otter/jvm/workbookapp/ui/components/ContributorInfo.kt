@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.collections.ObservableList
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -8,8 +9,9 @@ import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class ContributorInfo : VBox() {
-    private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."))
+class ContributorInfo(
+    private val contributors: ObservableList<Contributor>
+) : VBox() {
 
     init {
         addClass("contributor__container")

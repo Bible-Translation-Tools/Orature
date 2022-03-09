@@ -26,6 +26,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -43,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -68,6 +70,8 @@ class WorkbookPageViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
+    val contributorList: ObservableList<Contributor> = observableListOf()
+
     val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
@@ -89,6 +93,14 @@ class WorkbookPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+        workbookDataStore.activeProjectFilesAccessorProperty.onChange { projectAccessor ->
+            if (projectAccessor != null) {
+                val contributors = ResourceContainer.load(projectAccessor.projectDir).use { rc ->
+                    rc.manifest.dublinCore.contributor.map { Contributor(it) }
+                }
+                contributorList.setAll(contributors)
+            }
+        }
     }
 
     /**
@@ -106,6 +118,7 @@ class WorkbookPageViewModel : ViewModel() {
      * Sets WorkbookDataStore state to represent the selected workbook tab.
      */
     fun openTab(resourceMetadata: ResourceMetadata) {
+        if (resourceMetadata.identifier == currentTabProperty.value) return
         currentTabProperty.set(resourceMetadata.identifier)
         workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
         workbookDataStore.setProjectFilesAccessor(resourceMetadata)

@@ -35,7 +35,6 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
@@ -373,7 +372,7 @@ class WorkbookPage : View() {
                             ChapterCell()
                         }
                     }
-                    add(ContributorInfo())
+                    add(ContributorInfo(viewModel.contributorList))
                 }
             }
         }
