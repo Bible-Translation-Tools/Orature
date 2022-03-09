@@ -84,7 +84,7 @@ class ChapterPageViewModelTest2 {
         val chapter = mock<Chapter> {
             on { sort } doReturn 5
         }
-        val chapterCard = mock<CardData>() {
+        val chunkCard = mock<CardData>() {
             on { chapterSource } doReturn chapter
             on { chunkSource } doReturn chunk
         }
@@ -101,7 +101,7 @@ class ChapterPageViewModelTest2 {
         val chapterPageViewModel: ChapterPageViewModel = find()
         Assert.assertEquals(5, workbookDataStore.activeChapterProperty.value.sort)
         Assert.assertEquals(1, workbookDataStore.activeChunkProperty.value.sort)
-        chapterPageViewModel.onCardSelection(chapterCard)
+        chapterPageViewModel.onCardSelection(chunkCard)
         Assert.assertEquals(5, workbookDataStore.activeChapterProperty.value.sort)
         Assert.assertEquals(3, workbookDataStore.activeChunkProperty.value.sort)
     }
