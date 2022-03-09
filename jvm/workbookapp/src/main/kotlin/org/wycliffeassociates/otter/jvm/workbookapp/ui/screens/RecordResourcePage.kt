@@ -22,10 +22,12 @@ import com.jfoenix.controls.JFXTabPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.domain.content.Recordable
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.onUpdateAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -70,17 +72,25 @@ class RecordResourcePage : View() {
         return RecordableTab(
             viewModel = viewModel.contentTypeToViewModelMap.getNotNull(contentType),
             onTabSelect = viewModel::onTabSelect
-        )
+        ).apply {
+            whenSelected {
+                shortcut(Shortcut.RECORD.value, ::recordNewTake)
+            }
+        }
+    }
+
+    private fun addRemoveTabs(tab: RecordableTab, rec: Recordable?) {
+        rec?.let {
+            if (!tabPane.tabs.contains(tab)) tabPane.tabs.add(tab)
+        } ?: tabPane.tabs.remove(tab)
     }
 
     override fun onDock() {
         tabs.forEach { recordableTab ->
             recordableTab.bindProperties()
-            recordableTab.recordableProperty.onChangeAndDoNow { rec ->
-                rec?.let {
-                    if (!tabPane.tabs.contains(recordableTab)) tabPane.tabs.add(recordableTab)
-                } ?: tabPane.tabs.remove(recordableTab)
-            }
+            recordableTab.recordableProperty.onUpdateAndDoNow {
+                addRemoveTabs(recordableTab, it)
+            }.let { recordableTab.recordableListener = it }
         }
         navigator.dock(this, breadCrumb)
     }
@@ -88,6 +98,8 @@ class RecordResourcePage : View() {
     override fun onUndock() {
         tabs.forEach { recordableTab ->
             recordableTab.unbindProperties()
+            recordableTab.removeListeners()
         }
+        tabPane.tabs.clear()
     }
 }

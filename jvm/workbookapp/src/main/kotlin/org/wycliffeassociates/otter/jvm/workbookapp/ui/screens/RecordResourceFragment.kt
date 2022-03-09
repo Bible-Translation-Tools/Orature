@@ -40,6 +40,7 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.card.ResourceTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
@@ -143,6 +144,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         action {
             recordableViewModel.recordNewTake()
         }
+        shortcut(Shortcut.RECORD.value)
     }
 
     private val previousButton = Button().apply {

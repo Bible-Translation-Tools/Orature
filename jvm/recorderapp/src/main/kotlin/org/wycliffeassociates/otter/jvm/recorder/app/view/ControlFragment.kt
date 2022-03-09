@@ -25,6 +25,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
 
@@ -84,6 +85,7 @@ class ControlFragment : Fragment() {
             setOnAction {
                 toggleRecording()
             }
+            shortcut(Shortcut.RECORD.value)
         }
 
         continueBtn.apply {
@@ -94,6 +96,7 @@ class ControlFragment : Fragment() {
             setOnAction {
                 vm.save()
             }
+            shortcut(Shortcut.GO_BACK.value)
         }
 
         cancelBtn.apply {
@@ -104,6 +107,7 @@ class ControlFragment : Fragment() {
             setOnAction {
                 vm.save()
             }
+            shortcut(Shortcut.GO_BACK.value)
         }
     }
 
