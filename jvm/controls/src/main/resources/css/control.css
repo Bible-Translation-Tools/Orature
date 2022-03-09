@@ -550,10 +550,6 @@
     -fx-background-color: -wa-transparent;
 }
 
-.wa-list-view .label {
-    -fx-text-fill: -wa-gray-darker;
-}
-
 /* ------------------- Menu Button --------------- */
 .wa-menu-button {
     -fx-pref-height: 48px;
