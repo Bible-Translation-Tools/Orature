@@ -101,11 +101,7 @@ class ProjectImporter @Inject constructor(
         return Single.fromCallable {
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
-
-
-
                 val manifestSources = manifest.dublinCore.source.toSet()
-
                 val manifestProject = try {
                     manifest.projects.single()
                 } catch (t: Throwable) {
@@ -121,8 +117,7 @@ class ProjectImporter @Inject constructor(
                     } else {
                         existingSource
                     }
-                    // apply source version to target version to synchronize before import
-                    manifest.dublinCore.version = sourceCollection.resourceContainer!!.version
+                    syncProjectVersion(manifest, sourceCollection.resourceContainer!!.version)
 
                     val metadata = languageRepository
                         .getBySlug(manifest.dublinCore.language.identifier)
@@ -384,6 +379,11 @@ class ProjectImporter @Inject constructor(
         } else {
             null
         }
+    }
+
+    /** Applies source version to target version before importing. */
+    private fun syncProjectVersion(projectManifest: Manifest, version: String) {
+        projectManifest.dublinCore.version = version
     }
 
     data class ContentSignature(val chapter: Int, val verse: Int?, val sort: Int?, val type: ContentType?)
