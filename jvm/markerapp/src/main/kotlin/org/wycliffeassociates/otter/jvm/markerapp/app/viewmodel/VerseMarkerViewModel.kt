@@ -247,10 +247,12 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun pixelsInHighlight(controlWidth: Double): Double {
-        return audioPlayer.value.getAudioReader()?.let {
-            val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
-            val framesPerPixel = totalFrames / max(controlWidth, 1.0)
-            return max(framesInHighlight / framesPerPixel, 1.0)
-        } ?: 0.0
+        if (sampleRate == 0 || totalFrames == 0) {
+            return 1.0
+        }
+
+        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
+        val framesPerPixel = totalFrames / max(controlWidth, 1.0)
+        return max(framesInHighlight / framesPerPixel, 1.0)
     }
 }
