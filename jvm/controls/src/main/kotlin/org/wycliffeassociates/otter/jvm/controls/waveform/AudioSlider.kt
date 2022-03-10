@@ -44,7 +44,6 @@ class AudioSlider(
     var waveformMinimapListener: ChangeListener<Image>? = null
 
     val player = SimpleObjectProperty<IAudioPlayer>()
-    var reader: AudioFileReader? = null
     var pixelsInHighlight: (Double) -> Double = { 0.0 }
 
     init {
@@ -54,7 +53,6 @@ class AudioSlider(
 
         player.onChangeAndDoNow { player ->
             player?.let {
-                reader = it.getAudioReader()
                 setMax(it.getDurationInFrames().toDouble())
                 it.seek(0)
             }
