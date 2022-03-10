@@ -23,7 +23,6 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -79,9 +78,8 @@ class VerseMarkerViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     var imageWidth: Double = 0.0
 
-    val disposeables = mutableListOf<Disposable>()
-
-    private var audioFile: File? = null
+    private var sampleRate: Int = 0
+    private var totalFrames: Int = 0
 
     fun onDock() {
         val audio = loadAudio()
@@ -96,6 +94,10 @@ class VerseMarkerViewModel : ViewModel() {
         val audioFile = File(scope.parameters.named["wav"])
         val audio = AudioFile(audioFile)
         player.load(audioFile)
+        player.getAudioReader()!!.let {
+            sampleRate = it.sampleRate
+            totalFrames = it.totalFrames
+        }
         audioPlayer.set(player)
         return audio
     }
@@ -230,7 +232,7 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
-        val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
+        val samplesPerScreenWidth = sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
         return pixelsInDuration.toDouble()
@@ -245,9 +247,9 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun pixelsInHighlight(controlWidth: Double): Double {
-        return audioPlayer.value.getAudioReader()?.let { it ->
-            val framesInHighlight = it.sampleRate * SECONDS_ON_SCREEN
-            val framesPerPixel = it.totalFrames / max(controlWidth, 1.0)
+        return audioPlayer.value.getAudioReader()?.let {
+            val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
+            val framesPerPixel = totalFrames / max(controlWidth, 1.0)
             return max(framesInHighlight / framesPerPixel, 1.0)
         } ?: 0.0
     }
