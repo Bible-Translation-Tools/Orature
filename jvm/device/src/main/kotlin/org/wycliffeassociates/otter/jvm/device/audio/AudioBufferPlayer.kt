@@ -23,6 +23,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
+import kotlin.math.abs
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
@@ -116,11 +117,13 @@ class AudioBufferPlayer(
                             player.start()
                             while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                                 synchronized(monitor) {
-                                    if (_reader.framePosition > bytes.size / 2) {
+                                    // if the User did not change the playback rate, skip playback rate processing
+                                    val adjustedPlaybackRate = abs(processor.playbackRate - 1.0) < 0.0001
+                                    if (adjustedPlaybackRate && _reader.framePosition > bytes.size / 2) {
                                         _reader.seek(_reader.framePosition - processor.overlap)
                                     }
                                     _reader.getPcmBuffer(bytes)
-                                    val output = processor.process(bytes)
+                                    var output = if (adjustedPlaybackRate) processor.process(bytes) else bytes
                                     player.write(output, 0, output.size)
                                 }
                             }
