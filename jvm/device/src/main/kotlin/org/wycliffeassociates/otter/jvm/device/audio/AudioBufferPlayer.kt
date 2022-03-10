@@ -119,12 +119,12 @@ class AudioBufferPlayer(
                                 synchronized(monitor) {
                                     // if the User did not change the playback rate, skip playback rate processing
                                     val adjustedPlaybackRate = abs(processor.playbackRate - 1.0) < 0.0001
-                                    if (!adjustedPlaybackRate && _reader.framePosition > bytes.size / 2) {
+                                    if (adjustedPlaybackRate && _reader.framePosition > bytes.size / 2) {
                                         _reader.seek(_reader.framePosition - processor.overlap)
                                     }
                                     _reader.getPcmBuffer(bytes)
                                     val output = bytes
-                                    if (!adjustedPlaybackRate) {
+                                    if (adjustedPlaybackRate) {
                                         processor.process(bytes)
                                     }
                                     player.write(output, 0, output.size)
