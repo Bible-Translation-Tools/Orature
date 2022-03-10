@@ -45,6 +45,7 @@ class AudioSlider(
 
     val player = SimpleObjectProperty<IAudioPlayer>()
     var reader: AudioFileReader? = null
+    var pixelsInHighlight: (Double) -> Double = { 0.0 }
 
     init {
         // initial height/width to prevent the control from otherwise growing indefinitely

@@ -45,6 +45,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import kotlin.math.max
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -241,5 +242,13 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.get().getDurationInFrames() ?: 0
+    }
+
+    fun pixelsInHighlight(controlWidth: Double): Double {
+        return audioPlayer.value.getAudioReader()?.let { it ->
+            val framesInHighlight = it.sampleRate * SECONDS_ON_SCREEN
+            val framesPerPixel = it.totalFrames / max(controlWidth, 1.0)
+            return max(framesInHighlight / framesPerPixel, 1.0)
+        } ?: 0.0
     }
 }
