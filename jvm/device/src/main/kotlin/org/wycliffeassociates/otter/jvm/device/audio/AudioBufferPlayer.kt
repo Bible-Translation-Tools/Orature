@@ -123,10 +123,7 @@ class AudioBufferPlayer(
                                         _reader.seek(_reader.framePosition - processor.overlap)
                                     }
                                     _reader.getPcmBuffer(bytes)
-                                    val output = bytes
-                                    if (adjustedPlaybackRate) {
-                                        processor.process(bytes)
-                                    }
+                                    var output = if (adjustedPlaybackRate) processor.process(bytes) else bytes
                                     player.write(output, 0, output.size)
                                 }
                             }
