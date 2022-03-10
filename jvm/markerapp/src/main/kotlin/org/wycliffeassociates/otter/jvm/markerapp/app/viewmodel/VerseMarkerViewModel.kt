@@ -78,8 +78,8 @@ class VerseMarkerViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     var imageWidth: Double = 0.0
 
-    private var sampleRate: Int = 0
-    private var totalFrames: Int = 0
+    private var sampleRate: Int = 0 // beware of divided by 0
+    private var totalFrames: Int = 0 // beware of divided by 0
 
     fun onDock() {
         val audio = loadAudio()
@@ -94,7 +94,7 @@ class VerseMarkerViewModel : ViewModel() {
         val audioFile = File(scope.parameters.named["wav"])
         val audio = AudioFile(audioFile)
         player.load(audioFile)
-        player.getAudioReader()!!.let {
+        player.getAudioReader()?.let {
             sampleRate = it.sampleRate
             totalFrames = it.totalFrames
         }
@@ -232,6 +232,10 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
+        if (sampleRate == 0) {
+            return 0.0
+        }
+
         val samplesPerScreenWidth = sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
