@@ -45,11 +45,10 @@ class ContributorInfo : VBox() {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
                 setOnAction {
-                    if (contributorField.isVisible) {
-                        contributorField.clear()
-                        contributorField.hide()
-                    } else {
+                    if (!contributorField.isVisible) {
                         contributorField.show()
+                    } else {
+                        // TODO: add contributor to list
                     }
                 }
             }

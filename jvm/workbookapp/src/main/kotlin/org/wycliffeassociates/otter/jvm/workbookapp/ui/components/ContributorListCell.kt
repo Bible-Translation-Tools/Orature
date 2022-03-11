@@ -31,68 +31,21 @@ class ContributorListCell : ListCell<Contributor>() {
 
 class ContributorCell : HBox() {
     val nameProperty = SimpleStringProperty()
-    private val newNameProperty = SimpleStringProperty()
-    private val isEditingProperty = SimpleBooleanProperty()
-    private lateinit var nameTextField: TextField
 
     init {
-        hbox{
+        useMaxWidth = true
+        hgrow = Priority.ALWAYS
+        addClass("contributor__list-cell")
+
+        textfield(nameProperty) {
             hgrow = Priority.ALWAYS
-            spacing = 10.0
-            hbox {
-                useMaxWidth = true
-                hgrow = Priority.ALWAYS
-                addClass("contributor__list-cell")
+            addClass("txt-input", "contributor__text-input")
+        }
+        button {
+            addClass("btn", "btn--icon", "contributor__list-cell__delete-btn")
+            graphic = FontIcon(Material.DELETE)
+            setOnAction {
 
-                setOnMouseClicked {
-                    newNameProperty.set(nameProperty.value)
-                    isEditingProperty.set(true)
-                    nameTextField.requestFocus()
-                }
-
-                label(nameProperty) {
-                    addClass("contributor__list-cell__title")
-
-                    visibleProperty().bind(isEditingProperty.not())
-                    managedProperty().bind(isEditingProperty.not())
-
-                }
-                hbox {
-                    addClass("contributor__list-cell__editor")
-                    visibleProperty().bind(isEditingProperty)
-                    managedProperty().bind(isEditingProperty)
-
-                    textfield(newNameProperty) {
-                        nameTextField = this
-                        addClass("txt-input", "contributor__text-input")
-                    }
-                    button {
-                        addClass("btn", "btn--icon", "contributor__list-cell__save-btn")
-                        graphic = FontIcon(Material.CHECK)
-                        setOnAction {
-                            nameProperty.set(newNameProperty.value)
-                            isEditingProperty.set(false)
-                        }
-                    }
-                    button {
-                        addClass("btn", "btn--icon", "contributor__list-cell__discard-btn")
-                        graphic = FontIcon(Material.CANCEL)
-                        setOnAction {
-                            isEditingProperty.set(false)
-                        }
-                    }
-                }
-            }
-            hbox {
-                alignment = Pos.CENTER
-                hgrow = Priority.NEVER
-                button {
-                    addClass("btn", "btn--icon", "contributor__list-cell__delete-btn")
-                    graphic = FontIcon(Material.DELETE)
-                    setOnAction {
-
-                    }
-                }
             }
         }
     }

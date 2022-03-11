@@ -27,6 +27,7 @@
 .contributor__text-input {
     -fx-font-size: 1.15em;
     -fx-pref-height: 38px;
+    -fx-padding: 8px 12px;
     -fx-border-width: 1px;
 }
 
@@ -35,42 +36,28 @@
 }
 
 .contributor__list .list-cell {
-    -fx-padding: 2px 0;
+    -fx-padding: 0; /* unset default styles */
 }
 
 .contributor__list-cell {
-    -fx-background-color: -wa-foreground;
+    -fx-background-color: transparent;
     -fx-background-radius: 5px;
-    -fx-padding: 8px 20px;
-    -fx-pref-height: 55px;
-    -fx-alignment: center-left;
-}
-
-.contributor__list-cell:hover .contributor__list-cell__title {
-    -fx-underline: true;
-    -fx-cursor: hand;
-}
-
-.contributor__list-cell__title.label {
-    -fx-font-size: 1.15em;
-    -fx-text-fill: -wa-regular-text;
-}
-
-.contributor__list-cell__editor {
-    -fx-padding: 0 0 0 -11px;
+    -fx-padding: 4px 2px;
     -fx-spacing: 5px;
 }
 
-.contributor__list-cell__editor .btn--icon {
+.contributor__list-cell .btn--icon {
+    -fx-border-width: 0;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+}
+
+.contributor__list-cell .btn--icon:hover {
     -fx-border-width: 1px;
 }
 
-.contributor__list-cell__save-btn .ikonli-font-icon {
-    -fx-icon-color: -wa-status-active;
-}
-
-.contributor__list-cell__discard-btn .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
+.contributor__list .contributor__text-input {
+    -fx-underline: true;
 }
 
 .contributor__list-cell__delete-btn .ikonli-font-icon {
