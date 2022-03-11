@@ -26,7 +26,6 @@ import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -44,7 +43,7 @@ class AudioSlider(
     var waveformMinimapListener: ChangeListener<Image>? = null
 
     val player = SimpleObjectProperty<IAudioPlayer>()
-    var reader: AudioFileReader? = null
+    var pixelsInHighlight: (Double) -> Double = { 0.0 }
 
     init {
         // initial height/width to prevent the control from otherwise growing indefinitely
@@ -53,7 +52,6 @@ class AudioSlider(
 
         player.onChangeAndDoNow { player ->
             player?.let {
-                reader = it.getAudioReader()
                 setMax(it.getDurationInFrames().toDouble())
                 it.seek(0)
             }

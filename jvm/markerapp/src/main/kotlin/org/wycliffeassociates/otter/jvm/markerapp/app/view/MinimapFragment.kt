@@ -44,7 +44,7 @@ class MinimapFragment : Fragment() {
                 waveformImageProperty.set(it)
             }
             viewModel.waveformMinimapImage.addListener(waveformMinimapListener)
-
+            pixelsInHighlight = viewModel::pixelsInHighlight
             player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
         }
