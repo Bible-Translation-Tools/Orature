@@ -50,6 +50,7 @@ import java.text.MessageFormat
 import java.util.*
 import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportDialog
 
 class ChapterPage : View() {
@@ -114,6 +115,7 @@ class ChapterPage : View() {
         tryImportStylesheet(resources.get("/css/take-item.css"))
         tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/contributor-info.css"))
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
@@ -193,7 +195,10 @@ class ChapterPage : View() {
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
                             // Export action currently commented out
-                            ExportDialog()
+                            find<ExportDialog>().apply {
+                                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                                open()
+                            }
                             /*val directory = chooseDirectory(FX.messages["exportChapter"])
                             directory?.let {
                                 viewModel.exportChapter(it)

@@ -63,3 +63,8 @@
 .contributor__list-cell__delete-btn .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
 }
+
+/* --- dialog --- */
+.contributor-dialog {
+    -fx-background-color: -wa-dialog-background;
+}

@@ -1,26 +1,38 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
-import javafx.geometry.Pos
 import javafx.scene.control.TextField
-import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
-import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorListCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
 class ExportDialog : OtterDialog() {
-    private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."), Contributor("Joel S."))
     var contributorField: TextField by singleAssign()
 
-    private val content = ContributorInfo()
+    private val settingsViewModel: SettingsViewModel by inject()
+
+    private val content = VBox().apply {
+        addClass("contributor-dialog")
+
+        button {
+            addClass("add-plugin-dialog__btn--close") // TODO: refactor to common style class
+            tooltip(messages["close"])
+            graphic = FontIcon("gmi-close")
+            action { close() }
+        }
+        add(ContributorInfo())
+    }
 
     init {
         setContent(content)
         open()
+    }
+
+    override fun onDock() {
+        super.onDock()
+        themeProperty.set(settingsViewModel.appColorMode.value)
     }
 }
