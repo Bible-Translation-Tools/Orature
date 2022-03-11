@@ -49,6 +49,8 @@ class ContributorInfo : VBox() {
                         contributorField.show()
                     } else {
                         // TODO: add contributor to list
+                        contributors.add(Contributor(contributorField.getText()))
+                        contributorField.clear()
                     }
                 }
             }
