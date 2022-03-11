@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.beans.binding.Bindings
 import javafx.collections.ObservableList
 import javafx.scene.control.ListCell
+import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
@@ -51,6 +52,14 @@ class BookCell(
 
             setOnMouseClicked {
                 onSelected(item)
+            }
+
+            if (isSelected and !isDisabled) {
+                listView.setOnKeyPressed {
+                    when (it.code) {
+                        KeyCode.ENTER, KeyCode.SPACE -> onSelected(item)
+                    }
+                }
             }
 
             disableProperty().bind(

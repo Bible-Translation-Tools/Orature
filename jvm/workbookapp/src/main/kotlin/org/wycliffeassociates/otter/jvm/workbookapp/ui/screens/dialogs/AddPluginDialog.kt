@@ -42,7 +42,7 @@ class AddPluginDialog : OtterDialog() {
             }
             region { hgrow = Priority.ALWAYS }
             button {
-                addClass("add-plugin-dialog__btn--close")
+                addClass("btn", "btn--secondary")
                 tooltip(messages["close"])
                 graphic = FontIcon("gmi-close")
                 action { close() }

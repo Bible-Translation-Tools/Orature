@@ -125,7 +125,7 @@ class RecordScripturePage : View() {
             }
         )
         iconProperty.set(FontIcon(MaterialDesign.MDI_BOOKMARK_OUTLINE))
-        onClickAction {
+        setOnAction {
             navigator.dock(this@RecordScripturePage)
         }
     }

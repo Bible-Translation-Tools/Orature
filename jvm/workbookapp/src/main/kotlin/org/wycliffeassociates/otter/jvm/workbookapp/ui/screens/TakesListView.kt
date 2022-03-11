@@ -20,8 +20,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.collections.ObservableList
 import javafx.scene.Node
+import javafx.scene.control.Button
 import javafx.scene.control.ListView
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.utils.findChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 
@@ -30,19 +33,35 @@ class TakesListView(
     createTakeNode: (TakeCardModel) -> Node
 ) : ListView<TakeCardModel>(items) {
     init {
+        focusedProperty().onChange {
+            if (it) selectionModel.select(1)
+        }
+        focusModel.focusedItemProperty().onChange {
+            if (it?.selected == true) selectionModel.select(1)
+        }
+
         cellFormat {
             /* Don't use cell caching, because we remove the front node of the take card when it is dragged
                 and we don't ever add it back if it was made the selected take. (This is because we create a
                 new take card if it was selected.)
              */
             if (!it.selected) {
-                graphic = createTakeNode(it)
+                graphic = createTakeNode(it).apply {
+                    if (isSelected) {
+                        listView.setOnKeyPressed { event ->
+                            when (event.code) {
+                                KeyCode.TAB -> {
+                                    findChild<Button>()?.requestFocus()
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        vgrow = Priority.ALWAYS
-        isFocusTraversable = false
-        addClass("card__takes-list")
 
+        vgrow = Priority.ALWAYS
+        addClass("card__takes-list")
         childrenUnmodifiable.onChange { removeListViewClip(this as ListView<Any>) }
     }
 }

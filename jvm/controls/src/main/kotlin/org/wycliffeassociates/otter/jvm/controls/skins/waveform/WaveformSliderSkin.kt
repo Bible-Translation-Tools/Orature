@@ -147,14 +147,9 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     }
 
     private fun resizeThumbWidth(): Double {
-        return control.reader?.let { it ->
-            val secondsToHighlight = control.secondsToHighlightProperty.value
-            val framesInHighlight = it.sampleRate * secondsToHighlight
-            val framesPerPixel = it.totalFrames / max(control.widthProperty().value, 1.0)
-            val pixelsInHighlight = max(framesInHighlight / framesPerPixel, 1.0)
-            thumb.width = min(pixelsInHighlight, control.width)
-            return pixelsInHighlight
-        } ?: 0.0
+        val pixelsInHighlight = control.pixelsInHighlight(control.width)
+        thumb.width = min(pixelsInHighlight, control.width)
+        return pixelsInHighlight
     }
 
     private fun createMarker(cue: AudioCue): Node {

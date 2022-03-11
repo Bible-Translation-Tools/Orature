@@ -22,8 +22,11 @@ import javafx.beans.property.BooleanProperty
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.geometry.NodeOrientation
+import javafx.scene.control.Button
 import javafx.scene.control.ListView
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.utils.findChild
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceGroupCardItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import tornadofx.*
@@ -36,13 +39,25 @@ class ResourceListView(
 ) : ListView<ResourceGroupCardItem>(items) {
     init {
         cellFormat {
-            graphic = cache(it.title) {
-                resourcegroupcard(it, filterCompletedCardsProperty, sourceOrientationProperty, navigator)
+            graphic = resourcegroupcard(
+                it,
+                filterCompletedCardsProperty,
+                sourceOrientationProperty,
+                navigator
+            ).apply {
+                if (isSelected) {
+                    listView.setOnKeyPressed { event ->
+                        when (event.code) {
+                            KeyCode.TAB -> {
+                                findChild<Button>()?.requestFocus()
+                            }
+                        }
+                    }
+                }
             }
         }
 
         vgrow = Priority.ALWAYS
-        isFocusTraversable = false
         addClass("resource-list-view")
     }
 }

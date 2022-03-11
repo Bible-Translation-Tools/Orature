@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.button
 
+import com.sun.javafx.scene.control.behavior.ButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -27,6 +28,8 @@ import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 
 class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(checkbox) {
+
+    private val behavior = ButtonBehavior(checkbox)
 
     @FXML
     lateinit var root: HBox
@@ -46,7 +49,6 @@ class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(ch
     }
 
     private fun initializeControl() {
-        checkbox.setOnMouseClicked { checkbox.fire() }
         btnCheckbox.selectedProperty().bindBidirectional(checkbox.selectedProperty())
 
         btnLabel.apply {
@@ -62,5 +64,10 @@ class CheckboxButtonSkin(private val checkbox: CheckBox) : SkinBase<CheckBox>(ch
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        behavior.dispose()
     }
 }

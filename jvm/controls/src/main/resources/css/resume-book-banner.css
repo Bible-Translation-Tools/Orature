@@ -22,6 +22,7 @@
     -fx-max-height: 215px;
     -fx-background-color: -wa-primary;
     -fx-background-radius: 15px;
+    -fx-focus-traversable: false;
 }
 
 .resume-book-banner__overlay {

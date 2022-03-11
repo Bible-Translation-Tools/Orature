@@ -20,7 +20,6 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
-import java.util.*
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -41,7 +40,6 @@ import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
-import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.controls.card.ResourceTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
@@ -53,10 +51,14 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppTheme
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordResourceViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RecordableViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
 import tornadofx.*
+import java.util.*
 
 class RecordResourceFragment(private val recordableViewModel: RecordableViewModel) : Fragment() {
     private val logger = LoggerFactory.getLogger(RecordResourceFragment::class.java)
@@ -132,19 +134,16 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
         add(dragContainer)
     }
 
-    private val newTakeButton =
-        highlightablebutton {
-            highlightColor = AppTheme.colors.appBlue
-            secondaryColor = AppTheme.colors.white
-            isHighlighted = true
-            graphic = FontIcon("gmi-mic").apply { iconSize = 25 }
-            maxWidth = 500.0
-            text = messages["record"]
+    private val newTakeButton = Button().apply {
+        addClass("btn", "btn--primary")
+        graphic = FontIcon("gmi-mic")
+        maxWidth = 500.0
+        text = messages["record"]
 
-            action {
-                recordableViewModel.recordNewTake()
-            }
+        action {
+            recordableViewModel.recordNewTake()
         }
+    }
 
     private val previousButton = Button().apply {
         addClass("btn", "btn--secondary", "card__navigate-button")
@@ -341,6 +340,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
 
     private fun createTakeCard(take: TakeCardModel): Control {
         return ResourceTakeCard().apply {
+            addClass("resource-take-card")
             audioPlayerProperty().set(take.audioPlayer)
             takeProperty().set(take.take)
             takeNumberProperty().set(take.take.number.toString())

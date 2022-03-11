@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
+import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Tab
 import javafx.scene.paint.Color
@@ -48,6 +49,9 @@ class RecordableTab(
 
         selectedProperty().onChange { selected ->
             if (selected) {
+                Platform.runLater {
+                    content.requestFocus()
+                }
                 callOnTabSelect()
             }
         }

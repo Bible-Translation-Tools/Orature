@@ -16,27 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.audio
+package org.wycliffeassociates.otter.jvm.controls.utils
 
-import io.reactivex.Completable
-import java.io.File
-import javax.inject.Inject
-import de.sciss.jump3r.Main as jump3r
+import javafx.scene.Node
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 
-class AudioConverter @Inject constructor() {
-    fun wavToMp3(
-        wavFile: File,
-        mp3File: File,
-        bitrate: Int = 64
-    ): Completable {
-        return Completable.fromCallable {
-            val args = arrayOf(
-                "-b", bitrate.toString(),
-                "-m", "m",
-                wavFile.invariantSeparatorsPath,
-                mp3File.invariantSeparatorsPath
-            )
-            jump3r().run(args)
-        }
-    }
+fun Node.simulateKeyPress(
+    key: KeyCode,
+    shiftDown: Boolean = false,
+    controlDown: Boolean = false,
+    altDown: Boolean = false,
+    metaDown: Boolean = false
+) {
+    fireEvent(
+        KeyEvent(
+            KeyEvent.KEY_PRESSED,
+            "",
+            "",
+            key,
+            shiftDown,
+            controlDown,
+            altDown,
+            metaDown
+        )
+    )
 }

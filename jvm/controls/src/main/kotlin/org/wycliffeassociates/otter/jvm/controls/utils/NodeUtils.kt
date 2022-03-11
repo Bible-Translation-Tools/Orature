@@ -16,27 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.domain.audio
+package org.wycliffeassociates.otter.jvm.controls.utils
 
-import io.reactivex.Completable
-import java.io.File
-import javax.inject.Inject
-import de.sciss.jump3r.Main as jump3r
+import javafx.scene.Node
+import javafx.scene.Parent
+import kotlin.reflect.KClass
 
-class AudioConverter @Inject constructor() {
-    fun wavToMp3(
-        wavFile: File,
-        mp3File: File,
-        bitrate: Int = 64
-    ): Completable {
-        return Completable.fromCallable {
-            val args = arrayOf(
-                "-b", bitrate.toString(),
-                "-m", "m",
-                wavFile.invariantSeparatorsPath,
-                mp3File.invariantSeparatorsPath
-            )
-            jump3r().run(args)
+inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
+inline fun <reified T: Node> Node.findChildren(): List<Node> = findChildren(T::class)
+fun <T: Node> Node.findChildren(type: KClass<T>): List<Node> {
+    if (this !is Parent) return listOf()
+
+    val list = this.childrenUnmodifiable
+        .filter { type.isInstance(it) }
+        .filter { it.isVisible }
+        .toMutableList()
+
+    for (node: Node in this.childrenUnmodifiable) {
+        (node as? Parent)?.findChildren(type)?.let {
+            list.addAll(it)
         }
     }
+
+    return list
 }
