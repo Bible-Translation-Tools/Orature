@@ -118,7 +118,7 @@ class AudioBufferPlayer(
                             while (_reader.hasRemaining() && !pause.get() && !playbackThread.isInterrupted) {
                                 synchronized(monitor) {
                                     // if the User did not change the playback rate, skip playback rate processing
-                                    val adjustedPlaybackRate = abs(processor.playbackRate - 1.0) < 0.0001
+                                    val adjustedPlaybackRate = abs(processor.playbackRate - 1.0) > 0.0001
                                     if (adjustedPlaybackRate && _reader.framePosition > bytes.size / 2) {
                                         _reader.seek(_reader.framePosition - processor.overlap)
                                     }
