@@ -20,6 +20,8 @@ package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Assert
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -29,6 +31,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ContentType.TEXT
 import org.wycliffeassociates.otter.common.data.primitives.ContentType.TITLE
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.time.LocalDate
 import javax.inject.Inject
@@ -193,5 +196,27 @@ class TestProjectImport {
                 .filter { it.extension == "wav" }
                 .count() == 3
         )
+    }
+
+    @Test
+    fun importContributorInfo() {
+        val fileName = "en-x-demo1-ulb-rev.zip"
+        val expectedContributors = 2
+
+        val importPath = javaClass.classLoader.getResource("resource-containers/$fileName").file
+        ResourceContainer.load(File(importPath)).use {
+            assertEquals(expectedContributors, it.manifest.dublinCore.contributor.size)
+        }
+        // import resource container with 2 contributors
+        db.import(fileName)
+
+        val projectManifest = ulbProjectDir.resolve("manifest.yaml")
+        assertTrue(projectManifest.exists())
+
+        val projectContributors = ResourceContainer.load(ulbProjectDir).use {
+            it.manifest.dublinCore.contributor.toList()
+        }
+
+        assertEquals(expectedContributors, projectContributors.size)
     }
 }
