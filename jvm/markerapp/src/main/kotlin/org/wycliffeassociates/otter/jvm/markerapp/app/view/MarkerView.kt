@@ -21,7 +21,11 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import javafx.scene.Parent
+import javafx.scene.control.Slider
+import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -37,10 +41,7 @@ class MarkerView : PluginEntrypoint() {
     private val markerTrack: MarkerTrackControl = MarkerTrackControl()
     private val waveform = MarkerPlacementWaveform(markerTrack)
 
-    private val titleFragment = TitleFragment()
-    private val minimap = MinimapFragment()
-    private val source = SourceTextFragment()
-    private val playbackControls = PlaybackControlsFragment()
+    private var slider: AudioSlider? = null
 
     override fun onDock() {
         super.onDock()
@@ -63,10 +64,12 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
             setOnPositionChanged { id, position ->
-                minimap.slider.updateMarker(id, position)
+                slider!!.updateMarker(id, position)
             }
         }
-        viewModel.initializeAudioController(minimap.slider)
+        slider?.let {
+            viewModel.initializeAudioController(it)
+        }
     }
 
     init {
@@ -76,18 +79,25 @@ class MarkerView : PluginEntrypoint() {
 
     override fun onUndock() {
         super.onUndock()
+        println("undock marker view")
         timer?.stop()
         timer = null
         waveform.freeImages()
         waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
+
+        viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
+        viewModel.markerStateProperty.removeListener(viewModel.markerStateListener)
+        slider?.clearListeners()
     }
 
     override val root =
         borderpane {
             top = vbox {
-                add(titleFragment)
-                add(minimap)
+                add<TitleFragment>()
+                add<MinimapFragment>() {
+                    this@MarkerView.slider = slider
+                }
             }
             center = waveform.apply {
                 viewModel.compositeDisposable.add(
@@ -110,8 +120,8 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
             bottom = vbox {
-                add(source)
-                add(playbackControls)
+                add<SourceTextFragment>()
+                add<PlaybackControlsFragment>()
             }
         }
 }

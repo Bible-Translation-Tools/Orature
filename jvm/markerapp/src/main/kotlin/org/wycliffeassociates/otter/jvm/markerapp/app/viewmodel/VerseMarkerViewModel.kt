@@ -43,6 +43,7 @@ import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
+import javafx.beans.value.ChangeListener
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import kotlin.math.max
 
@@ -60,6 +61,8 @@ class VerseMarkerViewModel : ViewModel() {
     val waveform: Observable<Image>
         get() = waveformSubject
 
+    lateinit var waveformMinimapImageListener: ChangeListener<Image>
+    lateinit var markerStateListener: ChangeListener<VerseMarkerModel>
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -184,10 +187,14 @@ class VerseMarkerViewModel : ViewModel() {
         }
     }
 
-    fun initializeAudioController(slider: Slider) {
-        audioController = AudioPlayerController(slider)
+    fun initializeAudioController() {
+        audioController = AudioPlayerController()
         audioController?.load(audioPlayer.get())
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
+    }
+
+    fun setSlider(slider: Slider) {
+        audioController?.audioSlider = slider
     }
 
     fun pause() {
