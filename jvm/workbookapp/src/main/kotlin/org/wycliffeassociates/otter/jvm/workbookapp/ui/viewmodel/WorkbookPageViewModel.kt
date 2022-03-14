@@ -95,9 +95,7 @@ class WorkbookPageViewModel : ViewModel() {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
         workbookDataStore.activeProjectFilesAccessorProperty.onChange { projectAccessor ->
             if (projectAccessor != null) {
-                val contributors = ResourceContainer.load(projectAccessor.projectDir).use { rc ->
-                    rc.manifest.dublinCore.contributor.map { Contributor(it) }
-                }
+                val contributors = projectAccessor.getContributorInfo()
                 contributorList.setAll(contributors)
             }
         }

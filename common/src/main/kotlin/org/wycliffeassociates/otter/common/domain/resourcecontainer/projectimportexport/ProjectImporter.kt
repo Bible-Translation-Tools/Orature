@@ -162,6 +162,7 @@ class ProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.copySourceFiles(fileReader)
 
+        importContributorInfo(metadata, projectFilesAccessor)
         importTakes(
             fileReader,
             derivedProject,
@@ -173,6 +174,18 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
+    }
+
+    private fun importContributorInfo(
+        metadata: ResourceMetadata,
+        projectFilesAccessor: ProjectFilesAccessor
+    ) {
+        val contributors = ResourceContainer.load(metadata.path).use {
+            it.manifest.dublinCore.contributor
+        }
+        if (contributors.isNotEmpty()) {
+            projectFilesAccessor.setContributorInfo(contributors)
+        }
     }
 
     private fun importTakes(

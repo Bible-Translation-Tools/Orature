@@ -22,12 +22,14 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.DEFAULT_RC_SLUG
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRepository
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -57,10 +59,12 @@ class ProjectExporter @Inject constructor(
                 val projectToExportIsBook: Boolean =
                     projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
 
+                val contributors = projectFilesAccessor.getContributorInfo()
                 val zipFilename = makeExportFilename(workbook, projectSourceMetadata)
                 val zipFile = directory.resolve(zipFilename)
 
                 projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
+                setContributorInfo(contributors.map { it.name }, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectFilesAccessor.copyTakeFiles(
@@ -99,6 +103,13 @@ class ProjectExporter @Inject constructor(
         val project = workbook.target.slug
         val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
         return "$lang-$resource-$project-$timestamp.zip"
+    }
+
+    private fun setContributorInfo(contributors: List<String>, projectFile: File) {
+        ResourceContainer.load(projectFile).use {
+            it.manifest.dublinCore.contributor = contributors.toMutableList()
+            it.writeManifest()
+        }
     }
 
     private fun restoreFileExtension(file: File, extension: String) {
