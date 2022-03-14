@@ -1,6 +1,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -13,6 +14,7 @@ import tornadofx.FX.Companion.messages
 class ContributorInfo : VBox() {
     private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."), Contributor("Joel S."))
     var contributorField: TextField by singleAssign()
+    var saveContributorBtn: Button by singleAssign()
 
     init {
         addClass("contributor__container")
@@ -47,7 +49,7 @@ class ContributorInfo : VBox() {
                         contributorField.show()
                     } else {
                         // TODO: add contributor to list
-                        contributors.add(Contributor(contributorField.getText()))
+                        contributors.add(Contributor(contributorField.text))
                         contributorField.clear()
                     }
                 }
@@ -69,6 +71,7 @@ class ContributorInfo : VBox() {
             button (messages["saveContributors"]) {
                 addClass("btn--primary","btn--borderless")
                 useMaxWidth = true
+                saveContributorBtn = this
                 setOnAction {
 
                 }

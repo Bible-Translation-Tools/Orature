@@ -68,3 +68,14 @@
 .contributor-dialog {
     -fx-background-color: -wa-dialog-background;
 }
+
+.contributor__list-cell__close-btn .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+    -fx-background-color: -wa-btn-icon-background;
+    -fx-border-color: -wa-border-neutral;
+    -fx-border-width: 2px;
+    -fx-border-radius: 4px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+    -jfx-disable-visual-focus: true;
+}
