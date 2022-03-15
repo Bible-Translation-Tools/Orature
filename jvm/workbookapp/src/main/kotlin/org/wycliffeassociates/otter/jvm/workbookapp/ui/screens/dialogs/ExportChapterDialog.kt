@@ -10,12 +10,13 @@ import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 
-class ExportDialog : OtterDialog() {
+class ExportChapterDialog : OtterDialog() {
     var contributorField: TextField by singleAssign()
-    private val viewModel: ChapterPageViewModel by inject()
+    private val viewModel: ExportChapterViewModel by inject()
 
     private val settingsViewModel: SettingsViewModel by inject()
 
@@ -33,7 +34,7 @@ class ExportDialog : OtterDialog() {
                 }
             }
             hbox {
-                add(ContributorInfo())
+                add(ContributorInfo(viewModel.contributors))
                 button {
                     addClass("btn", "btn--icon","contributor__list-cell__close-btn .ikonli-font-icon") // TODO: refactor to common style class
                     tooltip(messages["close"])
@@ -54,6 +55,7 @@ class ExportDialog : OtterDialog() {
                 hgrow = Priority.ALWAYS
                 action {
                     export()
+                    close()
                 }
             }
             button (messages["cancel"]) {
@@ -69,13 +71,12 @@ class ExportDialog : OtterDialog() {
 
     init {
         setContent(content)
-        open()
     }
 
     fun export() {
         val directory = chooseDirectory(FX.messages["exportChapter"])
         directory?.let {
-            viewModel.exportChapter(it)
+            viewModel.export(it)
         }
     }
 

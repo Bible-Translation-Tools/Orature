@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.jfoenix.controls.JFXTabPane
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -372,7 +373,46 @@ class WorkbookPage : View() {
                             ChapterCell()
                         }
                     }
-                    add(ContributorInfo())
+                    add(
+                        ContributorInfo(viewModel.contributors).apply {
+                            addContributorCallbackProperty.set(
+                                EventHandler {
+                                    viewModel.addContributor(it.source as String)
+                                }
+                            )
+                            removeContributorCallbackProperty.set(
+                                EventHandler {
+                                    val indexToRemove = it.source as Int
+                                    viewModel.removeContributor(indexToRemove)
+                                }
+                            )
+                            button(messages["saveContributors"]) {
+                                addClass("btn--primary", "btn--borderless")
+                                useMaxWidth = true
+                                hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
+
+                                setOnAction {
+
+                                }
+                            }
+                            textflow {
+                                text(messages["creativeCommonsDescription"]) {
+                                    addClass("contributor__section-text")
+                                }
+                                hyperlink(messages["licenseCCBYSA"]) {
+                                    addClass("contributor__license-link")
+                                    action {
+                                        FX.application.hostServices.showDocument(
+                                            "https://creativecommons.org/licenses/by-sa/4.0/"
+                                        )
+                                    }
+                                }
+                                text(messages["creativeCommonsEnd"]) {
+                                    addClass("contributor__section-text")
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }

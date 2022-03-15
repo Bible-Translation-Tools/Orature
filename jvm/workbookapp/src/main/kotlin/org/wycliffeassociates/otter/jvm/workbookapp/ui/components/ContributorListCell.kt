@@ -1,10 +1,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
-import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.geometry.Pos
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.control.ListCell
-import javafx.scene.control.TextField
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -14,6 +15,8 @@ import tornadofx.*
 
 class ContributorListCell : ListCell<Contributor>() {
     private val cellGraphic = ContributorCell()
+
+    val onRemoveContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     override fun updateItem(item: Contributor?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -25,12 +28,16 @@ class ContributorListCell : ListCell<Contributor>() {
 
         graphic = cellGraphic.apply {
             nameProperty.set(item.name)
+            indexProperty.set(index)
+            onRemoveContributorActionProperty.bind(this@ContributorListCell.onRemoveContributorActionProperty)
         }
     }
 }
 
 class ContributorCell : HBox() {
+    val indexProperty = SimpleIntegerProperty(-1)
     val nameProperty = SimpleStringProperty()
+    val onRemoveContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
 
     init {
         useMaxWidth = true
@@ -45,7 +52,9 @@ class ContributorCell : HBox() {
             addClass("btn", "btn--icon", "contributor__list-cell__delete-btn")
             graphic = FontIcon(Material.DELETE)
             setOnAction {
-
+                onRemoveContributorActionProperty.value?.handle(
+                    ActionEvent(indexProperty.value, this@ContributorCell)
+                )
             }
         }
     }

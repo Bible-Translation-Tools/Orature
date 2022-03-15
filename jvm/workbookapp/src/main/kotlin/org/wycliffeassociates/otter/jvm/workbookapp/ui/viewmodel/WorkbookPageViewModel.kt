@@ -26,6 +26,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
@@ -68,6 +69,8 @@ class WorkbookPageViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
+//    val contributors = observableListOf<Contributor>()
+    val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."), Contributor("Joel S."))
     val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
@@ -260,6 +263,13 @@ class WorkbookPageViewModel : ViewModel() {
                     showDeleteFailDialogProperty.set(true)
                 }
             )
+    }
+
+    fun addContributor(name: String) {
+        contributors.add(Contributor(name))
+    }
+    fun removeContributor(index: Int) {
+        contributors.removeAt(index)
     }
 
     fun goBack() {

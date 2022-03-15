@@ -1,7 +1,10 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.ObservableList
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Pos
-import javafx.scene.control.Button
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
@@ -11,10 +14,13 @@ import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import tornadofx.*
 import tornadofx.FX.Companion.messages
 
-class ContributorInfo : VBox() {
-    private val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."), Contributor("Joel S."))
+class ContributorInfo(
+    private val contributors: ObservableList<Contributor>
+) : VBox() {
     var contributorField: TextField by singleAssign()
-    var saveContributorBtn: Button by singleAssign()
+
+    val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val addContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("contributor__container")
@@ -48,8 +54,9 @@ class ContributorInfo : VBox() {
                     if (!contributorField.isVisible) {
                         contributorField.show()
                     } else {
-                        // TODO: add contributor to list
-                        contributors.add(Contributor(contributorField.text))
+                        addContributorCallbackProperty.value?.handle(
+                            ActionEvent(contributorField.text, null)
+                        )
                         contributorField.clear()
                     }
                 }
@@ -64,32 +71,9 @@ class ContributorInfo : VBox() {
                 vgrow = Priority.ALWAYS
 
                 setCellFactory {
-                    ContributorListCell()
-                }
-            }
-
-            button (messages["saveContributors"]) {
-                addClass("btn--primary","btn--borderless")
-                useMaxWidth = true
-                saveContributorBtn = this
-                setOnAction {
-
-                }
-            }.isVisible = contributors.size != 0
-            textflow {
-                text(messages["creativeCommonsDescription"]) {
-                    addClass("contributor__section-text")
-                }
-                hyperlink(messages["licenseCCBYSA"]) {
-                    addClass("contributor__license-link")
-                    action {
-                        FX.application.hostServices.showDocument(
-                            "https://creativecommons.org/licenses/by-sa/4.0/"
-                        )
+                    ContributorListCell().apply {
+                        onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                     }
-                }
-                text(messages["creativeCommonsEnd"]) {
-                    addClass("contributor__section-text")
                 }
             }
         }

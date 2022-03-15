@@ -50,8 +50,7 @@ import java.text.MessageFormat
 import java.util.*
 import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.AddPluginDialog
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportDialog
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -194,15 +193,9 @@ class ChapterPage : View() {
                         tooltip(text)
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
-                            // Export action currently commented out
-                            find<ExportDialog>().apply {
+                            find<ExportChapterDialog>().apply {
                                 orientationProperty.set(settingsViewModel.orientationProperty.value)
-                                open()
-                            }
-                            /*val directory = chooseDirectory(FX.messages["exportChapter"])
-                            directory?.let {
-                                viewModel.exportChapter(it)
-                            }*/
+                            }.open()
                         }
                         disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
                     }
