@@ -68,7 +68,7 @@ class MarkerView : PluginEntrypoint() {
             }
         }
         slider?.let {
-            viewModel.initializeAudioController(it)
+            viewModel.initializeAudioController()
         }
     }
 
@@ -89,6 +89,7 @@ class MarkerView : PluginEntrypoint() {
         viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
         viewModel.markerStateProperty.removeListener(viewModel.markerStateListener)
         slider?.clearListeners()
+        find<MinimapFragment>().onUndock()
     }
 
     override val root =
