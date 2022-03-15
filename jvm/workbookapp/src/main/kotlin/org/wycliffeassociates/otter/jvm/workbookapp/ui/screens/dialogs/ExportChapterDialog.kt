@@ -1,5 +1,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
@@ -34,7 +35,7 @@ class ExportChapterDialog : OtterDialog() {
                 }
             }
             hbox {
-                add(ContributorInfo(viewModel.contributors))
+                add(buildContributorView())
                 button {
                     addClass("btn", "btn--icon","contributor__list-cell__close-btn .ikonli-font-icon") // TODO: refactor to common style class
                     tooltip(messages["close"])
@@ -71,6 +72,23 @@ class ExportChapterDialog : OtterDialog() {
 
     init {
         setContent(content)
+    }
+
+    fun buildContributorView(): ContributorInfo {
+        return ContributorInfo(viewModel.contributors)
+            .apply {
+                addContributorCallbackProperty.set(
+                    EventHandler {
+                        viewModel.addContributor(it.source as String)
+                    }
+                )
+                removeContributorCallbackProperty.set(
+                    EventHandler {
+                        val indexToRemove = it.source as Int
+                        viewModel.removeContributor(indexToRemove)
+                    }
+                )
+            }
     }
 
     fun export() {

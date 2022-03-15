@@ -18,7 +18,11 @@ class ExportChapterViewModel : ViewModel() {
         contributors.setAll(workbookPageViewModel.contributors)
     }
 
-    fun removeContributor(index: Int) {
+    fun addContributor(name: String) {
+        contributors.add(Contributor(name))
+    }
 
+    fun removeContributor(index: Int) {
+        contributors.removeAt(index)
     }
 }
