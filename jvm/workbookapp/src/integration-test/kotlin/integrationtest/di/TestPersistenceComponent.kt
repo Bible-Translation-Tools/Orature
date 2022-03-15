@@ -21,10 +21,7 @@ package integrationtest.di
 import dagger.Component
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeUlb
-import integrationtest.projects.TestProjectCreate
-import integrationtest.projects.TestProjectImport
-import integrationtest.projects.TestRcImport
-import integrationtest.projects.TestRemoveRc
+import integrationtest.projects.*
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
@@ -50,4 +47,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRcImport)
     fun inject(test: TestProjectImport)
     fun inject(test: TestRemoveRc)
+    fun inject(test: TestProjectExport)
 }
