@@ -62,9 +62,6 @@ class ChapterPageViewModel : ViewModel() {
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
     @Inject
-    lateinit var audioConverter: AudioConverter
-
-    @Inject
     lateinit var concatenateAudio: ConcatenateAudio
 
     // List of content to display on the screen
@@ -294,21 +291,6 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .observeOnFx()
                 .subscribe()
-        }
-    }
-
-    fun exportChapter(directory: File) {
-        selectedChapterTakeProperty.value?.let { take ->
-            showExportProgressDialogProperty.set(true)
-
-            val mp3Name = take.file.nameWithoutExtension + ".mp3"
-            val mp3File = File(directory, mp3Name)
-            audioConverter.wavToMp3(take.file, mp3File)
-                .subscribeOn(Schedulers.io())
-                .observeOnFx()
-                .subscribe {
-                    showExportProgressDialogProperty.set(false)
-                }
         }
     }
 
