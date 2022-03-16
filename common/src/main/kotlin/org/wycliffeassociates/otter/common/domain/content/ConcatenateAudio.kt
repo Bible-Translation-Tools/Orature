@@ -22,8 +22,9 @@ import io.reactivex.Single
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import java.io.File
+import javax.inject.Inject
 
-class ConcatenateAudio(private val directoryProvider: IDirectoryProvider) {
+class ConcatenateAudio @Inject constructor(private val directoryProvider: IDirectoryProvider) {
 
     fun execute(
         files: List<File>,

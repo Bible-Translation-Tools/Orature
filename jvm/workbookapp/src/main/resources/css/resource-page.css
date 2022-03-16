@@ -32,6 +32,7 @@
 .resource-list-view {
     -fx-background-color: -wa-background;
     -fx-padding: 10 0 0 80;
+    -fx-focus-traversable: true;
 }
 
 .resource-list-view .scroll-bar {
@@ -39,10 +40,21 @@
     -fx-background-insets: 0 0 0 80;
 }
 
+.resource-list-view:focused,
+.resource-list-view .list-cell:focused,
+.resource-list-view .list-cell:focused .resource-group-card {
+    -fx-border-width: 0;
+}
+
+.resource-list-view:focused .list-cell:focused .resource-group-card {
+    -fx-border-color: -wa-card-border;
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+}
+
 .resource-list-view .list-cell {
     -fx-background-color: transparent;
     -fx-padding: 10 5 20 0;
-
 }
 
 .resource-group-card {
@@ -61,4 +73,15 @@
 .resource-group-card .text-content {
     -fx-text-fill: -wa-regular-text;
     -fx-fill: -wa-regular-text;
+}
+
+.workbook-header__hide-completed:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
+    -fx-padding: 5px;
+}
+
+.workbook-header__status-indicator, .resource-group-card__status-indicator {
+    -fx-focus-traversable: false;
 }

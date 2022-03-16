@@ -74,3 +74,13 @@
 .waveform {
     -fx-background-color: -wa-waveform-background;
 }
+
+.continue-button:focused, .record-button:focused {
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -wa-button-border;
+}
+
+.continue-button:focused {
+    -fx-background-radius: 10px;
+}

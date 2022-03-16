@@ -16,21 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.controls.utils
 
-import javafx.scene.image.ImageView
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import javafx.scene.Node
+import javafx.scene.Parent
+import kotlin.reflect.KClass
 
-class TimecodeHolder(
-    viewModel: VerseMarkerViewModel,
-    val height: Double,
-    val imageWidth: Double = viewModel.imageWidth,
-    durationMs: Int = 0// viewModel.audioPlayer.getDurationMs()
-) : ImageView() {
+inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
+inline fun <reified T: Node> Node.findChildren(): List<Node> = findChildren(T::class)
+fun <T: Node> Node.findChildren(type: KClass<T>): List<Node> {
+    if (this !is Parent) return listOf()
 
-    val timecode: Timecode = Timecode(Math.floor(imageWidth), height)
+    val list = this.childrenUnmodifiable
+        .filter { type.isInstance(it) }
+        .filter { it.isVisible }
+        .toMutableList()
 
-    init {
-        image = timecode.drawTimecode(durationMs)
+    for (node: Node in this.childrenUnmodifiable) {
+        (node as? Parent)?.findChildren(type)?.let {
+            list.addAll(it)
+        }
     }
+
+    return list
 }

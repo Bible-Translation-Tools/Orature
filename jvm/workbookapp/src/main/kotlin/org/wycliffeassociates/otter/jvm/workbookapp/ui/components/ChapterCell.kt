@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
 import javafx.scene.control.ListCell
+import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.card.ChapterCard
@@ -52,7 +53,19 @@ class ChapterCell : ListCell<WorkbookItemModel>() {
             titleProperty.set(item.title)
             notStartedTextProperty.set(FX.messages["notStarted"])
 
-            setOnMouseClicked {
+            if (isSelected) {
+                listView.setOnKeyPressed {
+                    when (it.code) {
+                        KeyCode.ENTER, KeyCode.SPACE -> {
+                            item.source?.let { chapter ->
+                                item.onClick(chapter)
+                            }
+                        }
+                    }
+                }
+            }
+
+            setOnAction {
                 item.source?.let { chapter ->
                     item.onClick(chapter)
                 }

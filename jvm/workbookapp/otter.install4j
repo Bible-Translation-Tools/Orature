@@ -27,7 +27,7 @@
       </iconImageFiles>
     </launcher>
   </launchers>
-  <installerGui autoUpdateDescriptorUrl="http://nightlybuilds.s3-website-us-east-1.amazonaws.com/Bible-Translation-Tools/Orature/${compiler:env.CI_REF_NAME_SLUG}/updates.xml" useAutoUpdateBaseUrl="true" autoUpdateBaseUrl="http://nightlybuilds.s3-website-us-east-1.amazonaws.com/Bible-Translation-Tools/Orature/${compiler:env.CI_REF_NAME_SLUG}/">
+  <installerGui autoUpdateDescriptorUrl="http://nightlybuilds.s3-website-us-east-1.amazonaws.com/Bible-Translation-Tools/Orature/${compiler:env.UPDATE_PATH}/updates.xml" useAutoUpdateBaseUrl="true" autoUpdateBaseUrl="http://nightlybuilds.s3-website-us-east-1.amazonaws.com/Bible-Translation-Tools/Orature/${compiler:env.UPDATE_PATH}/">
     <applications>
       <application id="installer" beanClass="com.install4j.runtime.beans.applications.InstallerApplication">
         <serializedBean>

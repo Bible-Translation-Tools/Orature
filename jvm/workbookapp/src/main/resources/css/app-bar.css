@@ -28,3 +28,7 @@
     -fx-icon-color: -wa-white;
     -fx-icon-size: 40px;
 }
+
+.app-bar__app-content {
+    -fx-focus-traversable: false;
+}

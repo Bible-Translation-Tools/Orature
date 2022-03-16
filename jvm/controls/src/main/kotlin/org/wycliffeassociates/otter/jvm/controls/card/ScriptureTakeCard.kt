@@ -29,7 +29,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
-import tornadofx.stringBinding
+import tornadofx.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -49,6 +49,8 @@ class ScriptureTakeCard : Control() {
     val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
+        addClass("card--scripture-take")
+
         lastModifiedProperty.bind(takeProperty.stringBinding {
             it?.let {
                 SimpleDateFormat.getDateTimeInstance(

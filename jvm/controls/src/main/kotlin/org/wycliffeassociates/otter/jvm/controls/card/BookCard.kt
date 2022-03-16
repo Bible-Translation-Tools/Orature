@@ -23,21 +23,20 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
-import javafx.scene.control.Control
+import javafx.scene.control.ButtonBase
 import javafx.scene.control.Skin
-import org.wycliffeassociates.otter.jvm.controls.skins.cards.BookCardSkin
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
+import org.wycliffeassociates.otter.jvm.controls.skins.cards.BookCardSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.FX
+import tornadofx.*
 import tornadofx.FX.Companion.messages
-import tornadofx.get
 
 class BookCard(
     title: String = "",
     slug: String = "",
     coverArt: Artwork? = null,
     newBook: Boolean = false
-) : Control() {
+) : ButtonBase() {
 
     val coverArtProperty = SimpleObjectProperty<Artwork>(coverArt)
     val attributionTextProperty = SimpleStringProperty()
@@ -46,7 +45,7 @@ class BookCard(
     val newBookProperty = SimpleBooleanProperty(newBook)
 
     val addBookTextProperty = SimpleStringProperty(messages["createProject"])
-    val onPrimaryActionProperty = SimpleObjectProperty<() -> Unit>()
+    val onPrimaryActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onAddBookActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -63,14 +62,22 @@ class BookCard(
                 )
             } ?: attributionTextProperty.set(null)
         }
+
+        onActionProperty().bind(onPrimaryActionProperty)
     }
 
     override fun createDefaultSkin(): Skin<*> {
         return BookCardSkin(this)
     }
 
+    override fun fire() {
+        if (!isDisabled) {
+            fireEvent(ActionEvent())
+        }
+    }
+
     fun setOnPrimaryAction(op: () -> Unit) {
-        onPrimaryActionProperty.set(op)
+        onPrimaryActionProperty.set(EventHandler { op.invoke() })
     }
 
     fun setOnAddBookAction(op: () -> Unit) {

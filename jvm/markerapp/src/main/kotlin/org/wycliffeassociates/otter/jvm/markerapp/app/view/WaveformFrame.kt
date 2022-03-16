@@ -18,28 +18,47 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import com.github.thomasnield.rxkotlinfx.observeOnFx
-import com.sun.javafx.util.Utils
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
+import javafx.scene.image.Image
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
+import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
-    markerTrack: MarkerTrackControl,
-    // timecodeHolder: TimecodeHolder,
-    private val viewModel: VerseMarkerViewModel
+    topTrack: Node? = null,
+    bottomTrack: Node? = null
 ) : BorderPane() {
+
+    val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
+    val framePositionProperty = SimpleDoubleProperty(0.0)
+
+    fun onWaveformClicked(op: () -> Unit) {
+        onWaveformClickedProperty.set(EventHandler { op.invoke() })
+    }
+
+    fun onWaveformDragReleased(op: (pixel: Double) -> Unit) {
+        onWaveformDragReleasedProperty.set(op)
+    }
 
     var dragStart: Point2D? = null
     private var dragContextX = 0.0
+    var imageHolder: HBox? = null
+    lateinit var imageRegion: Region
+    lateinit var highlightHolder: StackPane
 
     init {
         fitToParentSize()
@@ -55,50 +74,23 @@ class WaveformFrame(
             top {
                 region {
                     styleClass.add("vm-waveform-frame__top-track")
-                    add(markerTrack)
+                    topTrack?.let {
+                        add(it)
+                    }
                 }
             }
 
             center {
                 region {
+                    imageRegion = this
                     stackpane {
+                        highlightHolder = this
                         styleClass.add("vm-waveform-frame__center")
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
                         hbox {
-                            viewModel.waveformContainerNode = this@hbox
-                            val disposable = viewModel.waveform
-                                .observeOnFx()
-                                .subscribe {
-                                    this@hbox.add(
-                                        imageview(it) {
-                                            fitToHeight(this@region)
-                                        }
-                                    )
-                                }
-
-                            // ready to receive images, start building waveform
-                            val disposableBuilder = viewModel.waveformAsyncBuilder
-                                .observeOnFx()
-                                .subscribe()
-
-                            viewModel.compositeDisposable.addAll(disposable, disposableBuilder)
-                        }
-
-                        viewModel.markers.highlightState.forEach {
-                            add(
-                                Rectangle().apply {
-                                    managedProperty().set(false)
-                                    heightProperty().bind(this@stackpane.heightProperty())
-                                    widthProperty().bind(it.width)
-                                    translateXProperty().bind(it.translate)
-                                    visibleProperty().bind(it.visibility)
-                                    it.styleClass.onChangeAndDoNow {
-                                        styleClass.setAll(it)
-                                    }
-                                }
-                            )
+                            imageHolder = this@hbox
                         }
                     }
                 }
@@ -107,16 +99,18 @@ class WaveformFrame(
             bottom {
                 region {
                     styleClass.add("vm-waveform-frame__bottom-track")
-    //                add(timecodeHolder)
+                    bottomTrack?.let {
+                        add(it)
+                    }
                 }
             }
 
             setOnMousePressed { me ->
-                viewModel.pause()
+                onWaveformClickedProperty.get().handle(ActionEvent())
                 val trackWidth = this.width
                 if (trackWidth > 0) {
                     val node = me.source as Node
-                    dragContextX = node!!.translateX - me.sceneX
+                    dragContextX = node.translateX - me.sceneX
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                 }
@@ -137,12 +131,7 @@ class WaveformFrame(
                         dragStart = localToParent(me.x, me.y)
                     }
                     val deltaPos = cur.x - dragStart!!.x
-                    val deltaFrames = pixelsToFrames(deltaPos)
-
-                    val curFrames = viewModel.getLocationInFrames()
-                    val duration = viewModel.getDurationInFrames()
-                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
-                    viewModel.seek(final)
+                    onWaveformDragReleasedProperty.get().invoke(deltaPos)
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                     bindTranslateX() // rebind when done
@@ -153,12 +142,44 @@ class WaveformFrame(
 
     private fun bindTranslateX() {
         this.translateXProperty().bind(
-            viewModel
-                .positionProperty
+            framePositionProperty
                 .negate()
                 .plus(
                     this@WaveformFrame.widthProperty().divide(2.0)
                 )
         )
+    }
+
+    fun addImage(image: Image) {
+        imageHolder?.add(
+            imageview(image) {
+                fitToHeight(imageRegion)
+            }
+        )
+    }
+
+    fun addHighlights(highlights: List<MarkerHighlightState>) {
+        highlights.forEach {
+            highlightHolder.add(
+                Rectangle().apply {
+                    managedProperty().set(false)
+                    heightProperty().bind(highlightHolder.heightProperty())
+                    widthProperty().bind(it.width)
+                    translateXProperty().bind(it.translate)
+                    visibleProperty().bind(it.visibility)
+                    it.styleClass.onChangeAndDoNow {
+                        styleClass.setAll(it)
+                    }
+                }
+            )
+        }
+    }
+
+    fun clearHighlights() {
+        highlightHolder.children.removeIf { it is Rectangle }
+    }
+
+    fun freeImages() {
+        imageHolder?.getChildList()?.clear()
     }
 }

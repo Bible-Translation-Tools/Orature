@@ -18,39 +18,100 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
-import javafx.stage.Screen
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.sun.javafx.util.Utils
+import javafx.animation.AnimationTimer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
 import tornadofx.*
 
-const val WINDOW_OFFSET = 50.0
-
 class MarkerView : PluginEntrypoint() {
+
+    var timer: AnimationTimer? = null
 
     val viewModel: VerseMarkerViewModel by inject()
 
-    val titleFragment = TitleFragment()
-    val minimap = MinimapFragment()
-    val waveformContainer = WaveformContainer()
-    val source = SourceTextFragment()
-    val playbackControls = PlaybackControlsFragment()
+    private val markerTrack: MarkerTrackControl = MarkerTrackControl()
+    private val waveform = MarkerPlacementWaveform(markerTrack)
+
+    private val titleFragment = TitleFragment()
+    private val minimap = MinimapFragment()
+    private val source = SourceTextFragment()
+    private val playbackControls = PlaybackControlsFragment()
+
+    override fun onDock() {
+        super.onDock()
+        viewModel.onDock()
+        timer = object : AnimationTimer() {
+            override fun handle(currentNanoTime: Long) {
+                viewModel.calculatePosition()
+            }
+        }
+        timer?.start()
+        markerTrack.apply {
+            prefWidth = viewModel.imageWidth
+            viewModel.markerStateProperty.onChangeAndDoNow { markers ->
+                markers?.let { markers ->
+                    markers.markerCountProperty?.onChangeAndDoNow {
+                        this.markers.setAll(viewModel.markers.markers)
+                        highlightState.setAll(viewModel.markers.highlightState)
+                        refreshMarkers()
+                    }
+                }
+            }
+            setOnPositionChanged { id, position ->
+                minimap.slider.updateMarker(id, position)
+            }
+        }
+        viewModel.initializeAudioController(minimap.slider)
+    }
 
     init {
         tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
-
-        viewModel.initializeAudioController(minimap.slider)
     }
 
-    override val root = vbox {
-        prefHeight = Screen.getPrimary().visualBounds.height - WINDOW_OFFSET
-        prefWidth = Screen.getPrimary().visualBounds.width - WINDOW_OFFSET
-
-        add(titleFragment)
-        add(minimap)
-        add(waveformContainer)
-        add(source)
-        add(playbackControls)
+    override fun onUndock() {
+        super.onUndock()
+        timer?.stop()
+        timer = null
+        waveform.freeImages()
+        waveform.markerStateProperty.unbind()
+        waveform.positionProperty.unbind()
     }
+
+    override val root =
+        borderpane {
+            top = vbox {
+                add(titleFragment)
+                add(minimap)
+            }
+            center = waveform.apply {
+                viewModel.compositeDisposable.add(
+                    viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
+                )
+                markerStateProperty.bind(viewModel.markerStateProperty)
+                positionProperty.bind(viewModel.positionProperty)
+
+                onSeekNext = viewModel::seekNext
+                onSeekPrevious = viewModel::seekPrevious
+
+                onPlaceMarker = viewModel::placeMarker
+                onWaveformClicked = { viewModel.pause() }
+                onWaveformDragReleased = { deltaPos ->
+                    val deltaFrames = pixelsToFrames(deltaPos)
+                    val curFrames = viewModel.getLocationInFrames()
+                    val duration = viewModel.getDurationInFrames()
+                    val final = Utils.clamp(0, curFrames - deltaFrames, duration)
+                    viewModel.seek(final)
+                }
+            }
+            bottom = vbox {
+                add(source)
+                add(playbackControls)
+            }
+        }
 }

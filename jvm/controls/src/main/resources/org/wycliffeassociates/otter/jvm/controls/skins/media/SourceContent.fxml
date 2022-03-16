@@ -31,7 +31,7 @@
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 <?import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer?>
 <?import java.lang.String?>
-<VBox styleClass="source-content" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<VBox styleClass="source-content__root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox fx:id="titleContainer">
             <HBox alignment="CENTER" HBox.hgrow="ALWAYS">

@@ -16,21 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.controls.utils
 
-import javafx.scene.image.ImageView
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import javafx.scene.Node
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 
-class TimecodeHolder(
-    viewModel: VerseMarkerViewModel,
-    val height: Double,
-    val imageWidth: Double = viewModel.imageWidth,
-    durationMs: Int = 0// viewModel.audioPlayer.getDurationMs()
-) : ImageView() {
-
-    val timecode: Timecode = Timecode(Math.floor(imageWidth), height)
-
-    init {
-        image = timecode.drawTimecode(durationMs)
-    }
+fun Node.simulateKeyPress(
+    key: KeyCode,
+    shiftDown: Boolean = false,
+    controlDown: Boolean = false,
+    altDown: Boolean = false,
+    metaDown: Boolean = false
+) {
+    fireEvent(
+        KeyEvent(
+            KeyEvent.KEY_PRESSED,
+            "",
+            "",
+            key,
+            shiftDown,
+            controlDown,
+            altDown,
+            metaDown
+        )
+    )
 }
