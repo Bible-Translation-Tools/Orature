@@ -361,7 +361,8 @@ class CollectionRepository @Inject constructor(
     override fun deriveProject(
         sourceMetadatas: List<ResourceMetadata>,
         sourceCollection: Collection,
-        language: Language
+        language: Language,
+        verseByVerse: Boolean
     ): Single<Collection> {
         return Single
             .fromCallable {
@@ -385,8 +386,10 @@ class CollectionRepository @Inject constructor(
                         // Copy the chapters
                         copyChapters(dsl, sourceCollectionEntity.id, projectEntity.id, mainDerivedMetadata.id)
 
-                        // Copy the content
-                        copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                        if (verseByVerse) {
+                            // Copy the content
+                            copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                        }
 
                         // Link the derivative content
                         linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
