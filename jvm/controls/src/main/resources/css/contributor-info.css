@@ -77,12 +77,12 @@
 
 .contributor-dialog__header {
     -fx-alignment: center;
-    -fx-padding: 10px 0;
+    -fx-padding: 5px 0;
 }
 
 .contributor-dialog__title {
-    -fx-font-size: 1.5em;
-    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 1.8em;
+    -fx-text-fill: -wa-highlight-text;
     -fx-font-weight: bold;
 }
 
