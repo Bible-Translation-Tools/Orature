@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
@@ -28,7 +29,6 @@ import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.audio.AudioCue
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -42,7 +42,9 @@ class AudioSlider(
     val waveformImageProperty = SimpleObjectProperty<Image>()
     val thumbFillProperty = SimpleObjectProperty(Paint.valueOf("#00000015"))
     val thumbLineColorProperty = SimpleObjectProperty(Color.BLACK)
+    val playbackLineColorProperty = SimpleObjectProperty(Paint.valueOf("#FDB849"))
     val secondsToHighlightProperty = SimpleIntegerProperty(1)
+    val currentPositionProperty = SimpleDoubleProperty(0.0)
     val markers: ObservableList<AudioCue> = observableListOf()
 
     var waveformMinimapListener: ChangeListener<Image>? = null
@@ -60,6 +62,9 @@ class AudioSlider(
                 setMax(it.getDurationInFrames().toDouble())
                 it.seek(0)
             }
+        }
+        currentPositionProperty.onChange {
+            player.value.seek(it.toInt())
         }
     }
 

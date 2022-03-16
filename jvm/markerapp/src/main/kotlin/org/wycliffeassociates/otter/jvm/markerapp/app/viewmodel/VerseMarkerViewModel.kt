@@ -48,7 +48,7 @@ import kotlin.math.max
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
-private const val BACKGROUND_COLOR = "#F7FAFF"
+private const val BACKGROUND_COLOR = "#FFFFFF"
 
 class VerseMarkerViewModel : ViewModel() {
     private val width = Screen.getMainScreen().platformWidth
