@@ -72,7 +72,7 @@ class ExportChapterDialog : OtterDialog() {
                 addClass("contributor__section-text")
             }
             hyperlink(messages["licenseCCBYSA"]) {
-                addClass("contributor__license-link")
+                addClass("wa-text--hyperlink", "contributor__license-link")
                 action {
                     FX.application.hostServices.showDocument(
                         "https://creativecommons.org/licenses/by-sa/4.0/"

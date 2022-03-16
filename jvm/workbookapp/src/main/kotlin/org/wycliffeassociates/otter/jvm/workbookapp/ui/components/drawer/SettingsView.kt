@@ -260,7 +260,7 @@ class SettingsView : View() {
                     }
 
                     hyperlink {
-                        addClass("app-drawer__text--link")
+                        addClass("wa-text--hyperlink", "app-drawer__text--link")
 
                         text = messages["addApp"]
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)

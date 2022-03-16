@@ -95,6 +95,15 @@
     -fx-wrap-text: true;
 }
 
+.app-drawer__text--link {
+    -fx-font-size: 1.4em;
+}
+
+.app-drawer__text--link .ikonli-font-icon {
+    -fx-font-size: 1.6em;
+    -fx-fill: -wa-highlight-text;
+}
+
 .app-drawer__text--centered {
     -fx-font-size: 20px;
     -fx-wrap-text: true;
