@@ -1,6 +1,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
+import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import tornadofx.*
 import java.io.File
 
@@ -11,7 +14,18 @@ class ExportChapterViewModel : ViewModel() {
     val contributors = observableListOf<Contributor>()
 
     fun export(outputDir: File) {
-        chapterViewModel.exportChapter(outputDir)
+        chapterViewModel.selectedChapterTakeProperty.value?.let { take ->
+            chapterViewModel.showExportProgressDialogProperty.set(true)
+
+            val mp3Name = take.file.nameWithoutExtension + ".mp3"
+            val mp3File = File(outputDir, mp3Name)
+            AudioConverter().wavToMp3(take.file, mp3File)
+                .subscribeOn(Schedulers.io())
+                .observeOnFx()
+                .subscribe {
+                    chapterViewModel.showExportProgressDialogProperty.set(false)
+                }
+        }
     }
 
     fun loadContributors() {

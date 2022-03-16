@@ -74,7 +74,8 @@ class ExportChapterDialog : OtterDialog() {
         setContent(content)
     }
 
-    fun buildContributorView(): ContributorInfo {
+    private fun buildContributorView(): ContributorInfo {
+        viewModel.loadContributors()
         return ContributorInfo(viewModel.contributors)
             .apply {
                 addContributorCallbackProperty.set(
@@ -88,6 +89,22 @@ class ExportChapterDialog : OtterDialog() {
                         viewModel.removeContributor(indexToRemove)
                     }
                 )
+                textflow {
+                    text(messages["creativeCommonsDescription"]) {
+                        addClass("contributor__section-text")
+                    }
+                    hyperlink(messages["licenseCCBYSA"]) {
+                        addClass("contributor__license-link")
+                        action {
+                            FX.application.hostServices.showDocument(
+                                "https://creativecommons.org/licenses/by-sa/4.0/"
+                            )
+                        }
+                    }
+                    text(messages["creativeCommonsEnd"]) {
+                        addClass("contributor__section-text")
+                    }
+                }
             }
     }
 
