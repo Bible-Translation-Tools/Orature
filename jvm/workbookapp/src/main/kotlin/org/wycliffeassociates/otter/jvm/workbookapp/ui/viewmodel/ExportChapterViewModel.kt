@@ -43,7 +43,7 @@ class ExportChapterViewModel : ViewModel() {
     }
 
     fun addContributor(name: String) {
-        contributors.add(Contributor(name))
+        contributors.add(0, Contributor(name))
     }
 
     fun editContributor(data: ContributorCellData) {
