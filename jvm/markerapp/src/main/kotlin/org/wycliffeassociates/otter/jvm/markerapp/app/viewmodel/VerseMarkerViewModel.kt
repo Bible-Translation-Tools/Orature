@@ -56,6 +56,7 @@ class VerseMarkerViewModel : ViewModel() {
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
+    var imageCleaner: () -> Unit = {}
 
     private val waveformSubject = PublishSubject.create<Image>()
     val waveform: Observable<Image>
@@ -141,13 +142,13 @@ class VerseMarkerViewModel : ViewModel() {
     fun saveAndQuit() {
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
+        imageCleaner()
 
         (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(300, TimeUnit.MILLISECONDS) // exec after UI clean up
                 .subscribe {
                     runLater {
                         it.navigateBack()

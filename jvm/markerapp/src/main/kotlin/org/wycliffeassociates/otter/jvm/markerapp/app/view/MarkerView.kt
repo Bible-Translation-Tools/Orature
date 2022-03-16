@@ -42,10 +42,12 @@ class MarkerView : PluginEntrypoint() {
     private val waveform = MarkerPlacementWaveform(markerTrack)
 
     private var slider: AudioSlider? = null
+    private var minimap: MinimapFragment? = null
 
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
+        viewModel.imageCleaner = waveform::freeImages
         timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
@@ -79,17 +81,11 @@ class MarkerView : PluginEntrypoint() {
 
     override fun onUndock() {
         super.onUndock()
-        println("undock marker view")
         timer?.stop()
         timer = null
-        waveform.freeImages()
         waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
-
-        viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
-        viewModel.markerStateProperty.removeListener(viewModel.markerStateListener)
-        slider?.clearListeners()
-        find<MinimapFragment>().onUndock()
+        minimap?.cleanUpOnUndock()
     }
 
     override val root =
@@ -97,6 +93,7 @@ class MarkerView : PluginEntrypoint() {
             top = vbox {
                 add<TitleFragment>()
                 add<MinimapFragment>() {
+                    this@MarkerView.minimap = this
                     this@MarkerView.slider = slider
                 }
             }

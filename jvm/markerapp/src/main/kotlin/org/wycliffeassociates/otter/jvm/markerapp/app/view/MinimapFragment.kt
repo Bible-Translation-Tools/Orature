@@ -64,9 +64,10 @@ class MinimapFragment : Fragment() {
         }
     }
 
-    override fun onUndock() {
-        super.onUndock()
-        println("undock minimap")
+    fun cleanUpOnUndock() {
+        viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
+        viewModel.markerStateProperty.removeListener(viewModel.markerStateListener)
+        slider.clearListeners()
     }
 
     override val root = hbox {
