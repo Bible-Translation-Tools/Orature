@@ -6,6 +6,7 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.TextField
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -19,8 +20,9 @@ class ContributorInfo(
 ) : VBox() {
     var contributorField: TextField by singleAssign()
 
-    val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val addContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val editContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val removeContributorCallbackProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
         addClass("contributor__container")
@@ -43,21 +45,27 @@ class ContributorInfo(
 
                 addClass("txt-input", "contributor__text-input")
                 promptText = messages["contributorName"]
+
+                setOnKeyReleased {
+                    if (it.code == KeyCode.ENTER) {
+                        addContributor()
+                    }
+                }
             }.hide()
+
             button(messages["addContributor"]) {
                 useMaxWidth = true
                 hgrow = Priority.SOMETIMES
 
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
+
                 setOnAction {
                     if (!contributorField.isVisible) {
                         contributorField.show()
+                        contributorField.requestFocus()
                     } else {
-                        addContributorCallbackProperty.value?.handle(
-                            ActionEvent(contributorField.text, null)
-                        )
-                        contributorField.clear()
+                        addContributor()
                     }
                 }
             }
@@ -73,9 +81,22 @@ class ContributorInfo(
                 setCellFactory {
                     ContributorListCell().apply {
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
+                        onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }
                 }
             }
         }
+    }
+
+    private fun addContributor() {
+        if (contributorField.text.isBlank()) {
+            return
+        }
+
+        addContributorCallbackProperty.value?.handle(
+            ActionEvent(contributorField.text, null)
+        )
+        contributorField.clear()
+        contributorField.requestFocus()
     }
 }

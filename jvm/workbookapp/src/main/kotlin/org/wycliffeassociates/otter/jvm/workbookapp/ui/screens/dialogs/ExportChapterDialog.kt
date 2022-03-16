@@ -7,10 +7,9 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
-import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -89,8 +88,14 @@ class ExportChapterDialog : OtterDialog() {
                         viewModel.removeContributor(indexToRemove)
                     }
                 )
+                editContributorCallbackProperty.set(
+                    EventHandler {
+                        val data = it.source as ContributorCellData
+                        viewModel.editContributor(data)
+                    }
+                )
                 textflow {
-                    text(messages["creativeCommonsDescription"]) {
+                    text(messages["exportLicenseDescription"]) {
                         addClass("contributor__section-text")
                     }
                     hyperlink(messages["licenseCCBYSA"]) {
@@ -100,9 +105,6 @@ class ExportChapterDialog : OtterDialog() {
                                 "https://creativecommons.org/licenses/by-sa/4.0/"
                             )
                         }
-                    }
-                    text(messages["creativeCommonsEnd"]) {
-                        addClass("contributor__section-text")
                     }
                 }
             }

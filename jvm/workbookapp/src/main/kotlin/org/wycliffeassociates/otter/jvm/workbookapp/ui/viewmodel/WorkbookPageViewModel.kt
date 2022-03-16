@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
@@ -69,8 +70,7 @@ class WorkbookPageViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
-//    val contributors = observableListOf<Contributor>()
-    val contributors = observableListOf(Contributor("Tony T."), Contributor("Jonathan T."), Contributor("Joel S."))
+    val contributors = observableListOf<Contributor>()
     val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
@@ -268,8 +268,17 @@ class WorkbookPageViewModel : ViewModel() {
     fun addContributor(name: String) {
         contributors.add(Contributor(name))
     }
+
+    fun editContributor(data: ContributorCellData) {
+        contributors[data.index] = Contributor(data.name)
+    }
+
     fun removeContributor(index: Int) {
         contributors.removeAt(index)
+    }
+
+    fun saveContributorInfo() {
+        // TODO: write to resource container
     }
 
     fun goBack() {

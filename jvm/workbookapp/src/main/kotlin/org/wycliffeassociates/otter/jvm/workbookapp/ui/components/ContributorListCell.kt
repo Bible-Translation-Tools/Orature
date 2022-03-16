@@ -11,12 +11,14 @@ import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import tornadofx.*
 
 class ContributorListCell : ListCell<Contributor>() {
     private val cellGraphic = ContributorCell()
 
     val onRemoveContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    val onEditContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     override fun updateItem(item: Contributor?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -30,6 +32,7 @@ class ContributorListCell : ListCell<Contributor>() {
             nameProperty.set(item.name)
             indexProperty.set(index)
             onRemoveContributorActionProperty.bind(this@ContributorListCell.onRemoveContributorActionProperty)
+            onEditContributorActionProperty.bind(this@ContributorListCell.onEditContributorActionProperty)
         }
     }
 }
@@ -38,6 +41,7 @@ class ContributorCell : HBox() {
     val indexProperty = SimpleIntegerProperty(-1)
     val nameProperty = SimpleStringProperty()
     val onRemoveContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
+    val onEditContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
 
     init {
         useMaxWidth = true
@@ -47,6 +51,18 @@ class ContributorCell : HBox() {
         textfield(nameProperty) {
             hgrow = Priority.ALWAYS
             addClass("txt-input", "contributor__text-input")
+
+            focusedProperty().onChange { focused ->
+                if (!focused) {
+                    // save changes when user click other control
+                    onEditContributorActionProperty.value?.handle(
+                        ActionEvent(
+                            ContributorCellData(indexProperty.value, nameProperty.value),
+                            null
+                        )
+                    )
+                }
+            }
         }
         button {
             addClass("btn", "btn--icon", "contributor__list-cell__delete-btn")

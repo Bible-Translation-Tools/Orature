@@ -5,6 +5,7 @@ import io.reactivex.schedulers.Schedulers
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
@@ -43,6 +44,10 @@ class ExportChapterViewModel : ViewModel() {
 
     fun addContributor(name: String) {
         contributors.add(Contributor(name))
+    }
+
+    fun editContributor(data: ContributorCellData) {
+        contributors[data.index] = Contributor(data.name)
     }
 
     fun removeContributor(index: Int) {

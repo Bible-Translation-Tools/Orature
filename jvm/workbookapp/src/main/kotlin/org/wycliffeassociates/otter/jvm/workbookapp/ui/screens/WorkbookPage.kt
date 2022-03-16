@@ -36,11 +36,11 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -381,6 +381,11 @@ class WorkbookPage : View() {
                                     viewModel.addContributor(it.source as String)
                                 }
                             )
+                            editContributorCallbackProperty.set(
+                                EventHandler {
+                                    viewModel.editContributor(it.source as ContributorCellData)
+                                }
+                            )
                             removeContributorCallbackProperty.set(
                                 EventHandler {
                                     val indexToRemove = it.source as Int
@@ -393,11 +398,11 @@ class WorkbookPage : View() {
                                 hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
 
                                 setOnAction {
-
+                                    viewModel.saveContributorInfo()
                                 }
                             }
                             textflow {
-                                text(messages["creativeCommonsDescription"]) {
+                                text(messages["licenseDescription"]) {
                                     addClass("contributor__section-text")
                                 }
                                 hyperlink(messages["licenseCCBYSA"]) {
@@ -407,9 +412,6 @@ class WorkbookPage : View() {
                                             "https://creativecommons.org/licenses/by-sa/4.0/"
                                         )
                                     }
-                                }
-                                text(messages["creativeCommonsEnd"]) {
-                                    addClass("contributor__section-text")
                                 }
                             }
                         }
