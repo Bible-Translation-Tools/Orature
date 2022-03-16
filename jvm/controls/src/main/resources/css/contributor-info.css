@@ -19,8 +19,8 @@
     -fx-text-fill: -wa-highlight-text;
 }
 
-.contributor__input-group {
-    -fx-align: center-left;
+.contributor__add-section {
+    -fx-alignment: center;
     -fx-spacing: 10px;
 }
 
@@ -67,15 +67,30 @@
 /* --- dialog --- */
 .contributor-dialog {
     -fx-background-color: -wa-dialog-background;
+    -fx-padding: 15px;
+    -fx-pref-width: 350px;
 }
 
-.contributor__list-cell__close-btn .ikonli-font-icon {
-    -fx-icon-color: -wa-regular-text;
-    -fx-background-color: -wa-btn-icon-background;
-    -fx-border-color: -wa-border-neutral;
-    -fx-border-width: 2px;
-    -fx-border-radius: 4px;
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
-    -jfx-disable-visual-focus: true;
+.contributor-dialog .contributor__container {
+    -fx-padding: 0; /* revert padding for dialog extra components*/
+}
+
+.contributor-dialog__header {
+    -fx-alignment: center;
+    -fx-padding: 10px 0;
+}
+
+.contributor-dialog__title {
+    -fx-font-size: 1.5em;
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-weight: bold;
+}
+
+.contributor-dialog__action {
+    -fx-padding: 10px 0;
+    -fx-spacing: 10px;
+}
+
+.contributor-dialog__export-btn {
+    -fx-max-width: infinity;
 }

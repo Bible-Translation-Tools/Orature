@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
@@ -25,34 +26,31 @@ class ExportChapterDialog : OtterDialog() {
 
         vbox {
             hbox {
-                paddingLeft = 30.0
-                paddingTop = 20.0
-                paddingBottom = -20.0
+                addClass("contributor-dialog__header")
                 label (messages["exportChapter"]) {
-                    alignment = Pos.CENTER
-                    addClass("contributor__section-title")
+                    addClass("contributor-dialog__title")
                 }
-            }
-            hbox {
-                add(buildContributorView())
+                region { hgrow = Priority.ALWAYS }
                 button {
-                    addClass("btn", "btn--icon","contributor__list-cell__close-btn .ikonli-font-icon") // TODO: refactor to common style class
+                    addClass("btn", "btn--secondary")
+                    graphic = FontIcon(MaterialDesign.MDI_CLOSE)
                     tooltip(messages["close"])
-                    graphic = FontIcon("gmi-close")
                     action { close() }
                 }
             }
+            hbox {
+                add(createContributorSection())
+            }
         }
         hbox {
-            spacing = 20.0
-            paddingBottom = 20.0
-            paddingTop = -20.0
-            alignment = Pos.CENTER
+            hgrow = Priority.ALWAYS
+            addClass("contributor-dialog__action")
 
             button (messages["exportChapter"]) {
-                addClass("btn--primary","btn--borderless")
+                addClass("btn--primary","btn--borderless", "contributor-dialog__export-btn")
                 graphic = FontIcon(Material.UPLOAD_FILE)
                 hgrow = Priority.ALWAYS
+
                 action {
                     export()
                     close()
@@ -62,8 +60,23 @@ class ExportChapterDialog : OtterDialog() {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon("gmi-close")
                 hgrow = Priority.SOMETIMES
+
                 action {
                     close()
+                }
+            }
+        }
+
+        textflow {
+            text(messages["exportLicenseDescription"]) {
+                addClass("contributor__section-text")
+            }
+            hyperlink(messages["licenseCCBYSA"]) {
+                addClass("contributor__license-link")
+                action {
+                    FX.application.hostServices.showDocument(
+                        "https://creativecommons.org/licenses/by-sa/4.0/"
+                    )
                 }
             }
         }
@@ -73,7 +86,7 @@ class ExportChapterDialog : OtterDialog() {
         setContent(content)
     }
 
-    private fun buildContributorView(): ContributorInfo {
+    private fun createContributorSection(): ContributorInfo {
         viewModel.loadContributors()
         return ContributorInfo(viewModel.contributors)
             .apply {
@@ -94,19 +107,6 @@ class ExportChapterDialog : OtterDialog() {
                         viewModel.editContributor(data)
                     }
                 )
-                textflow {
-                    text(messages["exportLicenseDescription"]) {
-                        addClass("contributor__section-text")
-                    }
-                    hyperlink(messages["licenseCCBYSA"]) {
-                        addClass("contributor__license-link")
-                        action {
-                            FX.application.hostServices.showDocument(
-                                "https://creativecommons.org/licenses/by-sa/4.0/"
-                            )
-                        }
-                    }
-                }
             }
     }
 

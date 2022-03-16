@@ -36,8 +36,7 @@ class ContributorInfo(
             }
         }
         hbox {
-            spacing = 20.0
-            alignment = Pos.CENTER
+            addClass("contributor__add-section")
 
             textfield {
                 contributorField = this
@@ -49,6 +48,7 @@ class ContributorInfo(
                 setOnKeyReleased {
                     if (it.code == KeyCode.ENTER) {
                         addContributor()
+                        contributorField.requestFocus()
                     }
                 }
             }.hide()
@@ -63,16 +63,15 @@ class ContributorInfo(
                 setOnAction {
                     if (!contributorField.isVisible) {
                         contributorField.show()
-                        contributorField.requestFocus()
                     } else {
                         addContributor()
                     }
+                    contributorField.requestFocus()
                 }
             }
         }
         vbox {
             vgrow = Priority.ALWAYS
-            addClass("contributor__input-group")
 
             listview(contributors) {
                 addClass("wa-list-view", "contributor__list")
@@ -97,6 +96,5 @@ class ContributorInfo(
             ActionEvent(contributorField.text, null)
         )
         contributorField.clear()
-        contributorField.requestFocus()
     }
 }
