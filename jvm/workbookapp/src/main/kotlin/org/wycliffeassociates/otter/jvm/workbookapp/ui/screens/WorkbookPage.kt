@@ -410,11 +410,16 @@ class WorkbookPage : View() {
                                 }
                             }
                             textflow {
-                                text(messages["licenseDescription"]) {
+                                label(messages["licenseDescription"]) {
                                     addClass("contributor__section-text")
+                                    fitToParentWidth()
+                                    isWrapText = true
                                 }
                                 hyperlink(messages["licenseCCBYSA"]) {
                                     addClass("contributor__license-link")
+                                    fitToParentWidth()
+                                    isWrapText = true
+
                                     action {
                                         FX.application.hostServices.showDocument(
                                             "https://creativecommons.org/licenses/by-sa/4.0/"

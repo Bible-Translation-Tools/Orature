@@ -29,6 +29,7 @@
 
 .contributor__section-text {
     -fx-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text;
     -fx-font-size: 1.1em;
 }
 
@@ -40,6 +41,10 @@
 .contributor__add-section {
     -fx-alignment: center;
     -fx-spacing: 10px;
+}
+
+.contributor__add-btn {
+    -fx-max-width: infinity;
 }
 
 .contributor__text-input {
@@ -86,7 +91,7 @@
 .contributor-dialog {
     -fx-background-color: -wa-dialog-background;
     -fx-padding: 15px;
-    -fx-pref-width: 350px;
+    -fx-pref-width: 500px;
 }
 
 .contributor-dialog .contributor__container {

@@ -49,7 +49,8 @@ class ContributorInfo(
             label(messages["contributorHeading"]) {
                 addClass("contributor__section-title")
             }
-            text(messages["contributorDescription"]) {
+            label(messages["contributorDescription"]) {
+                isWrapText = true
                 addClass("contributor__section-text")
             }
         }
@@ -72,10 +73,9 @@ class ContributorInfo(
             }.hide()
 
             button(messages["addContributor"]) {
-                useMaxWidth = true
                 hgrow = Priority.SOMETIMES
 
-                addClass("btn", "btn--secondary")
+                addClass("btn", "btn--secondary", "contributor__add-btn")
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
 
                 setOnAction {

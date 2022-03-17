@@ -62,7 +62,6 @@ class ContributorCell : HBox() {
     val onEditContributorActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>(null)
 
     init {
-        useMaxWidth = true
         hgrow = Priority.ALWAYS
         addClass("contributor__list-cell")
 
