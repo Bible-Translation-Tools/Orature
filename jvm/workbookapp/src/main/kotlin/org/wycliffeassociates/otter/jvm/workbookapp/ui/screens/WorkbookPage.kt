@@ -408,7 +408,8 @@ class WorkbookPage : View() {
                 button(messages["saveContributors"]) {
                     addClass("btn--primary", "btn--borderless")
                     fitToParentWidth()
-                    hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
+                    isDisable = true
+                    viewModel.contributors.onChange { isDisable = false }
 
                     setOnAction {
                         viewModel.saveContributorInfo()
