@@ -369,6 +369,7 @@ class WorkbookPage : View() {
                         hgrow = Priority.ALWAYS
                         vgrow = Priority.ALWAYS
                         addClass("workbook-page__chapter-list")
+                        fitToParentWidth()
 
                         setCellFactory {
                             ChapterCell()
@@ -376,6 +377,13 @@ class WorkbookPage : View() {
                     }
                     add(
                         ContributorInfo(viewModel.contributors).apply {
+                            hgrow = Priority.SOMETIMES
+
+                            visibleWhen {
+                                currentStage!!.widthProperty().greaterThan(minWidthProperty() * 2)
+                            }
+                            managedWhen(visibleProperty())
+
                             addContributorCallbackProperty.set(
                                 EventHandler {
                                     viewModel.addContributor(it.source as String)
@@ -394,7 +402,7 @@ class WorkbookPage : View() {
                             )
                             button(messages["saveContributors"]) {
                                 addClass("btn--primary", "btn--borderless")
-                                useMaxWidth = true
+                                fitToParentWidth()
                                 hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
 
                                 setOnAction {
