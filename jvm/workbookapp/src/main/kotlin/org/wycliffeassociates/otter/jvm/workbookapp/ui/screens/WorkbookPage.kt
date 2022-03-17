@@ -375,60 +375,62 @@ class WorkbookPage : View() {
                             ChapterCell()
                         }
                     }
-                    add(
-                        ContributorInfo(viewModel.contributors).apply {
-                            hgrow = Priority.SOMETIMES
+                    add(buildContributorSection())
+                }
+            }
+        }
 
-                            visibleWhen {
-                                currentStage!!.widthProperty().greaterThan(minWidthProperty() * 2)
-                            }
-                            managedWhen(visibleProperty())
+        private fun buildContributorSection(): ContributorInfo {
+            return ContributorInfo(viewModel.contributors).apply {
+                hgrow = Priority.SOMETIMES
 
-                            addContributorCallbackProperty.set(
-                                EventHandler {
-                                    viewModel.addContributor(it.source as String)
-                                }
+                visibleWhen {
+                    currentStage!!.widthProperty().greaterThan(minWidthProperty() * 2)
+                }
+                managedWhen(visibleProperty())
+
+                addContributorCallbackProperty.set(
+                    EventHandler {
+                        viewModel.addContributor(it.source as String)
+                    }
+                )
+                editContributorCallbackProperty.set(
+                    EventHandler {
+                        viewModel.editContributor(it.source as ContributorCellData)
+                    }
+                )
+                removeContributorCallbackProperty.set(
+                    EventHandler {
+                        val indexToRemove = it.source as Int
+                        viewModel.removeContributor(indexToRemove)
+                    }
+                )
+                button(messages["saveContributors"]) {
+                    addClass("btn--primary", "btn--borderless")
+                    fitToParentWidth()
+                    hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
+
+                    setOnAction {
+                        viewModel.saveContributorInfo()
+                    }
+                }
+                textflow {
+                    label(messages["licenseDescription"]) {
+                        addClass("contributor__section-text")
+                        fitToParentWidth()
+                        isWrapText = true
+                    }
+                    hyperlink(messages["licenseCCBYSA"]) {
+                        addClass("contributor__license-link")
+                        fitToParentWidth()
+                        isWrapText = true
+
+                        action {
+                            FX.application.hostServices.showDocument(
+                                "https://creativecommons.org/licenses/by-sa/4.0/"
                             )
-                            editContributorCallbackProperty.set(
-                                EventHandler {
-                                    viewModel.editContributor(it.source as ContributorCellData)
-                                }
-                            )
-                            removeContributorCallbackProperty.set(
-                                EventHandler {
-                                    val indexToRemove = it.source as Int
-                                    viewModel.removeContributor(indexToRemove)
-                                }
-                            )
-                            button(messages["saveContributors"]) {
-                                addClass("btn--primary", "btn--borderless")
-                                fitToParentWidth()
-                                hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
-
-                                setOnAction {
-                                    viewModel.saveContributorInfo()
-                                }
-                            }
-                            textflow {
-                                label(messages["licenseDescription"]) {
-                                    addClass("contributor__section-text")
-                                    fitToParentWidth()
-                                    isWrapText = true
-                                }
-                                hyperlink(messages["licenseCCBYSA"]) {
-                                    addClass("contributor__license-link")
-                                    fitToParentWidth()
-                                    isWrapText = true
-
-                                    action {
-                                        FX.application.hostServices.showDocument(
-                                            "https://creativecommons.org/licenses/by-sa/4.0/"
-                                        )
-                                    }
-                                }
-                            }
                         }
-                    )
+                    }
                 }
             }
         }

@@ -56,9 +56,7 @@ class ExportChapterDialog : OtterDialog() {
                     action { close() }
                 }
             }
-            hbox {
-                add(createContributorSection())
-            }
+            add(createContributorSection())
         }
         hbox {
             hgrow = Priority.ALWAYS
