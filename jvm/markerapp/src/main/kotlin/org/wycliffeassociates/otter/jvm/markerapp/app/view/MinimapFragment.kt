@@ -39,7 +39,6 @@ class MinimapFragment : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        println("ondock minimap")
         viewModel.setSlider(slider)
         slider.apply {
             viewModel.waveformMinimapImageListener = ChangeListener { _, _, it ->

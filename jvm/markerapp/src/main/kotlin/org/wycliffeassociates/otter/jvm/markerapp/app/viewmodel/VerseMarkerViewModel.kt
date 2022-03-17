@@ -42,7 +42,6 @@ import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
-import java.util.concurrent.TimeUnit
 import javafx.beans.value.ChangeListener
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import kotlin.math.max
@@ -56,7 +55,8 @@ class VerseMarkerViewModel : ViewModel() {
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
-    var imageCleaner: () -> Unit = {}
+    /** Call this before leaving the view to avoid memory leak */
+    var imageCleanup: () -> Unit = {}
 
     private val waveformSubject = PublishSubject.create<Image>()
     val waveform: Observable<Image>
@@ -142,7 +142,7 @@ class VerseMarkerViewModel : ViewModel() {
     fun saveAndQuit() {
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
-        imageCleaner()
+        imageCleanup()
 
         (scope as ParameterizedScope).let {
             writeMarkers()

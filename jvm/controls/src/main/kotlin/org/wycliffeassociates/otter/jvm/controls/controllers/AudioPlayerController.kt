@@ -39,17 +39,10 @@ const val DURATION_FORMAT = "%02d:%02d" // mm:ss
 private const val ANIMATION_REFRESH_MS = 16L
 
 class AudioPlayerController(
-    audioSlider: Slider? = null,
+    var audioSlider: Slider? = null,
     private var player: IAudioPlayer? = null
 ) {
-    var audioSlider: Slider? = audioSlider
-        public set
-
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
-
-//    fun setAudioSlider(slider: Slider) {
-//        audioSlider = slider
-//    }
 
     private var startAtLocation = 0
     private var disposable: Disposable? = null

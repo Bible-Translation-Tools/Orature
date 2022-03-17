@@ -21,9 +21,6 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
-import javafx.scene.Parent
-import javafx.scene.control.Slider
-import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
@@ -47,7 +44,7 @@ class MarkerView : PluginEntrypoint() {
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
-        viewModel.imageCleaner = waveform::freeImages
+        viewModel.imageCleanup = waveform::freeImages
         timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
