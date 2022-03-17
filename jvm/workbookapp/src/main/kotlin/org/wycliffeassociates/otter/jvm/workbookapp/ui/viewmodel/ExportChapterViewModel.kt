@@ -19,7 +19,9 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
@@ -32,6 +34,8 @@ class ExportChapterViewModel : ViewModel() {
     @Inject
     lateinit var audioConverter: AudioConverter
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val workbookPageViewModel: WorkbookPageViewModel by inject()
     private val chapterViewModel: ChapterPageViewModel by inject()
 
@@ -58,6 +62,20 @@ class ExportChapterViewModel : ViewModel() {
 
     fun loadContributors() {
         contributors.setAll(workbookPageViewModel.contributors)
+    }
+
+    fun saveContributors() {
+        Completable
+            .fromAction {
+                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(
+                    contributors.map { it.name }
+                )
+            }
+            .observeOnFx()
+            .doOnError {
+                logger.error("Error saving contributor before export.", it)
+            }
+            .subscribe()
     }
 
     fun addContributor(name: String) {

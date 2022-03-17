@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -284,7 +285,17 @@ class WorkbookPageViewModel : ViewModel() {
     }
 
     fun saveContributorInfo() {
-        // TODO: write to resource container
+        Completable
+            .fromAction {
+                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(
+                    contributors.map { it.name }
+                )
+            }
+            .observeOnFx()
+            .doOnError {
+                logger.error("Error saving contributor to project rc.", it)
+            }
+            .subscribe()
     }
 
     fun goBack() {

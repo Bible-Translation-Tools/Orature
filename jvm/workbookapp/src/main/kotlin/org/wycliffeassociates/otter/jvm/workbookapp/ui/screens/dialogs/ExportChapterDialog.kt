@@ -129,6 +129,7 @@ class ExportChapterDialog : OtterDialog() {
     }
 
     fun export() {
+        viewModel.saveContributors()
         val directory = chooseDirectory(FX.messages["exportChapter"])
         directory?.let {
             viewModel.export(it)
