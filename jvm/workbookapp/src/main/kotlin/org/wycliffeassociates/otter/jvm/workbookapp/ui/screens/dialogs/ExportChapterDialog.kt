@@ -66,6 +66,7 @@ class ExportChapterDialog : OtterDialog() {
                 addClass("btn--primary","btn--borderless", "contributor-dialog__export-btn")
                 graphic = FontIcon(Material.UPLOAD_FILE)
                 hgrow = Priority.ALWAYS
+                tooltip(this.text)
 
                 action {
                     export()
@@ -76,6 +77,7 @@ class ExportChapterDialog : OtterDialog() {
                 addClass("btn", "btn--secondary")
                 graphic = FontIcon("gmi-close")
                 hgrow = Priority.SOMETIMES
+                tooltip(this.text)
 
                 action {
                     close()
@@ -89,10 +91,10 @@ class ExportChapterDialog : OtterDialog() {
             }
             hyperlink(messages["licenseCCBYSA"]) {
                 addClass("wa-text--hyperlink", "contributor__license-link")
+                val url = "https://creativecommons.org/licenses/by-sa/4.0/"
+                tooltip(url)
                 action {
-                    FX.application.hostServices.showDocument(
-                        "https://creativecommons.org/licenses/by-sa/4.0/"
-                    )
+                    FX.application.hostServices.showDocument(url)
                 }
             }
         }

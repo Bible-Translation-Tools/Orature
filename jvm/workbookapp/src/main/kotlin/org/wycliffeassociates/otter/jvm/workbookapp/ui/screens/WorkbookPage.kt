@@ -425,10 +425,10 @@ class WorkbookPage : View() {
                         fitToParentWidth()
                         isWrapText = true
 
+                        val url = "https://creativecommons.org/licenses/by-sa/4.0/"
+                        tooltip(url)
                         action {
-                            FX.application.hostServices.showDocument(
-                                "https://creativecommons.org/licenses/by-sa/4.0/"
-                            )
+                            FX.application.hostServices.showDocument(url)
                         }
                     }
                 }
