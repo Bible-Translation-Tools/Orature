@@ -73,10 +73,10 @@ class ContributorInfo(
             }.hide()
 
             button(messages["addContributor"]) {
-                hgrow = Priority.SOMETIMES
-
                 addClass("btn", "btn--secondary", "contributor__add-btn")
+                hgrow = Priority.SOMETIMES
                 graphic = FontIcon(MaterialDesign.MDI_PLUS)
+                tooltip(this.text)
 
                 setOnAction {
                     if (!contributorField.isVisible) {

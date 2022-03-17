@@ -91,7 +91,7 @@
 .contributor-dialog {
     -fx-background-color: -wa-dialog-background;
     -fx-padding: 15px;
-    -fx-pref-width: 500px;
+    -fx-pref-width: 600px;
 }
 
 .contributor-dialog .contributor__container {
