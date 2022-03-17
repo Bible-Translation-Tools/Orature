@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
 
 import com.sun.javafx.util.Utils
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Point2D
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
@@ -34,15 +35,19 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
-import javafx.beans.property.SimpleObjectProperty
 
-class MarkerTrackControl() : Control() {
+class MarkerTrackControl : Control() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val highlightState = observableListOf<MarkerHighlightState>()
+    val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
 
     fun refreshMarkers() {
-        (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }
+        (skin as? MarkerTrackControlSkin)?.refreshMarkers()
+    }
+
+    fun setOnPositionChanged(op: (Int, Double) -> Unit) {
+        onPositionChangedProperty.set(op)
     }
 
     override fun createDefaultSkin(): Skin<*> {
@@ -193,17 +198,18 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         children.addAll(track)
     }
 
-    fun updateValue(id: Int, position: Double) {
+    private fun updateValue(id: Int, position: Double) {
         val newValue: Double = position * skinnable.width
         if (!newValue.isNaN()) {
             val min = getMin(id)
             val max = getMax(id)
             val clamped = Utils.clamp(min, newValue, max)
             markers.get(id).markerPositionProperty.set(clamped)
+            skinnable.onPositionChangedProperty.value?.invoke(id, position)
         }
     }
 
-    fun getMin(id: Int): Double {
+    private fun getMin(id: Int): Double {
         val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id > 0) {
             placedMarkers.get(id - 1)
@@ -215,7 +221,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
         } ?: 0.0
     }
 
-    fun getMax(id: Int): Double {
+    private fun getMax(id: Int): Double {
         val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id < placedMarkers.size - 1) {
             placedMarkers.get(id + 1)

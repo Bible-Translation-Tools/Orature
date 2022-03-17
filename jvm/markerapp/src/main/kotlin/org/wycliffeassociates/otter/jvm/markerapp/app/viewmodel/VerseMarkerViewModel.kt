@@ -23,7 +23,6 @@ import com.sun.glass.ui.Screen
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -45,6 +44,7 @@ import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
 import java.util.concurrent.TimeUnit
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import kotlin.math.max
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
@@ -78,9 +78,8 @@ class VerseMarkerViewModel : ViewModel() {
     val positionProperty = SimpleDoubleProperty(0.0)
     var imageWidth: Double = 0.0
 
-    val disposeables = mutableListOf<Disposable>()
-
-    private var audioFile: File? = null
+    private var sampleRate: Int = 0 // beware of divided by 0
+    private var totalFrames: Int = 0 // beware of divided by 0
 
     fun onDock() {
         val audio = loadAudio()
@@ -95,6 +94,10 @@ class VerseMarkerViewModel : ViewModel() {
         val audioFile = File(scope.parameters.named["wav"])
         val audio = AudioFile(audioFile)
         player.load(audioFile)
+        player.getAudioReader()?.let {
+            sampleRate = it.sampleRate
+            totalFrames = it.totalFrames
+        }
         audioPlayer.set(player)
         return audio
     }
@@ -229,7 +232,11 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
-        val samplesPerScreenWidth = audioPlayer.get().getAudioReader()!!.sampleRate * secondsOnScreen
+        if (sampleRate == 0) {
+            return 0.0
+        }
+
+        val samplesPerScreenWidth = sampleRate * secondsOnScreen
         val samplesPerPixel = samplesPerScreenWidth / width
         val pixelsInDuration = audioPlayer.get().getDurationInFrames() / samplesPerPixel
         return pixelsInDuration.toDouble()
@@ -241,5 +248,15 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun getDurationInFrames(): Int {
         return audioPlayer.get().getDurationInFrames() ?: 0
+    }
+
+    fun pixelsInHighlight(controlWidth: Double): Double {
+        if (sampleRate == 0 || totalFrames == 0) {
+            return 1.0
+        }
+
+        val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
+        val framesPerPixel = totalFrames / max(controlWidth, 1.0)
+        return max(framesInHighlight / framesPerPixel, 1.0)
     }
 }

@@ -37,10 +37,8 @@ import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
-import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -58,14 +56,11 @@ class ChapterPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
 
-    @Inject
-    lateinit var directoryProvider: IDirectoryProvider
-
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    var audioConverter: AudioConverter
-    var concatenateAudio: ConcatenateAudio
+    @Inject
+    lateinit var concatenateAudio: ConcatenateAudio
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -86,7 +81,7 @@ class ChapterPageViewModel : ViewModel() {
     val workChunkProperty = SimpleObjectProperty<CardData>()
     val noTakesProperty = SimpleBooleanProperty()
 
-    val chapterCardProperty = SimpleObjectProperty(CardData(workbookDataStore.chapter))
+    val chapterCardProperty = SimpleObjectProperty<CardData>()
     val contextProperty = SimpleObjectProperty(PluginType.RECORDER)
 
     val sourceAudioAvailableProperty = workbookDataStore.sourceAudioAvailableProperty
@@ -102,13 +97,11 @@ class ChapterPageViewModel : ViewModel() {
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
 
-        audioConverter = AudioConverter()
-        concatenateAudio = ConcatenateAudio(directoryProvider)
-
         audioPluginViewModel.pluginNameProperty.bind(pluginNameBinding())
     }
 
     fun dock() {
+        chapterCardProperty.set(CardData(workbookDataStore.chapter))
         workbookDataStore.activeChapterProperty.value.let { _chapter ->
             _chapter?.let { chapter ->
                 loadChapterContents(chapter).subscribe()
@@ -296,21 +289,6 @@ class ChapterPageViewModel : ViewModel() {
                 }
                 .observeOnFx()
                 .subscribe()
-        }
-    }
-
-    fun exportChapter(directory: File) {
-        selectedChapterTakeProperty.value?.let { take ->
-            showExportProgressDialogProperty.set(true)
-
-            val mp3Name = take.file.nameWithoutExtension + ".mp3"
-            val mp3File = File(directory, mp3Name)
-            audioConverter.wavToMp3(take.file, mp3File)
-                .subscribeOn(Schedulers.io())
-                .observeOnFx()
-                .subscribe {
-                    showExportProgressDialogProperty.set(false)
-                }
         }
     }
 

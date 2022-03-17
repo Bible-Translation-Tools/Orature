@@ -75,7 +75,7 @@ class TestProjectImport {
         creator = "Orature",
         language = Language("en-x-demo1", "", "", "", true, "Europe"),
         identifier = "tn",
-        version = "11",
+        version = sourceMetadata.version,
         type = ContainerType.Help
     )
 

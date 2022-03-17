@@ -39,12 +39,12 @@ import org.wycliffeassociates.otter.common.persistence.repositories.IWorkbookRep
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
@@ -70,8 +70,7 @@ class WorkbookPageViewModel : ViewModel() {
     val workbookDataStore: WorkbookDataStore by inject()
 
     val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
-    val contributorList: ObservableList<Contributor> = observableListOf()
-
+    val contributors = observableListOf<Contributor>()
     val currentTabProperty = SimpleStringProperty()
 
     private var loading: Boolean by property(false)
@@ -93,12 +92,6 @@ class WorkbookPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        workbookDataStore.activeProjectFilesAccessorProperty.onChange { projectAccessor ->
-            if (projectAccessor != null) {
-                val contributors = projectAccessor.getContributorInfo()
-                contributorList.setAll(contributors)
-            }
-        }
     }
 
     /**
@@ -116,7 +109,6 @@ class WorkbookPageViewModel : ViewModel() {
      * Sets WorkbookDataStore state to represent the selected workbook tab.
      */
     fun openTab(resourceMetadata: ResourceMetadata) {
-        if (resourceMetadata.identifier == currentTabProperty.value) return
         currentTabProperty.set(resourceMetadata.identifier)
         workbookDataStore.activeResourceMetadataProperty.set(resourceMetadata)
         workbookDataStore.setProjectFilesAccessor(resourceMetadata)
@@ -271,6 +263,22 @@ class WorkbookPageViewModel : ViewModel() {
                     showDeleteFailDialogProperty.set(true)
                 }
             )
+    }
+
+    fun addContributor(name: String) {
+        contributors.add(0, Contributor(name))
+    }
+
+    fun editContributor(data: ContributorCellData) {
+        contributors[data.index] = Contributor(data.name)
+    }
+
+    fun removeContributor(index: Int) {
+        contributors.removeAt(index)
+    }
+
+    fun saveContributorInfo() {
+        // TODO: write to resource container
     }
 
     fun goBack() {

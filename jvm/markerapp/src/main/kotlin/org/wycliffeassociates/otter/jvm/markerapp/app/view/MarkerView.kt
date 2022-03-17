@@ -35,13 +35,12 @@ class MarkerView : PluginEntrypoint() {
     val viewModel: VerseMarkerViewModel by inject()
 
     private val markerTrack: MarkerTrackControl = MarkerTrackControl()
+    private val waveform = MarkerPlacementWaveform(markerTrack)
 
-    val waveform = MarkerPlacementWaveform(markerTrack)
-
-    val titleFragment = TitleFragment()
-    val minimap = MinimapFragment()
-    val source = SourceTextFragment()
-    val playbackControls = PlaybackControlsFragment()
+    private val titleFragment = TitleFragment()
+    private val minimap = MinimapFragment()
+    private val source = SourceTextFragment()
+    private val playbackControls = PlaybackControlsFragment()
 
     override fun onDock() {
         super.onDock()
@@ -62,6 +61,9 @@ class MarkerView : PluginEntrypoint() {
                         refreshMarkers()
                     }
                 }
+            }
+            setOnPositionChanged { id, position ->
+                minimap.slider.updateMarker(id, position)
             }
         }
         viewModel.initializeAudioController(minimap.slider)

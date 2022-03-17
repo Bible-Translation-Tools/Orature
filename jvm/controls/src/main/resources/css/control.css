@@ -154,12 +154,12 @@
     -fx-border-width: 2px;
     -fx-border-color: -wa-secondary-btn-border;
     -fx-text-fill: -wa-secondary-btn-text-fill;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.4em;
     -fx-underline: true;
     -jfx-disable-visual-focus: true;
 }
 .btn--secondary .ikonli-font-icon {
-    -fx-font-size: 20px;
+    -fx-font-size: 1.6em;
     -fx-fill: -wa-secondary-btn-text-fill;
 }
 .btn--secondary:hover {
@@ -255,21 +255,19 @@
     -fx-background-color: transparent;
 }
 /* -------------- Text Link ----------------- */
-.wa-text-hyperlink {
+.wa-text--hyperlink {
     -fx-padding: 5 5 10 5;
-    -fx-font-size: 1.25em;
     -fx-text-fill: -wa-highlight-text;
     -fx-underline: true;
     -fx-cursor: hand;
 }
 
-.wa-text-hyperlink:hover {
+.wa-text--hyperlink:hover {
     -fx-underline: false;
 }
 
-.wa-text-hyperlink .ikonli-font-icon {
-    -fx-fill: -wa-highlight-text;
-    -fx-font-size: 1.5em;
+.wa-text--hyperlink:visited {
+    -fx-text-fill: -wa-highlight-text;
 }
 
 /* -------------- Text Input ---------------- */
@@ -564,10 +562,6 @@
 .wa-list-view .list-cell:even,
 .wa-list-view .list-cell:odd {
     -fx-background-color: -wa-transparent;
-}
-
-.wa-list-view .label {
-    -fx-text-fill: -wa-regular-text;
 }
 
 /* ------------------- Menu Button --------------- */

@@ -1,0 +1,119 @@
+/**
+ * Copyright (C) 2020-2022 Wycliffe Associates
+ *
+ * This file is part of Orature.
+ *
+ * Orature is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Orature is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
+ */
+.contributor__container {
+    -fx-padding: 30px;
+    -fx-spacing: 20px;
+}
+
+.contributor__section-title {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.25em;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.contributor__section-text {
+    -fx-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-size: 1.1em;
+}
+
+.contributor__license-link,
+.contributor__license-link:visited {
+    -fx-text-fill: -wa-highlight-text;
+}
+
+.contributor__add-section {
+    -fx-alignment: center;
+    -fx-spacing: 10px;
+}
+
+.contributor__add-btn {
+    -fx-max-width: infinity;
+}
+
+.contributor__text-input {
+    -fx-font-size: 1.15em;
+    -fx-pref-height: 38px;
+    -fx-padding: 8px 12px;
+    -fx-border-width: 1px;
+}
+
+.contributor__list {
+    -fx-padding: 8px 0;
+}
+
+.contributor__list .list-cell {
+    -fx-padding: 0; /* unset default styles */
+}
+
+.contributor__list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px 2px;
+    -fx-spacing: 5px;
+}
+
+.contributor__list-cell .btn--icon {
+    -fx-border-width: 0;
+    -fx-pref-width: 40px;
+    -fx-pref-height: 40px;
+}
+
+.contributor__list-cell .btn--icon:hover {
+    -fx-border-width: 1px;
+}
+
+.contributor__list .contributor__text-input {
+    -fx-underline: true;
+}
+
+.contributor__list-cell__delete-btn .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+}
+
+/* --- dialog --- */
+.contributor-dialog {
+    -fx-background-color: -wa-dialog-background;
+    -fx-padding: 15px;
+    -fx-pref-width: 500px;
+}
+
+.contributor-dialog .contributor__container {
+    -fx-padding: 0; /* revert padding for dialog extra components*/
+}
+
+.contributor-dialog__header {
+    -fx-alignment: center;
+    -fx-padding: 5px 0;
+}
+
+.contributor-dialog__title {
+    -fx-font-size: 1.8em;
+    -fx-text-fill: -wa-highlight-text;
+    -fx-font-weight: bold;
+}
+
+.contributor-dialog__action {
+    -fx-padding: 10px 0;
+    -fx-spacing: 10px;
+}
+
+.contributor-dialog__export-btn {
+    -fx-max-width: infinity;
+}

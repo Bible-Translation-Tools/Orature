@@ -80,7 +80,7 @@ class AddFilesView : View() {
                             addClass("app-drawer__text")
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
-                            addClass("wa-text-hyperlink")
+                            addClass("wa-text--hyperlink", "app-drawer__text--link")
                             tooltip {
                                 text = "audio.bibleineverylanguage.org"
                             }

@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXTabPane
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -39,6 +40,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -91,8 +93,8 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources.get("/css/chapter-card.css"))
         tryImportStylesheet(resources.get("/css/workbook-banner.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
-        tryImportStylesheet(resources.get("/css/tab-pane.css"))
         tryImportStylesheet(resources.get("/css/contributor-info.css"))
+        tryImportStylesheet(resources.get("/css/tab-pane.css"))
     }
 
     /**
@@ -367,12 +369,66 @@ class WorkbookPage : View() {
                         hgrow = Priority.ALWAYS
                         vgrow = Priority.ALWAYS
                         addClass("workbook-page__chapter-list")
+                        fitToParentWidth()
 
                         setCellFactory {
                             ChapterCell()
                         }
                     }
-                    add(ContributorInfo(viewModel.contributorList))
+                    add(
+                        ContributorInfo(viewModel.contributors).apply {
+                            hgrow = Priority.SOMETIMES
+
+                            visibleWhen {
+                                currentStage!!.widthProperty().greaterThan(minWidthProperty() * 2)
+                            }
+                            managedWhen(visibleProperty())
+
+                            addContributorCallbackProperty.set(
+                                EventHandler {
+                                    viewModel.addContributor(it.source as String)
+                                }
+                            )
+                            editContributorCallbackProperty.set(
+                                EventHandler {
+                                    viewModel.editContributor(it.source as ContributorCellData)
+                                }
+                            )
+                            removeContributorCallbackProperty.set(
+                                EventHandler {
+                                    val indexToRemove = it.source as Int
+                                    viewModel.removeContributor(indexToRemove)
+                                }
+                            )
+                            button(messages["saveContributors"]) {
+                                addClass("btn--primary", "btn--borderless")
+                                fitToParentWidth()
+                                hiddenWhen(viewModel.contributors.sizeProperty.isEqualTo(0))
+
+                                setOnAction {
+                                    viewModel.saveContributorInfo()
+                                }
+                            }
+                            textflow {
+                                label(messages["licenseDescription"]) {
+                                    addClass("contributor__section-text")
+                                    fitToParentWidth()
+                                    isWrapText = true
+                                }
+                                hyperlink(messages["licenseCCBYSA"]) {
+                                    addClass("contributor__license-link")
+                                    fitToParentWidth()
+                                    isWrapText = true
+
+                                    action {
+                                        FX.application.hostServices.showDocument(
+                                            "https://creativecommons.org/licenses/by-sa/4.0/"
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }

@@ -259,14 +259,16 @@ class SettingsView : View() {
                         }
                     }
 
-                    label(messages["addApp"]).apply {
-                        addClass("wa-text-hyperlink")
+                    hyperlink {
+                        addClass("wa-text--hyperlink", "app-drawer__text--link")
+
+                        text = messages["addApp"]
                         graphic = FontIcon(MaterialDesign.MDI_PLUS)
                         tooltip {
-                            text = messages["addApp"]
+                            textProperty().bind(this@hyperlink.textProperty())
                         }
 
-                        setOnMouseClicked {
+                        action {
                             addPluginDialog.open()
                         }
                     }
