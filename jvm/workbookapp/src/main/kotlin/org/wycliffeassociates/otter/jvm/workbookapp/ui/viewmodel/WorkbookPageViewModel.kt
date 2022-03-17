@@ -92,6 +92,12 @@ class WorkbookPageViewModel : ViewModel() {
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
+        workbookDataStore.activeProjectFilesAccessorProperty.onChange { projectAccessor ->
+            if (projectAccessor != null) {
+                val projectContributors = projectAccessor.getContributorInfo()
+                contributors.setAll(projectContributors)
+            }
+        }
     }
 
     /**
