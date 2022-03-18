@@ -31,7 +31,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.onUpdateAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
 import tornadofx.*
 
 class PluginOpenedPage : Fragment() {
@@ -98,13 +98,13 @@ class PluginOpenedPage : Fragment() {
     }
 
     override fun onDock() {
-        sourcePlayerListener = playerProperty.onUpdateAndDoNow {
+        playerProperty.onChangeAndDoNowWithListener {
             it?.let {
                 addShortcut(Shortcut.PLAY_SOURCE.value, it::toggle)
             }
-        }
+        }.let { sourcePlayerListener = it }
 
-        targetAudioPlayerProperty.onUpdateAndDoNow {
+        targetAudioPlayerProperty.onChangeAndDoNowWithListener {
             it?.let {
                 addShortcut(Shortcut.PLAY_TARGET.value, it::toggle)
             }

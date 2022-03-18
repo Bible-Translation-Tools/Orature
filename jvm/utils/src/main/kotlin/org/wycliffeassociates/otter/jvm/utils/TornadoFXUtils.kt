@@ -57,21 +57,21 @@ fun <T> ObservableList<T>.onChangeAndDoNow(op: (List<T>) -> Unit) {
  * @param op the function to run when observable value is changed
  * @return ChangeListener
  */
-fun <T> ObservableValue<T>.onUpdate(op: (T?) -> Unit): ChangeListener<T> {
+fun <T> ObservableValue<T>.onChangeWithListener(op: (T?) -> Unit): ChangeListener<T> {
     val listener = ChangeListener<T> { _, _, newValue -> op(newValue) }
     addListener(listener)
     return listener
 }
 
 /**
- * Runs the given operation now and also calls [onUpdate] with the given operation to set up an
+ * Runs the given operation now and also calls [onChangeWithListener] with the given operation to set up an
  * on change listener
  * @param op the function to run when observable value is changed
  * @return ChangeListener
  */
-fun <T> ObservableValue<T>.onUpdateAndDoNow(op: (T?) -> Unit): ChangeListener<T> {
+fun <T> ObservableValue<T>.onChangeAndDoNowWithListener(op: (T?) -> Unit): ChangeListener<T> {
     op(this.value)
-    return this.onUpdate {
+    return this.onChangeWithListener {
         op(it)
     }
 }
