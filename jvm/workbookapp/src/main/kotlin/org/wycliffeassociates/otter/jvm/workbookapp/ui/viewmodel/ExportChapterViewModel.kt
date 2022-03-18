@@ -51,40 +51,16 @@ class ExportChapterViewModel : ViewModel() {
     fun export(outputDir: File) {
         chapterViewModel.selectedChapterTakeProperty.value?.let { take ->
             chapterViewModel.showExportProgressDialogProperty.set(true)
-
             val mp3Name = take.file.nameWithoutExtension + ".mp3"
             val mp3File = File(outputDir, mp3Name)
             audioConverter.wavToMp3(take.file, mp3File)
-                .subscribeOn(Schedulers.io())
                 .doOnError {
-                    logger.error("Error while converting chapter file to export.", it)
+                    logger.error("Error while converting file to export.", it)
                 }
+                .andThen(updateMetadata(mp3File))
                 .observeOnFx()
                 .subscribe {
-                    Completable
-                        .fromAction {
-                            val licenseTitle =
-                                ResourceContainer.load(workbookDataStore.activeProjectFilesAccessor.projectDir).use {
-                                    it.manifest.dublinCore.rights
-                                }
-                            val license = License.get(licenseTitle)
-
-                            val mp3MetadataAccessor = Mp3MetadataAccessor(mp3File)
-                            mp3MetadataAccessor.setArtists(contributors.map { it.name })
-                            license?.url?.let {
-                                mp3MetadataAccessor.setLegalInformationUrl(it)
-                            }
-                            mp3MetadataAccessor.execute()
-                        }
-                        .subscribeOn(Schedulers.io())
-                        .doOnError {
-                            logger.error("Error while updating output file metadata.", it)
-                        }
-                        .onErrorComplete()
-                        .observeOnFx()
-                        .subscribe {
-                            chapterViewModel.showExportProgressDialogProperty.set(false)
-                        }
+                    chapterViewModel.showExportProgressDialogProperty.set(false)
                 }
         }
     }
@@ -117,5 +93,27 @@ class ExportChapterViewModel : ViewModel() {
 
     fun removeContributor(index: Int) {
         contributors.removeAt(index)
+    }
+
+    private fun updateMetadata(file: File): Completable {
+        return Completable
+            .fromAction {
+                val licenseTitle =
+                    ResourceContainer.load(workbookDataStore.activeProjectFilesAccessor.projectDir).use {
+                        it.manifest.dublinCore.rights
+                    }
+                val license = License.get(licenseTitle)
+
+                val mp3MetadataAccessor = Mp3MetadataAccessor(file)
+                mp3MetadataAccessor.setArtists(contributors.map { it.name })
+                license?.url?.let {
+                    mp3MetadataAccessor.setLegalInformationUrl(it)
+                }
+                mp3MetadataAccessor.execute()
+            }
+            .subscribeOn(Schedulers.io())
+            .doOnError {
+                logger.error("Error while updating output file metadata.", it)
+            }
     }
 }
