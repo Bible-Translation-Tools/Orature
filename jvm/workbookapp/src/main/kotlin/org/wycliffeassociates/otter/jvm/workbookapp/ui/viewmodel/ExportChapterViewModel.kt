@@ -20,22 +20,19 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
-import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
-import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
-import org.wycliffeassociates.otter.common.domain.audio.Mp3MetadataAccessor
+import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
 
 class ExportChapterViewModel : ViewModel() {
     @Inject
-    lateinit var audioConverter: AudioConverter
+    lateinit var audioExporter: AudioExporter
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val workbookDataStore: WorkbookDataStore by inject()
@@ -51,13 +48,14 @@ class ExportChapterViewModel : ViewModel() {
     fun export(outputDir: File) {
         chapterViewModel.selectedChapterTakeProperty.value?.let { take ->
             chapterViewModel.showExportProgressDialogProperty.set(true)
-            val mp3Name = take.file.nameWithoutExtension + ".mp3"
-            val mp3File = File(outputDir, mp3Name)
-            audioConverter.wavToMp3(take.file, mp3File)
+
+            val licenseTitle = workbookDataStore.workbook.target.resourceMetadata.license
+            val license = License.get(licenseTitle)
+
+            audioExporter.exportMp3(take.file, outputDir, license, contributors)
                 .doOnError {
-                    logger.error("Error while converting file to export.", it)
+                    logger.error("Error while exporting chapter.", it)
                 }
-                .andThen(updateMetadata(mp3File))
                 .observeOnFx()
                 .subscribe {
                     chapterViewModel.showExportProgressDialogProperty.set(false)
@@ -93,27 +91,5 @@ class ExportChapterViewModel : ViewModel() {
 
     fun removeContributor(index: Int) {
         contributors.removeAt(index)
-    }
-
-    private fun updateMetadata(file: File): Completable {
-        return Completable
-            .fromAction {
-                val licenseTitle =
-                    ResourceContainer.load(workbookDataStore.activeProjectFilesAccessor.projectDir).use {
-                        it.manifest.dublinCore.rights
-                    }
-                val license = License.get(licenseTitle)
-
-                val mp3MetadataAccessor = Mp3MetadataAccessor(file)
-                mp3MetadataAccessor.setArtists(contributors.map { it.name })
-                license?.url?.let {
-                    mp3MetadataAccessor.setLegalInformationUrl(it)
-                }
-                mp3MetadataAccessor.execute()
-            }
-            .subscribeOn(Schedulers.io())
-            .doOnError {
-                logger.error("Error while updating output file metadata.", it)
-            }
     }
 }
