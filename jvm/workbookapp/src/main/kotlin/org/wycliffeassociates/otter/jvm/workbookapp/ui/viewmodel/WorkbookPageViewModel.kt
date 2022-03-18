@@ -287,9 +287,7 @@ class WorkbookPageViewModel : ViewModel() {
     fun saveContributorInfo() {
         Completable
             .fromAction {
-                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(
-                    contributors.map { it.name }
-                )
+                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(contributors)
             }
             .observeOnFx()
             .doOnError {

@@ -70,9 +70,7 @@ class ExportChapterViewModel : ViewModel() {
     fun saveContributors() {
         Completable
             .fromAction {
-                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(
-                    contributors.map { it.name }
-                )
+                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(contributors)
             }
             .observeOnFx()
             .doOnError {

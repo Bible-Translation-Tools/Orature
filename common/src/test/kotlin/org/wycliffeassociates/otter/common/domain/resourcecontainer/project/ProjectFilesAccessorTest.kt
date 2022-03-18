@@ -209,7 +209,7 @@ class ProjectFilesAccessorTest {
         assertEquals(2, contributors.size)
 
         contributors.add(Contributor("Test User"))
-        projectFilesAccessor.setContributorInfo(contributors.map { it.name })
+        projectFilesAccessor.setContributorInfo(contributors)
         val newList = projectFilesAccessor.getContributorInfo()
 
         assertEquals(3, newList.size)

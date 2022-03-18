@@ -231,9 +231,9 @@ class ProjectFilesAccessor(
         }
     }
 
-    fun setContributorInfo(contributors: List<String>) {
+    fun setContributorInfo(contributors: List<Contributor>) {
         ResourceContainer.load(projectDir).use { rc ->
-            rc.manifest.dublinCore.contributor = contributors.toMutableList()
+            rc.manifest.dublinCore.contributor = contributors.map { it.toString() }.toMutableList()
             rc.writeManifest()
         }
     }
