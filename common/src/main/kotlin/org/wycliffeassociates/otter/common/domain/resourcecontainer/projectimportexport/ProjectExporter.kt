@@ -64,7 +64,7 @@ class ProjectExporter @Inject constructor(
                 val zipFile = directory.resolve(zipFilename)
 
                 projectFilesAccessor.initializeResourceContainerInFile(workbook, zipFile)
-                setContributorInfo(contributors.map { it.name }, zipFile)
+                setContributorInfo(contributors, zipFile)
 
                 directoryProvider.newFileWriter(zipFile).use { fileWriter ->
                     projectFilesAccessor.copyTakeFiles(
@@ -105,10 +105,10 @@ class ProjectExporter @Inject constructor(
         return "$lang-$resource-$project-$timestamp.zip"
     }
 
-    private fun setContributorInfo(contributors: List<String>, projectFile: File) {
-        ResourceContainer.load(projectFile).use {
-            it.manifest.dublinCore.contributor = contributors.toMutableList()
-            it.writeManifest()
+    private fun setContributorInfo(contributors: List<Contributor>, projectFile: File) {
+        ResourceContainer.load(projectFile).use { rc ->
+            rc.manifest.dublinCore.contributor = contributors.map { it.name }.toMutableList()
+            rc.writeManifest()
         }
     }
 
