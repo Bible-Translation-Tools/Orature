@@ -63,4 +63,22 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
     override fun getCues(): List<AudioCue> {
         return cueChunk.cues
     }
+
+    override fun artists(): List<String> {
+        // TODO
+        return listOf()
+    }
+
+    override fun setArtists(artists: List<String>) {
+        // TODO
+    }
+
+    override fun getLegalInformationUrl(): String {
+        // TODO
+        return ""
+    }
+
+    override fun setLegalInformationUrl(url: String) {
+        // TODO
+    }
 }

@@ -7,6 +7,6 @@ dependencies {
     implementation "org.slf4j:slf4j-api:$slf4jApiVer"
     implementation "javazoom.jl:SeekableJlayer:$jlayerVer"
     implementation "org.digitalmediaserver:cuelib-core:$cuelibVer"
-
+    implementation "com.mpatric:mp3agic:$mp3TagVer"
     implementation "be.tarsos:tarsosdsp:$tarsosDspVer"
 }

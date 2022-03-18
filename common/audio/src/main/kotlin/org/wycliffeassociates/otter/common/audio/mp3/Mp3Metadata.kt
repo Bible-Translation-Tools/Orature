@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.common.audio.mp3
 
+import com.mpatric.mp3agic.ID3v24Tag
+import com.mpatric.mp3agic.Mp3File
 import java.io.File
 import java.lang.Exception
 import kotlin.math.roundToInt
@@ -42,17 +44,21 @@ import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 private const val CUE_FRAME_SIZE = 75.0
 private const val DEFAULT_CUE_TRACK_INDEX = 1 // see https://en.wikipedia.org/wiki/Cue_sheet_(computing) or look up "cue sheet file"
 
-internal class Mp3Metadata(val file: File) : AudioMetadata {
+internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata {
 
     private val logger = LoggerFactory.getLogger(Mp3Metadata::class.java)
 
     private val _cues = mutableListOf<AudioCue>()
-    private var title = file.nameWithoutExtension
+    private var title = cueFile.nameWithoutExtension
+    private val id3Metadata = Mp3File(mp3File.path)
 
     init {
-        if (file.exists() && file.length() > 0) {
+        if (!id3Metadata.hasId3v2Tag()) {
+            id3Metadata.id3v2Tag = ID3v24Tag()
+        }
+        if (cueFile.exists() && cueFile.length() > 0) {
             try {
-                val cuesheet = CueParser.parse(file, Charsets.UTF_8)
+                val cuesheet = CueParser.parse(cueFile, Charsets.UTF_8)
                 if (cuesheet.title.isNotEmpty()) {
                     title = cuesheet.title
                 }
@@ -82,11 +88,11 @@ internal class Mp3Metadata(val file: File) : AudioMetadata {
     }
 
     fun write() {
-        file.delete()
-        file.createNewFile()
+        cueFile.delete()
+        cueFile.createNewFile()
         val sheet = CueSheet()
         sheet.title = title
-        val fileData = FileData(sheet, "\"${file.name}\"", "MP3")
+        val fileData = FileData(sheet, "\"${cueFile.name}\"", "MP3")
         for ((i, cue) in _cues.sortedBy { it.location }.withIndex()) {
             val cueNumber = cue.label.toInt()
             val trackData = TrackData(fileData, cueNumber, "AUDIO")
@@ -100,8 +106,32 @@ internal class Mp3Metadata(val file: File) : AudioMetadata {
         }
         sheet.fileData.add(fileData)
         val serialized = CueSheetSerializer().serializeCueSheet(sheet)
-        file.writer().use {
+        cueFile.writer().use {
             it.write(serialized)
         }
+
+        writeID3Tag()
+    }
+
+    override fun setArtists(artists: List<String>) {
+        id3Metadata.id3v2Tag.artist = artists.joinToString("/")
+    }
+
+    override fun artists(): List<String> = id3Metadata.id3v2Tag.artist.split("/")
+
+    override fun getLegalInformationUrl(): String = id3Metadata.id3v2Tag.copyrightUrl
+
+    override fun setLegalInformationUrl(url: String) {
+        id3Metadata.id3v2Tag.copyrightUrl = url
+    }
+
+    private fun writeID3Tag() {
+        /* Make a copy first, then overwrite the original file */
+        val tempFile = kotlin.io.path.createTempFile("orature-audio", ".mp3")
+            .toFile()
+
+        id3Metadata.save(tempFile.path)
+        tempFile.copyTo(mp3File, true)
+        tempFile.delete()
     }
 }

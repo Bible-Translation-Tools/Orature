@@ -55,7 +55,10 @@ internal class MP3FileReader(
         get() = end - start
     override val bitsPerSample = DEFAULT_BITS_PER_SAMPLE
 
-    override val metadata = Mp3Metadata(File(file.parent, "${file.nameWithoutExtension}.cue"))
+    override val metadata = Mp3Metadata(
+        mp3File = file,
+        cueFile = File(file.parent, "${file.nameWithoutExtension}.cue")
+    )
 
     private val buff = ShortArray(MP3_BUFFER_SIZE * 2)
 
@@ -68,6 +71,7 @@ internal class MP3FileReader(
     }
 
     override fun update() {
+        decoder?.stop()
         metadata.write()
     }
 

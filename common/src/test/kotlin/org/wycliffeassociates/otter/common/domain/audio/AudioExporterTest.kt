@@ -1,8 +1,9 @@
 package org.wycliffeassociates.otter.common.domain.audio
 
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File
@@ -30,11 +31,11 @@ class AudioExporterTest {
             .exportMp3(inputFile, outputDir, license, contributors)
             .blockingAwait()
 
-        val outputFile = outputDir.listFiles().singleOrNull()
-        assertNotNull(outputFile)
+        val outputFile = outputDir.resolve(inputFile.nameWithoutExtension + ".mp3")
+        assertTrue(outputFile.exists())
 
-        val metadata = Mp3MetadataAccessor(outputFile!!)
-        assertEquals(2, metadata.artists().size)
-        assertEquals(license.url, metadata.getLegalInformationUrl())
+        val audioFile = AudioFile(outputFile)
+        assertEquals(2, audioFile.metadata.artists().size)
+        assertEquals(license.url, audioFile.metadata.getLegalInformationUrl())
     }
 }

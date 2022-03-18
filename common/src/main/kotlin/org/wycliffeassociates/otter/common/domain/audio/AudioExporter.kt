@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.common.domain.audio
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
 import java.io.File
@@ -53,12 +54,12 @@ class AudioExporter @Inject constructor() {
     ): Completable {
         return Completable
             .fromAction {
-                val mp3MetadataAccessor = Mp3MetadataAccessor(file)
-                mp3MetadataAccessor.setArtists(contributors.map { it.name })
+                val audioFile = AudioFile(file)
+                audioFile.metadata.setArtists(contributors.map { it.name })
                 license?.url?.let {
-                    mp3MetadataAccessor.setLegalInformationUrl(it)
+                    audioFile.metadata.setLegalInformationUrl(it)
                 }
-                mp3MetadataAccessor.execute()
+                audioFile.update()
             }
             .subscribeOn(Schedulers.io())
             .doOnError {
