@@ -389,10 +389,12 @@ class CollectionRepository @Inject constructor(
                         if (verseByVerse) {
                             // Copy the content
                             copyContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
+                            // Link the derivative content
+                            linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
+                        } else {
+                            // Copy only meta content
+                            copyMetaContent(dsl, sourceCollectionEntity.id, mainDerivedMetadata.id)
                         }
-
-                        // Link the derivative content
-                        linkDerivativeContent(dsl, sourceCollectionEntity.id, projectEntity.id)
 
                         val metadataSourceToDerivedMap = sourceMetadatas.zip(derivedMetadata).associate { it }
                         copyResourceLinks(dsl, projectEntity, metadataSourceToDerivedMap)
@@ -625,6 +627,52 @@ class CollectionRepository @Inject constructor(
                                         .select(COLLECTION_ENTITY.ID)
                                         .from(COLLECTION_ENTITY)
                                         .where(COLLECTION_ENTITY.PARENT_FK.eq(sourceId))
+                                )
+                            )
+                    )
+                    .leftJoin(COLLECTION_ENTITY)
+                    .on(
+                        COLLECTION_ENTITY.SOURCE_FK.eq(field("chapterid", Int::class.java))
+                            .and(COLLECTION_ENTITY.DUBLIN_CORE_FK.eq(metadataId))
+                    )
+            ).execute()
+    }
+
+    private fun copyMetaContent(dsl: DSLContext, sourceId: Int, metadataId: Int) {
+        dsl.insertInto(
+            CONTENT_ENTITY,
+            CONTENT_ENTITY.COLLECTION_FK,
+            CONTENT_ENTITY.LABEL,
+            CONTENT_ENTITY.START,
+            CONTENT_ENTITY.SORT,
+            CONTENT_ENTITY.TYPE_FK
+        )
+            .select(
+                dsl.select(
+                    COLLECTION_ENTITY.ID,
+                    field("verselabel", String::class.java),
+                    field("versestart", Int::class.java),
+                    field("versesort", Int::class.java),
+                    field("typefk", Int::class.java)
+                )
+                    .from(
+                        dsl.select(
+                            CONTENT_ENTITY.ID.`as`("verseid"),
+                            CONTENT_ENTITY.COLLECTION_FK.`as`("chapterid"),
+                            CONTENT_ENTITY.LABEL.`as`("verselabel"),
+                            CONTENT_ENTITY.START.`as`("versestart"),
+                            CONTENT_ENTITY.SORT.`as`("versesort"),
+                            CONTENT_ENTITY.TYPE_FK.`as`("typefk")
+                        )
+                            .from(CONTENT_ENTITY)
+                            .where(
+                                CONTENT_ENTITY.COLLECTION_FK.`in`(
+                                    dsl
+                                        .select(COLLECTION_ENTITY.ID)
+                                        .from(COLLECTION_ENTITY)
+                                        .where(COLLECTION_ENTITY.PARENT_FK.eq(sourceId))
+                                ).and(
+                                    CONTENT_ENTITY.LABEL.eq("chapter")
                                 )
                             )
                     )
