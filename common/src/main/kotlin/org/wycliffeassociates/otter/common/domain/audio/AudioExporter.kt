@@ -23,7 +23,6 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.License
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
 import javax.inject.Inject
 

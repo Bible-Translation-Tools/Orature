@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs
 
 import javafx.event.EventHandler
-import javafx.geometry.Pos
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox

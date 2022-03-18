@@ -27,7 +27,6 @@ import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
-import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -43,7 +42,6 @@ import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
-import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
