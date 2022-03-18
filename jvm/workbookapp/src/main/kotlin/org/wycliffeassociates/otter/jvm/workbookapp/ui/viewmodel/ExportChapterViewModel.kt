@@ -23,9 +23,12 @@ import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
+import org.wycliffeassociates.otter.common.domain.audio.Mp3MetadataAccessor
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.*
 import java.io.File
 import javax.inject.Inject
@@ -53,9 +56,35 @@ class ExportChapterViewModel : ViewModel() {
             val mp3File = File(outputDir, mp3Name)
             audioConverter.wavToMp3(take.file, mp3File)
                 .subscribeOn(Schedulers.io())
+                .doOnError {
+                    logger.error("Error while converting chapter file to export.", it)
+                }
                 .observeOnFx()
                 .subscribe {
-                    chapterViewModel.showExportProgressDialogProperty.set(false)
+                    Completable
+                        .fromAction {
+                            val licenseTitle =
+                                ResourceContainer.load(workbookDataStore.activeProjectFilesAccessor.projectDir).use {
+                                    it.manifest.dublinCore.rights
+                                }
+                            val license = License.get(licenseTitle)
+
+                            val mp3MetadataAccessor = Mp3MetadataAccessor(mp3File)
+                            mp3MetadataAccessor.setArtists(contributors.map { it.name })
+                            license?.url?.let {
+                                mp3MetadataAccessor.setLegalInformationUrl(it)
+                            }
+                            mp3MetadataAccessor.execute()
+                        }
+                        .subscribeOn(Schedulers.io())
+                        .doOnError {
+                            logger.error("Error while updating output file metadata.", it)
+                        }
+                        .onErrorComplete()
+                        .observeOnFx()
+                        .subscribe {
+                            chapterViewModel.showExportProgressDialogProperty.set(false)
+                        }
                 }
         }
     }
