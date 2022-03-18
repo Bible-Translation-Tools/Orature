@@ -79,6 +79,7 @@ class SettingsView : View() {
 
                     combobox(viewModel.selectedThemeProperty, viewModel.supportedThemes) {
                         addClass("wa-combobox")
+                        fitToParentWidth()
 
                         cellFormat {
                             val view = ComboboxItem()
@@ -273,6 +274,12 @@ class SettingsView : View() {
                         }
                     }
                 }
+
+                label(messages["keyboardShortcutsSettings"]).apply {
+                    addClass("app-drawer__subtitle")
+                }
+
+                add(KeyboardShortcuts())
             }
         }
     }

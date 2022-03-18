@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
@@ -118,5 +119,7 @@ class MarkerView : PluginEntrypoint() {
                 add<SourceTextFragment>()
                 add<PlaybackControlsFragment>()
             }
+            shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
+            shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
         }
 }

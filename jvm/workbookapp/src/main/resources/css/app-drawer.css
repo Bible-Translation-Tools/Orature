@@ -18,14 +18,14 @@
  */
 
 .app-drawer__content {
-    -fx-pref-width: 400px;
+    -fx-pref-width: 550px;
     -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level5;
 }
 
 .app-drawer-container {
     -fx-spacing: 30px;
-    -fx-pref-width: 400px;
+    -fx-pref-width: 550px;
     -fx-background-color: -wa-foreground;
 }
 
@@ -168,4 +168,11 @@
 
 .app-drawer__overlay {
     -fx-background-color: -wa-dialog-overlay;
+}
+
+.app-drawer__shortcut {
+    -fx-border-width: 1px;
+    -fx-border-color: -wa-text-field-border;
+    -fx-border-radius: 6px;
+    -fx-padding: 10px;
 }

@@ -100,6 +100,10 @@ internal class AudioPlayerConnection(
         }
     }
 
+    override fun toggle() {
+        if (isPlaying()) pause() else play()
+    }
+
     override fun stop() {
         connectionFactory.currentConnection?.id?.let {
             if (it == id) {

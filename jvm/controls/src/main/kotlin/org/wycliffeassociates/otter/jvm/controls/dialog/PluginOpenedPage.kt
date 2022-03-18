@@ -22,12 +22,16 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
+import javafx.scene.input.KeyCodeCombination
 import javafx.scene.layout.Priority
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
 import tornadofx.*
 
 class PluginOpenedPage : Fragment() {
@@ -44,6 +48,9 @@ class PluginOpenedPage : Fragment() {
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceSpeedRateProperty = SimpleDoubleProperty()
     val targetSpeedRateProperty = SimpleDoubleProperty()
+
+    private var sourcePlayerListener: ChangeListener<IAudioPlayer>? = null
+    private var targetPlayerListener: ChangeListener<IAudioPlayer>? = null
 
     init {
         tryImportStylesheet(resources["/css/plugin-opened-page.css"])
@@ -90,9 +97,36 @@ class PluginOpenedPage : Fragment() {
         )
     }
 
+    override fun onDock() {
+        playerProperty.onChangeAndDoNowWithListener {
+            it?.let {
+                addShortcut(Shortcut.PLAY_SOURCE.value, it::toggle)
+            }
+        }.let { sourcePlayerListener = it }
+
+        targetAudioPlayerProperty.onChangeAndDoNowWithListener {
+            it?.let {
+                addShortcut(Shortcut.PLAY_TARGET.value, it::toggle)
+            }
+        }.let { targetPlayerListener = it }
+        super.onDock()
+    }
+
     override fun onUndock() {
         playerProperty.value?.stop()
         targetAudioPlayerProperty.value?.close()
+        sourcePlayerListener?.let { playerProperty.removeListener(it) }
+        targetPlayerListener?.let { targetAudioPlayerProperty.removeListener(it) }
+        removeShortcut(Shortcut.PLAY_SOURCE.value)
+        removeShortcut(Shortcut.PLAY_TARGET.value)
         super.onUndock()
+    }
+
+    private fun addShortcut(combo: KeyCodeCombination, action: () -> Unit) {
+        workspace.shortcut(combo, action)
+    }
+
+    private fun removeShortcut(combo: KeyCodeCombination) {
+        workspace.accelerators.remove(combo)
     }
 }

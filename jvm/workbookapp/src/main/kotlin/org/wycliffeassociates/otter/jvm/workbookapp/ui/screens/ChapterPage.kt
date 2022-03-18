@@ -31,6 +31,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.utils.capitalizeString
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
@@ -118,12 +119,14 @@ class ChapterPage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
+                pluginOpenedPage.onDock()
                 viewModel.openPlayers()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
+                pluginOpenedPage.onUndock()
             }
         }
     }
@@ -184,6 +187,7 @@ class ChapterPage : View() {
                         action {
                             viewModel.recordChapter()
                         }
+                        shortcut(Shortcut.RECORD.value)
                     }
                     button {
                         addClass("btn", "btn--secondary")

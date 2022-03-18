@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.utils
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Observable
 import javafx.application.Platform
+import javafx.beans.value.ChangeListener
 import javafx.beans.value.ObservableValue
 import javafx.collections.ObservableList
 import javafx.scene.Node
@@ -48,6 +49,30 @@ fun <T> ObservableList<T>.onChangeAndDoNow(op: (List<T>) -> Unit) {
     op(this)
     this.onChange {
         op(it.list)
+    }
+}
+
+/**
+ * Sets up an on change listener to run [op] function
+ * @param op the function to run when observable value is changed
+ * @return ChangeListener
+ */
+fun <T> ObservableValue<T>.onChangeWithListener(op: (T?) -> Unit): ChangeListener<T> {
+    val listener = ChangeListener<T> { _, _, newValue -> op(newValue) }
+    addListener(listener)
+    return listener
+}
+
+/**
+ * Runs the given operation now and also calls [onChangeWithListener] with the given operation to set up an
+ * on change listener
+ * @param op the function to run when observable value is changed
+ * @return ChangeListener
+ */
+fun <T> ObservableValue<T>.onChangeAndDoNowWithListener(op: (T?) -> Unit): ChangeListener<T> {
+    op(this.value)
+    return this.onChangeWithListener {
+        op(it)
     }
 }
 
