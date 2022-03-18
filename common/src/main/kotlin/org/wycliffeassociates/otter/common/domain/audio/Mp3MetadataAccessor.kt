@@ -17,9 +17,9 @@ class Mp3MetadataAccessor(private val file: File) {
         metadata.id3v2Tag.artist = artists.joinToString("/")
     }
 
-    fun artists(): List<String> {
-        return listOf()
-    }
+    fun artists(): List<String> = metadata.id3v2Tag.artist.split("/")
+
+    fun getLegalInformationUrl(): String = metadata.id3v2Tag.copyrightUrl
 
     fun setLegalInformationUrl(url: String) {
         metadata.id3v2Tag.copyrightUrl = url
