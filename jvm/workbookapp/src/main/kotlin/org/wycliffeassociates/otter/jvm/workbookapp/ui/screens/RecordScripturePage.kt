@@ -228,7 +228,24 @@ class RecordScripturePage : View() {
                             action {
                                 recordScriptureViewModel.previousChunk()
                             }
-                            enableWhen(recordScriptureViewModel.hasPrevious)
+                            enableWhen(recordScriptureViewModel.hasPreviousChunk)
+                            visibleWhen(recordScriptureViewModel.isChunk)
+                            managedWhen(visibleProperty())
+                        }
+
+                        // previous chapter button
+                        button(messages["previousChapter"]) {
+                            addClass("btn", "btn--secondary")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                            }
+                            action {
+                                recordScriptureViewModel.previousChapter()
+                            }
+                            enableWhen(recordScriptureViewModel.hasPreviousChapter)
+                            visibleWhen(recordScriptureViewModel.isChunk.not())
+                            managedWhen(visibleProperty())
                         }
 
                         vbox {
@@ -256,7 +273,24 @@ class RecordScripturePage : View() {
                             action {
                                 recordScriptureViewModel.nextChunk()
                             }
-                            enableWhen(recordScriptureViewModel.hasNext)
+                            enableWhen(recordScriptureViewModel.hasNextChunk)
+                            visibleWhen(recordScriptureViewModel.isChunk)
+                            managedWhen(visibleProperty())
+                        }
+
+                        // next chapter button
+                        button(messages["nextChapter"]) {
+                            addClass("btn", "btn--secondary")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                            }
+                            action {
+                                recordScriptureViewModel.nextChapter()
+                            }
+                            enableWhen(recordScriptureViewModel.hasNextChapter)
+                            visibleWhen(recordScriptureViewModel.isChunk.not())
+                            managedWhen(visibleProperty())
                         }
                     }
 
