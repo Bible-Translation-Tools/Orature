@@ -29,6 +29,8 @@ class Mp3MetadataAccessor(private val file: File) {
         if (output != null) {
             metadata.save(output.path)
         } else {
+            /* writing to currently opened file is not allowed;
+            Make a copy first, then overwrite the original file */
             val tempFile = kotlin.io.path.createTempFile("orature-audio", ".mp3")
                 .toFile()
 
