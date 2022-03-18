@@ -21,7 +21,11 @@ package integrationtest.di
 import dagger.Component
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeUlb
-import integrationtest.projects.*
+import integrationtest.projects.TestProjectCreate
+import integrationtest.projects.TestProjectExport
+import integrationtest.projects.TestProjectImport
+import integrationtest.projects.TestRcImport
+import integrationtest.projects.TestRemoveRc
 import org.wycliffeassociates.otter.jvm.workbookapp.di.AppDependencyGraph
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppDatabaseModule
 import org.wycliffeassociates.otter.jvm.workbookapp.di.modules.AppPreferencesModule
