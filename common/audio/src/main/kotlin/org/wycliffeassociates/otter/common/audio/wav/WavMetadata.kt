@@ -65,20 +65,18 @@ class WavMetadata(parsableChunks: List<RiffChunk>? = null) : AudioMetadata {
     }
 
     override fun artists(): List<String> {
-        // TODO
-        return listOf()
+        TODO()
     }
 
     override fun setArtists(artists: List<String>) {
-        // TODO
+        TODO()
     }
 
     override fun getLegalInformationUrl(): String {
-        // TODO
-        return ""
+        TODO()
     }
 
     override fun setLegalInformationUrl(url: String) {
-        // TODO
+        TODO()
     }
 }
