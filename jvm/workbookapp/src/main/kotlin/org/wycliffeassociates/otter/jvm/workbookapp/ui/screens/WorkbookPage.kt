@@ -414,6 +414,7 @@ class WorkbookPage : View() {
 
                     setOnAction {
                         viewModel.saveContributorInfo()
+                        isDisable = true
                     }
                 }
                 textflow {
