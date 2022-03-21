@@ -25,12 +25,13 @@
     -fx-font-weight: bold;
     -fx-font-size: 1.25em;
     -fx-text-fill: -wa-regular-text;
+    -fx-padding: 5 0 10 0;
 }
 
 .contributor__section-text {
     -fx-fill: -wa-regular-text;
     -fx-text-fill: -wa-regular-text;
-    -fx-font-size: 1.1em;
+    -fx-font-size: 1.2em;
 }
 
 .contributor__license-link,
