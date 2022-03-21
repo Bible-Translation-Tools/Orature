@@ -130,8 +130,12 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
         val tempFile = kotlin.io.path.createTempFile("orature-audio", ".mp3")
             .toFile()
 
-        id3Metadata.save(tempFile.path)
-        tempFile.copyTo(mp3File, true)
-        tempFile.delete()
+        try {
+            id3Metadata.save(tempFile.path)
+            tempFile.copyTo(mp3File, true)
+        } catch (e: Exception) {
+            logger.error("Error while updating ID3 tags for mp3 file $mp3File.", e)
+            tempFile.delete()
+        }
     }
 }
