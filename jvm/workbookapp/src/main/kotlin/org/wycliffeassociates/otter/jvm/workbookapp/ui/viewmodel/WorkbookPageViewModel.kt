@@ -23,6 +23,7 @@ import io.reactivex.Completable
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import org.slf4j.LoggerFactory
@@ -33,6 +34,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.collections.DeleteProject
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
 import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
@@ -90,15 +92,23 @@ class WorkbookPageViewModel : ViewModel() {
     val selectedResourceMetadata = SimpleObjectProperty<ResourceMetadata>()
 
     private val navigator: NavigationMediator by inject()
+    private var projectFilesAccessorListener: ChangeListener<ProjectFilesAccessor>? = null
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
-        workbookDataStore.activeProjectFilesAccessorProperty.onChange { projectAccessor ->
+        
+        projectFilesAccessorListener = ChangeListener<ProjectFilesAccessor> { _, _, projectAccessor ->
             if (projectAccessor != null) {
                 val projectContributors = projectAccessor.getContributorInfo()
                 contributors.setAll(projectContributors)
             }
         }
+    }
+
+    fun dock() {
+        workbookDataStore.activeProjectFilesAccessorProperty.addListener(
+            projectFilesAccessorListener
+        )
     }
 
     /**
@@ -294,6 +304,12 @@ class WorkbookPageViewModel : ViewModel() {
                 logger.error("Error saving contributor to project rc.", it)
             }
             .subscribe()
+    }
+
+    fun undock() {
+        workbookDataStore.activeProjectFilesAccessorProperty.removeListener(
+            projectFilesAccessorListener
+        )
     }
 
     fun goBack() {

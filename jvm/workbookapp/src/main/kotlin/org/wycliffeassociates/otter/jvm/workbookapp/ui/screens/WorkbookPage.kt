@@ -103,6 +103,7 @@ class WorkbookPage : View() {
      * created and added to the view.
      */
     override fun onDock() {
+        viewModel.dock()
         createTabs()
         root.tabs.setAll(tabMap.values)
         viewModel.openWorkbook()
@@ -127,6 +128,7 @@ class WorkbookPage : View() {
             viewModel.chapters.removeListener(it.value)
         }
         tabChaptersListeners.clear()
+        viewModel.undock()
     }
 
     private fun createTabs() {
