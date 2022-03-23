@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 
 import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -111,12 +112,19 @@ class SourceAudioFragment : Fragment() {
                     endFrame = null
                 }
                 val player = sourceFile?.let { initializeAudioPlayer(it, startFrame, endFrame) }
+
                 root.sourceAudioPlayerProperty.set(player)
+                root.sourceAudioPlayerProperty.value?.let {
+                    shortcut(Shortcut.PLAY_SOURCE.value, it::toggle)
+                }
 
                 val targetAudio: String? = parameters.named["target_chapter_audio"]
                 targetFile = if (targetAudio != null && File(targetAudio).exists()) File(targetAudio) else null
                 val targetPlayer = targetFile?.let { initializeAudioPlayer(it) }
                 root.targetAudioPlayerProperty.set(targetPlayer)
+                root.targetAudioPlayerProperty.value?.let {
+                    shortcut(Shortcut.PLAY_TARGET.value, it::toggle)
+                }
             }
         }
     }

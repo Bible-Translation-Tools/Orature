@@ -42,24 +42,28 @@ import tornadofx.*
 import java.io.File
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
-import java.util.concurrent.TimeUnit
+import javafx.beans.value.ChangeListener
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import kotlin.math.max
 
 const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
-private const val BACKGROUND_COLOR = "#F7FAFF"
+private const val BACKGROUND_COLOR = "#FFFFFF"
 
 class VerseMarkerViewModel : ViewModel() {
     private val width = Screen.getMainScreen().platformWidth
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
+    /** Call this before leaving the view to avoid memory leak */
+    var imageCleanup: () -> Unit = {}
 
     private val waveformSubject = PublishSubject.create<Image>()
     val waveform: Observable<Image>
         get() = waveformSubject
 
+    lateinit var waveformMinimapImageListener: ChangeListener<Image>
+    lateinit var markerStateListener: ChangeListener<VerseMarkerModel>
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -138,13 +142,13 @@ class VerseMarkerViewModel : ViewModel() {
     fun saveAndQuit() {
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
+        imageCleanup()
 
         (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(300, TimeUnit.MILLISECONDS) // exec after UI clean up
                 .subscribe {
                     runLater {
                         it.navigateBack()
@@ -184,10 +188,14 @@ class VerseMarkerViewModel : ViewModel() {
         }
     }
 
-    fun initializeAudioController(slider: Slider) {
-        audioController = AudioPlayerController(slider)
+    fun initializeAudioController() {
+        audioController = AudioPlayerController()
         audioController?.load(audioPlayer.get())
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
+    }
+
+    fun setSlider(slider: Slider) {
+        audioController?.audioSlider = slider
     }
 
     fun pause() {

@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins.waveform
 
 import com.sun.javafx.util.Utils
 import javafx.beans.value.ChangeListener
+import javafx.scene.Cursor
 import javafx.scene.Node
 import javafx.scene.control.SkinBase
 import javafx.scene.control.Slider
@@ -45,7 +46,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
     }
     private val playbackLine = Line(0.0, 0.0, 0.0, 1.0).apply {
         stroke = Color.BLACK
-        strokeWidth = 1.0
+        strokeWidth = 2.0
     }
     private val markersHolder = Region()
     private val root = Region()
@@ -64,14 +65,14 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 imageViewDisposable = imageView
                 root.getChildList()?.clear()
                 root.add(imageView)
-                root.add(thumb)
-                root.add(playbackLine)
-
                 markersHolder.apply {
                     prefHeightProperty().bind(root.heightProperty())
                     prefWidthProperty().bind(root.widthProperty())
                 }
                 root.add(markersHolder)
+
+                root.add(thumb)
+                root.add(playbackLine)
             }
 
             // clear minimap image when exiting marker app - free up memory
@@ -93,7 +94,12 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 thumb.stroke = it
             }
         }
-        control.secondsToHighlightProperty.onChange { resizeThumbWidth() }
+        control.playbackLineColorProperty.onChangeAndDoNow {
+            if (it != null) {
+                playbackLine.stroke = it
+            }
+        }
+        control.secondsToHighlightProperty.onChangeAndDoNow { resizeThumbWidth() }
         thumb.layoutY = control.padding.top
         playbackLine.layoutY = control.padding.top
         thumb.heightProperty().bind(
@@ -111,6 +117,13 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
         control.markers.onChangeAndDoNow {
             placeMarkers()
         }
+        thumb.setOnMouseDragged {
+            val x = control.sceneToLocal(it.sceneX, it.sceneY).x
+            val pos = (x / control.width) * control.max
+            control.valueProperty().set(pos)
+            control.currentPositionProperty.set(control.value)
+        }
+        thumb.cursor = Cursor.HAND
     }
 
     fun placeMarkers() {
@@ -160,7 +173,7 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
         val line = Line(0.0, 0.0, 0.0, 1.0).apply {
             stroke = Color.BLACK
-            strokeWidth = 2.0
+            strokeWidth = 1.0
         }
         line.layoutX = xFinal
         line.layoutY = control.padding.top

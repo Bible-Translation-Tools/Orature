@@ -39,7 +39,7 @@ const val DURATION_FORMAT = "%02d:%02d" // mm:ss
 private const val ANIMATION_REFRESH_MS = 16L
 
 class AudioPlayerController(
-    private val audioSlider: Slider,
+    var audioSlider: Slider? = null,
     private var player: IAudioPlayer? = null
 ) {
     private val logger = LoggerFactory.getLogger(AudioPlayerController::class.java)
@@ -85,8 +85,8 @@ class AudioPlayerController(
     }
 
     fun load(player: IAudioPlayer) {
-        audioSlider.value = 0.0
-        audioSlider.max = player.getDurationInFrames().toDouble()
+        audioSlider?.value = 0.0
+        audioSlider?.max = player.getDurationInFrames().toDouble()
         startAtLocation = 0
 
         this.player = player
@@ -105,7 +105,7 @@ class AudioPlayerController(
                     isPlayingProperty.set(false)
                     when (it) {
                         AudioPlayerEvent.COMPLETE -> {
-                            audioSlider.value = 0.0
+                            audioSlider?.value = 0.0
                             startAtLocation = 0
                             player.getAudioReader()?.seek(0)
                         }
@@ -117,15 +117,15 @@ class AudioPlayerController(
 
     private fun initializeSliderActions() {
         seek(0)
-        audioSlider.value = 0.0
-        audioSlider.setOnDragDetected {
+        audioSlider?.value = 0.0
+        audioSlider?.setOnDragDetected {
             if (player?.isPlaying() == true) {
                 resumeAfterDrag = true
                 toggle()
             }
         }
-        audioSlider.setOnMouseClicked {
-            val percent = max(0.0, min(it.x / audioSlider.width, 1.0))
+        audioSlider?.setOnMouseClicked {
+            val percent = max(0.0, min(it.x / audioSlider!!.width, 1.0))
             var wasPlaying = false
             if (player?.isPlaying() == true) {
                 toggle()
@@ -140,7 +140,7 @@ class AudioPlayerController(
                 toggle()
             }
         }
-        audioSlider.setOnKeyPressed {
+        audioSlider?.setOnKeyPressed {
             when (it.code) {
                 KeyCode.LEFT, KeyCode.RIGHT -> {
                     if (player?.isPlaying() == true) {
@@ -151,7 +151,7 @@ class AudioPlayerController(
                 }
             }
         }
-        audioSlider.setOnKeyReleased {
+        audioSlider?.setOnKeyReleased {
             when (it.code) {
                 KeyCode.LEFT, KeyCode.RIGHT -> {
                     if (resumeAfterDrag) {
@@ -180,8 +180,8 @@ class AudioPlayerController(
                 } else {
                     isPlayingProperty.set(false)
                 }
-                if (player?.isPlaying() == true && !audioSlider.isValueChanging) {
-                    audioSlider.value = playbackPosition().toDouble()
+                if (player?.isPlaying() == true && audioSlider?.isValueChanging != false) {
+                    audioSlider?.value = playbackPosition().toDouble()
                 }
             }
     }
@@ -204,7 +204,7 @@ class AudioPlayerController(
     }
 
     fun seek(location: Int) {
-        audioSlider.value = location.toDouble()
+        audioSlider?.value = location.toDouble()
 
         player?.let {
             it.seek(location)

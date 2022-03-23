@@ -32,6 +32,7 @@ interface IAudioPlayer {
     fun changeRate(rate: Double)
     fun play()
     fun pause()
+    fun toggle()
     fun stop()
     fun close()
     fun release()

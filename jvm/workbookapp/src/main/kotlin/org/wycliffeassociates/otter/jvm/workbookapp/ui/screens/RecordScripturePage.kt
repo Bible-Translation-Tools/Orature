@@ -40,6 +40,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.card.ListViewPlaceHolder
 import org.wycliffeassociates.otter.jvm.controls.card.NewRecordingCard
@@ -110,6 +111,16 @@ class RecordScripturePage : View() {
                     it.translation.targetRate.toLazyBinding()
                 }
             )
+            sourceAudioPlayerProperty.onChange {
+                it?.let { player ->
+                    shortcut(Shortcut.PLAY_SOURCE.value, player::toggle)
+                }
+            }
+            targetAudioPlayerProperty.onChange {
+                it?.let { player ->
+                    shortcut(Shortcut.PLAY_TARGET.value, player::toggle)
+                }
+            }
         }
 
     private val breadCrumb = BreadCrumb().apply {
@@ -170,6 +181,7 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
+                pluginOpenedPage.onDock()
                 recordScriptureViewModel.openSourceAudioPlayer()
                 recordScriptureViewModel.openTargetAudioPlayer()
             }
@@ -177,6 +189,7 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
+                pluginOpenedPage.onUndock()
             }
             recordScriptureViewModel.openPlayers()
         }
@@ -228,7 +241,24 @@ class RecordScripturePage : View() {
                             action {
                                 recordScriptureViewModel.previousChunk()
                             }
-                            enableWhen(recordScriptureViewModel.hasPrevious)
+                            enableWhen(recordScriptureViewModel.hasPreviousChunk)
+                            visibleWhen(recordScriptureViewModel.isChunk)
+                            managedWhen(visibleProperty())
+                        }
+
+                        // previous chapter button
+                        button(messages["previousChapter"]) {
+                            addClass("btn", "btn--secondary")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_LEFT).apply {
+                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                            }
+                            action {
+                                recordScriptureViewModel.previousChapter()
+                            }
+                            enableWhen(recordScriptureViewModel.hasPreviousChapter)
+                            visibleWhen(recordScriptureViewModel.isChunk.not())
+                            managedWhen(visibleProperty())
                         }
 
                         vbox {
@@ -256,7 +286,24 @@ class RecordScripturePage : View() {
                             action {
                                 recordScriptureViewModel.nextChunk()
                             }
-                            enableWhen(recordScriptureViewModel.hasNext)
+                            enableWhen(recordScriptureViewModel.hasNextChunk)
+                            visibleWhen(recordScriptureViewModel.isChunk)
+                            managedWhen(visibleProperty())
+                        }
+
+                        // next chapter button
+                        button(messages["nextChapter"]) {
+                            addClass("btn", "btn--secondary")
+                            tooltip(text)
+                            graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT).apply {
+                                scaleXProperty().bind(settingsViewModel.orientationScaleProperty)
+                            }
+                            action {
+                                recordScriptureViewModel.nextChapter()
+                            }
+                            enableWhen(recordScriptureViewModel.hasNextChapter)
+                            visibleWhen(recordScriptureViewModel.isChunk.not())
+                            managedWhen(visibleProperty())
                         }
                     }
 
@@ -264,7 +311,9 @@ class RecordScripturePage : View() {
                         NewRecordingCard(
                             FX.messages["record"],
                             recordScriptureViewModel::recordNewTake
-                        )
+                        ).apply {
+                            shortcut(Shortcut.RECORD.value, action)
+                        }
                     )
 
                     listview(recordScriptureViewModel.takeCardViews) {
