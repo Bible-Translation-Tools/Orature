@@ -154,12 +154,12 @@
     -fx-border-width: 2px;
     -fx-border-color: -wa-secondary-btn-border;
     -fx-text-fill: -wa-secondary-btn-text-fill;
-    -fx-font-size: 20px;
+    -fx-font-size: 1.4em;
     -fx-underline: true;
     -jfx-disable-visual-focus: true;
 }
 .btn--secondary .ikonli-font-icon {
-    -fx-font-size: 20px;
+    -fx-font-size: 1.6em;
     -fx-fill: -wa-secondary-btn-text-fill;
 }
 .btn--secondary:hover {
@@ -254,6 +254,21 @@
     -fx-border-width: 0px;
     -fx-background-color: transparent;
 }
+/* -------------- Text Link ----------------- */
+.wa-text--hyperlink {
+    -fx-padding: 5 5 10 5;
+    -fx-text-fill: -wa-highlight-text;
+    -fx-underline: true;
+    -fx-cursor: hand;
+}
+
+.wa-text--hyperlink:hover {
+    -fx-underline: false;
+}
+
+.wa-text--hyperlink:visited {
+    -fx-text-fill: -wa-highlight-text;
+}
 
 /* -------------- Text Input ---------------- */
 .txt-input {
@@ -274,7 +289,6 @@
 }
 .txt-input:focused {
     -fx-text-fill: -wa-text-input-fill;
-    -fx-font-size: 20px;
     -fx-background-color: -wa-text-field-background-focused;
     -fx-border-color: -wa-text-field-border-focused;
     -fx-effect: -wa-text-field-focused-effect;

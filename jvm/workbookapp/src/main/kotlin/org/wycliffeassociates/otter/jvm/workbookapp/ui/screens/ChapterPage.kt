@@ -51,6 +51,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -114,6 +115,7 @@ class ChapterPage : View() {
         tryImportStylesheet(resources.get("/css/take-item.css"))
         tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/contributor-info.css"))
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
@@ -195,10 +197,9 @@ class ChapterPage : View() {
                         tooltip(text)
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
-                            val directory = chooseDirectory(FX.messages["exportChapter"])
-                            directory?.let {
-                                viewModel.exportChapter(it)
-                            }
+                            find<ExportChapterDialog>().apply {
+                                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                            }.open()
                         }
                         disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
                     }

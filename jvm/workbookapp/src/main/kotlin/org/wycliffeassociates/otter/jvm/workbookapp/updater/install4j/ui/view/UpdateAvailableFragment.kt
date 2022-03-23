@@ -47,7 +47,7 @@ class UpdateAvailableFragment : Fragment() {
         }
 
         hyperlink {
-            styleClass.add("app-drawer__text--link")
+            styleClass.add("wa-text--hyperlink")
             textProperty().bind(vm.updateUrlText)
             action {
                 hostServices.showDocument(textProperty().value)

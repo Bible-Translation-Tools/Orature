@@ -41,3 +41,7 @@
 .workbook-page__chapter-list .list-cell:odd {
     -fx-background-color: -wa-background;
 }
+
+.workbook-page__tab-content .contributor__container {
+    -fx-min-width: 400px;
+}
