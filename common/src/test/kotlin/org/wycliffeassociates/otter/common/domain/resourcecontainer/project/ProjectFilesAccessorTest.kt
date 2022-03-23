@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.doReturn
+import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -26,10 +28,11 @@ import org.junit.Test
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
-import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import java.io.File
@@ -185,6 +188,31 @@ class ProjectFilesAccessorTest {
         )
 
         tempDir.deleteRecursively()
+    }
+
+    @Test
+    fun accessContributorInfo() {
+        val projectPath = getResource("valid_single_book_rc")
+        val mockProject = mock<Collection>()
+        val mockMetadata = mock<ResourceMetadata>()
+        val mockDirProvider = mock<IDirectoryProvider> {
+            on { getProjectDirectory(any(), any(), any<Collection>()) } doReturn (projectPath)
+            on { getProjectSourceDirectory(any(), any(), any<Collection>()) } doReturn (File("mock-dir"))
+            on { getProjectAudioDirectory(any(), any(), any<Collection>()) } doReturn (File("mock-dir"))
+        }
+
+        val projectFilesAccessor = ProjectFilesAccessor(
+            mockDirProvider, mockMetadata, mockMetadata, mockProject
+        )
+        var contributors = projectFilesAccessor.getContributorInfo().toMutableList()
+
+        assertEquals(2, contributors.size)
+
+        contributors.add(Contributor("Test User"))
+        projectFilesAccessor.setContributorInfo(contributors)
+        val newList = projectFilesAccessor.getContributorInfo()
+
+        assertEquals(3, newList.size)
     }
 
     @Throws(FileNotFoundException::class)

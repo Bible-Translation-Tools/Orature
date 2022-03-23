@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Take
@@ -160,6 +161,7 @@ class ProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.copySourceFiles(fileReader)
 
+        importContributorInfo(metadata, projectFilesAccessor)
         importTakes(
             fileReader,
             derivedProject,
@@ -171,6 +173,18 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
+    }
+
+    private fun importContributorInfo(
+        metadata: ResourceMetadata,
+        projectFilesAccessor: ProjectFilesAccessor
+    ) {
+        val contributors = ResourceContainer.load(metadata.path).use { rc ->
+            rc.manifest.dublinCore.contributor.map { Contributor(it) }
+        }
+        if (contributors.isNotEmpty()) {
+            projectFilesAccessor.setContributorInfo(contributors)
+        }
     }
 
     private fun importTakes(

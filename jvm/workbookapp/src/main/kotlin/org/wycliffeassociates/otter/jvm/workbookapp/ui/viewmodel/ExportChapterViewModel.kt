@@ -19,9 +19,11 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.Completable
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
-import org.wycliffeassociates.otter.common.domain.audio.AudioConverter
+import org.wycliffeassociates.otter.common.data.primitives.License
+import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import tornadofx.*
@@ -30,8 +32,10 @@ import javax.inject.Inject
 
 class ExportChapterViewModel : ViewModel() {
     @Inject
-    lateinit var audioConverter: AudioConverter
+    lateinit var audioExporter: AudioExporter
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val workbookDataStore: WorkbookDataStore by inject()
     private val workbookPageViewModel: WorkbookPageViewModel by inject()
     private val chapterViewModel: ChapterPageViewModel by inject()
 
@@ -45,10 +49,13 @@ class ExportChapterViewModel : ViewModel() {
         chapterViewModel.selectedChapterTakeProperty.value?.let { take ->
             chapterViewModel.showExportProgressDialogProperty.set(true)
 
-            val mp3Name = take.file.nameWithoutExtension + ".mp3"
-            val mp3File = File(outputDir, mp3Name)
-            audioConverter.wavToMp3(take.file, mp3File)
-                .subscribeOn(Schedulers.io())
+            val licenseTitle = workbookDataStore.workbook.target.resourceMetadata.license
+            val license = License.get(licenseTitle)
+
+            audioExporter.exportMp3(take.file, outputDir, license, contributors)
+                .doOnError {
+                    logger.error("Error while exporting chapter.", it)
+                }
                 .observeOnFx()
                 .subscribe {
                     chapterViewModel.showExportProgressDialogProperty.set(false)
@@ -58,6 +65,18 @@ class ExportChapterViewModel : ViewModel() {
 
     fun loadContributors() {
         contributors.setAll(workbookPageViewModel.contributors)
+    }
+
+    fun saveContributors() {
+        Completable
+            .fromAction {
+                workbookDataStore.activeProjectFilesAccessor.setContributorInfo(contributors)
+            }
+            .observeOnFx()
+            .doOnError {
+                logger.error("Error saving contributor before export.", it)
+            }
+            .subscribe()
     }
 
     fun addContributor(name: String) {

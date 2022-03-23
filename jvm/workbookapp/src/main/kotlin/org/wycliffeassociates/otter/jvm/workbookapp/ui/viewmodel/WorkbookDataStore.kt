@@ -113,16 +113,16 @@ class WorkbookDataStore : Component(), ScopedInstance {
             resourceMetadata,
             workbook.target.toCollection()
         )
-        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
 
         val linkedResource = workbook
             .source
             .linkedResources
             .firstOrNull { it.identifier == resourceMetadata.identifier }
 
-        activeProjectFilesAccessor.initializeResourceContainerInDir()
-        activeProjectFilesAccessor.copySourceFiles(linkedResource)
-        activeProjectFilesAccessor.createSelectedTakesFile()
+        projectFilesAccessor.initializeResourceContainerInDir(false)
+        projectFilesAccessor.copySourceFiles(linkedResource)
+        projectFilesAccessor.createSelectedTakesFile()
+        activeProjectFilesAccessorProperty.set(projectFilesAccessor)
     }
 
     fun updateSelectedTakesFile() {
