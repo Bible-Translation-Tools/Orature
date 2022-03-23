@@ -234,26 +234,38 @@ class SettingsView : View() {
                                 add(
                                     SelectButton().apply {
                                         isDisable = !pluginData.canRecord
+                                        toggleGroup = recorderToggleGroup
+
                                         viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
                                             isSelected = selectedData == pluginData
                                         }
-                                        selectedProperty().onChange { selected ->
-                                            if (selected) viewModel.selectRecorder(pluginData)
+
+                                        setOnAction {
+                                            if (isSelected) {
+                                                viewModel.selectRecorder(pluginData)
+                                            } else {
+                                                isSelected = true // prevent "unselect"
+                                            }
                                         }
-                                        toggleGroup = recorderToggleGroup
                                     }
                                 )
 
                                 add(
                                     SelectButton().apply {
                                         isDisable = !pluginData.canEdit
+                                        toggleGroup = editorToggleGroup
+
                                         viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
                                             isSelected = selectedData == pluginData
                                         }
-                                        selectedProperty().onChange { selected ->
-                                            if (selected) viewModel.selectEditor(pluginData)
+
+                                        setOnAction {
+                                            if (isSelected) {
+                                                viewModel.selectRecorder(pluginData)
+                                            } else {
+                                                isSelected = true // prevent "unselect"
+                                            }
                                         }
-                                        toggleGroup = editorToggleGroup
                                     }
                                 )
                             }
