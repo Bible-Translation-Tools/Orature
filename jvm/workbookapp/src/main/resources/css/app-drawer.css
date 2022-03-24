@@ -167,4 +167,9 @@
     -fx-border-color: -wa-text-field-border;
     -fx-border-radius: 6px;
     -fx-padding: 10px;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.app-drawer__shortcut .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }
