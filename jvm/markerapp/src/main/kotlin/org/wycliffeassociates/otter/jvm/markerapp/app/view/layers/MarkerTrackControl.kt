@@ -25,6 +25,7 @@ import javafx.geometry.Point2D
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
@@ -41,6 +42,12 @@ class MarkerTrackControl : Control() {
     val markers = observableListOf<ChunkMarkerModel>()
     val highlightState = observableListOf<MarkerHighlightState>()
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
+    val onSeekPreviousProperty = SimpleObjectProperty<() -> String?>()
+    val onSeekNextProperty = SimpleObjectProperty<() -> String?>()
+
+    init {
+        styleClass.add("vm-marker-track")
+    }
 
     fun refreshMarkers() {
         (skin as? MarkerTrackControlSkin)?.refreshMarkers()
@@ -65,6 +72,8 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     private val preDragThumbPos = DoubleArray(control.markers.size)
     var dragStart: Array<Point2D?> = Array(control.markers.size) { null }
 
+    private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
+
     fun refreshMarkers() {
         if (skinnable.width > 0) {
             skinnable.markers.forEachIndexed { index, chunkMarker ->
@@ -88,6 +97,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 ).toDouble()
 
                 isPlacedProperty.set(mk.placed)
+                markerIdProperty.set(i)
                 markerNumberProperty.set(mk.label)
                 canBeMovedProperty.set(i != 0)
                 markerPositionProperty.set(pixel)
@@ -104,6 +114,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                         preDragThumbPos[i] = clampedValue / trackWidth
                         me.consume()
                     }
+                    this.requestFocus()
                 }
 
                 setOnMouseDragged { me ->
@@ -140,6 +151,10 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                         }
                     }
                 }
+
+                focusedProperty().onChange {
+                    if (it) focusedMarkerProperty.set(this)
+                }
             }
 
             val rect = Rectangle().apply {
@@ -156,9 +171,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             highlights.add(rect)
         }
 
-        track = Region().apply {
-            styleClass.add("vm-marker-track")
-        }
+        track = Region()
 
         highlights.forEach { track.add(it) }
         markers.forEach { track.add(it) }
@@ -167,7 +180,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             val endPos = skinnable.widthProperty()
 
             if (i + 1 < highlights.size) {
-                highlights[i + 1]?.let { next ->
+                highlights[i + 1].let { next ->
                     val nextVis = next.visibleProperty()
                     val nextPos = next.translateXProperty()
                     val highlightWidth = Bindings.createDoubleBinding(
@@ -194,8 +207,55 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             skinnable.highlightState[i].width.bind(rect.widthProperty())
         }
 
+        control.setOnKeyPressed { e ->
+            when (e.code) {
+                KeyCode.LEFT, KeyCode.RIGHT -> {
+                    moveMarker(e.code)
+                    e.consume()
+                }
+                KeyCode.TAB -> {
+                    if (e.isShiftDown) {
+                        val marker = control.onSeekPreviousProperty.value?.invoke()
+                        focusMarker(marker)
+                        marker?.let { e.consume() }
+                    } else {
+                        val marker = control.onSeekNextProperty.value?.invoke()
+                        focusMarker(marker)
+                        marker?.let { e.consume() }
+                    }
+                }
+            }
+        }
+
+        control.setOnKeyReleased {
+            when (it.code) {
+                KeyCode.ENTER, KeyCode.SPACE -> it.consume()
+            }
+        }
+
         children.clear()
         children.addAll(track)
+    }
+
+    private fun moveMarker(code: KeyCode) {
+        focusedMarkerProperty.value?.let { marker ->
+            val id = marker.markerIdProperty.value
+            if (id == 0) return // don't move the first marker
+
+            val position = marker.markerPositionProperty.value
+            val percent = position / skinnable.width
+            val moveTo = if (code == KeyCode.LEFT) {
+                percent - 0.001
+            } else {
+                percent + 0.001
+            }
+            updateValue(marker.markerIdProperty.value, moveTo)
+        }
+    }
+
+    private fun focusMarker(label: String?) {
+        val marker = markers.singleOrNull { it.markerNumberProperty.value == label }
+        marker?.requestFocus()
     }
 
     private fun updateValue(id: Int, position: Double) {

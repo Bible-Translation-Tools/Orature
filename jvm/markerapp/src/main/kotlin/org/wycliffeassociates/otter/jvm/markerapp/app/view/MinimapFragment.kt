@@ -21,11 +21,9 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.beans.value.ChangeListener
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
-import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -39,7 +37,6 @@ class MinimapFragment : Fragment() {
 
     override fun onDock() {
         super.onDock()
-        viewModel.setSlider(slider)
         slider.apply {
             viewModel.waveformMinimapImageListener = ChangeListener { _, _, it ->
                 waveformImageProperty.set(it)

@@ -53,6 +53,7 @@
     -fx-border-width: 1px;
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
+    -fx-focus-traversable: false;
 }
 
 .vm-marker-count__icon .ikonli-font-icon {
@@ -149,6 +150,7 @@
 .vm-marker-track {
     -fx-background-color: #c8d2e3;
     -fx-pref-height: 40px;
+    -fx-focus-traversable: false;
 }
 
 .vm-waveform-container {
@@ -173,9 +175,23 @@
     -fx-background-color: white;
 }
 
+.vm-waveform-frame {
+    -fx-focus-traversable: true;
+}
+
+.vm-marker-waveform {
+    -fx-focus-traversable: false;
+}
+
+.vm-marker-waveform:active {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+}
+
 .vm-waveform-frame__top-track {
     -fx-pref-height: 40px;
     -fx-background-color: -wa-waveform-background-dark;
+    -fx-focus-traversable: false;
 }
 
 .vm-waveform-frame__center {

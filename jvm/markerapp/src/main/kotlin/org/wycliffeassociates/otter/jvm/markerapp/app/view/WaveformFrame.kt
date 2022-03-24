@@ -26,6 +26,7 @@ import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
@@ -34,6 +35,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -42,8 +44,14 @@ class WaveformFrame(
     bottomTrack: Node? = null
 ) : BorderPane() {
 
-    val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
+    private val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
+    private val onRewindProperty = SimpleObjectProperty<(Boolean, (Boolean) -> Unit) -> Unit>()
+    private val onFastForwardProperty = SimpleObjectProperty<(Boolean, (Boolean) -> Unit) -> Unit>()
+    private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
+    private val onSeekPreviousProperty = SimpleObjectProperty<() -> String?>()
+    private val onSeekNextProperty = SimpleObjectProperty<() -> String?>()
+
     val framePositionProperty = SimpleDoubleProperty(0.0)
 
     fun onWaveformClicked(op: () -> Unit) {
@@ -54,13 +62,36 @@ class WaveformFrame(
         onWaveformDragReleasedProperty.set(op)
     }
 
+    fun onRewind(op: (Boolean, (Boolean) -> Unit) -> Unit) {
+        onRewindProperty.set(op)
+    }
+
+    fun onFastForward(op: (Boolean, (Boolean) -> Unit) -> Unit) {
+        onFastForwardProperty.set(op)
+    }
+
+    fun onToggleMedia(op: () -> Unit) {
+        onToggleMediaProperty.set(op)
+    }
+
+    fun onSeekPrevious(op: () -> String?) {
+        onSeekPreviousProperty.set(op)
+    }
+
+    fun onSeekNext(op: () -> String?) {
+        onSeekNextProperty.set(op)
+    }
+
     var dragStart: Point2D? = null
     private var dragContextX = 0.0
     var imageHolder: HBox? = null
     lateinit var imageRegion: Region
     lateinit var highlightHolder: StackPane
+    var resumeAfterScroll = false
 
     init {
+        addClass("vm-waveform-frame")
+
         fitToParentSize()
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
@@ -75,7 +106,11 @@ class WaveformFrame(
                 region {
                     styleClass.add("vm-waveform-frame__top-track")
                     topTrack?.let {
-                        add(it)
+                        add(it.apply {
+                            val me = (it as MarkerTrackControl)
+                            me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
+                            me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
+                        })
                     }
                 }
             }
@@ -131,10 +166,42 @@ class WaveformFrame(
                         dragStart = localToParent(me.x, me.y)
                     }
                     val deltaPos = cur.x - dragStart!!.x
-                    onWaveformDragReleasedProperty.get().invoke(deltaPos)
+                    onWaveformDragReleasedProperty.get()?.invoke(deltaPos)
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                     bindTranslateX() // rebind when done
+                }
+            }
+
+            setOnKeyPressed {
+                when (it.code) {
+                    KeyCode.LEFT -> {
+                        onRewindProperty.value?.invoke(it.isControlDown) { resume ->
+                            resumeAfterScroll = resume
+                        }
+                        it.consume()
+                    }
+                    KeyCode.RIGHT -> {
+                        onFastForwardProperty.value?.invoke(it.isControlDown) { resume ->
+                            resumeAfterScroll = resume
+                        }
+                        it.consume()
+                    }
+                }
+            }
+            setOnKeyReleased {
+                when (it.code) {
+                    KeyCode.LEFT, KeyCode.RIGHT -> {
+                        if (resumeAfterScroll) {
+                            resumeAfterScroll = false
+                            onToggleMediaProperty.value?.invoke()
+                        }
+                        it.consume()
+                    }
+                    KeyCode.ENTER, KeyCode.SPACE -> {
+                        onToggleMediaProperty.value?.invoke()
+                        it.consume()
+                    }
                 }
             }
         }

@@ -5,11 +5,14 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
 
-open class ScrollingWaveform() : Control() {
+open class ScrollingWaveform : Control() {
     val positionProperty = SimpleDoubleProperty(0.0)
 
     var onWaveformClicked: () -> Unit = {}
     var onWaveformDragReleased: (Double) -> Unit = {}
+    var onRewind: ((Boolean, (Boolean) -> Unit) -> Unit) = { _, _ ->}
+    var onFastForward: ((Boolean, (Boolean) -> Unit) -> Unit) = { _, _ ->}
+    var onToggleMedia: () -> Unit = {}
 
     fun addWaveformImage(image: Image) {
         (skin as ScrollingWaveformSkin).addWaveformImage(image)

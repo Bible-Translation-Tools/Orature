@@ -31,7 +31,6 @@ import javafx.scene.paint.Paint
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class AudioSlider(
@@ -53,16 +52,12 @@ class AudioSlider(
     var pixelsInHighlight: (Double) -> Double = { 0.0 }
 
     init {
+        addClass("wa-audio-slider")
+
         // initial height/width to prevent the control from otherwise growing indefinitely
         prefHeight = 10.0
         prefWidth = 50.0
 
-        player.onChangeAndDoNow { player ->
-            player?.let {
-                setMax(it.getDurationInFrames().toDouble())
-                it.seek(0)
-            }
-        }
         currentPositionProperty.onChange {
             player.value.seek(it.toInt())
         }

@@ -162,44 +162,68 @@ class VerseMarkerViewModel : ViewModel() {
         markerStateProperty.get()?.addMarker(audioPlayer.get().getLocationInFrames())
     }
 
-    fun seekNext() {
+    fun seekNext(): String? {
+        var label: String? = null
         val wasPlaying = audioPlayer.get().isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
         }
         markerStateProperty.get()?.let { markers ->
-            seek(markers.seekNext(audioPlayer.get().getLocationInFrames()))
+            val to = markers.seekNext(audioPlayer.get().getLocationInFrames())
+            label = markers.markers.singleOrNull { it.frame == to }?.label
+            seek(to)
         }
         if (wasPlaying) {
             audioController?.toggle()
         }
+        return label
     }
 
-    fun seekPrevious() {
+    fun seekPrevious(): String? {
+        var label: String? = null
         val wasPlaying = audioPlayer.get().isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
         }
         markerStateProperty.get()?.let { markers ->
-            seek(markers.seekPrevious(audioPlayer.get().getLocationInFrames()))
+            val to = markers.seekPrevious(audioPlayer.get().getLocationInFrames())
+            label = markers.markers.singleOrNull { it.frame == to }?.label
+            seek(to)
         }
         if (wasPlaying) {
             audioController?.toggle()
         }
+        return label
     }
 
-    fun initializeAudioController() {
-        audioController = AudioPlayerController()
+    fun initializeAudioController(slider: Slider) {
+        audioController = AudioPlayerController(slider)
         audioController?.load(audioPlayer.get())
         isPlayingProperty.bind(audioController!!.isPlayingProperty)
     }
 
-    fun setSlider(slider: Slider) {
-        audioController?.audioSlider = slider
-    }
-
     fun pause() {
         audioController?.pause()
+    }
+
+    fun isPlaying(): Boolean {
+        return audioController?.isPlayingProperty?.value ?: false
+    }
+
+    fun rewind(fast: Boolean, resume: (Boolean) -> Unit) {
+        if (isPlaying()) {
+            resume(true)
+            mediaToggle()
+        }
+        audioController?.rewind(fast)
+    }
+
+    fun fastForward(fast: Boolean, resume: (Boolean) -> Unit) {
+        if (isPlaying()) {
+            resume(true)
+            mediaToggle()
+        }
+        audioController?.fastForward(fast)
     }
 
     fun mediaToggle() {

@@ -31,10 +31,11 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
             add(MarkerViewBackground())
             waveformFrame = WaveformFrame().apply {
                 framePositionProperty.bind(skinnable.positionProperty)
-                onWaveformClicked { skinnable.onWaveformClicked() }
-                onWaveformDragReleased {
-                    skinnable.onWaveformDragReleased(it)
-                }
+                onWaveformClicked(skinnable.onWaveformClicked)
+                onWaveformDragReleased(skinnable.onWaveformDragReleased)
+                onRewind(skinnable.onRewind)
+                onFastForward(skinnable.onFastForward)
+                onToggleMedia(skinnable.onToggleMedia)
             }
             add(waveformFrame)
             add(WaveformOverlay().apply { playbackPositionProperty.bind(skinnable.positionProperty) })
