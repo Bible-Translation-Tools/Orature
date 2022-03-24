@@ -141,6 +141,12 @@
     -fx-font-size: 24px;
 }
 
+.app-drawer__plugin .radio-btn--wrapper {
+    -fx-pref-width: 50px;
+    -fx-pref-height: 50px;
+    -fx-alignment: center;
+}
+
 .app-drawer__drag-drop-area {
     -fx-alignment: center;
     -fx-border-width: 2px;

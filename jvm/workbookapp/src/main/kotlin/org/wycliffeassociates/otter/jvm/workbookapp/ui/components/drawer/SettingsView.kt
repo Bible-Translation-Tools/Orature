@@ -254,31 +254,36 @@ class SettingsView : View() {
 
                                 region { hgrow = Priority.ALWAYS }
 
-                                add(
+                                hbox {
+                                    addClass("radio-btn--wrapper")
                                     radiobutton {
                                         addClass("wa-radio")
                                         isDisable = !pluginData.canRecord
-                                        toggleGroup = recorderToggleGroup
+                                        if (pluginData.canRecord) {
+                                            toggleGroup = recorderToggleGroup
+                                        }
                                         properties["recorderPlugin"] = pluginData
 
                                         viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
                                             isSelected = selectedData == pluginData
                                         }
                                     }
-                                )
-
-                                add(
+                                }
+                                hbox {
+                                    addClass("radio-btn--wrapper")
                                     radiobutton {
                                         addClass("wa-radio")
                                         isDisable = !pluginData.canEdit
-                                        toggleGroup = editorToggleGroup
+                                        if (pluginData.canEdit) {
+                                            toggleGroup = editorToggleGroup
+                                        }
                                         properties["editorPlugin"] = pluginData
 
                                         viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
                                             isSelected = selectedData == pluginData
                                         }
                                     }
-                                )
+                                }
                             }
                         }
                     }
