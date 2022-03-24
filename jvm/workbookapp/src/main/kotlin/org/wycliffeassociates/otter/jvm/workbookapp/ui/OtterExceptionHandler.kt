@@ -143,10 +143,12 @@ class OtterExceptionHandler(
     }
 
     private fun sendReport(error: Throwable): Completable {
-        return Completable.fromAction {
-            sendGithubReport(error)
-            sendSentryReport(error)
-        }
+        return Completable
+            .fromAction {
+                sendGithubReport(error)
+                sendSentryReport(error)
+            }
+            .onErrorComplete() // avoid crashing when failed to send
     }
 
     private fun sendGithubReport(error: Throwable) {
