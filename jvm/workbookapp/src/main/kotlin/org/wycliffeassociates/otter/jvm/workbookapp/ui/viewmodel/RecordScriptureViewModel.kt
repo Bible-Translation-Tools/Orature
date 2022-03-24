@@ -250,12 +250,15 @@ class RecordScriptureViewModel : ViewModel() {
         closePlayers()
         recordable?.let { rec ->
             contextProperty.set(PluginType.RECORDER)
+            println("prepping recorder")
             rec.audio.getNewTakeNumber()
                 .flatMapMaybe { takeNumber ->
+                    println("got a take number")
                     workbookDataStore.activeTakeNumberProperty.set(takeNumber)
                     audioPluginViewModel.getPlugin(PluginType.RECORDER)
                 }
                 .flatMapSingle { plugin ->
+                    println("bout to fire the plugin")
                     fire(PluginOpenedEvent(PluginType.RECORDER, plugin.isNativePlugin()))
                     audioPluginViewModel.record(rec)
                 }
@@ -266,6 +269,7 @@ class RecordScriptureViewModel : ViewModel() {
                 .onErrorReturn { TakeActions.Result.NO_PLUGIN }
                 .subscribe { result: TakeActions.Result ->
                     fire(PluginClosedEvent(PluginType.RECORDER))
+                    println("result")
                     when (result) {
                         TakeActions.Result.NO_PLUGIN -> snackBarObservable.onNext(messages["noRecorder"])
                         TakeActions.Result.SUCCESS, TakeActions.Result.NO_AUDIO -> {

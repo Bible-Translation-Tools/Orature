@@ -112,6 +112,7 @@ class WorkbookRepository(
             )
         )
         connections[workbook] = CompositeDisposable(disposables)
+        println("workbook built")
         return workbook
     }
 
@@ -202,7 +203,8 @@ class WorkbookRepository(
                     resources = constructResourceGroups(chapterCollection, disposables),
                     audio = constructAssociatedAudio(metaContent, disposables),
                     chunks = constructChunks(chapterCollection, disposables),
-                    subtreeResources = db.getSubtreeResourceMetadata(chapterCollection)
+                    subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
+                    addChunk = { db.addContentForCollection(chapterCollection, it).subscribe() }
                 )
             }
     }
@@ -212,10 +214,11 @@ class WorkbookRepository(
         disposables: MutableList<Disposable>
     ): Observable<Chunk> {
         return Observable.defer {
-            db.getContentByCollection(chapterCollection)
-                .flattenAsObservable { it }
+            db.getContentByCollectionActiveConnection(chapterCollection)
                 .filter { it.type == ContentType.TEXT }
-                .map { chunk(it, disposables) }
+                .map {
+                    chunk(it, disposables)
+                }
         }.cache()
     }
 
@@ -551,9 +554,11 @@ class WorkbookRepository(
     }
 
     interface IDatabaseAccessors {
+        fun addContentForCollection(collection: Collection, chunkNumber: Int): Completable
         fun getChildren(collection: Collection): Single<List<Collection>>
         fun getCollectionMetaContent(collection: Collection): Single<Content>
         fun getContentByCollection(collection: Collection): Single<List<Content>>
+        fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content>
         fun updateContent(content: Content): Completable
         fun getResources(content: Content, metadata: ResourceMetadata): Observable<Content>
         fun getResources(collection: Collection, metadata: ResourceMetadata): Observable<Content>
@@ -581,10 +586,18 @@ private class DefaultDatabaseAccessors(
     private val languageRepo: ILanguageRepository,
     private val updateTranslationUseCase: UpdateTranslation
 ) : WorkbookRepository.IDatabaseAccessors {
+
+    override fun addContentForCollection(collection: Collection, chunkNumber: Int): Completable {
+        val cont = Content(chunkNumber, "chunk", chunkNumber, chunkNumber, null, null, null, ContentType.TEXT)
+        return contentRepo.insertForCollection(cont, collection).ignoreElement()
+    }
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
 
     override fun getCollectionMetaContent(collection: Collection) = contentRepo.getCollectionMetaContent(collection)
     override fun getContentByCollection(collection: Collection) = contentRepo.getByCollection(collection)
+    override fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content> {
+        return contentRepo.getByCollectionWithPersistentConnection(collection)
+    }
     override fun updateContent(content: Content) = contentRepo.update(content)
 
     override fun getResources(content: Content, metadata: ResourceMetadata) =

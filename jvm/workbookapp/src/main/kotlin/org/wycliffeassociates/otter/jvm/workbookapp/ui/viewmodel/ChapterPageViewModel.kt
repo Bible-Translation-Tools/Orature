@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 import com.github.thomasnield.rxkotlinfx.changes
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -53,6 +54,7 @@ import tornadofx.*
 import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.data.workbook.Chunk
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -143,10 +145,12 @@ class ChapterPageViewModel : ViewModel() {
 
     fun onCardSelection(cardData: CardData) {
         cardData.chapterSource?.let {
+            println("setting chapter source?")
             workbookDataStore.activeChapterProperty.set(it)
         }
         // Chunk will be null if the chapter recording is opened. This needs to happen to update the recordable to
         // use the chapter recordable.
+        println("setting active chunk")
         workbookDataStore.activeChunkProperty.set(cardData.chunkSource)
     }
 
@@ -171,7 +175,8 @@ class ChapterPageViewModel : ViewModel() {
     fun checkCanCompile() {
         val hasUnselected = filteredContent.any { chunk ->
             chunk.chunkSource?.audio?.selected?.value?.value == null
-        }
+        }.or(filteredContent.isEmpty())
+
         canCompileProperty.set(hasUnselected.not())
     }
 
@@ -364,12 +369,14 @@ class ChapterPageViewModel : ViewModel() {
         )
     }
 
-    private fun loadChapterContents(chapter: Chapter): Completable {
+    private fun loadChapterContents(chapter: Chapter): Observable<CardData> {
         // Remove existing content so the user knows they are outdated
         allContent.clear()
         loading = true
         return chapter.chunks
-            .map { CardData(it) }
+            .map {
+                CardData(it)
+            }
             .map {
                 buildTakes(it)
                 it.player = getPlayer()
@@ -381,13 +388,13 @@ class ChapterPageViewModel : ViewModel() {
                 loading = false
             }
             .observeOnFx()
-            .toList()
             .doOnError { e ->
                 logger.error("Error in loading chapter contents for chapter: $chapter", e)
             }
-            .map { list: List<CardData> ->
-                allContent.setAll(list)
-            }.ignoreElement()
+            .map {
+                allContent.add(it)
+                it
+            }
     }
 
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
@@ -408,7 +415,9 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     private fun onChunkOpen(chunk: CardData) {
+        println("on chunk open ${chunk.chunkSource}")
         onCardSelection(chunk)
+        println("about to dock rsp")
         navigator.dock<RecordScripturePage>()
     }
 
@@ -452,5 +461,23 @@ class ChapterPageViewModel : ViewModel() {
 
     private fun getPlayer(): IAudioPlayer {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
+    }
+
+    fun addChunk() {
+        workbookDataStore.activeChapterProperty.value.addChunk(99)
+    }
+
+    fun subList() {
+        workbookDataStore.activeChapterProperty.value.chunks.map {
+            CardData(it)
+        }.map {
+            buildTakes(it)
+            it.player = getPlayer()
+            it.onChunkOpen = ::onChunkOpen
+            it.onTakeSelected = ::onTakeSelected
+            it
+        }.map {
+            allContent.add(it)
+        }.observeOnFx().subscribe()
     }
 }

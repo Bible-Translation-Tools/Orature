@@ -32,7 +32,8 @@ data class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    val chunks: Observable<Chunk>
+    val chunks: Observable<Chunk>,
+    val addChunk: (Int) -> Unit
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META
@@ -43,15 +44,17 @@ data class Chapter(
 
     private fun textItem(): TextItem {
         var format: MimeType? = null
-        val text = chunks
-            .reduce("") { acc, elm ->
-                if (format == null) format = elm.textItem.format
-                // Clean multiple line breaks to leave only one
-                val text = "${elm.textItem.text.replace("\n", "")}\n"
-                acc + "${verseLabel(elm.start, elm.end)}. $text"
-            }
-            .blockingGet()
-        return TextItem(text, format!!)
+        println("trying to get text item")
+//        val text = chunks
+//            .reduce("") { acc, elm ->
+//                if (format == null) format = elm.textItem.format
+//                // Clean multiple line breaks to leave only one
+//                val text = "${elm.textItem.text.replace("\n", "")}\n"
+//                acc + "${verseLabel(elm.start, elm.end)}. $text"
+//            }
+//            .blockingGet()
+        println("got text item")
+        return TextItem("text", MimeType.USFM!!)
     }
 
     private fun verseLabel(start: Int, end: Int): String {

@@ -66,7 +66,9 @@ class AudioPluginViewModel : ViewModel() {
     }
 
     fun record(recordable: Recordable): Single<TakeActions.Result> {
+        println("constructing plugin params")
         val params = constructPluginParameters()
+        println("params good")
         return takeActions.record(
             audio = recordable.audio,
             projectAudioDir = workbookDataStore.activeProjectFilesAccessor.audioDir,
@@ -87,17 +89,13 @@ class AudioPluginViewModel : ViewModel() {
     private fun constructPluginParameters(action: String = ""): PluginParameters {
         val workbook = workbookDataStore.workbook
         val sourceAudio = workbookDataStore.getSourceAudio()
-        val sourceText = workbookDataStore.getSourceText().blockingGet()
+        // val sourceText = workbookDataStore.getSourceText().blockingGet()
 
         val chapterLabel = messages[workbookDataStore.activeChapterProperty.value.label]
         val chapterNumber = workbookDataStore.activeChapterProperty.value.sort
 
         // TODO: This needs a better solution
-        val verseTotal =  try {
-            workbookDataStore.activeChapterProperty.value.chunks.blockingLast().end
-        } catch (e: NoSuchElementException) {
-            0
-        }
+        val verseTotal =  100
         val chunkLabel = workbookDataStore.activeChunkProperty.value?.let {
             messages[workbookDataStore.activeChunkProperty.value.label]
         }
@@ -122,7 +120,7 @@ class AudioPluginViewModel : ViewModel() {
             sourceChapterAudio = sourceAudio?.file,
             sourceChunkStart = sourceAudio?.start,
             sourceChunkEnd = sourceAudio?.end,
-            sourceText = sourceText,
+            sourceText = "sourceText",
             actionText = action,
             targetChapterAudio = targetAudio?.file,
             license = workbook.source.resourceMetadata.license,

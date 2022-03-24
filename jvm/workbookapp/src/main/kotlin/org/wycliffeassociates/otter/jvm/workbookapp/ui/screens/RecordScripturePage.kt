@@ -75,7 +75,7 @@ class RecordScripturePage : View() {
 
     private val mainContainer = GridPane()
     private val fileDragTarget = VBox()
-    private val pluginOpenedPage: PluginOpenedPage
+    // private val pluginOpenedPage: PluginOpenedPage
 
     private val isDraggingFileProperty = SimpleBooleanProperty(false)
 
@@ -162,24 +162,30 @@ class RecordScripturePage : View() {
         tryImportStylesheet(resources.get("/css/scripturetakecard.css"))
         tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
 
+        println("here in the init ya know")
+
         isDraggingFileProperty.onChange {
             if (it) recordScriptureViewModel.stopPlayers()
         }
+//
+//        pluginOpenedPage = createPluginOpenedPage()
+//        println("created plugin opened page")
+//        workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
+//            if (!pluginInfo.isNative) {
+//                workspace.dock(pluginOpenedPage)
+//                recordScriptureViewModel.openSourceAudioPlayer()
+//                recordScriptureViewModel.openTargetAudioPlayer()
+//            }
+//        }
 
-        pluginOpenedPage = createPluginOpenedPage()
-        workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
-            if (!pluginInfo.isNative) {
-                workspace.dock(pluginOpenedPage)
-                recordScriptureViewModel.openSourceAudioPlayer()
-                recordScriptureViewModel.openTargetAudioPlayer()
-            }
-        }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
             }
             recordScriptureViewModel.openPlayers()
         }
+
+        println("subbed on workbook stuff")
 
         fileDragTarget.setOnDragOver {
             if (it.gestureSource != fileDragTarget && it.dragboard.hasFiles()) {
@@ -199,6 +205,7 @@ class RecordScripturePage : View() {
             it.consume()
         }
 
+        println("before main container")
         mainContainer.apply {
             addEventHandler(DragEvent.DRAG_ENTERED) {
                 if (it.dragboard.hasFiles()) {
@@ -294,7 +301,7 @@ class RecordScripturePage : View() {
             columnConstraints.addAll(sourceContentColumn, rightPaneColumn)
             rowConstraints.add(row)
         }
-
+        println("after main container")
         fileDragTarget.apply {
             visibleProperty().bind(isDraggingFileProperty)
             isDraggingFileProperty.onChange {
@@ -304,6 +311,8 @@ class RecordScripturePage : View() {
                 isDraggingFileProperty.value = false
             }
         }
+        println("after file drag target")
+        println("finished init yeh")
     }
 
     private fun Parent.addButtonEventHandlers() {
@@ -439,8 +448,11 @@ class RecordScripturePage : View() {
 
     override fun onDock() {
         super.onDock()
+        println("docking rsp")
         recordScriptureViewModel.loadTakes()
+        println("loaded takes")
         recordScriptureViewModel.openPlayers()
+        println("opened players")
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()

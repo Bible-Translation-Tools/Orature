@@ -43,13 +43,14 @@ class RecorderView : PluginEntrypoint() {
         add<InfoFragment>()
         add(spacer)
         add(waveform)
-        add<SourceAudioFragment>()
+        // add<SourceAudioFragment>()
         add<ControlFragment>()
     }
 
     init {
         tryImportStylesheet(resources.get("/css/recorder.css"))
 
+        println("made it to the view")
         // notifies viewmodel that views have been inflated and the canvas now has a width
         waveform.root.widthProperty().onChange { width ->
             if (!viewInflated && width.toInt() > 0) {

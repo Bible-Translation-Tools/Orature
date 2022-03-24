@@ -223,9 +223,10 @@ class WorkbookDataStore : Component(), ScopedInstance {
     fun sourceTextBinding(): StringBinding {
         return Bindings.createStringBinding(
             Callable {
-                activeChapterProperty.value?.let {
-                    getSourceText().blockingGet()
-                }
+//                activeChapterProperty.value?.let {
+//                    getSourceText().blockingGet() ?: ""
+//                }
+                     ""
             },
             activeChapterProperty,
             activeChunkProperty,

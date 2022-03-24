@@ -94,7 +94,9 @@ class ChapterPage : View() {
         viewModel.openPlayers()
 
         viewModel.checkCanCompile()
+
         chunkListView.refresh()
+
         initializeProgressDialog()
     }
 
@@ -129,6 +131,9 @@ class ChapterPage : View() {
     }
 
     override val root = hbox {
+
+        button("add") {setOnAction {viewModel.addChunk() }}
+        button("subList") {setOnAction{ viewModel.subList()}}
         addClass("chapter-page")
 
         createSnackBar()

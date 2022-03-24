@@ -198,7 +198,8 @@ class ContentDao(
                 CONTENT_ENTITY.LABEL,
                 CONTENT_ENTITY.SELECTED_TAKE_FK,
                 CONTENT_ENTITY.TEXT,
-                CONTENT_ENTITY.FORMAT
+                CONTENT_ENTITY.FORMAT,
+                CONTENT_ENTITY.TYPE_FK
             )
             .values(
                 entity.collectionFk,
@@ -207,7 +208,8 @@ class ContentDao(
                 entity.labelKey,
                 entity.selectedTakeFk,
                 entity.text,
-                entity.format
+                entity.format,
+                entity.type_fk
             )
             .execute()
 

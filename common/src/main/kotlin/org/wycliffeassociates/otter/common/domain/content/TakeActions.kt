@@ -66,16 +66,20 @@ class TakeActions @Inject constructor(
         namer: FileNamer,
         pluginParameters: PluginParameters
     ): Single<Result> {
+        println("bout to get take number")
         return audio.getNewTakeNumber()
             .map { newTakeNumber ->
+                println("got take number")
                 val filename = namer.generateName(newTakeNumber, AudioFileFormat.WAV)
                 val chapterAudioDir = getChapterAudioDirectory(
                     projectAudioDir,
                     namer.formatChapterNumber()
                 )
+                println("creatn new take")
                 createNewTake(newTakeNumber, filename, chapterAudioDir, true)
             }
             .flatMap { take ->
+                println("launching")
                 launchPlugin(PluginType.RECORDER, take, pluginParameters)
             }.map { (take, result) ->
                 handleRecorderPluginResult(audio::insertTake, take, result)
