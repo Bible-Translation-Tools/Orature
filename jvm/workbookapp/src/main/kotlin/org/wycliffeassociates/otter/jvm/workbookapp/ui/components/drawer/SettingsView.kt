@@ -19,10 +19,12 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import javafx.application.Platform
+import javafx.scene.control.RadioButton
 import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.domain.plugins.AudioPluginData
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
@@ -220,6 +222,27 @@ class SettingsView : View() {
                         val recorderToggleGroup = ToggleGroup()
                         val editorToggleGroup = ToggleGroup()
 
+                        recorderToggleGroup.selectedToggleProperty().onChange {
+                            it?.let {
+                                (it as RadioButton).apply {
+                                    requestFocus()
+                                    (properties["recorderPlugin"] as AudioPluginData).let { plugin ->
+                                        viewModel.selectRecorder(plugin)
+                                    }
+                                }
+                            }
+                        }
+                        editorToggleGroup.selectedToggleProperty().onChange {
+                            it?.let {
+                                (it as RadioButton).apply {
+                                    requestFocus()
+                                    (properties["editorPlugin"] as AudioPluginData).let { plugin ->
+                                        viewModel.selectEditor(plugin)
+                                    }
+                                }
+                            }
+                        }
+
                         bindChildren(viewModel.audioPlugins) { pluginData ->
                             hbox {
                                 addClass("app-drawer__plugin")
@@ -232,39 +255,27 @@ class SettingsView : View() {
                                 region { hgrow = Priority.ALWAYS }
 
                                 add(
-                                    SelectButton().apply {
+                                    radiobutton {
+                                        addClass("wa-radio")
                                         isDisable = !pluginData.canRecord
                                         toggleGroup = recorderToggleGroup
+                                        properties["recorderPlugin"] = pluginData
 
                                         viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
                                             isSelected = selectedData == pluginData
-                                        }
-
-                                        setOnAction {
-                                            if (isSelected) {
-                                                viewModel.selectRecorder(pluginData)
-                                            } else {
-                                                isSelected = true // prevent "unselect"
-                                            }
                                         }
                                     }
                                 )
 
                                 add(
-                                    SelectButton().apply {
+                                    radiobutton {
+                                        addClass("wa-radio")
                                         isDisable = !pluginData.canEdit
                                         toggleGroup = editorToggleGroup
+                                        properties["editorPlugin"] = pluginData
 
                                         viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
                                             isSelected = selectedData == pluginData
-                                        }
-
-                                        setOnAction {
-                                            if (isSelected) {
-                                                viewModel.selectRecorder(pluginData)
-                                            } else {
-                                                isSelected = true // prevent "unselect"
-                                            }
                                         }
                                     }
                                 )
