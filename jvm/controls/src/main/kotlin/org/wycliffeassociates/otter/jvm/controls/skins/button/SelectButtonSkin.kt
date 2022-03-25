@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.button
 
-import com.sun.javafx.scene.control.behavior.ToggleButtonBehavior
+import com.sun.javafx.scene.control.behavior.ButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -31,7 +31,7 @@ import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import tornadofx.*
 
 class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton>(button) {
-    private val behavior = ToggleButtonBehavior(button)
+    private val behavior = ButtonBehavior(button)
 
     @FXML
     lateinit var root: HBox
@@ -54,7 +54,8 @@ class SelectButtonSkin(private val button: SelectButton) : SkinBase<SelectButton
     }
 
     private fun initializeControl() {
-        btnRadio.selectedProperty().bindBidirectional(button.selectedProperty())
+        btnRadio.isMouseTransparent = true
+        btnRadio.selectedProperty().bind(button.selectedProperty())
 
         btnLabel.apply {
             textProperty().bind(button.textProperty())
