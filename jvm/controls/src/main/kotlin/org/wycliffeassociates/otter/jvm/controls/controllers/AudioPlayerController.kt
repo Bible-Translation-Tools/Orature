@@ -38,8 +38,13 @@ import kotlin.math.min
 
 const val DURATION_FORMAT = "%02d:%02d" // mm:ss
 private const val ANIMATION_REFRESH_MS = 16L
-const val SKIP_INTERVAL = 0.1
-const val FAST_SKIP_INTERVAL = 1.0
+const val SEEK_INTERVAL = 0.1
+const val FAST_SEEK_INTERVAL = 1.0
+
+enum class SeekSpeed {
+    NORMAL,
+    FAST
+}
 
 class AudioPlayerController(
     var audioSlider: Slider? = null,
@@ -144,13 +149,14 @@ class AudioPlayerController(
             }
         }
         audioSlider?.setOnKeyPressed {
+            val speed = if (it.isControlDown) SeekSpeed.FAST else SeekSpeed.NORMAL
             when (it.code) {
                 KeyCode.LEFT -> {
-                    rewind(it.isControlDown)
+                    rewind(speed)
                     it.consume()
                 }
                 KeyCode.RIGHT -> {
-                    fastForward(it.isControlDown)
+                    fastForward(speed)
                     it.consume()
                 }
             }
@@ -234,14 +240,14 @@ class AudioPlayerController(
         return player?.getLocationInFrames() ?: 0
     }
 
-    private fun seekInterval(keyCode: KeyCode, fast: Boolean) {
+    private fun seekInterval(keyCode: KeyCode, speed: SeekSpeed) {
         player?.let {
             if (it.isPlaying()) {
                 resumeAfterDrag = true
                 toggle()
             }
 
-            val percent = if (fast) FAST_SKIP_INTERVAL else SKIP_INTERVAL
+            val percent = if (speed == SeekSpeed.FAST) FAST_SEEK_INTERVAL else SEEK_INTERVAL
             val interval = percentageToLocation(percent)
             var location = it.getLocationInFrames()
             when (keyCode) {
@@ -252,12 +258,12 @@ class AudioPlayerController(
         }
     }
 
-    fun rewind(fast: Boolean) {
-        seekInterval(KeyCode.LEFT, fast)
+    fun rewind(speed: SeekSpeed) {
+        seekInterval(KeyCode.LEFT, speed)
     }
 
-    fun fastForward(fast: Boolean) {
-        seekInterval(KeyCode.RIGHT, fast)
+    fun fastForward(speed: SeekSpeed) {
+        seekInterval(KeyCode.RIGHT, speed)
     }
 }
 

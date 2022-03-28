@@ -33,6 +33,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.jvm.controls.controllers.SeekSpeed
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
@@ -46,11 +47,11 @@ class WaveformFrame(
 
     private val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
-    private val onRewindProperty = SimpleObjectProperty<(Boolean, (Boolean) -> Unit) -> Unit>()
-    private val onFastForwardProperty = SimpleObjectProperty<(Boolean, (Boolean) -> Unit) -> Unit>()
+    private val onRewindProperty = SimpleObjectProperty<(SeekSpeed, (Boolean) -> Unit) -> Unit>()
+    private val onFastForwardProperty = SimpleObjectProperty<(SeekSpeed, (Boolean) -> Unit) -> Unit>()
     private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
-    private val onSeekPreviousProperty = SimpleObjectProperty<() -> String?>()
-    private val onSeekNextProperty = SimpleObjectProperty<() -> String?>()
+    private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
+    private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
 
     val framePositionProperty = SimpleDoubleProperty(0.0)
 
@@ -62,11 +63,11 @@ class WaveformFrame(
         onWaveformDragReleasedProperty.set(op)
     }
 
-    fun onRewind(op: (Boolean, (Boolean) -> Unit) -> Unit) {
+    fun onRewind(op: (SeekSpeed, (Boolean) -> Unit) -> Unit) {
         onRewindProperty.set(op)
     }
 
-    fun onFastForward(op: (Boolean, (Boolean) -> Unit) -> Unit) {
+    fun onFastForward(op: (SeekSpeed, (Boolean) -> Unit) -> Unit) {
         onFastForwardProperty.set(op)
     }
 
@@ -74,11 +75,11 @@ class WaveformFrame(
         onToggleMediaProperty.set(op)
     }
 
-    fun onSeekPrevious(op: () -> String?) {
+    fun onSeekPrevious(op: () -> Unit) {
         onSeekPreviousProperty.set(op)
     }
 
-    fun onSeekNext(op: () -> String?) {
+    fun onSeekNext(op: () -> Unit) {
         onSeekNextProperty.set(op)
     }
 
@@ -174,15 +175,16 @@ class WaveformFrame(
             }
 
             setOnKeyPressed {
+                val speed = if (it.isControlDown) SeekSpeed.FAST else SeekSpeed.NORMAL
                 when (it.code) {
                     KeyCode.LEFT -> {
-                        onRewindProperty.value?.invoke(it.isControlDown) { resume ->
+                        onRewindProperty.value?.invoke(speed) { resume ->
                             resumeAfterScroll = resume
                         }
                         it.consume()
                     }
                     KeyCode.RIGHT -> {
-                        onFastForwardProperty.value?.invoke(it.isControlDown) { resume ->
+                        onFastForwardProperty.value?.invoke(speed) { resume ->
                             resumeAfterScroll = resume
                         }
                         it.consume()

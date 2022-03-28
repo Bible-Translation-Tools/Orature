@@ -28,22 +28,23 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.SeekSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
-import javafx.beans.value.ChangeListener
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import kotlin.math.max
 
 const val SECONDS_ON_SCREEN = 10
@@ -162,38 +163,30 @@ class VerseMarkerViewModel : ViewModel() {
         markerStateProperty.get()?.addMarker(audioPlayer.get().getLocationInFrames())
     }
 
-    fun seekNext(): String? {
-        var label: String? = null
+    fun seekNext() {
         val wasPlaying = audioPlayer.get().isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
         }
         markerStateProperty.get()?.let { markers ->
-            val to = markers.seekNext(audioPlayer.get().getLocationInFrames())
-            label = markers.markers.singleOrNull { it.frame == to }?.label
-            seek(to)
+            seek(markers.seekNext(audioPlayer.get().getLocationInFrames()))
         }
         if (wasPlaying) {
             audioController?.toggle()
         }
-        return label
     }
 
-    fun seekPrevious(): String? {
-        var label: String? = null
+    fun seekPrevious() {
         val wasPlaying = audioPlayer.get().isPlaying()
         if (wasPlaying) {
             audioController?.toggle()
         }
         markerStateProperty.get()?.let { markers ->
-            val to = markers.seekPrevious(audioPlayer.get().getLocationInFrames())
-            label = markers.markers.singleOrNull { it.frame == to }?.label
-            seek(to)
+            seek(markers.seekPrevious(audioPlayer.get().getLocationInFrames()))
         }
         if (wasPlaying) {
             audioController?.toggle()
         }
-        return label
     }
 
     fun initializeAudioController(slider: Slider) {
@@ -210,20 +203,20 @@ class VerseMarkerViewModel : ViewModel() {
         return audioController?.isPlayingProperty?.value ?: false
     }
 
-    fun rewind(fast: Boolean, resume: (Boolean) -> Unit) {
+    fun rewind(speed: SeekSpeed, resume: (Boolean) -> Unit) {
         if (isPlaying()) {
             resume(true)
             mediaToggle()
         }
-        audioController?.rewind(fast)
+        audioController?.rewind(speed)
     }
 
-    fun fastForward(fast: Boolean, resume: (Boolean) -> Unit) {
+    fun fastForward(speed: SeekSpeed, resume: (Boolean) -> Unit) {
         if (isPlaying()) {
             resume(true)
             mediaToggle()
         }
-        audioController?.fastForward(fast)
+        audioController?.fastForward(speed)
     }
 
     fun mediaToggle() {

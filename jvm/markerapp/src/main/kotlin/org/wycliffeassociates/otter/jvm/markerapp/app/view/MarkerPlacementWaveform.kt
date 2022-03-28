@@ -11,8 +11,8 @@ class MarkerPlacementWaveform(
 
     val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
 
-    var onSeekNext: () -> String? = {null}
-    var onSeekPrevious: () -> String? = {null}
+    var onSeekNext: () -> Unit = {}
+    var onSeekPrevious: () -> Unit = {}
     var onPlaceMarker: () -> Unit = {}
     var topTrack: Node? = topNode
     var bottomTrack: Node? = null

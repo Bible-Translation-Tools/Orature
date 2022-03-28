@@ -66,6 +66,7 @@ class MarkerView : PluginEntrypoint() {
             setOnPositionChanged { id, position ->
                 slider?.updateMarker(id, position)
             }
+            playerProperty.bind(viewModel.audioPlayer)
         }
         slider?.let {
             viewModel.initializeAudioController(it)
