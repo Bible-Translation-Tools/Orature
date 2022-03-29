@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
@@ -40,6 +41,7 @@ import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.OutputStream
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.outputStream
 
 class ProjectFilesAccessor(
@@ -264,12 +266,19 @@ class ProjectFilesAccessor(
             // Work around a quirk that records resource takes to the source tree
             else -> Observable.concat(workbook.source.chapters, workbook.target.chapters)
         }
+        println("got chapters")
+
         val bookElements: Observable<BookElement> = when {
             chaptersOnly -> chapters.cast()
-            else -> chapters.concatMap { chapter -> chapter.children.startWith(chapter) }
+            else -> chapters.concatMap { chapter ->
+                chapter.chunks.values.toObservable().cast()
+            }
         }
+        println("got book elements")
+
         return bookElements
-            .flatMap { getAudioForCurrentResource(it, isBook) }
+            .flatMap {
+                getAudioForCurrentResource(it, isBook) }
             .mapNotNull { audio -> audio.selected.value?.value }
     }
 

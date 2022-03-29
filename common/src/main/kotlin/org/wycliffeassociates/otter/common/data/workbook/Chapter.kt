@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import com.jakewharton.rxrelay2.Relay
+import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
@@ -32,7 +34,7 @@ data class Chapter(
     override val audio: AssociatedAudio,
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
-    val chunks: Observable<Chunk>,
+    val chunks: ReplayRelay<Chunk>,
     val addChunk: (Int) -> Unit
 ) : BookElement, BookElementContainer, Recordable {
 

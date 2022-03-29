@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.common.persistence.repositories
 
 import com.jakewharton.rxrelay2.BehaviorRelay
+import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Completable
 import io.reactivex.Maybe
@@ -212,14 +213,14 @@ class WorkbookRepository(
     private fun constructChunks(
         chapterCollection: Collection,
         disposables: MutableList<Disposable>
-    ): Observable<Chunk> {
-        return Observable.defer {
+    ): ReplayRelay<Chunk> {
+        val rr = ReplayRelay.create<Chunk>()
             db.getContentByCollectionActiveConnection(chapterCollection)
                 .filter { it.type == ContentType.TEXT }
                 .map {
                     chunk(it, disposables)
-                }
-        }.cache()
+                }.subscribe { rr.accept(it) }
+        return rr
     }
 
     private fun chunk(content: Content, disposables: MutableList<Disposable>): Chunk {
@@ -588,7 +589,7 @@ private class DefaultDatabaseAccessors(
 ) : WorkbookRepository.IDatabaseAccessors {
 
     override fun addContentForCollection(collection: Collection, chunkNumber: Int): Completable {
-        val cont = Content(chunkNumber, "chunk", chunkNumber, chunkNumber, null, null, null, ContentType.TEXT)
+        val cont = Content(chunkNumber, "chunk", chunkNumber, chunkNumber, null, "null", "usfm", ContentType.TEXT)
         return contentRepo.insertForCollection(cont, collection).ignoreElement()
     }
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)

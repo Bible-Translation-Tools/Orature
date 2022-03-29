@@ -153,11 +153,12 @@ class ContentRepository @Inject constructor(
     }
 
     override fun insertForCollection(content: Content, collection: Collection): Single<Int> {
-        activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
-
         return Single
             .fromCallable {
-                contentDao.insert(contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
+                val id = contentDao.insert(contentMapper.mapToEntity(content, collection.id).apply { collectionFk = collection.id })
+                content.id = id
+                activeConnections.getOrDefault(collection, null)?.let { it.accept(content) }
+                id
             }
             .doOnError { e ->
                 logger.error("Error in insertForCollection for content: $content, collection: $collection", e)

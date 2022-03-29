@@ -123,6 +123,7 @@ class ChapterPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in setting up content cards", e)
             }
+            .observeOnFx()
             .subscribe {
                 filteredContent.setAll(
                     allContent.filtered { cardData ->
@@ -463,8 +464,11 @@ class ChapterPageViewModel : ViewModel() {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 
+
+    var count = 1
     fun addChunk() {
-        workbookDataStore.activeChapterProperty.value.addChunk(99)
+        workbookDataStore.activeChapterProperty.value.addChunk(count)
+        count++
     }
 
     fun subList() {
