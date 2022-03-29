@@ -229,7 +229,7 @@
     -fx-fill: -wa-white-80;
 }
 
-.btn--borderless {
+.btn--borderless, .btn--borderless:disabled {
     -fx-border-width: 0;
 }
 

@@ -45,6 +45,9 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
     lateinit var targetLanguageText: Label
 
     @FXML
+    lateinit var removeTranslationBtn: Button
+
+    @FXML
     lateinit var bookCards: VBox
 
     @FXML
@@ -67,6 +70,13 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
     private fun initializeControl() {
         sourceLanguageText.textProperty().bind(card.sourceLanguageProperty)
         targetLanguageText.textProperty().bind(card.targetLanguageProperty)
+
+        removeTranslationBtn.apply {
+            textProperty().bind(card.removeTranslationTextProperty)
+            disableWhen {
+                !card.itemsProperty.emptyProperty()
+            }
+        }
 
         bookCards.apply {
             val toShow = card.shownItemsNumberProperty.value

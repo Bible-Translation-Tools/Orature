@@ -40,6 +40,7 @@ class TranslationCard<T>(
     val sourceLanguageProperty = SimpleStringProperty(sourceLanguage)
     val targetLanguageProperty = SimpleStringProperty(targetLanguage)
     val itemsProperty = SimpleListProperty<T>(items)
+    val removeTranslationTextProperty = SimpleStringProperty()
     val showMoreTextProperty = SimpleStringProperty()
     val showLessTextProperty = SimpleStringProperty()
     val orientationScaleProperty = SimpleDoubleProperty()
