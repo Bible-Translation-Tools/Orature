@@ -48,8 +48,8 @@
                 </Label>
             </children>
         </HBox>
-        <VBox fx:id="bookCards" styleClass="translation-card__books" />
         <BookCard styleClass="translation-card__book--no-bg" fx:id="newBookCard" />
+        <VBox fx:id="bookCards" styleClass="translation-card__books" />
         <VBox styleClass="translation-card__see-more-content">
             <children>
                 <Button fx:id="seeMoreBtn">
