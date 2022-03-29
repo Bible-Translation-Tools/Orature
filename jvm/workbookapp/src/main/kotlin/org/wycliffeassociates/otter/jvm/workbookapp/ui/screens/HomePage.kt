@@ -123,6 +123,10 @@ class HomePage : View() {
                             showLessTextProperty.set(messages["showLess"])
                             orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
+                            onRemoveTranslation = {
+                                hide()
+                                viewModel.removeTranslation(it)
+                            }
                             setOnNewBookAction {
                                 viewModel.createProject(it)
                             }

@@ -45,6 +45,7 @@ class TranslationCard<T>(
     val showLessTextProperty = SimpleStringProperty()
     val orientationScaleProperty = SimpleDoubleProperty()
 
+    var onRemoveTranslation: () -> Unit = { }
     val onNewBookActionProperty = SimpleObjectProperty<() -> Unit>()
     val shownItemsNumberProperty = SimpleIntegerProperty(3)
 
