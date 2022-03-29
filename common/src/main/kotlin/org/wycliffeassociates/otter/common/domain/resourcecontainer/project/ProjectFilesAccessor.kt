@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.project
 
 import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.rxkotlin.cast
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -126,7 +125,9 @@ class ProjectFilesAccessor(
             try {
                 ResourceContainer.load(projectDir).close()
                 return
-            } catch (e: Exception) { }
+            } catch (e: Exception) {
+                log.error("Error in loading resource container $projectDir", e)
+            }
         }
 
         ResourceContainer
