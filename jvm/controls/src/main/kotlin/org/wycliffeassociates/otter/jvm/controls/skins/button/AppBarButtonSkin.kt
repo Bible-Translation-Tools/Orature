@@ -18,7 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.button
 
-import com.sun.javafx.scene.control.behavior.ToggleButtonBehavior
+import com.sun.javafx.scene.control.behavior.ButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -26,11 +26,11 @@ import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.control.ToggleButton
 import javafx.scene.layout.VBox
-import tornadofx.tooltip
+import tornadofx.*
 
 class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton>(button) {
 
-    private val behavior = ToggleButtonBehavior(button)
+    private val behavior = ButtonBehavior(button)
 
     @FXML
     lateinit var root: VBox
@@ -55,6 +55,9 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
         }
         btnIcon.apply {
             graphicProperty().bind(button.graphicProperty())
+        }
+        button.selectedProperty().onChange {
+            if (it) button.requestFocus()
         }
     }
 

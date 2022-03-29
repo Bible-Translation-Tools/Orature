@@ -70,10 +70,6 @@ class AppContent : View() {
                             rootViewModel.drawerOpenedProperty.set(true)
                             left = find(it.type).root
                             show(Side.LEFT)
-
-                            Platform.runLater {
-                                left.requestFocus()
-                            }
                         }
                     }.start()
                 }
