@@ -231,31 +231,37 @@ class SettingsView : View() {
 
                                 region { hgrow = Priority.ALWAYS }
 
-                                add(
-                                    SelectButton().apply {
-                                        isDisable = !pluginData.canRecord
-                                        viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
-                                            isSelected = selectedData == pluginData
+                                hbox {
+                                    addClass("app-drawer__plugin__radio-btn-wrapper")
+                                    add(
+                                        SelectButton().apply {
+                                            isDisable = !pluginData.canRecord
+                                            viewModel.selectedRecorderProperty.onChangeAndDoNow { selectedData ->
+                                                isSelected = selectedData == pluginData
+                                            }
+                                            selectedProperty().onChange { selected ->
+                                                if (selected) viewModel.selectRecorder(pluginData)
+                                            }
+                                            toggleGroup = recorderToggleGroup
                                         }
-                                        selectedProperty().onChange { selected ->
-                                            if (selected) viewModel.selectRecorder(pluginData)
-                                        }
-                                        toggleGroup = recorderToggleGroup
-                                    }
-                                )
+                                    )
+                                }
 
-                                add(
-                                    SelectButton().apply {
-                                        isDisable = !pluginData.canEdit
-                                        viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
-                                            isSelected = selectedData == pluginData
+                                hbox {
+                                    addClass("app-drawer__plugin__radio-btn-wrapper")
+                                    add(
+                                        SelectButton().apply {
+                                            isDisable = !pluginData.canEdit
+                                            viewModel.selectedEditorProperty.onChangeAndDoNow { selectedData ->
+                                                isSelected = selectedData == pluginData
+                                            }
+                                            selectedProperty().onChange { selected ->
+                                                if (selected) viewModel.selectEditor(pluginData)
+                                            }
+                                            toggleGroup = editorToggleGroup
                                         }
-                                        selectedProperty().onChange { selected ->
-                                            if (selected) viewModel.selectEditor(pluginData)
-                                        }
-                                        toggleGroup = editorToggleGroup
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
