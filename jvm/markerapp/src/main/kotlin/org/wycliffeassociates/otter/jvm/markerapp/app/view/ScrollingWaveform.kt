@@ -6,7 +6,7 @@ import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.controllers.SeekSpeed
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 
 open class ScrollingWaveform : Control() {
     val positionProperty = SimpleDoubleProperty(0.0)
@@ -14,8 +14,8 @@ open class ScrollingWaveform : Control() {
 
     var onWaveformClicked: () -> Unit = {}
     var onWaveformDragReleased: (Double) -> Unit = {}
-    var onRewind: ((SeekSpeed) -> Unit) = {}
-    var onFastForward: ((SeekSpeed) -> Unit) = {}
+    var onRewind: ((ScrollSpeed) -> Unit) = {}
+    var onFastForward: ((ScrollSpeed) -> Unit) = {}
     var onToggleMedia: () -> Unit = {}
 
     fun addWaveformImage(image: Image) {

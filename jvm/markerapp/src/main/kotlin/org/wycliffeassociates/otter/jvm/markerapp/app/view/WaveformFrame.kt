@@ -34,7 +34,7 @@ import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
-import org.wycliffeassociates.otter.jvm.controls.controllers.SeekSpeed
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
@@ -48,8 +48,8 @@ class WaveformFrame(
 
     private val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     private val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
-    private val onRewindProperty = SimpleObjectProperty<(SeekSpeed) -> Unit>()
-    private val onFastForwardProperty = SimpleObjectProperty<(SeekSpeed) -> Unit>()
+    private val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
+    private val onFastForwardProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
     private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
@@ -65,11 +65,11 @@ class WaveformFrame(
         onWaveformDragReleasedProperty.set(op)
     }
 
-    fun onRewind(op: (SeekSpeed) -> Unit) {
+    fun onRewind(op: (ScrollSpeed) -> Unit) {
         onRewindProperty.set(op)
     }
 
-    fun onFastForward(op: (SeekSpeed) -> Unit) {
+    fun onFastForward(op: (ScrollSpeed) -> Unit) {
         onFastForwardProperty.set(op)
     }
 
@@ -177,7 +177,7 @@ class WaveformFrame(
             }
 
             setOnKeyPressed {
-                val speed = if (it.isControlDown) SeekSpeed.FAST else SeekSpeed.NORMAL
+                val speed = if (it.isControlDown) ScrollSpeed.FAST else ScrollSpeed.NORMAL
                 when (it.code) {
                     KeyCode.LEFT -> {
                         scrollMedia { onRewindProperty.value?.invoke(speed) }

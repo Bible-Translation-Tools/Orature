@@ -41,7 +41,7 @@ private const val ANIMATION_REFRESH_MS = 16L
 const val SEEK_INTERVAL = 0.1
 const val FAST_SEEK_INTERVAL = 1.0
 
-enum class SeekSpeed {
+enum class ScrollSpeed {
     NORMAL,
     FAST
 }
@@ -149,7 +149,7 @@ class AudioPlayerController(
             }
         }
         audioSlider?.setOnKeyPressed {
-            val speed = if (it.isControlDown) SeekSpeed.FAST else SeekSpeed.NORMAL
+            val speed = if (it.isControlDown) ScrollSpeed.FAST else ScrollSpeed.NORMAL
             when (it.code) {
                 KeyCode.LEFT -> {
                     rewind(speed)
@@ -240,14 +240,14 @@ class AudioPlayerController(
         return player?.getLocationInFrames() ?: 0
     }
 
-    private fun seekInterval(keyCode: KeyCode, speed: SeekSpeed) {
+    private fun seekInterval(keyCode: KeyCode, speed: ScrollSpeed) {
         player?.let {
             if (it.isPlaying()) {
                 resumeAfterDrag = true
                 toggle()
             }
 
-            val percent = if (speed == SeekSpeed.FAST) FAST_SEEK_INTERVAL else SEEK_INTERVAL
+            val percent = if (speed == ScrollSpeed.FAST) FAST_SEEK_INTERVAL else SEEK_INTERVAL
             val interval = percentageToLocation(percent)
             var location = it.getLocationInFrames()
             when (keyCode) {
@@ -258,11 +258,11 @@ class AudioPlayerController(
         }
     }
 
-    fun rewind(speed: SeekSpeed) {
+    fun rewind(speed: ScrollSpeed) {
         seekInterval(KeyCode.LEFT, speed)
     }
 
-    fun fastForward(speed: SeekSpeed) {
+    fun fastForward(speed: ScrollSpeed) {
         seekInterval(KeyCode.RIGHT, speed)
     }
 }

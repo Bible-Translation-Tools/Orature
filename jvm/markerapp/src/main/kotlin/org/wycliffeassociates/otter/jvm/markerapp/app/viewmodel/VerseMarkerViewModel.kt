@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
-import org.wycliffeassociates.otter.jvm.controls.controllers.SeekSpeed
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
@@ -203,11 +203,11 @@ class VerseMarkerViewModel : ViewModel() {
         return audioController?.isPlayingProperty?.value ?: false
     }
 
-    fun rewind(speed: SeekSpeed) {
+    fun rewind(speed: ScrollSpeed) {
         audioController?.rewind(speed)
     }
 
-    fun fastForward(speed: SeekSpeed) {
+    fun fastForward(speed: ScrollSpeed) {
         audioController?.fastForward(speed)
     }
 
