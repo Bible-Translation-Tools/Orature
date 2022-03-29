@@ -31,6 +31,8 @@ class MarkerPlacementWaveformSkin(private val control: MarkerPlacementWaveform) 
                 (skinnable as MarkerPlacementWaveform).topTrack,
             ).apply {
                 framePositionProperty.bind(skinnable.positionProperty)
+                playerProperty.bind(skinnable.playerProperty)
+
                 onWaveformClicked(skinnable.onWaveformClicked)
                 onWaveformDragReleased(skinnable.onWaveformDragReleased)
                 onRewind(skinnable.onRewind)

@@ -103,6 +103,7 @@ class MarkerView : PluginEntrypoint() {
                 )
                 markerStateProperty.bind(viewModel.markerStateProperty)
                 positionProperty.bind(viewModel.positionProperty)
+                playerProperty.bind(viewModel.audioPlayer)
 
                 onSeekNext = viewModel::seekNext
                 onSeekPrevious = viewModel::seekPrevious

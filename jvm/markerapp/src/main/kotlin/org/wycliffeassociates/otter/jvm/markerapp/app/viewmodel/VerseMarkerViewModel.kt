@@ -203,19 +203,11 @@ class VerseMarkerViewModel : ViewModel() {
         return audioController?.isPlayingProperty?.value ?: false
     }
 
-    fun rewind(speed: SeekSpeed, resume: (Boolean) -> Unit) {
-        if (isPlaying()) {
-            resume(true)
-            mediaToggle()
-        }
+    fun rewind(speed: SeekSpeed) {
         audioController?.rewind(speed)
     }
 
-    fun fastForward(speed: SeekSpeed, resume: (Boolean) -> Unit) {
-        if (isPlaying()) {
-            resume(true)
-            mediaToggle()
-        }
+    fun fastForward(speed: SeekSpeed) {
         audioController?.fastForward(speed)
     }
 
