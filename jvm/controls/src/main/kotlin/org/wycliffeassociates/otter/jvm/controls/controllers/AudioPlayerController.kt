@@ -254,7 +254,7 @@ class AudioPlayerController(
                 KeyCode.LEFT -> location -= interval
                 KeyCode.RIGHT -> location += interval
             }
-            seek(Utils.clamp(0, location, player!!.getDurationInFrames()))
+            seek(Utils.clamp(0, location, it.getDurationInFrames()))
         }
     }
 
