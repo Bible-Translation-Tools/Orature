@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.controls.controllers
 
 import com.github.thomasnield.rxkotlinfx.observeOnFx
+import com.sun.javafx.util.Utils
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import javafx.application.Platform
@@ -37,6 +38,13 @@ import kotlin.math.min
 
 const val DURATION_FORMAT = "%02d:%02d" // mm:ss
 private const val ANIMATION_REFRESH_MS = 16L
+const val SEEK_INTERVAL = 0.1
+const val FAST_SEEK_INTERVAL = 1.0
+
+enum class ScrollSpeed {
+    NORMAL,
+    FAST
+}
 
 class AudioPlayerController(
     var audioSlider: Slider? = null,
@@ -125,7 +133,7 @@ class AudioPlayerController(
             }
         }
         audioSlider?.setOnMouseClicked {
-            val percent = max(0.0, min(it.x / audioSlider!!.width, 1.0))
+            val percent = max(0.0, min(it.x / audioSlider!!.width, 1.0)) * 100
             var wasPlaying = false
             if (player?.isPlaying() == true) {
                 toggle()
@@ -141,13 +149,15 @@ class AudioPlayerController(
             }
         }
         audioSlider?.setOnKeyPressed {
+            val speed = if (it.isControlDown) ScrollSpeed.FAST else ScrollSpeed.NORMAL
             when (it.code) {
-                KeyCode.LEFT, KeyCode.RIGHT -> {
-                    if (player?.isPlaying() == true) {
-                        resumeAfterDrag = true
-                        toggle()
-                    }
-                    seekInterval(it.code)
+                KeyCode.LEFT -> {
+                    rewind(speed)
+                    it.consume()
+                }
+                KeyCode.RIGHT -> {
+                    fastForward(speed)
+                    it.consume()
                 }
             }
         }
@@ -158,6 +168,7 @@ class AudioPlayerController(
                         resumeAfterDrag = false
                         toggle()
                     }
+                    it.consume()
                 }
                 KeyCode.ENTER, KeyCode.SPACE -> {
                     toggle()
@@ -180,7 +191,7 @@ class AudioPlayerController(
                 } else {
                     isPlayingProperty.set(false)
                 }
-                if (player?.isPlaying() == true && audioSlider?.isValueChanging != false) {
+                if (player?.isPlaying() == true && audioSlider?.isValueChanging == false) {
                     audioSlider?.value = playbackPosition().toDouble()
                 }
             }
@@ -217,7 +228,7 @@ class AudioPlayerController(
     }
 
     private fun percentageToLocation(percent: Double): Int {
-        val _percent = if (percent > 1.00) percent / 100F else percent
+        val _percent = percent / 100F
         player?.let {
             return (_percent * it.getDurationInFrames()).toInt()
         } ?: run {
@@ -229,16 +240,30 @@ class AudioPlayerController(
         return player?.getLocationInFrames() ?: 0
     }
 
-    private fun seekInterval(keyCode: KeyCode) {
+    private fun seekInterval(keyCode: KeyCode, speed: ScrollSpeed) {
         player?.let {
-            val interval = percentageToLocation(10.0)
+            if (it.isPlaying()) {
+                resumeAfterDrag = true
+                toggle()
+            }
+
+            val percent = if (speed == ScrollSpeed.FAST) FAST_SEEK_INTERVAL else SEEK_INTERVAL
+            val interval = percentageToLocation(percent)
             var location = it.getLocationInFrames()
             when (keyCode) {
                 KeyCode.LEFT -> location -= interval
                 KeyCode.RIGHT -> location += interval
             }
-            seek(max(0, location))
+            seek(Utils.clamp(0, location, it.getDurationInFrames()))
         }
+    }
+
+    fun rewind(speed: ScrollSpeed) {
+        seekInterval(KeyCode.LEFT, speed)
+    }
+
+    fun fastForward(speed: ScrollSpeed) {
+        seekInterval(KeyCode.RIGHT, speed)
     }
 }
 

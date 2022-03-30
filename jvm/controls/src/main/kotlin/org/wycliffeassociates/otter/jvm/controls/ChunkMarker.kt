@@ -35,6 +35,7 @@ class ChunkMarker : Control() {
     val canBeMovedProperty = SimpleBooleanProperty(true)
 
     init {
+        styleClass.add("chunk-marker")
         visibleProperty().bind(isPlacedProperty)
     }
 

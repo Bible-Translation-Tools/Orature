@@ -25,8 +25,11 @@ import javafx.geometry.Point2D
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.control.SkinBase
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Region
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
@@ -36,11 +39,20 @@ import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
 
+private const val MOVE_MARKER_INTERVAL = 0.001
+
 class MarkerTrackControl : Control() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val highlightState = observableListOf<MarkerHighlightState>()
     val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
+    val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val playerProperty = SimpleObjectProperty<IAudioPlayer>()
+
+    init {
+        styleClass.add("vm-marker-track")
+    }
 
     fun refreshMarkers() {
         (skin as? MarkerTrackControlSkin)?.refreshMarkers()
@@ -65,6 +77,8 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     private val preDragThumbPos = DoubleArray(control.markers.size)
     var dragStart: Array<Point2D?> = Array(control.markers.size) { null }
 
+    private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
+
     fun refreshMarkers() {
         if (skinnable.width > 0) {
             skinnable.markers.forEachIndexed { index, chunkMarker ->
@@ -88,6 +102,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                 ).toDouble()
 
                 isPlacedProperty.set(mk.placed)
+                markerIdProperty.set(i)
                 markerNumberProperty.set(mk.label)
                 canBeMovedProperty.set(i != 0)
                 markerPositionProperty.set(pixel)
@@ -104,6 +119,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                         preDragThumbPos[i] = clampedValue / trackWidth
                         me.consume()
                     }
+                    this.requestFocus()
                 }
 
                 setOnMouseDragged { me ->
@@ -134,11 +150,15 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                         val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                         translateX = it.toDouble()
                         if (trackWidth > 0) {
-                            control.markers.get(i).frame = pixelsToFrames(
+                            control.markers[i].frame = pixelsToFrames(
                                 it.toDouble()
                             )
                         }
                     }
+                }
+
+                focusedProperty().onChange {
+                    if (it) focusedMarkerProperty.set(this)
                 }
             }
 
@@ -156,9 +176,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             highlights.add(rect)
         }
 
-        track = Region().apply {
-            styleClass.add("vm-marker-track")
-        }
+        track = Region()
 
         highlights.forEach { track.add(it) }
         markers.forEach { track.add(it) }
@@ -167,7 +185,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             val endPos = skinnable.widthProperty()
 
             if (i + 1 < highlights.size) {
-                highlights[i + 1]?.let { next ->
+                highlights[i + 1].let { next ->
                     val nextVis = next.visibleProperty()
                     val nextPos = next.translateXProperty()
                     val highlightWidth = Bindings.createDoubleBinding(
@@ -194,8 +212,57 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             skinnable.highlightState[i].width.bind(rect.widthProperty())
         }
 
+        control.setOnKeyPressed { e ->
+            when (e.code) {
+                KeyCode.LEFT, KeyCode.RIGHT -> {
+                    moveMarker(e.code)
+                    e.consume()
+                }
+                KeyCode.TAB -> {
+                    if (e.isShiftDown) {
+                        control.onSeekPreviousProperty.value?.invoke()
+                    } else {
+                        control.onSeekNextProperty.value?.invoke()
+                    }
+                    focusMarker(e)
+                }
+            }
+        }
+
+        control.setOnKeyReleased {
+            when (it.code) {
+                KeyCode.ENTER, KeyCode.SPACE -> it.consume()
+            }
+        }
+
         children.clear()
         children.addAll(track)
+    }
+
+    private fun moveMarker(code: KeyCode) {
+        focusedMarkerProperty.value?.let { marker ->
+            val id = marker.markerIdProperty.value
+            if (id == 0) return // don't move the first marker
+
+            val position = marker.markerPositionProperty.value
+            val percent = position / skinnable.width
+            val moveTo = if (code == KeyCode.LEFT) {
+                percent - MOVE_MARKER_INTERVAL
+            } else {
+                percent + MOVE_MARKER_INTERVAL
+            }
+            updateValue(marker.markerIdProperty.value, moveTo)
+        }
+    }
+
+    private fun focusMarker(event: KeyEvent) {
+        val location = skinnable.playerProperty.value.getLocationInFrames()
+        val position = framesToPixels(location).toDouble()
+
+        markers.singleOrNull { it.markerPositionProperty.value == position }?.let {
+            it.requestFocus()
+            event.consume()
+        }
     }
 
     private fun updateValue(id: Int, position: Double) {
@@ -204,7 +271,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             val min = getMin(id)
             val max = getMax(id)
             val clamped = Utils.clamp(min, newValue, max)
-            markers.get(id).markerPositionProperty.set(clamped)
+            markers[id].markerPositionProperty.set(clamped)
             skinnable.onPositionChangedProperty.value?.invoke(id, position)
         }
     }
@@ -212,7 +279,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     private fun getMin(id: Int): Double {
         val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id > 0) {
-            placedMarkers.get(id - 1)
+            placedMarkers[id - 1]
         } else {
             null
         }
@@ -224,7 +291,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     private fun getMax(id: Int): Double {
         val placedMarkers = markers.filter { it.isPlacedProperty.value }
         val previousMaker = if (id < placedMarkers.size - 1) {
-            placedMarkers.get(id + 1)
+            placedMarkers[id + 1]
         } else {
             null
         }

@@ -552,6 +552,16 @@
     -fx-background-color: -wa-primary;
 }
 
+/* ---------------- Audio Slider --------------- */
+.wa-audio-slider {
+    -fx-focus-traversable: true;
+}
+
+.wa-audio-slider:focused .wa-audio-slider-thumb {
+    -fx-stroke-width: 4;
+    -fx-stroke: -wa-button-border;
+}
+
 /* ----------------- ListView ---------------- */
 .wa-list-view {
     -fx-background-color: -wa-transparent;

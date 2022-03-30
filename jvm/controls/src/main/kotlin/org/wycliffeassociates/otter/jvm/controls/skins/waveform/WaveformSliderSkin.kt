@@ -39,6 +39,7 @@ import kotlin.math.min
 class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
 
     private val thumb = Rectangle(1.0, 1.0).apply {
+        addClass("wa-audio-slider-thumb")
         stroke = Color.BLACK
         strokeWidth = 1.0
         arcHeight = 10.0
@@ -71,8 +72,8 @@ class WaveformSliderSkin(val control: AudioSlider) : SkinBase<Slider>(control) {
                 }
                 root.add(markersHolder)
 
-                root.add(thumb)
                 root.add(playbackLine)
+                root.add(thumb)
             }
 
             // clear minimap image when exiting marker app - free up memory

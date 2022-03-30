@@ -20,12 +20,20 @@
 .chunk-marker {
     -fx-pref-height: 40px;
     -fx-pref-width: 60px;
-    -fx-spacing: 2px;
     -fx-padding: 8px;
     -fx-background-color: -wa-primary-dark;
     -fx-border-color: -wa-black-40;
     -fx-background-radius: 0px 4px 4px 0px;
     -fx-border-radius: 0px 4px 4px 0px;
+}
+
+.chunk-marker:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+}
+
+.chunk-marker__root {
+    -fx-spacing: 2px;
 }
 
 .chunk-marker__text {

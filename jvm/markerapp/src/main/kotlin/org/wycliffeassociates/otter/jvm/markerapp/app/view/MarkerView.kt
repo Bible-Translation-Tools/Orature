@@ -56,7 +56,7 @@ class MarkerView : PluginEntrypoint() {
             prefWidth = viewModel.imageWidth
             viewModel.markerStateProperty.onChangeAndDoNow { markers ->
                 markers?.let { markers ->
-                    markers.markerCountProperty?.onChangeAndDoNow {
+                    markers.markerCountProperty.onChangeAndDoNow {
                         this.markers.setAll(viewModel.markers.markers)
                         highlightState.setAll(viewModel.markers.highlightState)
                         refreshMarkers()
@@ -64,11 +64,12 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
             setOnPositionChanged { id, position ->
-                slider!!.updateMarker(id, position)
+                slider?.updateMarker(id, position)
             }
+            playerProperty.bind(viewModel.audioPlayer)
         }
         slider?.let {
-            viewModel.initializeAudioController()
+            viewModel.initializeAudioController(it)
         }
     }
 
@@ -90,17 +91,19 @@ class MarkerView : PluginEntrypoint() {
         borderpane {
             top = vbox {
                 add<TitleFragment>()
-                add<MinimapFragment>() {
+                add<MinimapFragment> {
                     this@MarkerView.minimap = this
                     this@MarkerView.slider = slider
                 }
             }
             center = waveform.apply {
+                addClass("vm-marker-waveform")
                 viewModel.compositeDisposable.add(
                     viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
                 )
                 markerStateProperty.bind(viewModel.markerStateProperty)
                 positionProperty.bind(viewModel.positionProperty)
+                playerProperty.bind(viewModel.audioPlayer)
 
                 onSeekNext = viewModel::seekNext
                 onSeekPrevious = viewModel::seekPrevious
@@ -114,6 +117,9 @@ class MarkerView : PluginEntrypoint() {
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
                 }
+                onRewind = viewModel::rewind
+                onFastForward = viewModel::fastForward
+                onToggleMedia = viewModel::mediaToggle
             }
             bottom = vbox {
                 add<SourceTextFragment>()
