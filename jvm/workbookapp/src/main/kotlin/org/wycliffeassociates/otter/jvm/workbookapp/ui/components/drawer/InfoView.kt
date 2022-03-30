@@ -19,6 +19,8 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
 import com.jfoenix.controls.JFXButton
+import javafx.scene.control.Button
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -32,6 +34,9 @@ import java.text.MessageFormat
 class InfoView : View() {
     val info = AppInfo()
     private val viewModel: AppInfoViewModel by inject()
+
+    private lateinit var traversalEngine: DrawerTraversalEngine
+    private lateinit var closeButton: Button
 
     override val root = vbox {
         addClass("app-drawer__content")
@@ -54,6 +59,7 @@ class InfoView : View() {
                         graphic = FontIcon(MaterialDesign.MDI_CLOSE)
                         tooltip(messages["close"])
                         action { collapse() }
+                        closeButton = this
                     }
                 }
 
@@ -146,10 +152,37 @@ class InfoView : View() {
                 }
             }
         }
+
+        setOnKeyReleased {
+            if (it.code == KeyCode.ESCAPE) collapse()
+        }
     }
 
     init {
-        tryImportStylesheet(javaClass.getResource("/css/app-drawer.css").toExternalForm())
+        tryImportStylesheet(resources["/css/app-drawer.css"])
+
+        subscribe<DrawerEvent<UIComponent>> {
+            if (it.action == DrawerEventAction.OPEN) {
+                focusCloseButton()
+                traversalEngine.reset()
+            }
+        }
+
+        traversalEngine = DrawerTraversalEngine(root)
+        traversalEngine.set()
+    }
+
+    override fun onDock() {
+        super.onDock()
+        focusCloseButton()
+        traversalEngine.reset()
+    }
+
+    private fun focusCloseButton() {
+        runAsync {
+            Thread.sleep(500)
+            runLater(closeButton::requestFocus)
+        }
     }
 
     private fun collapse() {
