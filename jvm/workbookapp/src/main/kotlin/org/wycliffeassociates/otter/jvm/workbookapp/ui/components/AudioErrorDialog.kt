@@ -37,6 +37,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
+import org.wycliffeassociates.otter.jvm.utils.overrideEventsAndRun
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.util.concurrent.Callable
@@ -137,9 +138,8 @@ class AudioErrorDialog : OtterDialog() {
                 }
 
                 buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-
-                selectionModel.selectedItemProperty().onChange {
-                    it?.let { settingsViewModel.updateOutputDevice(it) }
+                overrideEventsAndRun {
+                    settingsViewModel.updateOutputDevice(it)
                 }
 
                 visibleProperty().bind(
@@ -159,9 +159,8 @@ class AudioErrorDialog : OtterDialog() {
                 }
 
                 buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-
-                selectionModel.selectedItemProperty().onChange {
-                    it?.let { settingsViewModel.updateInputDevice(it) }
+                overrideEventsAndRun {
+                    settingsViewModel.updateInputDevice(it)
                 }
 
                 visibleProperty().bind(

@@ -35,7 +35,7 @@ import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
+import org.wycliffeassociates.otter.jvm.utils.images.fitToHeight
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow

@@ -21,7 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.utils.capitalizeString
-import org.wycliffeassociates.otter.jvm.controls.utils.simulateKeyPress
+import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
 import tornadofx.*
