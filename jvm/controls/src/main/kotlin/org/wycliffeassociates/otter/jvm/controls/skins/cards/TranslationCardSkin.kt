@@ -76,7 +76,7 @@ class TranslationCardSkin<T>(private val card: TranslationCard<T>) : SkinBase<Tr
             disableWhen {
                 !card.itemsProperty.emptyProperty()
             }
-            setOnAction { card.onRemoveTranslation.value?.invoke() }
+            setOnAction { card.onRemoveTranslationProperty.value?.invoke() }
         }
 
         bookCards.apply {
