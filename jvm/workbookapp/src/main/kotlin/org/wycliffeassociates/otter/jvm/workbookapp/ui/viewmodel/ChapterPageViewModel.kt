@@ -108,16 +108,6 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun dock() {
-        chapterCardProperty.set(CardData(workbookDataStore.chapter))
-        workbookDataStore.activeChapterProperty.value.let { _chapter ->
-            _chapter?.let { chapter ->
-                loadChapterContents(chapter).subscribe()
-                val chap = CardData(chapter)
-                chapterCardProperty.set(chap)
-                subscribeSelectedTakePropertyToRelay(chapter.audio)
-            }
-        }
-
         allContent
             .changes()
             .doOnError { e ->
@@ -125,14 +115,25 @@ class ChapterPageViewModel : ViewModel() {
             }
             .observeOnFx()
             .subscribe {
-                filteredContent.setAll(
-                    allContent.filtered { cardData ->
-                        cardData.item != ContentLabel.CHAPTER.value
-                    }
-                )
+                println("in the allcontent changes")
+                println(allContent.size)
+
                 checkCanCompile()
                 setWorkChunk()
             }
+
+        chapterCardProperty.set(CardData(workbookDataStore.chapter))
+        workbookDataStore.activeChapterProperty.value.let { _chapter ->
+            _chapter?.let { chapter ->
+                loadChapterContents(chapter).subscribe { println("carddata from beginning $it")}
+                val chap = CardData(chapter)
+                chapterCardProperty.set(chap)
+                subscribeSelectedTakePropertyToRelay(chapter.audio)
+            }
+        }
+
+        println("allcontent size after dock is ${allContent.size}")
+        println("filtered size after dock is ${filteredContent.size}")
     }
 
     fun undock() {
@@ -376,6 +377,7 @@ class ChapterPageViewModel : ViewModel() {
         loading = true
         return chapter.chunks
             .map {
+                println("adding chunk $it to card data")
                 CardData(it)
             }
             .map {
@@ -393,9 +395,10 @@ class ChapterPageViewModel : ViewModel() {
                 logger.error("Error in loading chapter contents for chapter: $chapter", e)
             }
             .map {
-                allContent.add(it)
+                println("about to add it to allcontent")
+                filteredContent.add(it)
                 it
-            }
+            }.observeOnFx()
     }
 
     private fun subscribeSelectedTakePropertyToRelay(audio: AssociatedAudio) {
@@ -463,7 +466,6 @@ class ChapterPageViewModel : ViewModel() {
     private fun getPlayer(): IAudioPlayer {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
-
 
     var count = 1
     fun addChunk() {
