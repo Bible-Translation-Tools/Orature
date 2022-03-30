@@ -43,6 +43,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
@@ -55,7 +56,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
-import org.wycliffeassociates.otter.common.utils.capitalizeString
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -120,27 +120,14 @@ class RecordScriptureViewModel : ViewModel() {
         workbookDataStore.activeWorkbookProperty.onChangeAndDoNow { workbook ->
             workbook?.let {
                 getChapterList(workbook.target.chapters)
-                if (activeChapterProperty.value == null) {
-                    setHasNextAndPreviousChapter()
-                }
-            }
-        }
-
-        workbookDataStore.activeChapterProperty.onChangeAndDoNow { chapter ->
-            chapter?.let {
-                getChunkList(chapter.chunks)
-                if (activeChunkProperty.value == null) {
-                    recordable = it
-                    setHasNextAndPreviousChunk()
-                }
             }
         }
 
         activeChapterProperty.onChangeAndDoNow { chapter ->
             setHasNextAndPreviousChapter()
-            if (chapter != null) {
-                // This will trigger loading takes
-                recordable = chapter
+            chapter?.let {
+                getChunkList(chapter.chunks)
+                recordable = it
             }
         }
 
@@ -150,6 +137,10 @@ class RecordScriptureViewModel : ViewModel() {
                 setTitle(chunk)
                 // This will trigger loading takes
                 recordable = chunk
+            } else {
+                activeChapterProperty.value?.let {
+                    recordable = it
+                }
             }
         }
 
