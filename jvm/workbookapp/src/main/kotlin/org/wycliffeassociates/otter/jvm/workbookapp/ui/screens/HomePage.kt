@@ -123,7 +123,7 @@ class HomePage : View() {
                             showLessTextProperty.set(messages["showLess"])
                             orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
-                            onRemoveTranslation = {
+                            setOnRemoveTranslation {
                                 hide()
                                 viewModel.removeTranslation(it)
                             }
