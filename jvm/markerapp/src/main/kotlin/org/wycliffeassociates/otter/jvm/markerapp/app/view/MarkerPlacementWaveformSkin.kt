@@ -8,11 +8,9 @@ import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerViewBack
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.PlaceMarkerLayer
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.WaveformOverlay
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import tornadofx.add
-import tornadofx.hgrow
-import tornadofx.vgrow
+import tornadofx.*
 
-class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : ScrollingWaveformSkin(control) {
+class MarkerPlacementWaveformSkin(private val control: MarkerPlacementWaveform) : ScrollingWaveformSkin(control) {
 
     private fun addHighlights(highlights: List<MarkerHighlightState>) {
         waveformFrame.clearHighlights()
@@ -33,9 +31,18 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
                 (skinnable as MarkerPlacementWaveform).topTrack,
             ).apply {
                 framePositionProperty.bind(skinnable.positionProperty)
-                onWaveformClicked { skinnable.onWaveformClicked() }
-                onWaveformDragReleased {
-                    skinnable.onWaveformDragReleased(it)
+                playerProperty.bind(skinnable.playerProperty)
+
+                onWaveformClicked(skinnable.onWaveformClicked)
+                onWaveformDragReleased(skinnable.onWaveformDragReleased)
+                onRewind(skinnable.onRewind)
+                onFastForward(skinnable.onFastForward)
+                onToggleMedia(skinnable.onToggleMedia)
+                onSeekPrevious((skinnable as MarkerPlacementWaveform).onSeekPrevious)
+                onSeekNext((skinnable as MarkerPlacementWaveform).onSeekNext)
+
+                focusedProperty().onChange {
+                    skinnable.togglePseudoClass("active", it)
                 }
             }
             add(waveformFrame)
@@ -47,7 +54,6 @@ class MarkerPlacementWaveformSkin(val control: MarkerPlacementWaveform) : Scroll
                     addHighlights(markers.highlightState)
                 }
             }
-
         }
         children.add(root)
     }

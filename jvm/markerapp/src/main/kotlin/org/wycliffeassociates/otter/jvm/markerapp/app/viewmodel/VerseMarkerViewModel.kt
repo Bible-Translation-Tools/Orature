@@ -28,22 +28,23 @@ import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
-import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import java.lang.Integer.min
-import java.util.concurrent.TimeUnit
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import kotlin.math.max
 
 const val SECONDS_ON_SCREEN = 10
@@ -55,11 +56,15 @@ class VerseMarkerViewModel : ViewModel() {
     private val height = min(Screen.getMainScreen().platformHeight, 500)
 
     val waveformMinimapImage = SimpleObjectProperty<Image>()
+    /** Call this before leaving the view to avoid memory leak */
+    var imageCleanup: () -> Unit = {}
 
     private val waveformSubject = PublishSubject.create<Image>()
     val waveform: Observable<Image>
         get() = waveformSubject
 
+    lateinit var waveformMinimapImageListener: ChangeListener<Image>
+    lateinit var markerStateListener: ChangeListener<VerseMarkerModel>
 
     val logger = LoggerFactory.getLogger(VerseMarkerViewModel::class.java)
 
@@ -138,13 +143,13 @@ class VerseMarkerViewModel : ViewModel() {
     fun saveAndQuit() {
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
+        imageCleanup()
 
         (scope as ParameterizedScope).let {
             writeMarkers()
                 .doOnError { e ->
                     logger.error("Error in closing the maker app", e)
                 }
-                .delay(300, TimeUnit.MILLISECONDS) // exec after UI clean up
                 .subscribe {
                     runLater {
                         it.navigateBack()
@@ -192,6 +197,18 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun pause() {
         audioController?.pause()
+    }
+
+    fun isPlaying(): Boolean {
+        return audioController?.isPlayingProperty?.value ?: false
+    }
+
+    fun rewind(speed: ScrollSpeed) {
+        audioController?.rewind(speed)
+    }
+
+    fun fastForward(speed: ScrollSpeed) {
+        audioController?.fastForward(speed)
     }
 
     fun mediaToggle() {

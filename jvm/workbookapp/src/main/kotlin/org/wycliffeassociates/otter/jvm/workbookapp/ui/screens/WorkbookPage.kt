@@ -22,6 +22,7 @@ import com.jfoenix.controls.JFXTabPane
 import javafx.application.Platform
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
+import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
@@ -35,10 +36,11 @@ import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
-import org.wycliffeassociates.otter.jvm.workbookapp.theme.AppStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -91,6 +93,7 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources.get("/css/chapter-card.css"))
         tryImportStylesheet(resources.get("/css/workbook-banner.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/contributor-info.css"))
         tryImportStylesheet(resources.get("/css/tab-pane.css"))
     }
 
@@ -100,6 +103,7 @@ class WorkbookPage : View() {
      * created and added to the view.
      */
     override fun onDock() {
+        viewModel.dock()
         createTabs()
         root.tabs.setAll(tabMap.values)
         viewModel.openWorkbook()
@@ -124,6 +128,7 @@ class WorkbookPage : View() {
             viewModel.chapters.removeListener(it.value)
         }
         tabChaptersListeners.clear()
+        viewModel.undock()
     }
 
     private fun createTabs() {
@@ -352,19 +357,84 @@ class WorkbookPage : View() {
                 hgrow = Priority.ALWAYS
                 vgrow = Priority.ALWAYS
                 alignment = Pos.CENTER
-                addClass(AppStyles.whiteBackground)
+
                 progressindicator {
                     visibleProperty().bind(viewModel.loadingProperty)
                     managedProperty().bind(visibleProperty())
                     addClass(CardGridStyles.contentLoadingProgress)
                 }
 
-                listView = listview(viewModel.chapters) {
+                hbox {
                     vgrow = Priority.ALWAYS
-                    addClass("workbook-page__chapter-list")
 
-                    setCellFactory {
-                        ChapterCell()
+                    listView = listview(viewModel.chapters) {
+                        hgrow = Priority.ALWAYS
+                        vgrow = Priority.ALWAYS
+                        addClass("workbook-page__chapter-list")
+                        fitToParentWidth()
+
+                        setCellFactory {
+                            ChapterCell()
+                        }
+                    }
+                    add(buildContributorSection())
+                }
+            }
+        }
+
+        private fun buildContributorSection(): ContributorInfo {
+            return ContributorInfo(viewModel.contributors).apply {
+                hgrow = Priority.SOMETIMES
+
+                visibleWhen {
+                    currentStage!!.widthProperty().greaterThan(minWidthProperty() * 2)
+                }
+                managedWhen(visibleProperty())
+
+                addContributorCallbackProperty.set(
+                    EventHandler {
+                        viewModel.addContributor(it.source as String)
+                    }
+                )
+                editContributorCallbackProperty.set(
+                    EventHandler {
+                        viewModel.editContributor(it.source as ContributorCellData)
+                    }
+                )
+                removeContributorCallbackProperty.set(
+                    EventHandler {
+                        val indexToRemove = it.source as Int
+                        viewModel.removeContributor(indexToRemove)
+                    }
+                )
+                button(messages["saveContributors"]) {
+                    addClass("btn--primary", "btn--borderless")
+                    fitToParentWidth()
+                    tooltip(this.text)
+                    isDisable = true
+                    viewModel.contributors.onChange { isDisable = false }
+
+                    setOnAction {
+                        viewModel.saveContributorInfo()
+                        isDisable = true
+                    }
+                }
+                textflow {
+                    label(messages["licenseDescription"]) {
+                        addClass("contributor__section-text")
+                        fitToParentWidth()
+                        isWrapText = true
+                    }
+                    hyperlink(messages["licenseCCBYSA"]) {
+                        addClass("contributor__license-link")
+                        fitToParentWidth()
+                        isWrapText = true
+
+                        val url = "https://creativecommons.org/licenses/by-sa/4.0/"
+                        tooltip(url)
+                        action {
+                            FX.application.hostServices.showDocument(url)
+                        }
                     }
                 }
             }

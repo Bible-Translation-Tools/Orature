@@ -36,6 +36,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AddPluginViewMo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ExportChapterViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.HomePageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.RemovePluginsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -78,7 +79,7 @@ interface AppDependencyGraph {
     fun inject(viewModel: ChapterPageViewModel)
     fun inject(viewModel: AppInfoViewModel)
     fun inject(viewModel: VerbalizeViewModel)
-
+    fun inject(viewModel: ExportChapterViewModel)
     fun inject(viewModel: RemovePluginsViewModel)
 
     fun injectDatabase(): AppDatabase

@@ -1,15 +1,22 @@
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 
-open class ScrollingWaveform() : Control() {
+open class ScrollingWaveform : Control() {
     val positionProperty = SimpleDoubleProperty(0.0)
+    val playerProperty = SimpleObjectProperty<IAudioPlayer>()
 
     var onWaveformClicked: () -> Unit = {}
     var onWaveformDragReleased: (Double) -> Unit = {}
+    var onRewind: ((ScrollSpeed) -> Unit) = {}
+    var onFastForward: ((ScrollSpeed) -> Unit) = {}
+    var onToggleMedia: () -> Unit = {}
 
     fun addWaveformImage(image: Image) {
         (skin as ScrollingWaveformSkin).addWaveformImage(image)

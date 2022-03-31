@@ -84,7 +84,7 @@ class AppBar : Fragment() {
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/app-bar.css"))
+        tryImportStylesheet(resources["/css/app-bar.css"])
 
         root.apply {
             styleClass.setAll("app-bar")
@@ -106,7 +106,9 @@ class AppBar : Fragment() {
                 if (it.action == DrawerEventAction.CLOSE) {
                     when (it.type) {
                         // ignore the drawer views as they handle closing via the toggle group
-                        AddFilesView::class, SettingsView::class, InfoView::class -> { /* no-op */ }
+                        AddFilesView::class -> addButton.requestFocus()
+                        SettingsView::class -> settingsButton.requestFocus()
+                        InfoView::class -> infoButton.requestFocus()
                         // If the drawer is closed from something other than the toggle buttons, deselect them all
                         else -> { buttonsToggleGroup.toggles.forEach { it.isSelected = false } }
                     }

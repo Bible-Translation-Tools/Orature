@@ -31,6 +31,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.common.utils.capitalizeString
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
@@ -50,6 +51,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -115,17 +117,20 @@ class ChapterPage : View() {
         tryImportStylesheet(resources.get("/css/take-item.css"))
         tryImportStylesheet(resources.get("/css/add-plugin-dialog.css"))
         tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources.get("/css/contributor-info.css"))
 
         pluginOpenedPage = createPluginOpenedPage()
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
+                pluginOpenedPage.onDock()
                 viewModel.openPlayers()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
+                pluginOpenedPage.onUndock()
             }
         }
     }
@@ -189,6 +194,7 @@ class ChapterPage : View() {
                         action {
                             viewModel.recordChapter()
                         }
+                        shortcut(Shortcut.RECORD.value)
                     }
                     button {
                         addClass("btn", "btn--secondary")
@@ -196,10 +202,9 @@ class ChapterPage : View() {
                         tooltip(text)
                         graphic = FontIcon(Material.UPLOAD_FILE)
                         action {
-                            val directory = chooseDirectory(FX.messages["exportChapter"])
-                            directory?.let {
-                                viewModel.exportChapter(it)
-                            }
+                            find<ExportChapterDialog>().apply {
+                                orientationProperty.set(settingsViewModel.orientationProperty.value)
+                            }.open()
                         }
                         disableProperty().bind(viewModel.selectedChapterTakeProperty.isNull)
                     }

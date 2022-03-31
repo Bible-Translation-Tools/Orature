@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.application.Platform
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.value.ChangeListener
 import javafx.scene.control.Tab
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.common.domain.content.Recordable
@@ -34,6 +35,7 @@ class RecordableTab(
 ) : Tab() {
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
+    var recordableListener: ChangeListener<Recordable?>? = null
     private val recordResourceFragment = RecordResourceFragment(viewModel)
 
     init {
@@ -69,6 +71,14 @@ class RecordableTab(
         recordableProperty.unbind()
         viewModel.closePlayers()
         recordResourceFragment.onUndock()
+    }
+
+    fun removeListeners() {
+        recordableListener?.let { recordableProperty.removeListener(it) }
+    }
+
+    fun recordNewTake() {
+        viewModel.recordNewTake()
     }
 
     private fun callOnTabSelect() {

@@ -21,7 +21,9 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
@@ -37,14 +39,13 @@ class MarkerView : PluginEntrypoint() {
     private val markerTrack: MarkerTrackControl = MarkerTrackControl()
     private val waveform = MarkerPlacementWaveform(markerTrack)
 
-    private val titleFragment = TitleFragment()
-    private val minimap = MinimapFragment()
-    private val source = SourceTextFragment()
-    private val playbackControls = PlaybackControlsFragment()
+    private var slider: AudioSlider? = null
+    private var minimap: MinimapFragment? = null
 
     override fun onDock() {
         super.onDock()
         viewModel.onDock()
+        viewModel.imageCleanup = waveform::freeImages
         timer = object : AnimationTimer() {
             override fun handle(currentNanoTime: Long) {
                 viewModel.calculatePosition()
@@ -55,7 +56,7 @@ class MarkerView : PluginEntrypoint() {
             prefWidth = viewModel.imageWidth
             viewModel.markerStateProperty.onChangeAndDoNow { markers ->
                 markers?.let { markers ->
-                    markers.markerCountProperty?.onChangeAndDoNow {
+                    markers.markerCountProperty.onChangeAndDoNow {
                         this.markers.setAll(viewModel.markers.markers)
                         highlightState.setAll(viewModel.markers.highlightState)
                         refreshMarkers()
@@ -63,10 +64,13 @@ class MarkerView : PluginEntrypoint() {
                 }
             }
             setOnPositionChanged { id, position ->
-                minimap.slider.updateMarker(id, position)
+                slider?.updateMarker(id, position)
             }
+            playerProperty.bind(viewModel.audioPlayer)
         }
-        viewModel.initializeAudioController(minimap.slider)
+        slider?.let {
+            viewModel.initializeAudioController(it)
+        }
     }
 
     init {
@@ -78,23 +82,28 @@ class MarkerView : PluginEntrypoint() {
         super.onUndock()
         timer?.stop()
         timer = null
-        waveform.freeImages()
         waveform.markerStateProperty.unbind()
         waveform.positionProperty.unbind()
+        minimap?.cleanUpOnUndock()
     }
 
     override val root =
         borderpane {
             top = vbox {
-                add(titleFragment)
-                add(minimap)
+                add<TitleFragment>()
+                add<MinimapFragment> {
+                    this@MarkerView.minimap = this
+                    this@MarkerView.slider = slider
+                }
             }
             center = waveform.apply {
+                addClass("vm-marker-waveform")
                 viewModel.compositeDisposable.add(
                     viewModel.waveform.observeOnFx().subscribe { addWaveformImage(it) }
                 )
                 markerStateProperty.bind(viewModel.markerStateProperty)
                 positionProperty.bind(viewModel.positionProperty)
+                playerProperty.bind(viewModel.audioPlayer)
 
                 onSeekNext = viewModel::seekNext
                 onSeekPrevious = viewModel::seekPrevious
@@ -108,10 +117,15 @@ class MarkerView : PluginEntrypoint() {
                     val final = Utils.clamp(0, curFrames - deltaFrames, duration)
                     viewModel.seek(final)
                 }
+                onRewind = viewModel::rewind
+                onFastForward = viewModel::fastForward
+                onToggleMedia = viewModel::mediaToggle
             }
             bottom = vbox {
-                add(source)
-                add(playbackControls)
+                add<SourceTextFragment>()
+                add<PlaybackControlsFragment>()
             }
+            shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
+            shortcut(Shortcut.GO_BACK.value, viewModel::saveAndQuit)
         }
 }
