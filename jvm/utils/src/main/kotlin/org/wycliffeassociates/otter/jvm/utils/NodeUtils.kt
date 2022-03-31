@@ -66,21 +66,29 @@ fun Node.simulateKeyPress(
 }
 
 /**
- * Overrides combobox's default keyboard events
- * And triggers action only when value has been changed
- * @param action Action to invoke when value is changed
+ * Overrides ComboBox's default keyboard events
+ * And triggers action only when value has changed
+ * @param action Action to invoke when value has changed
  */
 fun <T> ComboBox<T>.overrideEventsAndRun(action: (T) -> Unit = {}) {
     var oldValue: T? = null
-    this.valueProperty().addListener { _, old, _ ->
-        oldValue = old
-    }
 
-    this.setOnHidden {
-        if (oldValue != null && oldValue != this.value) {
-            action(this.value)
+    this.addEventFilter(KeyEvent.KEY_RELEASED) {
+        when (it.code) {
+            KeyCode.ENTER, KeyCode.SPACE -> {
+                if (this.isShowing) return@addEventFilter
+
+                if (oldValue != null && oldValue != this.value) {
+                    action(this.value)
+                }
+                oldValue = this.value
+                it.consume()
+            }
+            KeyCode.ESCAPE -> {
+                this.value = oldValue
+                it.consume()
+            }
         }
-        oldValue = this.value
     }
 
     this.addEventFilter(KeyEvent.KEY_PRESSED) {

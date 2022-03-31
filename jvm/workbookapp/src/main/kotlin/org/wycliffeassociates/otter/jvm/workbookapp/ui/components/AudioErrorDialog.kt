@@ -80,7 +80,7 @@ class AudioErrorDialog : OtterDialog() {
             }
             region { hgrow = Priority.ALWAYS }
             button {
-                addClass("add-plugin-dialog__btn--close")
+                addClass("btn", "btn--secondary")
                 graphic = FontIcon("gmi-close")
                 onActionProperty().bind(onCancelActionProperty())
             }
