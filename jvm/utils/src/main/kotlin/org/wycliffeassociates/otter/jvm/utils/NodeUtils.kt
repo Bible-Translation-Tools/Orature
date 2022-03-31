@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.utils
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
+import javafx.scene.control.TextArea
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import kotlin.reflect.KClass
@@ -107,6 +108,35 @@ fun <T> ComboBox<T>.overrideEventsAndRun(action: (T) -> Unit = {}) {
             }
             KeyCode.TAB -> {
                 if (this.isShowing) it.consume()
+            }
+        }
+    }
+}
+
+/**
+ * Overrides TextArea's default keyboard events
+ * And triggers action only when Shift + Enter is pressed
+ * @param action Action to invoke when Shift + Enter is pressed
+ */
+fun TextArea.overrideEventsAndRun(action: (String) -> Unit = {}) {
+    this.addEventFilter(KeyEvent.KEY_RELEASED) {
+        if (it.code == KeyCode.ENTER && it.isShiftDown) {
+            it.consume()
+            action(this.text ?: "")
+            this.simulateKeyPress(KeyCode.TAB, controlDown = true)
+        }
+    }
+    this.addEventFilter(KeyEvent.KEY_PRESSED) {
+        when (it.code) {
+            KeyCode.TAB -> {
+                if (!it.isControlDown && !it.isShiftDown) {
+                    it.consume()
+                    this.simulateKeyPress(
+                        KeyCode.TAB,
+                        controlDown = !it.isShiftDown,
+                        shiftDown = it.isShiftDown
+                    )
+                }
             }
         }
     }
