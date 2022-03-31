@@ -105,6 +105,9 @@ fun <T> ComboBox<T>.overrideEventsAndRun(action: (T) -> Unit = {}) {
                 it.consume()
                 this.simulateKeyPress(KeyCode.TAB, shiftDown = true)
             }
+            KeyCode.TAB -> {
+                if (this.isShowing) it.consume()
+            }
         }
     }
 }
