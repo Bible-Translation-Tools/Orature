@@ -118,7 +118,7 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
  * And triggers action only when Shift + Enter is pressed
  * @param action Action to invoke when Shift + Enter is pressed
  */
-fun TextArea.overrideEventsAndRun(action: (String) -> Unit = {}) {
+fun TextArea.overrideDefaultKeyEventHandler(action: (String) -> Unit = {}) {
     this.addEventFilter(KeyEvent.KEY_RELEASED) {
         if (it.code == KeyCode.ENTER && it.isShiftDown) {
             it.consume()
