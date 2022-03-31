@@ -17,13 +17,14 @@ jobs:
         id: tagged
         run: |
           echo "ORG_GRADLE_PROJECT_gradlewCommandVersionProp=${{ steps.semver_parser.outputs.fullversion }}+$GITHUB_RUN_NUMBER" >> $GITHUB_ENV && \
-          echo "UPDATE_PATH=release" >> $GITHUB_ENV
+          echo "UPDATE_PATH=release" >> $GITHUB_ENV && \
+          echo "PRERELEASE_BOOL=false" >> $GITHUB_ENV
         if: contains( github.ref, 'refs/tags/v' )
       - name: If this is a tagged pre-release build set pre-release label and update path
         id: prerelease
         run: |
-          echo "PRERELEASE_LABEL=${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV && \
-          echo "UPDATE_PATH=pre-release-updates/$PRERELEASE_LABEL" >> $GITHUB_ENV
+          echo "PRERELEASE_BOOL=true" >> $GITHUB_ENV && \
+          echo "UPDATE_PATH=pre-release-updates/${{ steps.semver_parser.outputs.prerelease }}" >> $GITHUB_ENV
         if: ${{ steps.semver_parser.outputs.prerelease }}
       - name: set version var for not-tags and upload dir for branches
         run: |
@@ -40,7 +41,7 @@ jobs:
         run: |
           docker run -v $(pwd):/repo \
           -v $HOME/signing.p12:/root/signing.p12 \
-          -e CI_REF_NAME_SLUG \
+          -e UPDATE_PATH \
           -e ORG_GRADLE_PROJECT_gradlewCommandVersionProp \
           -e ORG_GRADLE_PROJECT_gradlewCommandLicenseProp \
           -e ORG_GRADLE_PROJECT_githubRepoUrl \
@@ -75,5 +76,5 @@ jobs:
         if: contains( github.ref, 'refs/tags/v' )
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
+          prerelease: ${{ env.PRERELEASE_BOOL }}
           files: jvm/workbookapp/.exec/*.*

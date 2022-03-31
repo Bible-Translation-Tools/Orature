@@ -27,6 +27,7 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Take
@@ -101,16 +102,7 @@ class ProjectImporter @Inject constructor(
         return Single.fromCallable {
             try {
                 val manifest: Manifest = ResourceContainer.load(resourceContainer).use { it.manifest }
-
-                val metadata = languageRepository
-                    .getBySlug(manifest.dublinCore.language.identifier)
-                    .map { language ->
-                        manifest.dublinCore.mapToMetadata(resourceContainer, language)
-                    }
-                    .blockingGet()
-
                 val manifestSources = manifest.dublinCore.source.toSet()
-
                 val manifestProject = try {
                     manifest.projects.single()
                 } catch (t: Throwable) {
@@ -119,7 +111,23 @@ class ProjectImporter @Inject constructor(
                 }
 
                 directoryProvider.newFileReader(resourceContainer).use { fileReader ->
-                    importResumableProject(fileReader, metadata, manifestProject, manifestSources)
+                    val existingSource = fetchExistingSource(manifestProject, manifestSources)
+                    val sourceCollection = if (existingSource == null) {
+                        importSources(fileReader)
+                        findSourceCollection(manifestSources, manifestProject)
+                    } else {
+                        existingSource
+                    }
+                    syncProjectVersion(manifest, sourceCollection.resourceContainer!!.version)
+
+                    val metadata = languageRepository
+                        .getBySlug(manifest.dublinCore.language.identifier)
+                        .map { language ->
+                            manifest.dublinCore.mapToMetadata(resourceContainer, language)
+                        }
+                        .blockingGet()
+
+                    importResumableProject(fileReader, metadata, manifestProject, sourceCollection)
                 }
 
                 ImportResult.SUCCESS
@@ -136,17 +144,8 @@ class ProjectImporter @Inject constructor(
         fileReader: IFileReader,
         metadata: ResourceMetadata,
         manifestProject: Project,
-        manifestSources: Set<Source>
+        sourceCollection: Collection
     ) {
-        val existingSource = fetchExistingSource(manifestProject, manifestSources)
-        // if any relevant source exists then use it
-        val sourceCollection = if (existingSource == null) {
-            importSources(fileReader)
-            findSourceCollection(manifestSources, manifestProject)
-        } else {
-            existingSource
-        }
-
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
@@ -162,6 +161,7 @@ class ProjectImporter @Inject constructor(
         projectFilesAccessor.initializeResourceContainerInDir()
         projectFilesAccessor.copySourceFiles(fileReader)
 
+        importContributorInfo(metadata, projectFilesAccessor)
         importTakes(
             fileReader,
             derivedProject,
@@ -173,6 +173,18 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
+    }
+
+    private fun importContributorInfo(
+        metadata: ResourceMetadata,
+        projectFilesAccessor: ProjectFilesAccessor
+    ) {
+        val contributors = ResourceContainer.load(metadata.path).use { rc ->
+            rc.manifest.dublinCore.contributor.map { Contributor(it) }
+        }
+        if (contributors.isNotEmpty()) {
+            projectFilesAccessor.setContributorInfo(contributors)
+        }
     }
 
     private fun importTakes(
@@ -381,6 +393,11 @@ class ProjectImporter @Inject constructor(
         } else {
             null
         }
+    }
+
+    /** Applies source version to target version before importing. */
+    private fun syncProjectVersion(projectManifest: Manifest, version: String) {
+        projectManifest.dublinCore.version = version
     }
 
     data class ContentSignature(val chapter: Int, val verse: Int?, val sort: Int?, val type: ContentType?)

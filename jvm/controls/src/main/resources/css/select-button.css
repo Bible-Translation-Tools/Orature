@@ -34,16 +34,23 @@
     -fx-border-width: 0px;
 }
 
-.select-button:hover {
+.select-button:hover, .select-button:hover .wa-radio .radio {
     -fx-background-color: -wa-secondary-btn-background-hover;
 }
 
-.select-button:pressed {
+.select-button:pressed, .select-button:pressed .wa-radio .radio {
     -fx-background-color: -wa-checkbox-button-background-pressed;
 }
 
-.select-button:selected {
+.select-button:selected, .select-button:selected .wa-radio .radio {
     -fx-background-color: -wa-checkbox-button-background-selected;
+}
+
+.select-button:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 10px;
 }
 
 .select-button__title {

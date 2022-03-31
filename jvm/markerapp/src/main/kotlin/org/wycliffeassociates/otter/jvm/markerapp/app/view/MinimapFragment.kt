@@ -21,33 +21,49 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import javafx.beans.value.ChangeListener
 import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
-import javafx.scene.image.Image
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class MinimapFragment : Fragment() {
 
-    val viewModel: VerseMarkerViewModel by inject()
-
-    lateinit var waveformMinimapListener: ChangeListener<Image>
+    private val viewModel: VerseMarkerViewModel by inject()
 
     val slider = AudioSlider()
 
-    init {
+    override fun onDock() {
         super.onDock()
         slider.apply {
-            waveformMinimapListener = ChangeListener { _, _, it ->
+            viewModel.waveformMinimapImageListener = ChangeListener { _, _, it ->
                 waveformImageProperty.set(it)
             }
-            viewModel.waveformMinimapImage.addListener(waveformMinimapListener)
-
+            viewModel.waveformMinimapImage.addListener(viewModel.waveformMinimapImageListener)
+            pixelsInHighlight = viewModel::pixelsInHighlight
             player.bind(viewModel.audioPlayer)
             secondsToHighlightProperty.set(SECONDS_ON_SCREEN)
+
+            viewModel.markerStateListener = ChangeListener { _, _, it ->
+                it?.let { model ->
+                    model.markers.onChangeAndDoNow {
+                        markers.setAll(
+                            it.filter { marker -> marker.placed }
+                                .map { marker -> marker.toAudioCue() }
+                        )
+                    }
+                }
+            }
+            viewModel.markerStateProperty.addListener(viewModel.markerStateListener)
         }
+    }
+
+    fun cleanUpOnUndock() {
+        viewModel.waveformMinimapImage.removeListener(viewModel.waveformMinimapImageListener)
+        viewModel.markerStateProperty.removeListener(viewModel.markerStateListener)
+        slider.clearListeners()
     }
 
     override val root = hbox {
@@ -73,11 +89,5 @@ class MinimapFragment : Fragment() {
                 hgrow = Priority.ALWAYS
             }
         )
-    }
-
-    override fun onUndock() {
-        super.onUndock()
-        viewModel.waveformMinimapImage.removeListener(waveformMinimapListener)
-        slider.clearListeners()
     }
 }

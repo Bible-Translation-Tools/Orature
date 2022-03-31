@@ -43,7 +43,7 @@ class HomePage : View() {
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.set(messages["projects"])
         iconProperty.set(FontIcon(MaterialDesign.MDI_HOME))
-        onClickAction {
+        setOnAction {
             navigator.dock(this@HomePage)
         }
     }

@@ -158,6 +158,10 @@ class AudioBufferPlayer(
         }
     }
 
+    override fun toggle() {
+        if (isPlaying()) pause() else play()
+    }
+
     override fun stop() {
         pause()
         seek(0)

@@ -24,6 +24,7 @@
     -fx-cursor: hand;
     -fx-pref-height: 96px;
     -fx-max-width: 800px;
+    -fx-focus-traversable: false;
 }
 
 .chapter-card:hover {

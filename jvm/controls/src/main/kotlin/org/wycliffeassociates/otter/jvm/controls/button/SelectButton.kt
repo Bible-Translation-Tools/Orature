@@ -32,4 +32,11 @@ class SelectButton : ToggleButton() {
     override fun createDefaultSkin(): Skin<*> {
         return SelectButtonSkin(this)
     }
+
+    override fun fire() {
+        // we don't toggle from selected to not selected if part of a group
+        if (toggleGroup == null || !isSelected) {
+            super.fire()
+        }
+    }
 }

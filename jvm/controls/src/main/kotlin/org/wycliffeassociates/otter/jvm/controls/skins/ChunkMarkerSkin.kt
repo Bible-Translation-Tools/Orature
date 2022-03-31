@@ -41,7 +41,7 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
 
         children.add(
             HBox().apply {
-
+                styleClass.add("chunk-marker__root")
                 var priorCursor = Cursor.DEFAULT
                 var dragging = false
 
@@ -73,7 +73,6 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
                     cursor = priorCursor
                 }
 
-                styleClass.add("chunk-marker")
                 add(dragIcon)
                 add(placedBookmarkIcon)
                 add(addBookmarkIcon)

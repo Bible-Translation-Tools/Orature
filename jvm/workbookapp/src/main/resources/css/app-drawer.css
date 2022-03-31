@@ -18,14 +18,14 @@
  */
 
 .app-drawer__content {
-    -fx-pref-width: 400px;
+    -fx-pref-width: 550px;
     -fx-background-color: -wa-foreground;
     -fx-effect: -wa-level5;
 }
 
 .app-drawer-container {
     -fx-spacing: 30px;
-    -fx-pref-width: 400px;
+    -fx-pref-width: 550px;
     -fx-background-color: -wa-foreground;
 }
 
@@ -38,24 +38,6 @@
     -fx-font-size: 36px;
     -fx-wrap-text: true;
     -fx-text-fill: -wa-regular-text;
-}
-
-.app-drawer__btn--close {
-    -fx-background-color: -wa-btn-icon-background;
-    -fx-border-color: -wa-border-neutral;
-    -fx-border-width: 2px;
-    -fx-border-radius: 4px;
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
-}
-
-.app-drawer__btn--close:hover {
-    -fx-background-color: -wa-foreground-hover;
-}
-
-.app-drawer__btn--close .ikonli-font-icon {
-    -fx-icon-size: 24px;
-    -fx-fill: -wa-fill-neutral;
 }
 
 .app-drawer__subtitle {
@@ -114,15 +96,12 @@
 }
 
 .app-drawer__text--link {
-    -fx-padding: 5 5 15 5;
-    -fx-font-size: 20px;
-    -fx-text-fill: -wa-highlight-text;
-    -fx-underline: true;
-    -fx-cursor: hand;
+    -fx-font-size: 1.4em;
 }
 
-.app-drawer__text--link:hover {
-    -fx-underline: false;
+.app-drawer__text--link .ikonli-font-icon {
+    -fx-font-size: 1.6em;
+    -fx-fill: -wa-highlight-text;
 }
 
 .app-drawer__text--centered {
@@ -130,11 +109,6 @@
     -fx-wrap-text: true;
     -fx-text-alignment: center;
     -fx-text-fill: -wa-regular-text;
-}
-
-.app-drawer__text--link .ikonli-font-icon {
-    -fx-fill: -wa-highlight-text;
-    -fx-font-size: 24px;
 }
 
 .app-drawer__plugin-list {
@@ -167,37 +141,13 @@
     -fx-font-size: 24px;
 }
 
-.app-drawer__plugin .radio-button {
-    -fx-padding: 14px;
-    -fx-background-radius: 6px;
+.app-drawer__plugin__radio-btn-wrapper {
+    -fx-pref-width: 50px;
+    -fx-alignment: center;
 }
 
-.app-drawer__plugin .radio-button:selected {
-    -fx-background-color: -wa-primary-05;
-}
-
-.app-drawer__plugin .radio-button:hover {
-    -fx-background-color: -wa-foreground-hover;
-}
-
-.app-drawer__plugin .radio-button:pressed {
-    -fx-background-color: -wa-foreground-pressed;
-}
-
-.app-drawer__plugin .radio-button .radio {
-    -fx-background-color: -wa-white;
-    -fx-border-width: 2px;
-    -fx-border-radius: 1.0em;
-    -fx-border-color: -wa-gray-darker;
-}
-
-.app-drawer__plugin .radio-button:selected .radio {
-    -fx-border-color: -wa-primary;
-}
-
-.app-drawer__plugin .radio-button:selected .radio .dot {
-    -fx-background-color: -wa-primary;
-    -fx-background-insets: -1, 0;
+.app-drawer__plugin .select-button {
+    -fx-background-color: transparent;
 }
 
 .app-drawer__drag-drop-area {
@@ -219,4 +169,16 @@
 
 .app-drawer__overlay {
     -fx-background-color: -wa-dialog-overlay;
+}
+
+.app-drawer__shortcut {
+    -fx-border-width: 1px;
+    -fx-border-color: -wa-text-field-border;
+    -fx-border-radius: 6px;
+    -fx-padding: 10px;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.app-drawer__shortcut .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }

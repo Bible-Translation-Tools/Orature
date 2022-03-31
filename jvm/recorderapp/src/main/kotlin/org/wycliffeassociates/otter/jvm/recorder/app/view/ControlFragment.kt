@@ -25,6 +25,7 @@ import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.recorder.app.viewmodel.RecorderViewModel
 import tornadofx.*
 
@@ -70,6 +71,7 @@ class ControlFragment : Fragment() {
         }
 
         recordBtn.apply {
+            addClass("record-button")
             graphic = FontIcon("gmi-mic").apply {
                 iconSize = 48
                 fill = Color.WHITE
@@ -80,9 +82,10 @@ class ControlFragment : Fragment() {
                         if (it == true) messages["pause"] else messages["record"]
                 })
             }
-            setOnMouseClicked {
+            setOnAction {
                 toggleRecording()
             }
+            shortcut(Shortcut.RECORD.value)
         }
 
         continueBtn.apply {
@@ -90,9 +93,10 @@ class ControlFragment : Fragment() {
             tooltip(text)
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
-            setOnMouseClicked {
+            setOnAction {
                 vm.save()
             }
+            shortcut(Shortcut.GO_BACK.value)
         }
 
         cancelBtn.apply {
@@ -100,9 +104,10 @@ class ControlFragment : Fragment() {
             tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
-            setOnMouseClicked {
+            setOnAction {
                 vm.save()
             }
+            shortcut(Shortcut.GO_BACK.value)
         }
     }
 

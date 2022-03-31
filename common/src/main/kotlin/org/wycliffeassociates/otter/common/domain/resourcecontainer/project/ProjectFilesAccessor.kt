@@ -23,6 +23,7 @@ import io.reactivex.rxkotlin.cast
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Collection
+import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.AssociatedAudio
 import org.wycliffeassociates.otter.common.data.workbook.BookElement
@@ -119,7 +120,16 @@ class ProjectFilesAccessor(
             .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }
     }
 
-    fun initializeResourceContainerInDir() {
+    fun initializeResourceContainerInDir(overwrite: Boolean = true) {
+        if (!overwrite) { // if existing container is valid, then use it
+            try {
+                ResourceContainer.load(projectDir).close()
+                return
+            } catch (e: Exception) {
+                log.error("Error in loading resource container $projectDir", e)
+            }
+        }
+
         ResourceContainer
             .create(projectDir) {
                 val projectPath = "./${RcConstants.MEDIA_DIR}"
@@ -213,6 +223,19 @@ class ProjectFilesAccessor(
         fileWriter.copyDirectory(audioDir, RcConstants.MEDIA_DIR) {
             val normalized = File(it).invariantSeparatorsPath
             selectedChapters.contains(normalized)
+        }
+    }
+
+    fun getContributorInfo(): List<Contributor> {
+        return ResourceContainer.load(projectDir).use { rc ->
+            rc.manifest.dublinCore.contributor.map { Contributor(it) }
+        }
+    }
+
+    fun setContributorInfo(contributors: List<Contributor>) {
+        ResourceContainer.load(projectDir).use { rc ->
+            rc.manifest.dublinCore.contributor = contributors.map { it.toString() }.toMutableList()
+            rc.writeManifest()
         }
     }
 

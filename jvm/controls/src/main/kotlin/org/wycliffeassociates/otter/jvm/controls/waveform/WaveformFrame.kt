@@ -26,13 +26,19 @@ import javafx.geometry.Point2D
 import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.image.Image
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
+import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
+import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
+import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
@@ -40,8 +46,15 @@ class WaveformFrame(
     bottomTrack: Node? = null
 ) : BorderPane() {
 
-    val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
-    val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
+    private val onWaveformClickedProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+    private val onWaveformDragReleasedProperty = SimpleObjectProperty<(pixel: Double) -> Unit>()
+    private val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
+    private val onFastForwardProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
+    private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
+    private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
+    private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+
+    val playerProperty = SimpleObjectProperty<IAudioPlayer>()
     val framePositionProperty = SimpleDoubleProperty(0.0)
 
     fun onWaveformClicked(op: () -> Unit) {
@@ -52,13 +65,36 @@ class WaveformFrame(
         onWaveformDragReleasedProperty.set(op)
     }
 
+    fun onRewind(op: (ScrollSpeed) -> Unit) {
+        onRewindProperty.set(op)
+    }
+
+    fun onFastForward(op: (ScrollSpeed) -> Unit) {
+        onFastForwardProperty.set(op)
+    }
+
+    fun onToggleMedia(op: () -> Unit) {
+        onToggleMediaProperty.set(op)
+    }
+
+    fun onSeekPrevious(op: () -> Unit) {
+        onSeekPreviousProperty.set(op)
+    }
+
+    fun onSeekNext(op: () -> Unit) {
+        onSeekNextProperty.set(op)
+    }
+
     var dragStart: Point2D? = null
     private var dragContextX = 0.0
     var imageHolder: HBox? = null
     lateinit var imageRegion: Region
     lateinit var highlightHolder: StackPane
+    var resumeAfterScroll = false
 
     init {
+        addClass("vm-waveform-frame")
+
         fitToParentSize()
         hgrow = Priority.ALWAYS
         vgrow = Priority.ALWAYS
@@ -73,7 +109,11 @@ class WaveformFrame(
                 region {
                     styleClass.add("scrolling-waveform-frame__top-track")
                     topTrack?.let {
-                        add(it)
+                        add(it.apply {
+                            val me = (it as MarkerTrackControl)
+                            me.onSeekPreviousProperty.bind(this@WaveformFrame.onSeekPreviousProperty)
+                            me.onSeekNextProperty.bind(this@WaveformFrame.onSeekNextProperty)
+                        })
                     }
                 }
             }
@@ -129,13 +169,50 @@ class WaveformFrame(
                         dragStart = localToParent(me.x, me.y)
                     }
                     val deltaPos = cur.x - dragStart!!.x
-                    onWaveformDragReleasedProperty.get().invoke(deltaPos)
+                    onWaveformDragReleasedProperty.get()?.invoke(deltaPos)
                     dragStart = localToParent(me.x, me.y)
                     me.consume()
                     bindTranslateX() // rebind when done
                 }
             }
+
+            setOnKeyPressed {
+                val speed = if (it.isControlDown) ScrollSpeed.FAST else ScrollSpeed.NORMAL
+                when (it.code) {
+                    KeyCode.LEFT -> {
+                        scrollMedia { onRewindProperty.value?.invoke(speed) }
+                        it.consume()
+                    }
+                    KeyCode.RIGHT -> {
+                        scrollMedia { onFastForwardProperty.value?.invoke(speed) }
+                        it.consume()
+                    }
+                }
+            }
+            setOnKeyReleased {
+                when (it.code) {
+                    KeyCode.LEFT, KeyCode.RIGHT -> {
+                        if (resumeAfterScroll) {
+                            resumeAfterScroll = false
+                            onToggleMediaProperty.value?.invoke()
+                        }
+                        it.consume()
+                    }
+                    KeyCode.ENTER, KeyCode.SPACE -> {
+                        onToggleMediaProperty.value?.invoke()
+                        it.consume()
+                    }
+                }
+            }
         }
+    }
+
+    private fun scrollMedia(scroll: () -> Unit) {
+        if (playerProperty.value?.isPlaying() == true) {
+            resumeAfterScroll = true
+            playerProperty.value?.toggle()
+        }
+        scroll()
     }
 
     private fun bindTranslateX() {

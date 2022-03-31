@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadcrumbBar
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -88,6 +89,7 @@ class NavigationMediator : Component(), ScopedInstance {
     }
 
     fun dock(view: UIComponent, breadCrumb: BreadCrumb? = null) {
+        view.shortcut(Shortcut.GO_BACK.value, ::back)
         breadCrumb?.let {
             breadCrumbsBar.addItem(it)
         }

@@ -91,20 +91,12 @@ class BookWizardViewModelTest {
     fun loadBooksViewData() {
         `when`(mockCollectionRepo.getChildren(simpleResource))
             .thenReturn(Single.just(simpleBooks))
-//        val lockObject = Object()
 
         assertEquals(0, vm.filteredBooks.size)
 
-//        vm.filteredBooks.onChange {
-//            thread {
-//                notifyListenerExecuted(lockObject)
-//            }
-//        }
         vm.selectedSourceProperty.set(simpleResource)
         WaitForAsyncUtils.waitForFxEvents()
 
-//        waitForListenerExecution(lockObject) {
-//        }
         assertEquals(1, vm.filteredBooks.size)
         verify(mockCollectionRepo).getChildren(simpleResource)
     }

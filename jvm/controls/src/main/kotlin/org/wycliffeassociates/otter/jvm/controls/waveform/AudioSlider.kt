@@ -18,18 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
+import javafx.collections.ObservableList
 import javafx.scene.control.Skin
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javafx.scene.paint.Paint
-import org.wycliffeassociates.otter.common.audio.AudioFileReader
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.WaveformSliderSkin
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import tornadofx.*
 
 class AudioSlider(
     min: Double = 0.0,
@@ -37,31 +39,36 @@ class AudioSlider(
     value: Double = 0.0
 ) : Slider(min, max, value) {
     val waveformImageProperty = SimpleObjectProperty<Image>()
-    val thumbFillProperty = SimpleObjectProperty<Paint>(Paint.valueOf("#00000015"))
-    val thumbLineColorProperty = SimpleObjectProperty<Paint>(Color.BLACK)
+    val thumbFillProperty = SimpleObjectProperty(Paint.valueOf("#00000015"))
+    val thumbLineColorProperty = SimpleObjectProperty(Color.BLACK)
+    val playbackLineColorProperty = SimpleObjectProperty(Paint.valueOf("#FDB849"))
     val secondsToHighlightProperty = SimpleIntegerProperty(1)
+    val currentPositionProperty = SimpleDoubleProperty(0.0)
+    val markers: ObservableList<AudioCue> = observableListOf()
 
     var waveformMinimapListener: ChangeListener<Image>? = null
 
     val player = SimpleObjectProperty<IAudioPlayer>()
-    var reader: AudioFileReader? = null
+    var pixelsInHighlight: (Double) -> Double = { 0.0 }
 
     init {
+        addClass("wa-audio-slider")
+
         // initial height/width to prevent the control from otherwise growing indefinitely
         prefHeight = 10.0
         prefWidth = 50.0
 
-        player.onChangeAndDoNow { player ->
-            player?.let {
-                reader = it.getAudioReader()
-                setMax(it.getDurationInFrames().toDouble())
-                it.seek(0)
-            }
+        currentPositionProperty.onChange {
+            player.value.seek(it.toInt())
         }
     }
 
     override fun createDefaultSkin(): Skin<*> {
         return WaveformSliderSkin(this)
+    }
+
+    fun updateMarker(id: Int, position: Double) {
+        (skin as WaveformSliderSkin).updateMarker(id, position)
     }
 
     /**

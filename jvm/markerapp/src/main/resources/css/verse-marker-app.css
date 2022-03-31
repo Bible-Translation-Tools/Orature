@@ -53,6 +53,7 @@
     -fx-border-width: 1px;
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
+    -fx-focus-traversable: false;
 }
 
 .vm-marker-count__icon .ikonli-font-icon {
@@ -72,6 +73,22 @@
     -fx-background-radius: 50%;
     -fx-border-radius: 50%;
     -fx-border-width: 1px;
+}
+
+.vm-play-controls__btn--rounded:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+}
+
+.vm-play-controls__seek-btn:focused {
+    -fx-border-width: 2px;
+}
+
+.vm-continue-button:focused {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 10px;
 }
 
 .vm-play-controls__btn--rounded .ikonli-font-icon {

@@ -18,12 +18,13 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components.drawer
 
-import com.jfoenix.controls.JFXButton
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.application.Platform
 import javafx.event.EventHandler
+import javafx.scene.control.Button
 import javafx.scene.input.DragEvent
+import javafx.scene.input.KeyCode
 import javafx.scene.input.TransferMode
 import javafx.scene.layout.Priority
 import javafx.util.Duration
@@ -44,6 +45,9 @@ class AddFilesView : View() {
     private val viewModel: AddFilesViewModel by inject()
     private val settingsViewModel: SettingsViewModel by inject()
 
+    private lateinit var traversalEngine: DrawerTraversalEngine
+    private lateinit var closeButton: Button
+
     override val root = vbox {
         addClass("app-drawer__content")
 
@@ -62,14 +66,13 @@ class AddFilesView : View() {
                         addClass("app-drawer__title")
                     }
                     region { hgrow = Priority.ALWAYS }
-                    add(
-                        JFXButton().apply {
-                            addClass("app-drawer__btn--close")
-                            graphic = FontIcon(MaterialDesign.MDI_CLOSE)
-                            tooltip(messages["close"])
-                            action { collapse() }
-                        }
-                    )
+                    button {
+                        addClass("btn", "btn--secondary")
+                        graphic = FontIcon(MaterialDesign.MDI_CLOSE)
+                        tooltip(messages["close"])
+                        action { collapse() }
+                        closeButton = this
+                    }
                 }
 
                 vbox {
@@ -83,7 +86,10 @@ class AddFilesView : View() {
                             addClass("app-drawer__text")
                         }
                         hyperlink("audio.bibleineverylanguage.org").apply {
-                            addClass("app-drawer__text--link")
+                            addClass("wa-text--hyperlink", "app-drawer__text--link")
+                            tooltip {
+                                text = "audio.bibleineverylanguage.org"
+                            }
                             action {
                                 hostServices.showDocument("https://audio.bibleineverylanguage.org/")
                             }
@@ -125,16 +131,36 @@ class AddFilesView : View() {
                 }
             }
         }
+
+        setOnKeyPressed {
+            if (it.code == KeyCode.ESCAPE) collapse()
+        }
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/app-drawer.css"))
-        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources["/css/app-drawer.css"])
+        tryImportStylesheet(resources["/css/confirm-dialog.css"])
 
         initImportDialog()
         initSuccessDialog()
         initErrorDialog()
         createSnackBar()
+
+        subscribe<DrawerEvent<UIComponent>> {
+            if (it.action == DrawerEventAction.OPEN) {
+                focusCloseButton()
+                traversalEngine.reset()
+            }
+        }
+
+        traversalEngine = DrawerTraversalEngine(root)
+        traversalEngine.set()
+    }
+
+    override fun onDock() {
+        super.onDock()
+        focusCloseButton()
+        traversalEngine.reset()
     }
 
     private fun initImportDialog() {
@@ -257,6 +283,13 @@ class AddFilesView : View() {
                     )
                 )
             }
+    }
+
+    private fun focusCloseButton() {
+        runAsync {
+            Thread.sleep(500)
+            runLater(closeButton::requestFocus)
+        }
     }
 
     private fun collapse() {

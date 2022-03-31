@@ -87,6 +87,8 @@ class WorkbookPageViewModelTest {
                 .thenReturn(mockBook.resourceMetadata)
             `when`(mockWorkbookDS.activeProjectFilesAccessor)
                 .thenReturn(mock(ProjectFilesAccessor::class.java))
+            `when`(mockWorkbookDS.activeProjectFilesAccessorProperty)
+                .thenReturn(SimpleObjectProperty())
 
             return mockWorkbookDS
         }

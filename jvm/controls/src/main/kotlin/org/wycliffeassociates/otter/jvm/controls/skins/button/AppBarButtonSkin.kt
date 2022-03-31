@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.button
 
+import com.sun.javafx.scene.control.behavior.ButtonBehavior
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.scene.Node
@@ -25,9 +26,11 @@ import javafx.scene.control.Label
 import javafx.scene.control.SkinBase
 import javafx.scene.control.ToggleButton
 import javafx.scene.layout.VBox
-import tornadofx.tooltip
+import tornadofx.*
 
 class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton>(button) {
+
+    private val behavior = ButtonBehavior(button)
 
     @FXML
     lateinit var root: VBox
@@ -44,8 +47,6 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
     }
 
     private fun initializeControl() {
-        button.setOnMouseClicked { button.fire() }
-
         root.tooltip {
             textProperty().bind(button.textProperty())
         }
@@ -55,6 +56,9 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
         btnIcon.apply {
             graphicProperty().bind(button.graphicProperty())
         }
+        button.selectedProperty().onChange {
+            if (it) button.requestFocus()
+        }
     }
 
     private fun loadFXML() {
@@ -62,5 +66,10 @@ class AppBarButtonSkin(private val button: ToggleButton) : SkinBase<ToggleButton
         loader.setController(this)
         val root: Node = loader.load()
         children.add(root)
+    }
+
+    override fun dispose() {
+        super.dispose()
+        behavior.dispose()
     }
 }

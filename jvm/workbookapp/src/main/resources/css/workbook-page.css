@@ -20,10 +20,28 @@
 .workbook-page__chapter-list {
     -fx-padding: 20px 0 0 30px;
     -fx-background-color: -wa-background;
+    -fx-focus-traversable: true;
+}
+
+.workbook-page__chapter-list:focused,
+.workbook-page__chapter-list .list-cell:focused,
+.workbook-page__chapter-list .list-cell:focused .chapter-card {
+    -fx-border-width: 0;
+}
+
+.workbook-page__chapter-list:focused .list-cell:focused .chapter-card,
+.workbook-page__chapter-list:focused .list-cell:focused .workbook-banner {
+    -fx-border-color: -wa-card-border;
+    -fx-border-width: 4px;
+    -fx-border-radius: 6px;
 }
 
 .workbook-page__chapter-list .list-cell:selected,
 .workbook-page__chapter-list .list-cell:even,
 .workbook-page__chapter-list .list-cell:odd {
     -fx-background-color: -wa-background;
+}
+
+.workbook-page__tab-content .contributor__container {
+    -fx-min-width: 400px;
 }

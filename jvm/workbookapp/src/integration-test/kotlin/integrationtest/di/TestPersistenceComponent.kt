@@ -22,6 +22,7 @@ import dagger.Component
 import integrationtest.initialization.TestInitializeProjects
 import integrationtest.initialization.TestInitializeUlb
 import integrationtest.projects.TestProjectCreate
+import integrationtest.projects.TestProjectExport
 import integrationtest.projects.TestProjectImport
 import integrationtest.projects.TestRcImport
 import integrationtest.projects.TestRemoveRc
@@ -50,4 +51,5 @@ interface TestPersistenceComponent : AppDependencyGraph {
     fun inject(test: TestRcImport)
     fun inject(test: TestProjectImport)
     fun inject(test: TestRemoveRc)
+    fun inject(test: TestProjectExport)
 }

@@ -21,16 +21,17 @@ package org.wycliffeassociates.otter.jvm.controls.model
 import io.reactivex.Completable
 import io.reactivex.Single
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.collections.ObservableList
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import tornadofx.isInt
+import tornadofx.*
 
 private const val SEEK_EPSILON = 15_000
 
-class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
+class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: Int) {
 
     val cues = sanitizeCues(audio)
-    val markers: List<ChunkMarkerModel>
+    val markers: ObservableList<ChunkMarkerModel> = observableListOf()
     val highlightState: List<MarkerHighlightState>
 
     val markerCountProperty = SimpleIntegerProperty(1)
@@ -44,7 +45,7 @@ class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
         cues.sortBy { it.location }
         markerCountProperty.value = cues.size
 
-        markers = initializeMarkers(markerTotal, cues)
+        markers.setAll(initializeMarkers(markerTotal, cues))
         highlightState = initializeHighlights(markers)
     }
 
@@ -57,10 +58,9 @@ class VerseMarkerModel(private val audio: AudioFile, val markerTotal: Int) {
                 break
             }
         }
-        markers as MutableList
         markers.sortWith(compareBy({ !it.placed }, { it.frame }))
         markers.forEachIndexed { index, chunkMarker -> chunkMarker.label = (index + 1).toString() }
-        markerCountProperty.value = markers.filter { it.placed == true }.size
+        markerCountProperty.value = markers.filter { it.placed }.size
     }
 
     fun seekNext(location: Int): Int {

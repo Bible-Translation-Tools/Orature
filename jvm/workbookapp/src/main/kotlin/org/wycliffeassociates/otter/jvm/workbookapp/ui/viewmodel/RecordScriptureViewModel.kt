@@ -35,6 +35,7 @@ import javafx.collections.ObservableList
 import javafx.scene.control.ButtonType
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.DateHolder
 import org.wycliffeassociates.otter.common.data.workbook.Take
@@ -42,6 +43,7 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
+import org.wycliffeassociates.otter.common.utils.capitalizeString
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
@@ -54,7 +56,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 import java.io.File
 import java.text.MessageFormat
-import org.wycliffeassociates.otter.common.utils.capitalizeString
 import io.reactivex.rxkotlin.toObservable as toRxObservable
 
 class RecordScriptureViewModel : ViewModel() {
@@ -69,7 +70,12 @@ class RecordScriptureViewModel : ViewModel() {
     private val workbookDataStore: WorkbookDataStore by inject()
     private val audioPluginViewModel: AudioPluginViewModel by inject()
 
-    // This will be bidirectionally bound to workbookViewModel's activeChunkProperty
+    // This will be bidirectionally bound to workbookDataStore's activeChapterProperty
+    private val activeChapterProperty = SimpleObjectProperty<Chapter>()
+    private val activeChapter: Chapter
+        get() = activeChapterProperty.value ?: throw IllegalStateException("Chapter is null")
+
+    // This will be bidirectionally bound to workbookDataStore's activeChunkProperty
     private val activeChunkProperty = SimpleObjectProperty<Chunk>()
     private val activeChunk: Chunk
         get() = activeChunkProperty.value ?: throw IllegalStateException("Chunk is null")
@@ -77,10 +83,17 @@ class RecordScriptureViewModel : ViewModel() {
     private val titleProperty = SimpleStringProperty()
     private var title by titleProperty
 
-    private val chunkList: ObservableList<Chunk> = observableListOf()
-    val hasNext = SimpleBooleanProperty(false)
-    val hasPrevious = SimpleBooleanProperty(false)
+    private val chapterList: ObservableList<Chapter> = observableListOf()
+    val hasNextChapter = SimpleBooleanProperty(false)
+    val hasPreviousChapter = SimpleBooleanProperty(false)
 
+    private val chunkList: ObservableList<Chunk> = observableListOf()
+    val hasNextChunk = SimpleBooleanProperty(false)
+    val hasPreviousChunk = SimpleBooleanProperty(false)
+
+    val isChunk = activeChunkProperty.isNotNull
+
+    private var activeChapterSubscription: Disposable? = null
     private var activeChunkSubscription: Disposable? = null
 
     val recordableProperty = SimpleObjectProperty<Recordable?>()
@@ -101,26 +114,31 @@ class RecordScriptureViewModel : ViewModel() {
     private val disposables = CompositeDisposable()
 
     init {
+        activeChapterProperty.bindBidirectional(workbookDataStore.activeChapterProperty)
         activeChunkProperty.bindBidirectional(workbookDataStore.activeChunkProperty)
 
-        workbookDataStore.activeChapterProperty.onChangeAndDoNow { chapter ->
+        workbookDataStore.activeWorkbookProperty.onChangeAndDoNow { workbook ->
+            workbook?.let {
+                getChapterList(workbook.target.chapters)
+            }
+        }
+
+        activeChapterProperty.onChangeAndDoNow { chapter ->
+            setHasNextAndPreviousChapter()
             chapter?.let {
                 getChunkList(chapter.chunks)
-                if (activeChunkProperty.value == null) {
-                    recordable = it
-                    setHasNextAndPrevious()
-                }
+                recordable = it
             }
         }
 
         activeChunkProperty.onChangeAndDoNow { chunk ->
-            setHasNextAndPrevious()
+            setHasNextAndPreviousChunk()
             if (chunk != null) {
                 setTitle(chunk)
                 // This will trigger loading takes
                 recordable = chunk
             } else {
-                workbookDataStore.activeChapterProperty.value?.let {
+                activeChapterProperty.value?.let {
                     recordable = it
                 }
             }
@@ -187,6 +205,16 @@ class RecordScriptureViewModel : ViewModel() {
         }
     }
 
+    fun nextChapter() {
+        closePlayers()
+        stepToChapter(StepDirection.FORWARD)
+    }
+
+    fun previousChapter() {
+        closePlayers()
+        stepToChapter(StepDirection.BACKWARD)
+    }
+
     fun nextChunk() {
         closePlayers()
         stepToChunk(StepDirection.FORWARD)
@@ -197,21 +225,39 @@ class RecordScriptureViewModel : ViewModel() {
         stepToChunk(StepDirection.BACKWARD)
     }
 
-    private fun setHasNextAndPrevious() {
-        activeChunkProperty.value?.let { chunk ->
-            if (chunkList.isNotEmpty()) {
-                hasNext.set(chunk.start < chunkList.last().start)
-                hasPrevious.set(chunk.start > chunkList.first().start)
+    private fun setHasNextAndPreviousChapter() {
+        activeChapterProperty.value?.let { chapter ->
+            if (chapterList.isNotEmpty()) {
+                hasNextChapter.set(chapter.sort < chapterList.last().sort)
+                hasPreviousChapter.set(chapter.sort > chapterList.first().sort)
             } else {
-                hasNext.set(false)
-                hasPrevious.set(false)
-                chunkList.sizeProperty.onChangeOnce {
-                    setHasNextAndPrevious()
+                hasNextChapter.set(false)
+                hasPreviousChapter.set(false)
+                chapterList.sizeProperty.onChangeOnce {
+                    setHasNextAndPreviousChapter()
                 }
             }
         } ?: run {
-            hasNext.set(false)
-            hasPrevious.set(false)
+            hasNextChapter.set(false)
+            hasPreviousChapter.set(false)
+        }
+    }
+
+    private fun setHasNextAndPreviousChunk() {
+        activeChunkProperty.value?.let { chunk ->
+            if (chunkList.isNotEmpty()) {
+                hasNextChunk.set(chunk.start < chunkList.last().start)
+                hasPreviousChunk.set(chunk.start > chunkList.first().start)
+            } else {
+                hasNextChunk.set(false)
+                hasPreviousChunk.set(false)
+                chunkList.sizeProperty.onChangeOnce {
+                    setHasNextAndPreviousChunk()
+                }
+            }
+        } ?: run {
+            hasNextChunk.set(false)
+            hasPreviousChunk.set(false)
         }
     }
 
@@ -221,6 +267,20 @@ class RecordScriptureViewModel : ViewModel() {
             messages["verse"],
             chunk.start
         )
+    }
+
+    private fun getChapterList(chapters: Observable<Chapter>) {
+        activeChapterSubscription?.dispose()
+        activeChapterSubscription = chapters
+            .toList()
+            .map { it.sortedBy { chapter -> chapter.sort } }
+            .observeOnFx()
+            .doOnError { e ->
+                logger.error("Error in getting the chapter list", e)
+            }
+            .subscribe { list ->
+                chapterList.setAll(list)
+            }
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {
@@ -235,6 +295,15 @@ class RecordScriptureViewModel : ViewModel() {
             .subscribe { list ->
                 chunkList.setAll(list)
             }
+    }
+
+    private fun stepToChapter(direction: StepDirection) {
+        val amount = when (direction) {
+            StepDirection.FORWARD -> 1
+            StepDirection.BACKWARD -> -1
+        }
+        val nextIndex = chapterList.indexOf(activeChapter) + amount
+        chapterList.elementAtOrNull(nextIndex)?.let { activeChapterProperty.set(it) }
     }
 
     private fun stepToChunk(direction: StepDirection) {

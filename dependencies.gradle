@@ -49,4 +49,5 @@ ext {
     jump3rVer='1.0.5'
     systemThemeDectectorVer='3.7'
     tarsosDspVer = '2.4.1'
+    mp3TagVer = '0.9.3'
 }
