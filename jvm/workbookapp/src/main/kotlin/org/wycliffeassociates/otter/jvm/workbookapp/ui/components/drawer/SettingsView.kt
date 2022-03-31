@@ -28,7 +28,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.button.SelectButton
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
-import org.wycliffeassociates.otter.jvm.utils.overrideEventsAndRun
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ComboboxItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.DeviceComboboxCell
@@ -96,7 +96,7 @@ class SettingsView : View() {
                         }
 
                         buttonCell = ThemeComboboxCell(FontIcon(MaterialDesign.MDI_BRIGHTNESS_6))
-                        overrideEventsAndRun {
+                        overrideDefaultKeyEventHandler {
                             fire(ThemeColorEvent(this@SettingsView::class, it))
                         }
                     }
@@ -126,7 +126,7 @@ class SettingsView : View() {
                         }
 
                         buttonCell = LanguageComboboxCell()
-                        overrideEventsAndRun {
+                        overrideDefaultKeyEventHandler {
                             viewModel.updateLanguage(it)
                         }
                     }
@@ -159,7 +159,7 @@ class SettingsView : View() {
                         }
 
                         buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_VOLUME_HIGH))
-                        overrideEventsAndRun {
+                        overrideDefaultKeyEventHandler {
                             viewModel.updateOutputDevice(it)
                         }
                     }
@@ -183,7 +183,7 @@ class SettingsView : View() {
                         }
 
                         buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-                        overrideEventsAndRun {
+                        overrideDefaultKeyEventHandler {
                             viewModel.updateInputDevice(it)
                         }
                     }

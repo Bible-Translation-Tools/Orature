@@ -71,7 +71,7 @@ fun Node.simulateKeyPress(
  * And triggers action only when value has changed
  * @param action Action to invoke when value has changed
  */
-fun <T> ComboBox<T>.overrideEventsAndRun(action: (T) -> Unit = {}) {
+fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     var oldValue: T? = null
 
     this.addEventFilter(KeyEvent.KEY_RELEASED) {
