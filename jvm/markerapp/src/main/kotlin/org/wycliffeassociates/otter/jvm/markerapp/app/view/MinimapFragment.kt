@@ -23,8 +23,8 @@ import javafx.geometry.NodeOrientation
 import javafx.geometry.Pos
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*

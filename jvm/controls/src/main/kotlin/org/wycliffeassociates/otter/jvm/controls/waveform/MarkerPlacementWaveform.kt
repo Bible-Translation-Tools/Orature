@@ -16,23 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
 import javafx.scene.Node
-import javafx.scene.layout.HBox
-import tornadofx.*
+import javafx.scene.control.Skin
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.skins.waveform.MarkerPlacementWaveformSkin
 
-class ComboboxButton : HBox() {
-    val iconProperty = SimpleObjectProperty<Node>()
-    val textProperty = SimpleStringProperty()
+class MarkerPlacementWaveform(
+    val topNode: Node
+) : ScrollingWaveform() {
 
-    init {
-        addClass("wa-combobox-button")
-        label {
-            graphicProperty().bind(iconProperty)
-        }
-        label(textProperty)
+    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
+
+    var onSeekNext: () -> Unit = {}
+    var onSeekPrevious: () -> Unit = {}
+    var onPlaceMarker: () -> Unit = {}
+    var topTrack: Node? = topNode
+    var bottomTrack: Node? = null
+
+    override fun createDefaultSkin(): Skin<*> {
+        return MarkerPlacementWaveformSkin(this)
     }
 }
