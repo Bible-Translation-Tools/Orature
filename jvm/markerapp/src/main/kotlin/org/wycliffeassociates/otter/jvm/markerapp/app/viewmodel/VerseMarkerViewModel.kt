@@ -37,6 +37,7 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.markerapp.app.view.SourceTextFragment
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
@@ -148,6 +149,7 @@ class VerseMarkerViewModel : ViewModel() {
     fun saveAndQuit() {
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
+        currentMarkerNumberProperty.set(-1)
         imageCleanup()
 
         (scope as ParameterizedScope).let {
