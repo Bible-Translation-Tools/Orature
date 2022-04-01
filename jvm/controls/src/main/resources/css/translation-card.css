@@ -49,7 +49,8 @@
     -fx-font-size: 20px;
 }
 
-.translation-card__language .ikonli-font-icon {
+.translation-card__language .ikonli-font-icon,
+.translation-card__remove-btn .ikonli-font-icon {
     -fx-font-size: 24px;
 }
 

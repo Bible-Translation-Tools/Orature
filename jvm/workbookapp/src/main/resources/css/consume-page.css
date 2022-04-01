@@ -16,17 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.model
 
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleStringProperty
+ .consume__bottom {
+    -fx-pref-height: 88px;
+    -fx-alignment: center;
+    -fx-background-color: -wa-recorder-controls-background;
+ }
 
-class MarkerHighlightState {
-    val visibility = SimpleBooleanProperty(false)
-    val styleClass = SimpleStringProperty("vm-highlight-primary")
-    val primaryStyleClass = SimpleStringProperty("vm-highlight-primary")
-    val secondaryStyleClass = SimpleStringProperty("vm-highlight-secondary")
-    val translate = SimpleDoubleProperty(0.0)
-    val width = SimpleDoubleProperty(0.0)
+.consume__btn {
+    -fx-pref-height: 60px;
+    -fx-pref-width: 60px;
+    -fx-border-radius: 90px;
+    -fx-background-radius: 90px;
+}
+
+.consume__btn .ikonli-font-icon {
+    -fx-icon-size: 28px;
 }
