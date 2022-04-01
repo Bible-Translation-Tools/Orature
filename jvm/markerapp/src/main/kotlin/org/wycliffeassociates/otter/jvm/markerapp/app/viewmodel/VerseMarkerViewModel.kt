@@ -136,13 +136,7 @@ class VerseMarkerViewModel : ViewModel() {
             val percentPlayed = current / duration
             val pos = percentPlayed * imageWidth
             positionProperty.set(pos)
-
-            markers.let { markerModel ->
-                val currentMarkerFrame = markerModel.seekCurrent(current)
-                val currentMarker = markerModel.markers.find { it.frame == currentMarkerFrame }
-                val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: 0
-                currentMarkerNumberProperty.set(index)
-            }
+            updateCurrentPlaybackMarker(current)
         }
     }
 
@@ -224,6 +218,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     fun seek(location: Int) {
         audioController?.seek(location)
+        updateCurrentPlaybackMarker(location)
     }
 
     fun createWaveformImages(audio: AudioFile) {
@@ -282,5 +277,12 @@ class VerseMarkerViewModel : ViewModel() {
         val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
         val framesPerPixel = totalFrames / max(controlWidth, 1.0)
         return max(framesInHighlight / framesPerPixel, 1.0)
+    }
+    
+    private fun updateCurrentPlaybackMarker(currentFrame: Int) {
+        val currentMarkerFrame = markers.seekCurrent(currentFrame)
+        val currentMarker = markers.markers.find { it.frame == currentMarkerFrame }
+        val index = currentMarker?.let { markers.markers.indexOf(it) } ?: 0
+        currentMarkerNumberProperty.set(index)
     }
 }

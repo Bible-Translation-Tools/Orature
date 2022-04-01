@@ -66,7 +66,7 @@ class VerseMarkerModel(private val audio: AudioFile, private val markerTotal: In
     fun seekCurrent(location: Int): Int {
         // find the nearest frame preceding the location
         return markers.filter { it.placed }.lastOrNull {
-            it.frame < location
+            it.frame <= location
         }?.frame ?: 0
     }
 
