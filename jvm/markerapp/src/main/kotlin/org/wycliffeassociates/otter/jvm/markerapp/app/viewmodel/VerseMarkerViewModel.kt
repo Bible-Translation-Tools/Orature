@@ -38,16 +38,16 @@ import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import java.lang.Integer.min
+import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import kotlin.math.max
 
-const val SECONDS_ON_SCREEN = 10
 private const val WAV_COLOR = "#0A337390"
 private const val BACKGROUND_COLOR = "#FFFFFF"
 
@@ -85,6 +85,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     private var sampleRate: Int = 0 // beware of divided by 0
     private var totalFrames: Int = 0 // beware of divided by 0
+    private var resumeAfterScroll = false
 
     fun onDock() {
         val audio = loadAudio()
@@ -204,11 +205,26 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun rewind(speed: ScrollSpeed) {
+        if (isPlaying()) {
+            resumeAfterScroll = true
+            mediaToggle()
+        }
         audioController?.rewind(speed)
     }
 
     fun fastForward(speed: ScrollSpeed) {
+        if (isPlaying()) {
+            resumeAfterScroll = true
+            mediaToggle()
+        }
         audioController?.fastForward(speed)
+    }
+
+    fun resumeMedia() {
+        if (resumeAfterScroll) {
+            mediaToggle()
+            resumeAfterScroll = false
+        }
     }
 
     fun mediaToggle() {
@@ -275,5 +291,9 @@ class VerseMarkerViewModel : ViewModel() {
         val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
         val framesPerPixel = totalFrames / max(controlWidth, 1.0)
         return max(framesInHighlight / framesPerPixel, 1.0)
+    }
+
+    fun requestAudioLocation(): Int {
+        return audioPlayer.value?.getLocationInFrames() ?: 0
     }
 }

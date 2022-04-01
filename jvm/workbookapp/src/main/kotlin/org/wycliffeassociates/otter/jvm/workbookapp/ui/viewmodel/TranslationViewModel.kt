@@ -26,22 +26,31 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.domain.collections.CreateTranslation
+import org.wycliffeassociates.otter.common.domain.collections.DeleteTranslation
 import org.wycliffeassociates.otter.common.persistence.repositories.ICollectionRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.IResourceMetadataRepository
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TranslationCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation.TargetLanguageSelection
 import tornadofx.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class TranslationViewModel : ViewModel() {
     private val logger = LoggerFactory.getLogger(TranslationViewModel::class.java)
 
-    @Inject lateinit var languageRepo: ILanguageRepository
-    @Inject lateinit var collectionRepo: ICollectionRepository
-    @Inject lateinit var resourceMetadataRepository: IResourceMetadataRepository
-    @Inject lateinit var creationUseCase: CreateTranslation
+    @Inject
+    lateinit var languageRepo: ILanguageRepository
+    @Inject
+    lateinit var collectionRepo: ICollectionRepository
+    @Inject
+    lateinit var resourceMetadataRepository: IResourceMetadataRepository
+    @Inject
+    lateinit var creationUseCase: CreateTranslation
+    @Inject
+    lateinit var deleteUseCase: DeleteTranslation
 
     private val navigator: NavigationMediator by inject()
 
@@ -88,6 +97,22 @@ class TranslationViewModel : ViewModel() {
                     Platform.runLater { navigator.home() }
                 }
         }
+    }
+
+    fun deleteTranslation(
+        translation: TranslationCardModel,
+        callback: () -> Unit = {}
+    ) {
+        deleteUseCase
+            .delete(translation.sourceLanguage, translation.targetLanguage)
+            .doOnError {
+                logger.error(
+                    "Error while removing translation: " +
+                            "${translation.sourceLanguage.id} - ${translation.targetLanguage.id}"
+                )
+            }
+            .doOnComplete(callback)
+            .subscribe()
     }
 
     fun reset() {

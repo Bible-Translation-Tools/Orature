@@ -16,29 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.view
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
-import org.wycliffeassociates.otter.jvm.workbookapp.updater.install4j.ui.viewmodel.AppUpdaterViewModel
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.Priority
 import tornadofx.*
 
-class UpdaterView : View() {
-
-    val vm: AppUpdaterViewModel by inject()
+class MarkerViewBackground : BorderPane() {
 
     init {
-        vm.applyScheduledUpdate()
-    }
+        fitToParentSize()
+        hgrow = Priority.ALWAYS
+        vgrow = Priority.ALWAYS
 
-    override val root = borderpane {
-        styleClass.add("app-drawer__section")
+        with(this) {
+            top {
+                region {
+                    styleClass.add("scrolling-waveform-frame__top-track")
+                }
+            }
 
-        center = stackpane {
-            add<NoUpdatesAvailable>()
-            add<UpdateWillCompleteLaterFragment>()
-            add<UpdateCompleteFragment>()
-            add<UpdateDownloadingFragment>()
-            add<UpdateAvailableFragment>()
-            add<CheckForUpdatesFragment>()
+            center {
+                styleClass.add("scrolling-waveform-frame__center")
+            }
+
+            bottom {
+                region {
+                    styleClass.add("scrolling-waveform-frame__bottom-track")
+                }
+            }
         }
     }
 }

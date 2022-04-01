@@ -36,10 +36,13 @@
     -wa-white-90: rgba(255,255,255,0.9);
     -wa-black: rgb(0, 21, 51);
     -wa-black-05: rgba(0, 21, 51, 0.05);
+    -wa-black-05-noalpha: rgb(242,243,245);
     -wa-black-10: rgba(0, 21, 51, 0.1);
+    -wa-black-10-noalpha: rgb(230,232,235);
     -wa-black-15: rgba(0, 21, 51, 0.15);
     -wa-black-20: rgba(0, 21, 51, 0.2);
     -wa-black-30: rgba(0, 21, 51, 0.3);
+    -wa-black-30-noalpha: rgb(179,185,194);
     -wa-black-40: rgba(0, 21, 51, 0.4);
     -wa-black-50: rgba(0, 21, 51, 0.5);
     -wa-black-60: rgba(0, 21, 51, 0.6);

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import com.jfoenix.controls.JFXButton
 import javafx.beans.property.SimpleObjectProperty
@@ -49,14 +49,14 @@ class PlaceMarkerLayer : VBox() {
                 JFXButton("", FontIcon("mdi-bookmark-plus-outline")).apply {
                     styleClass.addAll(
                         "btn--cta",
-                        "vm-play-controls__btn--rounded",
-                        "vm-play-controls__add-marker-btn"
+                        "scrolling-waveform-play-controls__btn--rounded",
+                        "scrolling-waveform-play-controls__add-marker-btn"
                     )
                     onActionProperty().bind(onPlaceMarkerActionProperty)
                 }
             )
             style {
-                styleClass.addAll("vm-play-controls__add-marker-container")
+                styleClass.addAll("scrolling-waveform-play-controls__add-marker-container")
             }
         }
     }

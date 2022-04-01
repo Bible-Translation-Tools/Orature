@@ -34,4 +34,5 @@ interface ILanguageRepository : IRepository<Language> {
     fun getAllTranslations(): Single<List<Translation>>
     fun insertTranslation(translation: Translation): Single<Int>
     fun updateTranslation(translation: Translation): Completable
+    fun deleteTranslation(translation: Translation): Completable
 }
