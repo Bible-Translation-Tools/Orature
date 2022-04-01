@@ -51,6 +51,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 
 class ChapterPage : View() {
@@ -137,6 +138,9 @@ class ChapterPage : View() {
 
     override val root = hbox {
 
+        button("chunk") { setOnAction {
+            workspace.dockInNewScope<ChunkingWizard>()
+        } }
         button("add") {setOnAction {viewModel.addChunk() }}
         button("subList") {setOnAction{ viewModel.subList()}}
         addClass("chapter-page")

@@ -76,7 +76,7 @@ class RecordScripturePage : View() {
 
     private val mainContainer = GridPane()
     private val fileDragTarget = VBox()
-    // private val pluginOpenedPage: PluginOpenedPage
+    private val pluginOpenedPage: PluginOpenedPage
 
     private val isDraggingFileProperty = SimpleBooleanProperty(false)
 
