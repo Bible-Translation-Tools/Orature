@@ -85,6 +85,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     private var sampleRate: Int = 0 // beware of divided by 0
     private var totalFrames: Int = 0 // beware of divided by 0
+    private var resumeAfterScroll = false
 
     fun onDock() {
         val audio = loadAudio()
@@ -204,24 +205,25 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun rewind(speed: ScrollSpeed) {
-        val resumeAfterScroll = true
-        if (audioController?.isPlayingProperty?.value == true) {
-            audioController?.toggle()
+        if (isPlaying()) {
+            resumeAfterScroll = true
+            mediaToggle()
         }
         audioController?.rewind(speed)
-        if (resumeAfterScroll) {
-            audioController?.toggle()
-        }
     }
 
     fun fastForward(speed: ScrollSpeed) {
-        val resumeAfterScroll = true
-        if (audioController?.isPlayingProperty?.value == true) {
-            audioController?.toggle()
+        if (isPlaying()) {
+            resumeAfterScroll = true
+            mediaToggle()
         }
         audioController?.fastForward(speed)
+    }
+
+    fun resumeMedia() {
         if (resumeAfterScroll) {
-            audioController?.toggle()
+            mediaToggle()
+            resumeAfterScroll = false
         }
     }
 

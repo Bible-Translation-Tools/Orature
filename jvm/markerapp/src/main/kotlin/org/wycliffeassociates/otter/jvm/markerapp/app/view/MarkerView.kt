@@ -124,6 +124,7 @@ class MarkerView : PluginEntrypoint() {
                 onRewind = viewModel::rewind
                 onFastForward = viewModel::fastForward
                 onToggleMedia = viewModel::mediaToggle
+                onResumeMedia = viewModel::resumeMedia
             }
             bottom = vbox {
                 add<SourceTextFragment>()

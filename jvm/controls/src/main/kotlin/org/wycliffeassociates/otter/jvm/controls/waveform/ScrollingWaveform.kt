@@ -25,7 +25,7 @@ import javafx.scene.image.Image
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.ScrollingWaveformSkin
 
-open class ScrollingWaveform() : Control() {
+open class ScrollingWaveform : Control() {
     val positionProperty = SimpleDoubleProperty(0.0)
 
     var onWaveformClicked: () -> Unit = {}
@@ -33,6 +33,7 @@ open class ScrollingWaveform() : Control() {
     var onRewind: ((ScrollSpeed) -> Unit) = {}
     var onFastForward: ((ScrollSpeed) -> Unit) = {}
     var onToggleMedia: () -> Unit = {}
+    var onResumeMedia: () -> Unit = {}
 
     fun addWaveformImage(image: Image) {
         (skin as ScrollingWaveformSkin).addWaveformImage(image)

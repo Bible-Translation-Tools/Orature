@@ -54,6 +54,7 @@ open class ScrollingWaveformSkin(control: ScrollingWaveform) : SkinBase<Scrollin
                 onRewind(skinnable.onRewind)
                 onFastForward(skinnable.onFastForward)
                 onToggleMedia(skinnable.onToggleMedia)
+                onResumeMedia(skinnable.onResumeMedia)
             }
             add(waveformFrame)
             add(WaveformOverlay().apply { playbackPositionProperty.bind(skinnable.positionProperty) })

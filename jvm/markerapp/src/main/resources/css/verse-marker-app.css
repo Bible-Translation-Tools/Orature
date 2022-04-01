@@ -146,3 +146,20 @@
 .vm-continue-button > .ikonli-font-icon {
     -fx-icon-size: 28px;
 }
+
+.vm-waveform-frame {
+    -fx-focus-traversable: true;
+}
+
+.vm-marker-waveform {
+    -fx-focus-traversable: false;
+}
+
+.vm-marker-waveform:active {
+    -fx-border-width: 4px;
+    -fx-border-color: -wa-button-border;
+}
+
+.vm-marker-track {
+    -fx-focus-traversable: false;
+}

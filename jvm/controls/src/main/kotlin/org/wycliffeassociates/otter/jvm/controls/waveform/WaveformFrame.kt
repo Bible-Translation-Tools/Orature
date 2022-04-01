@@ -48,6 +48,7 @@ class WaveformFrame(
     private val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
     private val onFastForwardProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
     private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
+    private val onResumeMediaProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
 
@@ -73,6 +74,10 @@ class WaveformFrame(
         onToggleMediaProperty.set(op)
     }
 
+    fun onResumeMedia(op: () -> Unit) {
+        onResumeMediaProperty.set(op)
+    }
+
     fun onSeekPrevious(op: () -> Unit) {
         onSeekPreviousProperty.set(op)
     }
@@ -86,7 +91,6 @@ class WaveformFrame(
     var imageHolder: HBox? = null
     lateinit var imageRegion: Region
     lateinit var highlightHolder: StackPane
-    var resumeAfterScroll = false
 
     init {
         addClass("vm-waveform-frame")
@@ -188,10 +192,7 @@ class WaveformFrame(
             setOnKeyReleased {
                 when (it.code) {
                     KeyCode.LEFT, KeyCode.RIGHT -> {
-                        if (resumeAfterScroll) {
-                            resumeAfterScroll = false
-                            onToggleMediaProperty.value?.invoke()
-                        }
+                        onResumeMediaProperty.value?.invoke()
                         it.consume()
                     }
                     KeyCode.ENTER, KeyCode.SPACE -> {
