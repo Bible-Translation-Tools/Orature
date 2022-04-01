@@ -603,7 +603,6 @@
 
 .wa-menu-button .menu-item {
     -fx-background-color: -wa-foreground;
-    -fx-focus-traversable: true;
 }
 
 .wa-menu-button .menu-item:focused .wa-menu-button__list-item,
@@ -626,6 +625,10 @@
 .wa-menu-button__icon .ikonli-font-icon {
     -fx-icon-size: 34;
     -fx-icon-color: -wa-regular-text;
+}
+
+.wa-menu-button__separator {
+    -fx-focus-traversable: false;
 }
 
 .wa-menu-button__separator .label {

@@ -45,7 +45,6 @@ class BookCard(
     val newBookProperty = SimpleBooleanProperty(newBook)
 
     val addBookTextProperty = SimpleStringProperty(messages["createProject"])
-    val onPrimaryActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onAddBookActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
     init {
@@ -55,15 +54,13 @@ class BookCard(
             artwork?.let {
                 attributionTextProperty.set(
                     it.attributionText(
-                        FX.messages["artworkLicense"],
-                        FX.messages["artworkAttributionTitle"],
-                        FX.messages["license"]
+                        messages["artworkLicense"],
+                        messages["artworkAttributionTitle"],
+                        messages["license"]
                     )
                 )
             } ?: attributionTextProperty.set(null)
         }
-
-        onActionProperty().bind(onPrimaryActionProperty)
     }
 
     override fun createDefaultSkin(): Skin<*> {
@@ -74,10 +71,6 @@ class BookCard(
         if (!isDisabled) {
             fireEvent(ActionEvent())
         }
-    }
-
-    fun setOnPrimaryAction(op: () -> Unit) {
-        onPrimaryActionProperty.set(EventHandler { op.invoke() })
     }
 
     fun setOnAddBookAction(op: () -> Unit) {

@@ -20,13 +20,17 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.translation
 
 import javafx.application.Platform
 import javafx.geometry.Pos
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
+import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.LanguageType
@@ -77,15 +81,45 @@ class TargetLanguageSelection : Fragment() {
                 viewModel.searchQueryProperty.onChange {
                     it?.let { if (it.isNotBlank()) scrollTo(0) }
                 }
+
+                overrideDefaultKeyEventHandler {
+                    val current = selectionModel.selectedItem
+                    val availableItems = getAvailableLanguages()
+                    var index = availableItems.indexOf(current)
+                    when (it) {
+                        KeyCode.UP -> index--
+                        KeyCode.DOWN -> index++
+                    }
+                    val item = availableItems.getOrElse(index) { current }
+                    selectionModel.select(item)
+
+                    virtualFlow().apply {
+                        scrollTo(items.indexOf(item))
+                    }
+                }
+                focusedProperty().onChange { focused ->
+                    if (focused) {
+                        val item = getAvailableLanguages().firstOrNull()
+                        val index = items.indexOf(item)
+                        selectionModel.select(index)
+                    }
+                }
             }
         }
     }
 
+    private fun getAvailableLanguages(): List<Language> {
+        return viewModel.filteredLanguages.filter {
+            translationViewModel.existingLanguages
+                .contains(it).not()
+        }
+    }
+
     init {
-        tryImportStylesheet(resources.get("/css/translation-wizard.css"))
-        tryImportStylesheet(resources.get("/css/language-card-cell.css"))
-        tryImportStylesheet(resources.get("/css/filtered-search-bar.css"))
-        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources["/css/translation-wizard.css"])
+        tryImportStylesheet(resources["/css/language-card-cell.css"])
+        tryImportStylesheet(resources["/css/filtered-search-bar.css"])
+        tryImportStylesheet(resources["/css/confirm-dialog.css"])
 
         translationViewModel.targetLanguages.onChange {
             viewModel.regions.setAll(

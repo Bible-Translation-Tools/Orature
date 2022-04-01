@@ -26,7 +26,6 @@ import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.jvm.controls.card.BookCardCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import tornadofx.*
-import java.util.concurrent.Callable
 
 class BookCell(
     private val existingBooks: ObservableList<Workbook> = observableListOf(),
@@ -47,10 +46,10 @@ class BookCell(
             bookSlugProperty.set(item.collection.slug.uppercase())
             bookNameProperty.set(item.collection.titleKey)
             licenseProperty.set(item.collection.resourceContainer?.license)
-            coverArtProperty.bind(item.artworkFileProperty)
+            coverArtProperty.bind(item.artworkProperty)
             attributionProperty.bind(item.attributionProperty)
 
-            setOnMouseClicked {
+            setOnAction {
                 onSelected(item)
             }
 
@@ -61,17 +60,14 @@ class BookCell(
                     }
                 }
             }
-
-            disableProperty().bind(
-                Bindings.createBooleanBinding(
-                    Callable {
-                        existingBooks.map {
-                            it.target.slug
-                        }.contains(item.collection.slug)
-                    },
-                    existingBooks
-                )
-            )
         }
+
+        disableProperty().bind(
+            Bindings.createBooleanBinding(
+                { existingBooks.map { it.target.slug }.contains(item.collection.slug) },
+                existingBooks
+            )
+        )
+        mouseTransparentProperty().bind(disableProperty())
     }
 }

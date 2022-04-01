@@ -114,7 +114,7 @@ class HomePage : View() {
                                         workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE)
                                     )
 
-                                    setOnPrimaryAction { viewModel.selectProject(workbook) }
+                                    setOnAction { viewModel.selectProject(workbook) }
                                 }
                             }
 

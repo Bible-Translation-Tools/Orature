@@ -70,7 +70,7 @@
     -fx-icon-size: 24px;
 }
 
-.breadcrumb--active {
+.breadcrumb--active, .breadcrumb--active .breadcrumb__content {
     -fx-focus-traversable: false;
 }
 
