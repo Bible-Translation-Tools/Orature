@@ -28,10 +28,15 @@ import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 import java.util.concurrent.Callable
+import javafx.beans.property.SimpleObjectProperty
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.model.framesToPixels
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
+
+private const val MOVE_MARKER_INTERVAL = 0.001
 
 class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrackControl>(control) {
 
@@ -46,6 +51,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
     private var preDragThumbPos = DoubleArray(control.markers.size)
     var dragStart: Array<Point2D?> = Array(control.markers.size) { null }
 
+    private val focusedMarkerProperty = SimpleObjectProperty<ChunkMarker>()
 
     fun refreshMarkers() {
         if (skinnable.width > 0) {
@@ -76,6 +82,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             ).toDouble()
 
             isPlacedProperty.set(mk.placed)
+            markerIdProperty.set(i)
             markerNumberProperty.set(mk.label)
             canBeMovedProperty.set(i != 0)
             markerPositionProperty.set(pixel)
@@ -92,6 +99,7 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                     preDragThumbPos[i] = clampedValue / trackWidth
                     me.consume()
                 }
+                this.requestFocus()
             }
 
             setOnMouseDragged { me ->
@@ -122,11 +130,15 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
                     val trackWidth = this@MarkerTrackControlSkin.skinnable.width
                     translateX = it.toDouble()
                     if (trackWidth > 0) {
-                        skinnable.markers.get(i).frame = pixelsToFrames(
+                        skinnable.markers[i].frame = pixelsToFrames(
                             it.toDouble()
                         )
                     }
                 }
+            }
+
+            focusedProperty().onChange {
+                if (it) focusedMarkerProperty.set(this)
             }
         }
     }
@@ -194,8 +206,57 @@ class MarkerTrackControlSkin(control: MarkerTrackControl) : SkinBase<MarkerTrack
             }
         }
 
+        control.setOnKeyPressed { e ->
+            when (e.code) {
+                KeyCode.LEFT, KeyCode.RIGHT -> {
+                    moveMarker(e.code)
+                    e.consume()
+                }
+                KeyCode.TAB -> {
+                    if (e.isShiftDown) {
+                        control.onSeekPreviousProperty.value?.invoke()
+                    } else {
+                        control.onSeekNextProperty.value?.invoke()
+                    }
+                    focusMarker(e)
+                }
+            }
+        }
+
+        control.setOnKeyReleased {
+            when (it.code) {
+                KeyCode.ENTER, KeyCode.SPACE -> it.consume()
+            }
+        }
+
         children.clear()
         children.addAll(track)
+    }
+
+    private fun moveMarker(code: KeyCode) {
+        focusedMarkerProperty.value?.let { marker ->
+            val id = marker.markerIdProperty.value
+            if (id == 0) return // don't move the first marker
+
+            val position = marker.markerPositionProperty.value
+            val percent = position / skinnable.width
+            val moveTo = if (code == KeyCode.LEFT) {
+                percent - MOVE_MARKER_INTERVAL
+            } else {
+                percent + MOVE_MARKER_INTERVAL
+            }
+            updateValue(marker.markerIdProperty.value, moveTo)
+        }
+    }
+
+    private fun focusMarker(event: KeyEvent) {
+        val location = skinnable.onLocationRequestProperty.value?.invoke() ?: 0
+        val position = framesToPixels(location).toDouble()
+
+        markers.singleOrNull { it.markerPositionProperty.value == position }?.let {
+            it.requestFocus()
+            event.consume()
+        }
     }
 
     fun updateValue(id: Int, position: Double) {

@@ -40,14 +40,11 @@ import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
 import java.io.File
 import java.lang.Integer.min
-import java.util.concurrent.TimeUnit
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import kotlin.math.max
 
@@ -207,11 +204,25 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun rewind(speed: ScrollSpeed) {
+        val resumeAfterScroll = true
+        if (audioController?.isPlayingProperty?.value == true) {
+            audioController?.toggle()
+        }
         audioController?.rewind(speed)
+        if (resumeAfterScroll) {
+            audioController?.toggle()
+        }
     }
 
     fun fastForward(speed: ScrollSpeed) {
+        val resumeAfterScroll = true
+        if (audioController?.isPlayingProperty?.value == true) {
+            audioController?.toggle()
+        }
         audioController?.fastForward(speed)
+        if (resumeAfterScroll) {
+            audioController?.toggle()
+        }
     }
 
     fun mediaToggle() {
@@ -278,5 +289,9 @@ class VerseMarkerViewModel : ViewModel() {
         val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
         val framesPerPixel = totalFrames / max(controlWidth, 1.0)
         return max(framesInHighlight / framesPerPixel, 1.0)
+    }
+
+    fun requestAudioLocation(): Int {
+        return audioPlayer.value?.getLocationInFrames() ?: 0
     }
 }

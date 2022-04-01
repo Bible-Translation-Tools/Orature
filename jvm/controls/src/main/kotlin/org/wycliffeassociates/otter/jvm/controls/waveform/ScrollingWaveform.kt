@@ -22,6 +22,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import javafx.scene.image.Image
+import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.skins.waveform.ScrollingWaveformSkin
 
 open class ScrollingWaveform() : Control() {
@@ -29,6 +30,9 @@ open class ScrollingWaveform() : Control() {
 
     var onWaveformClicked: () -> Unit = {}
     var onWaveformDragReleased: (Double) -> Unit = {}
+    var onRewind: ((ScrollSpeed) -> Unit) = {}
+    var onFastForward: ((ScrollSpeed) -> Unit) = {}
+    var onToggleMedia: () -> Unit = {}
 
     fun addWaveformImage(image: Image) {
         (skin as ScrollingWaveformSkin).addWaveformImage(image)

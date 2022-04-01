@@ -36,9 +36,6 @@ import javafx.scene.shape.Rectangle
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
 import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
 class WaveformFrame(
@@ -54,7 +51,6 @@ class WaveformFrame(
     private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
 
-    val playerProperty = SimpleObjectProperty<IAudioPlayer>()
     val framePositionProperty = SimpleDoubleProperty(0.0)
 
     fun onWaveformClicked(op: () -> Unit) {
@@ -180,11 +176,11 @@ class WaveformFrame(
                 val speed = if (it.isControlDown) ScrollSpeed.FAST else ScrollSpeed.NORMAL
                 when (it.code) {
                     KeyCode.LEFT -> {
-                        scrollMedia { onRewindProperty.value?.invoke(speed) }
+                        onRewindProperty.value?.invoke(speed)
                         it.consume()
                     }
                     KeyCode.RIGHT -> {
-                        scrollMedia { onFastForwardProperty.value?.invoke(speed) }
+                        onFastForwardProperty.value?.invoke(speed)
                         it.consume()
                     }
                 }
@@ -205,14 +201,6 @@ class WaveformFrame(
                 }
             }
         }
-    }
-
-    private fun scrollMedia(scroll: () -> Unit) {
-        if (playerProperty.value?.isPlaying() == true) {
-            resumeAfterScroll = true
-            playerProperty.value?.toggle()
-        }
-        scroll()
     }
 
     private fun bindTranslateX() {

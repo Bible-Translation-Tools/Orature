@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.control.Control
 import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.jvm.controls.model.ChunkMarkerModel
@@ -29,9 +30,25 @@ class MarkerTrackControl : Control() {
 
     val markers = observableListOf<ChunkMarkerModel>()
     val highlightState = observableListOf<MarkerHighlightState>()
+    val onPositionChangedProperty = SimpleObjectProperty<(Int, Double) -> Unit>()
+    val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
+    val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
+    val onLocationRequestProperty = SimpleObjectProperty<() -> Int>()
+
+    init {
+        styleClass.add("vm-marker-track")
+    }
 
     fun refreshMarkers() {
         (skin as? MarkerTrackControlSkin)?.let { it.refreshMarkers() }
+    }
+
+    fun setOnPositionChanged(op: (Int, Double) -> Unit) {
+        onPositionChangedProperty.set(op)
+    }
+
+    fun setOnLocationRequest(op: () -> Int) {
+        onLocationRequestProperty.set(op)
     }
 
     override fun createDefaultSkin(): Skin<*> {

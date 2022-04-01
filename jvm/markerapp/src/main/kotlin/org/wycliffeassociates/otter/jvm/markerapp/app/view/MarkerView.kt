@@ -21,8 +21,10 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
+import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
@@ -66,7 +68,9 @@ class MarkerView : PluginEntrypoint() {
             setOnPositionChanged { id, position ->
                 slider?.updateMarker(id, position)
             }
-            playerProperty.bind(viewModel.audioPlayer)
+            setOnLocationRequest {
+                viewModel.requestAudioLocation()
+            }
         }
         slider?.let {
             viewModel.initializeAudioController(it)
@@ -104,7 +108,6 @@ class MarkerView : PluginEntrypoint() {
                 )
                 markerStateProperty.bind(viewModel.markerStateProperty)
                 positionProperty.bind(viewModel.positionProperty)
-                playerProperty.bind(viewModel.audioPlayer)
 
                 onSeekNext = viewModel::seekNext
                 onSeekPrevious = viewModel::seekPrevious
