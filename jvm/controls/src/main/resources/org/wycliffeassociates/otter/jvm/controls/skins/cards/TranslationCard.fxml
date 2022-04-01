@@ -41,15 +41,26 @@
                         <FontIcon iconLiteral="mdi-menu-right" />
                     </graphic>
                 </Label>
-                <Label fx:id="targetLanguageText" graphicTextGap="8.0" styleClass="translation-card__language">
+                <Label fx:id="targetLanguageText" graphicTextGap="8.0" styleClass="translation-card__language">`
                     <graphic>
                         <FontIcon iconLiteral="mdi-voice" />
                     </graphic>
                 </Label>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button fx:id="removeTranslationBtn" styleClass="translation-card__remove-btn">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-close-circle" />
+                    </graphic>
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn--secondary" />
+                        <String fx:value="btn--borderless" />
+                    </styleClass>
+                </Button>
             </children>
         </HBox>
-        <VBox fx:id="bookCards" styleClass="translation-card__books" />
         <BookCard styleClass="translation-card__book--no-bg" fx:id="newBookCard" />
+        <VBox fx:id="bookCards" styleClass="translation-card__books" />
         <VBox styleClass="translation-card__see-more-content">
             <children>
                 <Button fx:id="seeMoreBtn">
