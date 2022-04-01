@@ -29,6 +29,7 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.scene.text.TextFlow
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
@@ -81,6 +82,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     @FXML
     lateinit var sourceText: Label
+
+    @FXML
+    lateinit var sourceTextChunksContainer: TextFlow
 
     @FXML
     lateinit var licenseText: Label
@@ -192,8 +196,20 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
         }
 
-        sourceText.apply {
-            textProperty().bind(sourceContent.sourceTextProperty)
+//        sourceText.apply {
+//            textProperty().bind(sourceContent.sourceTextProperty)
+//        }
+
+        sourceTextChunksContainer.apply {
+            sourceContent.sourceTextChunks.forEach { chunkText ->
+                text(chunkText + "\n") {
+                    addClass("source-content__text")
+                    sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
+                        val isHighlighted = highlightedIndex == indexInParent
+                        toggleClass("source-content__text--highlighted", isHighlighted)
+                    }
+                }
+            }
         }
 
         licenseText.apply {

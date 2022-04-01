@@ -107,13 +107,16 @@
 }
 
 .source-content__text-wrapper {
-    -fx-padding: 10px;
+    -fx-padding: 20px 15px;
 }
 
 .source-content__text {
     -fx-font-size: 1.5em;
-    -fx-padding: 0 15px;
-    -fx-text-fill: -wa-regular-text;
+    -fx-fill: -wa-regular-text;
+}
+
+.source-content__text--highlighted {
+    -fx-fill: -wa-highlight-text;
 }
 
 .source-content__license-text {

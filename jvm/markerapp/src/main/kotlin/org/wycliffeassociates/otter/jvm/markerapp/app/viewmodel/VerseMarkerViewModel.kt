@@ -24,10 +24,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.beans.value.ChangeListener
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
@@ -70,6 +67,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     var markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
     val markers by markerStateProperty
+    val currentMarkerNumberProperty = SimpleIntegerProperty(0)
 
     var audioController: AudioPlayerController? = null
 
@@ -137,6 +135,13 @@ class VerseMarkerViewModel : ViewModel() {
             val percentPlayed = current / duration
             val pos = percentPlayed * imageWidth
             positionProperty.set(pos)
+
+            markers.let { markerModel ->
+                val currentMarkerFrame = markerModel.seekCurrent(current)
+                val currentMarker = markerModel.markers.find { it.frame == currentMarkerFrame }
+                val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: 0
+                currentMarkerNumberProperty.set(index)
+            }
         }
     }
 

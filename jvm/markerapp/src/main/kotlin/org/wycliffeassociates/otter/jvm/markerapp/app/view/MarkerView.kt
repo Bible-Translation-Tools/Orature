@@ -122,7 +122,11 @@ class MarkerView : PluginEntrypoint() {
                 onToggleMedia = viewModel::mediaToggle
             }
             bottom = vbox {
-                add<SourceTextFragment>()
+                add(
+                    SourceTextFragment().apply {
+                        highlightedChunkNumberProperty.bind(viewModel.currentMarkerNumberProperty)
+                    }
+                )
                 add<PlaybackControlsFragment>()
             }
             shortcut(Shortcut.ADD_MARKER.value, viewModel::placeMarker)
