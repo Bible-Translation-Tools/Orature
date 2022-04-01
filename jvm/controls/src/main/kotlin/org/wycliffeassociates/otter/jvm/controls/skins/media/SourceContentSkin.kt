@@ -29,6 +29,7 @@ import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.scene.text.Text
 import javafx.scene.text.TextFlow
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -79,9 +80,6 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     @FXML
     lateinit var sourceTextScroll: ScrollPane
-
-    @FXML
-    lateinit var sourceText: Label
 
     @FXML
     lateinit var sourceTextChunksContainer: TextFlow
@@ -196,20 +194,11 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
         }
 
-//        sourceText.apply {
-//            textProperty().bind(sourceContent.sourceTextProperty)
-//        }
-
-        sourceTextChunksContainer.apply {
-            sourceContent.sourceTextChunks.forEach { chunkText ->
-                text(chunkText + "\n") {
-                    addClass("source-content__text")
-                    sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
-                        val isHighlighted = highlightedIndex == indexInParent
-                        toggleClass("source-content__text--highlighted", isHighlighted)
-                    }
-                }
+        sourceContent.sourceTextChunks.onChangeAndDoNow {
+            val nodes = it.mapIndexed { index, chunkText ->
+                buildChunkText(chunkText, index)
             }
+            sourceTextChunksContainer.children.setAll(nodes)
         }
 
         licenseText.apply {
@@ -250,6 +239,16 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     private fun toggleBody() {
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
+    }
+
+    private fun buildChunkText(textContent: String, index: Int): Node {
+        return Text(textContent + "\n").apply {
+            addClass("source-content__text")
+            sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
+                val isHighlighted = highlightedIndex == index
+                toggleClass("source-content__text--highlighted", isHighlighted)
+            }
+        }
     }
 
     private fun loadFXML() {

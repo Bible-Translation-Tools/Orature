@@ -107,7 +107,11 @@
 }
 
 .source-content__text-wrapper {
-    -fx-padding: 20px 15px;
+    -fx-padding: 20px;
+}
+
+.source-content__text-flow {
+    -fx-line-spacing: 0.4em;
 }
 
 .source-content__text {

@@ -44,7 +44,7 @@ class SourceContent : Control() {
 
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
-    val sourceTextChunks = SimpleListProperty<String>(observableListOf())
+    val sourceTextChunks = observableListOf<String>()
     val highlightedChunk = SimpleIntegerProperty(-1)
 
     val licenseProperty = SimpleStringProperty()
@@ -79,10 +79,7 @@ class SourceContent : Control() {
         }
         sourceTextProperty.onChange {
             val chunks = it?.split("\n") ?: listOf()
-            if (chunks.isNotEmpty()) {
-                sourceTextChunks.clear()
-                sourceTextChunks.addAll(chunks.toObservable())
-            }
+            sourceTextChunks.setAll(chunks)
         }
     }
 
