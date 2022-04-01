@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
+import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
@@ -25,8 +26,10 @@ import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.control.ScrollBar
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.SkinBase
+import javafx.scene.control.skin.ScrollPaneSkin
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -35,6 +38,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.utils.findChildren
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -190,6 +194,20 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             whenVisible { vvalue = 0.0 }
             isFitToWidth = true
             nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
+
+            focusTraversableProperty().bind(Bindings.createBooleanBinding(
+                {
+                    skin?.let {
+                        val scrollPaneSkin = skin as? ScrollPaneSkin
+                        scrollPaneSkin?.verticalScrollBar?.isVisible
+                    } ?: false
+                },
+                skinProperty().select { (it as ScrollPaneSkin).verticalScrollBar.visibleProperty() }
+            ))
+            mouseTransparentProperty().bind(focusTraversableProperty().not())
+            mouseTransparentProperty().onChange {
+                if (it) sourceContent.requestFocus()
+            }
         }
 
         sourceText.apply {
