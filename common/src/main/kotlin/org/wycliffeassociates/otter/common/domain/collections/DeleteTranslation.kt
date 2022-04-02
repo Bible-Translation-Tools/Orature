@@ -16,31 +16,23 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.common.domain.collections
 
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.Priority
-import tornadofx.*
+import io.reactivex.Completable
+import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.persistence.repositories.ILanguageRepository
+import javax.inject.Inject
 
-class MarkerViewBackground : BorderPane() {
-
-    init {
-        fitToParentSize()
-        hgrow = Priority.ALWAYS
-        vgrow = Priority.ALWAYS
-
-        with(this) {
-            top {
-                region {
-                    styleClass.add("vm-waveform-frame__top-track")
-                }
+class DeleteTranslation @Inject constructor(
+    private val languageRepo: ILanguageRepository
+) {
+    fun delete(
+        sourceLanguage: Language,
+        targetLanguage: Language
+    ): Completable {
+        return languageRepo.getTranslation(sourceLanguage, targetLanguage)
+            .flatMapCompletable {
+                languageRepo.deleteTranslation(it)
             }
-
-            bottom {
-                region {
-                    styleClass.add("vm-waveform-frame__bottom-track")
-                }
-            }
-        }
     }
 }

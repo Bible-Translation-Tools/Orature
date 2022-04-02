@@ -118,10 +118,15 @@ class HomePage : View() {
                                 }
                             }
 
+                            removeTranslationTextProperty.set(messages["removeTranslation"])
                             showMoreTextProperty.set(messages["showMore"])
                             showLessTextProperty.set(messages["showLess"])
                             orientationScaleProperty.bind(settingsViewModel.orientationScaleProperty)
 
+                            setOnRemoveTranslation {
+                                hide()
+                                viewModel.removeTranslation(it)
+                            }
                             setOnNewBookAction {
                                 viewModel.createProject(it)
                             }

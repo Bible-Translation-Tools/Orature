@@ -55,7 +55,7 @@
     -wa-disabled-text: gray;
     -wa-disabled-background: #ffffff20;
     -wa-status-active: #2ec144;
-    -wa-status-inactive: -wa-gray;
+    -wa-status-inactive: -wa-black-05-noalpha;
     -wa-status-complete: -wa-blue;
     -wa-inverse-text: -wa-gray-dark;
 
@@ -131,11 +131,19 @@
     -wa-slider-track-color: gray;
     -wa-slider-border-color: -wa-white-30;
     -wa-recorder-controls-background: #0c0033;
+
+    -wa-scrolling-waveform-background:  #999999;
+    -wa-scrolling-waveform-track-border: rgb(167, 182, 207);
+
+    -wa-played-audio-highlight: rgba(1, 90, 217, 0.4);
+    -wa-playback-line: rgb(255, 177, 0);
+
     -wa-waveform-background: #999999;
     -wa-waveform-background-dark: #4f5964;
 
     -wa-marker-overlay-primary: #0f32a542;
     -wa-marker-overlay-secondary: #224e7150;
+    -wa-marker-track-background: #4f5964;
 
     /* dialog */
     -wa-dialog-overlay: -wa-black-80;
