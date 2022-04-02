@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.utils
+package org.wycliffeassociates.otter.jvm.utils.images
 
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region

@@ -37,6 +37,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.dialog.OtterDialog
 import org.wycliffeassociates.otter.jvm.device.audio.AudioErrorType
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
 import java.util.concurrent.Callable
@@ -79,7 +80,7 @@ class AudioErrorDialog : OtterDialog() {
             }
             region { hgrow = Priority.ALWAYS }
             button {
-                addClass("add-plugin-dialog__btn--close")
+                addClass("btn", "btn--secondary")
                 graphic = FontIcon("gmi-close")
                 onActionProperty().bind(onCancelActionProperty())
             }
@@ -137,9 +138,8 @@ class AudioErrorDialog : OtterDialog() {
                 }
 
                 buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-
-                selectionModel.selectedItemProperty().onChange {
-                    it?.let { settingsViewModel.updateOutputDevice(it) }
+                overrideDefaultKeyEventHandler {
+                    settingsViewModel.updateOutputDevice(it)
                 }
 
                 visibleProperty().bind(
@@ -159,9 +159,8 @@ class AudioErrorDialog : OtterDialog() {
                 }
 
                 buttonCell = DeviceComboboxCell(FontIcon(MaterialDesign.MDI_MICROPHONE))
-
-                selectionModel.selectedItemProperty().onChange {
-                    it?.let { settingsViewModel.updateInputDevice(it) }
+                overrideDefaultKeyEventHandler {
+                    settingsViewModel.updateInputDevice(it)
                 }
 
                 visibleProperty().bind(

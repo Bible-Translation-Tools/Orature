@@ -24,7 +24,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.ListView
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.jvm.controls.utils.findChild
+import org.wycliffeassociates.otter.jvm.utils.findChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 

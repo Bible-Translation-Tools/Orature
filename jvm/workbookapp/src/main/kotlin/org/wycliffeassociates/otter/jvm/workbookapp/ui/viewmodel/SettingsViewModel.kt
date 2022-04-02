@@ -107,11 +107,6 @@ class SettingsViewModel : ViewModel() {
         audioPluginViewModel.selectedEditorProperty.bind(selectedEditorProperty)
         audioPluginViewModel.selectedRecorderProperty.bind(selectedRecorderProperty)
         audioPluginViewModel.selectedMarkerProperty.bind(selectedMarkerProperty)
-        selectedLocaleLanguageProperty.addListener { _, oldValue, newValue ->
-            if (oldValue != null) {
-                newValue?.let { updateLanguage(it) }
-            }
-        }
 
         osThemeDetector.registerListener {
             runLater { isOSDarkMode.set(it) }
