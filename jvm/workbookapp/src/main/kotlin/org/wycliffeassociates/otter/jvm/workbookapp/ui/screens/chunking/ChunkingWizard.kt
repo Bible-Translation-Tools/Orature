@@ -110,6 +110,8 @@ class ChunkingWizard : Wizard() {
     }
 
     init {
+        add<Consume>()
         add<Verbalize>()
+        add<Chunk>()
     }
 }

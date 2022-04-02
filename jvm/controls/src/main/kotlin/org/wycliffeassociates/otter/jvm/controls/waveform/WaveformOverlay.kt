@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view.layers
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleDoubleProperty
@@ -24,7 +24,10 @@ import javafx.geometry.Pos
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Line
 import javafx.scene.shape.Rectangle
-import tornadofx.*
+import tornadofx.add
+import tornadofx.div
+import tornadofx.minus
+import tornadofx.unaryMinus
 
 class WaveformOverlay : StackPane() {
 
@@ -36,7 +39,7 @@ class WaveformOverlay : StackPane() {
 
         add(
             Rectangle().apply {
-                styleClass.add("vm-waveform-holder--played")
+                styleClass.add("scrolling-waveform-holder--played")
                 heightProperty().bind(this@WaveformOverlay.heightProperty().minus(90.0))
                 widthProperty().bind(
                     Bindings.min(
@@ -51,7 +54,7 @@ class WaveformOverlay : StackPane() {
         add(
             Line(0.0, 40.0, 0.0, 0.0).apply {
                 endYProperty().bind(this@WaveformOverlay.heightProperty())
-                styleClass.add("vm-playback-line")
+                styleClass.add("scrolling-waveform__playback-line")
             }
         )
     }

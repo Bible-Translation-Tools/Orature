@@ -16,15 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.common.data.workbook
+package org.wycliffeassociates.otter.jvm.controls.model
 
-import com.jakewharton.rxrelay2.Relay
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleStringProperty
 
-class AssociatedTranslation(
-    val sourceRate: Relay<Double>,
-    val targetRate: Relay<Double>
-) {
-    fun updateSourceRate(rate: Double) = sourceRate.accept(rate)
-
-    fun updateTargetRate(rate: Double) = targetRate.accept(rate)
+class MarkerHighlightState {
+    val visibility = SimpleBooleanProperty(false)
+    val styleClass = SimpleStringProperty("scrolling-waveform__highlight--primary")
+    val primaryStyleClass = SimpleStringProperty("scrolling-waveform__highlight--primary")
+    val secondaryStyleClass = SimpleStringProperty("scrolling-waveform__highlight--secondary")
+    val translate = SimpleDoubleProperty(0.0)
+    val width = SimpleDoubleProperty(0.0)
 }

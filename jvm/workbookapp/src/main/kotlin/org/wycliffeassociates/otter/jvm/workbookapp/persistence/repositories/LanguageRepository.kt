@@ -194,4 +194,15 @@ class LanguageRepository @Inject constructor(
             }
             .subscribeOn(Schedulers.io())
     }
+
+    override fun deleteTranslation(translation: Translation): Completable {
+        return Completable
+            .fromAction {
+                translationDao.delete(translationMapper.mapToEntity(translation))
+            }
+            .doOnError { e->
+                logger.error("Error in delete translation: $translation", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
 }
