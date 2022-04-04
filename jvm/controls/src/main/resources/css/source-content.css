@@ -106,24 +106,22 @@
     -fx-background-color: -wa-background;
 }
 
-.source-content__text-wrapper {
-    -fx-padding: 20px;
-}
-
-.source-content__text-flow {
-    -fx-line-spacing: 0.4em;
+.source-content__text-container {
+    -fx-padding: 10px 0 0 0;
 }
 
 .source-content__text {
+    -fx-padding: 0 15px;
     -fx-font-size: 1.5em;
-    -fx-fill: -wa-regular-text;
+    -fx-text-fill: -wa-regular-text;
 }
 
 .source-content__text--highlighted {
-    -fx-fill: -wa-highlight-text;
+    -fx-text-fill: -wa-highlight-text;
 }
 
 .source-content__license-text {
+    -fx-padding: 20px 15px 0 15px;
     -fx-font-size: 1.25em;
     -fx-text-fill: -wa-note-text;
 }

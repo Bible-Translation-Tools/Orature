@@ -25,12 +25,10 @@ import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.control.ScrollPane
+import javafx.scene.control.ListView
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
-import javafx.scene.text.Text
-import javafx.scene.text.TextFlow
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
@@ -79,13 +77,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var textNotAvailableText: Label
 
     @FXML
-    lateinit var sourceTextScroll: ScrollPane
-
-    @FXML
-    lateinit var sourceTextChunksContainer: TextFlow
-
-    @FXML
-    lateinit var licenseText: Label
+    lateinit var sourceTextChunksContainer: ListView<Label>
 
     @FXML
     lateinit var title: Label
@@ -188,27 +180,12 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             managedWhen(visibleProperty())
         }
 
-        sourceTextScroll.apply {
-            whenVisible { vvalue = 0.0 }
-            isFitToWidth = true
-            nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
-        }
-
         sourceContent.sourceTextChunks.onChangeAndDoNow {
-            val nodes = it.mapIndexed { index, chunkText ->
+            val textNodes = it.mapIndexed { index, chunkText ->
                 buildChunkText(chunkText, index)
-            }
-            sourceTextChunksContainer.children.setAll(nodes)
-        }
-
-        licenseText.apply {
-            textProperty().bind(sourceContent.licenseTextProperty)
-            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
-                when (it) {
-                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
-                    else -> ""
-                }
-            })
+            }.toMutableList()
+            textNodes.add(buildLicenseText())
+            sourceTextChunksContainer.items.setAll(textNodes)
         }
 
         title.apply {
@@ -241,13 +218,34 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
     }
 
-    private fun buildChunkText(textContent: String, index: Int): Node {
-        return Text(textContent + "\n").apply {
+    private fun buildChunkText(textContent: String, index: Int): Label {
+        return Label(textContent).apply {
             addClass("source-content__text")
+            isWrapText = true
+            prefWidthProperty().bind(
+                sourceTextChunksContainer.widthProperty().minus(50)
+            )
+
             sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
                 val isHighlighted = highlightedIndex == index
                 toggleClass("source-content__text--highlighted", isHighlighted)
+                if (isHighlighted) {
+                    sourceTextChunksContainer.scrollTo(index)
+                }
             }
+        }
+    }
+
+    private fun buildLicenseText(): Label {
+        return Label().apply {
+            addClass("source-content__license-text")
+            textProperty().bind(sourceContent.licenseTextProperty)
+            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
+                when (it) {
+                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                    else -> ""
+                }
+            })
         }
     }
 
