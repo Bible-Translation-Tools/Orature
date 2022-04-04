@@ -159,6 +159,12 @@ class Chunk : Fragment() {
                 }
             }
             add(nextBtn)
+            button("save") {
+                setOnAction {
+                    vm.saveAndQuit()
+                    workspace.navigateBack()
+                }
+            }
         }
     }
 }

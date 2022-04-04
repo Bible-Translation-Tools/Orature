@@ -159,6 +159,9 @@ class ChunkingViewModel : ViewModel() {
 
     fun saveAndQuit() {
         compositeDisposable.clear()
+        for (i in 1..markers.markers.filter { it.placed }.size) {
+            workbookDataStore.activeChapterProperty.value.addChunk(i)
+        }
     }
 
     fun initializeAudioController() {

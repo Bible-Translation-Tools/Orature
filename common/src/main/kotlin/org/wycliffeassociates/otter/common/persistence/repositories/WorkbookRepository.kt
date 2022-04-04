@@ -52,6 +52,7 @@ import org.wycliffeassociates.otter.common.domain.collections.UpdateTranslation
 import java.util.WeakHashMap
 import java.util.Collections.synchronizedMap
 import javax.inject.Inject
+import kotlin.math.log
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 private typealias ModelTake = org.wycliffeassociates.otter.common.data.primitives.Take
@@ -205,7 +206,10 @@ class WorkbookRepository(
                     audio = constructAssociatedAudio(metaContent, disposables),
                     chunks = constructChunks(chapterCollection, disposables),
                     subtreeResources = db.getSubtreeResourceMetadata(chapterCollection),
-                    addChunk = { db.addContentForCollection(chapterCollection, it).subscribe() }
+                    addChunk = {
+                        logger.info("Adding chunk $it")
+                        db.addContentForCollection(chapterCollection, it).subscribe()
+                    }
                 )
             }
     }
@@ -588,8 +592,11 @@ private class DefaultDatabaseAccessors(
     private val updateTranslationUseCase: UpdateTranslation
 ) : WorkbookRepository.IDatabaseAccessors {
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     override fun addContentForCollection(collection: Collection, chunkNumber: Int): Completable {
         val cont = Content(chunkNumber, "chunk", chunkNumber, chunkNumber, null, "null", "usfm", ContentType.TEXT)
+        logger.info("Adding content $cont for collection $collection")
         return contentRepo.insertForCollection(cont, collection).ignoreElement()
     }
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)

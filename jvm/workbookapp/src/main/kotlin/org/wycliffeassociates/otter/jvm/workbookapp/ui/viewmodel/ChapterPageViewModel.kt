@@ -377,6 +377,7 @@ class ChapterPageViewModel : ViewModel() {
             .map {
                 println("about to add it to allcontent")
                 filteredContent.add(it)
+                filteredContent.sortBy { it.sort }
                 it
             }.observeOnFx()
     }
