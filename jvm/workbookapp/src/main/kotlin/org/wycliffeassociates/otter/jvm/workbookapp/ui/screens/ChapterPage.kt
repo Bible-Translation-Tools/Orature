@@ -101,6 +101,8 @@ class ChapterPage : View() {
         chunkListView.refresh()
 
         initializeProgressDialog()
+
+        println("sourceAudio is ${workbookDataStore.sourceAudioProperty.get()}")
     }
 
     override fun onUndock() {
@@ -139,7 +141,7 @@ class ChapterPage : View() {
     override val root = hbox {
 
         button("chunk") { setOnAction {
-            workspace.dockInNewScope<ChunkingWizard>()
+            workspace.dock<ChunkingWizard>()
         } }
         button("add") {setOnAction {viewModel.addChunk() }}
         button("subList") {setOnAction{ viewModel.subList()}}
