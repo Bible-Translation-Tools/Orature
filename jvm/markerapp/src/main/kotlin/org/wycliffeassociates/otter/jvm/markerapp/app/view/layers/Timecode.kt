@@ -23,8 +23,8 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.image.Image
 import javafx.scene.image.WritableImage
 import javafx.scene.paint.Color
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.pixelsInSecond
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.positionToMs
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsInSecond
+import org.wycliffeassociates.otter.jvm.controls.model.positionToMs
 import java.lang.Math.floor
 import java.util.concurrent.TimeUnit
 

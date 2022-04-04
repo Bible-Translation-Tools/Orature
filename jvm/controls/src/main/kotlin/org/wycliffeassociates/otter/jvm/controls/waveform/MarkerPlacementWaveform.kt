@@ -16,27 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.controls.utils
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
+import javafx.beans.property.SimpleObjectProperty
 import javafx.scene.Node
-import javafx.scene.Parent
-import kotlin.reflect.KClass
+import javafx.scene.control.Skin
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
+import org.wycliffeassociates.otter.jvm.controls.skins.waveform.MarkerPlacementWaveformSkin
 
-inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
-inline fun <reified T: Node> Node.findChildren(): List<Node> = findChildren(T::class)
-fun <T: Node> Node.findChildren(type: KClass<T>): List<Node> {
-    if (this !is Parent) return listOf()
+class MarkerPlacementWaveform(
+    val topNode: Node
+) : ScrollingWaveform() {
 
-    val list = this.childrenUnmodifiable
-        .filter { type.isInstance(it) }
-        .filter { it.isVisible }
-        .toMutableList()
+    val markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
 
-    for (node: Node in this.childrenUnmodifiable) {
-        (node as? Parent)?.findChildren(type)?.let {
-            list.addAll(it)
-        }
+    var onSeekNext: () -> Unit = {}
+    var onSeekPrevious: () -> Unit = {}
+    var onPlaceMarker: () -> Unit = {}
+    var topTrack: Node? = topNode
+    var bottomTrack: Node? = null
+
+    override fun createDefaultSkin(): Skin<*> {
+        return MarkerPlacementWaveformSkin(this)
     }
-
-    return list
 }

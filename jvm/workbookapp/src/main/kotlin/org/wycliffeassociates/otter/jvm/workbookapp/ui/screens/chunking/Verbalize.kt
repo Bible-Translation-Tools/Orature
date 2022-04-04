@@ -20,10 +20,12 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 
 import javafx.scene.shape.Circle
 import org.kordamp.ikonli.javafx.FontIcon
+import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.VerbalizeViewModel
 import tornadofx.*
 
@@ -33,11 +35,11 @@ class Verbalize : View() {
     val chunkVm: ChunkingViewModel by inject()
     val vm: VerbalizeViewModel by inject()
 
-    val playIcon = FontIcon("mdi-play")
-    val pauseIcon = FontIcon("mdi-pause")
-    val recordIcon = FontIcon("mdi-microphone")
-    val stopIcon = FontIcon("mdi-stop")
-    val rerecordButton = FontIcon("mdi-sync")
+    val playIcon = FontIcon(MaterialDesign.MDI_PLAY)
+    val pauseIcon = FontIcon(MaterialDesign.MDI_PAUSE)
+    val recordIcon = FontIcon(MaterialDesign.MDI_MICROPHONE)
+    val stopIcon = FontIcon(MaterialDesign.MDI_STOP)
+    val rerecordButton = FontIcon(MaterialDesign.MDI_SYNC)
 
     val arc = Circle(120.0, 120.0, 60.0).apply {
         addClass("verbalize__animation")
@@ -48,6 +50,7 @@ class Verbalize : View() {
         tryImportStylesheet(resources["/css/verbalize-page.css"])
         logger.info("Verbalize docked")
         vm.onDock()
+        chunkVm.pageProperty.set(ChunkingWizardPage.VERBALIZE)
         chunkVm.titleProperty.set(messages["verbalizeTitle"])
         chunkVm.stepProperty.set(messages["verbalizeDescription"])
     }

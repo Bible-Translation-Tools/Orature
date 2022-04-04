@@ -22,9 +22,11 @@ import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.sun.javafx.util.Utils
 import javafx.animation.AnimationTimer
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
+import org.wycliffeassociates.otter.jvm.controls.model.pixelsToFrames
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.AudioSlider
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
+import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
 import org.wycliffeassociates.otter.jvm.markerapp.app.viewmodel.VerseMarkerViewModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.PluginEntrypoint
@@ -57,8 +59,8 @@ class MarkerView : PluginEntrypoint() {
             viewModel.markerStateProperty.onChangeAndDoNow { markers ->
                 markers?.let { markers ->
                     markers.markerCountProperty.onChangeAndDoNow {
-                        this.markers.setAll(viewModel.markers.markers)
                         highlightState.setAll(viewModel.markers.highlightState)
+                        this.markers.setAll(viewModel.markers.markers)
                         refreshMarkers()
                     }
                 }
@@ -66,7 +68,9 @@ class MarkerView : PluginEntrypoint() {
             setOnPositionChanged { id, position ->
                 slider?.updateMarker(id, position)
             }
-            playerProperty.bind(viewModel.audioPlayer)
+            setOnLocationRequest {
+                viewModel.requestAudioLocation()
+            }
         }
         slider?.let {
             viewModel.initializeAudioController(it)
@@ -75,6 +79,7 @@ class MarkerView : PluginEntrypoint() {
 
     init {
         tryImportStylesheet(resources.get("/css/verse-marker-app.css"))
+        tryImportStylesheet(resources.get("/css/scrolling-waveform.css"))
         tryImportStylesheet(resources.get("/css/chunk-marker.css"))
     }
 
@@ -103,7 +108,6 @@ class MarkerView : PluginEntrypoint() {
                 )
                 markerStateProperty.bind(viewModel.markerStateProperty)
                 positionProperty.bind(viewModel.positionProperty)
-                playerProperty.bind(viewModel.audioPlayer)
 
                 onSeekNext = viewModel::seekNext
                 onSeekPrevious = viewModel::seekPrevious
@@ -120,6 +124,7 @@ class MarkerView : PluginEntrypoint() {
                 onRewind = viewModel::rewind
                 onFastForward = viewModel::fastForward
                 onToggleMedia = viewModel::mediaToggle
+                onResumeMedia = viewModel::resumeMedia
             }
             bottom = vbox {
                 add(

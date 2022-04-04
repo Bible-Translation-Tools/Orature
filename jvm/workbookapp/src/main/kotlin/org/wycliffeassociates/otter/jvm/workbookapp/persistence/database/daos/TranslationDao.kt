@@ -110,4 +110,15 @@ class TranslationDao(
             .where(Tables.TRANSLATION_ENTITY.ID.eq(entity.id))
             .execute()
     }
+
+    @Synchronized
+    fun delete(entity: TranslationEntity, dsl: DSLContext = instanceDsl) {
+        dsl
+            .deleteFrom(Tables.TRANSLATION_ENTITY)
+            .where(
+                Tables.TRANSLATION_ENTITY.SOURCE_FK.equal(entity.sourceFk)
+                    .and(Tables.TRANSLATION_ENTITY.TARGET_FK.equal(entity.targetFk))
+            )
+            .execute()
+    }
 }

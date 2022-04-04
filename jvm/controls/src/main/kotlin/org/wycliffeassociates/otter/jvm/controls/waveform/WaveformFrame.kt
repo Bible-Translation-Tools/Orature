@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.view
+package org.wycliffeassociates.otter.jvm.controls.waveform
 
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -33,12 +33,9 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
-import org.wycliffeassociates.otter.jvm.markerapp.app.model.MarkerHighlightState
-import org.wycliffeassociates.otter.jvm.markerapp.app.view.layers.MarkerTrackControl
-import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
+import org.wycliffeassociates.otter.jvm.utils.images.fitToHeight
+
 import tornadofx.*
 
 class WaveformFrame(
@@ -51,10 +48,10 @@ class WaveformFrame(
     private val onRewindProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
     private val onFastForwardProperty = SimpleObjectProperty<(ScrollSpeed) -> Unit>()
     private val onToggleMediaProperty = SimpleObjectProperty<() -> Unit>()
+    private val onResumeMediaProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekPreviousProperty = SimpleObjectProperty<() -> Unit>()
     private val onSeekNextProperty = SimpleObjectProperty<() -> Unit>()
 
-    val playerProperty = SimpleObjectProperty<IAudioPlayer>()
     val framePositionProperty = SimpleDoubleProperty(0.0)
 
     fun onWaveformClicked(op: () -> Unit) {
@@ -77,6 +74,10 @@ class WaveformFrame(
         onToggleMediaProperty.set(op)
     }
 
+    fun onResumeMedia(op: () -> Unit) {
+        onResumeMediaProperty.set(op)
+    }
+
     fun onSeekPrevious(op: () -> Unit) {
         onSeekPreviousProperty.set(op)
     }
@@ -90,7 +91,6 @@ class WaveformFrame(
     var imageHolder: HBox? = null
     lateinit var imageRegion: Region
     lateinit var highlightHolder: StackPane
-    var resumeAfterScroll = false
 
     init {
         addClass("vm-waveform-frame")
@@ -107,7 +107,7 @@ class WaveformFrame(
 
             top {
                 region {
-                    styleClass.add("vm-waveform-frame__top-track")
+                    styleClass.add("scrolling-waveform-frame__top-track")
                     topTrack?.let {
                         add(it.apply {
                             val me = (it as MarkerTrackControl)
@@ -123,7 +123,7 @@ class WaveformFrame(
                     imageRegion = this
                     stackpane {
                         highlightHolder = this
-                        styleClass.add("vm-waveform-frame__center")
+                        styleClass.add("scrolling-waveform-frame__center")
                         alignment = Pos.CENTER
 
                         fitToParentHeight()
@@ -136,7 +136,7 @@ class WaveformFrame(
 
             bottom {
                 region {
-                    styleClass.add("vm-waveform-frame__bottom-track")
+                    styleClass.add("scrolling-waveform-frame__bottom-track")
                     bottomTrack?.let {
                         add(it)
                     }
@@ -180,11 +180,11 @@ class WaveformFrame(
                 val speed = if (it.isControlDown) ScrollSpeed.FAST else ScrollSpeed.NORMAL
                 when (it.code) {
                     KeyCode.LEFT -> {
-                        scrollMedia { onRewindProperty.value?.invoke(speed) }
+                        onRewindProperty.value?.invoke(speed)
                         it.consume()
                     }
                     KeyCode.RIGHT -> {
-                        scrollMedia { onFastForwardProperty.value?.invoke(speed) }
+                        onFastForwardProperty.value?.invoke(speed)
                         it.consume()
                     }
                 }
@@ -192,10 +192,7 @@ class WaveformFrame(
             setOnKeyReleased {
                 when (it.code) {
                     KeyCode.LEFT, KeyCode.RIGHT -> {
-                        if (resumeAfterScroll) {
-                            resumeAfterScroll = false
-                            onToggleMediaProperty.value?.invoke()
-                        }
+                        onResumeMediaProperty.value?.invoke()
                         it.consume()
                     }
                     KeyCode.ENTER, KeyCode.SPACE -> {
@@ -205,14 +202,6 @@ class WaveformFrame(
                 }
             }
         }
-    }
-
-    private fun scrollMedia(scroll: () -> Unit) {
-        if (playerProperty.value?.isPlaying() == true) {
-            resumeAfterScroll = true
-            playerProperty.value?.toggle()
-        }
-        scroll()
     }
 
     private fun bindTranslateX() {
@@ -233,21 +222,9 @@ class WaveformFrame(
         )
     }
 
-    fun addHighlights(highlights: List<MarkerHighlightState>) {
-        highlights.forEach {
-            highlightHolder.add(
-                Rectangle().apply {
-                    managedProperty().set(false)
-                    heightProperty().bind(highlightHolder.heightProperty())
-                    widthProperty().bind(it.width)
-                    translateXProperty().bind(it.translate)
-                    visibleProperty().bind(it.visibility)
-                    it.styleClass.onChangeAndDoNow {
-                        styleClass.setAll(it)
-                    }
-                }
-            )
-        }
+    fun addHighlight(rect: Rectangle) {
+        rect.heightProperty().bind(highlightHolder.heightProperty())
+        highlightHolder.add(rect)
     }
 
     fun clearHighlights() {

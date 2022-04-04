@@ -120,6 +120,11 @@ class HomePageViewModel : ViewModel() {
         navigator.dock<SourceLanguageSelection>()
     }
 
+    fun removeTranslation(translation: TranslationCardModel) {
+        val vm: TranslationViewModel = find()
+        vm.deleteTranslation(translation, ::loadTranslations)
+    }
+
     fun selectProject(workbook: Workbook) {
         setResumeBook(workbook)
         workbookDataStore.activeWorkbookProperty.set(workbook)

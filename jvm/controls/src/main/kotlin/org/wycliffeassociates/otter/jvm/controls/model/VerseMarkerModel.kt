@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.wycliffeassociates.otter.jvm.markerapp.app.model
+package org.wycliffeassociates.otter.jvm.controls.model
 
 import io.reactivex.Completable
 import io.reactivex.Single
