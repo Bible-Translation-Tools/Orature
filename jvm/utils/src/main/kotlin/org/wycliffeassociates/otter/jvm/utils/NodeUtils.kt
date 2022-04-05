@@ -21,11 +21,9 @@ package org.wycliffeassociates.otter.jvm.utils
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
-import javafx.scene.control.skin.ComboBoxListViewSkin
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
-import tornadofx.*
 import kotlin.reflect.KClass
 
 inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
