@@ -184,7 +184,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             val textNodes = it.mapIndexed { index, chunkText ->
                 buildChunkText(chunkText, index)
             }.toMutableList()
-            textNodes.add(buildLicenseText())
+
+            textNodes.add(buildLicenseText()) // append license at bottom of the list
             sourceTextChunksContainer.items.setAll(textNodes)
         }
 
