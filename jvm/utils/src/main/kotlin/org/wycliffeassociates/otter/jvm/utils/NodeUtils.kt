@@ -21,6 +21,8 @@ package org.wycliffeassociates.otter.jvm.utils
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
+import javafx.scene.control.ListView
+import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import kotlin.reflect.KClass
@@ -107,6 +109,35 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
             }
             KeyCode.TAB -> {
                 if (this.isShowing) it.consume()
+            }
+        }
+    }
+}
+
+fun <T> ListView<T>.enableScrollByKey(
+    smallDelta: Double = 20.0,
+    largeDelta: Double = 500.0
+) {
+    addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+        val flow = childrenUnmodifiable
+            .find { it is VirtualFlow<*> } as VirtualFlow<*>
+
+        when (keyEvent.code) {
+            KeyCode.UP -> {
+                flow.scrollPixels(-smallDelta)
+                keyEvent.consume()
+            }
+            KeyCode.DOWN -> {
+                flow.scrollPixels(smallDelta)
+                keyEvent.consume()
+            }
+            KeyCode.PAGE_UP -> {
+                flow.scrollPixels(-largeDelta)
+                keyEvent.consume()
+            }
+            KeyCode.PAGE_DOWN -> {
+                flow.scrollPixels(largeDelta)
+                keyEvent.consume()
             }
         }
     }

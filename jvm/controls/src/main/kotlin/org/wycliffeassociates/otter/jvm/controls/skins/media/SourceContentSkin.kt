@@ -27,6 +27,9 @@ import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
 import javafx.scene.control.SkinBase
+import javafx.scene.control.skin.VirtualFlow
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -35,6 +38,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -179,6 +183,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             visibleWhen(sourceContent.sourceTextAvailableProperty)
             managedWhen(visibleProperty())
         }
+
+        sourceTextChunksContainer.enableScrollByKey()
 
         sourceContent.sourceTextChunks.onChangeAndDoNow {
             val textNodes = it.mapIndexed { index, chunkText ->
