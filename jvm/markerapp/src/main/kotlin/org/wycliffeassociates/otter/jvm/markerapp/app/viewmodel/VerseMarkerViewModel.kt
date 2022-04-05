@@ -228,6 +228,12 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun mediaToggle() {
+        if (audioController?.isPlayingProperty?.value == false) {
+            /* trigger change to auto-scroll when it starts playing */
+            val currentMarkerIndex = currentMarkerNumberProperty.value
+            currentMarkerNumberProperty.set(-1)
+            currentMarkerNumberProperty.set(currentMarkerIndex)
+        }
         audioController?.toggle()
     }
 
