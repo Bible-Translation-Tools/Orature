@@ -57,7 +57,7 @@
                         </children>
                     </HBox>
                     <VBox fx:id="sourceTextContainer" styleClass="source-content__text-container" VBox.vgrow="ALWAYS">
-                        <ListView fx:id="sourceTextChunksContainer" styleClass="wa-list-view,source-chunk-list" VBox.vgrow="ALWAYS"/>
+                        <ListView fx:id="sourceTextChunksContainer" styleClass="wa-list-view,source-content__chunk-list" VBox.vgrow="ALWAYS"/>
                     </VBox>
                 </children>
             </VBox>

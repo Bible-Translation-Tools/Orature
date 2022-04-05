@@ -90,20 +90,13 @@
     -fx-padding: 15px 5px;
 }
 
-.source-content__scroll-pane {
-    -fx-focus-traversable: true;
-}
-
-.source-content__scroll-pane:focused {
-    -fx-border-width: 4px;
+.source-content__chunk-list {
+    -fx-border-width: 3px;
     -fx-border-radius: 6px;
-    -fx-border-color: -wa-card-border;
+    -fx-border-color: transparent;
 }
-
-.source-content__scroll-pane,
-.source-content__scroll-pane .viewport, /* this region belongs to scroll bar skin */
-.source-content__text-wrapper {
-    -fx-background-color: -wa-background;
+.source-content__chunk-list:focused {
+    -fx-border-color: -wa-card-border;
 }
 
 .source-content__text-container {
