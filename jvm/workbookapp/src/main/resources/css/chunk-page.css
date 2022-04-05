@@ -55,17 +55,3 @@
     -fx-icon-size: 18px;
     -fx-icon-color: "#FFFFFF";
 }
-
-.chunking-play-controls__add-marker-btn {
-    -fx-pref-width: 60px;
-    -fx-pref-height: 60px;
-}
-
-.chunking-play-controls__add-marker-btn .ikonli-font-icon {
-    -fx-icon-size: 24px;
-    -fx-icon-color: black;
-}
-
-.chunking-play-controls__add-marker-container {
-    -fx-padding: 0 0 28px 0;
-}
