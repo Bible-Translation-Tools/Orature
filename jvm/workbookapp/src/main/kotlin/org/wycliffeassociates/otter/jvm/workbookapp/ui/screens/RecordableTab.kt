@@ -51,9 +51,6 @@ class RecordableTab(
 
         selectedProperty().onChange { selected ->
             if (selected) {
-                Platform.runLater {
-                    content.requestFocus()
-                }
                 callOnTabSelect()
             }
         }

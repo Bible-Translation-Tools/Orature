@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import tornadofx.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
@@ -159,6 +160,8 @@ class AudioPlayerController(
                     fastForward(speed)
                     it.consume()
                 }
+                KeyCode.DOWN -> audioSlider?.simulateKeyPress(KeyCode.TAB)
+                KeyCode.UP -> audioSlider?.simulateKeyPress(KeyCode.TAB, shiftDown = true)
             }
         }
         audioSlider?.setOnKeyReleased {
