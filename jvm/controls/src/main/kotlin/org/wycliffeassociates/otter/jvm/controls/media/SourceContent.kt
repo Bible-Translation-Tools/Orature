@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.media
 import javafx.beans.binding.BooleanBinding
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.NodeOrientation
@@ -42,6 +43,8 @@ class SourceContent : Control() {
 
     val sourceTextProperty = SimpleStringProperty()
     val sourceTextAvailableProperty: BooleanBinding = sourceTextProperty.isNotNull
+    val sourceTextChunks = observableListOf<String>()
+    val highlightedChunk = SimpleIntegerProperty(-1)
 
     val licenseProperty = SimpleStringProperty()
     val licenseTextProperty = SimpleStringProperty()
@@ -72,6 +75,10 @@ class SourceContent : Control() {
             licenseTextProperty.set(
                 MessageFormat.format(FX.messages["licenseStatement"], it)
             )
+        }
+        sourceTextProperty.onChange {
+            val chunks = it?.split("\n") ?: listOf()
+            sourceTextChunks.setAll(chunks)
         }
     }
 
