@@ -24,8 +24,9 @@ import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import java.time.LocalDateTime
+import java.util.*
 
-data class Book(
+class Book(
     val collectionId: Int,
     val sort: Int,
     val slug: String,
@@ -53,4 +54,26 @@ data class Book(
         modifiedTs,
         collectionId
     )
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            collectionId,
+            sort,
+            slug,
+            title,
+            label
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Book
+
+        if (slug != other.slug) return false
+        if (collectionId != other.collectionId) return false
+
+        return true
+    }
 }
