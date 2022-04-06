@@ -94,6 +94,13 @@ class WorkbookRepository(
     private val connections = mutableMapOf<Workbook, CompositeDisposable>()
 
     override fun get(source: Collection, target: Collection): Workbook {
+        logger.info("Opening workbook with source $source and target $target")
+
+        val existing = getExistingWorkbookIfExists(source, target)
+        if (existing != null) {
+            return existing
+        }
+
         // Clear database connections and dispose observables for the
         // previous Workbook if a new one was requested.
         val disposables = mutableListOf<Disposable>()
@@ -113,6 +120,10 @@ class WorkbookRepository(
         )
         connections[workbook] = CompositeDisposable(disposables)
         return workbook
+    }
+
+    private fun getExistingWorkbookIfExists(source: Collection, target: Collection): Workbook? {
+        return connections.keys.find { it.source.collectionId == source.id && it.target.collectionId == target.id }
     }
 
     override fun closeWorkbook(workbook: Workbook) {
