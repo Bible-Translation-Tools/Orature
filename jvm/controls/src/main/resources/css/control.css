@@ -565,7 +565,7 @@
 /* ----------------- ListView ---------------- */
 .wa-list-view {
     -fx-background-color: -wa-transparent;
-    -fx-focus-traversable: false;
+    -fx-focus-traversable: true;
 }
 
 .wa-list-view .list-cell:selected,
@@ -670,4 +670,71 @@
     -fx-border-color: -wa-button-border;
     -fx-border-style: solid;
     -fx-border-radius: 6px;
+}
+
+/* ------------------- TabPane --------------- */
+
+.wa-tab-pane {
+    -fx-tab-min-height: 57px;
+    -fx-tab-max-height: 57px;
+    -fx-tab-min-width: 157px;
+    -fx-tab-max-width: 157px;
+    -fx-effect: -wa-level2;
+}
+
+.wa-tab-pane .tab {
+    -fx-border-width: 0 0 3px 0;
+    -fx-border-radius: 3px 3px 0 0;
+    -fx-border-color: rgba(224,224,224, .87);
+    -fx-background-color: -wa-tab-background;
+}
+
+.wa-tab-pane .tab:hover {
+}
+
+.wa-tab-pane .tab:selected {
+    -fx-background-color: -wa-white;
+    -fx-border-color: -wa-selected-tab-line;
+    -fx-border-width: 0 0 3 0;
+}
+
+.wa-tab-pane:focused .tab {
+    -fx-border-color: transparent;
+}
+
+.wa-tab-pane .tab-header-background {
+    -fx-background-color: -wa-tab-region-background;
+}
+
+.wa-tab-pane .tab-header-area .tab-down-button {
+    -fx-background-color: BLACK;
+}
+
+.wa-tab-pane .tab:selected .focus-indicator {
+    -fx-border-color: transparent;
+}
+
+.wa-tab-pane:focused .tab:selected .focus-indicator {
+    -fx-border-color: -wa-button-border -wa-button-border -wa-selected-tab-line -wa-button-border;
+    -fx-border-width: 3px;
+}
+
+.wa-tab-pane:top .tab-header-area {
+    -fx-padding: 0;
+}
+
+.wa-tab-pane.singleTab .tab-header-area {
+    -fx-pref-height: 0;
+}
+
+.wa-tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -wa-selected-tab-label;
+}
+
+.wa-tab-pane .tab-label {
+    -fx-font-size: 16px;
+    -fx-alignment: CENTER;
+    -fx-text-fill: -wa-regular-text;
+    -fx-font-family: "Noto Sans";
+    -fx-font-weight: NORMAL;
 }

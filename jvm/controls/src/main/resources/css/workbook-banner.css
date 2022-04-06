@@ -22,6 +22,7 @@
     -fx-max-height: 215px;
     -fx-background-color: -wa-primary;
     -fx-background-radius: 15px;
+    -fx-focus-traversable: false;
 }
 
 .workbook-banner__overlay {
@@ -41,7 +42,6 @@
 }
 
 .workbook-banner__btn--delete {
-    -fx-background-color: -wa-transparent;
     -fx-border-color: -wa-white;
     -fx-text-fill: -wa-white;
 }
