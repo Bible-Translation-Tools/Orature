@@ -33,9 +33,9 @@ import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
 import javafx.scene.layout.StackPane
 import javafx.scene.shape.Rectangle
-import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.ScrollSpeed
-import org.wycliffeassociates.otter.jvm.controls.utils.fitToHeight
+import org.wycliffeassociates.otter.jvm.utils.images.fitToHeight
+
 import tornadofx.*
 
 class WaveformFrame(
