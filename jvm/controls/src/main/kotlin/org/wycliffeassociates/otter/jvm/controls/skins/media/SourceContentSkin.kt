@@ -21,15 +21,14 @@ package org.wycliffeassociates.otter.jvm.controls.skins.media
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
+import javafx.geometry.Orientation
 import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
+import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
-import javafx.scene.control.skin.VirtualFlow
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -195,6 +194,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             sourceTextChunksContainer.items.setAll(textNodes)
         }
 
+        bindListFocusableWithScrollable()
+
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
         }
@@ -253,6 +254,22 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                     else -> ""
                 }
             })
+        }
+    }
+
+    /**
+     * Allow focusing when list is scrollable (overflow the bound height).
+     * Unlike ScrollPane, the scrollbar of ListView is dynamically managed.
+     * This binding should be established after the construction of the ListView.
+     */
+    private fun bindListFocusableWithScrollable() {
+        sourceContent.sourceTextProperty.onChangeOnce {
+            sourceTextChunksContainer.lookupAll(".scroll-bar").filter {
+                it is ScrollBar && it.orientation == Orientation.VERTICAL
+            }.firstOrNull()?.let { node ->
+                val scrollBar = node as ScrollBar
+                sourceTextChunksContainer.focusTraversableProperty().bind(scrollBar.visibleProperty())
+            }
         }
     }
 
