@@ -126,9 +126,6 @@ class ChapterPageViewModel : ViewModel() {
                 subscribeSelectedTakePropertyToRelay(chapter.audio)
             }
         }
-
-        println("allcontent size after dock is ${allContent.size}")
-        println("filtered size after dock is ${filteredContent.size}")
     }
 
     fun undock() {
@@ -142,12 +139,10 @@ class ChapterPageViewModel : ViewModel() {
 
     fun onCardSelection(cardData: CardData) {
         cardData.chapterSource?.let {
-            println("setting chapter source?")
             workbookDataStore.activeChapterProperty.set(it)
         }
         // Chunk will be null if the chapter recording is opened. This needs to happen to update the recordable to
         // use the chapter recordable.
-        println("setting active chunk")
         workbookDataStore.activeChunkProperty.set(cardData.chunkSource)
     }
 
@@ -375,9 +370,10 @@ class ChapterPageViewModel : ViewModel() {
                 logger.error("Error in loading chapter contents for chapter: $chapter", e)
             }
             .map {
-                println("about to add it to allcontent")
-                filteredContent.add(it)
-                filteredContent.sortBy { it.sort }
+                if (filteredContent.find { cont -> it.sort == cont.sort } == null) {
+                    filteredContent.add(it)
+                    filteredContent.sortBy { it.sort }
+                }
                 it
             }.observeOnFx()
     }
@@ -400,9 +396,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     private fun onChunkOpen(chunk: CardData) {
-        println("on chunk open ${chunk.chunkSource}")
         onCardSelection(chunk)
-        println("about to dock rsp")
         navigator.dock<RecordScripturePage>()
     }
 
