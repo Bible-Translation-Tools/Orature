@@ -90,33 +90,31 @@
     -fx-padding: 15px 5px;
 }
 
-.source-content__scroll-pane {
-    -fx-focus-traversable: true;
-}
-
-.source-content__scroll-pane:focused {
-    -fx-border-width: 4px;
+.source-content__chunk-list {
+    -fx-border-width: 3px;
     -fx-border-radius: 6px;
+    -fx-border-color: transparent;
+}
+.source-content__chunk-list:focused {
     -fx-border-color: -wa-card-border;
 }
 
-.source-content__scroll-pane,
-.source-content__scroll-pane .viewport, /* this region belongs to scroll bar skin */
-.source-content__text-wrapper {
-    -fx-background-color: -wa-background;
-}
-
-.source-content__text-wrapper {
-    -fx-padding: 10px;
+.source-content__text-container {
+    -fx-padding: 5px 0 0 0;
 }
 
 .source-content__text {
-    -fx-font-size: 1.5em;
     -fx-padding: 0 15px;
+    -fx-font-size: 1.5em;
     -fx-text-fill: -wa-regular-text;
 }
 
+.source-content__text--highlighted {
+    -fx-text-fill: -wa-highlight-text;
+}
+
 .source-content__license-text {
+    -fx-padding: 10px 15px 0 15px;
     -fx-font-size: 1.25em;
     -fx-text-fill: -wa-note-text;
 }
