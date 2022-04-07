@@ -39,12 +39,14 @@ class ChunkingWizard : Wizard() {
             updateStepCssClass(it!!, this)
         }
     }
+
     val verbalizeStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
         vm.verbalizeStepColor.onChangeAndDoNow {
             updateStepCssClass(it!!, this)
         }
     }
+
     val chunkStep = Rectangle(STEP_WIDTH, STEP_HEIGHT).apply {
         addClass("chunking-wizard__step")
         vm.chunkStepColor.onChangeAndDoNow {
@@ -61,6 +63,10 @@ class ChunkingWizard : Wizard() {
 
     override fun onDock() {
         tryImportStylesheet(resources["/css/chunking-wizard.css"])
+        pages.clear()
+        add<Consume>()
+        add<Verbalize>()
+        add<Chunk>()
         val top = vbox {
             removeClass(WizardStyles.content)
             addClass("chunking-wizard")
@@ -107,11 +113,5 @@ class ChunkingWizard : Wizard() {
         root.center.style {
             padding = box(0.px)
         }
-    }
-
-    init {
-        add<Consume>()
-        add<Verbalize>()
-        add<Chunk>()
     }
 }

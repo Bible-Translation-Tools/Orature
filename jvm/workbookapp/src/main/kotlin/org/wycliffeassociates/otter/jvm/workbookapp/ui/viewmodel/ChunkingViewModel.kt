@@ -78,7 +78,6 @@ class ChunkingViewModel : ViewModel() {
     val markers by markerStateProperty
 
     init {
-
         pageProperty.onChange {
             when(it) {
                 ChunkingWizardPage.CONSUME -> {
@@ -121,7 +120,9 @@ class ChunkingViewModel : ViewModel() {
     lateinit var audio: AudioFile
 
     fun onDockConsume() {
+        println("docking consume")
         sourceAudio?.file?.let {
+            println("loading stufff")
             (app as IDependencyGraphProvider).dependencyGraph.inject(this)
             audio = loadAudio(it)
             createWaveformImages(audio)
@@ -162,6 +163,10 @@ class ChunkingViewModel : ViewModel() {
         for (i in 1..markers.markers.filter { it.placed }.size) {
             workbookDataStore.activeChapterProperty.value.addChunk(i)
         }
+        pageProperty.set(ChunkingWizardPage.CONSUME)
+        audioPlayer.value.close()
+        audioController = null
+        markerStateProperty.set(null)
     }
 
     fun initializeAudioController() {
