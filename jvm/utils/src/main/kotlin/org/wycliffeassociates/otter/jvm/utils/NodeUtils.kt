@@ -21,9 +21,12 @@ package org.wycliffeassociates.otter.jvm.utils
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
+import javafx.scene.control.ListView
+import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.control.TextArea
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import javafx.scene.input.MouseEvent
 import kotlin.reflect.KClass
 
 inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
@@ -74,7 +77,18 @@ fun Node.simulateKeyPress(
 fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     var oldValue: T? = null
 
+    this.addEventFilter(MouseEvent.MOUSE_PRESSED) {
+        oldValue = this.value
+        setOnHidden {
+            if (oldValue != this.value) {
+                action(this.value)
+            }
+        }
+    }
+
     this.addEventFilter(KeyEvent.KEY_RELEASED) {
+        onHiddenProperty().set(null)
+
         when (it.code) {
             KeyCode.ENTER, KeyCode.SPACE -> {
                 if (this.isShowing) return@addEventFilter
@@ -113,6 +127,34 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     }
 }
 
+fun <T> ListView<T>.enableScrollByKey(
+    smallDelta: Double = 20.0,
+    largeDelta: Double = 500.0
+) {
+    addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+        val flow = childrenUnmodifiable
+            .find { it is VirtualFlow<*> } as VirtualFlow<*>
+
+        when (keyEvent.code) {
+            KeyCode.UP -> {
+                flow.scrollPixels(-smallDelta)
+                keyEvent.consume()
+            }
+            KeyCode.DOWN -> {
+                flow.scrollPixels(smallDelta)
+                keyEvent.consume()
+            }
+            KeyCode.PAGE_UP -> {
+                flow.scrollPixels(-largeDelta)
+                keyEvent.consume()
+            }
+            KeyCode.PAGE_DOWN -> {
+                flow.scrollPixels(largeDelta)
+                keyEvent.consume()
+            }
+        }
+    }
+}
 /**
  * Overrides TextArea's default keyboard events
  * And triggers action only when Shift + Enter is pressed
