@@ -24,10 +24,7 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
-import javafx.beans.property.SimpleBooleanProperty
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
 import javafx.beans.value.ChangeListener
 import javafx.scene.control.Slider
 import javafx.scene.image.Image
@@ -70,6 +67,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     var markerStateProperty = SimpleObjectProperty<VerseMarkerModel>()
     val markers by markerStateProperty
+    val currentMarkerNumberProperty = SimpleIntegerProperty(0)
 
     var audioController: AudioPlayerController? = null
 
@@ -138,12 +136,14 @@ class VerseMarkerViewModel : ViewModel() {
             val percentPlayed = current / duration
             val pos = percentPlayed * imageWidth
             positionProperty.set(pos)
+            updateCurrentPlaybackMarker(current)
         }
     }
 
     fun saveAndQuit() {
         compositeDisposable.clear()
         waveformMinimapImage.set(null)
+        currentMarkerNumberProperty.set(-1)
         imageCleanup()
 
         (scope as ParameterizedScope).let {
@@ -228,11 +228,18 @@ class VerseMarkerViewModel : ViewModel() {
     }
 
     fun mediaToggle() {
+        if (audioController?.isPlayingProperty?.value == false) {
+            /* trigger change to auto-scroll when it starts playing */
+            val currentMarkerIndex = currentMarkerNumberProperty.value
+            currentMarkerNumberProperty.set(-1)
+            currentMarkerNumberProperty.set(currentMarkerIndex)
+        }
         audioController?.toggle()
     }
 
     fun seek(location: Int) {
         audioController?.seek(location)
+        updateCurrentPlaybackMarker(location)
     }
 
     fun createWaveformImages(audio: AudioFile) {
@@ -291,6 +298,13 @@ class VerseMarkerViewModel : ViewModel() {
         val framesInHighlight = sampleRate * SECONDS_ON_SCREEN
         val framesPerPixel = totalFrames / max(controlWidth, 1.0)
         return max(framesInHighlight / framesPerPixel, 1.0)
+    }
+
+    private fun updateCurrentPlaybackMarker(currentFrame: Int) {
+        val currentMarkerFrame = markers.seekCurrent(currentFrame)
+        val currentMarker = markers.markers.find { it.frame == currentMarkerFrame }
+        val index = currentMarker?.let { markers.markers.indexOf(it) } ?: 0
+        currentMarkerNumberProperty.set(index)
     }
 
     fun requestAudioLocation(): Int {
