@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
@@ -25,6 +26,8 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class SourceTextFragment : Fragment() {
+
+    val highlightedChunkNumberProperty = SimpleIntegerProperty()
 
     override val root = initializeSourceContent()
 
@@ -55,6 +58,7 @@ class SourceTextFragment : Fragment() {
 
         return SourceContent().apply {
             sourceTextProperty.set(sourceText)
+            highlightedChunk.bind(this@SourceTextFragment.highlightedChunkNumberProperty)
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             contentTitleProperty.set(sourceContentTitle)
             licenseProperty.set(license)
