@@ -127,7 +127,9 @@ class InfoView : View() {
                     textarea {
                         addClass("app-drawer__report-message")
                         textProperty().bindBidirectional(viewModel.errorDescription)
-                        overrideDefaultKeyEventHandler()
+                        overrideDefaultKeyEventHandler {
+                            viewModel.submitErrorReport()
+                        }
                     }
                     label {
                         addClass("app-drawer__report-status")
