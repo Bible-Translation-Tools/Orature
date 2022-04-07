@@ -565,7 +565,6 @@
 /* ----------------- ListView ---------------- */
 .wa-list-view {
     -fx-background-color: -wa-transparent;
-    -fx-focus-traversable: true;
 }
 
 .wa-list-view .list-cell:selected,
