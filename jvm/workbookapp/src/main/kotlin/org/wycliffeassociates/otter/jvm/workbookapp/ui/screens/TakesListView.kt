@@ -20,11 +20,8 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.collections.ObservableList
 import javafx.scene.Node
-import javafx.scene.control.Button
 import javafx.scene.control.ListView
-import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
-import org.wycliffeassociates.otter.jvm.utils.findChild
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 
@@ -33,12 +30,7 @@ class TakesListView(
     createTakeNode: (TakeCardModel) -> Node
 ) : ListView<TakeCardModel>(items) {
     init {
-        focusedProperty().onChange {
-            if (it) selectionModel.select(1)
-        }
-        focusModel.focusedItemProperty().onChange {
-            if (it?.selected == true) selectionModel.select(1)
-        }
+        selectionModelProperty().set(null)
 
         cellFormat {
             /* Don't use cell caching, because we remove the front node of the take card when it is dragged
@@ -46,23 +38,13 @@ class TakesListView(
                 new take card if it was selected.)
              */
             if (!it.selected) {
-                graphic = createTakeNode(it).apply {
-                    if (isSelected) {
-                        listView.setOnKeyPressed { event ->
-                            when (event.code) {
-                                KeyCode.TAB -> {
-                                    findChild<Button>()?.requestFocus()
-                                }
-                            }
-                        }
-                    }
-                }
+                graphic = createTakeNode(it)
             }
         }
 
         vgrow = Priority.ALWAYS
         addClass("card__takes-list")
-        childrenUnmodifiable.onChange { removeListViewClip(this as ListView<Any>) }
+        childrenUnmodifiable.onChange { removeListViewClip(this as ListView<*>) }
     }
 }
 
@@ -74,7 +56,7 @@ class TakesListView(
  *
  * Call this method after the list view children have rendered.
  */
-fun removeListViewClip(lv: ListView<Any>) {
+fun removeListViewClip(lv: ListView<*>) {
     // traverse to ClippedContainer and update it
     lv.getChildList()?.firstOrNull { it.hasClass("virtual-flow") }
         ?.getChildList()?.firstOrNull { it.hasClass("clipped-container") }
