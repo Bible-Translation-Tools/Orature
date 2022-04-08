@@ -160,4 +160,8 @@ class ChunkItem : VBox() {
         if (!showTakesProperty.value) createTakeViews()
         showTakesProperty.set(showTakesProperty.value.not())
     }
+
+    fun hideTakes() {
+        showTakesProperty.set(false)
+    }
 }
