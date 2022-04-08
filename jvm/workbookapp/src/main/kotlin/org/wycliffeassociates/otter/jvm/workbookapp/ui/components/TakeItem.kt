@@ -70,6 +70,7 @@ class TakeItem : HBox() {
             selectedProperty.onChange {
                 togglePseudoClass("selected", it)
             }
+            focusTraversableProperty().bind(selectedProperty.not())
             setOnAction {
                 animationMediatorProperty.value?.let {
                     if (it.isAnimating || selectedProperty.value) {
