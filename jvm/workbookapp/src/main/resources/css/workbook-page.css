@@ -17,10 +17,14 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.workbook-page__left-pane {
+    -fx-padding: 20px 0 0 20px;
+    -fx-spacing: 10px;
+}
+
 .workbook-page__chapter-list {
-    -fx-padding: 20px 0 0 30px;
-    -fx-background-color: -wa-background;
-    -fx-focus-traversable: true;
+    -fx-padding: 10px 0 0 0;
+    -fx-effect: none;
 }
 
 .workbook-page__chapter-list:focused,
@@ -29,8 +33,7 @@
     -fx-border-width: 0;
 }
 
-.workbook-page__chapter-list:focused .list-cell:focused .chapter-card,
-.workbook-page__chapter-list:focused .list-cell:focused .workbook-banner {
+.workbook-page__chapter-list:focused .list-cell:focused .chapter-card {
     -fx-border-color: -wa-card-border;
     -fx-border-width: 4px;
     -fx-border-radius: 6px;
@@ -39,7 +42,8 @@
 .workbook-page__chapter-list .list-cell:selected,
 .workbook-page__chapter-list .list-cell:even,
 .workbook-page__chapter-list .list-cell:odd {
-    -fx-background-color: -wa-background;
+    -fx-background-color: transparent;
+    -fx-padding: 5px 0;
 }
 
 .workbook-page__tab-content .contributor__container {

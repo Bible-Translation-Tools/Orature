@@ -18,9 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.utils
 
+import com.sun.javafx.util.Utils
+import javafx.animation.TranslateTransition
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
+import javafx.scene.control.TabPane
 import javafx.scene.control.ListView
 import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.control.TextArea
@@ -28,6 +31,7 @@ import javafx.scene.control.skin.ListViewSkin
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
+import javafx.util.Duration
 import kotlin.reflect.KClass
 
 inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
@@ -156,6 +160,7 @@ fun <T> ListView<T>.enableScrollByKey(
         }
     }
 }
+
 /**
  * Overrides TextArea's default keyboard events
  * And triggers action only when Shift + Enter is pressed
@@ -198,4 +203,20 @@ fun <T> ListView<T>.overrideDefaultKeyEventHandler(action: (KeyCode) -> Unit = {
 
 fun <T> ListView<T>.virtualFlow(): VirtualFlow<*> {
     return (this.skin as ListViewSkin<*>).children.first() as VirtualFlow<*>
+}
+
+fun TabPane.enableContentAnimation() {
+    selectionModel.selectedItemProperty().addListener { _, old, new ->
+        if (old == null || new == null) return@addListener
+
+        val oldIndex = tabs.indexOf(old)
+        val newIndex = tabs.indexOf(new)
+        val dir = Utils.clamp(-1, newIndex - oldIndex, 1)
+
+        val getIn = TranslateTransition(Duration.seconds(0.2), new.content)
+        getIn.fromX = width * dir
+        getIn.toX = 0.0
+
+        getIn.play()
+    }
 }
