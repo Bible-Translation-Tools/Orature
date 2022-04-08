@@ -61,6 +61,7 @@ class SourceContent : Control() {
     val enableAudioProperty = SimpleBooleanProperty(true)
     val isMinimizableProperty = SimpleBooleanProperty(true)
     val isMinimizedProperty = SimpleBooleanProperty(false)
+    val zoomRateProperty = SimpleIntegerProperty(100)
 
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()

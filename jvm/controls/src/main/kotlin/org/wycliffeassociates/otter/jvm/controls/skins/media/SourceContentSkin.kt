@@ -96,6 +96,15 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var minimizeBtn: Button
 
     @FXML
+    lateinit var zoomInBtn: Button
+
+    @FXML
+    lateinit var zoomOutBtn: Button
+
+    @FXML
+    lateinit var zoomRateText: Label
+
+    @FXML
     lateinit var sourceAudioBlock: VBox
 
     init {
@@ -221,10 +230,32 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             hiddenWhen(sourceContent.isMinimizedProperty)
             managedWhen(visibleProperty())
         }
+
+        zoomRateText.apply {
+            textProperty().bind(sourceContent.zoomRateProperty.stringBinding{
+                String.format("%d%%", it)
+            })
+        }
+
+        zoomInBtn.setOnAction { textZoom(10) }
+        zoomOutBtn.setOnAction { textZoom(-10) }
+
+        sourceContent.zoomRateProperty.onChange { rate ->
+            sourceTextChunksContainer.styleClass.removeAll { it.startsWith("text-zoom") }
+            sourceTextChunksContainer.addClass("text-zoom-$rate")
+        }
     }
 
     private fun toggleBody() {
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
+    }
+
+    private fun textZoom(delta: Int) {
+        val zoomTo = sourceContent.zoomRateProperty.value + delta
+        if (zoomTo < 50 || zoomTo > 200) {
+            return
+        }
+        sourceContent.zoomRateProperty += delta
     }
 
     private fun buildChunkText(textContent: String, index: Int): Label {
