@@ -324,7 +324,6 @@ class RecordScripturePage : View() {
 
                         minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
                         placeholder = ListViewPlaceHolder()
-                        selectionModelProperty().set(null)
                     }
                 }
             }
