@@ -27,6 +27,7 @@ import javafx.scene.control.TabPane
 import javafx.scene.control.ListView
 import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.control.TextArea
+import javafx.scene.control.skin.ListViewSkin
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
@@ -187,6 +188,21 @@ fun TextArea.overrideDefaultKeyEventHandler(action: (String) -> Unit = {}) {
             }
         }
     }
+}
+
+fun <T> ListView<T>.overrideDefaultKeyEventHandler(action: (KeyCode) -> Unit = {}) {
+    this.addEventFilter(KeyEvent.KEY_PRESSED) {
+        when (it.code) {
+            KeyCode.UP, KeyCode.DOWN -> {
+                it.consume()
+                action(it.code)
+            }
+        }
+    }
+}
+
+fun <T> ListView<T>.virtualFlow(): VirtualFlow<*> {
+    return (this.skin as ListViewSkin<*>).children.first() as VirtualFlow<*>
 }
 
 fun TabPane.enableContentAnimation() {

@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.book
 
 import javafx.application.Platform
 import javafx.geometry.Pos
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
@@ -28,8 +29,11 @@ import org.wycliffeassociates.otter.jvm.controls.bar.FilteredSearchBar
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.overrideDefaultKeyEventHandler
+import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.BookCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.BookCardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.BookWizardViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import tornadofx.*
@@ -91,6 +95,7 @@ class BookSelection : Fragment() {
                     viewModel.searchQueryProperty.bindBidirectional(textProperty)
                 }
             )
+
             listview(viewModel.filteredBooks) {
                 addClass("book-wizard__list")
                 vgrow = Priority.ALWAYS
@@ -102,15 +107,39 @@ class BookSelection : Fragment() {
                 viewModel.searchQueryProperty.onChange {
                     it?.let { if (it.isNotBlank()) scrollTo(0) }
                 }
+
+                overrideDefaultKeyEventHandler {
+                    val current = selectionModel.selectedItem
+                    val availableItems = getAvailableBooks()
+                    var index = availableItems.indexOf(current)
+                    when (it) {
+                        KeyCode.UP -> index--
+                        KeyCode.DOWN -> index++
+                    }
+                    val item = availableItems.getOrElse(index) { current }
+                    selectionModel.select(item)
+
+                    virtualFlow().apply {
+                        scrollTo(items.indexOf(item))
+                    }
+                }
+
+                focusedProperty().onChange { focused ->
+                    if (focused) {
+                        val item = getAvailableBooks().firstOrNull()
+                        val index = items.indexOf(item)
+                        selectionModel.select(index)
+                    }
+                }
             }
         }
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/book-wizard.css"))
-        tryImportStylesheet(resources.get("/css/filtered-search-bar.css"))
-        tryImportStylesheet(resources.get("/css/book-card-cell.css"))
-        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
+        tryImportStylesheet(resources["/css/book-wizard.css"])
+        tryImportStylesheet(resources["/css/filtered-search-bar.css"])
+        tryImportStylesheet(resources["/css/book-card-cell.css"])
+        tryImportStylesheet(resources["/css/confirm-dialog.css"])
 
         createProgressDialog()
     }
@@ -138,6 +167,14 @@ class BookSelection : Fragment() {
             viewModel.showProgressProperty.onChange {
                 Platform.runLater { if (it) open() else close() }
             }
+        }
+    }
+
+    private fun getAvailableBooks(): List<BookCardData> {
+        return viewModel.filteredBooks.filter {
+            viewModel.existingBooks
+                .map { book -> book.target.slug }
+                .contains(it.collection.slug).not()
         }
     }
 
