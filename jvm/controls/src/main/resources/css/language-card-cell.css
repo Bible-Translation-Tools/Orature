@@ -18,12 +18,6 @@
  */
 
 .language-card-cell {
-    -fx-padding: 10px;
-    -fx-spacing: 20px;
-    -fx-alignment: center-left;
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 6px;
-    -fx-effect: -wa-card-shadow-lower-right;
     -fx-focus-traversable: false;
 }
 
@@ -38,6 +32,15 @@
 .language-card-cell:disabled {
     -fx-background-color: -wa-transparent;
     -fx-effect: none;
+}
+
+.language-card-cell__root {
+    -fx-padding: 10px;
+    -fx-spacing: 20px;
+    -fx-alignment: center-left;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 6px;
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .language-card-cell__icon {

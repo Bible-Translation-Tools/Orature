@@ -27,10 +27,9 @@ import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.artwork.Artwork
 import tornadofx.FX
 import tornadofx.get
-import java.io.File
 
 class BookCardData(val collection: Collection, artwork: Observable<Artwork>) {
-    val artworkFileProperty = SimpleObjectProperty<File>()
+    val artworkProperty = SimpleObjectProperty<Artwork>()
     val attributionProperty = SimpleStringProperty()
 
     init {
@@ -38,7 +37,7 @@ class BookCardData(val collection: Collection, artwork: Observable<Artwork>) {
             .subscribeOn(Schedulers.io())
             .observeOnFx()
             .subscribe {
-                artworkFileProperty.set(it.file)
+                artworkProperty.set(it)
                 attributionProperty.set(
                     it.attributionText(
                         FX.messages["artworkLicense"],
