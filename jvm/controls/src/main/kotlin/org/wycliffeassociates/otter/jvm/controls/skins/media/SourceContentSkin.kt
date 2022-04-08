@@ -18,18 +18,18 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
+import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
+import javafx.geometry.Orientation
 import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
 import javafx.scene.control.ListView
+import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
-import javafx.scene.control.skin.VirtualFlow
-import javafx.scene.input.KeyCode
-import javafx.scene.input.KeyEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
@@ -195,6 +195,8 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             sourceTextChunksContainer.items.setAll(textNodes)
         }
 
+        bindListFocusableWithScrollable()
+
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
         }
@@ -254,6 +256,31 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
                 }
             })
         }
+    }
+
+    /**
+     * Allow focusing when list is scrollable (overflow the bound height).
+     * Unlike ScrollPane, the scrollbar of ListView is dynamically managed.
+     * This binding should be established after the construction of the ListView.
+     */
+    private fun bindListFocusableWithScrollable() {
+        sourceTextChunksContainer.apply {
+            focusTraversableProperty().bind(Bindings.createBooleanBinding(
+                {
+                    getScrollBar(Orientation.VERTICAL)?.isVisible ?: false
+                },
+                skinProperty().select {
+                    getScrollBar(Orientation.VERTICAL)?.visibleProperty()
+                        ?: visibleProperty()
+                }
+            ))
+        }
+    }
+
+    private fun ListView<*>.getScrollBar(orientation: Orientation): ScrollBar? {
+        return lookupAll(".scroll-bar").firstOrNull {
+            it is ScrollBar && it.orientation == orientation
+        } as? ScrollBar
     }
 
     private fun loadFXML() {

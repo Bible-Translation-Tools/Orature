@@ -144,7 +144,7 @@ class WorkbookPageViewModelTest {
 
         WaitForAsyncUtils.waitForFxEvents()
 
-        assertEquals(3, vm.chapters.size)
+        assertEquals(2, vm.chapters.size)
         verify(mockWorkbookDS, atLeastOnce()).workbook
         verify(mockWorkbookDS).activeChapterProperty
     }
