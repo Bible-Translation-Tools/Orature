@@ -18,12 +18,6 @@
  */
 
 .book-card-cell {
-    -fx-padding: 10px;
-    -fx-spacing: 20px;
-    -fx-alignment: center-left;
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 6px;
-    -fx-effect: -wa-card-shadow-lower-right;
     -fx-focus-traversable: false;
 }
 
@@ -39,6 +33,15 @@
 .book-card-cell:disabled {
     -fx-background-color: -wa-transparent;
     -fx-effect: none;
+}
+
+.book-card-cell__root {
+    -fx-padding: 10px;
+    -fx-spacing: 20px;
+    -fx-alignment: center-left;
+    -fx-background-color: -wa-foreground;
+    -fx-background-radius: 6px;
+    -fx-effect: -wa-card-shadow-lower-right;
 }
 
 .book-card-cell__title {
