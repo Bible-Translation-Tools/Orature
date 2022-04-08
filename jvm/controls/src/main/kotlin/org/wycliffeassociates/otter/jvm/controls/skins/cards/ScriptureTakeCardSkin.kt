@@ -91,6 +91,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
                     }
                 }
             })
+            focusTraversableProperty().bind(card.selectedProperty.not())
             setOnAction {
                 card.animationMediatorProperty.value?.let {
                     if (it.isAnimating || card.selectedProperty.value) {

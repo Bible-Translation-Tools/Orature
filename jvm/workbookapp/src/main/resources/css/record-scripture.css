@@ -53,6 +53,12 @@
     -fx-font-size: 36px;
 }
 
-.record-scripture__take-list .cell {
+.record-scripture__take-list {
+    -fx-background-color: -wa-transparent;
+    -fx-focus-traversable: false;
+}
+
+.record-scripture__take-list .list-cell {
+    -fx-background-color: -wa-transparent;
     -fx-padding: 15px 1px 0 1px;
 }
