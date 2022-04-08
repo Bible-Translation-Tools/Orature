@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
+import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
@@ -263,14 +264,23 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
      * This binding should be established after the construction of the ListView.
      */
     private fun bindListFocusableWithScrollable() {
-        sourceContent.sourceTextProperty.onChangeOnce {
-            sourceTextChunksContainer.lookupAll(".scroll-bar").filter {
-                it is ScrollBar && it.orientation == Orientation.VERTICAL
-            }.firstOrNull()?.let { node ->
-                val scrollBar = node as ScrollBar
-                sourceTextChunksContainer.focusTraversableProperty().bind(scrollBar.visibleProperty())
-            }
+        sourceTextChunksContainer.apply {
+            focusTraversableProperty().bind(Bindings.createBooleanBinding(
+                {
+                    getScrollBar(Orientation.VERTICAL)?.isVisible ?: false
+                },
+                skinProperty().select {
+                    getScrollBar(Orientation.VERTICAL)?.visibleProperty()
+                        ?: visibleProperty()
+                }
+            ))
         }
+    }
+
+    private fun ListView<*>.getScrollBar(orientation: Orientation): ScrollBar? {
+        return lookupAll(".scroll-bar").firstOrNull {
+            it is ScrollBar && it.orientation == orientation
+        } as? ScrollBar
     }
 
     private fun loadFXML() {
