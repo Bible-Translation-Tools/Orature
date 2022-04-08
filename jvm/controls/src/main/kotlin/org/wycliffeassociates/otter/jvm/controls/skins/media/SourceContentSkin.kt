@@ -32,6 +32,7 @@ import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
+import javafx.scene.text.TextAlignment
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
@@ -240,9 +241,11 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         zoomInBtn.setOnAction { textZoom(10) }
         zoomOutBtn.setOnAction { textZoom(-10) }
 
-        sourceContent.zoomRateProperty.onChange { rate ->
-            sourceTextChunksContainer.styleClass.removeAll { it.startsWith("text-zoom") }
-            sourceTextChunksContainer.addClass("text-zoom-$rate")
+        sourceContent.zoomRateProperty.onChangeAndDoNow { rate ->
+            sourceTextChunksContainer.items.forEach { item ->
+                item.styleClass.removeAll { it.startsWith("text-zoom") }
+                item.addClass("text-zoom-$rate")
+            }
         }
     }
 
