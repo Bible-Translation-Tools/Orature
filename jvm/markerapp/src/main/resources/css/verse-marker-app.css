@@ -117,20 +117,6 @@
     -fx-icon-color: "#FFFFFF";
 }
 
-.vm-play-controls__add-marker-btn {
-    -fx-pref-width: 60px;
-    -fx-pref-height: 60px;
-}
-
-.vm-play-controls__add-marker-btn .ikonli-font-icon {
-    -fx-icon-size: 24px;
-    -fx-icon-color: black;
-}
-
-.vm-play-controls__add-marker-container {
-    -fx-padding: 0 0 28px 0;
-}
-
 .vm-continue-button {
     -fx-min-height: 30px;
     -fx-min-width: 160px;
