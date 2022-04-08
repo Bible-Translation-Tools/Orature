@@ -18,14 +18,14 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jfoenix.controls.JFXTabPane
+import javafx.scene.control.TabPane
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.Recordable
 import org.wycliffeassociates.otter.jvm.controls.Shortcut
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
-import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
 import org.wycliffeassociates.otter.jvm.utils.getNotNull
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
@@ -39,8 +39,10 @@ class RecordResourcePage : View() {
     private val navigator: NavigationMediator by inject()
     private val workbookDataStore: WorkbookDataStore by inject()
 
-    val tabPane = JFXTabPane().apply {
-        tryImportStylesheet(resources.get("/css/tab-pane.css"))
+    val tabPane = TabPane().apply {
+        addClass("wa-tab-pane")
+        tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
+        enableContentAnimation()
     }
 
     override val root = tabPane

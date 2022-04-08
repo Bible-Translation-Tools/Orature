@@ -111,7 +111,7 @@ class ChunkItem : VBox() {
                     setCellFactory { TakeCell() }
                     prefHeightProperty().bind(Bindings.size(takes).multiply(TAKE_CELL_HEIGHT))
 
-                    this.childrenUnmodifiable.onChange { removeListViewClip(this as ListView<Any>) }
+                    this.childrenUnmodifiable.onChange { removeListViewClip(this as ListView<*>) }
                 }
             }
         }

@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.scene.control.ListCell
-import javafx.scene.input.KeyCode
 import tornadofx.*
 
 class ScriptureTakeCardCell : ListCell<ScriptureTakeCard>() {
@@ -35,29 +34,6 @@ class ScriptureTakeCardCell : ListCell<ScriptureTakeCard>() {
 
         graphic = item.apply {
             animationMediatorProperty.value?.listView = listView
-
-            setOnKeyReleased {
-                when (it.code) {
-                    KeyCode.DOWN -> nextItem(item)?.requestFocus()
-                    KeyCode.UP -> previousItem(item)?.requestFocus()
-                }
-            }
         }
-    }
-
-    private fun nextItem(item: ScriptureTakeCard): ScriptureTakeCard? {
-        val current = listView.items.indexOf(item)
-        val next = current + 1
-        return if (next < listView.items.size) {
-            listView.items[next]
-        } else null
-    }
-
-    private fun previousItem(item: ScriptureTakeCard): ScriptureTakeCard? {
-        val current = listView.items.indexOf(item)
-        val previous = current - 1
-        return if (previous >= 0) {
-            listView.items[previous]
-        } else null
     }
 }

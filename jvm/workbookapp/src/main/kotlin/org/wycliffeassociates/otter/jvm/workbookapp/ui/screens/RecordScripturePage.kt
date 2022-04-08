@@ -317,13 +317,14 @@ class RecordScripturePage : View() {
                     )
 
                     listview(recordScriptureViewModel.takeCardViews) {
-                        addClass("wa-list-view", "record-scripture__take-list")
+                        addClass("record-scripture__take-list")
                         vgrow = Priority.ALWAYS
 
                         setCellFactory { ScriptureTakeCardCell() }
 
                         minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
                         placeholder = ListViewPlaceHolder()
+                        selectionModelProperty().set(null)
                     }
                 }
             }

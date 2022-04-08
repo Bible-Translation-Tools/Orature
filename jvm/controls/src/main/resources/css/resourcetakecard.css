@@ -103,24 +103,12 @@
 .card__takes-list {
     -fx-background-color: -wa-transparent;
     -fx-min-width: 250px;
-    -fx-focus-traversable: true;
+    -fx-focus-traversable: false;
 }
 
 .card__takes-list .list-cell {
     -fx-background-color: -wa-transparent;
     -fx-padding: 0 0 15px 0;
-}
-
-.card__takes-list:focused,
-.card__takes-list .list-cell:focused,
-.card__takes-list .list-cell:focused .card--resource-take {
-    -fx-border-width: 0;
-}
-
-.card__takes-list:focused .list-cell:focused .card--resource-take {
-    -fx-border-color: -wa-card-border;
-    -fx-border-width: 4px;
-    -fx-border-radius: 6px;
 }
 
 .card__navigate-button {
