@@ -242,9 +242,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         zoomOutBtn.setOnAction { textZoom(-10) }
 
         sourceContent.zoomRateProperty.onChangeAndDoNow { rate ->
-            sourceTextChunksContainer.items.forEach { item ->
-                item.styleClass.removeAll { it.startsWith("text-zoom") }
-                item.addClass("text-zoom-$rate")
+            sourceTextChunksContainer.apply {
+                styleClass.removeAll { it.startsWith("text-zoom") }
+                addClass("text-zoom-$rate")
             }
         }
     }
