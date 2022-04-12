@@ -259,8 +259,9 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         if (zoomTo < 50 || zoomTo > 200) {
             return
         }
-        FX.eventbus.fire(SourceTextZoomRateChangedEvent(zoomTo))
         sourceContent.zoomRateProperty.set(zoomTo)
+        /* notify listeners to save zoom preference */
+        FX.eventbus.fire(SourceTextZoomRateChangedEvent(zoomTo))
     }
 
     private fun buildChunkText(textContent: String, index: Int): Label {

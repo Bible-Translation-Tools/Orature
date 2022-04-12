@@ -103,6 +103,7 @@ class AudioPluginViewModel : ViewModel() {
 
         val sourceRate = (workbookDataStore.workbook.translation.sourceRate as BehaviorRelay).value ?: 1.0
         val targetRate = (workbookDataStore.workbook.translation.targetRate as BehaviorRelay).value ?: 1.0
+        val sourceTextZoom = workbookDataStore.sourceTextZoomRateProperty.value
 
         return PluginParameters(
             languageName = workbook.target.language.name,
@@ -123,7 +124,8 @@ class AudioPluginViewModel : ViewModel() {
             direction = localeLanguage.preferredLanguage?.direction,
             sourceDirection = workbook.source.language.direction,
             sourceRate = sourceRate,
-            targetRate = targetRate
+            targetRate = targetRate,
+            sourceTextZoom = sourceTextZoom
         )
     }
 

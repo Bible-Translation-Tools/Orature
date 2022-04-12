@@ -23,6 +23,7 @@ import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
+import java.lang.Exception
 import java.text.MessageFormat
 
 class SourceTextFragment : Fragment() {
@@ -38,6 +39,7 @@ class SourceTextFragment : Fragment() {
         var license: String? = null
         var direction: String? = null
         var sourceDirection: String? = null
+        var sourceTextZoom: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -53,6 +55,7 @@ class SourceTextFragment : Fragment() {
                     parameters.named["chapter_number"],
                     parameters.named["unit_number"]
                 )
+                sourceTextZoom = parameters.named["source_text_zoom"]
             }
         }
 
@@ -73,6 +76,13 @@ class SourceTextFragment : Fragment() {
                 when (sourceDirection) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                     else -> NodeOrientation.LEFT_TO_RIGHT
+                }
+            )
+            zoomRateProperty.set(
+                try {
+                    sourceTextZoom?.toInt() ?: 100
+                } catch (e: Exception) {
+                    100
                 }
             )
         }
