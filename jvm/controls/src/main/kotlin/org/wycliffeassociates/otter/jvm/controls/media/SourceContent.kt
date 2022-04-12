@@ -32,6 +32,8 @@ import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
 import tornadofx.*
 import java.text.MessageFormat
 
+class SourceTextZoomRateChangedEvent(val rate: Int) : FXEvent()
+
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
 

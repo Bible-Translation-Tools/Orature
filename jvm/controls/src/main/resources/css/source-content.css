@@ -106,6 +106,7 @@
 .source-content__text {
     -fx-padding: 0 15px;
     -fx-text-fill: -wa-regular-text;
+    -fx-wrap-text: true;
 }
 
 .source-content__text--highlighted {
@@ -116,6 +117,7 @@
     -fx-padding: 10px 15px 0 15px;
     -fx-font-size: 1.25em;
     -fx-text-fill: -wa-note-text;
+    -fx-wrap-text: true;
 }
 
 .source-content__title {

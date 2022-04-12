@@ -39,6 +39,7 @@ import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
 import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -258,13 +259,13 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
         if (zoomTo < 50 || zoomTo > 200) {
             return
         }
-        sourceContent.zoomRateProperty += delta
+        FX.eventbus.fire(SourceTextZoomRateChangedEvent(zoomTo))
+        sourceContent.zoomRateProperty.set(zoomTo)
     }
 
     private fun buildChunkText(textContent: String, index: Int): Label {
         return Label(textContent).apply {
             addClass("source-content__text")
-            isWrapText = true
             prefWidthProperty().bind(
                 sourceTextChunksContainer.widthProperty().minus(50)
             )

@@ -347,6 +347,9 @@ class ChapterPage : View() {
                     it.translation.targetRate.toLazyBinding()
                 }
             )
+            sourceTextZoomRateProperty.bind(
+                workbookDataStore.sourceTextZoomRateProperty
+            )
         }
     }
 

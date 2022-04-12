@@ -100,6 +100,7 @@ class RecordScripturePage : View() {
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
+            zoomRateProperty.set(workbookDataStore.sourceTextZoomRateProperty.value)
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.sourceRate.toLazyBinding()
