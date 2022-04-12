@@ -22,6 +22,7 @@ import javafx.collections.ObservableList
 import javafx.scene.Node
 import javafx.scene.control.ListView
 import javafx.scene.layout.Priority
+import org.wycliffeassociates.otter.jvm.controls.listview.NoSelectionModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeCardModel
 import tornadofx.*
 
@@ -30,7 +31,7 @@ class TakesListView(
     createTakeNode: (TakeCardModel) -> Node
 ) : ListView<TakeCardModel>(items) {
     init {
-        selectionModelProperty().set(null)
+        selectionModelProperty().set(NoSelectionModel())
 
         cellFormat {
             /* Don't use cell caching, because we remove the front node of the take card when it is dragged
