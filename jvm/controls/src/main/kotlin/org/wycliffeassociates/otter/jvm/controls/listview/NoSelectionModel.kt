@@ -1,59 +1,36 @@
 package org.wycliffeassociates.otter.jvm.controls.listview
 
-import javafx.collections.ObservableList
 import javafx.scene.control.MultipleSelectionModel
 import tornadofx.*
 
 class NoSelectionModel<T> : MultipleSelectionModel<T>() {
-    override fun clearAndSelect(index: Int) {
-    }
+    override fun clearAndSelect(index: Int) { /*no op */ }
 
-    override fun select(index: Int) {
-    }
+    override fun select(index: Int) { /*no op */ }
 
-    override fun select(obj: T) {
-    }
+    override fun select(obj: T) { /*no op */ }
 
-    override fun clearSelection(index: Int) {
-    }
+    override fun clearSelection(index: Int) { /*no op */ }
 
-    override fun clearSelection() {
-    }
+    override fun clearSelection() { /*no op */ }
 
-    override fun isSelected(index: Int): Boolean {
-        return false
-    }
+    override fun isSelected(index: Int) = false
 
-    override fun isEmpty(): Boolean {
-        return true
-    }
+    override fun isEmpty() = true
 
-    override fun selectPrevious() {
-        TODO("Not yet implemented")
-    }
+    override fun selectPrevious() { /*no op */ }
 
-    override fun selectNext() {
-    }
+    override fun selectNext() { /*no op */ }
 
-    override fun selectFirst() {
-    }
+    override fun selectFirst() { /*no op */ }
 
-    override fun selectLast() {
-    }
+    override fun selectLast() { /*no op */ }
 
-    override fun getSelectedIndices(): ObservableList<Int> {
-        return observableListOf()
-    }
+    override fun getSelectedIndices() = observableListOf<Int>()
 
-    override fun getSelectedItems(): ObservableList<T> {
-        return observableListOf()
-    }
+    override fun getSelectedItems() = observableListOf<T>()
 
-    override fun selectIndices(index: Int, vararg indices: Int) {
-        TODO("Not yet implemented")
-    }
+    override fun selectIndices(index: Int, vararg indices: Int) { /*no op */ }
 
-    override fun selectAll() {
-        TODO("Not yet implemented")
-    }
+    override fun selectAll() { /*no op */ }
 }
