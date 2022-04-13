@@ -21,12 +21,17 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking
 import com.github.thomasnield.rxkotlinfx.observeOnFx
 import com.jfoenix.controls.JFXButton
 import com.sun.javafx.util.Utils
+import java.io.File
 import java.text.MessageFormat
 import javafx.animation.AnimationTimer
 import javafx.geometry.Pos
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.material.Material
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.audio.AudioCue
+import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerPlacementWaveform
 import org.wycliffeassociates.otter.jvm.controls.waveform.MarkerTrackControl
@@ -34,6 +39,7 @@ import org.wycliffeassociates.otter.jvm.controls.waveform.ScrollingWaveform
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChunkingWizardPage
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.Fragment
 import tornadofx.action
 import tornadofx.borderpane
@@ -172,4 +178,3 @@ class Chunk : Fragment() {
         }
     }
 }
-

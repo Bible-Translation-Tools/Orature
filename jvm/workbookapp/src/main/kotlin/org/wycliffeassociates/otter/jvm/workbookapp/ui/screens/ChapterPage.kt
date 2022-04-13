@@ -51,6 +51,8 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataSto
 import tornadofx.*
 import java.text.MessageFormat
 import java.util.*
+import javafx.geometry.Pos
+import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 
@@ -139,12 +141,6 @@ class ChapterPage : View() {
     }
 
     override val root = hbox {
-
-        button("chunk") { setOnAction {
-            workspace.dock<ChunkingWizard>()
-        } }
-        button("add") {setOnAction {viewModel.addChunk() }}
-        button("subList") {setOnAction{ viewModel.subList()}}
         addClass("chapter-page")
 
         createSnackBar()
@@ -256,52 +252,136 @@ class ChapterPage : View() {
             }
         }
 
-        vbox {
+        stackpane {
             addClass("chapter-page__chunks")
             vgrow = Priority.ALWAYS
 
-            hbox {
-                addClass("chapter-page__chunks-header")
-                button {
-                    addClass("btn", "btn--secondary", "btn--secondary-light")
-                    text = messages["compile"]
-                    tooltip(text)
-                    graphic = FontIcon(MaterialDesign.MDI_LAYERS)
-                    enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
-                    action {
-                        viewModel.compile()
+            vbox {
+                addClass("chapter-page__chunks")
+                vgrow = Priority.ALWAYS
+
+                hbox {
+                    addClass("chapter-page__chunks-header")
+                    button {
+                        addClass("btn", "btn--secondary", "btn--secondary-light")
+                        text = messages["compile"]
+                        tooltip(text)
+                        graphic = FontIcon(MaterialDesign.MDI_LAYERS)
+                        enableWhen(viewModel.canCompileProperty.and(viewModel.isCompilingProperty.not()))
+                        action {
+                            viewModel.compile()
+                        }
+                    }
+                    region {
+                        hgrow = Priority.ALWAYS
+                    }
+                    button {
+                        addClass("btn", "btn--cta")
+                        textProperty().bind(viewModel.noTakesProperty.stringBinding {
+                            when (it) {
+                                true -> messages["beginTranslation"]
+                                else -> messages["continueTranslation"]
+                            }
+                        })
+                        tooltip { textProperty().bind(this@button.textProperty()) }
+                        graphic = FontIcon(MaterialDesign.MDI_VOICE)
+                        action {
+                            viewModel.workChunkProperty.value?.let {
+                                viewModel.onCardSelection(it)
+                                navigator.dock<RecordScripturePage>()
+                            }
+                        }
                     }
                 }
-                region {
-                    hgrow = Priority.ALWAYS
-                }
-                button {
-                    addClass("btn", "btn--cta")
-                    textProperty().bind(viewModel.noTakesProperty.stringBinding {
-                        when (it) {
-                            true -> messages["beginTranslation"]
-                            else -> messages["continueTranslation"]
-                        }
-                    })
-                    tooltip { textProperty().bind(this@button.textProperty()) }
-                    graphic = FontIcon(MaterialDesign.MDI_VOICE)
-                    action {
-                        viewModel.workChunkProperty.value?.let {
-                            viewModel.onCardSelection(it)
-                            navigator.dock<RecordScripturePage>()
-                        }
+
+                listview(viewModel.filteredContent) {
+                    addClass("wa-list-view")
+                    chunkListView = this
+                    fitToParentHeight()
+                    setCellFactory {
+                        ChunkCell(
+                            settingsViewModel.orientationScaleProperty.value
+                        )
                     }
                 }
             }
 
-            listview(viewModel.filteredContent) {
-                addClass("wa-list-view")
-                chunkListView = this
-                fitToParentHeight()
-                setCellFactory {
-                    ChunkCell(
-                        settingsViewModel.orientationScaleProperty.value
-                    )
+            hbox {
+                addClass("chapter-page__chunks")
+
+                prefWidth = 648.0
+
+                style {
+                    padding = box(8.px, 4.px, 8.px, 8.px)
+                }
+
+                visibleProperty().bind(viewModel.filteredContent.sizeProperty.lessThan(1))
+
+                vbox {
+                    vgrow = Priority.ALWAYS
+                    alignment = Pos.CENTER_LEFT
+
+                    style {
+                        backgroundColor += Color.rgb(0, 21, 51, 0.2)
+                        padding = box(8.px, 4.px, 8.px, 8.px)
+                    }
+
+                    add(FontIcon(MaterialDesign.MDI_BOOKMARK).apply {
+                        iconSize = 40
+                        iconColor = Color.WHITE
+                    })
+                    label("Verse by Verse") {
+                        style {
+                            fontSize = 24.pt
+                            textFill = Color.WHITE
+                        }
+                    }
+
+                    label("Start a new translation with the default verse structure."){
+                        style {
+                            fontSize = 14.pt
+                            textFill = Color.WHITE
+                            wrapText = true
+                        }
+                    }
+                    button("verse by verse") {
+
+                    }
+                }
+
+                vbox {
+                    vgrow = Priority.ALWAYS
+                    alignment = Pos.CENTER_LEFT
+
+                    style {
+                        backgroundColor += Color.rgb(0, 21, 51, 0.2)
+                        padding = box(8.px, 8.px, 8.px, 4.px)
+                    }
+
+                    add(FontIcon(MaterialDesign.MDI_FLAG).apply {
+                        iconSize = 40
+                        iconColor = Color.WHITE
+                    })
+                    label("Chunks"){
+                        style {
+                            fontSize = 24.pt
+                            textFill = Color.WHITE
+                        }
+                    }
+                    label("Start a new translation with custom chunk markers."){
+                        style {
+                            fontSize = 14.pt
+                            textFill = Color.WHITE
+                            wrapText = true
+                        }
+                    }
+                    button("chunk") {
+                        setOnAction {
+                            workspace.dock<ChunkingWizard>()
+                        }
+
+                        enableWhen(viewModel.sourceAudioAvailableProperty)
+                    }
                 }
             }
         }
