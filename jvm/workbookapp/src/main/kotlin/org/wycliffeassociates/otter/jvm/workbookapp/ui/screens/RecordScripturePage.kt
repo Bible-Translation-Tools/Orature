@@ -50,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.listview.NoSelectionModel
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -325,7 +326,8 @@ class RecordScripturePage : View() {
 
                         minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
                         placeholder = ListViewPlaceHolder()
-                        selectionModelProperty().set(null)
+
+                        selectionModelProperty().set(NoSelectionModel())
                     }
                 }
             }
