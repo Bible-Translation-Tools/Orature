@@ -102,8 +102,8 @@ class HomePage : View() {
                 )
 
                 vbox {
-                    maxWidth = 800.0
-                    spacing = 20.0
+                    addClass("home-page__translations")
+
                     bindChildren(viewModel.translationModels) {
                         TranslationCard(it.sourceLanguage.name, it.targetLanguage.name, it.books).apply {
                             setConverter { workbook ->

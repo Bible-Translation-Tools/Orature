@@ -50,6 +50,7 @@
 
 .breadcrumb__content:focused {
     -fx-border-width: 4px;
+    -fx-border-insets: -3;
 }
 
 .breadcrumb__content:disabled {

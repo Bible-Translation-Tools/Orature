@@ -66,6 +66,9 @@ class WaMenuButton : Button() {
             if (it.list.isNotEmpty()) {
                 menu = ContextMenu()
                 menu?.items?.setAll(it.list)
+                menu?.setOnShown {
+                    menu?.skin?.node?.lookup(".button")?.requestFocus()
+                }
             }
         }
     }

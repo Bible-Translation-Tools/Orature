@@ -26,6 +26,7 @@
 <?import org.kordamp.ikonli.javafx.*?>
 
 <?import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer?>
+<?import java.lang.String?>
 <VBox styleClass="card--resource-take" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox alignment="CENTER" spacing="16.0">
@@ -45,22 +46,40 @@
         <Separator />
         <HBox alignment="CENTER" spacing="16.0" VBox.vgrow="ALWAYS">
             <children>
-                <Button fx:id="editBtn" styleClass="btn, btn--secondary, btn--borderless">
+                <Button fx:id="editBtn">
                     <graphic>
                         <FontIcon iconLiteral="gmi-mode-edit" />
                     </graphic>
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn--secondary" />
+                        <String fx:value="btn--borderless" />
+                        <String fx:value="card--resource-take__btn" />
+                    </styleClass>
                 </Button>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="playBtn" styleClass="btn, btn--secondary, btn--borderless">
+                <Button fx:id="playBtn">
                     <graphic>
                         <FontIcon iconLiteral="mdi-play" />
                     </graphic>
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn--secondary" />
+                        <String fx:value="btn--borderless" />
+                        <String fx:value="card--resource-take__btn" />
+                    </styleClass>
                 </Button>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="deleteBtn" styleClass="btn, btn--secondary, btn--borderless">
+                <Button fx:id="deleteBtn">
                     <graphic>
                         <FontIcon iconLiteral="mdi-delete" />
                     </graphic>
+                    <styleClass>
+                        <String fx:value="btn" />
+                        <String fx:value="btn--secondary" />
+                        <String fx:value="btn--borderless" />
+                        <String fx:value="card--resource-take__btn" />
+                    </styleClass>
                 </Button>
             </children>
             <padding>

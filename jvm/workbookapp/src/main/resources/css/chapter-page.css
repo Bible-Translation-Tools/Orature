@@ -99,14 +99,15 @@
     -fx-pref-width: 280px;
 }
 
+.chapter-page__chunks .list-view {
+    -fx-focus-traversable: false;
+}
+
 .chapter-page__chunks .list-view .list-cell:selected,
 .chapter-page__chunks .list-view .list-cell:even,
 .chapter-page__chunks .list-view .list-cell:odd {
     -fx-background-color: -wa-foreground;
-}
-
-.chapter-page__chunks .list-view {
-    -fx-focus-traversable: false;
+    -fx-padding: 4px;
 }
 
 .btn--icon .ikonli-font-icon {

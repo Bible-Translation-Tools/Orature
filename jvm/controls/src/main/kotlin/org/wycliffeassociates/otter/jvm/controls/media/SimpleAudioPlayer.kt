@@ -35,6 +35,7 @@ import javafx.scene.control.Button
 import javafx.scene.control.CustomMenuItem
 import javafx.scene.control.MenuItem
 import javafx.scene.control.Slider
+import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
@@ -344,6 +345,15 @@ class SimpleAudioPlayer(
                     text = title
                 }
                 tooltip(title)
+
+                setOnKeyReleased {
+                    when (it.code) {
+                        KeyCode.ENTER, KeyCode.SPACE -> {
+                            onSelected()
+                            menuButton.hide()
+                        }
+                    }
+                }
             }
             setOnAction {
                 onSelected()

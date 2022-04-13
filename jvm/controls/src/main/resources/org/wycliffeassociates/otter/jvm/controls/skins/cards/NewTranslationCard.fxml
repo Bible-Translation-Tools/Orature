@@ -53,6 +53,7 @@
                 <String fx:value="btn" />
                 <String fx:value="btn--secondary" />
                 <String fx:value="btn--borderless" />
+                <String fx:value="new-translation-card__btn" />
             </styleClass>
             <graphic>
                 <FontIcon iconLiteral="mdi-plus" />

@@ -118,23 +118,28 @@
 }
 
 .vm-continue-button {
-    -fx-min-height: 30px;
-    -fx-min-width: 160px;
-    -fx-background-color: white;
-    -fx-background-radius: 5px;
-    -fx-font-size: 14px;
-}
-
-.vm-continue-button * {
-    -fx-fill: #282CBD;
+    -fx-pref-height: 30px;
+    -fx-pref-width: 160px;
+    -fx-background-color: -wa-white;
+    -fx-text-fill: -wa-primary;
 }
 
 .vm-continue-button > .ikonli-font-icon {
     -fx-icon-size: 28px;
+    -fx-fill: -wa-primary;
+}
+
+.vm-continue-button:hover, .vm-continue-button:pressed {
+    -fx-background-color: -wa-foreground-hover;
 }
 
 .vm-waveform-frame {
     -fx-focus-traversable: true;
+}
+
+.vm-marker-waveform__container {
+    -fx-padding: 4px;
+    -fx-background-color: transparent;
 }
 
 .vm-marker-waveform {
@@ -144,6 +149,7 @@
 .vm-marker-waveform:active {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
+    -fx-border-insets: -4;
 }
 
 .vm-marker-track {

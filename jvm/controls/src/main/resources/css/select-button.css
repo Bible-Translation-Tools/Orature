@@ -50,6 +50,7 @@
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;
+    -fx-border-insets: -4;
     -fx-background-radius: 10px;
 }
 

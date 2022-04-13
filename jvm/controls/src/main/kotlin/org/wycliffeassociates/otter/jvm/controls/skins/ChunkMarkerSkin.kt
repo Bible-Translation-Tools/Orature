@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.controls.skins
 import javafx.scene.Cursor
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.wycliffeassociates.otter.jvm.controls.ChunkMarker
 import tornadofx.*
@@ -73,15 +74,20 @@ class ChunkMarkerSkin(val control: ChunkMarker) : SkinBase<ChunkMarker>(control)
                     cursor = priorCursor
                 }
 
-                add(dragIcon)
-                add(placedBookmarkIcon)
-                add(addBookmarkIcon)
-                add(
-                    text {
-                        styleClass.add("chunk-marker__text")
-                        textProperty().bind(control.markerNumberProperty)
-                    }
-                )
+                hbox {
+                    hgrow = Priority.ALWAYS
+                    addClass("chunk-marker__container")
+
+                    add(dragIcon)
+                    add(placedBookmarkIcon)
+                    add(addBookmarkIcon)
+                    add(
+                        text {
+                            styleClass.add("chunk-marker__text")
+                            textProperty().bind(control.markerNumberProperty)
+                        }
+                    )
+                }
             }
         )
     }

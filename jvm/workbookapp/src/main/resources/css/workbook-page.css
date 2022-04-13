@@ -37,13 +37,14 @@
     -fx-border-color: -wa-card-border;
     -fx-border-width: 4px;
     -fx-border-radius: 6px;
+    -fx-border-insets: -4;
 }
 
 .workbook-page__chapter-list .list-cell:selected,
 .workbook-page__chapter-list .list-cell:even,
 .workbook-page__chapter-list .list-cell:odd {
     -fx-background-color: transparent;
-    -fx-padding: 5px 0;
+    -fx-padding: 5px 4px;
 }
 
 .workbook-page__tab-content .contributor__container {
