@@ -24,6 +24,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 import java.io.File
+import java.io.IOException
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -31,7 +32,10 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.image.Image
 import javafx.scene.paint.Color
 import javax.inject.Inject
+import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -39,6 +43,7 @@ import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.waveform.WaveformImageBuilder
 import org.wycliffeassociates.otter.jvm.device.audio.AudioConnectionFactory
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
+import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import tornadofx.ViewModel
 import tornadofx.getValue
 import tornadofx.onChange
@@ -54,6 +59,30 @@ enum class ChunkingWizardPage {
     CONSUME,
     VERBALIZE,
     CHUNK
+}
+
+
+class ChunkAudioUseCase(val workbook: Workbook) {
+    fun createChunkedSourceAudio(source: File, cues: List<AudioCue>) {
+        val temp = File(source.name).apply { createNewFile() }
+        val rm = workbook.target.resourceMetadata
+        try {
+            source.copyTo(temp, true)
+            val audio = AudioFile(temp)
+            audio.metadata.clearMarkers()
+            audio.update()
+            for (cue in cues) {
+                audio.metadata.addCue(cue.location, cue.label)
+            }
+            audio.update()
+            ResourceContainer.load(rm.path).use {
+                it.addFileToContainer(temp, ".apps/orature/source/audio/${temp.name}")
+                it.write()
+            }
+        } finally {
+           temp.delete()
+        }
+    }
 }
 
 class ChunkingViewModel : ViewModel() {
@@ -144,6 +173,7 @@ class ChunkingViewModel : ViewModel() {
 
     fun loadMarkers(audio: AudioFile) {
         val totalMarkers: Int = 200
+        audio.metadata.clearMarkers()
         val markers = VerseMarkerModel(audio, totalMarkers)
         markerStateProperty.set(markers)
     }
@@ -166,6 +196,14 @@ class ChunkingViewModel : ViewModel() {
         pageProperty.set(ChunkingWizardPage.CONSUME)
         audioPlayer.value.close()
         audioController = null
+
+        val cues = markers.markers.filter { it.placed }.map { it.toAudioCue() }
+
+        println("cues to write is ${cues.size}")
+
+        ChunkAudioUseCase(workbookDataStore.workbook)
+            .createChunkedSourceAudio(sourceAudio.file, cues)
+
         markerStateProperty.set(null)
     }
 
