@@ -31,6 +31,7 @@ import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import javafx.scene.text.TextAlignment
 import org.kordamp.ikonli.javafx.FontIcon
@@ -267,8 +268,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private fun buildChunkText(textContent: String, index: Int): Label {
         return Label(textContent).apply {
             addClass("source-content__text")
+            minHeight = Region.USE_PREF_SIZE // avoid ellipsis
+
             prefWidthProperty().bind(
-                sourceTextChunksContainer.widthProperty().minus(50)
+                sourceTextChunksContainer.widthProperty().minus(60) // scrollbar offset
             )
 
             sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
@@ -284,6 +287,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private fun buildLicenseText(): Label {
         return Label().apply {
             addClass("source-content__license-text")
+
+            prefWidthProperty().bind(
+                sourceTextChunksContainer.widthProperty().minus(60)
+            )
             textProperty().bind(sourceContent.licenseTextProperty)
             styleProperty().bind(sourceContent.orientationProperty.objectBinding {
                 when (it) {
