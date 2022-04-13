@@ -35,7 +35,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
 import tornadofx.*
 
-class PluginOpenedPage : Fragment() {
+class PluginOpenedPage : View() {
 
     val dialogTitleProperty = SimpleStringProperty()
     val dialogTextProperty = SimpleStringProperty()

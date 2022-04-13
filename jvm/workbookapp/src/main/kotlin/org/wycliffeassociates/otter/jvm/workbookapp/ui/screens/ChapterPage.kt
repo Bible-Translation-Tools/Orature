@@ -127,7 +127,6 @@ class ChapterPage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                pluginOpenedPage.onDock()
                 viewModel.openPlayers()
             }
         }
@@ -324,7 +323,7 @@ class ChapterPage : View() {
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        return PluginOpenedPage().apply {
+        return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(viewModel.dialogTitleBinding())
             dialogTextProperty.bind(viewModel.dialogTextBinding())
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)

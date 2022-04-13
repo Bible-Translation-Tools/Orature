@@ -112,6 +112,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             updatePlaybackSpeedRate(event)
         }
         workspace.subscribe<SourceTextZoomRateChangedEvent> { event ->
+            sourceTextZoomRateProperty.set(event.rate)
             appPreferenceRepo.setSourceTextZoomRate(event.rate).subscribe()
         }
     }

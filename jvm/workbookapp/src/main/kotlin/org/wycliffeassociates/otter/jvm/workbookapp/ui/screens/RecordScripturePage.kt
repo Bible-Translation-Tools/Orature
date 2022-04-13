@@ -23,6 +23,7 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.value.ChangeListener
 import javafx.scene.Parent
 import javafx.scene.control.ScrollPane
@@ -100,7 +101,6 @@ class RecordScripturePage : View() {
             orientationProperty.bind(settingsViewModel.orientationProperty)
             sourceOrientationProperty.bind(settingsViewModel.sourceOrientationProperty)
 
-            zoomRateProperty.bindBidirectional(workbookDataStore.sourceTextZoomRateProperty)
             sourceSpeedRateProperty.bind(
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.sourceRate.toLazyBinding()
@@ -492,6 +492,7 @@ class RecordScripturePage : View() {
         super.onDock()
         recordScriptureViewModel.loadTakes()
         recordScriptureViewModel.openPlayers()
+        sourceContent.zoomRateProperty.set(workbookDataStore.sourceTextZoomRateProperty.value)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()
