@@ -65,6 +65,7 @@ class SimpleAudioPlayer(
 
     val playTextProperty = SimpleStringProperty()
     val pauseTextProperty = SimpleStringProperty()
+    var onPlaybackProgressChanged: (value: Double) -> Unit = {}
 
     private val slider = JFXSlider()
     private val audioPlayerController = AudioPlayerController(slider)
@@ -168,6 +169,10 @@ class SimpleAudioPlayer(
         audioPlayerController.playbackRateProperty.bind(audioPlaybackRateProperty)
 
         menuItems.setAll(createPlaybackRateMenu())
+
+        slider.valueProperty().onChange {
+            onPlaybackProgressChanged(it)
+        }
     }
 
     private fun playPauseTextBinding(hideButtonText: Boolean = false): StringBinding {

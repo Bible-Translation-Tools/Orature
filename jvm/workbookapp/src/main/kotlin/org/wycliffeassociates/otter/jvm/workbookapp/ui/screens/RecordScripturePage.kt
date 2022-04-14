@@ -91,6 +91,7 @@ class RecordScripturePage : View() {
             sourceAudioPlayerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
             licenseProperty.bind(workbookDataStore.sourceLicenseProperty)
             isMinimizableProperty.set(false)
+            highlightedChunk.bind(recordScriptureViewModel.highlightedChunkProperty)
 
             audioNotAvailableTextProperty.set(messages["audioNotAvailable"])
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
@@ -493,6 +494,7 @@ class RecordScripturePage : View() {
         super.onDock()
         recordScriptureViewModel.loadTakes()
         recordScriptureViewModel.openPlayers()
+        recordScriptureViewModel.highlightedChunkProperty.set(-1)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()

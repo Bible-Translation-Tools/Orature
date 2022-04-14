@@ -121,6 +121,7 @@ class ScriptureTakeCardSkin(val card: ScriptureTakeCard) : SkinBase<ScriptureTak
         player.apply {
             playerProperty.bind(card.audioPlayerProperty)
             playButtonProperty.set(playBtn)
+            onPlaybackProgressChanged = card.onPlaybackProgressChanged
         }
     }
 
