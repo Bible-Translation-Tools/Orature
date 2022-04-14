@@ -133,7 +133,6 @@ class ChapterPage : View() {
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
-                pluginOpenedPage.onUndock()
             }
         }
     }

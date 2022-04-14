@@ -183,7 +183,6 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                pluginOpenedPage.onDock()
                 recordScriptureViewModel.openSourceAudioPlayer()
                 recordScriptureViewModel.openTargetAudioPlayer()
             }
@@ -191,7 +190,6 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
-                pluginOpenedPage.onUndock()
             }
             recordScriptureViewModel.openPlayers()
         }
