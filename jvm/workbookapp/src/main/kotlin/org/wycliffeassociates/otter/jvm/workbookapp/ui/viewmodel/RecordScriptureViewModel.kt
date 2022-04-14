@@ -168,7 +168,7 @@ class RecordScriptureViewModel : ViewModel() {
                         takeProperty.set(takeCardModel.take)
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
                         markerModelProperty.set(VerseMarkerModel(AudioFile(takeCardModel.take.file), chunkList.size))
-                        onPlaybackProgressUpdated = ::onPlaybackProgressUpdated
+                        onChunkPlaybackUpdated = { chunkNumber -> highlightedChunkProperty.set(chunkNumber) }
                         selectedProperty.set(takeCardModel.selected)
                         takeLabelProperty.set(
                             MessageFormat.format(
@@ -575,13 +575,6 @@ class RecordScriptureViewModel : ViewModel() {
         takeCardModels.forEach { it.audioPlayer.stop() }
         sourceAudioPlayerProperty.value?.stop()
         workbookDataStore.targetAudioProperty.value?.player?.stop()
-    }
-
-    private fun onPlaybackProgressUpdated(markerModel: VerseMarkerModel, location: Double) {
-        val nearestMarkerFrame = markerModel.seekCurrent(location.toInt())
-        val currentMarker = markerModel.markers.find { it.frame == nearestMarkerFrame }
-        val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: 0
-        highlightedChunkProperty.set(index)
     }
 
     private fun subscribeSelectedTakePropertyToRelay() {

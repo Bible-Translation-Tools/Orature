@@ -50,10 +50,15 @@ class ScriptureTakeCard : Control() {
     val onTakeDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
 
-    var onPlaybackProgressUpdated: (markerModel: VerseMarkerModel, value: Double) -> Unit = { _,_ -> }
+    var onChunkPlaybackUpdated: (number: Int) -> Unit = {}
 
     val onPlaybackProgressChanged: (value: Double) -> Unit = { location ->
-        onPlaybackProgressUpdated(markerModelProperty.value, location)
+        markerModelProperty.value?.let { markerModel ->
+            val nearestMarkerFrame = markerModel.seekCurrent(location.toInt())
+            val currentMarker = markerModel.markers.find { it.frame == nearestMarkerFrame }
+            val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: 0
+            onChunkPlaybackUpdated(index)
+        }
     }
 
     init {
