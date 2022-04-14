@@ -396,7 +396,7 @@ class RecordScripturePage : View() {
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        return PluginOpenedPage().apply {
+        return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(recordScriptureViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
             playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
@@ -418,6 +418,9 @@ class RecordScripturePage : View() {
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
                 }
+            )
+            sourceTextZoomRateProperty.bind(
+                workbookDataStore.sourceTextZoomRateProperty
             )
         }
     }
