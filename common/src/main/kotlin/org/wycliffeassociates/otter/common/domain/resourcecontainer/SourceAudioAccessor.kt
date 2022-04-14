@@ -36,7 +36,20 @@ class SourceAudioAccessor(
     private val dir = File(directoryProvider.cacheDirectory, "source").apply { mkdirs() }
     private val cache = mutableMapOf<String, File>()
 
-    fun getChapter(chapter: Int): SourceAudio? {
+    fun getChapter(chapter: Int, targetMetadata: ResourceMetadata? = null): SourceAudio? {
+        targetMetadata?.let { meta ->
+            println("looking for target audio")
+            val dir = File(meta.path, ".apps/orature/source/audio/")
+            val file = dir.listFiles()?.find {
+                it.name.contains("_c$chapter") || it.name.contains("_c0$chapter") || it.name.contains("_c00$chapter")
+            }
+            file?.let {
+                println("found the file! ${it.path}")
+                val audioFile = AudioFile(it)
+                val size = audioFile.totalFrames
+                return SourceAudio(it, 0, size)
+            }
+        }
         ResourceContainer.load(metadata.path).use { rc ->
             if (rc.media != null) {
                 val mediaProject = rc.media!!.projects.find { it.identifier == project }
@@ -46,14 +59,14 @@ class SourceAudioAccessor(
                     media = mediaProject?.media?.find { it.identifier == "wav" }
                 }
                 if (media != null) {
-                    return getChapter(media, chapter, rc)
+                    return getChapter(media, chapter, rc, targetMetadata)
                 }
             }
         }
         return null
     }
 
-    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer): SourceAudio? {
+    private fun getChapter(media: Media, chapter: Int, rc: ResourceContainer, targetMetadata: ResourceMetadata?): SourceAudio? {
         return if (rc.media != null && media.chapterUrl.isNotEmpty()) {
             val path = media.chapterUrl.replace("{chapter}", chapter.toString())
             if (rc.accessor.fileExists(path)) {
@@ -95,9 +108,10 @@ class SourceAudioAccessor(
         }
     }
 
-    fun getChunk(chapter: Int, chunk: Int): SourceAudio? {
-        val file = getChapter(chapter)?.file
+    fun getChunk(chapter: Int, chunk: Int, targetMetadata: ResourceMetadata?): SourceAudio? {
+        val file = getChapter(chapter, targetMetadata)?.file
         if (file != null) {
+            println("chunk file is ${file.absolutePath}")
             val audioFile = AudioFile(file)
             val cues = audioFile.metadata.getCues()
             cues.sortedBy { it.location }
