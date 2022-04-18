@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.controls.dialog
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ChangeListener
@@ -34,7 +35,7 @@ import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNowWithListener
 import tornadofx.*
 
-class PluginOpenedPage : Fragment() {
+class PluginOpenedPage : View() {
 
     val dialogTitleProperty = SimpleStringProperty()
     val dialogTextProperty = SimpleStringProperty()
@@ -48,6 +49,7 @@ class PluginOpenedPage : Fragment() {
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceSpeedRateProperty = SimpleDoubleProperty()
     val targetSpeedRateProperty = SimpleDoubleProperty()
+    val sourceTextZoomRateProperty = SimpleIntegerProperty()
 
     private var sourcePlayerListener: ChangeListener<IAudioPlayer>? = null
     private var targetPlayerListener: ChangeListener<IAudioPlayer>? = null
@@ -93,6 +95,9 @@ class PluginOpenedPage : Fragment() {
 
                 sourceSpeedRateProperty.bind(this@PluginOpenedPage.sourceSpeedRateProperty)
                 targetSpeedRateProperty.bind(this@PluginOpenedPage.targetSpeedRateProperty)
+                this@PluginOpenedPage.sourceTextZoomRateProperty.onChange {
+                    zoomRateProperty.set(it)
+                }
             }
         )
     }

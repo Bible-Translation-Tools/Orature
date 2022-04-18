@@ -31,13 +31,16 @@ import javafx.scene.control.ListView
 import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.scene.text.TextAlignment
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
 import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
@@ -94,6 +97,15 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     @FXML
     lateinit var minimizeBtn: Button
+
+    @FXML
+    lateinit var zoomInBtn: Button
+
+    @FXML
+    lateinit var zoomOutBtn: Button
+
+    @FXML
+    lateinit var zoomRateText: Label
 
     @FXML
     lateinit var sourceAudioBlock: VBox
@@ -221,18 +233,45 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             hiddenWhen(sourceContent.isMinimizedProperty)
             managedWhen(visibleProperty())
         }
+
+        zoomRateText.apply {
+            textProperty().bind(sourceContent.zoomRateProperty.stringBinding{
+                String.format("%d%%", it)
+            })
+        }
+
+        zoomInBtn.setOnAction { textZoom(10) }
+        zoomOutBtn.setOnAction { textZoom(-10) }
+
+        sourceContent.zoomRateProperty.onChangeAndDoNow { rate ->
+            sourceTextChunksContainer.apply {
+                styleClass.removeAll { it.startsWith("text-zoom") }
+                addClass("text-zoom-$rate")
+            }
+        }
     }
 
     private fun toggleBody() {
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
     }
 
+    private fun textZoom(delta: Int) {
+        val zoomTo = sourceContent.zoomRateProperty.value + delta
+        if (zoomTo < 50 || zoomTo > 200) {
+            return
+        }
+        sourceContent.zoomRateProperty.set(zoomTo)
+        /* notify listeners to save zoom preference */
+        FX.eventbus.fire(SourceTextZoomRateChangedEvent(zoomTo))
+    }
+
     private fun buildChunkText(textContent: String, index: Int): Label {
         return Label(textContent).apply {
             addClass("source-content__text")
-            isWrapText = true
+            minHeight = Region.USE_PREF_SIZE // avoid ellipsis
+
             prefWidthProperty().bind(
-                sourceTextChunksContainer.widthProperty().minus(50)
+                sourceTextChunksContainer.widthProperty().minus(60) // scrollbar offset
             )
 
             sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
@@ -248,6 +287,10 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     private fun buildLicenseText(): Label {
         return Label().apply {
             addClass("source-content__license-text")
+
+            prefWidthProperty().bind(
+                sourceTextChunksContainer.widthProperty().minus(60)
+            )
             textProperty().bind(sourceContent.licenseTextProperty)
             styleProperty().bind(sourceContent.orientationProperty.objectBinding {
                 when (it) {

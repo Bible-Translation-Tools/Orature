@@ -351,7 +351,7 @@ class RecordResourceFragment(private val recordableViewModel: RecordableViewMode
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        return PluginOpenedPage().apply {
+        return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(recordableViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordableViewModel.dialogTextBinding())
             playerProperty.bind(recordableViewModel.sourceAudioPlayerProperty)
