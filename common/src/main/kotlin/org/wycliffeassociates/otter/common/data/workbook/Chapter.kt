@@ -22,6 +22,7 @@ import com.jakewharton.rxrelay2.Relay
 import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
+import java.lang.Thread.sleep
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -41,22 +42,13 @@ data class Chapter(
     override val contentType: ContentType = ContentType.META
     override val children: Observable<BookElement> = chunks.cast()
 
+    var text: String = ""
+
     override val textItem
         get() = textItem()
 
     private fun textItem(): TextItem {
-        var format: MimeType? = null
-        println("trying to get text item")
-//        val text = chunks
-//            .reduce("") { acc, elm ->
-//                if (format == null) format = elm.textItem.format
-//                // Clean multiple line breaks to leave only one
-//                val text = "${elm.textItem.text.replace("\n", "")}\n"
-//                acc + "${verseLabel(elm.start, elm.end)}. $text"
-//            }
-//            .blockingGet()
-        println("got text item")
-        return TextItem("text", MimeType.USFM!!)
+        return TextItem(text, MimeType.USFM!!)
     }
 
     private fun verseLabel(start: Int, end: Int): String {

@@ -213,9 +213,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
             activeResourceComponent != null -> Maybe.just(
                 activeResourceComponent.textItem.text
             )
-            chunk != null -> getSourceChunk().map { _chunk ->
-                _chunk.textItem.text
-            }
+            chunk != null -> Maybe.just("")
             else -> getSourceChapter().map { _chapter ->
                 _chapter.textItem.text
             }
@@ -224,11 +222,10 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
     fun sourceTextBinding(): StringBinding {
         return Bindings.createStringBinding(
-            Callable {
-//                activeChapterProperty.value?.let {
-//                    getSourceText().blockingGet() ?: ""
-//                }
-                     ""
+            {
+                activeChapterProperty.value?.let {
+                    getSourceText().blockingGet() ?: ""
+                }
             },
             activeChapterProperty,
             activeChunkProperty,

@@ -221,7 +221,7 @@ class WorkbookRepository(
                         logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
                     }
-                )
+                ).also { it.text = metaContent.text ?: "" }
             }
     }
 

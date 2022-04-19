@@ -44,6 +44,7 @@ import java.io.File
 import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.outputStream
+import org.wycliffeassociates.otter.common.data.workbook.Book
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -51,6 +52,14 @@ class ProjectFilesAccessor(
     private val targetMetadata: ResourceMetadata,
     private val project: Collection
 ) {
+
+    constructor(
+        directoryProvider: IDirectoryProvider,
+        sourceMetadata: ResourceMetadata,
+        targetMetadata: ResourceMetadata,
+        project: Book
+    ) : this(directoryProvider, sourceMetadata, targetMetadata, project.toCollection())
+
     private val log = LoggerFactory.getLogger(ProjectFilesAccessor::class.java)
 
     val projectDir = directoryProvider.getProjectDirectory(
