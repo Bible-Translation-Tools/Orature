@@ -20,11 +20,12 @@ package org.wycliffeassociates.otter.jvm.controls.card
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.event.ActionEvent
 import javafx.scene.Node
-import javafx.scene.layout.HBox
-import tornadofx.*
+import javafx.scene.control.ButtonBase
+import javafx.scene.control.Skin
 
-class LanguageCardCell : HBox() {
+class LanguageCardCell : ButtonBase() {
 
     val iconProperty = SimpleObjectProperty<Node>()
     val languageNameProperty = SimpleStringProperty()
@@ -32,20 +33,15 @@ class LanguageCardCell : HBox() {
 
     init {
         styleClass.setAll("language-card-cell")
+    }
 
-        label {
-            addClass("language-card-cell__icon")
-            graphicProperty().bind(iconProperty)
-        }
+    override fun createDefaultSkin(): Skin<*> {
+        return LanguageCardCellSkin(this)
+    }
 
-        vbox {
-            addClass("language-card-cell__title")
-            label(languageNameProperty).apply {
-                addClass("language-card-cell__name")
-            }
-            label(languageSlugProperty).apply {
-                addClass("language-card-cell__slug")
-            }
+    override fun fire() {
+        if (!isDisabled) {
+            fireEvent(ActionEvent())
         }
     }
 }

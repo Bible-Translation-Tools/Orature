@@ -39,5 +39,6 @@ data class PluginParameters(
     val direction: String? = null,
     val sourceDirection: String? = null,
     val sourceRate: Double = 1.0,
-    val targetRate: Double = 1.0
+    val targetRate: Double = 1.0,
+    val sourceTextZoom: Int = 100
 )

@@ -23,6 +23,7 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.value.ChangeListener
 import javafx.scene.Parent
 import javafx.scene.control.ScrollPane
@@ -49,6 +50,7 @@ import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
 import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
+import org.wycliffeassociates.otter.jvm.controls.listview.NoSelectionModel
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
@@ -183,7 +185,6 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                pluginOpenedPage.onDock()
                 recordScriptureViewModel.openSourceAudioPlayer()
                 recordScriptureViewModel.openTargetAudioPlayer()
             }
@@ -191,7 +192,6 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
-                pluginOpenedPage.onUndock()
             }
             recordScriptureViewModel.openPlayers()
         }
@@ -322,13 +322,15 @@ class RecordScripturePage : View() {
                     )
 
                     listview(recordScriptureViewModel.takeCardViews) {
-                        addClass("wa-list-view", "record-scripture__take-list")
+                        addClass("record-scripture__take-list")
                         vgrow = Priority.ALWAYS
 
                         setCellFactory { ScriptureTakeCardCell() }
 
                         minHeightProperty().bind(Bindings.size(items).multiply(TAKES_ROW_HEIGHT))
                         placeholder = ListViewPlaceHolder()
+
+                        selectionModelProperty().set(NoSelectionModel())
                     }
                 }
             }
@@ -401,7 +403,7 @@ class RecordScripturePage : View() {
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        return PluginOpenedPage().apply {
+        return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(recordScriptureViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
             playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
@@ -423,6 +425,9 @@ class RecordScripturePage : View() {
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
                 }
+            )
+            sourceTextZoomRateProperty.bind(
+                workbookDataStore.sourceTextZoomRateProperty
             )
         }
     }
@@ -495,11 +500,9 @@ class RecordScripturePage : View() {
 
     override fun onDock() {
         super.onDock()
-        println("docking rsp")
         recordScriptureViewModel.loadTakes()
-        println("loaded takes")
         recordScriptureViewModel.openPlayers()
-        println("opened players")
+        sourceContent.zoomRateProperty.set(workbookDataStore.sourceTextZoomRateProperty.value)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()

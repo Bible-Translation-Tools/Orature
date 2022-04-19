@@ -29,7 +29,6 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.common.data.primitives.Language
 import org.wycliffeassociates.otter.jvm.controls.card.LanguageCardCell
 import tornadofx.*
-import java.util.concurrent.Callable
 
 enum class LanguageType {
     SOURCE,
@@ -69,7 +68,7 @@ class LanguageCell(
             })
             languageSlugProperty.set(item.slug)
 
-            setOnMouseClicked {
+            setOnAction {
                 onSelected(item)
             }
 
@@ -80,13 +79,12 @@ class LanguageCell(
                     }
                 }
             }
-
-            disableProperty().bind(Bindings.createBooleanBinding(
-                Callable {
-                    existingLanguages.contains(item)
-                },
-                existingLanguages
-            ))
         }
+
+        disableProperty().bind(Bindings.createBooleanBinding(
+            { existingLanguages.contains(item) },
+            existingLanguages
+        ))
+        mouseTransparentProperty().bind(disableProperty())
     }
 }

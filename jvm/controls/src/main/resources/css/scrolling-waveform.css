@@ -38,7 +38,7 @@
 
 .scrolling-waveform-play-controls__add-marker-btn .ikonli-font-icon {
     -fx-icon-size: 24px;
-    -fx-icon-color: -wa-regular-text;
+    -fx-icon-color: black;
 }
 
 .scrolling-waveform-play-controls__add-marker-container {

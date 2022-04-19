@@ -96,8 +96,6 @@ class WorkbookRepository(
     private val connections = mutableMapOf<Workbook, CompositeDisposable>()
 
     override fun get(source: Collection, target: Collection): Workbook {
-        logger.info("Opening workbook with source $source and target $target")
-
         val existing = getExistingWorkbookIfExists(source, target)
         if (existing != null) {
             return existing

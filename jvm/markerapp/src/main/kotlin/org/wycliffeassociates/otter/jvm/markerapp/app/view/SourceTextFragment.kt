@@ -18,13 +18,17 @@
  */
 package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.geometry.NodeOrientation
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
 import org.wycliffeassociates.otter.jvm.workbookplugin.plugin.ParameterizedScope
 import tornadofx.*
+import java.lang.Exception
 import java.text.MessageFormat
 
 class SourceTextFragment : Fragment() {
+
+    val highlightedChunkNumberProperty = SimpleIntegerProperty()
 
     override val root = initializeSourceContent()
 
@@ -35,6 +39,7 @@ class SourceTextFragment : Fragment() {
         var license: String? = null
         var direction: String? = null
         var sourceDirection: String? = null
+        var sourceTextZoom: String? = null
 
         if (scope is ParameterizedScope) {
             val parameters = (scope as? ParameterizedScope)?.parameters
@@ -50,11 +55,13 @@ class SourceTextFragment : Fragment() {
                     parameters.named["chapter_number"],
                     parameters.named["unit_number"]
                 )
+                sourceTextZoom = parameters.named["source_text_zoom"]
             }
         }
 
         return SourceContent().apply {
             sourceTextProperty.set(sourceText)
+            highlightedChunk.bind(this@SourceTextFragment.highlightedChunkNumberProperty)
             textNotAvailableTextProperty.set(messages["textNotAvailable"])
             contentTitleProperty.set(sourceContentTitle)
             licenseProperty.set(license)
@@ -69,6 +76,13 @@ class SourceTextFragment : Fragment() {
                 when (sourceDirection) {
                     "rtl" -> NodeOrientation.RIGHT_TO_LEFT
                     else -> NodeOrientation.LEFT_TO_RIGHT
+                }
+            )
+            zoomRateProperty.set(
+                try {
+                    sourceTextZoom?.toInt() ?: 100
+                } catch (e: Exception) {
+                    100
                 }
             )
         }

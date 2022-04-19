@@ -17,6 +17,10 @@
  * along with Orature.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+.filtered-search-bar {
+    -fx-focus-traversable: false;
+}
+
 .filtered-search-bar__root {
     -fx-spacing: 10px;
 }

@@ -21,8 +21,11 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 import com.github.thomasnield.rxkotlinfx.toLazyBinding
 import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ChangeListener
 import javafx.scene.control.ListView
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.layout.Priority
 import javafx.util.Duration
 import org.kordamp.ikonli.javafx.FontIcon
@@ -37,13 +40,16 @@ import org.wycliffeassociates.otter.jvm.controls.dialog.PluginOpenedPage
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.media.simpleaudioplayer
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.virtualFlow
 import org.wycliffeassociates.otter.jvm.workbookapp.SnackbarHandler
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginOpenedEvent
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkCell
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChunkItem
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
+import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.AudioPluginViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ChapterPageViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -55,6 +61,7 @@ import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
+import kotlin.math.max
 
 class ChapterPage : View() {
     private val logger = LoggerFactory.getLogger(ChapterPage::class.java)
@@ -128,14 +135,12 @@ class ChapterPage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                pluginOpenedPage.onDock()
                 viewModel.openPlayers()
             }
         }
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
-                pluginOpenedPage.onUndock()
             }
         }
     }
@@ -298,9 +303,13 @@ class ChapterPage : View() {
                     addClass("wa-list-view")
                     chunkListView = this
                     fitToParentHeight()
+
+                    val focusedChunkProperty = SimpleObjectProperty<ChunkItem>()
+
                     setCellFactory {
                         ChunkCell(
-                            settingsViewModel.orientationScaleProperty.value
+                            settingsViewModel.orientationScaleProperty.value,
+                            focusedChunkProperty
                         )
                     }
                 }
@@ -383,13 +392,29 @@ class ChapterPage : View() {
                         enableWhen(viewModel.sourceAudioAvailableProperty)
                     }
                 }
+
+                addEventFilter(KeyEvent.KEY_PRESSED) {
+                    when (it.code) {
+                        KeyCode.TAB, KeyCode.DOWN, KeyCode.UP -> {
+                            val delta = if (it.isShiftDown || it.code == KeyCode.UP) -1 else 1
+                            scrollListTo(delta)
+                        }
+                    }
+                }
             }
         }
     }
 
+    private fun ListView<CardData>.scrollListTo(delta: Int) {
+        if (selectionModel.selectedIndex == 0) return
+        val current = max(0, selectionModel.selectedIndex)
+        val index = current + delta
+        virtualFlow().scrollTo(index)
+    }
+
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        return PluginOpenedPage().apply {
+        return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(viewModel.dialogTitleBinding())
             dialogTextProperty.bind(viewModel.dialogTextBinding())
             playerProperty.bind(viewModel.sourceAudioPlayerProperty)
@@ -411,6 +436,9 @@ class ChapterPage : View() {
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
                 }
+            )
+            sourceTextZoomRateProperty.bind(
+                workbookDataStore.sourceTextZoomRateProperty
             )
         }
     }

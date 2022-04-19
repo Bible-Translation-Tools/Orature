@@ -270,16 +270,16 @@ open class RecordableViewModel(
 
             val takes =
                 audio.getAllTakes()
-                    .filter { it.isNotDeleted() }
+                    .filter { it.isNotDeleted() && it != selected }
                     .map { take ->
-                        take.mapToCardModel(take == selected)
+                        take.mapToCardModel(false)
                     }
                     .sortedWith(
                         compareByDescending<TakeCardModel> { it.selected }
                             .thenByDescending { it.take.file.lastModified() }
                     )
 
-            val selectedModel = takes.find { it.selected }
+            val selectedModel = selected?.mapToCardModel(true)
             selectedTakeProperty.set(selectedModel)
 
             takeCardModels.clear()
@@ -295,19 +295,21 @@ open class RecordableViewModel(
             }
             .observeOnFx()
             .subscribe {
-                val isTakeSelected = takeCardModels.any { it.take == take && it.selected }
+                val isTakeSelected = take == selectedTakeProperty.value?.take
                 removeFromTakes(take, isTakeSelected)
             }
             .let { disposables.add(it) }
     }
 
-    private fun removeFromTakes(take: Take, autoSelect: Boolean = false) {
+    private fun removeFromTakes(take: Take, isSelected: Boolean = false) {
         Platform.runLater {
-            takeCardModels.removeAll { it.take == take }
-            if (autoSelect) {
+            if (isSelected) {
+                selectedTakeProperty.set(null)
                 takeCardModels.firstOrNull()?.let {
                     selectTake(it.take)
                 }
+            } else {
+                takeCardModels.removeAll { it.take == take }
             }
         }
     }

@@ -18,23 +18,30 @@
  */
 package org.wycliffeassociates.otter.jvm.controls.skins.media
 
+import javafx.beans.binding.Bindings
 import javafx.fxml.FXML
 import javafx.fxml.FXMLLoader
 import javafx.geometry.NodeOrientation
+import javafx.geometry.Orientation
 import javafx.geometry.Side
 import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Label
-import javafx.scene.control.ScrollPane
+import javafx.scene.control.ListView
+import javafx.scene.control.ScrollBar
 import javafx.scene.control.SkinBase
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
+import javafx.scene.text.TextAlignment
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
 import org.wycliffeassociates.otter.jvm.controls.media.SimpleAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.media.SourceContent
+import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
+import org.wycliffeassociates.otter.jvm.utils.enableScrollByKey
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import tornadofx.*
 
@@ -77,13 +84,7 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
     lateinit var textNotAvailableText: Label
 
     @FXML
-    lateinit var sourceTextScroll: ScrollPane
-
-    @FXML
-    lateinit var sourceText: Label
-
-    @FXML
-    lateinit var licenseText: Label
+    lateinit var sourceTextChunksContainer: ListView<Label>
 
     @FXML
     lateinit var title: Label
@@ -96,6 +97,15 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
 
     @FXML
     lateinit var minimizeBtn: Button
+
+    @FXML
+    lateinit var zoomInBtn: Button
+
+    @FXML
+    lateinit var zoomOutBtn: Button
+
+    @FXML
+    lateinit var zoomRateText: Label
 
     @FXML
     lateinit var sourceAudioBlock: VBox
@@ -186,25 +196,18 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             managedWhen(visibleProperty())
         }
 
-        sourceTextScroll.apply {
-            whenVisible { vvalue = 0.0 }
-            isFitToWidth = true
-            nodeOrientationProperty().bind(sourceContent.sourceOrientationProperty)
+        sourceTextChunksContainer.enableScrollByKey()
+
+        sourceContent.sourceTextChunks.onChangeAndDoNow {
+            val textNodes = it.mapIndexed { index, chunkText ->
+                buildChunkText(chunkText, index)
+            }.toMutableList()
+
+            textNodes.add(buildLicenseText()) // append license at bottom of the list
+            sourceTextChunksContainer.items.setAll(textNodes)
         }
 
-        sourceText.apply {
-            textProperty().bind(sourceContent.sourceTextProperty)
-        }
-
-        licenseText.apply {
-            textProperty().bind(sourceContent.licenseTextProperty)
-            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
-                when (it) {
-                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
-                    else -> ""
-                }
-            })
-        }
+        bindListFocusableWithScrollable()
 
         title.apply {
             textProperty().bind(sourceContent.contentTitleProperty)
@@ -230,10 +233,97 @@ class SourceContentSkin(private val sourceContent: SourceContent) : SkinBase<Sou
             hiddenWhen(sourceContent.isMinimizedProperty)
             managedWhen(visibleProperty())
         }
+
+        zoomRateText.apply {
+            textProperty().bind(sourceContent.zoomRateProperty.stringBinding{
+                String.format("%d%%", it)
+            })
+        }
+
+        zoomInBtn.setOnAction { textZoom(10) }
+        zoomOutBtn.setOnAction { textZoom(-10) }
+
+        sourceContent.zoomRateProperty.onChangeAndDoNow { rate ->
+            sourceTextChunksContainer.apply {
+                styleClass.removeAll { it.startsWith("text-zoom") }
+                addClass("text-zoom-$rate")
+            }
+        }
     }
 
     private fun toggleBody() {
         sourceContent.isMinimizedProperty.set(!sourceContent.isMinimizedProperty.value)
+    }
+
+    private fun textZoom(delta: Int) {
+        val zoomTo = sourceContent.zoomRateProperty.value + delta
+        if (zoomTo < 50 || zoomTo > 200) {
+            return
+        }
+        sourceContent.zoomRateProperty.set(zoomTo)
+        /* notify listeners to save zoom preference */
+        FX.eventbus.fire(SourceTextZoomRateChangedEvent(zoomTo))
+    }
+
+    private fun buildChunkText(textContent: String, index: Int): Label {
+        return Label(textContent).apply {
+            addClass("source-content__text")
+            minHeight = Region.USE_PREF_SIZE // avoid ellipsis
+
+            prefWidthProperty().bind(
+                sourceTextChunksContainer.widthProperty().minus(60) // scrollbar offset
+            )
+
+            sourceContent.highlightedChunk.onChangeAndDoNow { highlightedIndex ->
+                val isHighlighted = highlightedIndex == index
+                toggleClass("source-content__text--highlighted", isHighlighted)
+                if (isHighlighted) {
+                    sourceTextChunksContainer.scrollTo(index)
+                }
+            }
+        }
+    }
+
+    private fun buildLicenseText(): Label {
+        return Label().apply {
+            addClass("source-content__license-text")
+
+            prefWidthProperty().bind(
+                sourceTextChunksContainer.widthProperty().minus(60)
+            )
+            textProperty().bind(sourceContent.licenseTextProperty)
+            styleProperty().bind(sourceContent.orientationProperty.objectBinding {
+                when (it) {
+                    NodeOrientation.LEFT_TO_RIGHT -> "-fx-font-style: italic;"
+                    else -> ""
+                }
+            })
+        }
+    }
+
+    /**
+     * Allow focusing when list is scrollable (overflow the bound height).
+     * Unlike ScrollPane, the scrollbar of ListView is dynamically managed.
+     * This binding should be established after the construction of the ListView.
+     */
+    private fun bindListFocusableWithScrollable() {
+        sourceTextChunksContainer.apply {
+            focusTraversableProperty().bind(Bindings.createBooleanBinding(
+                {
+                    getScrollBar(Orientation.VERTICAL)?.isVisible ?: false
+                },
+                skinProperty().select {
+                    getScrollBar(Orientation.VERTICAL)?.visibleProperty()
+                        ?: visibleProperty()
+                }
+            ))
+        }
+    }
+
+    private fun ListView<*>.getScrollBar(orientation: Orientation): ScrollBar? {
+        return lookupAll(".scroll-bar").firstOrNull {
+            it is ScrollBar && it.orientation == orientation
+        } as? ScrollBar
     }
 
     private fun loadFXML() {

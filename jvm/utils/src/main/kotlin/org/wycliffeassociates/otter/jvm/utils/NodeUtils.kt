@@ -18,12 +18,20 @@
  */
 package org.wycliffeassociates.otter.jvm.utils
 
+import com.sun.javafx.util.Utils
+import javafx.animation.TranslateTransition
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
+import javafx.scene.control.TabPane
+import javafx.scene.control.ListView
+import javafx.scene.control.TextArea
+import javafx.scene.control.skin.ListViewSkin
+import javafx.scene.control.skin.VirtualFlow
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
+import javafx.util.Duration
 import kotlin.reflect.KClass
 
 inline fun <reified T: Node> Node.findChild(): Node? = findChildren<T>().firstOrNull()
@@ -121,5 +129,94 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
                 if (this.isShowing) it.consume()
             }
         }
+    }
+}
+
+fun <T> ListView<T>.enableScrollByKey(
+    smallDelta: Double = 20.0,
+    largeDelta: Double = 500.0
+) {
+    addEventFilter(KeyEvent.KEY_PRESSED) { keyEvent ->
+        val flow = childrenUnmodifiable
+            .find { it is VirtualFlow<*> } as VirtualFlow<*>
+
+        when (keyEvent.code) {
+            KeyCode.UP -> {
+                flow.scrollPixels(-smallDelta)
+                keyEvent.consume()
+            }
+            KeyCode.DOWN -> {
+                flow.scrollPixels(smallDelta)
+                keyEvent.consume()
+            }
+            KeyCode.PAGE_UP -> {
+                flow.scrollPixels(-largeDelta)
+                keyEvent.consume()
+            }
+            KeyCode.PAGE_DOWN -> {
+                flow.scrollPixels(largeDelta)
+                keyEvent.consume()
+            }
+        }
+    }
+}
+
+fun <T> ListView<T>.overrideDefaultKeyEventHandler(action: (KeyCode) -> Unit = {}) {
+    this.addEventFilter(KeyEvent.KEY_PRESSED) {
+        when (it.code) {
+            KeyCode.UP, KeyCode.DOWN -> {
+                it.consume()
+                action(it.code)
+            }
+        }
+    }
+}
+
+fun <T> ListView<T>.virtualFlow(): VirtualFlow<*> {
+    return (this.skin as ListViewSkin<*>).children.first() as VirtualFlow<*>
+}
+
+/**
+ * Overrides TextArea's default keyboard events
+ * And triggers action only when Shift + Enter is pressed
+ * @param action Action to invoke when Shift + Enter is pressed
+ */
+fun TextArea.overrideDefaultKeyEventHandler(action: (String) -> Unit = {}) {
+    this.addEventFilter(KeyEvent.KEY_RELEASED) {
+        if (it.code == KeyCode.ENTER && it.isShiftDown) {
+            it.consume()
+            action(this.text ?: "")
+            this.simulateKeyPress(KeyCode.TAB, controlDown = true)
+        }
+    }
+    this.addEventFilter(KeyEvent.KEY_PRESSED) {
+        when (it.code) {
+            KeyCode.TAB -> {
+                if (!it.isControlDown && !it.isShiftDown) {
+                    it.consume()
+                    this.simulateKeyPress(
+                        KeyCode.TAB,
+                        controlDown = !it.isShiftDown,
+                        shiftDown = it.isShiftDown
+                    )
+                }
+            }
+        }
+    }
+}
+
+fun TabPane.enableContentAnimation() {
+    selectionModel.selectedItemProperty().addListener { _, old, new ->
+        if (old == null || new == null) return@addListener
+
+        val oldIndex = tabs.indexOf(old)
+        val newIndex = tabs.indexOf(new)
+        val dir = Utils.clamp(-1, newIndex - oldIndex, 1)
+
+        val getIn = TranslateTransition(Duration.seconds(0.2), new.content)
+        getIn.fromX = width * dir
+        getIn.toX = 0.0
+
+        getIn.play()
     }
 }

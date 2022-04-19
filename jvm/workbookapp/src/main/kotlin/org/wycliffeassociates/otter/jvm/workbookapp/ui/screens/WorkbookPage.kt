@@ -18,30 +18,32 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
-import com.jfoenix.controls.JFXTabPane
-import javafx.application.Platform
+import javafx.beans.binding.Bindings
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.control.ListView
 import javafx.scene.control.Tab
+import javafx.scene.control.TabPane
 import javafx.scene.layout.Priority
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
+import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.ImageRatio
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.jvm.controls.banner.WorkbookBanner
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.dialog.confirmdialog
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
+import org.wycliffeassociates.otter.jvm.utils.enableContentAnimation
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ChapterCell
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.components.ContributorInfo
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.styles.CardGridStyles
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.WorkbookDataStore
@@ -74,7 +76,7 @@ class WorkbookPage : View() {
     private var deleteSuccessListener: ChangeListener<Boolean>? = null
     private var deleteFailListener: ChangeListener<Boolean>? = null
     private var exportProgressListener: ChangeListener<Boolean>? = null
-    private val tabChaptersListeners = mutableMapOf<String, ListChangeListener<WorkbookItemModel>>()
+    private val tabChaptersListeners = mutableMapOf<String, ListChangeListener<ChapterCardModel>>()
 
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
@@ -89,12 +91,11 @@ class WorkbookPage : View() {
     }
 
     init {
-        tryImportStylesheet(resources.get("/css/workbook-page.css"))
-        tryImportStylesheet(resources.get("/css/chapter-card.css"))
-        tryImportStylesheet(resources.get("/css/workbook-banner.css"))
-        tryImportStylesheet(resources.get("/css/confirm-dialog.css"))
-        tryImportStylesheet(resources.get("/css/contributor-info.css"))
-        tryImportStylesheet(resources.get("/css/tab-pane.css"))
+        tryImportStylesheet(resources["/css/workbook-page.css"])
+        tryImportStylesheet(resources["/css/chapter-card.css"])
+        tryImportStylesheet(resources["/css/workbook-banner.css"])
+        tryImportStylesheet(resources["/css/confirm-dialog.css"])
+        tryImportStylesheet(resources["/css/contributor-info.css"])
     }
 
     /**
@@ -147,13 +148,22 @@ class WorkbookPage : View() {
         }
     }
 
-    override val root = JFXTabPane().apply {
+    override val root = TabPane().apply {
+        addClass("wa-tab-pane")
+        tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tabs.onChange {
             when (it.list.size) {
                 1 -> addClass("singleTab")
                 else -> removeClass("singleTab")
             }
         }
+        focusTraversableProperty().bind(
+            Bindings.createBooleanBinding(
+                { tabs.count() > 1 },
+                tabs
+            )
+        )
+        enableContentAnimation()
     }
 
     private fun initializeDeleteConfirmDialog() {
@@ -323,7 +333,7 @@ class WorkbookPage : View() {
      */
     private inner class WorkbookResourceTab(val resourceMetadata: ResourceMetadata) : Tab() {
 
-        lateinit var listView: ListView<WorkbookItemModel>
+        lateinit var listView: ListView<ChapterCardModel>
         val tab = buildTab()
 
         init {
@@ -334,17 +344,12 @@ class WorkbookPage : View() {
                 viewModel.openTab(resourceMetadata)
                 viewModel.selectedResourceMetadata.set(resourceMetadata)
                 listView.refresh()
-                Platform.runLater {
-                    content.requestFocus()
-                }
             }
 
             tabChaptersListeners.putIfAbsent(text, ListChangeListener {
-                val item =
-                    it.list.singleOrNull { model ->
-                        model is ChapterCardModel &&
-                                model.source == viewModel.selectedChapterProperty.value
-                    }
+                val item = it.list.singleOrNull { model ->
+                    model.source == viewModel.selectedChapterProperty.value
+                }
                 val index = it.list.indexOf(item)
                 listView.scrollTo(index)
             })
@@ -367,17 +372,64 @@ class WorkbookPage : View() {
                 hbox {
                     vgrow = Priority.ALWAYS
 
-                    listView = listview(viewModel.chapters) {
+                    vbox {
                         hgrow = Priority.ALWAYS
-                        vgrow = Priority.ALWAYS
-                        addClass("workbook-page__chapter-list")
                         fitToParentWidth()
+                        addClass("workbook-page__left-pane")
 
-                        setCellFactory {
-                            ChapterCell()
+                        add(buildWorkbookBanner())
+
+                        listview(viewModel.chapters) {
+                            listView = this
+                            vgrow = Priority.ALWAYS
+
+                            addClass("wa-list-view", "workbook-page__chapter-list")
+
+                            setCellFactory {
+                                ChapterCell()
+                            }
                         }
                     }
+
                     add(buildContributorSection())
+                }
+            }
+        }
+
+        private fun buildWorkbookBanner(): WorkbookBanner {
+            return WorkbookBanner().apply {
+                val workbook = workbookDataStore.activeWorkbookProperty
+                backgroundArtworkProperty.bind(
+                    workbook.objectBinding {
+                        it?.artworkAccessor?.getArtwork(ImageRatio.TWO_BY_ONE)
+                    }
+                )
+                bookTitleProperty.bind(workbook.stringBinding { it?.target?.title })
+                resourceTitleProperty.bind(viewModel.selectedResourceMetadata.stringBinding { it?.title })
+                hideDeleteButtonProperty.bind(
+                    viewModel.selectedResourceMetadata.booleanBinding {
+                        it?.type == ContainerType.Help
+                    }
+                )
+                deleteTitleProperty.set(FX.messages["delete"])
+                exportTitleProperty.bind(
+                    Bindings.createStringBinding(
+                        {
+                            when (viewModel.selectedResourceMetadata.value?.type) {
+                                ContainerType.Book, ContainerType.Bundle -> FX.messages["exportProject"]
+                                ContainerType.Help -> FX.messages["exportResource"]
+                                else -> ""
+                            }
+                        },
+                        viewModel.selectedResourceMetadata
+                    )
+                )
+                onDeleteAction { viewModel.showDeleteDialogProperty.set(true) }
+                onExportAction {
+                    val directory = chooseDirectory(FX.messages["exportProject"])
+                    directory?.let {
+                        viewModel.exportWorkbook(it)
+                    }
                 }
             }
         }

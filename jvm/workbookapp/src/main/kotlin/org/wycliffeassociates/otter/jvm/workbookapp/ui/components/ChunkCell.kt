@@ -18,9 +18,12 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.property.Property
+import javafx.scene.control.Button
 import javafx.scene.control.ListCell
 import javafx.scene.input.KeyCode
 import org.wycliffeassociates.otter.common.utils.capitalizeString
+import org.wycliffeassociates.otter.jvm.utils.findChild
 import org.wycliffeassociates.otter.jvm.utils.simulateKeyPress
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.CardData
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.TakeModel
@@ -28,7 +31,8 @@ import tornadofx.*
 import java.text.MessageFormat
 
 class ChunkCell(
-    private val orientationScale: Double
+    private val orientationScale: Double,
+    private val focusedChunkProperty: Property<ChunkItem>
 ) : ListCell<CardData>() {
     private val view = ChunkItem()
 
@@ -56,19 +60,42 @@ class ChunkCell(
             setOnTakeSelected {
                 item.onTakeSelected(item, it)
                 refreshTakes()
+                findChild<Button>()?.requestFocus()
             }
 
             hasSelectedProperty.set(item.takes.size > 0)
 
             refreshTakes()
 
+            focusedProperty().onChange {
+                if (isFocused) {
+                    focusedChunkProperty.value?.hideTakes()
+                    focusedChunkProperty.value = this
+
+                    listView.selectionModel.select(item)
+                }
+            }
+
             setOnKeyReleased {
                 when (it.code) {
                     KeyCode.ENTER, KeyCode.SPACE -> {
                         toggleShowTakes()
                     }
-                    KeyCode.DOWN -> simulateKeyPress(KeyCode.TAB)
-                    KeyCode.UP -> simulateKeyPress(KeyCode.TAB, shiftDown = true)
+                    KeyCode.DOWN, KeyCode.UP -> {
+                        val isDown = it.code == KeyCode.DOWN
+                        if (isDown && listView.selectionModel.selectedIndex == 0) {
+                            return@setOnKeyReleased
+                        }
+
+                        if (it.target is ChunkItem) {
+                            hideTakes()
+                            simulateKeyPress(
+                                KeyCode.TAB,
+                                shiftDown = it.code == KeyCode.UP
+                            )
+                        }
+                    }
+                    KeyCode.ESCAPE -> hideTakes()
                 }
             }
 

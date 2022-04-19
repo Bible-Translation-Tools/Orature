@@ -43,8 +43,6 @@ import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ChapterCardModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.ContributorCellData
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookBannerModel
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.model.WorkbookItemModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ChapterPage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.ResourcePage
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.system.errorMessage
@@ -72,7 +70,7 @@ class WorkbookPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
 
-    val chapters: ObservableList<WorkbookItemModel> = FXCollections.observableArrayList()
+    val chapters: ObservableList<ChapterCardModel> = FXCollections.observableArrayList()
     val contributors = observableListOf<Contributor>()
     val currentTabProperty = SimpleStringProperty()
 
@@ -168,27 +166,9 @@ class WorkbookPageViewModel : ViewModel() {
             .doOnError { e ->
                 logger.error("Error in loading chapters for project: ${workbook.target.slug}", e)
             }
-            .subscribe { list: List<WorkbookItemModel> ->
-                chapters.add(createWorkbookBanner())
+            .subscribe { list: List<ChapterCardModel> ->
                 chapters.addAll(list)
             }
-    }
-
-    private fun createWorkbookBanner(): WorkbookBannerModel {
-        val workbook = workbookDataStore.workbook
-        return WorkbookBannerModel(
-            title = workbook.target.title,
-            coverArt = workbook.artworkAccessor.getArtwork(ImageRatio.TWO_BY_ONE),
-            onDelete = { showDeleteDialogProperty.set(true) },
-            onExport = {
-                val directory = chooseDirectory(FX.messages["exportProject"])
-                directory?.let {
-                    exportWorkbook(it)
-                }
-            }
-        ).apply {
-            rcMetadataProperty.bind(selectedResourceMetadata)
-        }
     }
 
     fun getLastResource(): String {
