@@ -60,7 +60,6 @@ import java.util.*
 import javafx.geometry.Pos
 import javafx.scene.paint.Color
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.chunking.ChunkingWizard
-import org.wycliffeassociates.otter.jvm.workbookapp.ui.screens.dialogs.ExportChapterDialog
 import kotlin.math.max
 
 class ChapterPage : View() {
@@ -312,6 +311,15 @@ class ChapterPage : View() {
                             focusedChunkProperty
                         )
                     }
+
+                    addEventFilter(KeyEvent.KEY_PRESSED) {
+                        when (it.code) {
+                            KeyCode.TAB, KeyCode.DOWN, KeyCode.UP -> {
+                                val delta = if (it.isShiftDown || it.code == KeyCode.UP) -1 else 1
+                                scrollListTo(delta)
+                            }
+                        }
+                    }
                 }
             }
 
@@ -390,15 +398,6 @@ class ChapterPage : View() {
                         }
 
                         enableWhen(viewModel.sourceAudioAvailableProperty)
-                    }
-                }
-
-                addEventFilter(KeyEvent.KEY_PRESSED) {
-                    when (it.code) {
-                        KeyCode.TAB, KeyCode.DOWN, KeyCode.UP -> {
-                            val delta = if (it.isShiftDown || it.code == KeyCode.UP) -1 else 1
-                            scrollListTo(delta)
-                        }
                     }
                 }
             }
