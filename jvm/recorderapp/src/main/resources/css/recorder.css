@@ -63,16 +63,21 @@
 }
 
 .continue-button > .ikonli-font-icon {
-    -fx-icon-size: 28px;
     -fx-fill: -wa-primary;
 }
 
 .continue-button:focused {
+    -fx-background-color: -wa-background;
     -fx-border-insets: -4;
 }
 
 .continue-button:hover, .continue-button:pressed {
     -fx-background-color: -wa-foreground-hover;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.continue-button:hover .ikonli-font-icon, .continue-button:pressed .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }
 
 .waveform-container {
