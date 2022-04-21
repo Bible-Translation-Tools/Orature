@@ -124,3 +124,7 @@
     -fx-padding: 0 15px;
     -fx-background-color: -wa-breadcrumb-background;
 }
+
+.card--resource-take__btn {
+    -fx-border-insets: 2;
+}

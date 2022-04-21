@@ -71,3 +71,11 @@
     -fx-alignment: center;
     -fx-padding: 20px;
 }
+
+.translation-card__books {
+    -fx-spacing: 5px;
+}
+
+.translation-card__remove-btn:focused {
+    -fx-border-insets: -4;
+}

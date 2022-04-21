@@ -84,13 +84,6 @@
     -fx-border-width: 2px;
 }
 
-.vm-continue-button:focused {
-    -fx-border-width: 4px;
-    -fx-border-color: -wa-button-border;
-    -fx-border-radius: 6px;
-    -fx-background-radius: 10px;
-}
-
 .vm-play-controls__btn--rounded .ikonli-font-icon {
     -fx-fill: #000000;
 }
@@ -103,6 +96,14 @@
 
 .vm-play-controls__play-btn .ikonli-font-icon {
     -fx-icon-size: 22px;
+}
+
+.vm-play-controls__play-btn:focused {
+    -fx-background-color: -wa-background;
+}
+
+.vm-play-controls__play-btn:focused .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }
 
 .vm-play-controls__seek-btn {
@@ -118,23 +119,36 @@
 }
 
 .vm-continue-button {
-    -fx-min-height: 30px;
-    -fx-min-width: 160px;
-    -fx-background-color: white;
-    -fx-background-radius: 5px;
-    -fx-font-size: 14px;
-}
-
-.vm-continue-button * {
-    -fx-fill: #282CBD;
+    -fx-pref-height: 30px;
+    -fx-pref-width: 160px;
+    -fx-background-color: -wa-white;
+    -fx-text-fill: -wa-primary;
 }
 
 .vm-continue-button > .ikonli-font-icon {
-    -fx-icon-size: 28px;
+    -fx-fill: -wa-primary;
+}
+
+.vm-continue-button:focused {
+    -fx-background-color: -wa-background;
+}
+
+.vm-continue-button:hover, .vm-continue-button:pressed {
+    -fx-background-color: -wa-foreground-hover;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.vm-continue-button:hover .ikonli-font-icon, .vm-continue-button:pressed .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }
 
 .vm-waveform-frame {
     -fx-focus-traversable: true;
+}
+
+.vm-marker-waveform__container {
+    -fx-padding: 4px;
+    -fx-background-color: transparent;
 }
 
 .vm-marker-waveform {
@@ -144,6 +158,7 @@
 .vm-marker-waveform:active {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
+    -fx-border-insets: -4;
 }
 
 .vm-marker-track {
