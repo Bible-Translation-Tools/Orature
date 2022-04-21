@@ -547,6 +547,7 @@
 
 .wa-slider:focused .thumb {
     -fx-border-color: -wa-button-border;
+    -fx-border-width: 4px;
 }
 
 .wa-slider .animated-thumb {

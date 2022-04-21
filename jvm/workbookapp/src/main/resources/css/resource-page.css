@@ -70,7 +70,7 @@
 
 .workbook-header__hide-completed:focused {
     -fx-border-width: 4px;
-    -fx-border-color: -wa-card-border;
+    -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;
     -fx-border-insets: -4;
 }
