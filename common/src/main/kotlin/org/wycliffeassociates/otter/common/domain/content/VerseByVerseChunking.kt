@@ -10,7 +10,7 @@ class VerseByVerseChunking {
         chapterNumber: Int
     ) {
         accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
-            chunkCreator(idx)
+            chunkCreator(idx + 1)
         }
     }
 }
