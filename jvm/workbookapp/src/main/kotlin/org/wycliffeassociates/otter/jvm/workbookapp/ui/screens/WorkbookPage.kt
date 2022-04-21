@@ -19,6 +19,7 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.screens
 
 import javafx.beans.binding.Bindings
+import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.value.ChangeListener
 import javafx.collections.ListChangeListener
 import javafx.event.EventHandler
@@ -78,6 +79,8 @@ class WorkbookPage : View() {
     private var exportProgressListener: ChangeListener<Boolean>? = null
     private val tabChaptersListeners = mutableMapOf<String, ListChangeListener<ChapterCardModel>>()
 
+    private val tabHeightProperty = SimpleDoubleProperty()
+
     private val breadCrumb = BreadCrumb().apply {
         titleProperty.bind(
             workbookDataStore.activeWorkbookProperty.stringBinding {
@@ -96,6 +99,10 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources["/css/workbook-banner.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
         tryImportStylesheet(resources["/css/contributor-info.css"])
+
+        tabHeightProperty.onChange {
+            println(it)
+        }
     }
 
     /**
@@ -363,6 +370,8 @@ class WorkbookPage : View() {
                 vgrow = Priority.ALWAYS
                 alignment = Pos.CENTER
 
+                tabHeightProperty.bind(heightProperty())
+
                 progressindicator {
                     visibleProperty().bind(viewModel.loadingProperty)
                     managedProperty().bind(visibleProperty())
@@ -391,7 +400,9 @@ class WorkbookPage : View() {
                         }
                     }
 
-                    add(buildContributorSection())
+                    add(buildContributorSection().apply {
+                        minHeightProperty().bind(tabHeightProperty)
+                    })
                 }
             }
         }
@@ -437,6 +448,7 @@ class WorkbookPage : View() {
         private fun buildContributorSection(): ContributorInfo {
             return ContributorInfo(viewModel.contributors).apply {
                 hgrow = Priority.SOMETIMES
+                vgrow = Priority.NEVER
 
                 visibleWhen {
                     currentStage!!.widthProperty().greaterThan(minWidthProperty() * 2)
