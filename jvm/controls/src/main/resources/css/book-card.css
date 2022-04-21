@@ -33,6 +33,7 @@
     -fx-border-color: -wa-card-border;
     -fx-border-width: 4px;
     -fx-border-radius: 6px;
+    -fx-border-insets: -4;
 }
 
 .book-card__root {

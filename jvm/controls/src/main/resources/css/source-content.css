@@ -56,9 +56,7 @@
 }
 
 .source-content__minimize-btn {
-    -fx-border-color: -wa-btn-icon-border-color;
-    -fx-border-radius: 3px;
-    -fx-background-radius: 3px;
+    -fx-pref-height: 30px;
 }
 
 .source-content__minimize-btn:focused {
@@ -115,7 +113,7 @@
 
 .source-content__license-text {
     -fx-padding: 10px 15px 0 15px;
-    -fx-font-size: 1.25em;
+    -fx-font-size: 18px !important;
     -fx-text-fill: -wa-note-text;
     -fx-wrap-text: true;
 }

@@ -48,9 +48,9 @@ class ContributorInfo(
             label(messages["contributorHeading"]) {
                 addClass("contributor__section-title")
             }
-            label(messages["contributorDescription"]) {
-                isWrapText = true
+            text(messages["contributorDescription"]) {
                 addClass("contributor__section-text")
+                wrappingWidthProperty().bind(this@ContributorInfo.widthProperty())
             }
         }
         hbox {
@@ -87,15 +87,16 @@ class ContributorInfo(
                 }
             }
         }
-        vbox {
-            vgrow = Priority.ALWAYS
+        scrollpane {
+            isFitToWidth = true
 
-            listview(contributors) {
-                addClass("wa-list-view", "contributor__list")
-                vgrow = Priority.ALWAYS
+            addClass("contributor__list")
 
-                setCellFactory {
-                    ContributorListCell().apply {
+            vbox {
+                bindChildren(contributors) {
+                    ContributorCell().apply {
+                        nameProperty.set(it.name)
+                        indexProperty.set(contributors.indexOf(it))
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }

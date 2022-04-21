@@ -84,7 +84,7 @@ class ExportChapterViewModel : ViewModel() {
     }
 
     fun editContributor(data: ContributorCellData) {
-        contributors[data.index] = Contributor(data.name)
+        contributors[data.index].name = data.name
     }
 
     fun removeContributor(index: Int) {

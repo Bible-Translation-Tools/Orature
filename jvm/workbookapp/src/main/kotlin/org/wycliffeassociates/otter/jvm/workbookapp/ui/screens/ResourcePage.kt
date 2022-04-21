@@ -23,7 +23,7 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign
 import org.wycliffeassociates.otter.jvm.controls.breadcrumbs.BreadCrumb
 import org.wycliffeassociates.otter.jvm.controls.styles.tryImportStylesheet
 import org.wycliffeassociates.otter.jvm.controls.workbookheader.workbookheader
-import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.ResourceListView
+import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view.resourcegroupcard
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.NavigationMediator
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.ResourceListViewModel
 import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewModel
@@ -73,22 +73,33 @@ class ResourcePage : View() {
                 resourceListViewModel.isFilterOnProperty.bind(isFilterOnProperty)
             }
         )
-        add(
-            ResourceListView(
-                resourceListViewModel.filteredResourceGroupCardItemList,
-                resourceListViewModel.isFilterOnProperty,
-                settingsViewModel.sourceOrientationProperty,
-                navigator
-            ).apply {
-                whenDocked {
-                    resourceListViewModel.selectedGroupCardItem.get()?.let {
-                        scrollTo(it)
-                        resourceListViewModel.selectedGroupCardItem.set(null)
-                        resourceListViewModel.calculateCompletionProgress()
-                    }
+
+        scrollpane {
+            isFitToWidth = true
+
+            resourceListViewModel.lastScrollPositionProperty.bind(vvalueProperty())
+
+            vbox {
+                addClass("resource-group-card__container")
+
+                bindChildren(resourceListViewModel.filteredResourceGroupCardItemList) {
+                    resourcegroupcard(
+                        it,
+                        resourceListViewModel.isFilterOnProperty,
+                        settingsViewModel.sourceOrientationProperty,
+                        navigator
+                    )
                 }
             }
-        )
+
+            whenDocked {
+                resourceListViewModel.selectedGroupCardItem.get()?.let {
+                    vvalue = resourceListViewModel.lastScrollPositionProperty.value
+                    resourceListViewModel.selectedGroupCardItem.set(null)
+                    resourceListViewModel.calculateCompletionProgress()
+                }
+            }
+        }
     }
 
     override fun onDock() {

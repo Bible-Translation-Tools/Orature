@@ -21,7 +21,6 @@
 
 -->
 
-<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -54,11 +53,16 @@
                     </VBox.margin>
                 </Label>
             </HBox>
-            <JFXButton fx:id="minimizeBtn" styleClass="source-content__minimize-btn">
+            <Button fx:id="minimizeBtn">
                 <graphic>
                     <FontIcon iconLiteral="mdi-window-minimize" iconSize="20"/>
                 </graphic>
-            </JFXButton>
+                <styleClass>
+                    <String fx:value="btn"/>
+                    <String fx:value="btn--icon"/>
+                    <String fx:value="source-content__minimize-btn"/>
+                </styleClass>
+            </Button>
         </HBox>
         <VBox fx:id="sourceContentBody" styleClass="source-content__body" VBox.vgrow="ALWAYS">
             <VBox styleClass="source-content__top" VBox.vgrow="ALWAYS">

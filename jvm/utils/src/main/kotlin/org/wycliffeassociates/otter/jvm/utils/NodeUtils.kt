@@ -23,8 +23,8 @@ import javafx.animation.TranslateTransition
 import javafx.scene.Node
 import javafx.scene.Parent
 import javafx.scene.control.ComboBox
-import javafx.scene.control.TabPane
 import javafx.scene.control.ListView
+import javafx.scene.control.TabPane
 import javafx.scene.control.TextArea
 import javafx.scene.control.skin.ListViewSkin
 import javafx.scene.control.skin.VirtualFlow
@@ -81,9 +81,14 @@ fun Node.simulateKeyPress(
  */
 fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
     var oldValue: T? = null
+    var wasOpen = false
 
     this.addEventFilter(MouseEvent.MOUSE_PRESSED) {
         oldValue = this.value
+
+        setOnShown {
+            wasOpen = true
+        }
         setOnHidden {
             if (oldValue != this.value) {
                 action(this.value)
@@ -93,20 +98,26 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
 
     this.addEventFilter(KeyEvent.KEY_RELEASED) {
         onHiddenProperty().set(null)
+        onShownProperty().set(null)
 
         when (it.code) {
             KeyCode.ENTER, KeyCode.SPACE -> {
                 if (this.isShowing) return@addEventFilter
-
-                if (oldValue != null && oldValue != this.value) {
+                if (oldValue != this.value) {
                     action(this.value)
+                    wasOpen = false
                 }
                 oldValue = this.value
                 it.consume()
             }
             KeyCode.ESCAPE -> {
-                this.value = oldValue
-                it.consume()
+                if (oldValue != null && oldValue != this.value) {
+                    this.value = oldValue
+                }
+                if (wasOpen) {
+                    it.consume()
+                    wasOpen = false
+                }
             }
         }
     }
@@ -115,6 +126,7 @@ fun <T> ComboBox<T>.overrideDefaultKeyEventHandler(action: (T) -> Unit = {}) {
         when (it.code) {
             KeyCode.ENTER, KeyCode.SPACE -> {
                 it.consume()
+                wasOpen = true
                 this.show()
             }
             KeyCode.RIGHT, KeyCode.DOWN -> {
