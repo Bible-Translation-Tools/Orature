@@ -48,6 +48,11 @@
     -fx-max-width: infinity;
 }
 
+.contributor__add-btn:focused {
+    -fx-border-color: -wa-card-border;
+    -fx-border-insets: -2;
+}
+
 .contributor__text-input {
     -fx-font-size: 1.15em;
     -fx-pref-height: 38px;
@@ -74,6 +79,24 @@
 .contributor__list-cell .btn--icon {
     -fx-pref-width: 40px;
     -fx-pref-height: 40px;
+}
+
+.contributor__list-cell .btn--icon:focused {
+    -fx-border-color: -wa-card-border;
+}
+
+.contributor__list-cell .btn--icon .ikonli-font-icon {
+    -fx-icon-color: -wa-regular-text;
+}
+
+.contributor__save-btn:focused {
+    -fx-border-color: -wa-card-border;
+    -fx-border-insets: -4;
+}
+
+.contributor__license-link:focused {
+    -fx-border-color: -wa-card-border;
+    -fx-border-insets: -3;
 }
 
 .contributor__list .contributor__text-input {
