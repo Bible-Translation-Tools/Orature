@@ -49,6 +49,7 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
     private val AUDIO_RECORD_DEVICE_KEY = "audioRecordDevice"
     private val LOCALE_LANGUAGE_KEY = "localeLanguage"
     private val APP_THEME_KEY = "appTheme"
+    private val SOURCE_TEXT_ZOOM_KEY = "sourceTextZoom"
 
     private fun putInt(key: String, value: Int): Completable {
         return Completable
@@ -204,5 +205,13 @@ class AppPreferences @Inject constructor(database: AppDatabase) : IAppPreference
 
     override fun setAppTheme(theme: String): Completable {
         return putString(APP_THEME_KEY, theme)
+    }
+
+    override fun sourceTextZoomRate(): Single<Int> {
+        return getInt(SOURCE_TEXT_ZOOM_KEY, 100)
+    }
+
+    override fun setSourceTextZoomRate(rate: Int): Completable {
+        return putInt(SOURCE_TEXT_ZOOM_KEY, rate)
     }
 }

@@ -34,6 +34,19 @@
 <VBox styleClass="source-content__root" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <HBox fx:id="titleContainer">
+            <HBox styleClass="source-content__zoom-control">
+                <Button fx:id="zoomOutBtn" styleClass="btn,btn--icon,btn--borderless">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-magnify-minus" />
+                    </graphic>
+                </Button>
+                <Label fx:id="zoomRateText" styleClass="source-content__zoom-rate-text"></Label>
+                <Button fx:id="zoomInBtn" styleClass="btn,btn--icon,btn--borderless">
+                    <graphic>
+                        <FontIcon iconLiteral="mdi-magnify-plus" />
+                    </graphic>
+                </Button>
+            </HBox>
             <HBox alignment="CENTER" HBox.hgrow="ALWAYS">
                 <Label fx:id="title" styleClass="source-content__title">
                     <VBox.margin>
