@@ -62,9 +62,7 @@ class ExportChapterDialog : OtterDialog() {
             addClass("contributor-dialog__action")
 
             button (messages["exportChapter"]) {
-                addClass(
-                    "btn", "btn--primary","btn--borderless", "contributor-dialog__export-btn"
-                )
+                addClass("btn", "btn--primary", "btn--borderless", "contributor-dialog__export-btn")
                 graphic = FontIcon(Material.UPLOAD_FILE)
                 hgrow = Priority.ALWAYS
                 tooltip(this.text)

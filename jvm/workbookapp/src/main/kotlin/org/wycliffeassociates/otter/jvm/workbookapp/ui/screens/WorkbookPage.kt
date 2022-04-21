@@ -460,7 +460,7 @@ class WorkbookPage : View() {
                     }
                 )
                 button(messages["saveContributors"]) {
-                    addClass("btn", "btn--primary", "btn--borderless")
+                    addClass("btn", "btn--primary", "btn--borderless", "contributor__save-btn")
                     fitToParentWidth()
                     tooltip(this.text)
                     isDisable = true
