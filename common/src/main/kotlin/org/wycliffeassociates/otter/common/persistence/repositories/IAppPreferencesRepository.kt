@@ -37,4 +37,6 @@ interface IAppPreferencesRepository {
     fun setLocaleLanguage(language: Language): Completable
     fun appTheme(): Single<ColorTheme>
     fun setAppTheme(theme: ColorTheme): Completable
+    fun sourceTextZoomRate(): Single<Int>
+    fun setSourceTextZoomRate(rate: Int): Completable
 }

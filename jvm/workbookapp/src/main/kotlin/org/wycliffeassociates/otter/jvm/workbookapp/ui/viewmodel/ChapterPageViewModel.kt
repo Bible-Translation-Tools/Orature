@@ -27,6 +27,7 @@ import io.reactivex.subjects.PublishSubject
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -39,6 +40,7 @@ import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.ConcatenateAudio
 import org.wycliffeassociates.otter.common.domain.content.TakeActions
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.common.persistence.repositories.PluginType
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -61,6 +63,9 @@ class ChapterPageViewModel : ViewModel() {
 
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
+
+    @Inject
+    lateinit var appPreferencesRepo: IAppPreferencesRepository
 
     // List of content to display on the screen
     // Boolean tracks whether the content has takes associated with it
@@ -125,6 +130,10 @@ class ChapterPageViewModel : ViewModel() {
                 checkCanCompile()
                 setWorkChunk()
             }
+
+        appPreferencesRepo.sourceTextZoomRate().subscribe { rate ->
+            workbookDataStore.sourceTextZoomRateProperty.set(rate)
+        }
     }
 
     fun undock() {

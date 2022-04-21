@@ -19,7 +19,6 @@
 package org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.view
 
 import javafx.beans.property.BooleanProperty
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.value.ObservableValue
 import javafx.geometry.NodeOrientation
@@ -28,7 +27,6 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import org.kordamp.ikonli.javafx.FontIcon
-import org.wycliffeassociates.otter.jvm.controls.button.highlightablebutton
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.StatusIndicator
 import org.wycliffeassociates.otter.jvm.controls.statusindicator.statusindicator
 import org.wycliffeassociates.otter.jvm.workbookapp.controls.resourcecard.model.ResourceCardItem
@@ -43,7 +41,6 @@ class ResourceCardFragment(
     private val navigator: NavigationMediator
 ) : Fragment() {
     override val root = HBox()
-    val isCurrentResourceProperty = SimpleBooleanProperty(false)
     var primaryColorProperty = SimpleObjectProperty(Color.ORANGE)
 
     init {
@@ -84,19 +81,15 @@ class ResourceCardFragment(
                 hgrow = Priority.ALWAYS
             }
 
-            add(
-                highlightablebutton {
-                    highlightColorProperty.bind(primaryColorProperty)
-                    secondaryColor = Color.WHITE
-                    isHighlightedProperty.bind(isCurrentResourceProperty)
-                    graphic = FontIcon("gmi-apps").apply { iconSize = 25 }
-                    text = messages["open"]
-                    action {
-                        item.onSelect()
-                        navigator.dock<RecordResourcePage>()
-                    }
+            button {
+                addClass("btn", "btn--cta", "resource-group-card__action-button")
+                graphic = FontIcon("gmi-apps").apply { iconSize = 25 }
+                text = messages["open"]
+                action {
+                    item.onSelect()
+                    navigator.dock<RecordResourcePage>()
                 }
-            )
+            }
         }
     }
 

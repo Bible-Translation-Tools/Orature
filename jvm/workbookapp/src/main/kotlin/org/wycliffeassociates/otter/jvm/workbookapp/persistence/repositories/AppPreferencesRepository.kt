@@ -105,4 +105,12 @@ class AppPreferencesRepository @Inject constructor(
     override fun setAppTheme(theme: ColorTheme): Completable {
         return preferences.setAppTheme(theme.name)
     }
+
+    override fun sourceTextZoomRate(): Single<Int> {
+        return preferences.sourceTextZoomRate()
+    }
+
+    override fun setSourceTextZoomRate(rate: Int): Completable {
+        return preferences.setSourceTextZoomRate(rate)
+    }
 }

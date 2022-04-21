@@ -39,7 +39,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel.SettingsViewMod
 import tornadofx.*
 import java.text.MessageFormat
 
-class BookSelection : Fragment() {
+class BookSelection : View() {
 
     private val viewModel: BookWizardViewModel by inject()
     private val navigator: NavigationMediator by inject()

@@ -710,7 +710,7 @@
 }
 
 .wa-tab-pane .tab:selected {
-    -fx-background-color: -wa-white;
+    -fx-background-color: -wa-selected-tab-background;
     -fx-border-color: -wa-selected-tab-line;
     -fx-border-width: 0 0 3 0;
 }
