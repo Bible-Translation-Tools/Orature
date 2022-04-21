@@ -354,7 +354,7 @@ class ChapterPage : View() {
                         }
                     }
 
-                    label("Start a new translation with the default verse structure."){
+                    label("Start a new translation with the default verse structure.") {
                         style {
                             fontSize = 14.pt
                             textFill = Color.WHITE
@@ -362,7 +362,7 @@ class ChapterPage : View() {
                         }
                     }
                     button("verse by verse") {
-
+                        setOnAction { viewModel.chunkVerseByVerse() }
                     }
                 }
 
@@ -379,13 +379,13 @@ class ChapterPage : View() {
                         iconSize = 40
                         iconColor = Color.WHITE
                     })
-                    label("Chunks"){
+                    label("Chunks") {
                         style {
                             fontSize = 24.pt
                             textFill = Color.WHITE
                         }
                     }
-                    label("Start a new translation with custom chunk markers."){
+                    label("Start a new translation with custom chunk markers.") {
                         style {
                             fontSize = 14.pt
                             textFill = Color.WHITE

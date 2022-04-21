@@ -55,6 +55,9 @@ import java.io.File
 import java.util.concurrent.Callable
 import javax.inject.Inject
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
+import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 class ChapterPageViewModel : ViewModel() {
 
@@ -62,6 +65,9 @@ class ChapterPageViewModel : ViewModel() {
 
     val workbookDataStore: WorkbookDataStore by inject()
     val audioPluginViewModel: AudioPluginViewModel by inject()
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     @Inject
     lateinit var concatenateAudio: ConcatenateAudio
@@ -468,5 +474,12 @@ class ChapterPageViewModel : ViewModel() {
         }.map {
             allContent.add(it)
         }.observeOnFx().subscribe()
+    }
+
+    fun chunkVerseByVerse() {
+        val wkbk = workbookDataStore.activeWorkbookProperty.value
+        val accessor = ProjectFilesAccessor(directoryProvider, wkbk.source.resourceMetadata, wkbk.target.resourceMetadata, wkbk.source)
+        val chapter = workbookDataStore.activeChapterProperty.value
+        VerseByVerseChunking().chunkVerseByVerse(accessor, chapter.addChunk, wkbk.source.slug, chapter.sort)
     }
 }

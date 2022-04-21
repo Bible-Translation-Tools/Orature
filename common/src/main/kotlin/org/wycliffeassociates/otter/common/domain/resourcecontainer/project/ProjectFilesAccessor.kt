@@ -42,9 +42,13 @@ import org.wycliffeassociates.resourcecontainer.ZipAccessor
 import org.wycliffeassociates.resourcecontainer.entity.Project
 import java.io.File
 import java.io.OutputStream
-import java.util.concurrent.TimeUnit
 import kotlin.io.path.outputStream
 import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.usfm.getText
+import org.wycliffeassociates.usfmtools.USFMParser
+import org.wycliffeassociates.usfmtools.models.markers.CMarker
+import org.wycliffeassociates.usfmtools.models.markers.VMarker
+
 
 class ProjectFilesAccessor(
     directoryProvider: IDirectoryProvider,
@@ -248,6 +252,63 @@ class ProjectFilesAccessor(
             rc.manifest.dublinCore.contributor = contributors.map { it.toString() }.toMutableList()
             rc.writeManifest()
         }
+    }
+
+    fun getChapterText(projectSlug: String, chapterNumber: Int): List<String> {
+        val chapterText = arrayListOf<String>()
+
+        println(sourceMetadata.path)
+        ResourceContainer.load(sourceMetadata.path).use { rc ->
+            val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
+            projectEntry?.let {
+                println(it.path)
+                println(rc.accessor.fileExists(it.path.removePrefix("./")))
+                val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
+                val parser = USFMParser(arrayListOf("s5"))
+                val doc = parser.parseFromString(text)
+                val chapters = doc.getChildMarkers(CMarker::class.java)
+                val chap = chapters.find { it.number == chapterNumber }
+                chap?.let {
+                    it.getChildMarkers(VMarker::class.java).forEach {
+                        chapterText.add(it.getText())
+                    }
+                }
+            }
+        }
+
+        return chapterText
+    }
+
+    fun getChunkText(
+        projectSlug: String,
+        chapterNumber: Int,
+        startVerse: Int,
+        endVerse: Int
+    ): List<String> {
+        val chapterText = arrayListOf<String>()
+
+        ResourceContainer.load(sourceMetadata.path).use { rc ->
+            val projectEntry = rc.manifest.projects.find { it.identifier == projectSlug }
+            projectEntry?.let {
+                println(it.path)
+                println(rc.accessor.fileExists(it.path.removePrefix("./")))
+                val text = rc.accessor.getReader(it.path.removePrefix("./")).readText()
+                val parser = USFMParser(arrayListOf("s5"))
+                val doc = parser.parseFromString(text)
+                val chapters = doc.getChildMarkers(CMarker::class.java)
+                val chap = chapters.find { it.number == chapterNumber }
+                chap?.let {
+                    for (i in startVerse..endVerse) {
+                        val verse = it.getChildMarkers(VMarker::class.java).find { it.startingVerse == i }
+                        verse?.let {
+                            chapterText.add(it.getText())
+                        }
+                    }
+                }
+            }
+        }
+
+        return chapterText
     }
 
     private fun copySourceWithoutMedia(source: File, target: File) {
