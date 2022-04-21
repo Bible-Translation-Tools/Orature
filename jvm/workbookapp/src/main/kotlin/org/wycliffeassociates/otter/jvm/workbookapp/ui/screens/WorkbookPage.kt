@@ -99,10 +99,6 @@ class WorkbookPage : View() {
         tryImportStylesheet(resources["/css/workbook-banner.css"])
         tryImportStylesheet(resources["/css/confirm-dialog.css"])
         tryImportStylesheet(resources["/css/contributor-info.css"])
-
-        tabHeightProperty.onChange {
-            println(it)
-        }
     }
 
     /**
