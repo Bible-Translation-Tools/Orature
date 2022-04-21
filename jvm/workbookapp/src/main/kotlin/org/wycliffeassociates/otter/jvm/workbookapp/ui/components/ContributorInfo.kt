@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -93,10 +94,17 @@ class ContributorInfo(
             addClass("contributor__list")
 
             vbox {
-                bindChildren(contributors) {
+                bindChildren(contributors) { contributor ->
                     ContributorCell().apply {
-                        nameProperty.set(it.name)
-                        indexProperty.set(contributors.indexOf(it))
+                        nameProperty.set(contributor.name)
+                        indexProperty.bind(
+                            Bindings.createIntegerBinding(
+                                {
+                                    contributors.indexOf(contributor)
+                                },
+                                contributors
+                            )
+                        )
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }
