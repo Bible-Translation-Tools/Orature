@@ -43,9 +43,12 @@ class ResourceGroupCard(
 
     init {
         addClass("resource-group-card")
-        label(group.title) {
-            addClass("resource-group-card__title")
-        }
+
+        add(
+            label(group.title) {
+                addClass("resource-group-card__title")
+            }
+        )
 
         group.resources
             .buffer(RENDER_BATCH_SIZE)

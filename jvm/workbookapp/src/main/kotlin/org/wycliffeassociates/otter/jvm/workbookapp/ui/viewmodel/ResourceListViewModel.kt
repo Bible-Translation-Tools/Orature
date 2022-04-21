@@ -45,6 +45,7 @@ class ResourceListViewModel : ViewModel() {
     var selectedGroupCardItem = SimpleObjectProperty<ResourceGroupCardItem>()
     val resourceGroupCardItemList: ResourceGroupCardItemList = ResourceGroupCardItemList()
     val filteredResourceGroupCardItemList = FilteredList(resourceGroupCardItemList)
+    val lastScrollPositionProperty = SimpleDoubleProperty(0.0)
 
     val completionProgressProperty = SimpleDoubleProperty(0.0)
     val isFilterOnProperty = SimpleBooleanProperty(false)
