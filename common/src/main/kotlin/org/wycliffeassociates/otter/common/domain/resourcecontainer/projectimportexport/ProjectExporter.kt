@@ -23,6 +23,7 @@ import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
+import org.wycliffeassociates.otter.common.data.primitives.License
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
@@ -99,19 +100,19 @@ class ProjectExporter @Inject constructor(
 
     fun exportMp3(
         directory: File,
-        workbook: Workbook
+        workbook: Workbook,
+        projectFilesAccessor: ProjectFilesAccessor
     ): Single<ExportResult> {
-        val outputProjectDir = directory.resolve(workbook.target.slug)
-            .apply {
-                mkdirs()
-            }
+        val outputProjectDir = directory.resolve(workbook.target.slug).apply { mkdirs() }
+        val contributors = projectFilesAccessor.getContributorInfo()
+        val license = License.get(workbook.target.resourceMetadata.license)
 
         return workbook.target.chapters
             .filter { it.audio.selected.value?.value != null }
             .flatMapCompletable { chapter ->
                 chapter.audio.selected.value!!.value!!.let {
                     val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
-                    audioExporter.exportMp3(it.file, outputFile)
+                    audioExporter.exportMp3(it.file, outputFile, license, contributors)
                 }
             }
             .toSingle {
