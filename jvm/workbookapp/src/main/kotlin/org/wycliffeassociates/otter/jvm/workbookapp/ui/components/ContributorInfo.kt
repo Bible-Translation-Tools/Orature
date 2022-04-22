@@ -89,6 +89,7 @@ class ContributorInfo(
             }
         }
         scrollpane {
+            vgrow = Priority.ALWAYS
             isFitToWidth = true
 
             addClass("contributor__list")
