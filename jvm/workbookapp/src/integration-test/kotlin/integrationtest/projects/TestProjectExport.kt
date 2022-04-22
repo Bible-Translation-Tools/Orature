@@ -22,12 +22,17 @@ import integrationtest.di.DaggerTestPersistenceComponent
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
@@ -52,6 +57,9 @@ class TestProjectExport {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val db = dbEnvProvider.get()
+
+    private lateinit var workbook: Workbook
+    private lateinit var projectFilesAccessor: ProjectFilesAccessor
 
     private val sourceMetadata = ResourceMetadata(
         "rc0.2",
@@ -92,16 +100,20 @@ class TestProjectExport {
         targetMetadata
     )
 
-    @Test
-    fun exportProjectWithContributors() {
+    @Before
+    fun setUp() {
         db.import("en-x-demo1-ulb-rev.zip")
-        val workbook = workbookRepository.getProjects().blockingGet().single()
-        val projectFilesAccessor = ProjectFilesAccessor(
+        workbook = workbookRepository.getProjects().blockingGet().single()
+        projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
             sourceMetadata,
             targetMetadata,
             targetCollection
         )
+    }
+
+    @Test
+    fun exportProjectWithContributors() {
         val outputDir = createTempDirectory("orature-export").toFile()
         outputDir.deleteOnExit()
 
@@ -119,5 +131,46 @@ class TestProjectExport {
             it.manifest.dublinCore.contributor.toList()
         }
         assertTrue(exportedContributorList.isNotEmpty())
+    }
+
+    @Test
+    fun exportMp3ProjectWithMetadata() {
+        val workbook = workbookRepository.getProjects().blockingGet().single()
+        val projectFilesAccessor = ProjectFilesAccessor(
+            directoryProvider,
+            sourceMetadata,
+            targetMetadata,
+            targetCollection
+        )
+        val outputDir = createTempDirectory("orature-export").toFile()
+        outputDir.deleteOnExit()
+
+        val testTake = javaClass.classLoader.getResource("resource-containers/chapter_take.wav").path
+        val take = Take(
+            "chapter-1",
+            File(testTake),
+            1,
+            MimeType.WAV,
+            LocalDate.now()
+        )
+
+        workbook.target.chapters.blockingFirst().audio.selectTake(take)
+
+        val result = exportUseCase.get()
+            .exportMp3(outputDir, workbook, projectFilesAccessor)
+            .blockingGet()
+
+        assertEquals(ExportResult.SUCCESS, result)
+
+        val projectOutputDir = outputDir.listFiles().singleOrNull()
+        assertNotNull(projectOutputDir)
+
+        val exportedChapter = projectOutputDir!!.listFiles().firstOrNull { it.extension == "mp3"}
+        assertNotNull(exportedChapter)
+        assertEquals(
+            "Exported file metadata does not match contributors info",
+            projectFilesAccessor.getContributorInfo(),
+            AudioFile(exportedChapter!!).metadata.artists()
+        )
     }
 }
