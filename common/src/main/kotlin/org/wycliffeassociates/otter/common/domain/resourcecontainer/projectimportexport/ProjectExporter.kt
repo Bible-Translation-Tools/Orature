@@ -25,6 +25,7 @@ import org.wycliffeassociates.otter.common.data.OratureFileFormat
 import org.wycliffeassociates.otter.common.data.primitives.Contributor
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
+import org.wycliffeassociates.otter.common.domain.audio.AudioExporter
 import org.wycliffeassociates.otter.common.domain.content.FileNamer.Companion.DEFAULT_RC_SLUG
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
@@ -41,6 +42,9 @@ class ProjectExporter @Inject constructor(
     private val directoryProvider: IDirectoryProvider,
     private val workbookRepository: IWorkbookRepository
 ) {
+    @Inject
+    lateinit var audioExporter: AudioExporter
+
     private val log = LoggerFactory.getLogger(this.javaClass)
 
     fun export(
@@ -88,6 +92,30 @@ class ProjectExporter @Inject constructor(
             }
             .doOnError {
                 log.error("Failed to export in-progress project", it)
+            }
+            .onErrorReturnItem(ExportResult.FAILURE)
+            .subscribeOn(Schedulers.io())
+    }
+
+    fun exportMp3(
+        directory: File,
+        workbook: Workbook
+    ): Single<ExportResult> {
+        val outputProjectDir = directory.resolve(workbook.target.slug)
+            .apply {
+                mkdirs()
+            }
+
+        return workbook.target.chapters
+            .filter { it.audio.selected.value?.value != null }
+            .flatMapCompletable { chapter ->
+                chapter.audio.selected.value!!.value!!.let {
+                    val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
+                    audioExporter.exportMp3(it.file, outputFile)
+                }
+            }
+            .toSingle {
+                ExportResult.SUCCESS
             }
             .onErrorReturnItem(ExportResult.FAILURE)
             .subscribeOn(Schedulers.io())
