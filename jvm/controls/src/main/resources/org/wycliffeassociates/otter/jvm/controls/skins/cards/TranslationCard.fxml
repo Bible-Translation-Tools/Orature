@@ -47,7 +47,7 @@
                     </graphic>
                 </Label>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button fx:id="removeTranslationBtn" styleClass="translation-card__remove-btn">
+                <Button fx:id="removeTranslationBtn">
                     <graphic>
                         <FontIcon iconLiteral="mdi-close-circle" />
                     </graphic>
@@ -55,6 +55,7 @@
                         <String fx:value="btn" />
                         <String fx:value="btn--secondary" />
                         <String fx:value="btn--borderless" />
+                        <String fx:value="translation-card__remove-btn" />
                     </styleClass>
                 </Button>
             </children>

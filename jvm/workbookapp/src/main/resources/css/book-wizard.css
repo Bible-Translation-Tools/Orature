@@ -99,7 +99,7 @@
 
 .book-wizard__list .list-cell {
     -fx-background-color: -wa-transparent;
-    -fx-padding: 5px 0;
+    -fx-padding: 5px 4px;
 }
 
 .book-wizard__list:focused,
@@ -112,6 +112,7 @@
     -fx-border-color: -wa-card-border;
     -fx-border-width: 4px;
     -fx-border-radius: 6px;
+    -fx-border-insets: -4;
 }
 
 .book-wizard__title,

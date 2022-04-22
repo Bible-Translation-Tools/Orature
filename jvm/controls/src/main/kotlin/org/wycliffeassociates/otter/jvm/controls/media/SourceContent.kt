@@ -32,6 +32,8 @@ import org.wycliffeassociates.otter.jvm.controls.skins.media.SourceContentSkin
 import tornadofx.*
 import java.text.MessageFormat
 
+class SourceTextZoomRateChangedEvent(val rate: Int) : FXEvent()
+
 class SourceContent : Control() {
     val contentTitleProperty = SimpleStringProperty()
 
@@ -61,6 +63,7 @@ class SourceContent : Control() {
     val enableAudioProperty = SimpleBooleanProperty(true)
     val isMinimizableProperty = SimpleBooleanProperty(true)
     val isMinimizedProperty = SimpleBooleanProperty(false)
+    val zoomRateProperty = SimpleIntegerProperty(100)
 
     val orientationProperty = SimpleObjectProperty<NodeOrientation>()
     val sourceOrientationProperty = SimpleObjectProperty<NodeOrientation>()

@@ -55,3 +55,7 @@
 .new-translation-card__languages .ikonli-font-icon {
     -fx-icon-color: -wa-regular-text;
 }
+
+.new-translation-card__btn:focused {
+    -fx-border-insets: -4;
+}

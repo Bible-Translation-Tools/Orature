@@ -42,7 +42,12 @@ class LanguageCell(
     private val onSelected: (Language) -> Unit
 ) : ListCell<Language>() {
 
-    private val view = LanguageCardCell()
+    private val view = LanguageCardCell().apply {
+        iconProperty.value = when (type) {
+            LanguageType.SOURCE -> FontIcon(Material.HEARING)
+            LanguageType.TARGET -> FontIcon(MaterialDesign.MDI_VOICE)
+        }
+    }
 
     override fun updateItem(item: Language?, empty: Boolean) {
         super.updateItem(item, empty)
@@ -53,11 +58,6 @@ class LanguageCell(
         }
 
         graphic = view.apply {
-            iconProperty.value = when (type) {
-                LanguageType.SOURCE -> FontIcon(Material.HEARING)
-                LanguageType.TARGET -> FontIcon(MaterialDesign.MDI_VOICE)
-            }
-
             languageNameProperty.bind(anglicisedProperty.stringBinding {
                 it?.let {
                     when {

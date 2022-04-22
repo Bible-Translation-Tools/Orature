@@ -21,6 +21,7 @@ package org.wycliffeassociates.otter.jvm.recorder.app.view
 import com.jfoenix.controls.JFXButton
 import javafx.geometry.Insets
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Font
@@ -31,14 +32,14 @@ import tornadofx.*
 
 class ControlFragment : Fragment() {
 
-    val vm: RecorderViewModel by inject()
+    private val vm: RecorderViewModel by inject()
 
-    val timer = label {
+    private val timer = label {
         textProperty().bind(vm.timerTextProperty)
     }
-    val continueBtn = button(messages["continue"], FontIcon("fas-check"))
-    val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
-    val recordBtn = JFXButton()
+    private val continueBtn = button(messages["continue"], FontIcon("fas-check"))
+    private val cancelBtn = button(messages["cancel"], FontIcon("gmi-undo"))
+    private val recordBtn = Button()
 
     override val root = borderpane {
         addClass("controls")
@@ -66,16 +67,12 @@ class ControlFragment : Fragment() {
 
     init {
         timer.apply {
-            fontProperty().set(Font.font("noto sans", 32.0))
-            textFill = Color.WHITE
+            addClass("timer")
         }
 
         recordBtn.apply {
-            addClass("record-button")
-            graphic = FontIcon("gmi-mic").apply {
-                iconSize = 48
-                fill = Color.WHITE
-            }
+            addClass("btn", "btn--icon", "btn--borderless", "record-button")
+            graphic = FontIcon("gmi-mic")
             tooltip {
                 textProperty().bind(
                     vm.recordingProperty.stringBinding {
@@ -89,7 +86,7 @@ class ControlFragment : Fragment() {
         }
 
         continueBtn.apply {
-            addClass("continue-button")
+            addClass("btn", "btn--primary", "btn--borderless", "continue-button")
             tooltip(text)
             visibleProperty().bind(vm.canSaveProperty)
             managedProperty().bind(vm.recordingProperty.or(vm.hasWrittenProperty))
@@ -100,7 +97,7 @@ class ControlFragment : Fragment() {
         }
 
         cancelBtn.apply {
-            addClass("continue-button")
+            addClass("btn", "btn--primary", "btn--borderless", "continue-button")
             tooltip(text)
             visibleProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))
             managedProperty().bind(vm.recordingProperty.not().and(vm.hasWrittenProperty.not()))

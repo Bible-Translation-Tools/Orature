@@ -50,21 +50,34 @@
     -fx-padding: 0 0 0 5px;
 }
 
-.continue-button {
-    -fx-min-height: 30px;
-    -fx-min-width: 160px;
-    -fx-background-color: white;
-    -fx-background-radius: 5px;
-    -fx-font-size: 14px;
+.record-button .ikonli-font-icon {
+    -fx-icon-color: -wa-white;
+    -fx-icon-size: 48px;
 }
 
-.continue-button > .text{
-    -fx-fill: #282CBD;
+.continue-button {
+    -fx-pref-height: 30px;
+    -fx-pref-width: 160px;
+    -fx-background-color: -wa-white;
+    -fx-text-fill: -wa-primary;
 }
 
 .continue-button > .ikonli-font-icon {
-    -fx-icon-size: 28px;
-    -fx-fill: #282CBD;
+    -fx-fill: -wa-primary;
+}
+
+.continue-button:focused {
+    -fx-background-color: -wa-background;
+    -fx-border-insets: -4;
+}
+
+.continue-button:hover, .continue-button:pressed {
+    -fx-background-color: -wa-foreground-hover;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.continue-button:hover .ikonli-font-icon, .continue-button:pressed .ikonli-font-icon {
+    -fx-fill: -wa-regular-text;
 }
 
 .waveform-container {
@@ -75,12 +88,8 @@
     -fx-background-color: -wa-waveform-background;
 }
 
-.continue-button:focused, .record-button:focused {
-    -fx-border-width: 4px;
-    -fx-border-radius: 6px;
-    -fx-border-color: -wa-button-border;
-}
-
-.continue-button:focused {
-    -fx-background-radius: 10px;
+.timer {
+    -fx-font-family: "noto sans";
+    -fx-font-size: 30px;
+    -fx-text-fill: -wa-white;
 }

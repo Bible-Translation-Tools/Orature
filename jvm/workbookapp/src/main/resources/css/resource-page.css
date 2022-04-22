@@ -29,32 +29,10 @@
     -fx-text-fill: -wa-regular-text;
 }
 
-.resource-list-view {
+.resource-group-card__container {
+    -fx-spacing: 30px;
+    -fx-padding: 30px 80px;
     -fx-background-color: -wa-background;
-    -fx-padding: 10 0 0 80;
-    -fx-focus-traversable: true;
-}
-
-.resource-list-view .scroll-bar {
-    -fx-padding: 0 0 0 80;
-    -fx-background-insets: 0 0 0 80;
-}
-
-.resource-list-view:focused,
-.resource-list-view .list-cell:focused,
-.resource-list-view .list-cell:focused .resource-group-card {
-    -fx-border-width: 0;
-}
-
-.resource-list-view:focused .list-cell:focused .resource-group-card {
-    -fx-border-color: -wa-card-border;
-    -fx-border-width: 4px;
-    -fx-border-radius: 6px;
-}
-
-.resource-list-view .list-cell {
-    -fx-background-color: transparent;
-    -fx-padding: 10 5 20 0;
 }
 
 .resource-group-card {
@@ -63,6 +41,7 @@
     -fx-background-color: -wa-foreground;
     -fx-background-radius: 5;
     -fx-effect: -wa-card-shadow-lower-right-dark;
+    -fx-focus-traversable: false;
 }
 
 .resource-group-card__title {
@@ -75,11 +54,25 @@
     -fx-fill: -wa-regular-text;
 }
 
+.resource-group-card__action-button {
+    -fx-pref-height: 40px;
+    -fx-min-height: 40px;
+    -fx-font-size: 16px;
+}
+
+.resource-group-card__action-button .ikonli-font-icon {
+    -fx-font-size: 16px;
+}
+
+.workbook-header__hide-completed {
+    -fx-padding: 4px;
+}
+
 .workbook-header__hide-completed:focused {
     -fx-border-width: 4px;
     -fx-border-color: -wa-button-border;
     -fx-border-radius: 6px;
-    -fx-padding: 5px;
+    -fx-border-insets: -4;
 }
 
 .workbook-header__status-indicator, .resource-group-card__status-indicator {

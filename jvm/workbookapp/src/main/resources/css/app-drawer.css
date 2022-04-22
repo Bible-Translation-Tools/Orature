@@ -27,10 +27,10 @@
     -fx-spacing: 30px;
     -fx-pref-width: 550px;
     -fx-background-color: -wa-foreground;
+    -fx-padding: 40px;
 }
 
 .app-drawer__scroll-pane {
-    -fx-padding: 40px;
     -fx-background-color: -wa-foreground;
 }
 

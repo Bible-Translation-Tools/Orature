@@ -23,3 +23,8 @@
     -fx-spacing: 20px;
     -fx-background-color: -wa-background;
 }
+
+.home-page__translations {
+    -fx-max-width: 800px;
+    -fx-spacing: 20px;
+}

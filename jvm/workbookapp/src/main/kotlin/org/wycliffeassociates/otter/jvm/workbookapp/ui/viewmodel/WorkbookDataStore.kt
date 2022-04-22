@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.workbookapp.ui.viewmodel
 
 import io.reactivex.Completable
 import io.reactivex.Maybe
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
@@ -38,8 +39,10 @@ import org.wycliffeassociates.otter.common.domain.languages.LocaleLanguage
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.SourceAudio
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
+import org.wycliffeassociates.otter.common.persistence.repositories.IAppPreferencesRepository
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateChangedEvent
 import org.wycliffeassociates.otter.jvm.controls.media.PlaybackRateType
+import org.wycliffeassociates.otter.jvm.controls.media.SourceTextZoomRateChangedEvent
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import tornadofx.*
@@ -51,6 +54,9 @@ import javax.inject.Inject
 class WorkbookDataStore : Component(), ScopedInstance {
     @Inject
     lateinit var directoryProvider: IDirectoryProvider
+
+    @Inject
+    lateinit var appPreferenceRepo: IAppPreferencesRepository
 
     @Inject
     lateinit var localeLanguage: LocaleLanguage
@@ -86,6 +92,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
     val targetAudioProperty = SimpleObjectProperty<TargetAudio>()
     val selectedChapterPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
 
+    val sourceTextZoomRateProperty = SimpleIntegerProperty()
     val sourceLicenseProperty = SimpleStringProperty()
 
     init {
@@ -103,6 +110,10 @@ class WorkbookDataStore : Component(), ScopedInstance {
 
         workspace.subscribe<PlaybackRateChangedEvent> { event ->
             updatePlaybackSpeedRate(event)
+        }
+        workspace.subscribe<SourceTextZoomRateChangedEvent> { event ->
+            sourceTextZoomRateProperty.set(event.rate)
+            appPreferenceRepo.setSourceTextZoomRate(event.rate).subscribe()
         }
     }
 

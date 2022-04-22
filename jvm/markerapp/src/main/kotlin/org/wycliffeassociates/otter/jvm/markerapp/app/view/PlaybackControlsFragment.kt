@@ -20,6 +20,7 @@ package org.wycliffeassociates.otter.jvm.markerapp.app.view
 
 import com.jfoenix.controls.JFXButton
 import javafx.geometry.Pos
+import javafx.scene.control.Button
 import javafx.scene.layout.Priority
 import org.kordamp.ikonli.javafx.FontIcon
 import org.slf4j.LoggerFactory
@@ -62,7 +63,7 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekNext() }
     }
 
-    private val previousBtn = JFXButton().apply {
+    private val previousBtn = Button().apply {
         styleClass.addAll(
             seekButtonStyle,
             roundedButtonStyle
@@ -71,10 +72,10 @@ class PlaybackControlsFragment : Fragment() {
         setOnAction { viewModel.seekPrevious() }
     }
 
-    private val closeBtn = JFXButton().apply {
+    private val closeBtn = Button().apply {
         text = messages["continue"]
         graphic = continueIcon
-        styleClass.add(continueButtonStyle)
+        styleClass.addAll("btn", "btn--primary", "btn--borderless", continueButtonStyle)
         setOnAction {
             viewModel.saveAndQuit()
         }

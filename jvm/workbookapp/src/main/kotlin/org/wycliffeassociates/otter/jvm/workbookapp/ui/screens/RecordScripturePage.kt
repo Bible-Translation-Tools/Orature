@@ -23,6 +23,7 @@ import com.jfoenix.controls.JFXSnackbar
 import com.jfoenix.controls.JFXSnackbarLayout
 import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.value.ChangeListener
 import javafx.scene.Parent
 import javafx.scene.control.ScrollPane
@@ -183,7 +184,6 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginOpenedEvent> { pluginInfo ->
             if (!pluginInfo.isNative) {
                 workspace.dock(pluginOpenedPage)
-                pluginOpenedPage.onDock()
                 recordScriptureViewModel.openSourceAudioPlayer()
                 recordScriptureViewModel.openTargetAudioPlayer()
             }
@@ -191,7 +191,6 @@ class RecordScripturePage : View() {
         workspace.subscribe<PluginClosedEvent> {
             (workspace.dockedComponentProperty.value as? PluginOpenedPage)?.let {
                 workspace.navigateBack()
-                pluginOpenedPage.onUndock()
             }
             recordScriptureViewModel.openPlayers()
         }
@@ -398,7 +397,7 @@ class RecordScripturePage : View() {
 
     private fun createPluginOpenedPage(): PluginOpenedPage {
         // Plugin active cover
-        return PluginOpenedPage().apply {
+        return find<PluginOpenedPage>().apply {
             dialogTitleProperty.bind(recordScriptureViewModel.dialogTitleBinding())
             dialogTextProperty.bind(recordScriptureViewModel.dialogTextBinding())
             playerProperty.bind(recordScriptureViewModel.sourceAudioPlayerProperty)
@@ -420,6 +419,9 @@ class RecordScripturePage : View() {
                 workbookDataStore.activeWorkbookProperty.select {
                     it.translation.targetRate.toLazyBinding()
                 }
+            )
+            sourceTextZoomRateProperty.bind(
+                workbookDataStore.sourceTextZoomRateProperty
             )
         }
     }
@@ -495,6 +497,7 @@ class RecordScripturePage : View() {
         recordScriptureViewModel.loadTakes()
         recordScriptureViewModel.openPlayers()
         recordScriptureViewModel.highlightedChunkProperty.set(-1)
+        sourceContent.zoomRateProperty.set(workbookDataStore.sourceTextZoomRateProperty.value)
         navigator.dock(this, breadCrumb)
 
         initializeImportProgressDialog()
