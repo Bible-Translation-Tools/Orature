@@ -117,6 +117,7 @@ class SimpleAudioPlayer(
                 setValueFactory {
                     valueProperty().stringBinding {
                         it?.let {
+                            onPlaybackProgressChanged(it.toDouble())
                             framesToTimecode(it.toDouble(), audioSampleRate.value)
                         }
                     }
@@ -169,10 +170,6 @@ class SimpleAudioPlayer(
         audioPlayerController.playbackRateProperty.bind(audioPlaybackRateProperty)
 
         menuItems.setAll(createPlaybackRateMenu())
-
-        slider.valueProperty().onChange {
-            onPlaybackProgressChanged(it)
-        }
     }
 
     private fun playPauseTextBinding(hideButtonText: Boolean = false): StringBinding {
