@@ -26,6 +26,7 @@ import javafx.event.EventHandler
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -49,9 +50,9 @@ class ContributorInfo(
             label(messages["contributorHeading"]) {
                 addClass("contributor__section-title")
             }
-            text(messages["contributorDescription"]) {
+            label(messages["contributorDescription"]) {
                 addClass("contributor__section-text")
-                wrappingWidthProperty().bind(this@ContributorInfo.widthProperty())
+                minHeight = Region.USE_PREF_SIZE // prevent overflow ellipsis
             }
         }
         hbox {

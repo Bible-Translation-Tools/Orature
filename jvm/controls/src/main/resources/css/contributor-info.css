@@ -32,6 +32,7 @@
     -fx-fill: -wa-regular-text;
     -fx-text-fill: -wa-regular-text;
     -fx-font-size: 1.2em;
+    -fx-wrap-text: true;
 }
 
 .contributor__license-link,
