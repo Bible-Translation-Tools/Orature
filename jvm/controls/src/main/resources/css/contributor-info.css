@@ -138,3 +138,7 @@
 .contributor-dialog__export-btn {
     -fx-max-width: infinity;
 }
+
+.contributor-dialog .contributor__list {
+    -fx-pref-height: 400px;
+}
