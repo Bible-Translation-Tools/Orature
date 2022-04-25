@@ -19,6 +19,7 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -57,6 +58,9 @@ class TestProjectExport {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val db = dbEnvProvider.get()
+    private val tempDir = createTempDirectory("orature-export").toFile()
+        .apply { deleteOnExit() }
+
 
     private lateinit var workbook: Workbook
     private lateinit var projectFilesAccessor: ProjectFilesAccessor
@@ -84,14 +88,6 @@ class TestProjectExport {
         language = Language("en-x-demo1", "", "", "", true, "Europe")
     )
 
-    private val sourceCollection = Collection(
-        1,
-        "rev",
-        "rev",
-        "",
-        sourceMetadata
-    )
-
     private val targetCollection = Collection(
         1,
         "rev",
@@ -114,8 +110,7 @@ class TestProjectExport {
 
     @Test
     fun exportProjectWithContributors() {
-        val outputDir = createTempDirectory("orature-export").toFile()
-        outputDir.deleteOnExit()
+        val outputDir = tempDir.resolve("output").apply { mkdirs() }
 
         val result = exportUseCase.get()
             .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
@@ -135,16 +130,7 @@ class TestProjectExport {
 
     @Test
     fun exportMp3ProjectWithMetadata() {
-        val workbook = workbookRepository.getProjects().blockingGet().single()
-        val projectFilesAccessor = ProjectFilesAccessor(
-            directoryProvider,
-            sourceMetadata,
-            targetMetadata,
-            targetCollection
-        )
-        val outputDir = createTempDirectory("orature-export").toFile()
-        outputDir.deleteOnExit()
-
+        val outputDir = tempDir.resolve("output-mp3").apply { mkdirs() }
         val testTake = javaClass.classLoader.getResource("resource-containers/chapter_take.wav").path
         val take = Take(
             "chapter-1",
@@ -153,7 +139,7 @@ class TestProjectExport {
             MimeType.WAV,
             LocalDate.now()
         )
-
+        // select a take to be included when export
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
 
         val result = exportUseCase.get()
@@ -162,15 +148,13 @@ class TestProjectExport {
 
         assertEquals(ExportResult.SUCCESS, result)
 
-        val projectOutputDir = outputDir.listFiles().singleOrNull()
-        assertNotNull(projectOutputDir)
+        val exportedChapter = outputDir.walk().firstOrNull { it.extension == "mp3" }
 
-        val exportedChapter = projectOutputDir!!.listFiles().firstOrNull { it.extension == "mp3"}
-        assertNotNull(exportedChapter)
+        assertNotNull("Exported file not found.", exportedChapter)
         assertEquals(
-            "Exported file metadata does not match contributors info",
-            projectFilesAccessor.getContributorInfo(),
-            AudioFile(exportedChapter!!).metadata.artists()
+            "Exported file metadata does not match contributors info.",
+            projectFilesAccessor.getContributorInfo().size,
+            AudioFile(exportedChapter!!).metadata.artists().size
         )
     }
 }
