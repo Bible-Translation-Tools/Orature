@@ -58,9 +58,7 @@ class TestProjectExport {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val db = dbEnvProvider.get()
-    private val tempDir = createTempDirectory("orature-export").toFile()
-        .apply { deleteOnExit() }
-
+    private lateinit var outputDir: File
 
     private lateinit var workbook: Workbook
     private lateinit var projectFilesAccessor: ProjectFilesAccessor
@@ -106,12 +104,16 @@ class TestProjectExport {
             targetMetadata,
             targetCollection
         )
+        outputDir = createTempDirectory("orature-export-test").toFile()
+    }
+
+    @After
+    fun cleanUp() {
+        outputDir.deleteRecursively()
     }
 
     @Test
     fun exportProjectWithContributors() {
-        val outputDir = tempDir.resolve("output").apply { mkdirs() }
-
         val result = exportUseCase.get()
             .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
@@ -130,7 +132,6 @@ class TestProjectExport {
 
     @Test
     fun exportMp3ProjectWithMetadata() {
-        val outputDir = tempDir.resolve("output-mp3").apply { mkdirs() }
         val testTake = javaClass.classLoader.getResource("resource-containers/chapter_take.wav").path
         val take = Take(
             "chapter-1",
@@ -149,12 +150,13 @@ class TestProjectExport {
         assertEquals(ExportResult.SUCCESS, result)
 
         val exportedChapter = outputDir.walk().firstOrNull { it.extension == "mp3" }
+        val contributorCount = AudioFile(exportedChapter!!).metadata.artists().size
 
         assertNotNull("Exported file not found.", exportedChapter)
         assertEquals(
             "Exported file metadata does not match contributors info.",
             projectFilesAccessor.getContributorInfo().size,
-            AudioFile(exportedChapter!!).metadata.artists().size
+            contributorCount
         )
     }
 }
