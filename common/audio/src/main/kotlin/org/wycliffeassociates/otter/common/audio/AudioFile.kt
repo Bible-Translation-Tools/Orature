@@ -44,7 +44,9 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
-            AudioFileFormat.MP3 -> MP3FileReader(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release()
+            }
         }
     }
 
@@ -52,7 +54,9 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file)
-            AudioFileFormat.MP3 -> MP3FileReader(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release()
+            }
         }
     }
 
@@ -65,7 +69,9 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample)
-            AudioFileFormat.MP3 -> MP3FileReader(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release()
+            }
         }
     }
 
@@ -79,7 +85,9 @@ class AudioFile private constructor() {
         this.file = file
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, channels, sampleRate, bitsPerSample, metadata as WavMetadata)
-            AudioFileFormat.MP3 -> MP3FileReader(file)
+            AudioFileFormat.MP3 -> MP3FileReader(file).apply {
+                release()
+            }
         }
     }
 
