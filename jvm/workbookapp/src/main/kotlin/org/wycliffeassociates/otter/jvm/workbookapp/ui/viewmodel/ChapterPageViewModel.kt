@@ -456,12 +456,6 @@ class ChapterPageViewModel : ViewModel() {
         return (app as IDependencyGraphProvider).dependencyGraph.injectPlayer()
     }
 
-    var count = 1
-    fun addChunk() {
-        workbookDataStore.activeChapterProperty.value.addChunk(count)
-        count++
-    }
-
     fun subList() {
         workbookDataStore.activeChapterProperty.value.chunks.map {
             CardData(it)
@@ -478,8 +472,8 @@ class ChapterPageViewModel : ViewModel() {
 
     fun chunkVerseByVerse() {
         val wkbk = workbookDataStore.activeWorkbookProperty.value
-        val accessor = ProjectFilesAccessor(directoryProvider, wkbk.source.resourceMetadata, wkbk.target.resourceMetadata, wkbk.source)
         val chapter = workbookDataStore.activeChapterProperty.value
-        VerseByVerseChunking().chunkVerseByVerse(accessor, chapter.addChunk, wkbk.source.slug, chapter.sort)
+        VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+            .chunkVerseByVerse(wkbk.source.slug)
     }
 }

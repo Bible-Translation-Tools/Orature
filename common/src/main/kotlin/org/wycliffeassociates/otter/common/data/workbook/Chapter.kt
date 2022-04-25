@@ -23,6 +23,7 @@ import com.jakewharton.rxrelay2.ReplayRelay
 import io.reactivex.Observable
 import io.reactivex.rxkotlin.cast
 import java.lang.Thread.sleep
+import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
@@ -36,7 +37,7 @@ data class Chapter(
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
     val chunks: ReplayRelay<Chunk>,
-    val addChunk: (Int) -> Unit
+    val addChunk: (Content) -> Unit
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META

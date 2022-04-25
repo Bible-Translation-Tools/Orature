@@ -51,7 +51,6 @@ class Consume : Fragment() {
         tryImportStylesheet(resources.get("/css/consume-page.css"))
         vm.compositeDisposable.add(
             vm.waveform.observeOnFx().subscribe {
-                println("yeet")
                 (root.center as ScrollingWaveform).addWaveformImage(it)
             }
         )

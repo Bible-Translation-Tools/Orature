@@ -568,7 +568,7 @@ class WorkbookRepository(
     }
 
     interface IDatabaseAccessors {
-        fun addContentForCollection(collection: Collection, chunkNumber: Int): Completable
+        fun addContentForCollection(collection: Collection, chunk: Content): Completable
         fun getChildren(collection: Collection): Single<List<Collection>>
         fun getCollectionMetaContent(collection: Collection): Single<Content>
         fun getContentByCollection(collection: Collection): Single<List<Content>>
@@ -603,10 +603,9 @@ private class DefaultDatabaseAccessors(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun addContentForCollection(collection: Collection, chunkNumber: Int): Completable {
-        val cont = Content(chunkNumber, "chunk", chunkNumber, chunkNumber, null, "null", "usfm", ContentType.TEXT)
-        logger.info("Adding content $cont for collection $collection")
-        return contentRepo.insertForCollection(cont, collection).ignoreElement()
+    override fun addContentForCollection(collection: Collection, chunk: Content): Completable {
+        logger.info("Adding content $chunk for collection $collection")
+        return contentRepo.insertForCollection(chunk, collection).ignoreElement()
     }
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
 

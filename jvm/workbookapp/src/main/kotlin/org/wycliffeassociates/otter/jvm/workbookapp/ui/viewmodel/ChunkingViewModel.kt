@@ -37,6 +37,8 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
+import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
+import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
 import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
@@ -99,6 +101,9 @@ class ChunkingViewModel : ViewModel() {
     val stepProperty = SimpleStringProperty("")
 
     val sourceAudio by workbookDataStore.sourceAudioProperty
+
+    @Inject
+    lateinit var directoryProvider: IDirectoryProvider
 
     @Inject
     lateinit var audioConnectionFactory: AudioConnectionFactory
@@ -190,16 +195,22 @@ class ChunkingViewModel : ViewModel() {
 
     fun saveAndQuit() {
         compositeDisposable.clear()
-        for (i in 1..markers.markers.filter { it.placed }.size) {
-            workbookDataStore.activeChapterProperty.value.addChunk(i)
-        }
+
+        val wkbk = workbookDataStore.activeWorkbookProperty.value
+        val chapter = workbookDataStore.activeChapterProperty.value
+        val cues = markers.markers.filter { it.placed }.map { it.toAudioCue() }
+
+        println("cues size is $cues")
+        println("cues are:")
+        cues.forEach { println(it) }
+        println()
+
+        VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
+            .chunkChunkByChunk(wkbk.source.slug, cues)
+
         pageProperty.set(ChunkingWizardPage.CONSUME)
         audioPlayer.value.close()
         audioController = null
-
-        val cues = markers.markers.filter { it.placed }.map { it.toAudioCue() }
-
-        println("cues to write is ${cues.size}")
 
         ChunkAudioUseCase(workbookDataStore.workbook)
             .createChunkedSourceAudio(sourceAudio.file, cues)
