@@ -45,7 +45,7 @@ class AudioFile private constructor() {
         strategy = when (AudioFileFormat.of(file.extension)) {
             AudioFileFormat.WAV -> WavFile(file, metadata as WavMetadata)
             AudioFileFormat.MP3 -> MP3FileReader(file).apply {
-                release()
+                release() // clean up resource after parsing the metadata
             }
         }
     }
