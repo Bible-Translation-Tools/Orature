@@ -89,6 +89,12 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
 
     fun write() {
         cueFile.delete()
+
+        if (_cues.isEmpty()) {
+            writeID3Tag()
+            return
+        }
+
         cueFile.createNewFile()
         val sheet = CueSheet()
         sheet.title = title
