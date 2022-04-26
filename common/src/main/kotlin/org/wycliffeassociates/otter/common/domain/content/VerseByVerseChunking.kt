@@ -38,11 +38,8 @@ class VerseByVerseChunking(
             val start = verses.first()
             val end = verses.last()
             val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
-            val text = StringBuilder().apply { verses.forEach { append(it) } }.toString()
-            println("text for chunk $idx:")
-            println(text)
-            println()
-            val content = Content(idx, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT)
+            val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
+            val content = Content(idx+1, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT)
             chunkCreator(content)
         }
     }
@@ -53,7 +50,6 @@ class VerseByVerseChunking(
         for (verse in verseMarkers) {
             // chunk start inside verse
             if (chunk.startLoc >= verse.startLoc && chunk.startLoc <= verse.endLoc) {
-                println("matched first")
                 verses.add(verse.sort)
             }
             // chunk end inside verse
