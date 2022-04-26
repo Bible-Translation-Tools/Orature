@@ -115,8 +115,6 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
         cueFile.writer().use {
             it.write(serialized)
         }
-
-        writeID3Tag()
     }
 
     override fun setArtists(artists: List<String>) {
