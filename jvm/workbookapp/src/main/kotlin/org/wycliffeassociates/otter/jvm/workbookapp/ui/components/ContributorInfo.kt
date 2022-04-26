@@ -18,6 +18,7 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.components
 
+import javafx.beans.binding.Bindings
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ObservableList
 import javafx.event.ActionEvent
@@ -25,6 +26,7 @@ import javafx.event.EventHandler
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -48,9 +50,9 @@ class ContributorInfo(
             label(messages["contributorHeading"]) {
                 addClass("contributor__section-title")
             }
-            text(messages["contributorDescription"]) {
+            label(messages["contributorDescription"]) {
                 addClass("contributor__section-text")
-                wrappingWidthProperty().bind(this@ContributorInfo.widthProperty())
+                minHeight = Region.USE_PREF_SIZE // prevent overflow ellipsis
             }
         }
         hbox {
@@ -88,15 +90,23 @@ class ContributorInfo(
             }
         }
         scrollpane {
+            vgrow = Priority.ALWAYS
             isFitToWidth = true
 
             addClass("contributor__list")
 
             vbox {
-                bindChildren(contributors) {
+                bindChildren(contributors) { contributor ->
                     ContributorCell().apply {
-                        nameProperty.set(it.name)
-                        indexProperty.set(contributors.indexOf(it))
+                        nameProperty.set(contributor.name)
+                        indexProperty.bind(
+                            Bindings.createIntegerBinding(
+                                {
+                                    contributors.indexOf(contributor)
+                                },
+                                contributors
+                            )
+                        )
                         onRemoveContributorActionProperty.bind(removeContributorCallbackProperty)
                         onEditContributorActionProperty.bind(editContributorCallbackProperty)
                     }
