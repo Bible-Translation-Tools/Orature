@@ -129,6 +129,11 @@
     -fx-alignment: center-left;
 }
 
+.source-content__zoom-control .btn--icon .ikonli-font-icon {
+    -fx-icon-size: 22px;
+    -fx-fill: -wa-regular-text;
+}
+
 .source-content__zoom-rate-text {
     -fx-min-width: 65px;
     -fx-padding: 0 2px;
