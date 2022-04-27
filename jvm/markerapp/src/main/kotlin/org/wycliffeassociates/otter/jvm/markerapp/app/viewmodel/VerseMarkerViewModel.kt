@@ -73,6 +73,7 @@ class VerseMarkerViewModel : ViewModel() {
 
     val audioPlayer = SimpleObjectProperty<IAudioPlayer>()
 
+    val isLoadingProperty = SimpleBooleanProperty(false)
     val isPlayingProperty = SimpleBooleanProperty(false)
     val markerRatioProperty = SimpleStringProperty()
     val headerTitle = SimpleStringProperty()
@@ -86,6 +87,7 @@ class VerseMarkerViewModel : ViewModel() {
     private var resumeAfterScroll = false
 
     fun onDock() {
+        isLoadingProperty.set(true)
         val audio = loadAudio()
         loadMarkers(audio)
         loadTitles()
@@ -268,7 +270,11 @@ class VerseMarkerViewModel : ViewModel() {
                     height = height,
                     waveformSubject
                 )
-            ).subscribe()
+            ).subscribe {
+                runLater {
+                    isLoadingProperty.set(false)
+                }
+            }
     }
 
     fun computeImageWidth(secondsOnScreen: Int): Double {
