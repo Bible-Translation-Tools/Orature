@@ -270,7 +270,7 @@ class ProjectFilesAccessor(
         }
     }
 
-    private fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
+    fun selectedChapterFilePaths(workbook: Workbook, isBook: Boolean): Set<String> {
         return fetchSelectedTakes(workbook, isBook, true)
             .map(this::relativeTakePath)
             .collectInto(hashSetOf<String>(), { set, path -> set.add(path) })

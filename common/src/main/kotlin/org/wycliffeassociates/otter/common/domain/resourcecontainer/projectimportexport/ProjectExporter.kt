@@ -18,7 +18,10 @@
  */
 package org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport
 
+import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.rxkotlin.toObservable
 import io.reactivex.schedulers.Schedulers
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.OratureFileFormat
@@ -100,6 +103,20 @@ class ProjectExporter @Inject constructor(
 
     fun exportMp3(
         directory: File,
+        projectMetadataToExport: ResourceMetadata,
+        workbook: Workbook,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Single<ExportResult> {
+        val isBook = projectMetadataToExport.identifier == workbook.target.resourceMetadata.identifier
+        return if (isBook) {
+            exportBookMp3(directory, workbook, projectFilesAccessor)
+        } else {
+            exportResourceMp3(directory, projectMetadataToExport, workbook, projectFilesAccessor)
+        }
+    }
+
+    private fun exportBookMp3(
+        directory: File,
         workbook: Workbook,
         projectFilesAccessor: ProjectFilesAccessor
     ): Single<ExportResult> {
@@ -114,6 +131,38 @@ class ProjectExporter @Inject constructor(
                     val outputFile = outputProjectDir.resolve("chapter-${chapter.sort}.mp3")
                     audioExporter.exportMp3(it.file, outputFile, license, contributors)
                 }
+            }
+            .toSingle {
+                ExportResult.SUCCESS
+            }
+            .onErrorReturnItem(ExportResult.FAILURE)
+            .subscribeOn(Schedulers.io())
+    }
+
+    private fun exportResourceMp3(
+        directory: File,
+        projectMetadataToExport: ResourceMetadata,
+        workbook: Workbook,
+        projectFilesAccessor: ProjectFilesAccessor
+    ): Single<ExportResult> {
+        val contributors = projectFilesAccessor.getContributorInfo()
+        val license = License.get(workbook.target.resourceMetadata.license)
+
+        val outputProjectDir =  directory
+            .resolve("${workbook.target.slug}-${projectMetadataToExport.identifier}")
+            .apply { mkdirs() }
+
+        return projectFilesAccessor.selectedChapterFilePaths(workbook, false)
+            .toObservable()
+            .flatMapCompletable { takePath ->
+                val takeFile = projectFilesAccessor.audioDir.resolve(takePath)
+                val outputFile = outputProjectDir.resolve(
+                    takePath
+                ).let {
+                    it.parentFile.mkdirs()
+                    it.parentFile.resolve("${takeFile.nameWithoutExtension}.mp3")
+                }
+                audioExporter.exportMp3(takeFile, outputFile, license, contributors)
             }
             .toSingle {
                 ExportResult.SUCCESS

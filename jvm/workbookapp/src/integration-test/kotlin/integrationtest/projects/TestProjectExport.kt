@@ -144,7 +144,7 @@ class TestProjectExport {
         workbook.target.chapters.blockingFirst().audio.selectTake(take)
 
         val result = exportUseCase.get()
-            .exportMp3(outputDir, workbook, projectFilesAccessor)
+            .exportMp3(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
 
         assertEquals(ExportResult.SUCCESS, result)
