@@ -18,7 +18,10 @@
  */
 
 .language-card-cell {
+    -fx-background-color: -wa-foreground;
     -fx-focus-traversable: false;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
 }
 
 .language-card-cell:hover {
@@ -38,8 +41,6 @@
     -fx-padding: 10px;
     -fx-spacing: 20px;
     -fx-alignment: center-left;
-    -fx-background-color: -wa-foreground;
-    -fx-background-radius: 6px;
     -fx-effect: -wa-card-shadow-lower-right;
 }
 
