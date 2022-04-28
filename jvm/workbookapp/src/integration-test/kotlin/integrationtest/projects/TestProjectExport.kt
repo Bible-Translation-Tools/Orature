@@ -27,6 +27,13 @@ import org.junit.Before
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.wav.CueChunk
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
@@ -113,7 +120,7 @@ class TestProjectExport {
     }
 
     @Test
-    fun exportProjectWithContributors() {
+    fun exportOratureProjectWithMetadata() {
         val result = exportUseCase.get()
             .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
@@ -132,10 +139,10 @@ class TestProjectExport {
 
     @Test
     fun exportMp3ProjectWithMetadata() {
-        val testTake = javaClass.classLoader.getResource("chapter_take.wav").path
+        val testTake = createTestWavFile()
         val take = Take(
             "chapter-1",
-            File(testTake),
+            testTake,
             1,
             MimeType.WAV,
             LocalDate.now()
@@ -158,5 +165,25 @@ class TestProjectExport {
             projectFilesAccessor.getContributorInfo().size,
             contributorCount
         )
+    }
+
+    private fun createTestWavFile(): File {
+        val testFile = File.createTempFile("test-take", "wav")
+            .apply { deleteOnExit() }
+
+        val wav = WavFile(
+            testFile,
+            DEFAULT_CHANNELS,
+            DEFAULT_SAMPLE_RATE,
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
+        )
+        WavOutputStream(wav).use {
+            for (i in 0 until 4) {
+                it.write(i)
+            }
+        }
+        wav.update()
+        return testFile
     }
 }
