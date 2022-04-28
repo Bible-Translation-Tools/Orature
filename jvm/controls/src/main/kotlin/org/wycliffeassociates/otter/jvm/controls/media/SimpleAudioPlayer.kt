@@ -66,6 +66,7 @@ class SimpleAudioPlayer(
 
     val playTextProperty = SimpleStringProperty()
     val pauseTextProperty = SimpleStringProperty()
+    var onPlaybackProgressChanged: (value: Double) -> Unit = {}
 
     private val slider = JFXSlider()
     private val audioPlayerController = AudioPlayerController(slider)
@@ -117,6 +118,7 @@ class SimpleAudioPlayer(
                 setValueFactory {
                     valueProperty().stringBinding {
                         it?.let {
+                            onPlaybackProgressChanged(it.toDouble())
                             framesToTimecode(it.toDouble(), audioSampleRate.value)
                         }
                     }
