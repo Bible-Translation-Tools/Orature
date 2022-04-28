@@ -132,7 +132,7 @@ class TestProjectExport {
 
     @Test
     fun exportMp3ProjectWithMetadata() {
-        val testTake = javaClass.classLoader.getResource("resource-containers/chapter_take.wav").path
+        val testTake = javaClass.classLoader.getResource("chapter_take.wav").path
         val take = Take(
             "chapter-1",
             File(testTake),
