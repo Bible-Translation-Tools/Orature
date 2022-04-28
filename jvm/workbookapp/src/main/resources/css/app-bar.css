@@ -24,6 +24,10 @@
     -fx-spacing: 4px;
 }
 
+.app-bar__logo {
+    -fx-focus-traversable: true;
+}
+
 .app-bar__logo .ikonli-font-icon {
     -fx-icon-color: -wa-white;
     -fx-icon-size: 40px;
