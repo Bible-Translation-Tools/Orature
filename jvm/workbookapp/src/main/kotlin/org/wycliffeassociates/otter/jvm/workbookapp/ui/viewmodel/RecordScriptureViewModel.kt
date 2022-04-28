@@ -28,6 +28,7 @@ import javafx.application.Platform
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
@@ -48,6 +49,7 @@ import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
 import org.wycliffeassociates.otter.jvm.controls.card.ScriptureTakeCard
 import org.wycliffeassociates.otter.jvm.controls.card.events.DeleteTakeEvent
 import org.wycliffeassociates.otter.jvm.controls.card.events.TakeEvent
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.utils.onChangeAndDoNow
 import org.wycliffeassociates.otter.jvm.workbookapp.di.IDependencyGraphProvider
 import org.wycliffeassociates.otter.jvm.workbookapp.plugin.PluginClosedEvent
@@ -92,6 +94,7 @@ class RecordScriptureViewModel : ViewModel() {
     val hasPreviousChunk = SimpleBooleanProperty(false)
 
     val isChunk = activeChunkProperty.isNotNull
+    val highlightedChunkProperty = SimpleIntegerProperty(-1)
 
     private var activeChapterSubscription: Disposable? = null
     private var activeChunkSubscription: Disposable? = null
@@ -164,6 +167,8 @@ class RecordScriptureViewModel : ViewModel() {
                         animationMediatorProperty.set(animationMediator)
                         takeProperty.set(takeCardModel.take)
                         audioPlayerProperty.set(takeCardModel.audioPlayer)
+                        markerModelProperty.set(VerseMarkerModel(AudioFile(takeCardModel.take.file), chunkList.size))
+                        onChunkPlaybackUpdated = { chunkNumber -> highlightedChunkProperty.set(chunkNumber) }
                         selectedProperty.set(takeCardModel.selected)
                         takeLabelProperty.set(
                             MessageFormat.format(

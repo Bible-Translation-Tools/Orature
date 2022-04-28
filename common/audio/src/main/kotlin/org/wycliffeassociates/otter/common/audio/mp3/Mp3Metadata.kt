@@ -92,7 +92,12 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
     }
 
     fun write() {
+        writeID3Tag()
         cueFile.delete()
+        if (_cues.isEmpty()) {
+            return
+        }
+
         cueFile.createNewFile()
         val sheet = CueSheet()
         sheet.title = title
@@ -113,8 +118,6 @@ internal class Mp3Metadata(val mp3File: File, val cueFile: File) : AudioMetadata
         cueFile.writer().use {
             it.write(serialized)
         }
-
-        writeID3Tag()
     }
 
     override fun setArtists(artists: List<String>) {

@@ -28,6 +28,7 @@ import javafx.scene.control.Skin
 import org.wycliffeassociates.otter.common.data.workbook.Take
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.jvm.controls.ListAnimationMediator
+import org.wycliffeassociates.otter.jvm.controls.model.VerseMarkerModel
 import org.wycliffeassociates.otter.jvm.controls.skins.cards.ScriptureTakeCardSkin
 import tornadofx.*
 import java.text.SimpleDateFormat
@@ -37,6 +38,7 @@ class ScriptureTakeCard : Control() {
 
     val takeProperty = SimpleObjectProperty<Take>()
     val audioPlayerProperty = SimpleObjectProperty<IAudioPlayer>()
+    val markerModelProperty = SimpleObjectProperty<VerseMarkerModel>()
     val selectedProperty = SimpleBooleanProperty()
     val takeLabelProperty = SimpleStringProperty()
     val lastModifiedProperty = SimpleStringProperty()
@@ -47,6 +49,17 @@ class ScriptureTakeCard : Control() {
     val onTakeSelectedActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeDeleteActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
     val onTakeEditActionProperty = SimpleObjectProperty<EventHandler<ActionEvent>>()
+
+    var onChunkPlaybackUpdated: (number: Int) -> Unit = {}
+
+    val onPlaybackProgressChanged: (value: Double) -> Unit = { location ->
+        markerModelProperty.value?.let { markerModel ->
+            val nearestMarkerFrame = markerModel.seekCurrent(location.toInt())
+            val currentMarker = markerModel.markers.find { it.frame == nearestMarkerFrame }
+            val index = currentMarker?.let { markerModel.markers.indexOf(it) } ?: 0
+            onChunkPlaybackUpdated(index)
+        }
+    }
 
     init {
         addClass("card--scripture-take")

@@ -76,6 +76,8 @@ class PlaybackControlsFragment : Fragment() {
         text = messages["continue"]
         graphic = continueIcon
         styleClass.addAll("btn", "btn--primary", "btn--borderless", continueButtonStyle)
+
+        disableProperty().bind(viewModel.isLoadingProperty)
         setOnAction {
             viewModel.saveAndQuit()
         }
