@@ -132,7 +132,7 @@ class RecordScripturePage : View() {
                 chunk?.let {
                     MessageFormat.format(
                         messages["chunkTitle"],
-                        messages[ContentLabel.of(chunk.contentType).value],
+                        messages[chunk.label],
                         chunk.start
                     )
                 } ?: messages["chapter"]

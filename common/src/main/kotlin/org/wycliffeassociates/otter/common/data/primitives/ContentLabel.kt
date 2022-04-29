@@ -18,6 +18,12 @@
  */
 package org.wycliffeassociates.otter.common.data.primitives
 
+@Deprecated(
+    """
+        "Don't use this to figure out labels to use for UI, as text could be verse or chunk.
+         Book elements already have a label field which should be used directly. This enum should be removed.
+"""
+)
 enum class ContentLabel(val value: String, val type: ContentType) {
     CHAPTER("chapter", ContentType.META),
     VERSE("verse", ContentType.TEXT),

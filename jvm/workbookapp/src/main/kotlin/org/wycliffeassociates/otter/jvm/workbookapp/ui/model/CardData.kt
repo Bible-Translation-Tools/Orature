@@ -18,7 +18,6 @@
  */
 package org.wycliffeassociates.otter.jvm.workbookapp.ui.model
 
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
@@ -39,7 +38,7 @@ data class CardData(
     var onTakeSelected: (CardData, TakeModel) -> Unit = { _, _ -> }
 
     constructor(chunk: Chunk) : this(
-        item = ContentLabel.of(chunk.contentType).value,
+        item = chunk.label,
         dataType = CardDataType.CONTENT.value,
         bodyText = chunk.start.toString(),
         sort = chunk.sort,
@@ -47,7 +46,7 @@ data class CardData(
     )
 
     constructor(chapter: Chapter) : this(
-        item = ContentLabel.CHAPTER.value,
+        item = chapter.label,
         dataType = CardDataType.COLLECTION.value,
         bodyText = chapter.title,
         sort = chapter.sort,
