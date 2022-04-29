@@ -290,6 +290,7 @@ class RecordScriptureViewModel : ViewModel() {
 
     private fun getChunkList(chunks: Observable<Chunk>) {
         activeChunkSubscription?.dispose()
+        chunkList.clear()
         activeChunkSubscription = chunks
             .observeOnFx()
             .doOnError { e ->

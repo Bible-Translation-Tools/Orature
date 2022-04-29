@@ -65,4 +65,8 @@ class Chunk(
 
         return true
     }
+
+    override fun toString(): String {
+        return "Chunk(sort=$sort, label=$label, textItem=$textItem, start=$start, end=$end)"
+    }
 }
