@@ -22,7 +22,12 @@ class VerseByVerseChunking(
     val sourceAudio: SourceAudioAccessor
 
     init {
-        accessor = ProjectFilesAccessor(directoryProvider, workbook.source.resourceMetadata, workbook.target.resourceMetadata, workbook.source)
+        accessor = ProjectFilesAccessor(
+            directoryProvider,
+            workbook.source.resourceMetadata,
+            workbook.target.resourceMetadata,
+            workbook.source
+        )
         sourceAudio = SourceAudioAccessor(directoryProvider, workbook.source.resourceMetadata, workbook.source.slug)
     }
 
@@ -39,7 +44,7 @@ class VerseByVerseChunking(
             val end = verses.last()
             val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
             val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
-            val content = Content(idx+1, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT)
+            val content = Content(idx + 1, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT)
             chunkCreator(content)
         }
     }
@@ -68,13 +73,12 @@ class VerseByVerseChunking(
     }
 
 
-
     private fun mapCuesToRanges(cues: List<AudioCue>): List<VerseRange> {
         cues.sortedBy { it.location }
         val ranges = mutableListOf<VerseRange>()
         cues.forEachIndexed { idx, cue ->
-            val end = if (cues.size > idx+1) cues[idx+1].location else Int.MAX_VALUE
-            ranges.add(VerseRange(idx+1, cue.location, end))
+            val end = if (cues.size > idx + 1) cues[idx + 1].location else Int.MAX_VALUE
+            ranges.add(VerseRange(idx + 1, cue.location, end))
         }
         return ranges
     }
@@ -85,7 +89,17 @@ class VerseByVerseChunking(
         projectSlug: String,
     ) {
         accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
-            val content = Content(idx, "verse", idx, idx, null, str, "usfm", ContentType.TEXT)
+            val verseNumber = idx + 1
+            val content = Content(
+                verseNumber,
+                "verse",
+                verseNumber,
+                verseNumber,
+                null,
+                str,
+                "usfm",
+                ContentType.TEXT
+            )
             chunkCreator(content)
         }
     }
