@@ -22,10 +22,7 @@ import io.reactivex.Observable
 import java.util.concurrent.Callable
 import javafx.beans.binding.Bindings
 import javafx.beans.binding.BooleanBinding
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.workbook.BookElement
-import org.wycliffeassociates.otter.common.data.workbook.Chapter
-import org.wycliffeassociates.otter.common.data.workbook.Chunk
 import org.wycliffeassociates.otter.common.data.workbook.Resource
 import org.wycliffeassociates.otter.common.data.workbook.ResourceGroup
 import tornadofx.*
@@ -76,11 +73,7 @@ private fun findResourceGroup(element: BookElement, slug: String): ResourceGroup
 }
 
 private fun getGroupTitle(element: BookElement): String {
-    return when (element) {
-        is Chapter -> "${messages[ContentLabel.CHAPTER.value]} ${element.title}"
-        is Chunk -> "${messages["chunk"]} ${element.title}"
-        else -> element.title
-    }
+    return "${messages[element.label]} ${element.title}"
 }
 
 private fun getResourceCardItems(
