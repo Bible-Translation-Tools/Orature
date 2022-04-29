@@ -130,7 +130,7 @@ class WorkbookDataStoreTest {
                 end = 1,
                 contentType = ContentType.TEXT,
                 resources = listOf(),
-                label = "Chunk"
+                label = "chunk"
             )
         }
 
@@ -368,7 +368,7 @@ class WorkbookDataStoreTest {
         val stringProperty = SimpleStringProperty()
         stringProperty.bind(workbookDataStore.activeChunkTitleBinding())
 
-        Assert.assertEquals("Verse 1", stringProperty.value)
+        Assert.assertEquals("Chunk 1", stringProperty.value)
     }
 
     @Test
