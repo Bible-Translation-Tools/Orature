@@ -133,7 +133,7 @@ class RecordScripturePage : View() {
                     MessageFormat.format(
                         messages["chunkTitle"],
                         messages[chunk.label],
-                        chunk.start
+                        chunk.sort
                     )
                 } ?: messages["chapter"]
             }

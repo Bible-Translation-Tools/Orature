@@ -18,10 +18,11 @@
  */
 package org.wycliffeassociates.otter.common.data.workbook
 
+import java.util.*
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.domain.content.ResourceRecordable
 
-data class Chunk(
+class Chunk(
     override val sort: Int,
     override val label: String,
     override val audio: AssociatedAudio,
@@ -35,4 +36,33 @@ data class Chunk(
 ) : BookElement, ResourceRecordable {
     override val title
         get() = start.toString()
+
+    override fun hashCode(): Int {
+        return Objects.hash(
+            sort,
+            title,
+            label,
+            textItem,
+            start,
+            end,
+            contentType
+        )
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Chunk
+
+        if (sort != other.sort) return false
+        if (contentType != other.contentType) return false
+        if (label != other.label) return false
+        if (contentType != other.contentType) return false
+        if (textItem != other.textItem) return false
+        if (start != other.start) return false
+        if (end != other.end) return false
+
+        return true
+    }
 }

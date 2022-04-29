@@ -40,7 +40,7 @@ data class CardData(
     constructor(chunk: Chunk) : this(
         item = chunk.label,
         dataType = CardDataType.CONTENT.value,
-        bodyText = chunk.start.toString(),
+        bodyText = chunk.sort.toString(),
         sort = chunk.sort,
         chunkSource = chunk
     )
