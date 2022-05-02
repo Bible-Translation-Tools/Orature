@@ -67,6 +67,7 @@ enum class ChunkingWizardPage {
 class ChunkAudioUseCase(val workbook: Workbook) {
     fun createChunkedSourceAudio(source: File, cues: List<AudioCue>) {
         val temp = File(source.name).apply { createNewFile() }
+        val tempCue = File(temp.parent, "${temp.nameWithoutExtension}.cue")
         val rm = workbook.target.resourceMetadata
         try {
             source.copyTo(temp, true)
@@ -79,10 +80,16 @@ class ChunkAudioUseCase(val workbook: Workbook) {
             audio.update()
             ResourceContainer.load(rm.path).use {
                 it.addFileToContainer(temp, ".apps/orature/source/audio/${temp.name}")
+                if (tempCue.exists()) {
+                    it.addFileToContainer(tempCue, ".apps/orature/source/audio/${tempCue.name}")
+                }
                 it.write()
             }
         } finally {
            temp.delete()
+            if (tempCue.exists()) {
+                tempCue.delete()
+            }
         }
     }
 }

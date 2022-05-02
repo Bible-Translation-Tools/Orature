@@ -23,6 +23,7 @@ import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.sound.sampled.LineUnavailableException
 import javax.sound.sampled.SourceDataLine
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.audio.AudioFileReader
 import org.wycliffeassociates.otter.common.device.AudioPlayerEvent
@@ -34,7 +35,9 @@ class AudioBufferPlayer(
     private val errorRelay: PublishRelay<AudioError> = PublishRelay.create()
 ) : IAudioPlayer {
 
-    val monitor = Object()
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    private val monitor = Object()
 
     override val frameStart: Int
         get() = begin
@@ -88,6 +91,7 @@ class AudioBufferPlayer(
         reader?.let { close() }
         begin = frameStart
         end = frameEnd
+        logger.info("Loading mp3 file ${file.name} from start: $frameStart to end: $end")
         reader = AudioFile(file).reader(frameStart, frameEnd).let { _reader ->
             bytes = ByteArray(processor.inputBufferSize * 2)
             listeners.forEach { it.onEvent(AudioPlayerEvent.LOAD) }
