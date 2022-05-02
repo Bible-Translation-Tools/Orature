@@ -27,6 +27,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.BiConsumer
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -228,11 +229,11 @@ class WorkbookRepository(
         disposables: MutableList<Disposable>
     ): ReplayRelay<Chunk> {
         val rr = ReplayRelay.create<Chunk>()
-            db.getContentByCollectionActiveConnection(chapterCollection)
-                .filter { it.type == ContentType.TEXT }
-                .map {
-                    chunk(it, disposables)
-                }.subscribe { rr.accept(it) }
+        db.getContentByCollectionActiveConnection(chapterCollection)
+            .filter { it.type == ContentType.TEXT }
+            .map {
+                chunk(it, disposables)
+            }.subscribe { rr.accept(it) }
         return rr
     }
 
@@ -568,7 +569,7 @@ class WorkbookRepository(
     }
 
     interface IDatabaseAccessors {
-        fun addContentForCollection(collection: Collection, chunk: Content): Completable
+        fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable
         fun getChildren(collection: Collection): Single<List<Collection>>
         fun getCollectionMetaContent(collection: Collection): Single<Content>
         fun getContentByCollection(collection: Collection): Single<List<Content>>
@@ -603,10 +604,18 @@ private class DefaultDatabaseAccessors(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    override fun addContentForCollection(collection: Collection, chunk: Content): Completable {
-        logger.info("Adding content $chunk for collection $collection")
-        return contentRepo.insertForCollection(chunk, collection).ignoreElement()
+    override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
+        return Observable
+            .fromArray(*chunks.toTypedArray())
+            .map {
+                contentRepo.insertForCollection(it, collection)
+            }
+            .map { it.toObservable() }
+            .flatMap { it }
+            .collectInto(mutableListOf<Int>()) { l, i -> l.add(i) }
+            .ignoreElement()
     }
+
     override fun getChildren(collection: Collection) = collectionRepo.getChildren(collection)
 
     override fun getCollectionMetaContent(collection: Collection) = contentRepo.getCollectionMetaContent(collection)
@@ -614,6 +623,7 @@ private class DefaultDatabaseAccessors(
     override fun getContentByCollectionActiveConnection(collection: Collection): Observable<Content> {
         return contentRepo.getByCollectionWithPersistentConnection(collection)
     }
+
     override fun updateContent(content: Content) = contentRepo.update(content)
 
     override fun getResources(content: Content, metadata: ResourceMetadata) =

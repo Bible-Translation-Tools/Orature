@@ -14,7 +14,7 @@ import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 class VerseByVerseChunking(
     val directoryProvider: IDirectoryProvider,
     val workbook: Workbook,
-    val chunkCreator: (Content) -> Unit,
+    val chunkCreator: (List<Content>) -> Unit,
     val chapterNumber: Int
 ) {
 
@@ -38,15 +38,16 @@ class VerseByVerseChunking(
         val chapAudio = sourceAudio.getChapter(chapterNumber, workbook.target.resourceMetadata)
         val verseMarkers = AudioFile(chapAudio!!.file).metadata.getCues()
         val chunkRanges = mapCuesToRanges(chunks)
+        val chunksToAdd = mutableListOf<Content>()
         for ((idx, chunk) in chunkRanges.withIndex()) {
             val verses = findVerseRange(mapCuesToRanges(verseMarkers), chunk)
             val start = verses.first()
             val end = verses.last()
             val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
             val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
-            val content = Content(idx + 1, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT)
-            chunkCreator(content)
+            chunksToAdd.add(Content(idx + 1, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT))
         }
+        chunkCreator(chunksToAdd)
     }
 
     private fun findVerseRange(verseMarkers: List<VerseRange>, chunk: VerseRange): List<Int> {
@@ -88,6 +89,7 @@ class VerseByVerseChunking(
     fun chunkVerseByVerse(
         projectSlug: String,
     ) {
+        val chunksToAdd = mutableListOf<Content>()
         accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
             val verseNumber = idx + 1
             val content = Content(
@@ -100,7 +102,8 @@ class VerseByVerseChunking(
                 "usfm",
                 ContentType.TEXT
             )
-            chunkCreator(content)
+            chunksToAdd.add(content)
         }
+        chunkCreator(chunksToAdd)
     }
 }
