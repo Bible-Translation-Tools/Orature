@@ -132,6 +132,12 @@ class ProjectFilesAccessor(
     }
 
     fun copySourceFiles(fileWriter: IFileWriter, linkedResource: ResourceMetadata? = null) {
+        if (sourceAudioDir.exists()) {
+            sourceAudioDir.listFiles()?.forEach {
+                fileWriter.copyFile(it, RcConstants.SOURCE_AUDIO_DIR)
+            }
+        }
+
         val sources = mutableListOf(sourceMetadata)
         linkedResource?.let { sources.add(it) }
 
@@ -140,6 +146,7 @@ class ProjectFilesAccessor(
             .distinct()
             .forEach { fileWriter.copyFile(it, RcConstants.SOURCE_DIR) }
     }
+
 
     fun initializeResourceContainerInDir(overwrite: Boolean = true) {
         if (!overwrite) { // if existing container is valid, then use it
