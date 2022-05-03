@@ -23,6 +23,8 @@ import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.resourcecontainer.ResourceContainer
 import org.wycliffeassociates.resourcecontainer.entity.Media
 import java.io.File
+import org.wycliffeassociates.otter.common.data.workbook.Book
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
 data class SourceAudio(val file: File, val start: Int, val end: Int)
@@ -36,10 +38,11 @@ class SourceAudioAccessor(
     private val dir = File(directoryProvider.cacheDirectory, "source").apply { mkdirs() }
     private val cache = mutableMapOf<String, File>()
 
-    fun getChapter(chapter: Int, targetMetadata: ResourceMetadata? = null): SourceAudio? {
-        targetMetadata?.let { meta ->
+    fun getChapter(chapter: Int, target: Book? = null): SourceAudio? {
+        target?.let { meta ->
             println("looking for target audio")
-            val dir = File(meta.path, ".apps/orature/source/audio/")
+            val accessor = ProjectFilesAccessor(directoryProvider, metadata, target.resourceMetadata, target)
+            val dir = accessor.sourceAudioDir
             val file = dir.listFiles()?.find {
                 it.name.contains("_c$chapter") || it.name.contains("_c0$chapter") || it.name.contains("_c00$chapter")
             }
@@ -59,7 +62,7 @@ class SourceAudioAccessor(
                     media = mediaProject?.media?.find { it.identifier == "wav" }
                 }
                 if (media != null) {
-                    return getChapter(media, chapter, rc, targetMetadata)
+                    return getChapter(media, chapter, rc, target?.resourceMetadata)
                 }
             }
         }
@@ -108,8 +111,8 @@ class SourceAudioAccessor(
         }
     }
 
-    fun getChunk(chapter: Int, chunk: Int, targetMetadata: ResourceMetadata?): SourceAudio? {
-        val file = getChapter(chapter, targetMetadata)?.file
+    fun getChunk(chapter: Int, chunk: Int, target: Book?): SourceAudio? {
+        val file = getChapter(chapter, target)?.file
         if (file != null) {
             println("chunk file is ${file.absolutePath}")
             val audioFile = AudioFile(file)

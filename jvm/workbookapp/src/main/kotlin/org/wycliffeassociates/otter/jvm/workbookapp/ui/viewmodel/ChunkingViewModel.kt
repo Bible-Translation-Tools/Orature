@@ -38,6 +38,7 @@ import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.device.IAudioPlayer
 import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
+import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 import org.wycliffeassociates.otter.jvm.controls.controllers.AudioPlayerController
 import org.wycliffeassociates.otter.jvm.controls.model.SECONDS_ON_SCREEN
@@ -64,11 +65,12 @@ enum class ChunkingWizardPage {
 }
 
 
-class ChunkAudioUseCase(val workbook: Workbook) {
+class ChunkAudioUseCase(val directoryProvider: IDirectoryProvider, val workbook: Workbook) {
     fun createChunkedSourceAudio(source: File, cues: List<AudioCue>) {
         val temp = File(source.name).apply { createNewFile() }
         val tempCue = File(temp.parent, "${temp.nameWithoutExtension}.cue")
-        val rm = workbook.target.resourceMetadata
+
+        val accessor = ProjectFilesAccessor(directoryProvider, workbook.source.resourceMetadata, workbook.target.resourceMetadata, workbook.target)
         try {
             source.copyTo(temp, true)
             val audio = AudioFile(temp)
@@ -78,7 +80,8 @@ class ChunkAudioUseCase(val workbook: Workbook) {
                 audio.metadata.addCue(cue.location, cue.label)
             }
             audio.update()
-            ResourceContainer.load(rm.path).use {
+            val path = accessor.projectDir
+            ResourceContainer.load(path).use {
                 it.addFileToContainer(temp, ".apps/orature/source/audio/${temp.name}")
                 if (tempCue.exists()) {
                     it.addFileToContainer(tempCue, ".apps/orature/source/audio/${tempCue.name}")
@@ -219,7 +222,7 @@ class ChunkingViewModel : ViewModel() {
         audioPlayer.value.close()
         audioController = null
 
-        ChunkAudioUseCase(workbookDataStore.workbook)
+        ChunkAudioUseCase(directoryProvider, workbookDataStore.workbook)
             .createChunkedSourceAudio(sourceAudio.file, cues)
 
         markerStateProperty.set(null)

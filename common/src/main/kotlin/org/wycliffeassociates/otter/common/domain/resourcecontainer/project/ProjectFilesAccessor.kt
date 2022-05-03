@@ -78,6 +78,12 @@ class ProjectFilesAccessor(
         project
     )
 
+    val sourceAudioDir = directoryProvider.getProjectSourceAudioDirectory(
+        sourceMetadata,
+        targetMetadata,
+        project.slug
+    )
+
     val audioDir = directoryProvider.getProjectAudioDirectory(
         sourceMetadata,
         targetMetadata,
