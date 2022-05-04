@@ -68,6 +68,7 @@ subprojects {
     apply plugin: 'kotlin-kapt'
     apply plugin: 'nebula.lint'
     apply plugin: 'org.jlleitschuh.gradle.ktlint'
+    apply plugin: 'jacoco'
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVer"
@@ -87,6 +88,16 @@ subprojects {
 
     compileTestKotlin {
         kotlinOptions.jvmTarget = "11"
+    }
+
+    jacoco {
+        toolVersion = "0.8.7"
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+        }
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
