@@ -6,6 +6,7 @@ plugins {
     id 'org.openjfx.javafxplugin' version "$javafxPluginVer"
     id "com.install4j.gradle" version "$install4jPluginVer"
     id 'com.github.johnrengelman.shadow' version "$shadowPluginVer"
+    id 'jacoco'
 }
 
 apply plugin: 'application'
@@ -64,6 +65,10 @@ test {
     systemProperty 'testfx.headless', 'true'
     systemProperty 'prism.order', 'sw'
     systemProperty 'prism.text', 'native'
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
 }
 
 apply from: './jooq.gradle'
