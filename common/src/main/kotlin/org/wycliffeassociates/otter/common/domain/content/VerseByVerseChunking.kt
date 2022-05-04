@@ -35,7 +35,7 @@ class VerseByVerseChunking(
         projectSlug: String,
         chunks: List<AudioCue>
     ) {
-        val chapAudio = sourceAudio.getChapter(chapterNumber, workbook.target.resourceMetadata)
+        val chapAudio = sourceAudio.getChapter(chapterNumber, workbook.target)
         val verseMarkers = AudioFile(chapAudio!!.file).metadata.getCues()
         val chunkRanges = mapCuesToRanges(chunks)
         val chunksToAdd = mutableListOf<Content>()

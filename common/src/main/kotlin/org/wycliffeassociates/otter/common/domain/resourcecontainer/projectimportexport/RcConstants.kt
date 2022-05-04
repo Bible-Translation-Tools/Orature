@@ -23,6 +23,7 @@ internal object RcConstants {
     const val APP_SPECIFIC_DIR = ".apps/orature"
     const val TAKE_DIR = "$APP_SPECIFIC_DIR/takes"
     const val SOURCE_DIR = "$APP_SPECIFIC_DIR/source"
+    const val SOURCE_AUDIO_DIR = "$APP_SPECIFIC_DIR/source/audio"
     const val SELECTED_TAKES_FILE = "$APP_SPECIFIC_DIR/selected.txt"
     const val LICENSE_FILE = "LICENSE.md"
     const val SOURCE_MEDIA_DIR = "media"

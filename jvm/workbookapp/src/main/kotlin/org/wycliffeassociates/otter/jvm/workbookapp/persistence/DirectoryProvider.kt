@@ -152,6 +152,17 @@ class DirectoryProvider(
         return path
     }
 
+    override fun getProjectSourceAudioDirectory(
+        source: ResourceMetadata,
+        target: ResourceMetadata?,
+        bookSlug: String
+    ): File {
+        val path = getProjectSourceDirectory(source, target, bookSlug)
+            .resolve("audio")
+        path.mkdirs()
+        return path
+    }
+
     override fun getSourceContainerDirectory(container: ResourceContainer): File {
         val dublinCore = container.manifest.dublinCore
         container.close()
