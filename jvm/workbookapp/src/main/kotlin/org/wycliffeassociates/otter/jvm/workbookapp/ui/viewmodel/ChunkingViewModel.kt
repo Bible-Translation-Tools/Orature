@@ -96,6 +96,8 @@ class ChunkAudioUseCase(val workbook: Workbook) {
 
 class ChunkingViewModel : ViewModel() {
 
+    val chapterPageViewModel: ChapterPageViewModel by inject()
+
     val workbookDataStore: WorkbookDataStore by inject()
 
     val consumeStepColor = SimpleStringProperty(ACTIVE)
@@ -213,7 +215,7 @@ class ChunkingViewModel : ViewModel() {
         println()
 
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkChunkByChunk(wkbk.source.slug, cues, 1)
+            .chunkChunkByChunk(wkbk.source.slug, cues, chapterPageViewModel.draft + 1)
 
         pageProperty.set(ChunkingWizardPage.CONSUME)
         audioPlayer.value.close()

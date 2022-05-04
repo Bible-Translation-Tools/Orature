@@ -31,6 +31,9 @@ class Chunk(
     override val textItem: TextItem,
     val start: Int,
     val end: Int,
+
+    val draftNumber: Int,
+
     override val contentType: ContentType
 
 ) : BookElement, ResourceRecordable {
@@ -62,11 +65,12 @@ class Chunk(
         if (textItem != other.textItem) return false
         if (start != other.start) return false
         if (end != other.end) return false
+        if (draftNumber != other.draftNumber) return false
 
         return true
     }
 
     override fun toString(): String {
-        return "Chunk(sort=$sort, label=$label, textItem=$textItem, start=$start, end=$end)"
+        return "Chunk(sort=$sort, label=$label, textItem=$textItem, start=$start, end=$end, draftNumber=$draftNumber)"
     }
 }

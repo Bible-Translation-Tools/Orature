@@ -249,7 +249,8 @@ class WorkbookRepository(
             textItem = textItem(content),
             start = content.start,
             end = content.end,
-            contentType = content.type
+            contentType = content.type,
+            draftNumber = content.draftNumber
         )
     }
 
