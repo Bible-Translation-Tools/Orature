@@ -345,6 +345,5 @@ compileJava.dependsOn copyTestResources
 integrationTest.mustRunAfter test
 integrationTest.dependsOn ':assets:build'
 integrationTest.dependsOn ':assets:copyToResources'
-jacocoTestReport.mustRunAfter integrationTest
 install4jdeploy.dependsOn build
 install4jdeploy.dependsOn integrationTest
