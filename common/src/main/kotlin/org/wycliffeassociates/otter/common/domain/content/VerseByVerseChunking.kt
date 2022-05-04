@@ -1,9 +1,7 @@
 package org.wycliffeassociates.otter.common.domain.content
 
-import java.text.Format
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
-import org.wycliffeassociates.otter.common.audio.wav.CueChunk
 import org.wycliffeassociates.otter.common.data.primitives.Content
 import org.wycliffeassociates.otter.common.data.primitives.ContentType
 import org.wycliffeassociates.otter.common.data.workbook.Workbook
@@ -33,7 +31,8 @@ class VerseByVerseChunking(
 
     fun chunkChunkByChunk(
         projectSlug: String,
-        chunks: List<AudioCue>
+        chunks: List<AudioCue>,
+        draftNumber: Int
     ) {
         val chapAudio = sourceAudio.getChapter(chapterNumber, workbook.target.resourceMetadata)
         val verseMarkers = AudioFile(chapAudio!!.file).metadata.getCues()
@@ -45,7 +44,17 @@ class VerseByVerseChunking(
             val end = verses.last()
             val v = accessor.getChunkText(projectSlug, chapterNumber, start, end)
             val text = StringBuilder().apply { v.forEach { append("$it\n") } }.toString()
-            chunksToAdd.add(Content(idx + 1, "chunk", verses.first(), verses.last(), null, text, "usfm", ContentType.TEXT))
+            chunksToAdd.add(Content(
+                idx + 1,
+                "chunk",
+                verses.first(),
+                verses.last(),
+                null,
+                text,
+                "usfm",
+                ContentType.TEXT,
+                draftNumber
+            ))
         }
         chunkCreator(chunksToAdd)
     }
@@ -88,6 +97,7 @@ class VerseByVerseChunking(
 
     fun chunkVerseByVerse(
         projectSlug: String,
+        draftNumber: Int
     ) {
         val chunksToAdd = mutableListOf<Content>()
         accessor.getChapterText(projectSlug, chapterNumber).forEachIndexed { idx, str ->
@@ -100,7 +110,8 @@ class VerseByVerseChunking(
                 null,
                 str,
                 "usfm",
-                ContentType.TEXT
+                ContentType.TEXT,
+                draftNumber
             )
             chunksToAdd.add(content)
         }

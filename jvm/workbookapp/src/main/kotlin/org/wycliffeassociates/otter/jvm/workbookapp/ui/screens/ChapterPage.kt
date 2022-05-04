@@ -150,6 +150,7 @@ class ChapterPage : View() {
         createSnackBar()
 
         vbox {
+            button("Reset") { setOnAction { viewModel.resetChapter() } }
             addClass("chapter-page__chapter-info")
             vgrow = Priority.ALWAYS
 

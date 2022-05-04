@@ -219,6 +219,9 @@ class WorkbookRepository(
                     addChunk = {
                         logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
+                    },
+                    reset = {
+                        db.clearContentForCollection(chapterCollection).subscribe()
                     }
                 ).also { it.text = metaContent.text ?: "" }
             }
@@ -589,6 +592,7 @@ class WorkbookRepository(
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
         fun updateTranslation(translation: Translation): Completable
+        fun clearContentForCollection(chapterCollection: Collection): Completable
     }
 }
 
@@ -603,6 +607,10 @@ private class DefaultDatabaseAccessors(
 ) : WorkbookRepository.IDatabaseAccessors {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun clearContentForCollection(chapterCollection: Collection): Completable {
+        return contentRepo.deleteForCollection(chapterCollection)
+    }
 
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
         return Observable

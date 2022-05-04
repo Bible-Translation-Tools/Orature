@@ -27,5 +27,6 @@ data class ContentEntity(
     var selectedTakeFk: Int?,
     var text: String?,
     var format: String?,
-    var type_fk: Int
+    var type_fk: Int,
+    var draftNumber: Int
 )

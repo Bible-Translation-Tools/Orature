@@ -213,7 +213,7 @@ class ChunkingViewModel : ViewModel() {
         println()
 
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkChunkByChunk(wkbk.source.slug, cues)
+            .chunkChunkByChunk(wkbk.source.slug, cues, 1)
 
         pageProperty.set(ChunkingWizardPage.CONSUME)
         audioPlayer.value.close()

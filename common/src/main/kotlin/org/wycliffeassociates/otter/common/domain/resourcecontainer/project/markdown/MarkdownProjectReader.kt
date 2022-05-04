@@ -155,7 +155,8 @@ class MarkdownProjectReader(private val isHelp: Boolean) : IProjectReader {
         selectedTake = null,
         text = text,
         format = MimeType.MARKDOWN.norm,
-        type = type
+        type = type,
+        draftNumber = 1
     )
 
     /**

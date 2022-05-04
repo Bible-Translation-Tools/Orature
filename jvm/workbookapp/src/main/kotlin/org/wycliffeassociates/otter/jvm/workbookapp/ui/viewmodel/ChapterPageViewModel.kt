@@ -59,6 +59,8 @@ import org.wycliffeassociates.otter.common.domain.content.VerseByVerseChunking
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.persistence.IDirectoryProvider
 
+
+const val draftNumber = 1
 class ChapterPageViewModel : ViewModel() {
 
     private val logger = LoggerFactory.getLogger(ChapterPageViewModel::class.java)
@@ -474,6 +476,11 @@ class ChapterPageViewModel : ViewModel() {
         val wkbk = workbookDataStore.activeWorkbookProperty.value
         val chapter = workbookDataStore.activeChapterProperty.value
         VerseByVerseChunking(directoryProvider, wkbk, chapter.addChunk, chapter.sort)
-            .chunkVerseByVerse(wkbk.source.slug)
+            .chunkVerseByVerse(wkbk.source.slug, 1)
+    }
+
+    fun resetChapter() {
+        val chapter = workbookDataStore.activeChapterProperty.value
+        chapter.reset()
     }
 }
