@@ -38,7 +38,6 @@ enum class LanguageType {
 class LanguageCell(
     private val type: LanguageType,
     private val anglicisedProperty: BooleanProperty,
-    private val existingLanguages: ObservableList<Language> = observableListOf(),
     private val onSelected: (Language) -> Unit
 ) : ListCell<Language>() {
 
@@ -81,10 +80,6 @@ class LanguageCell(
             }
         }
 
-        disableProperty().bind(Bindings.createBooleanBinding(
-            { existingLanguages.contains(item) },
-            existingLanguages
-        ))
         mouseTransparentProperty().bind(disableProperty())
     }
 }

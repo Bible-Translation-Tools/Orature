@@ -177,7 +177,13 @@ class LanguageRepository @Inject constructor(
         return Single
             .fromCallable {
                 val existing = translationDao.fetch(translation.source.id, translation.target.id)
-                existing?.id ?: translationDao.insert(translationMapper.mapToEntity(translation))
+                if (existing != null) {
+                    existing.modifiedTs = translation.modifiedTs?.toString()
+                    translationDao.update(existing)
+                    existing.id
+                } else {
+                    translationDao.insert(translationMapper.mapToEntity(translation))
+                }
             }
             .doOnError { e ->
                 logger.error("Error in insert for translation: $translation", e)
