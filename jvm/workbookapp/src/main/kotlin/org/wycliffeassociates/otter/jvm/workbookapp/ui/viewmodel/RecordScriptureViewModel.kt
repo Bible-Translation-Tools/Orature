@@ -269,7 +269,7 @@ class RecordScriptureViewModel : ViewModel() {
     private fun setTitle(chunk: Chunk) {
         title = MessageFormat.format(
             messages["chunkTitle"],
-            messages["verse"],
+            messages[chunk.label],
             chunk.start
         )
     }

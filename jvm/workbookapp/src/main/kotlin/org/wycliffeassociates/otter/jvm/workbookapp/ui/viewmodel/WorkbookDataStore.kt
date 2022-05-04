@@ -27,7 +27,6 @@ import javafx.beans.binding.StringBinding
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
-import org.wycliffeassociates.otter.common.data.primitives.ContentLabel
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
 import org.wycliffeassociates.otter.common.data.workbook.Chapter
 import org.wycliffeassociates.otter.common.data.workbook.Chunk
@@ -269,7 +268,7 @@ class WorkbookDataStore : Component(), ScopedInstance {
                     if (activeChunkProperty.value != null) {
                         MessageFormat.format(
                             messages["chunkTitle"],
-                            messages[ContentLabel.of(activeChunkProperty.value.contentType).value],
+                            messages[activeChunkProperty.value.label],
                             activeChunkProperty.value.start
                         )
                     } else {
