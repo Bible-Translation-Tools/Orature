@@ -183,6 +183,7 @@ dependencies {
     implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer"
     implementation "com.install4j:install4j-runtime:$install4jVer"
 
+    implementation "com.mpatric:mp3agic:$mp3TagVer"
     implementation "be.tarsos:tarsosdsp:$tarsosDspVer"
 }
 

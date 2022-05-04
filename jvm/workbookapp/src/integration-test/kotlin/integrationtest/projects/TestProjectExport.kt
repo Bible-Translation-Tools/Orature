@@ -19,15 +19,28 @@
 package integrationtest.projects
 
 import integrationtest.di.DaggerTestPersistenceComponent
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import org.slf4j.LoggerFactory
+import org.wycliffeassociates.otter.common.audio.AudioFile
+import org.wycliffeassociates.otter.common.audio.DEFAULT_BITS_PER_SAMPLE
+import org.wycliffeassociates.otter.common.audio.DEFAULT_CHANNELS
+import org.wycliffeassociates.otter.common.audio.DEFAULT_SAMPLE_RATE
+import org.wycliffeassociates.otter.common.audio.wav.CueChunk
+import org.wycliffeassociates.otter.common.audio.wav.WavFile
+import org.wycliffeassociates.otter.common.audio.wav.WavMetadata
+import org.wycliffeassociates.otter.common.audio.wav.WavOutputStream
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
 import org.wycliffeassociates.otter.common.data.primitives.Language
+import org.wycliffeassociates.otter.common.data.primitives.MimeType
 import org.wycliffeassociates.otter.common.data.primitives.ResourceMetadata
+import org.wycliffeassociates.otter.common.data.workbook.Take
+import org.wycliffeassociates.otter.common.data.workbook.Workbook
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.project.ProjectFilesAccessor
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ExportResult
 import org.wycliffeassociates.otter.common.domain.resourcecontainer.projectimportexport.ProjectExporter
@@ -52,6 +65,10 @@ class TestProjectExport {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private val db = dbEnvProvider.get()
+    private lateinit var outputDir: File
+
+    private lateinit var workbook: Workbook
+    private lateinit var projectFilesAccessor: ProjectFilesAccessor
 
     private val sourceMetadata = ResourceMetadata(
         "rc0.2",
@@ -76,14 +93,6 @@ class TestProjectExport {
         language = Language("en-x-demo1", "", "", "", true, "Europe")
     )
 
-    private val sourceCollection = Collection(
-        1,
-        "rev",
-        "rev",
-        "",
-        sourceMetadata
-    )
-
     private val targetCollection = Collection(
         1,
         "rev",
@@ -92,19 +101,26 @@ class TestProjectExport {
         targetMetadata
     )
 
-    @Test
-    fun exportProjectWithContributors() {
+    @Before
+    fun setUp() {
         db.import("en-x-demo1-ulb-rev.zip")
-        val workbook = workbookRepository.getProjects().blockingGet().single()
-        val projectFilesAccessor = ProjectFilesAccessor(
+        workbook = workbookRepository.getProjects().blockingGet().single()
+        projectFilesAccessor = ProjectFilesAccessor(
             directoryProvider,
             sourceMetadata,
             targetMetadata,
             targetCollection
         )
-        val outputDir = createTempDirectory("orature-export").toFile()
-        outputDir.deleteOnExit()
+        outputDir = createTempDirectory("orature-export-test").toFile()
+    }
 
+    @After
+    fun cleanUp() {
+        outputDir.deleteRecursively()
+    }
+
+    @Test
+    fun exportOratureProjectWithMetadata() {
         val result = exportUseCase.get()
             .export(outputDir, targetMetadata, workbook, projectFilesAccessor)
             .blockingGet()
@@ -119,5 +135,55 @@ class TestProjectExport {
             it.manifest.dublinCore.contributor.toList()
         }
         assertTrue(exportedContributorList.isNotEmpty())
+    }
+
+    @Test
+    fun exportMp3ProjectWithMetadata() {
+        val testTake = createTestWavFile()
+        val take = Take(
+            "chapter-1",
+            testTake,
+            1,
+            MimeType.WAV,
+            LocalDate.now()
+        )
+        // select a take to be included when export
+        workbook.target.chapters.blockingFirst().audio.selectTake(take)
+
+        val result = exportUseCase.get()
+            .exportMp3(outputDir, targetMetadata, workbook, projectFilesAccessor)
+            .blockingGet()
+
+        assertEquals(ExportResult.SUCCESS, result)
+
+        val exportedChapter = outputDir.walk().firstOrNull { it.extension == "mp3" }
+        val contributorCount = AudioFile(exportedChapter!!).metadata.artists().size
+
+        assertNotNull("Exported file not found.", exportedChapter)
+        assertEquals(
+            "Exported file metadata does not match contributors info.",
+            projectFilesAccessor.getContributorInfo().size,
+            contributorCount
+        )
+    }
+
+    private fun createTestWavFile(): File {
+        val testFile = File.createTempFile("test-take", "wav")
+            .apply { deleteOnExit() }
+
+        val wav = WavFile(
+            testFile,
+            DEFAULT_CHANNELS,
+            DEFAULT_SAMPLE_RATE,
+            DEFAULT_BITS_PER_SAMPLE,
+            WavMetadata(listOf(CueChunk()))
+        )
+        WavOutputStream(wav).use {
+            for (i in 0 until 4) {
+                it.write(i)
+            }
+        }
+        wav.update()
+        return testFile
     }
 }
