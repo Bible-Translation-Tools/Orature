@@ -31,4 +31,5 @@ interface ITakeRepository : IRepository<Take> {
     fun markDeleted(take: Take): Completable
     fun getSoftDeletedTakes(project: Collection): Single<List<Take>>
     fun deleteExpiredTakes(expiry: Int = 0): Completable
+    fun getByCollection(chapterCollection: Collection, includeDeleted: Boolean = false): Single<List<Take>>
 }

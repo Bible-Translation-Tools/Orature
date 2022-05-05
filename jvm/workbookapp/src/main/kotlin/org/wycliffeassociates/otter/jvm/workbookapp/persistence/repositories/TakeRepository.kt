@@ -200,6 +200,19 @@ class TakeRepository @Inject constructor(
             .subscribeOn(Schedulers.io())
     }
 
+    override fun getByCollection(chapterCollection: Collection, includeDeleted: Boolean): Single<List<Take>> {
+        return Single
+            .fromCallable {
+                takeDao
+                    .fetchByCollectionId(chapterCollection.id, includeDeleted)
+                    .map(this::buildTake)
+            }
+            .doOnError { e ->
+                logger.error("Error in getByCollection for collection: $chapterCollection, includeDeleted: $includeDeleted", e)
+            }
+            .subscribeOn(Schedulers.io())
+    }
+
     private fun buildTake(entity: TakeEntity): Take {
         val markers = markerDao
             .fetchByTakeId(entity.id)

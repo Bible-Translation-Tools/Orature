@@ -169,4 +169,26 @@ class TakeDao(
                 RecordMappers.mapToTakeEntity(it)
             }
     }
+
+    fun fetchByCollectionId(
+        id: Int,
+        includeDeleted: Boolean = false,
+        dsl: DSLContext = instanceDsl
+    ): List<TakeEntity> {
+        val contentid = CONTENT_ENTITY.ID.`as`("contentid")
+        val baseQuery = dsl
+            .select()
+            .from(TAKE_ENTITY)
+            .leftJoin(
+                select(contentid)
+                    .from(CONTENT_ENTITY)
+                    .where(CONTENT_ENTITY.COLLECTION_FK.eq(id))
+            ).on(contentid.eq(TAKE_ENTITY.CONTENT_FK))
+
+        val query = when {
+            includeDeleted -> baseQuery
+            else -> baseQuery.and(TAKE_ENTITY.DELETED_TS.isNull)
+        }
+        return query.fetch(RecordMappers.Companion::mapToTakeEntity)
+    }
 }

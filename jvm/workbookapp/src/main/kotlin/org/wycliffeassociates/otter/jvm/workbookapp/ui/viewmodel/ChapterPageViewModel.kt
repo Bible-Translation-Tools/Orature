@@ -438,6 +438,7 @@ class ChapterPageViewModel : ViewModel() {
             val selected = chunk.audio.selected.value?.value
             chunk.audio.takes
                 .filter { it.deletedTimestamp.value?.value == null }
+                .filter { it.file.exists() }
                 .map { take ->
                     setMarker(chunk.start.toString(), take)
                     take.mapToModel(take == selected)
@@ -489,6 +490,7 @@ class ChapterPageViewModel : ViewModel() {
     }
 
     fun resetChapter() {
+        closePlayers()
         filteredContent.clear()
         val chapter = workbookDataStore.activeChapterProperty.value
         chapter.reset()
