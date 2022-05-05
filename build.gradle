@@ -35,7 +35,7 @@ def allTestCoverageFile = "$buildDir/reports/jacoco/totalTestCoverage.exec" // h
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.jacoco.reportPaths", allTestCoverageFile
+        property "sonar.jacoco.reportPath", allTestCoverageFile
 //        property "sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
