@@ -12,6 +12,8 @@ buildscript {
 }
 
 plugins {
+    id 'java'
+    id 'jacoco'
     id 'nebula.lint' version "$nebulaLintPluginVer"
     id 'io.gitlab.arturbosch.detekt' version "$detektPluginVer"
     id "org.sonarqube" version "$sonarcloudPluginVer"
@@ -24,11 +26,25 @@ repositories {
     maven { url "https://nexus-registry.walink.org/repository/maven-public/" }
 }
 
+jacoco {
+    toolVersion = "0.8.7"
+}
+
+def allTestCoverageFile = "$buildDir/reports/jacoco/totalTestCoverage.exec" // https://github.com/BolderTechnologies/SonarQube-TotalCoverage
+
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml"
+        property "sonar.jacoco.reportPaths", allTestCoverageFile
+//        property "sonar.coverage.jacoco.xmlReportPaths", "**/build/reports/jacoco/test/jacocoTestReport.xml"
     }
+}
+
+task jacocoTotalCoverage(type: JacocoMerge) {
+    // merge jacoco coverage report from subprojects to one output file
+    // see detail at: https://github.com/BolderTechnologies/SonarQube-TotalCoverage
+    destinationFile = file(allTestCoverageFile)
+    executionData = project.fileTree(dir: '.', include:'**/build/jacoco/test.exec')
 }
 
 detekt {
@@ -94,9 +110,9 @@ subprojects {
         toolVersion = "0.8.7"
     }
 
-    jacocoTestReport {
-        reports {
-            xml.enabled true
+    sonarqube {
+        properties {
+            property "sonar.jacoco.reportPath", allTestCoverageFile
         }
     }
 
