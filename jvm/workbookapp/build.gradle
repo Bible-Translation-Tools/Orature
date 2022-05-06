@@ -10,7 +10,6 @@ plugins {
 
 apply plugin: 'application'
 apply plugin: 'idea'
-apply plugin: 'jacoco'
 
 javafx {
     version = "$javafxVer"

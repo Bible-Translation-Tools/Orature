@@ -1,5 +1,3 @@
-apply plugin: 'jacoco'
-
 dependencies {
     implementation "io.reactivex.rxjava2:rxkotlin:$rxkotlinVer"
     implementation "com.jakewharton.rxrelay2:rxrelay:$rxrelayVer"
