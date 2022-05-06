@@ -104,7 +104,7 @@ subprojects {
     apply plugin: 'kotlin-kapt'
     apply plugin: 'nebula.lint'
     apply plugin: 'org.jlleitschuh.gradle.ktlint'
-//    apply plugin: 'jacoco'
+    apply plugin: 'jacoco'
 
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVer"
