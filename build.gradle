@@ -40,7 +40,7 @@ sonarqube {
     }
 }
 
-task jacocoTotalCoverage(type: JacocoMerge) {
+task jacocoMerge(type: JacocoMerge) {
     // merge jacoco coverage report from subprojects to one output file
     // see detail at: https://github.com/BolderTechnologies/SonarQube-TotalCoverage
     destinationFile = file(allTestCoverageFile)
@@ -114,6 +114,9 @@ subprojects {
         properties {
             property "sonar.jacoco.reportPath", allTestCoverageFile
         }
+    }
+    test {
+        finalizedBy(jacocoMerge)
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
