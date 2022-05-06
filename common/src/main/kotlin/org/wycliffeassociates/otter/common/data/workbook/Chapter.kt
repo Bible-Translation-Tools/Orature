@@ -37,7 +37,8 @@ data class Chapter(
     override val resources: List<ResourceGroup>,
     override val subtreeResources: List<ResourceMetadata>,
     val chunks: ReplayRelay<Chunk>,
-    val addChunk: (List<Content>) -> Unit
+    val addChunk: (List<Content>) -> Unit,
+    val reset: () -> Unit
 ) : BookElement, BookElementContainer, Recordable {
 
     override val contentType: ContentType = ContentType.META

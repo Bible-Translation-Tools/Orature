@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS content_entity (
     start            INTEGER NOT NULL,
     sort             INTEGER NOT NULL,
     text             TEXT,
-    format           TEXT
+    format           TEXT,
+    draft_number     INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_content_entity_collection_start ON content_entity (collection_fk, start, type_fk);
 

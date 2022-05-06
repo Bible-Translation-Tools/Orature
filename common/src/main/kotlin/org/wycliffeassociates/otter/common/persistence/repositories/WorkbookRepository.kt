@@ -28,6 +28,7 @@ import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.BiConsumer
+import io.reactivex.rxkotlin.toObservable
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.ContainerType
@@ -219,6 +220,14 @@ class WorkbookRepository(
                     addChunk = {
                         logger.info("Adding chunk $it")
                         db.addContentForCollection(chapterCollection, it).subscribe()
+                    },
+                    reset = {
+                        db.clearContentForCollection(chapterCollection).map {
+                            it.forEach { take ->
+                                println("deleting take: $take")
+                                println("delete status is: ${take.path.delete()}")
+                            }
+                        }.subscribe()
                     }
                 ).also { it.text = metaContent.text ?: "" }
             }
@@ -246,7 +255,8 @@ class WorkbookRepository(
             textItem = textItem(content),
             start = content.start,
             end = content.end,
-            contentType = content.type
+            contentType = content.type,
+            draftNumber = content.draftNumber
         )
     }
 
@@ -589,6 +599,7 @@ class WorkbookRepository(
         fun getSourceProject(targetProject: Collection): Maybe<Collection>
         fun getTranslation(sourceLanguage: Language, targetLanguage: Language): Single<Translation>
         fun updateTranslation(translation: Translation): Completable
+        fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>>
     }
 }
 
@@ -603,6 +614,19 @@ private class DefaultDatabaseAccessors(
 ) : WorkbookRepository.IDatabaseAccessors {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    override fun clearContentForCollection(chapterCollection: Collection): Single<List<ModelTake>> {
+        return takeRepo
+            .getByCollection(chapterCollection, true).map {
+                contentRepo.deleteForCollection(chapterCollection).blockingAwait()
+                it.forEach {
+                    takeRepo.markDeleted(it).blockingAwait()
+                }
+                takeRepo.deleteExpiredTakes().blockingAwait()
+                it
+            }
+
+    }
 
     override fun addContentForCollection(collection: Collection, chunks: List<Content>): Completable {
         return Observable

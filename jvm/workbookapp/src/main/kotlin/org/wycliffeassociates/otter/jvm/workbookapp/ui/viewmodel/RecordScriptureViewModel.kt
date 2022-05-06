@@ -289,6 +289,7 @@ class RecordScriptureViewModel : ViewModel() {
     }
 
     private fun getChunkList(chunks: Observable<Chunk>) {
+        var draft = 0
         activeChunkSubscription?.dispose()
         chunkList.clear()
         activeChunkSubscription = chunks
@@ -297,6 +298,10 @@ class RecordScriptureViewModel : ViewModel() {
                 logger.error("Error in getting the chunk list", e)
             }
             .subscribe {
+                if (it.draftNumber > draft) {
+                    draft = it.draftNumber
+                    chunkList.removeIf { it.draftNumber < draft }
+                }
                 chunkList.add(it)
                 chunkList.sortBy { it.sort }
             }

@@ -23,8 +23,6 @@ import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
-import io.reactivex.subjects.ReplaySubject
 import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.data.primitives.Collection
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -37,6 +35,7 @@ import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.map
 import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.TakeMapper
 import java.lang.IllegalStateException
 import javax.inject.Inject
+import org.wycliffeassociates.otter.jvm.workbookapp.persistence.repositories.mapping.CollectionMapper
 
 class ContentRepository @Inject constructor(
     database: AppDatabase
@@ -50,6 +49,7 @@ class ContentRepository @Inject constructor(
     private val markerDao = database.markerDao
     private val contentTypeDao = database.contentTypeDao
     private val contentMapper: ContentMapper = ContentMapper(contentTypeDao)
+    private val collectionMapper = CollectionMapper()
     private val takeMapper: TakeMapper = TakeMapper()
     private val markerMapper: MarkerMapper = MarkerMapper()
 
@@ -126,6 +126,12 @@ class ContentRepository @Inject constructor(
                 logger.error("End source content", e)
             }
             .subscribeOn(Schedulers.io())
+    }
+
+    override fun deleteForCollection(chapterCollection: Collection): Completable {
+        return Completable.fromCallable {
+            contentDao.deleteForCollection(collectionMapper.mapToEntity(chapterCollection))
+        }
     }
 
     override fun delete(obj: Content): Completable {

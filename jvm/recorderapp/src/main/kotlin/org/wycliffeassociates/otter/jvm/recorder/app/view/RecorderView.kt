@@ -43,7 +43,7 @@ class RecorderView : PluginEntrypoint() {
         add<InfoFragment>()
         add(spacer)
         add(waveform)
-        // add<SourceAudioFragment>()
+        add<SourceAudioFragment>()
         add<ControlFragment>()
     }
 

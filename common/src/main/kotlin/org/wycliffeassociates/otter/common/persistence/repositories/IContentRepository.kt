@@ -36,4 +36,5 @@ interface IContentRepository : IRepository<Content> {
     fun getSources(content: Content): Single<List<Content>>
     // Update the sources for a content
     fun updateSources(content: Content, sourceContents: List<Content>): Completable
+    fun deleteForCollection(chapterCollection: Collection): Completable
 }
