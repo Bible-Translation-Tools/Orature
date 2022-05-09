@@ -27,7 +27,7 @@ repositories {
 }
 
 jacoco {
-    toolVersion = "0.8.7"
+    toolVersion = "0.8.7" // use this jacoco version to avoid error
 }
 
 sonarqube {
@@ -38,6 +38,9 @@ sonarqube {
 }
 
 task codeCoverageReport(type: JacocoReport) {
+    // see detail at: https://docs.gradle.org/6.4-rc-1/samples/sample_jvm_multi_project_with_code_coverage.html
+
+    // collect jacoco reports exec from subprojects
     executionData(fileTree(projectDir).include("**/build/jacoco/*.exec"))
     // If a subproject applies the 'jacoco' plugin, add the result it to the report
     subprojects { subproject ->
