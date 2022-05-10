@@ -27,7 +27,7 @@ repositories {
 }
 
 jacoco {
-    toolVersion = "0.8.7" // use this jacoco version to avoid error
+    toolVersion = "$jacocoToolVer"
 }
 
 sonarqube {
@@ -119,7 +119,7 @@ subprojects {
     }
 
     jacoco {
-        toolVersion = "0.8.7"
+        toolVersion = "$jacocoToolVer"
     }
 
     gradleLint.rules = ['deprecated-dependency-configuration']
