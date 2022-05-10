@@ -111,13 +111,9 @@ class TranslationViewModelTest {
     @Test
     fun loadTargetLanguages() {
         val languages = LanguageSelectionViewModelTest.initLanguages()
-        val translation = Translation(sourceLanguage, languages[0], null)
-
         val mockLanguageRepo = mock(ILanguageRepository::class.java)
         `when`(mockLanguageRepo.getAll())
             .thenReturn(Single.just(languages))
-        `when`(mockLanguageRepo.getAllTranslations())
-            .thenReturn(Single.just(listOf(translation)))
         vm.languageRepo = mockLanguageRepo
 
         assertEquals(0, vm.targetLanguages.size)
@@ -128,6 +124,5 @@ class TranslationViewModelTest {
 
         assertEquals(languages.size, vm.targetLanguages.size)
         verify(mockLanguageRepo).getAll()
-        verify(mockLanguageRepo).getAllTranslations()
     }
 }
