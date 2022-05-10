@@ -147,22 +147,17 @@ class ImportResourceContainer @Inject constructor(
 
     private fun importContainer(file: File): Single<ImportResult> {
         return Single.fromCallable {
-            var exists = false
             logger.info("Importing RC...")
             val internalDir = getInternalDirectory(file) ?: throw ImportException(ImportResult.LOAD_RC_ERROR)
             if (internalDir.exists()) {
                 val rcFileExists = file.isFile && internalDir.contains(file.name)
                 val rcDirExists = file.isDirectory && internalDir.listFiles().isNotEmpty()
                 if (rcFileExists || rcDirExists) {
-                    exists = true
+                    throw ImportException(ImportResult.ALREADY_EXISTS)
                 }
             }
-            val rcToImport = if (exists) {
-                file
-            } else {
-                copyToInternalDirectory(file, internalDir)
-            }
-            importFromInternalDir(rcToImport).blockingGet()
+            val copiedRc = copyToInternalDirectory(file, internalDir)
+            importFromInternalDir(copiedRc).blockingGet()
         }.onErrorReturn { e ->
             logger.error("Error in importContainer, file: $file", e)
             e.castOrFindImportException()?.result ?: throw e
