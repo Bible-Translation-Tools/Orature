@@ -118,9 +118,5 @@ subprojects {
         kotlinOptions.jvmTarget = "11"
     }
 
-    jacoco {
-        toolVersion = "$jacocoToolVer"
-    }
-
     gradleLint.rules = ['deprecated-dependency-configuration']
 }
