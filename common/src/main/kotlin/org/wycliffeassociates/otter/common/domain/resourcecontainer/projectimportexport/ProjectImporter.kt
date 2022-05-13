@@ -146,6 +146,7 @@ class ProjectImporter @Inject constructor(
         manifestProject: Project,
         sourceCollection: Collection
     ) {
+        println("importing resumable project")
         val sourceMetadata = sourceCollection.resourceContainer!!
         val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
 
@@ -173,6 +174,13 @@ class ProjectImporter @Inject constructor(
 
         translation.modifiedTs = LocalDateTime.now()
         languageRepository.updateTranslation(translation).subscribe()
+        println("here in thing")
+        resetChaptersWithoutTakes(derivedProject)
+    }
+
+    private fun resetChaptersWithoutTakes(derivedProject: Collection) {
+        println(derivedProject)
+        collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
     }
 
     private fun importContributorInfo(
