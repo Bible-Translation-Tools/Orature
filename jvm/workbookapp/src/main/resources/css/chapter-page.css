@@ -117,3 +117,41 @@
 .btn--icon:selected .ikonli-font-icon {
     -fx-icon-color: -wa-primary;
 }
+
+.chapter-page__chunks .chunk-mode {
+    -fx-pref-width: 870px;
+    -fx-spacing: 15px;
+    -fx-padding: 15 15 0 15;
+}
+
+.chapter-page__chunks .chunk-mode__selection-card {
+    -fx-padding: 15px;
+    -fx-background-color: -wa-background;
+    -fx-alignment: center-left;
+    -fx-background-radius: 8px;
+    -fx-spacing: 30px;
+}
+
+.chunk-mode__icon {
+    -fx-fill: -wa-regular-text;
+    -fx-icon-size: 72px;
+}
+
+.chunk-mode__selection__title {
+    -fx-padding: 10 0;
+    -fx-font-size: 2em;
+    -fx-text-fill: -wa-regular-text;
+}
+
+.chunk-mode__selection__text {
+    -fx-alignment: top-center;
+    -fx-font-size: 1.3em;
+    -fx-text-fill: -wa-note-text;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 5px;
+}
+
+.chunk-mode__selection-btn {
+    -fx-padding: 10;
+    -fx-max-width: infinity;
+}
