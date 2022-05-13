@@ -138,7 +138,7 @@
 }
 
 .chunk-mode__selection__title {
-    -fx-padding: 10 0;
+    -fx-padding: 10px 0px;
     -fx-font-size: 2em;
     -fx-text-fill: -wa-regular-text;
 }

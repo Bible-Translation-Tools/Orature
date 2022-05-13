@@ -95,7 +95,6 @@ class ChapterPage : View() {
             navigator.dock(this@ChapterPage)
         }
     }
-    private lateinit var toggleNode: Node
 
     override fun onDock() {
         super.onDock()
@@ -257,7 +256,6 @@ class ChapterPage : View() {
         }
 
         stackpane {
-            setOnMouseClicked { if (toggleNode.isVisible) toggleNode.hide() else toggleNode.show() }
             vbox {
                 addClass("chapter-page__chunks")
                 vgrow = Priority.ALWAYS
@@ -324,7 +322,6 @@ class ChapterPage : View() {
                 addClass("chapter-page__chunks")
                 vgrow = Priority.ALWAYS
 
-                toggleNode = this
                 var textBlock1: Label? = null
                 var textBlock2: Label? = null
 
@@ -347,15 +344,13 @@ class ChapterPage : View() {
                             label("Verse by Verse") {
                                 addClass("chunk-mode__selection__title")
                             }
-                            label("Start a new translation with the default verse structure. " +
-                                    "Start a new translation with the default verse structure." +
-                                    "Start a new translation with the default verse structure.") {
+                            label("Start a new translation with the default verse structure.") {
                                 addClass("chunk-mode__selection__text")
                                 textBlock1 = this
                             }
                         }
 
-                        button("verse by verse") {
+                        button("Select") {
                             addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                         }
@@ -381,7 +376,7 @@ class ChapterPage : View() {
                             }
                         }
 
-                        button("chunk") {
+                        button("Select") {
                             addClass("btn", "btn--secondary", "chunk-mode__selection-btn")
                             graphic = FontIcon(MaterialDesign.MDI_ARROW_RIGHT)
                         }
@@ -389,7 +384,7 @@ class ChapterPage : View() {
 
                     textBlock1?.let { text1 ->
                         textBlock2?.let { text2 ->
-                            // bind to the "tallest" block
+                            // bind height to the tallest block's height by text size (it wraps)
                             if (text1.text.length > text2.text.length) {
                                 text2.prefHeightProperty().bind(text1.heightProperty())
                             } else {
