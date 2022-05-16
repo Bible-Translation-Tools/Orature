@@ -148,7 +148,7 @@ class ProjectImporter @Inject constructor(
     ) {
         println("importing resumable project")
         val sourceMetadata = sourceCollection.resourceContainer!!
-        val derivedProject = createDerivedProjects(metadata.language, sourceCollection)
+        val derivedProject = createDerivedProjects(metadata.language, sourceCollection, true)
 
         val translation = createTranslation(sourceMetadata.language, metadata.language)
 
@@ -180,7 +180,8 @@ class ProjectImporter @Inject constructor(
 
     private fun resetChaptersWithoutTakes(derivedProject: Collection) {
         println(derivedProject)
-        collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
+        val chaptersNotStarted = collectionRepository.collectionsWithoutTakes(derivedProject).blockingGet()
+        chaptersNotStarted.forEach { contentRepository.deleteForCollection(it).blockingGet() }
     }
 
     private fun importContributorInfo(
@@ -257,9 +258,13 @@ class ProjectImporter @Inject constructor(
         }
     }
 
-    private fun createDerivedProjects(language: Language, sourceCollection: Collection): Collection {
+    private fun createDerivedProjects(
+        language: Language,
+        sourceCollection: Collection,
+        verseByVerse: Boolean
+    ): Collection {
         return CreateProject(collectionRepository, resourceMetadataRepository)
-            .create(sourceCollection, language)
+            .create(sourceCollection, language, verseByVerse = verseByVerse)
             .blockingGet()
     }
 

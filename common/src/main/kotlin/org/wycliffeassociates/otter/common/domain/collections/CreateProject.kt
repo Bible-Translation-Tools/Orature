@@ -37,7 +37,8 @@ class CreateProject @Inject constructor(
     fun create(
         sourceProject: Collection,
         targetLanguage: Language,
-        resourceId: String? = null
+        resourceId: String? = null,
+        verseByVerse: Boolean = false
     ): Single<Collection> {
         // Find the source RC and its linked (help) RCs
         val sourceRc = sourceProject.resourceContainer
@@ -57,7 +58,7 @@ class CreateProject @Inject constructor(
         return matchingRcs
             .toList()
             .flatMap {
-                collectionRepo.deriveProject(it, sourceProject, targetLanguage, false)
+                collectionRepo.deriveProject(it, sourceProject, targetLanguage, verseByVerse)
             }
     }
 }
