@@ -63,7 +63,6 @@ class TranslationViewModel : ViewModel() {
     val showProgressProperty = SimpleBooleanProperty(false)
 
     private val sourceResources = mutableListOf<ResourceMetadata>()
-    val existingLanguages = observableListOf<Language>()
 
     init {
         (app as IDependencyGraphProvider).dependencyGraph.inject(this)
@@ -119,7 +118,6 @@ class TranslationViewModel : ViewModel() {
         sourceResources.clear()
         sourceLanguages.clear()
         targetLanguages.clear()
-        existingLanguages.clear()
         selectedSourceLanguageProperty.set(null)
         selectedTargetLanguageProperty.set(null)
     }
@@ -153,26 +151,6 @@ class TranslationViewModel : ViewModel() {
             }
             .subscribe { retrieved ->
                 targetLanguages.addAll(retrieved)
-                loadTranslations()
-            }
-    }
-
-    private fun loadTranslations() {
-        languageRepo
-            .getAllTranslations()
-            .map { list ->
-                list.filter {
-                    it.source == selectedSourceLanguageProperty.value
-                }
-            }
-            .observeOnFx()
-            .doOnError { e ->
-                logger.error("Error loading translations", e)
-            }
-            .subscribe { translations ->
-                existingLanguages.setAll(
-                    translations.map { it.target }.intersect(targetLanguages)
-                )
             }
     }
 }

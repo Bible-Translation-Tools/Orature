@@ -10,6 +10,7 @@ ext {
     shadowPluginVer = '5.2.0'
     sonarcloudPluginVer = '3.0'
     licensePluginVer = "0.15.0"
+    jacocoToolVer = "0.8.7" // stable 0.8.7, not plugin version
 
     // Libraries
     kotlinVer = '1.5.10'

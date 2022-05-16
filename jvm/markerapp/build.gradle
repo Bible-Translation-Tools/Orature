@@ -9,6 +9,7 @@ javafx {
 
 repositories {
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' } // TornadoFX 2.0 Snapshot
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -33,6 +34,8 @@ dependencies {
     implementation "org.kordamp.ikonli:ikonli-fontawesome5-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-materialdesign-pack:$ikonliVer"
     implementation "org.kordamp.ikonli:ikonli-material-pack:$ikonliVer"
+
+    implementation "com.github.Dansoftowner:jSystemThemeDetector:$systemThemeDectectorVer" // from jitpack
 
     //WA Libraries
     implementation project(':common')

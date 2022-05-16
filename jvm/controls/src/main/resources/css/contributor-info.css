@@ -35,9 +35,10 @@
     -fx-wrap-text: true;
 }
 
-.contributor__license-link,
-.contributor__license-link:visited {
-    -fx-text-fill: -wa-highlight-text;
+.contributor__license-link {
+    -fx-font-size: 1.1em;
+    -fx-wrap-text: true;
+    -fx-padding: 0;
 }
 
 .contributor__add-section {

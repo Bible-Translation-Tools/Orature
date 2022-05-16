@@ -27,6 +27,7 @@ import javafx.scene.control.ListView
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.layout.Priority
+import javafx.scene.layout.Region
 import javafx.scene.layout.VBox
 import org.kordamp.ikonli.javafx.FontIcon
 import org.kordamp.ikonli.materialdesign.MaterialDesign
@@ -471,16 +472,14 @@ class WorkbookPage : View() {
                         isDisable = true
                     }
                 }
-                textflow {
+                vbox {
                     label(messages["licenseDescription"]) {
                         addClass("contributor__section-text")
-                        fitToParentWidth()
-                        isWrapText = true
+                        minHeight = Region.USE_PREF_SIZE // prevent overflow
                     }
                     hyperlink(messages["licenseCCBYSA"]) {
-                        addClass("contributor__license-link")
-                        fitToParentWidth()
-                        isWrapText = true
+                        addClass("wa-text--hyperlink","contributor__license-link")
+                        minHeight = Region.USE_PREF_SIZE // prevent overflow
 
                         val url = "https://creativecommons.org/licenses/by-sa/4.0/"
                         tooltip(url)
