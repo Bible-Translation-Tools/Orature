@@ -1,5 +1,13 @@
 package org.wycliffeassociates.otter.common.domain.content
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import java.io.File
+import org.slf4j.LoggerFactory
 import org.wycliffeassociates.otter.common.audio.AudioCue
 import org.wycliffeassociates.otter.common.audio.AudioFile
 import org.wycliffeassociates.otter.common.data.primitives.Content
@@ -15,6 +23,8 @@ class VerseByVerseChunking(
     val chunkCreator: (List<Content>) -> Unit,
     val chapterNumber: Int
 ) {
+
+    private val logger = LoggerFactory.getLogger(VerseByVerseChunking::class.java)
 
     val accessor: ProjectFilesAccessor
     val sourceAudio: SourceAudioAccessor
@@ -56,7 +66,27 @@ class VerseByVerseChunking(
                 draftNumber
             ))
         }
+
+        writeChunkFile(projectSlug, chapterNumber, chunksToAdd)
+
         chunkCreator(chunksToAdd)
+    }
+
+    private fun writeChunkFile(projectSlug: String, chapterNumber: Int, chunksToAdd: List<Content>) {
+        val factory = JsonFactory()
+        factory.disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+        val mapper = ObjectMapper(factory)
+        mapper.registerModule(KotlinModule())
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+        val file: File = accessor.getChunkFile(projectSlug, chapterNumber)
+        if (file.exists()) { file.delete() }
+
+        logger.error("File with chunks is ${file.absolutePath}")
+
+        file.writer().use {
+            mapper.writeValue(it, chunksToAdd)
+        }
     }
 
     private fun findVerseRange(verseMarkers: List<VerseRange>, chunk: VerseRange): List<Int> {

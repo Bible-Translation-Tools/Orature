@@ -18,6 +18,8 @@
  */
 package org.wycliffeassociates.otter.common.data.primitives
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 data class Content(
     var sort: Int,
     var labelKey: String,
@@ -28,5 +30,6 @@ data class Content(
     var format: String?,
     var type: ContentType,
     var draftNumber: Int,
+    @JsonIgnore
     var id: Int = 0
 ) : CollectionOrContent
